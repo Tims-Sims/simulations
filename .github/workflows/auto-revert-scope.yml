@@ -7,11 +7,18 @@ on:
 permissions:
   contents: write
   pull-requests: read
+  workflows: write
 
 jobs:
   check-and-revert:
     runs-on: ubuntu-latest
     steps:
+      - name: Skip if pushed by github-actions bot
+        if: github.actor == 'github-actions[bot]'
+        run: |
+          echo "Push is from github-actions bot, skipping."
+          exit 0
+
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
@@ -24,6 +31,29 @@ jobs:
         run: |
           REPO="${{ github.repository }}"
           COMMIT_SHA="${{ github.sha }}"
+          PUSHER="${{ github.actor }}"
+
+          # Check if push only touches .github/
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          GITHUB_ONLY=$(echo "$CHANGED" | grep -v '^\.github/' || true)
+
+          if [ -z "$GITHUB_ONLY" ]; then
+            echo "Push only touches .github/ — checking if pusher is admin..."
+            ROLE=$(gh api repos/$REPO/collaborators/$PUSHER/permission \
+              --jq '.permission')
+            echo "$PUSHER has role: $ROLE"
+            if [ "$ROLE" == "admin" ]; then
+              echo "✅ Admin pushed to .github/ — allowed."
+              exit 0
+            else
+              echo "❌ Non-admin pushed directly to .github/ — reverting!"
+              git config user.name "github-actions"
+              git config user.email "github-actions@github.com"
+              git revert HEAD --no-edit
+              git push origin main
+              exit 0
+            fi
+          fi
 
           # Find the PR associated with this merge commit
           PR_NUMBER=$(gh pr list --state merged --json number,mergeCommit \
@@ -48,4 +78,45 @@ jobs:
           if [ -z "$APPROVERS" ]; then
             echo "❌ No approvals found on PR #$PR_NUMBER — reverting!"
             git config user.name "github-actions"
-            git config user.email "g
+            git config user.email "github-actions@github.com"
+            git revert HEAD --no-edit
+            git push origin main
+            exit 0
+          fi
+
+          # Check if any approver is an admin
+          ADMIN_APPROVED=false
+          for APPROVER in $APPROVERS; do
+            ROLE=$(gh api repos/$REPO/collaborators/$APPROVER/permission \
+              --jq '.permission')
+            echo "$APPROVER has role: $ROLE"
+            if [ "$ROLE" == "admin" ]; then
+              ADMIN_APPROVED=true
+              echo "✅ Admin approval found from $APPROVER"
+              break
+            fi
+          done
+
+          if [ "$ADMIN_APPROVED" = false ]; then
+            echo "❌ No admin approval found — reverting!"
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git revert HEAD --no-edit
+            git push origin main
+            exit 0
+          fi
+
+          # Scope check
+          FOLDERS=$(echo "$CHANGED" | awk -F/ 'NF>1 {print $1}' | sort -u)
+          FOLDER_COUNT=$(echo "$FOLDERS" | grep -c .)
+
+          if [ "$FOLDER_COUNT" -gt 1 ]; then
+            echo "❌ Scope violation! Changes span multiple folders: $FOLDERS"
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git revert HEAD --no-edit
+            git push origin main
+            exit 0
+          fi
+
+          echo "✅ All checks passed!"
