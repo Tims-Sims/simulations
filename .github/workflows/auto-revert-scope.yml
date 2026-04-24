@@ -1,0 +1,47 @@
+name: Auto-Revert Scope Violation
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  check-and-revert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check admin approval and scope
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          COMMIT_SHA="${{ github.sha }}"
+
+          # Find the PR associated with this merge commit
+          PR_NUMBER=$(gh pr list --state merged --json number,mergeCommit \
+            --jq ".[] | select(.mergeCommit.oid == \"$COMMIT_SHA\") | .number")
+
+          # If no PR found, revert (direct push to main, not allowed)
+          if [ -z "$PR_NUMBER" ]; then
+            echo "❌ No PR found for this commit — direct push to main is not allowed!"
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git revert HEAD --no-edit
+            git push origin main
+            exit 0
+          fi
+
+          echo "Found PR #$PR_NUMBER"
+
+          # Get list of approving reviewers on the PR
+          APPROVERS=$(gh api repos/$REPO/pulls/$PR_NUMBER/reviews \
+            --jq '[.[] | select(.state == "APPROVED") | .user.login] | unique | .[]')
+
+          if [ -z "$APPROVERS" ]; then
+            echo "❌ No approvals found on PR #$PR_NUMBER — reverting!"
+            git config user.name "github-actions"
+            git config user.email "g
