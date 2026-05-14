@@ -1,0 +1,99 @@
+name: Sync Project Status → Issue Labels
+
+on:
+  project_v2_item:
+    types: [created, edited]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync Status to Labels
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const STATUS_TO_LABEL = {
+              "Developer Needed": "dev needed",
+              "In Progress": "in progress",
+              "Review Needed": "review needed",
+              "Changes Needed": "changes needed",
+              "Ready for Final Review": "done"
+            };
+
+            const ALL_LABELS = Object.values(STATUS_TO_LABEL);
+
+            const query = `
+              query($id: ID!) {
+                node(id: $id) {
+                  ... on ProjectV2Item {
+                    content {
+                      ... on Issue {
+                        number
+                        repository {
+                          owner { login }
+                          name
+                        }
+                        labels(first: 20) {
+                          nodes { name }
+                        }
+                      }
+                    }
+                    fieldValues(first: 20) {
+                      nodes {
+                        ... on ProjectV2ItemFieldSingleSelectValue {
+                          name
+                          field {
+                            ... on ProjectV2FieldCommon {
+                              name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const itemId = context.payload.project_v2_item.node_id;
+
+            const result = await github.graphql(query, { id: itemId });
+
+            const item = result.node;
+            const issue = item.content;
+
+            if (!issue || !issue.number) return;
+
+            const statusField = item.fieldValues.nodes.find(
+              f => f?.field?.name === "Status"
+            );
+
+            const status = statusField?.name;
+            if (!status || !STATUS_TO_LABEL[status]) return;
+
+            const repo = issue.repository;
+            const newLabel = STATUS_TO_LABEL[status];
+
+            const existingLabels = issue.labels.nodes.map(l => l.name);
+
+            // Remove old status labels
+            for (const label of existingLabels) {
+              if (ALL_LABELS.includes(label)) {
+                await github.rest.issues.removeLabel({
+                  owner: repo.owner.login,
+                  repo: repo.name,
+                  issue_number: issue.number,
+                  name: label
+                });
+              }
+            }
+
+            // Add correct label
+            await github.rest.issues.addLabels({
+              owner: repo.owner.login,
+              repo: repo.name,
+              issue_number: issue.number,
+              labels: [newLabel]
+            });
