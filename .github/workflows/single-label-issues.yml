@@ -1,4 +1,4 @@
-name: Enforce single status label
+name: Enforce only one label on issues
 
 on:
   issues:
@@ -8,34 +8,42 @@ permissions:
   issues: write
 
 jobs:
-  enforce:
+  enforce-single-label:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Remove other status labels
+      - name: Keep only the newest label
         uses: actions/github-script@v7
         with:
           script: |
-            const issue = context.payload.issue;
+            const issue_number = context.payload.issue.number;
             const addedLabel = context.payload.label.name;
 
-            const prefix = "status:";
+            console.log("New label added:", addedLabel);
 
-            if (!addedLabel.startsWith(prefix)) {
-              console.log("Not a status label, skipping");
-              return;
-            }
+            // ✅ Get fresh list of labels (IMPORTANT)
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number
+            });
 
-            const labelsToRemove = issue.labels
-              .map(l => l.name)
-              .filter(name => name.startsWith(prefix) && name !== addedLabel);
+            const labelNames = labels.map(l => l.name);
 
-            console.log("Removing:", labelsToRemove);
+            console.log("All labels before cleanup:", labelNames);
 
-            for (const name of labelsToRemove) {
+            // ✅ Remove everything except the newly added label
+            const toRemove = labelNames.filter(name => name !== addedLabel);
+
+            console.log("Removing labels:", toRemove);
+
+            for (const name of toRemove) {
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: issue.number,
+                issue_number,
                 name
               });
             }
+
+            console.log("Done. Only one label remains.");
