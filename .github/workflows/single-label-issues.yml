@@ -4,6 +4,9 @@ on:
   issues:
     types: [labeled]
 
+permissions:
+  issues: write
+
 jobs:
   enforce:
     runs-on: ubuntu-latest
@@ -15,21 +18,24 @@ jobs:
             const issue = context.payload.issue;
             const addedLabel = context.payload.label.name;
 
-            const groupPrefix = "status:";
+            const prefix = "status:";
 
-            if (!addedLabel.startsWith(groupPrefix)) return;
+            if (!addedLabel.startsWith(prefix)) {
+              console.log("Not a status label, skipping");
+              return;
+            }
 
-            const allLabels = issue.labels.map(l => l.name);
+            const labelsToRemove = issue.labels
+              .map(l => l.name)
+              .filter(name => name.startsWith(prefix) && name !== addedLabel);
 
-            const labelsToRemove = allLabels.filter(l =>
-              l.startsWith(groupPrefix) && l !== addedLabel
-            );
+            console.log("Removing:", labelsToRemove);
 
-            for (const label of labelsToRemove) {
+            for (const name of labelsToRemove) {
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                name: label
+                name
               });
             }
