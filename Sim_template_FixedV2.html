@@ -494,6 +494,65 @@
         .choice-card input[type="radio"] { margin-top: 3px; transform: scale(1.2); accent-color: var(--accent); flex-shrink: 0; }
         .choice-text { line-height: 1.55; color: var(--text-soft); font-size: 0.96rem; }
 
+        /* ── BUTTON-CHOICE (word/option tiles) ── */
+        .word-btn-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+
+        .word-btn {
+            padding: 18px 32px;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 1.08rem;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.15s ease, background 0.15s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+        .word-btn:hover:not(.locked):not(:disabled) {
+            border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+            background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+        }
+        .word-btn.selected {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+        }
+        .word-btn.selected::after {
+            content: "✓";
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: var(--accent);
+            line-height: 1;
+        }
+        .word-btn.reveal-correct {
+            border-color: var(--success) !important;
+            background: color-mix(in srgb, var(--success) 12%, var(--surface)) !important;
+        }
+        .word-btn.reveal-correct::after {
+            content: "✓";
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: var(--success);
+            line-height: 1;
+        }
+        .word-btn.reveal-wrong {
+            border-color: var(--danger) !important;
+            background: color-mix(in srgb, var(--danger) 10%, var(--surface)) !important;
+        }
+        .word-btn.reveal-partial {
+            border-color: var(--warning) !important;
+            background: color-mix(in srgb, var(--warning) 10%, var(--surface)) !important;
+        }
+        .word-btn.locked, .word-btn:disabled { cursor: default; }
+
         /* ── BUTTON ROW ── */
         .button-row {
             display: flex;
@@ -895,6 +954,24 @@
     </section>
 </div>
 
+<!-- BLANK QUESTIONS WARNING MODAL -->
+<div class="modal" id="blankWarningModal" role="dialog" aria-modal="true" aria-labelledby="blankWarningHeading">
+    <section class="modal-card" style="max-width: 480px;">
+        <h3 id="blankWarningHeading">&#9888;&#65039; Unanswered Questions</h3>
+        <p style="color: var(--text-soft); line-height: 1.65; margin: 0 0 10px;">
+            The following questions have no answer yet:
+        </p>
+        <ul id="blankWarningList" style="margin: 0 0 16px; padding-left: 20px; color: var(--text-soft); line-height: 1.8;"></ul>
+        <p style="color: var(--text-soft); line-height: 1.65; margin: 0 0 20px;">
+            Go back to answer them, or submit with blank answers.
+        </p>
+        <div class="button-row">
+            <button class="primary-btn" id="blankGoBackBtn">&#8592; Go to Question</button>
+            <button class="secondary-btn" id="blankSubmitAnywayBtn">Submit Anyway</button>
+        </div>
+    </section>
+</div>
+
 <script>
 "use strict";
 
@@ -1124,26 +1201,18 @@ const QUESTIONS = [
     {
         id: "q5",
         title: "Question 5",
-        prompt: "Write either 'even' or 'odd' to describe the number 9.",
-        directions: "This example shows how custom grading works.",
-        type: "text",
+        prompt: "Is the number 9 even or odd?",
+        directions: "Click the correct answer.",
+        type: "button-choice",
+        choices: ["Even", "Odd"],
         difficulty: "medium",
         screenLabel: "Try It (Medium)",
-        placeholder: "Type even or odd",
         hint: "A number is odd when it cannot be split into two equal whole groups.",
         points: 10,
         grading: {
-            mode: "custom",
-            grader(answer, question) {
-                const cleaned = normalizeText(answer);
-                if (cleaned === "odd") {
-                    return { status: "correct", scoreAwarded: question.points, explanation: "9 is an odd number." };
-                }
-                if (cleaned === "even") {
-                    return { status: "wrong", scoreAwarded: 0, explanation: "9 is not even — it cannot be split into two equal whole groups." };
-                }
-                return { status: "partial", scoreAwarded: Math.round(question.points * 0.3), explanation: "You used a different response. The expected answer is 'odd'." };
-            }
+            mode: "exactText",
+            acceptableAnswers: ["odd"],
+            explanation: "9 is an odd number — it cannot be split into two equal whole groups."
         }
     }
 ];
@@ -1245,7 +1314,11 @@ const dom = {
     closeRulesBtn2:     document.getElementById("closeRulesBtn2"),
     confirmModal:       document.getElementById("confirmModal"),
     confirmYesBtn:      document.getElementById("confirmYesBtn"),
-    confirmNoBtn:       document.getElementById("confirmNoBtn")
+    confirmNoBtn:       document.getElementById("confirmNoBtn"),
+    blankWarningModal:  document.getElementById("blankWarningModal"),
+    blankWarningList:   document.getElementById("blankWarningList"),
+    blankGoBackBtn:     document.getElementById("blankGoBackBtn"),
+    blankSubmitAnywayBtn: document.getElementById("blankSubmitAnywayBtn")
 };
 
 /* ============================================================
@@ -1485,6 +1558,22 @@ function bindEvents() {
     dom.confirmYesBtn.addEventListener("click", confirmReset);
     dom.confirmNoBtn.addEventListener("click", closeConfirmModal);
     dom.confirmModal.addEventListener("click", function(e) { if (e.target === dom.confirmModal) closeConfirmModal(); });
+
+    dom.blankGoBackBtn.addEventListener("click", function() {
+        const targetIndex = Number(dom.blankGoBackBtn.dataset.targetIndex);
+        closeBlankWarningModal();
+        state.reviewModeIndex = null;
+        state.currentIndex = targetIndex;
+        showScreen("game");
+        renderQuestion();
+    });
+    dom.blankSubmitAnywayBtn.addEventListener("click", function() {
+        closeBlankWarningModal();
+        showSummaryScreen();
+    });
+    dom.blankWarningModal.addEventListener("click", function(e) {
+        if (e.target === dom.blankWarningModal) closeBlankWarningModal();
+    });
     dom.previousBtn.addEventListener("click", goPrevious);
     dom.nextBtn.addEventListener("click", goNext);
     dom.playAgainBtn.addEventListener("click", resetSimulation);
@@ -1507,6 +1596,7 @@ function bindEvents() {
             closeInstructionsModal();
             closeRulesModal();
             closeConfirmModal();
+            closeBlankWarningModal();
         }
     });
 }
@@ -1583,12 +1673,25 @@ function renderQuestion() {
     dom.questionTitle.textContent   = question.title || "";
     dom.modeChip.textContent        = isReviewMode ? "Mode: Review" : "Mode: Live Play";
 
-    if (question.prompt && (question.prompt.includes("</") || question.prompt.includes("<br>"))) {
-        dom.questionPrompt.innerHTML = question.prompt;
+    if (question.prompt) {
+        if (question.prompt.includes("</") || question.prompt.includes("<br>")) {
+            dom.questionPrompt.innerHTML = question.prompt;
+        } else {
+            dom.questionPrompt.textContent = question.prompt;
+        }
+        dom.questionPrompt.classList.remove("hidden");
     } else {
-        dom.questionPrompt.textContent = question.prompt || "";
+        dom.questionPrompt.textContent = "";
+        dom.questionPrompt.classList.add("hidden");
     }
-    dom.questionDirections.textContent = question.directions || "";
+
+    if (question.directions) {
+        dom.questionDirections.textContent = question.directions;
+        dom.questionDirections.classList.remove("hidden");
+    } else {
+        dom.questionDirections.textContent = "";
+        dom.questionDirections.classList.add("hidden");
+    }
 
     /* Difficulty badge */
     if (question.difficulty) {
@@ -1612,6 +1715,9 @@ function renderQuestion() {
     switch (question.type) {
         case "mcq":
             renderMultipleChoice(question, currentAnswer, isReviewMode, alreadyAnswered);
+            break;
+        case "button-choice":
+            renderButtonChoice(question, currentAnswer, isReviewMode, alreadyAnswered);
             break;
         case "textarea":
             renderTextarea(question, currentAnswer, isReviewMode, alreadyAnswered);
@@ -1724,6 +1830,46 @@ function renderTextarea(question, currentAnswer, isReviewMode, alreadyAnswered) 
     dom.answerArea.appendChild(ta);
 }
 
+function renderButtonChoice(question, currentAnswer, isReviewMode, alreadyAnswered) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "word-btn-grid";
+
+    const locked = isReviewMode || alreadyAnswered;
+    const acceptableNorm = (question.grading && question.grading.mode === "exactText")
+        ? (question.grading.acceptableAnswers || []).map(normalizeText)
+        : [];
+
+    (question.choices || []).forEach(function(choice) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "word-btn" + (locked ? " locked" : "");
+        btn.textContent = choice;
+        btn.dataset.value = choice;
+        if (locked) btn.disabled = true;
+
+        const isSelected = currentAnswer != null &&
+            normalizeText(String(currentAnswer)) === normalizeText(choice);
+        if (isSelected) btn.classList.add("selected");
+
+        if (alreadyAnswered && acceptableNorm.includes(normalizeText(choice))) {
+            btn.classList.add("reveal-correct");
+        }
+
+        if (!locked) {
+            btn.addEventListener("click", function() {
+                wrapper.querySelectorAll(".word-btn").forEach(function(b) {
+                    b.classList.remove("selected");
+                });
+                btn.classList.add("selected");
+            });
+        }
+
+        wrapper.appendChild(btn);
+    });
+
+    dom.answerArea.appendChild(wrapper);
+}
+
 /* ============================================================
    ANSWER HANDLING
    ============================================================ */
@@ -1759,6 +1905,7 @@ function handleAnswerSubmit(event) {
     renderStepDots();
     updateStatusUI();
     updateSummaryScreen();
+    updateNavigationButtons();
     saveStateToStorage();
 
     if (result.status === "correct" || result.status === "partial") {
@@ -1776,6 +1923,10 @@ function readAnswerFromUI(question) {
         const sel = dom.answerArea.querySelector("input[type=\"radio\"]:checked");
         return sel ? Number(sel.value) : null;
     }
+    if (question.type === "button-choice") {
+        const sel = dom.answerArea.querySelector(".word-btn.selected");
+        return sel ? sel.dataset.value : null;
+    }
     const input = document.getElementById("dynamicAnswerInput");
     return input ? input.value.trim() : null;
 }
@@ -1787,6 +1938,16 @@ function lockChoices(question) {
         if (inp) inp.disabled = true;
         if (i === Number(question.grading.correctAnswer)) card.classList.add("reveal-correct");
     });
+    const acceptableNorm = (question.grading && question.grading.mode === "exactText")
+        ? (question.grading.acceptableAnswers || []).map(normalizeText)
+        : [];
+    dom.answerArea.querySelectorAll(".word-btn").forEach(function(btn) {
+        btn.classList.add("locked");
+        btn.disabled = true;
+        if (acceptableNorm.includes(normalizeText(btn.dataset.value || ""))) {
+            btn.classList.add("reveal-correct");
+        }
+    });
     const inp = document.getElementById("dynamicAnswerInput");
     if (inp) inp.disabled = true;
 }
@@ -1797,6 +1958,11 @@ function showWrongFeedback(question, studentAnswer, result) {
     if (question.type === "mcq") {
         dom.answerArea.querySelectorAll(".choice-card").forEach(function(card, i) {
             if (i === Number(studentAnswer)) card.classList.add("reveal-wrong");
+        });
+    }
+    if (question.type === "button-choice") {
+        dom.answerArea.querySelectorAll(".word-btn").forEach(function(btn) {
+            if (btn.dataset.value === String(studentAnswer)) btn.classList.add("reveal-wrong");
         });
     }
 
@@ -1823,6 +1989,10 @@ function tryAgain(question) {
         card.classList.remove("selected", "reveal-wrong", "locked");
         const inp = card.querySelector("input");
         if (inp) { inp.checked = false; inp.disabled = false; }
+    });
+    dom.answerArea.querySelectorAll(".word-btn").forEach(function(btn) {
+        btn.classList.remove("selected", "reveal-wrong", "locked");
+        btn.disabled = false;
     });
     const dynInput = document.getElementById("dynamicAnswerInput");
     if (dynInput) { dynInput.value = ""; dynInput.disabled = false; }
@@ -2008,7 +2178,16 @@ function goNext() {
     }
 
     if (state.currentIndex === QUESTIONS.length - 1) {
-        if (SIM_CONFIG.allowSummaryPage) { showSummaryScreen(); }
+        if (SIM_CONFIG.allowSummaryPage) {
+            const blankIndices = QUESTIONS
+                .map(function(q, i) { return !state.results[q.id] ? i : -1; })
+                .filter(function(i) { return i !== -1; });
+            if (blankIndices.length > 0) {
+                openBlankWarningModal(blankIndices);
+            } else {
+                showSummaryScreen();
+            }
+        }
         return;
     }
 
@@ -2222,6 +2401,22 @@ function playFeedbackSound(status) {
    ============================================================ */
 function openConfirmModal()  { dom.confirmModal.classList.add("show"); }
 function closeConfirmModal() { dom.confirmModal.classList.remove("show"); }
+
+function openBlankWarningModal(blankIndices) {
+    dom.blankWarningList.innerHTML = "";
+    blankIndices.forEach(function(i) {
+        const li = document.createElement("li");
+        li.textContent = QUESTIONS[i].title || ("Question " + (i + 1));
+        dom.blankWarningList.appendChild(li);
+    });
+    dom.blankGoBackBtn.textContent = "← Go to Question " + (blankIndices[0] + 1);
+    dom.blankGoBackBtn.dataset.targetIndex = String(blankIndices[0]);
+    dom.blankWarningModal.classList.add("show");
+}
+
+function closeBlankWarningModal() {
+    dom.blankWarningModal.classList.remove("show");
+}
 
 function confirmReset() {
     closeConfirmModal();
