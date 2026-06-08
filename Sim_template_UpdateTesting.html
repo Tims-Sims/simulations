@@ -1,0 +1,2533 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulation Template Shell</title>
+    <style>
+        /* ============================================================
+           CHILD / TEEN SIMULATION TEMPLATE SHELL  v3
+           Single-file HTML/CSS/JS — offline friendly
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body { min-height: 100vh; padding: 16px; }
+
+        button, input, textarea, select { font: inherit; }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover { transform: translateY(-1px); }
+        button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        /* ── APP SHELL ── */
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            font-size: 0.78rem;
+            text-align: center;
+            line-height: 1.2;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+        }
+
+        .brand-copy { min-width: 0; }
+        .brand-copy h1, .brand-copy p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .brand-copy h1 { font-size: 1.08rem; }
+        .brand-copy p { color: var(--muted); margin-top: 2px; font-size: 0.92rem; }
+
+        .controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+
+        .control-btn, .primary-btn, .secondary-btn, .ghost-btn, .danger-btn, .nav-btn {
+            border-radius: 999px;
+            padding: 10px 15px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .control-btn, .secondary-btn, .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        /* Pulse ring on help button */
+        .pulse-help { position: relative; }
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+        @keyframes pulseRing {
+            0%   { opacity: 0.9; transform: scale(0.98); }
+            70%  { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* ── SCREENS ── */
+        .screen { display: none; flex: 1; }
+        .screen.active { display: flex; }
+        .center-stage { flex: 1; display: grid; place-items: center; padding: 8px; }
+
+        /* ── HOME CARD ── */
+        .hero-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+            font-size: 0.88rem;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(1.85rem, 3.5vw, 2.8rem);
+            line-height: 1.1;
+        }
+
+        .hero-card > p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* ── TEACH SCREEN ── */
+        .teach-card {
+            width: min(100%, 960px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(20px, 3vw, 36px);
+        }
+
+        .teach-card h2 { margin: 0 0 4px; font-size: clamp(1.4rem, 2.5vw, 1.9rem); }
+        .teach-subtitle { color: var(--muted); margin: 0 0 22px; font-size: 0.93rem; }
+
+        .teach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .teach-box {
+            padding: 18px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+        }
+        .teach-box h3 { margin: 0 0 10px; font-size: 0.98rem; }
+        .teach-box ul { margin: 0; padding-left: 18px; }
+        .teach-box li { color: var(--text-soft); line-height: 1.78; font-size: 0.96rem; }
+
+        .teach-example {
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+            margin-bottom: 10px;
+        }
+        .teach-example p { margin: 0 0 8px; color: var(--text-soft); font-style: italic; font-size: 0.96rem; }
+        .ex-label { display: inline-flex; padding: 4px 11px; border-radius: 999px; font-size: 0.81rem; font-weight: 700; }
+        .ex-accent  { background: color-mix(in srgb, var(--accent)   20%, var(--surface)); color: var(--accent); }
+        .ex-accent2 { background: color-mix(in srgb, var(--accent-2) 20%, var(--surface)); color: var(--accent-2); }
+        .ex-success { background: color-mix(in srgb, var(--success)  20%, var(--surface)); color: var(--success); }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 18px;
+        }
+        .nav-row .spacer { flex: 1; }
+
+        /* ── GAME SCREEN ── */
+        .game-layout { flex: 1; display: grid; place-items: start center; padding: 8px; }
+
+        .game-card {
+            width: min(100%, 1120px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(16px, 2.5vw, 24px);
+        }
+
+        .status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .chip-group { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        .chip {
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        /* ── PROGRESS ── */
+        .progress-shell { margin-bottom: 18px; }
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .progress-bar {
+            height: 14px;
+            width: 100%;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0;
+            background: var(--progress);
+            transition: width 0.3s ease;
+        }
+        .step-dots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .step-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 0.84rem;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text-soft);
+            cursor: default;
+        }
+        .step-dot.clickable { cursor: pointer; }
+        .step-dot.clickable:hover { border-color: var(--accent); }
+        .step-dot.current { outline: 3px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+        .step-dot.correct { background: color-mix(in srgb, var(--success) 18%, var(--surface)); border-color: color-mix(in srgb, var(--success) 40%, transparent); }
+        .step-dot.partial { background: color-mix(in srgb, var(--warning) 18%, var(--surface)); border-color: color-mix(in srgb, var(--warning) 40%, transparent); }
+        .step-dot.wrong   { background: color-mix(in srgb, var(--danger)  18%, var(--surface)); border-color: color-mix(in srgb, var(--danger)  40%, transparent); }
+
+        /* ── GAME GRID (two-column when mini-scene active) ── */
+        .game-grid { display: grid; gap: 20px; align-items: start; }
+        .game-grid.with-scene { grid-template-columns: 1fr 1fr; }
+        .game-grid.no-scene   { grid-template-columns: 1fr; }
+
+        /* ── MINI-SCENE PANEL ── */
+        .mini-scene-panel {
+            background: color-mix(in srgb, var(--accent) 6%, var(--surface-2));
+            border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+            border-radius: var(--radius-lg);
+            padding: 18px;
+        }
+        .mini-scene-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .mini-scene-header h3 { margin: 0; font-size: 0.95rem; color: var(--accent); }
+
+        /* Audio bar */
+        .audio-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 9px 12px;
+            border-radius: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+        .audio-bar-label { color: var(--muted); font-size: 0.8rem; font-weight: 700; margin-right: 2px; }
+        .audio-btn {
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-soft);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .audio-btn:hover { background: var(--surface-2); }
+        .speed-group { display: flex; gap: 5px; margin-left: auto; }
+        .speed-btn {
+            padding: 5px 9px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            font-size: 0.77rem;
+            font-weight: 700;
+        }
+        .speed-btn.active {
+            background: color-mix(in srgb, var(--accent) 20%, var(--surface));
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .mini-scene-text {
+            font-size: 0.97rem;
+            line-height: 1.88;
+            color: var(--text-soft);
+            font-style: italic;
+            margin: 0 0 10px;
+        }
+        .mini-scene-footer { color: var(--muted); font-size: 0.77rem; margin: 0; }
+
+        /* ── QUESTION PANEL ── */
+        .question-panel {
+            padding: clamp(16px, 2.5vw, 22px);
+            background: color-mix(in srgb, var(--surface-2) 38%, transparent);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .q-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        /* Difficulty badges */
+        .difficulty-badge {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.79rem;
+        }
+        .difficulty-badge.easy     { background: color-mix(in srgb, var(--success) 20%, var(--surface)); color: var(--success); }
+        .difficulty-badge.medium   { background: color-mix(in srgb, var(--warning) 20%, var(--surface)); color: var(--warning); }
+        .difficulty-badge.challenge{ background: color-mix(in srgb, var(--danger)  18%, var(--surface)); color: var(--danger); }
+
+        .screen-label-chip { color: var(--muted); font-size: 0.87rem; }
+
+        .question-title    { margin: 0; font-size: clamp(1.2rem, 2vw, 1.6rem); }
+        .question-prompt   { color: var(--text-soft); line-height: 1.7; margin: 0; font-size: 1.04rem; }
+        .question-directions { color: var(--muted); margin: 0; font-size: 0.96rem; }
+
+        /* ── ANSWER AREA ── */
+        .answer-area { display: grid; gap: 14px; }
+
+        .input-field, .textarea-field {
+            width: 100%;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+        }
+        .textarea-field { min-height: 150px; resize: vertical; line-height: 1.55; }
+
+        .choice-grid { display: grid; gap: 10px; }
+
+        .choice-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 13px 16px;
+            border-radius: 14px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease;
+            width: 100%;
+            text-align: left;
+        }
+        .choice-card:hover:not(.locked) { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+        .choice-card.selected   { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+        .choice-card.reveal-correct { border-color: var(--success) !important; background: color-mix(in srgb, var(--success) 12%, var(--surface)) !important; }
+        .choice-card.reveal-wrong   { border-color: var(--danger)  !important; background: color-mix(in srgb, var(--danger)  10%, var(--surface)) !important; }
+        .choice-card.reveal-partial { border-color: var(--warning) !important; background: color-mix(in srgb, var(--warning) 10%, var(--surface)) !important; }
+        .choice-card.locked { cursor: default; }
+        .choice-card input[type="radio"] { margin-top: 3px; transform: scale(1.2); accent-color: var(--accent); flex-shrink: 0; }
+        .choice-text { line-height: 1.55; color: var(--text-soft); font-size: 0.96rem; }
+
+        /* ── BUTTON-CHOICE (word/option tiles) ── */
+        .word-btn-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+
+        .word-btn {
+            padding: 18px 32px;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 1.08rem;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.15s ease, background 0.15s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+        .word-btn:hover:not(.locked):not(:disabled) {
+            border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+            background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+        }
+        .word-btn.selected {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+        }
+        .word-btn.selected::after {
+            content: "✓";
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: var(--accent);
+            line-height: 1;
+        }
+        .word-btn.reveal-correct {
+            border-color: var(--success) !important;
+            background: color-mix(in srgb, var(--success) 12%, var(--surface)) !important;
+        }
+        .word-btn.reveal-correct::after {
+            content: "✓";
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: var(--success);
+            line-height: 1;
+        }
+        .word-btn.reveal-wrong {
+            border-color: var(--danger) !important;
+            background: color-mix(in srgb, var(--danger) 10%, var(--surface)) !important;
+        }
+        .word-btn.reveal-partial {
+            border-color: var(--warning) !important;
+            background: color-mix(in srgb, var(--warning) 10%, var(--surface)) !important;
+        }
+        .word-btn.locked, .word-btn:disabled { cursor: default; }
+
+        /* ── BUTTON ROW ── */
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            align-items: center;
+        }
+
+        /* ── FEEDBACK / HINT / ALERT ── */
+        .feedback-box, .hint-box, .review-box, .alert-box {
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            padding: 14px 16px;
+            line-height: 1.65;
+            display: none;
+        }
+        .feedback-box.show, .hint-box.show, .review-box.show, .alert-box.show { display: block; }
+
+        .feedback-box.correct { background: color-mix(in srgb, var(--success) 14%, var(--surface)); border-color: color-mix(in srgb, var(--success) 42%, transparent); }
+        .feedback-box.partial { background: color-mix(in srgb, var(--warning) 14%, var(--surface)); border-color: color-mix(in srgb, var(--warning) 42%, transparent); }
+        .feedback-box.wrong   { background: color-mix(in srgb, var(--danger)  12%, var(--surface)); border-color: color-mix(in srgb, var(--danger)  38%, transparent); }
+        .alert-box            { background: color-mix(in srgb, var(--warning) 12%, var(--surface)); border-color: color-mix(in srgb, var(--warning) 38%, transparent); }
+        .hint-box, .review-box { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+        .feedback-label { display: inline-flex; align-items: center; gap: 7px; font-weight: 800; margin-bottom: 8px; font-size: 1rem; }
+        .feedback-body p { margin: 0 0 6px; color: var(--text-soft); font-size: 0.95rem; }
+        .feedback-body p:last-child { margin-bottom: 0; }
+        .feedback-fix   { color: var(--muted); font-style: italic; }
+        .feedback-model { color: var(--text-soft); font-weight: 700; }
+
+        /* ── NAVIGATION ROW ── */
+        .navigation-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 18px;
+        }
+        .navigation-row .spacer { flex: 1; }
+
+        /* ── SUMMARY ── */
+        .summary-layout { flex: 1; display: grid; place-items: center; padding: 8px; }
+
+        .summary-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(22px, 4vw, 36px);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .summary-stat { padding: 16px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); }
+        .summary-stat h4 { margin: 0 0 8px; color: var(--muted); font-size: 0.85rem; }
+        .summary-stat p  { margin: 0; font-size: 1.45rem; font-weight: 800; }
+
+        .results-list { display: grid; gap: 12px; }
+        .result-card {
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+        }
+        .result-card h4, .result-card p { margin: 0; }
+        .result-card h4 { margin-bottom: 8px; }
+        .result-meta { margin-top: 10px; color: var(--muted); font-size: 0.9rem; }
+
+        /* ── REVIEW MEMORY DRAWER ── */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.56);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+        .drawer.show { display: flex; }
+        .drawer-card {
+            width: min(100%, 420px);
+            height: 100%;
+            border-radius: 0;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            overflow: auto;
+        }
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .history-list { display: grid; gap: 10px; }
+        .history-item {
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+        }
+        .history-item h4, .history-item p { margin: 0; }
+        .history-item h4 { margin-bottom: 8px; }
+        .history-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* ── MODALS ── */
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+        .modal.show { display: flex; }
+        .modal-card {
+            width: min(100%, 560px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+        .modal-card h3 { margin: 0 0 16px; font-size: clamp(1.2rem, 2vw, 1.6rem); }
+        .modal-card p, .modal-card li { color: var(--text-soft); line-height: 1.65; }
+        .modal-card ul { padding-left: 20px; margin: 0 0 18px; }
+        .modal-card li { margin-bottom: 6px; }
+
+        /* Status pill (review drawer) */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+        .status-pill.correct { background: color-mix(in srgb, var(--success) 18%, var(--surface)); color: var(--success); }
+        .status-pill.partial { background: color-mix(in srgb, var(--warning) 18%, var(--surface)); color: var(--warning); }
+        .status-pill.wrong   { background: color-mix(in srgb, var(--danger)  14%, var(--surface)); color: var(--danger); }
+
+        /* ── UTIL ── */
+        .hidden { display: none !important; }
+        .muted  { color: var(--muted); }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 780px) {
+            body { padding: 10px; }
+            .game-grid.with-scene { grid-template-columns: 1fr; }
+            .teach-grid { grid-template-columns: 1fr; }
+            .controls { width: 100%; justify-content: flex-start; }
+            .navigation-row { flex-wrap: wrap; }
+            .brand-copy h1 { font-size: 0.92rem; }
+            .step-dot { width: 34px; height: 34px; font-size: 0.82rem; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="app-shell">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div class="brand-wrap">
+            <div class="brand-badge" id="brandBadge">SIM</div>
+            <div class="brand-copy">
+                <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                <p id="brandSubtitle">Offline interactive learning shell</p>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="control-btn hidden" id="rulesBtn">&#128203; Rules</button>
+            <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">&#10067; Help</button>
+            <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">&#127769; Dark</button>
+            <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">&#9974; Full Screen</button>
+            <button class="control-btn" id="historyBtn" aria-label="Open review memory">&#129504; Review Memory</button>
+            <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">&#8634; Reset</button>
+        </div>
+    </header>
+
+    <!-- HOME SCREEN -->
+    <main class="screen active" id="homeScreen">
+        <div class="center-stage">
+            <section class="hero-card">
+                <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                <p id="homeDescription">
+                    This is a professional offline-ready template for student simulations.
+                    Swap in your own questions, hints, explanations, and content.
+                </p>
+                <div class="hero-actions">
+                    <button class="primary-btn" id="beginBtn">&#9654; Begin</button>
+                    <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- TEACH SCREEN -->
+    <main class="screen" id="teachScreen">
+        <div class="center-stage">
+            <section class="teach-card" id="teachCard">
+                <!-- Populated by JS from SIM_CONFIG.teachContent -->
+            </section>
+        </div>
+    </main>
+
+    <!-- GAME SCREEN -->
+    <main class="screen" id="gameScreen">
+        <div class="game-layout">
+            <section class="game-card">
+
+                <div class="status-row">
+                    <div class="chip-group">
+                        <div class="chip" id="questionCounter">Question 1 of 1</div>
+                        <div class="chip" id="scoreChip">Score: 0</div>
+                        <div class="chip" id="modeChip">Mode: Live Play</div>
+                    </div>
+                    <div class="chip" id="streakChip">Streak: 0</div>
+                </div>
+
+                <div class="progress-shell">
+                    <div class="progress-meta">
+                        <span id="progressLabel">0% complete</span>
+                        <span id="progressSummary">0 answered</span>
+                    </div>
+                    <div class="progress-bar" aria-hidden="true">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="step-dots" id="stepDots"></div>
+                </div>
+
+                <!-- game-grid class toggled by JS: with-scene or no-scene -->
+                <div class="game-grid no-scene" id="gameGrid">
+
+                    <!-- Mini-scene panel — hidden when showMiniScene is false -->
+                    <div class="mini-scene-panel hidden" id="miniScenePanel">
+                        <div class="mini-scene-header">
+                            <h3>&#128218; Passage</h3>
+                            <button class="audio-btn hidden" id="toggleAudioBarBtn">&#128266; Listen</button>
+                        </div>
+                        <div class="audio-bar hidden" id="audioBar">
+                            <span class="audio-bar-label">Audio:</span>
+                            <button class="audio-btn" id="audioPlayBtn">&#9654; Play</button>
+                            <button class="audio-btn" id="audioPauseBtn">&#9646;&#9646; Pause</button>
+                            <button class="audio-btn" id="audioReplayBtn">&#8634; Replay</button>
+                            <div class="speed-group">
+                                <button class="speed-btn" data-rate="0.75">0.75&#215;</button>
+                                <button class="speed-btn active" data-rate="1">1&#215;</button>
+                                <button class="speed-btn" data-rate="1.25">1.25&#215;</button>
+                            </div>
+                        </div>
+                        <p class="mini-scene-text" id="miniSceneText"></p>
+                        <p class="mini-scene-footer" id="miniSceneFooter"></p>
+                        <!-- Hidden audio element for file playback -->
+                        <audio id="sceneAudio" preload="auto"></audio>
+                    </div>
+
+                    <!-- Question panel -->
+                    <div class="question-panel" id="questionPanel">
+                        <div class="q-header">
+                            <span class="difficulty-badge hidden" id="diffBadge"></span>
+                            <span class="screen-label-chip hidden" id="screenLabelChip"></span>
+                        </div>
+                        <h2 class="question-title" id="questionTitle">Question title</h2>
+                        <p class="question-prompt" id="questionPrompt">Prompt will appear here.</p>
+                        <p class="question-directions" id="questionDirections">Directions will appear here.</p>
+
+                        <form id="answerForm" novalidate>
+                            <div class="answer-area" id="answerArea"></div>
+                            <div class="button-row" id="buttonRow" style="margin-top: 14px;"></div>
+                        </form>
+
+                        <div class="hint-box" id="hintBox"></div>
+                        <div class="feedback-box" id="feedbackBox"></div>
+                        <div class="review-box" id="reviewBox"></div>
+                        <div class="alert-box" id="alertBox"></div>
+
+                        <div class="navigation-row">
+                            <button type="button" class="nav-btn" id="previousBtn">&#8592; Previous</button>
+                            <div class="spacer"></div>
+                            <button type="button" class="nav-btn" id="nextBtn">Next &#8594;</button>
+                        </div>
+                    </div>
+
+                </div><!-- /game-grid -->
+            </section>
+        </div>
+    </main>
+
+    <!-- SUMMARY SCREEN -->
+    <main class="screen" id="summaryScreen">
+        <div class="summary-layout">
+            <section class="summary-card">
+                <div class="eyebrow">&#127881; Complete</div>
+                <h2 id="summaryTitle">You finished the simulation.</h2>
+                <p id="summaryDescription" class="question-prompt">
+                    Great work. Review your answers, see what you got right, and learn from anything you missed.
+                </p>
+                <div class="summary-grid">
+                    <div class="summary-stat"><h4>Score</h4><p id="summaryScore">0</p></div>
+                    <div class="summary-stat"><h4>Accuracy</h4><p id="summaryAccuracy">0%</p></div>
+                    <div class="summary-stat"><h4>Correct</h4><p id="summaryCorrect">0</p></div>
+                    <div class="summary-stat"><h4>Partial</h4><p id="summaryPartial">0</p></div>
+                    <div class="summary-stat"><h4>Wrong</h4><p id="summaryWrong">0</p></div>
+                    <div class="summary-stat"><h4>Best Streak</h4><p id="summaryStreak">0</p></div>
+                </div>
+                <div class="results-list" id="summaryResults"></div>
+                <div class="button-row" style="margin-top: 24px;">
+                    <button class="secondary-btn" id="reviewFromSummaryBtn">&#129504; Review Memory</button>
+                    <button class="primary-btn" id="playAgainBtn">&#8634; Play Again</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="footer-note" id="footerNote">
+        Built as a local, editable shell. Swap the content, keep the structure.
+    </div>
+
+</div><!-- /app-shell -->
+
+<!-- REVIEW MEMORY DRAWER -->
+<aside class="drawer" id="historyDrawer" aria-hidden="true">
+    <section class="drawer-card">
+        <div class="drawer-head">
+            <div>
+                <h3 style="margin:0;">Review Memory</h3>
+                <p class="muted" style="margin:4px 0 0; font-size:0.9rem;">Completed questions, answers, and explanations.</p>
+            </div>
+            <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">&#215;</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+    </section>
+</aside>
+
+<!-- INSTRUCTIONS MODAL -->
+<div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+    <section class="modal-card">
+        <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">&#215;</button>
+        <h3 id="instructionsHeading">&#10067; How This Works</h3>
+        <div id="instructionsBody"></div>
+        <div style="margin-top: 18px;">
+            <button class="primary-btn" id="gotItBtn">Got it</button>
+        </div>
+    </section>
+</div>
+
+<!-- RESET CONFIRM MODAL -->
+<div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmHeading">
+    <section class="modal-card" style="max-width: 460px;">
+        <h3 id="confirmHeading">&#8634; Reset Simulation</h3>
+        <p style="color: var(--text-soft); line-height: 1.65; margin: 0 0 20px;">
+            This will erase all saved progress and restart from the beginning. Are you sure?
+        </p>
+        <div class="button-row">
+            <button class="danger-btn" id="confirmYesBtn">Yes, Reset</button>
+            <button class="secondary-btn" id="confirmNoBtn">Cancel</button>
+        </div>
+    </section>
+</div>
+
+<!-- RULES MODAL -->
+<div class="modal" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesHeading">
+    <section class="modal-card">
+        <button class="close-btn" id="closeRulesBtn" aria-label="Close rules">&#215;</button>
+        <h3 id="rulesHeading">&#128203; Quick Rules</h3>
+        <ul id="rulesList"></ul>
+        <button class="primary-btn" id="closeRulesBtn2">Close</button>
+    </section>
+</div>
+
+<!-- BLANK QUESTIONS WARNING MODAL -->
+<div class="modal" id="blankWarningModal" role="dialog" aria-modal="true" aria-labelledby="blankWarningHeading">
+    <section class="modal-card" style="max-width: 480px;">
+        <h3 id="blankWarningHeading">&#9888;&#65039; Unanswered Questions</h3>
+        <p style="color: var(--text-soft); line-height: 1.65; margin: 0 0 10px;">
+            The following questions have no answer yet:
+        </p>
+        <ul id="blankWarningList" style="margin: 0 0 16px; padding-left: 20px; color: var(--text-soft); line-height: 1.8;"></ul>
+        <p style="color: var(--text-soft); line-height: 1.65; margin: 0 0 20px;">
+            Go back to answer them, or submit with blank answers.
+        </p>
+        <div class="button-row">
+            <button class="primary-btn" id="blankGoBackBtn">&#8592; Go to Question</button>
+            <button class="secondary-btn" id="blankSubmitAnywayBtn">Submit Anyway</button>
+        </div>
+    </section>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   DEVELOPER EDIT AREA 1 — SIMULATION CONFIGURATION
+   ============================================================ */
+const SIM_CONFIG = {
+    simId:       "simulation-template-shell",
+    title:       "Editable Simulation Template",
+    subtitle:    "Single-file shell for local student activities",
+    badgeText:   "SIM",
+    homeEyebrow: "Template Shell Ready",
+    homeDescription:
+        "Use this shell to build a student simulation. Replace the sample questions below with your own content.",
+    footerText: "Simulation Template Shell — swap the content, keep the structure.",
+
+    /* ── Instructions modal ── */
+    showIntroModalOnLoad: true,
+    instructions: [
+        "Read the question carefully before answering.",
+        "Use the Hint button if you get stuck.",
+        "Watch your score, streak, and progress bar as you go.",
+        "Use Review Memory to revisit completed answers.",
+        "Use the Reset button any time you want to restart."
+    ],
+
+    /* ── Rules modal (set showRulesModal: false to hide the button) ── */
+    showRulesModal: true,
+    rules: [
+        "Read the full question before choosing an answer.",
+        "Use the Hint if you are stuck — it will not cost points.",
+        "After a wrong answer, read the feedback carefully before trying again.",
+        "You can review any answered question using Review Memory."
+    ],
+
+    /* ── Teach screen (set showTeachScreen: false to skip it) ── */
+    showTeachScreen: true,
+    teachContent: {
+        eyebrow:   "&#128218; Quick Reminder",
+        title:     "Key Concept Title",
+        subtitle:  "Skill focus: what students are about to practise.",
+        columns: [
+            {
+                headingHTML: "&#11088; <strong>Concept A</strong> usually:",
+                headingColor: "var(--accent)",
+                items: [
+                    "First key point about Concept A",
+                    "Second key point",
+                    "Third key point"
+                ]
+            },
+            {
+                headingHTML: "&#9671; <strong>Concept B</strong> usually:",
+                headingColor: "var(--accent-2)",
+                items: [
+                    "First key point about Concept B",
+                    "Second key point",
+                    "Third key point"
+                ]
+            }
+        ],
+        examples: [
+            {
+                text:      "Sample sentence illustrating Concept A.",
+                labelHTML: "&#11088; Concept A example",
+                labelClass: "ex-accent"
+            },
+            {
+                text:      "Sample sentence illustrating Concept B.",
+                labelHTML: "&#9671; Concept B example",
+                labelClass: "ex-accent2"
+            }
+        ]
+    },
+
+    /* ── Mini-scene panel (set showMiniScene: false to hide it) ──
+       audioSrc: path to an audio file, or "" to hide the Listen button.
+       footerText: small hint shown below the passage.                    */
+    showMiniScene: true,
+    miniScene: {
+        panelTitle:  "&#128218; Passage",
+        text:
+            "This is the passage or scenario text the student reads before answering. " +
+            "Replace this with your own mini-scene. It will appear in the left column " +
+            "of the game screen alongside the question panel on the right.",
+        audioSrc:   "",
+        footerText: "Read the passage carefully before answering each question."
+    },
+
+    scoreLabels: {
+        correct: "Correct",
+        partial: "Partially Correct",
+        wrong:   "Not Quite"
+    },
+
+    allowSummaryPage: true,
+    storageKey: "simulation-template-shell-v3"
+};
+
+/* ============================================================
+   DEVELOPER EDIT AREA 2 — LANGUAGE FILTER
+   ============================================================ */
+const BLOCKED_LANGUAGE = [
+    "placeholderbadword1",
+    "placeholderbadword2"
+];
+
+/* ============================================================
+   DEVELOPER EDIT AREA 3 — QUESTION DATA
+
+   Fields per question:
+     id, title, prompt, directions, type (mcq/text/textarea/number)
+     hint, points, grading { mode, ... }
+
+   NEW optional fields:
+     difficulty: "easy" | "medium" | "challenge"
+     screenLabel: "Try It (Easy)"  — shown as a chip beside the badge
+
+   Grading modes:
+     mcq              — correctAnswer (index), perFeedback[] OR explanations[]
+     exactText        — acceptableAnswers[]
+     exactNumber      — correctAnswer, tolerance
+     containsKeywords — keywords[], minimumForCorrect, minimumForPartial
+     custom           — grader(answer, question) => { status, scoreAwarded, explanation }
+
+   perFeedback[] (mcq only) — one entry per choice:
+     { status, icon, label, text, fix (optional), model (optional) }
+   If perFeedback is omitted, explanations[] is used as before.
+   ============================================================ */
+const QUESTIONS = [
+    {
+        id: "q1",
+        title: "Question 1",
+        passage: {
+            panelTitle: "&#128218; Passage",
+            text: "This is an example passage for Question 1. Replace this with your own reading text. It will appear in the left column alongside the question.",
+            footerText: "Read carefully before answering.",
+            audioSrc: ""
+        },
+        prompt: `You must read this over the PA system: <br>"Please report to the main hall after lunch."<br>Which delivery plan is best?`,
+        directions: "Choose one answer.",
+        type: "mcq",
+        difficulty: "easy",
+        screenLabel: "Try It (Easy)",
+        choices: [
+            "Speak quickly so you finish fast. Make every word equally loud.",
+            "Speak at a steady pace, finish the ends of words, and put extra stress on <strong>main hall</strong>.",
+            "Speak very slowly with a long pause after almost every word."
+        ],
+        hint: "Think about which plan helps the listener catch the most important information.",
+        points: 10,
+        grading: {
+            mode: "mcq",
+            correctAnswer: 1,
+            perFeedback: [
+                {
+                    status: "wrong",
+                    icon: "❌", label: "Incorrect",
+                    text: "This is incorrect because speaking quickly and evenly makes it hard for the listener to catch the key detail.",
+                    fix: "To fix it, choose the plan that stresses the most important words.",
+                    model: "Correct version: option B"
+                },
+                {
+                    status: "correct",
+                    icon: "✅", label: "Correct",
+                    text: "You followed the rule because a steady pace with stress on the key location gives the listener the best chance of understanding.",
+                    fix: null, model: null
+                },
+                {
+                    status: "wrong",
+                    icon: "❌", label: "Incorrect",
+                    text: "This is incorrect because pausing after every word breaks the natural flow and makes the message harder to follow.",
+                    fix: "To fix it, choose the plan that keeps a natural pace while stressing the key word.",
+                    model: "Correct version: option B"
+                }
+            ]
+        }
+    },
+    {
+        id: "q2",
+        title: "Question 2",
+        prompt: "Type the word that names a person, place, animal, or thing.",
+        directions: "Use one word only.",
+        type: "text",
+        difficulty: "medium",
+        screenLabel: "Try It (Medium)",
+        placeholder: "Type your answer here",
+        hint: "It starts with the letter N.",
+        points: 10,
+        grading: {
+            mode: "exactText",
+            acceptableAnswers: ["noun"],
+            explanation: "A noun names a person, place, animal, thing, or idea."
+        }
+    },
+    {
+        id: "q3",
+        title: "Question 3",
+        prompt: "What is 24 ÷ 6?",
+        directions: "Enter a number only.",
+        type: "number",
+        difficulty: "easy",
+        screenLabel: "Try It (Easy)",
+        placeholder: "0",
+        hint: "Think of how many groups of 6 fit into 24.",
+        points: 10,
+        grading: {
+            mode: "exactNumber",
+            correctAnswer: 4,
+            tolerance: 0,
+            explanation: "24 divided by 6 equals 4."
+        }
+    },
+    {
+        id: "q4",
+        title: "Question 4",
+        prompt: "Write one short sentence that explains why kindness matters in a classroom.",
+        directions: "A full sentence is best.",
+        type: "textarea",
+        difficulty: "challenge",
+        screenLabel: "Challenge",
+        placeholder: "Write your sentence here",
+        hint: "Think about respect, teamwork, or safety.",
+        points: 15,
+        grading: {
+            mode: "containsKeywords",
+            keywords: ["respect", "help", "safe", "kind", "teamwork", "learn"],
+            minimumForCorrect: 2,
+            minimumForPartial: 1,
+            explanation: "Kindness helps classrooms feel safe, respectful, and ready for learning."
+        }
+    },
+    {
+        id: "q5",
+        title: "Question 5",
+        prompt: "Is the number 9 even or odd?",
+        directions: "Click the correct answer.",
+        type: "mcq",
+        choiceStyle: "buttons",
+        choices: ["Even", "Odd"],
+        difficulty: "medium",
+        screenLabel: "Try It (Medium)",
+        hint: "A number is odd when it cannot be split into two equal whole groups.",
+        points: 10,
+        grading: {
+            mode: "exactText",
+            acceptableAnswers: ["odd"],
+            explanation: "9 is an odd number — it cannot be split into two equal whole groups."
+        }
+    }
+];
+
+/* ============================================================
+   APPLICATION STATE
+   ============================================================ */
+const state = {
+    currentIndex:    0,
+    currentScreen:   "home",
+    answers:         {},
+    results:         {},
+    score:           0,
+    streak:          0,
+    bestStreak:      0,
+    reviewModeIndex: null,
+    theme:           "dark",
+    audioRate:       1
+};
+
+/* ============================================================
+   DOM REFERENCES
+   ============================================================ */
+const dom = {
+    html:               document.documentElement,
+    brandBadge:         document.getElementById("brandBadge"),
+    brandTitle:         document.getElementById("brandTitle"),
+    brandSubtitle:      document.getElementById("brandSubtitle"),
+    homeEyebrow:        document.getElementById("homeEyebrow"),
+    homeTitle:          document.getElementById("homeTitle"),
+    homeDescription:    document.getElementById("homeDescription"),
+    footerNote:         document.getElementById("footerNote"),
+    homeScreen:         document.getElementById("homeScreen"),
+    teachScreen:        document.getElementById("teachScreen"),
+    teachCard:          document.getElementById("teachCard"),
+    gameScreen:         document.getElementById("gameScreen"),
+    summaryScreen:      document.getElementById("summaryScreen"),
+    beginBtn:           document.getElementById("beginBtn"),
+    openInstructionsBtn:document.getElementById("openInstructionsBtn"),
+    helpBtn:            document.getElementById("helpBtn"),
+    rulesBtn:           document.getElementById("rulesBtn"),
+    themeToggleBtn:     document.getElementById("themeToggleBtn"),
+    fullscreenBtn:      document.getElementById("fullscreenBtn"),
+    historyBtn:         document.getElementById("historyBtn"),
+    resetBtn:           document.getElementById("resetBtn"),
+    questionCounter:    document.getElementById("questionCounter"),
+    scoreChip:          document.getElementById("scoreChip"),
+    modeChip:           document.getElementById("modeChip"),
+    streakChip:         document.getElementById("streakChip"),
+    progressLabel:      document.getElementById("progressLabel"),
+    progressSummary:    document.getElementById("progressSummary"),
+    progressFill:       document.getElementById("progressFill"),
+    stepDots:           document.getElementById("stepDots"),
+    gameGrid:           document.getElementById("gameGrid"),
+    miniScenePanel:     document.getElementById("miniScenePanel"),
+    miniSceneText:      document.getElementById("miniSceneText"),
+    miniSceneFooter:    document.getElementById("miniSceneFooter"),
+    toggleAudioBarBtn:  document.getElementById("toggleAudioBarBtn"),
+    audioBar:           document.getElementById("audioBar"),
+    audioPlayBtn:       document.getElementById("audioPlayBtn"),
+    audioPauseBtn:      document.getElementById("audioPauseBtn"),
+    audioReplayBtn:     document.getElementById("audioReplayBtn"),
+    sceneAudio:         document.getElementById("sceneAudio"),
+    diffBadge:          document.getElementById("diffBadge"),
+    screenLabelChip:    document.getElementById("screenLabelChip"),
+    questionTitle:      document.getElementById("questionTitle"),
+    questionPrompt:     document.getElementById("questionPrompt"),
+    questionDirections: document.getElementById("questionDirections"),
+    answerForm:         document.getElementById("answerForm"),
+    answerArea:         document.getElementById("answerArea"),
+    buttonRow:          document.getElementById("buttonRow"),
+    hintBox:            document.getElementById("hintBox"),
+    feedbackBox:        document.getElementById("feedbackBox"),
+    reviewBox:          document.getElementById("reviewBox"),
+    alertBox:           document.getElementById("alertBox"),
+    previousBtn:        document.getElementById("previousBtn"),
+    nextBtn:            document.getElementById("nextBtn"),
+    summaryTitle:       document.getElementById("summaryTitle"),
+    summaryDescription: document.getElementById("summaryDescription"),
+    summaryScore:       document.getElementById("summaryScore"),
+    summaryAccuracy:    document.getElementById("summaryAccuracy"),
+    summaryCorrect:     document.getElementById("summaryCorrect"),
+    summaryPartial:     document.getElementById("summaryPartial"),
+    summaryWrong:       document.getElementById("summaryWrong"),
+    summaryStreak:      document.getElementById("summaryStreak"),
+    summaryResults:     document.getElementById("summaryResults"),
+    reviewFromSummaryBtn:document.getElementById("reviewFromSummaryBtn"),
+    playAgainBtn:       document.getElementById("playAgainBtn"),
+    historyDrawer:      document.getElementById("historyDrawer"),
+    closeHistoryBtn:    document.getElementById("closeHistoryBtn"),
+    historyList:        document.getElementById("historyList"),
+    instructionsModal:  document.getElementById("instructionsModal"),
+    instructionsBody:   document.getElementById("instructionsBody"),
+    closeInstructionsBtn:document.getElementById("closeInstructionsBtn"),
+    gotItBtn:           document.getElementById("gotItBtn"),
+    rulesModal:         document.getElementById("rulesModal"),
+    rulesList:          document.getElementById("rulesList"),
+    closeRulesBtn:      document.getElementById("closeRulesBtn"),
+    closeRulesBtn2:     document.getElementById("closeRulesBtn2"),
+    confirmModal:       document.getElementById("confirmModal"),
+    confirmYesBtn:      document.getElementById("confirmYesBtn"),
+    confirmNoBtn:       document.getElementById("confirmNoBtn"),
+    blankWarningModal:  document.getElementById("blankWarningModal"),
+    blankWarningList:   document.getElementById("blankWarningList"),
+    blankGoBackBtn:     document.getElementById("blankGoBackBtn"),
+    blankSubmitAnywayBtn: document.getElementById("blankSubmitAnywayBtn")
+};
+
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
+initializeApp();
+
+function initializeApp() {
+    applyConfigToUI();
+    buildTeachScreen();
+    /* passage is now rendered per-question inside renderQuestion() */
+    renderInstructions();
+    renderRules();
+    bindEvents();
+    loadStateFromStorage();
+    renderStepDots();
+    renderQuestion();
+    updateStatusUI();
+    updateSummaryScreen();
+
+    if (SIM_CONFIG.showIntroModalOnLoad) {
+        openInstructionsModal();
+    }
+}
+
+function applyConfigToUI() {
+    document.title              = SIM_CONFIG.title;
+    dom.brandBadge.textContent  = SIM_CONFIG.badgeText;
+    dom.brandTitle.textContent  = SIM_CONFIG.title;
+    dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+    dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+    dom.homeTitle.textContent   = SIM_CONFIG.title;
+    dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+    dom.footerNote.textContent  = SIM_CONFIG.footerText;
+
+    if (SIM_CONFIG.showRulesModal) {
+        dom.rulesBtn.classList.remove("hidden");
+    }
+}
+
+/* ============================================================
+   TEACH SCREEN BUILDER
+   ============================================================ */
+function buildTeachScreen() {
+    if (!SIM_CONFIG.showTeachScreen) return;
+
+    const tc = SIM_CONFIG.teachContent;
+    const card = dom.teachCard;
+    card.innerHTML = "";
+
+    const eyebrow = document.createElement("div");
+    eyebrow.className = "eyebrow";
+    eyebrow.innerHTML = tc.eyebrow;
+
+    const h2 = document.createElement("h2");
+    h2.textContent = tc.title;
+
+    const sub = document.createElement("p");
+    sub.className = "teach-subtitle";
+    sub.textContent = tc.subtitle;
+
+    card.appendChild(eyebrow);
+    card.appendChild(h2);
+    card.appendChild(sub);
+
+    if (tc.columns && tc.columns.length) {
+        const grid = document.createElement("div");
+        grid.className = "teach-grid";
+        tc.columns.forEach(function(col) {
+            const box = document.createElement("div");
+            box.className = "teach-box";
+            const h3 = document.createElement("h3");
+            h3.innerHTML = col.headingHTML;
+            h3.style.color = col.headingColor || "var(--accent)";
+            const ul = document.createElement("ul");
+            col.items.forEach(function(item) {
+                const li = document.createElement("li");
+                li.textContent = item;
+                ul.appendChild(li);
+            });
+            box.appendChild(h3);
+            box.appendChild(ul);
+            grid.appendChild(box);
+        });
+        card.appendChild(grid);
+    }
+
+    if (tc.examples && tc.examples.length) {
+        tc.examples.forEach(function(ex) {
+            const block = document.createElement("div");
+            block.className = "teach-example";
+            const p = document.createElement("p");
+            p.textContent = "“" + ex.text + "”";
+            const lbl = document.createElement("span");
+            lbl.className = "ex-label " + (ex.labelClass || "ex-accent");
+            lbl.innerHTML = ex.labelHTML;
+            block.appendChild(p);
+            block.appendChild(lbl);
+            card.appendChild(block);
+        });
+    }
+
+    const navRow = document.createElement("div");
+    navRow.className = "nav-row";
+    navRow.style.marginTop = "24px";
+
+    const backBtn = document.createElement("button");
+    backBtn.className = "nav-btn";
+    backBtn.id = "backFromTeachBtn";
+    backBtn.innerHTML = "&#8592; Back";
+    backBtn.addEventListener("click", function() { showScreen("home"); });
+
+    const spacer = document.createElement("div");
+    spacer.className = "spacer";
+
+    const continueBtn = document.createElement("button");
+    continueBtn.className = "primary-btn";
+    continueBtn.id = "continueFromTeachBtn";
+    continueBtn.innerHTML = "Continue &#8594;";
+    continueBtn.addEventListener("click", function() {
+        showScreen("game");
+        state.reviewModeIndex = null;
+        renderQuestion();
+    });
+
+    navRow.appendChild(backBtn);
+    navRow.appendChild(spacer);
+    navRow.appendChild(continueBtn);
+    card.appendChild(navRow);
+}
+
+/* ============================================================
+   MINI-SCENE BUILDER
+   ============================================================ */
+function buildMiniScene(question) {
+    const ms = question && question.passage;
+
+    if (!ms || !ms.text) {
+        dom.miniScenePanel.classList.add("hidden");
+        dom.gameGrid.classList.remove("with-scene");
+        dom.gameGrid.classList.add("no-scene");
+        dom.toggleAudioBarBtn.classList.add("hidden");
+        dom.sceneAudio.src = "";
+        return;
+    }
+
+    dom.miniScenePanel.classList.remove("hidden");
+    dom.gameGrid.classList.remove("no-scene");
+    dom.gameGrid.classList.add("with-scene");
+
+    dom.miniScenePanel.querySelector(".mini-scene-header h3").innerHTML = ms.panelTitle || "&#128218; Passage";
+    dom.miniSceneText.textContent = ms.text || "";
+    dom.miniSceneFooter.textContent = ms.footerText || "";
+
+    if (ms.audioSrc) {
+        dom.sceneAudio.src = ms.audioSrc;
+        dom.toggleAudioBarBtn.classList.remove("hidden");
+    } else {
+        dom.toggleAudioBarBtn.classList.add("hidden");
+        dom.sceneAudio.src = "";
+    }
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function renderInstructions() {
+    const intro = document.createElement("p");
+    intro.textContent = "Here is how this simulation works:";
+    const list = document.createElement("ul");
+    SIM_CONFIG.instructions.forEach(function(item) {
+        const li = document.createElement("li");
+        li.textContent = item;
+        list.appendChild(li);
+    });
+    dom.instructionsBody.replaceChildren(intro, list);
+}
+
+function renderRules() {
+    dom.rulesList.innerHTML = "";
+    SIM_CONFIG.rules.forEach(function(rule) {
+        const li = document.createElement("li");
+        li.textContent = rule;
+        dom.rulesList.appendChild(li);
+    });
+}
+
+function openInstructionsModal() { dom.instructionsModal.classList.add("show"); }
+function closeInstructionsModal() {
+    dom.instructionsModal.classList.remove("show");
+}
+function openRulesModal()  { dom.rulesModal.classList.add("show"); }
+function closeRulesModal() { dom.rulesModal.classList.remove("show"); }
+
+function openHistoryDrawer() {
+    renderHistoryList();
+    dom.historyDrawer.classList.add("show");
+    dom.historyDrawer.setAttribute("aria-hidden", "false");
+}
+function closeHistoryDrawer() {
+    dom.historyDrawer.classList.remove("show");
+    dom.historyDrawer.setAttribute("aria-hidden", "true");
+}
+
+/* ============================================================
+   EVENT BINDING
+   ============================================================ */
+function bindEvents() {
+    dom.beginBtn.addEventListener("click", function() {
+        if (SIM_CONFIG.showTeachScreen) {
+            showScreen("teach");
+        } else {
+            showScreen("game");
+            state.reviewModeIndex = null;
+            renderQuestion();
+        }
+    });
+
+    dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+    dom.helpBtn.addEventListener("click", function() {
+        dom.helpBtn.classList.remove("pulse-help");
+        openInstructionsModal();
+    });
+    dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+    dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+    dom.instructionsModal.addEventListener("click", function(e) {
+        if (e.target === dom.instructionsModal) closeInstructionsModal();
+    });
+
+    dom.rulesBtn.addEventListener("click", openRulesModal);
+    dom.closeRulesBtn.addEventListener("click", closeRulesModal);
+    dom.closeRulesBtn2.addEventListener("click", closeRulesModal);
+    dom.rulesModal.addEventListener("click", function(e) {
+        if (e.target === dom.rulesModal) closeRulesModal();
+    });
+
+    dom.themeToggleBtn.addEventListener("click", toggleTheme);
+    dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+    dom.historyBtn.addEventListener("click", openHistoryDrawer);
+    dom.reviewFromSummaryBtn.addEventListener("click", openHistoryDrawer);
+    dom.closeHistoryBtn.addEventListener("click", closeHistoryDrawer);
+    dom.historyDrawer.addEventListener("click", function(e) {
+        if (e.target === dom.historyDrawer) closeHistoryDrawer();
+    });
+
+    dom.resetBtn.addEventListener("click", openConfirmModal);
+    dom.confirmYesBtn.addEventListener("click", confirmReset);
+    dom.confirmNoBtn.addEventListener("click", closeConfirmModal);
+    dom.confirmModal.addEventListener("click", function(e) { if (e.target === dom.confirmModal) closeConfirmModal(); });
+
+    dom.blankGoBackBtn.addEventListener("click", function() {
+        const targetIndex = Number(dom.blankGoBackBtn.dataset.targetIndex);
+        closeBlankWarningModal();
+        state.reviewModeIndex = null;
+        state.currentIndex = targetIndex;
+        showScreen("game");
+        renderQuestion();
+    });
+    dom.blankSubmitAnywayBtn.addEventListener("click", function() {
+        closeBlankWarningModal();
+        showSummaryScreen();
+    });
+    dom.blankWarningModal.addEventListener("click", function(e) {
+        if (e.target === dom.blankWarningModal) closeBlankWarningModal();
+    });
+    dom.previousBtn.addEventListener("click", goPrevious);
+    dom.nextBtn.addEventListener("click", goNext);
+    dom.playAgainBtn.addEventListener("click", resetSimulation);
+
+    dom.toggleAudioBarBtn.addEventListener("click", function() {
+        dom.audioBar.classList.toggle("hidden");
+    });
+    dom.audioPlayBtn.addEventListener("click",   function() { audioPlay(); });
+    dom.audioPauseBtn.addEventListener("click",  function() { audioPause(); });
+    dom.audioReplayBtn.addEventListener("click", function() { audioReplay(); });
+    document.querySelectorAll(".speed-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() { setAudioRate(Number(btn.dataset.rate)); });
+    });
+
+    dom.answerForm.addEventListener("submit", handleAnswerSubmit);
+    document.addEventListener("fullscreenchange", updateFullscreenButton);
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+            closeHistoryDrawer();
+            closeInstructionsModal();
+            closeRulesModal();
+            closeConfirmModal();
+            closeBlankWarningModal();
+        }
+    });
+}
+
+/* ============================================================
+   SCREEN FLOW
+   ============================================================ */
+function showScreen(screenName) {
+    state.currentScreen = screenName;
+    dom.homeScreen.classList.toggle("active",    screenName === "home");
+    dom.teachScreen.classList.toggle("active",   screenName === "teach");
+    dom.gameScreen.classList.toggle("active",    screenName === "game");
+    dom.summaryScreen.classList.toggle("active", screenName === "summary");
+    window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   AUDIO (file-based)
+   ============================================================ */
+function audioPlay() {
+    const a = dom.sceneAudio;
+    if (!a.src) return;
+    a.playbackRate = state.audioRate;
+    a.play().catch(function() {});
+}
+
+function audioPause() {
+    const a = dom.sceneAudio;
+    if (a.paused) { a.play().catch(function() {}); }
+    else          { a.pause(); }
+}
+
+function audioReplay() {
+    const a = dom.sceneAudio;
+    if (!a.src) return;
+    a.currentTime = 0;
+    a.playbackRate = state.audioRate;
+    a.play().catch(function() {});
+}
+
+function setAudioRate(rate) {
+    state.audioRate = rate;
+    dom.sceneAudio.playbackRate = rate;
+    document.querySelectorAll(".speed-btn").forEach(function(btn) {
+        btn.classList.toggle("active", Number(btn.dataset.rate) === rate);
+    });
+    saveStateToStorage();
+}
+
+/* ============================================================
+   QUESTION RENDERING
+   ============================================================ */
+function getCurrentQuestionIndex() {
+    return state.reviewModeIndex !== null ? state.reviewModeIndex : state.currentIndex;
+}
+
+function getCurrentQuestion() {
+    return QUESTIONS[getCurrentQuestionIndex()];
+}
+
+function renderQuestion() {
+    const question = getCurrentQuestion();
+    if (!question) return;
+
+    clearMessageBoxes();
+
+    const isReviewMode   = state.reviewModeIndex !== null;
+    const currentResult  = state.results[question.id];
+    const currentAnswer  = state.answers[question.id];
+    /* Wrong answers are recorded but NOT locked — student can retry */
+    const alreadyAnswered = !!(currentResult && currentResult.status !== "wrong");
+
+    dom.questionCounter.textContent = "Question " + (getCurrentQuestionIndex() + 1) + " of " + QUESTIONS.length;
+    dom.questionTitle.textContent   = question.title || "";
+    dom.modeChip.textContent        = isReviewMode ? "Mode: Review" : "Mode: Live Play";
+
+    if (question.prompt) {
+        if (question.prompt.includes("</") || question.prompt.includes("<br>")) {
+            dom.questionPrompt.innerHTML = question.prompt;
+        } else {
+            dom.questionPrompt.textContent = question.prompt;
+        }
+        dom.questionPrompt.classList.remove("hidden");
+    } else {
+        dom.questionPrompt.textContent = "";
+        dom.questionPrompt.classList.add("hidden");
+    }
+
+    if (question.directions) {
+        dom.questionDirections.textContent = question.directions;
+        dom.questionDirections.classList.remove("hidden");
+    } else {
+        dom.questionDirections.textContent = "";
+        dom.questionDirections.classList.add("hidden");
+    }
+
+    /* Difficulty badge */
+    if (question.difficulty) {
+        dom.diffBadge.className = "difficulty-badge " + question.difficulty;
+        dom.diffBadge.textContent = capitalize(question.difficulty);
+        dom.diffBadge.classList.remove("hidden");
+    } else {
+        dom.diffBadge.classList.add("hidden");
+    }
+
+    /* Screen label chip */
+    if (question.screenLabel) {
+        dom.screenLabelChip.textContent = question.screenLabel;
+        dom.screenLabelChip.classList.remove("hidden");
+    } else {
+        dom.screenLabelChip.classList.add("hidden");
+    }
+
+    buildMiniScene(question);
+
+    dom.answerArea.innerHTML = "";
+
+    switch (question.type) {
+        case "mcq":
+            renderMultipleChoice(question, currentAnswer, isReviewMode, alreadyAnswered);
+            break;
+        case "textarea":
+            renderTextarea(question, currentAnswer, isReviewMode, alreadyAnswered);
+            break;
+        default:
+            renderTextInput(question, currentAnswer, isReviewMode, alreadyAnswered);
+            break;
+    }
+
+    if (isReviewMode && currentResult) {
+        showReviewBox(question, currentAnswer, currentResult);
+    }
+
+    renderButtonRow(isReviewMode, alreadyAnswered, question);
+    updateNavigationButtons();
+    updateStatusUI();
+    renderStepDots();
+}
+
+function renderButtonRow(isReviewMode, alreadyAnswered, question) {
+    dom.buttonRow.innerHTML = "";
+
+    if (isReviewMode || alreadyAnswered) {
+        /* Locked — no action buttons needed; navigation row handles movement */
+        return;
+    }
+
+    const hintBtn = makeBtn("secondary-btn", "&#128161; Hint", showHint);
+    const submitBtn = makeBtn("primary-btn", "&#10003; Check Answer", null);
+    submitBtn.type = "submit";
+    submitBtn.id   = "submitBtn";
+
+    dom.buttonRow.appendChild(hintBtn);
+    dom.buttonRow.appendChild(submitBtn);
+}
+
+function makeBtn(cls, html, fn) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = cls;
+    b.innerHTML = html;
+    if (fn) b.addEventListener("click", fn);
+    return b;
+}
+
+function renderMultipleChoice(question, currentAnswer, isReviewMode, alreadyAnswered) {
+    const useButtons = question.choiceStyle === "buttons";
+    const locked = isReviewMode || alreadyAnswered;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = useButtons ? "word-btn-grid" : "choice-grid";
+
+    question.choices.forEach(function(choice, index) {
+        const isSelected = String(currentAnswer) === String(index);
+        const isCorrect  = index === Number(question.grading.correctAnswer);
+
+        if (useButtons) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "word-btn" + (locked ? " locked" : "") + (isSelected ? " selected" : "");
+            btn.dataset.index = String(index);
+            btn.disabled = locked;
+            if (choice.includes("</") || choice.includes("<strong>")) {
+                btn.innerHTML = choice;
+            } else {
+                btn.textContent = choice;
+            }
+            if (alreadyAnswered && isCorrect) btn.classList.add("reveal-correct");
+            if (!locked) {
+                btn.addEventListener("click", function() {
+                    wrapper.querySelectorAll(".word-btn").forEach(function(b) { b.classList.remove("selected"); });
+                    btn.classList.add("selected");
+                });
+            }
+            wrapper.appendChild(btn);
+        } else {
+            const label = document.createElement("label");
+            label.className = "choice-card" + (locked ? " locked" : "");
+
+            const input = document.createElement("input");
+            input.type     = "radio";
+            input.name     = "question-" + question.id;
+            input.value    = String(index);
+            input.checked  = isSelected;
+            input.disabled = locked;
+            input.style.transform   = "scale(1.2)";
+            input.style.marginTop   = "3px";
+            input.style.accentColor = "var(--accent)";
+
+            const span = document.createElement("div");
+            span.className = "choice-text";
+            if (choice.includes("</") || choice.includes("<strong>")) {
+                span.innerHTML = choice;
+            } else {
+                span.textContent = choice;
+            }
+
+            label.appendChild(input);
+            label.appendChild(span);
+
+            if (alreadyAnswered && isCorrect) label.classList.add("reveal-correct");
+
+            if (!locked) {
+                input.addEventListener("change", function() {
+                    wrapper.querySelectorAll(".choice-card").forEach(function(c) { c.classList.remove("selected"); });
+                    label.classList.add("selected");
+                });
+            }
+            wrapper.appendChild(label);
+        }
+    });
+
+    dom.answerArea.appendChild(wrapper);
+}
+
+function renderTextInput(question, currentAnswer, isReviewMode, alreadyAnswered) {
+    const input = document.createElement("input");
+    input.className   = "input-field";
+    input.type        = question.type === "number" ? "number" : "text";
+    input.id          = "dynamicAnswerInput";
+    input.placeholder = question.placeholder || "Type your answer here";
+    input.value       = currentAnswer != null ? currentAnswer : "";
+    input.disabled    = isReviewMode || alreadyAnswered;
+    dom.answerArea.appendChild(input);
+}
+
+function renderTextarea(question, currentAnswer, isReviewMode, alreadyAnswered) {
+    const ta = document.createElement("textarea");
+    ta.className   = "textarea-field";
+    ta.id          = "dynamicAnswerInput";
+    ta.placeholder = question.placeholder || "Write your answer here";
+    ta.value       = currentAnswer != null ? currentAnswer : "";
+    ta.disabled    = isReviewMode || alreadyAnswered;
+    dom.answerArea.appendChild(ta);
+}
+
+
+/* ============================================================
+   ANSWER HANDLING
+   ============================================================ */
+function handleAnswerSubmit(event) {
+    event.preventDefault();
+    const question = getCurrentQuestion();
+
+    /* Block resubmission only for locked (correct/partial) questions */
+    const existingResult = state.results[question.id];
+    if (existingResult && existingResult.status !== "wrong") {
+        showAlert("You have already answered this question.");
+        return;
+    }
+
+    const studentAnswer = readAnswerFromUI(question);
+    clearAlert();
+
+    if (studentAnswer === null || studentAnswer === "") {
+        showAlert("Please enter or select an answer before submitting.");
+        return;
+    }
+
+    if ((question.type === "text" || question.type === "textarea") && containsBlockedLanguage(String(studentAnswer))) {
+        showAlert("That response contains blocked language.");
+        return;
+    }
+
+    const result = gradeAnswer(question, studentAnswer);
+
+    /* Always record — updates score correctly on re-attempts */
+    recordResult(question, studentAnswer, result);
+    renderHistoryList();
+    renderStepDots();
+    updateStatusUI();
+    updateSummaryScreen();
+    updateNavigationButtons();
+    saveStateToStorage();
+
+    if (result.status === "correct" || result.status === "partial") {
+        showFeedbackFromResult(result);
+        lockChoices(question);
+        renderButtonRow(false, true, question);
+    } else {
+        /* Wrong — show feedback + Try Again, question stays unlocked */
+        showWrongFeedback(question, studentAnswer, result);
+    }
+}
+
+function readAnswerFromUI(question) {
+    if (question.type === "mcq") {
+        if (question.choiceStyle === "buttons") {
+            const sel = dom.answerArea.querySelector(".word-btn.selected");
+            return sel ? Number(sel.dataset.index) : null;
+        }
+        const sel = dom.answerArea.querySelector("input[type=\"radio\"]:checked");
+        return sel ? Number(sel.value) : null;
+    }
+    const input = document.getElementById("dynamicAnswerInput");
+    return input ? input.value.trim() : null;
+}
+
+function lockChoices(question) {
+    dom.answerArea.querySelectorAll(".choice-card").forEach(function(card, i) {
+        card.classList.add("locked");
+        const inp = card.querySelector("input");
+        if (inp) inp.disabled = true;
+        if (i === Number(question.grading.correctAnswer)) card.classList.add("reveal-correct");
+    });
+    dom.answerArea.querySelectorAll(".word-btn").forEach(function(btn) {
+        btn.classList.add("locked");
+        btn.disabled = true;
+        if (Number(btn.dataset.index) === Number(question.grading.correctAnswer)) {
+            btn.classList.add("reveal-correct");
+        }
+    });
+    const inp = document.getElementById("dynamicAnswerInput");
+    if (inp) inp.disabled = true;
+}
+
+/* ── Wrong answer: show per-choice feedback + Try Again ── */
+function showWrongFeedback(question, studentAnswer, result) {
+    /* Highlight the wrong choice */
+    if (question.type === "mcq") {
+        dom.answerArea.querySelectorAll(".choice-card").forEach(function(card, i) {
+            if (i === Number(studentAnswer)) card.classList.add("reveal-wrong");
+        });
+        dom.answerArea.querySelectorAll(".word-btn").forEach(function(btn) {
+            if (Number(btn.dataset.index) === Number(studentAnswer)) btn.classList.add("reveal-wrong");
+        });
+    }
+
+    /* Build feedback from perFeedback or generic */
+    const fb = getPerFeedback(question, studentAnswer) || result;
+    showFeedbackFromResult(fb);
+
+    /* Replace button row with Try Again + Show Me the Rules */
+    dom.buttonRow.innerHTML = "";
+    const tryAgainBtn = makeBtn("secondary-btn", "&#8634; Try Again", function() { tryAgain(question); });
+    dom.buttonRow.appendChild(tryAgainBtn);
+
+    if (SIM_CONFIG.showRulesModal) {
+        const rulesBtn = makeBtn("secondary-btn", "&#128203; Show Me the Rules", openRulesModal);
+        dom.buttonRow.appendChild(rulesBtn);
+    }
+
+    playFeedbackSound("wrong");
+}
+
+function tryAgain(question) {
+    /* Clear wrong highlights */
+    dom.answerArea.querySelectorAll(".choice-card").forEach(function(card) {
+        card.classList.remove("selected", "reveal-wrong", "locked");
+        const inp = card.querySelector("input");
+        if (inp) { inp.checked = false; inp.disabled = false; }
+    });
+    dom.answerArea.querySelectorAll(".word-btn").forEach(function(btn) {
+        btn.classList.remove("selected", "reveal-wrong", "locked");
+        btn.disabled = false;
+    });
+    const dynInput = document.getElementById("dynamicAnswerInput");
+    if (dynInput) { dynInput.value = ""; dynInput.disabled = false; }
+
+    clearMessageBoxes();
+    renderButtonRow(false, false, question);
+}
+
+/* ============================================================
+   GRADING
+   ============================================================ */
+function gradeAnswer(question, answer) {
+    const g = question.grading || {};
+    switch (g.mode) {
+        case "mcq":              return gradeMcq(question, answer);
+        case "exactText":        return gradeExactText(question, answer);
+        case "exactNumber":      return gradeExactNumber(question, answer);
+        case "containsKeywords": return gradeContainsKeywords(question, answer);
+        case "custom":           return g.grader(answer, question);
+        default: return { status: "wrong", scoreAwarded: 0, explanation: "No grading mode set." };
+    }
+}
+
+function gradeMcq(question, answer) {
+    const g = question.grading;
+    const isCorrect = Number(answer) === Number(g.correctAnswer);
+    const fb = getPerFeedback(question, answer);
+    const status = fb ? fb.status : (isCorrect ? "correct" : "wrong");
+    return {
+        status,
+        scoreAwarded: status === "correct" ? question.points : (status === "partial" ? Math.round(question.points * 0.5) : 0),
+        explanation:  fb ? fb.text : (g.explanations ? g.explanations[Number(answer)] : "")
+    };
+}
+
+function getPerFeedback(question, answer) {
+    const pf = question.grading && question.grading.perFeedback;
+    if (!pf) return null;
+    return pf[Number(answer)] || null;
+}
+
+function gradeExactText(question, answer) {
+    const cleaned    = normalizeText(answer);
+    const acceptable = (question.grading.acceptableAnswers || []).map(normalizeText);
+    const isCorrect  = acceptable.includes(cleaned);
+    return { status: isCorrect ? "correct" : "wrong", scoreAwarded: isCorrect ? question.points : 0, explanation: question.grading.explanation || "" };
+}
+
+function gradeExactNumber(question, answer) {
+    const num       = Number(answer);
+    const correct   = Number(question.grading.correctAnswer);
+    const tolerance = Number(question.grading.tolerance || 0);
+    const isCorrect = Number.isFinite(num) && Math.abs(num - correct) <= tolerance;
+    return { status: isCorrect ? "correct" : "wrong", scoreAwarded: isCorrect ? question.points : 0, explanation: question.grading.explanation || "" };
+}
+
+function gradeContainsKeywords(question, answer) {
+    const cleaned  = normalizeText(answer);
+    const keywords = question.grading.keywords || [];
+    const matched  = keywords.filter(function(kw) { return cleaned.includes(normalizeText(kw)); });
+    const minC = Number(question.grading.minimumForCorrect || 2);
+    const minP = Number(question.grading.minimumForPartial || 1);
+    if (matched.length >= minC) {
+        return { status: "correct", scoreAwarded: question.points, explanation: (question.grading.explanation || "") + " Matched: " + matched.join(", ") + "." };
+    }
+    if (matched.length >= minP) {
+        return { status: "partial", scoreAwarded: Math.max(1, Math.round(question.points * 0.5)), explanation: (question.grading.explanation || "") + " Partial match: " + matched.join(", ") + "." };
+    }
+    return { status: "wrong", scoreAwarded: 0, explanation: (question.grading.explanation || "") + " No expected keywords found." };
+}
+
+function recordResult(question, answer, result) {
+    /* On a re-attempt, subtract the previously recorded score first */
+    const existing = state.results[question.id];
+    if (existing) {
+        state.score = Math.max(0, state.score - existing.scoreAwarded);
+    }
+
+    state.answers[question.id] = answer;
+    state.results[question.id] = {
+        status:       result.status,
+        scoreAwarded: result.scoreAwarded,
+        explanation:  result.explanation,
+        answeredAt:   new Date().toISOString()
+    };
+
+    state.score += result.scoreAwarded;
+
+    if (result.status === "correct") {
+        state.streak    += 1;
+        state.bestStreak = Math.max(state.bestStreak, state.streak);
+    } else {
+        state.streak = 0;
+    }
+}
+
+/* ============================================================
+   FEEDBACK / HINT / ALERT
+   ============================================================ */
+function showHint() {
+    const q = getCurrentQuestion();
+    dom.hintBox.className = "hint-box show";
+    dom.hintBox.innerHTML = "<div class=\"feedback-label\">&#128161; Hint</div><p>" + escapeHtml(q.hint || "No hint added yet.") + "</p>";
+}
+
+function showFeedbackFromResult(resultOrFb) {
+    /* Accepts either a grading result or a perFeedback entry */
+    const status = resultOrFb.status;
+    const icon   = status === "correct" ? "✅" : status === "partial" ? "🟡" : "❌";
+    const label  = resultOrFb.label || SIM_CONFIG.scoreLabels[status] || status;
+
+    dom.feedbackBox.className = "feedback-box show " + status;
+    dom.feedbackBox.innerHTML = "<div class=\"feedback-label\">" + icon + " " + escapeHtml(label) + "</div><div class=\"feedback-body\">" +
+        "<p>" + escapeHtml(resultOrFb.text || resultOrFb.explanation || "") + "</p>" +
+        (resultOrFb.fix   ? "<p class=\"feedback-fix\">"   + escapeHtml(resultOrFb.fix)   + "</p>" : "") +
+        (resultOrFb.model ? "<p class=\"feedback-model\">" + escapeHtml(resultOrFb.model) + "</p>" : "") +
+        "</div>";
+
+    playFeedbackSound(status);
+}
+
+function showReviewBox(question, studentAnswer, result) {
+    const formattedAnswer = formatAnswerForDisplay(question, studentAnswer);
+    dom.reviewBox.className = "review-box show";
+    dom.reviewBox.innerHTML =
+        "<div class=\"feedback-label\">&#129504; Review Mode</div>" +
+        "<p><span class=\"status-pill " + escapeHtml(result.status) + "\">" + escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status) + "</span> " +
+        "Your saved answer: <em>" + escapeHtml(formattedAnswer) + "</em></p>" +
+        "<p style=\"margin-top:8px;\">" + (result.explanation || "") + "</p>";
+}
+
+function showAlert(msg) {
+    dom.alertBox.className = "alert-box show";
+    dom.alertBox.innerHTML = "<div class=\"feedback-label\">&#9888;&#65039; Check this</div><p>" + escapeHtml(msg) + "</p>";
+}
+
+function clearAlert() {
+    dom.alertBox.className = "alert-box";
+    dom.alertBox.innerHTML = "";
+}
+
+function clearMessageBoxes() {
+    ["hintBox","feedbackBox","reviewBox","alertBox"].forEach(function(k) {
+        dom[k].className = k.replace(/([A-Z])/g, function(m) { return "-" + m.toLowerCase(); });
+        dom[k].innerHTML = "";
+    });
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function updateNavigationButtons() {
+    const activeIndex = getCurrentQuestionIndex();
+    dom.previousBtn.disabled = activeIndex === 0;
+
+    if (state.reviewModeIndex !== null) {
+        dom.nextBtn.textContent = activeIndex === QUESTIONS.length - 1 ? "Back to Live Question" : "Next Review →";
+    } else if (activeIndex === QUESTIONS.length - 1) {
+        dom.nextBtn.textContent = "Finish →";
+    } else {
+        dom.nextBtn.textContent = "Next →";
+    }
+}
+
+function goPrevious() {
+    if (state.reviewModeIndex !== null) {
+        if (state.reviewModeIndex > 0) { state.reviewModeIndex -= 1; renderQuestion(); }
+        return;
+    }
+    if (state.currentIndex > 0) { state.currentIndex -= 1; renderQuestion(); }
+}
+
+function goNext() {
+    if (state.reviewModeIndex !== null) {
+        if (state.reviewModeIndex < QUESTIONS.length - 1) {
+            state.reviewModeIndex += 1;
+        } else {
+            state.reviewModeIndex = null;
+            state.currentIndex    = getNextUnansweredIndex();
+        }
+        renderQuestion();
+        return;
+    }
+
+    if (state.currentIndex === QUESTIONS.length - 1) {
+        if (SIM_CONFIG.allowSummaryPage) {
+            const blankIndices = QUESTIONS
+                .map(function(q, i) { return !state.results[q.id] ? i : -1; })
+                .filter(function(i) { return i !== -1; });
+            if (blankIndices.length > 0) {
+                openBlankWarningModal(blankIndices);
+            } else {
+                showSummaryScreen();
+            }
+        }
+        return;
+    }
+
+    state.currentIndex += 1;
+    renderQuestion();
+}
+
+function getNextUnansweredIndex() {
+    const first = QUESTIONS.findIndex(function(q) { return !state.results[q.id]; });
+    return first === -1 ? 0 : first;
+}
+
+/* ============================================================
+   PROGRESS / STATUS
+   ============================================================ */
+function updateStatusUI() {
+    const answeredCount   = Object.keys(state.results).length;
+    const progressPercent = Math.round((answeredCount / QUESTIONS.length) * 100);
+
+    dom.scoreChip.textContent    = "Score: " + state.score;
+    dom.streakChip.textContent   = "Streak: " + state.streak;
+    dom.progressLabel.textContent   = progressPercent + "% complete";
+    dom.progressSummary.textContent = answeredCount + " answered";
+    dom.progressFill.style.width    = progressPercent + "%";
+}
+
+function renderStepDots() {
+    dom.stepDots.innerHTML = "";
+    const activeIndex = getCurrentQuestionIndex();
+
+    QUESTIONS.forEach(function(question, index) {
+        const dot = document.createElement("button");
+        dot.type      = "button";
+        dot.className = "step-dot";
+        dot.textContent = String(index + 1);
+        dot.setAttribute("aria-label", "Go to question " + (index + 1));
+
+        if (index === activeIndex) dot.classList.add("current");
+
+        const result = state.results[question.id];
+        if (result) {
+            dot.classList.add(result.status);
+            dot.classList.add("clickable");
+            dot.addEventListener("click", function() {
+                if (result.status === "wrong") {
+                    /* Wrong — go back in retry mode so student can try again */
+                    state.reviewModeIndex = null;
+                    state.currentIndex    = index;
+                } else {
+                    /* Correct / partial — open read-only review mode */
+                    state.reviewModeIndex = index;
+                }
+                showScreen("game");
+                renderQuestion();
+            });
+        } else if (index <= state.currentIndex) {
+            dot.classList.add("clickable");
+            dot.addEventListener("click", function() {
+                state.reviewModeIndex = null;
+                state.currentIndex    = index;
+                showScreen("game");
+                renderQuestion();
+            });
+        }
+
+        dom.stepDots.appendChild(dot);
+    });
+}
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+function showSummaryScreen() {
+    updateSummaryScreen();
+    showScreen("summary");
+    /* Clear saved state — sim is complete, next open starts fresh */
+    clearSavedState();
+}
+
+function updateSummaryScreen() {
+    const results      = Object.values(state.results);
+    const totalPossible = QUESTIONS.reduce(function(s, q) { return s + q.points; }, 0);
+    const correctCount  = results.filter(function(r) { return r.status === "correct"; }).length;
+    const partialCount  = results.filter(function(r) { return r.status === "partial"; }).length;
+    const wrongCount    = results.filter(function(r) { return r.status === "wrong"; }).length;
+    const accuracy      = totalPossible === 0 ? 0 : Math.round((state.score / totalPossible) * 100);
+
+    dom.summaryScore.textContent    = state.score + " / " + totalPossible;
+    dom.summaryAccuracy.textContent = accuracy + "%";
+    dom.summaryCorrect.textContent  = String(correctCount);
+    dom.summaryPartial.textContent  = String(partialCount);
+    dom.summaryWrong.textContent    = String(wrongCount);
+    dom.summaryStreak.textContent   = String(state.bestStreak);
+
+    dom.summaryResults.innerHTML = "";
+    QUESTIONS.forEach(function(question) {
+        const result = state.results[question.id];
+        const card   = document.createElement("div");
+        card.className = "result-card";
+
+        if (!result) {
+            card.innerHTML = "<h4>" + escapeHtml(question.title) + "</h4><p class=\"muted\">Not answered.</p>";
+            dom.summaryResults.appendChild(card);
+            return;
+        }
+
+        const formattedAnswer = formatAnswerForDisplay(question, state.answers[question.id]);
+        card.innerHTML =
+            "<h4>" + escapeHtml(question.title) + "</h4>" +
+            "<p><span class=\"status-pill " + escapeHtml(result.status) + "\">" + escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status) + "</span></p>" +
+            "<p style=\"margin-top:8px;\">Answer: <em>" + escapeHtml(formattedAnswer) + "</em></p>" +
+            "<p style=\"margin-top:6px;\">" + (result.explanation || "") + "</p>" +
+            "<div class=\"result-meta\">Score awarded: " + result.scoreAwarded + " / " + question.points + "</div>";
+        dom.summaryResults.appendChild(card);
+    });
+}
+
+/* ============================================================
+   REVIEW MEMORY (HISTORY DRAWER)
+   ============================================================ */
+function renderHistoryList() {
+    dom.historyList.innerHTML = "";
+    const answered = QUESTIONS.filter(function(q) { return !!state.results[q.id]; });
+
+    if (answered.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "history-item";
+        empty.innerHTML = "<h4>No saved answers yet</h4><p class=\"muted\">Completed questions will appear here.</p>";
+        dom.historyList.appendChild(empty);
+        return;
+    }
+
+    answered.forEach(function(question) {
+        const result = state.results[question.id];
+        const answer = state.answers[question.id];
+        const formatted = formatAnswerForDisplay(question, answer);
+
+        const item = document.createElement("div");
+        item.className = "history-item";
+        item.innerHTML =
+            "<h4>" + escapeHtml(question.title) + "</h4>" +
+            "<p><span class=\"status-pill " + escapeHtml(result.status) + "\">" + escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status) + "</span></p>" +
+            "<p class=\"muted\" style=\"margin-top:8px;\">Answer: " + escapeHtml(formatted) + "</p>" +
+            "<p class=\"muted\" style=\"margin-top:6px;\">" + (result.explanation || "") + "</p>";
+
+        const actions = document.createElement("div");
+        actions.className = "history-actions";
+        const qIndex  = QUESTIONS.findIndex(function(q) { return q.id === question.id; });
+        const btnLabel = result.status === "wrong" ? "&#8634; Try Again" : "Open Review";
+        const openBtn = makeBtn("secondary-btn", btnLabel, function() {
+            closeHistoryDrawer();
+            if (result.status === "wrong") {
+                /* Send back in retry mode so they can attempt again */
+                state.reviewModeIndex = null;
+                state.currentIndex    = qIndex;
+            } else {
+                /* Read-only review for correct/partial */
+                state.reviewModeIndex = qIndex;
+            }
+            showScreen("game");
+            renderQuestion();
+        });
+        actions.appendChild(openBtn);
+        item.appendChild(actions);
+        dom.historyList.appendChild(item);
+    });
+}
+
+/* ============================================================
+   THEME / FULLSCREEN / SOUNDS
+   ============================================================ */
+function toggleTheme() {
+    state.theme = state.theme === "dark" ? "light" : "dark";
+    dom.html.setAttribute("data-theme", state.theme);
+    dom.themeToggleBtn.innerHTML = state.theme === "dark" ? "&#127769; Dark" : "&#9728;&#65039; Light";
+    saveStateToStorage();
+}
+
+async function toggleFullscreen() {
+    try {
+        if (!document.fullscreenElement) { await document.documentElement.requestFullscreen(); }
+        else                             { await document.exitFullscreen(); }
+    } catch (e) { showAlert("Fullscreen is not available right now."); }
+}
+
+function updateFullscreenButton() {
+    dom.fullscreenBtn.innerHTML = document.fullscreenElement ? "&#8613; Exit Full Screen" : "&#9974; Full Screen";
+}
+
+function playFeedbackSound(status) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx  = new Ctx();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    const settings = { correct: { freq: 660, dur: 0.18 }, partial: { freq: 440, dur: 0.14 }, wrong: { freq: 240, dur: 0.22 } }[status] || { freq: 320, dur: 0.14 };
+    osc.frequency.value = settings.freq;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + settings.dur);
+    osc.start();
+    osc.stop(ctx.currentTime + settings.dur + 0.01);
+    osc.onended = function() { ctx.close(); };
+}
+
+/* ============================================================
+   RESET / STORAGE
+   ============================================================ */
+function openConfirmModal()  { dom.confirmModal.classList.add("show"); }
+function closeConfirmModal() { dom.confirmModal.classList.remove("show"); }
+
+function openBlankWarningModal(blankIndices) {
+    dom.blankWarningList.innerHTML = "";
+    blankIndices.forEach(function(i) {
+        const li = document.createElement("li");
+        li.textContent = QUESTIONS[i].title || ("Question " + (i + 1));
+        dom.blankWarningList.appendChild(li);
+    });
+    dom.blankGoBackBtn.textContent = "← Go to Question " + (blankIndices[0] + 1);
+    dom.blankGoBackBtn.dataset.targetIndex = String(blankIndices[0]);
+    dom.blankWarningModal.classList.add("show");
+}
+
+function closeBlankWarningModal() {
+    dom.blankWarningModal.classList.remove("show");
+}
+
+function confirmReset() {
+    closeConfirmModal();
+
+    state.currentIndex    = 0;
+    state.currentScreen   = "home";
+    state.answers         = {};
+    state.results         = {};
+    state.score           = 0;
+    state.streak          = 0;
+    state.bestStreak      = 0;
+    state.reviewModeIndex = null;
+
+    clearSavedState();
+    renderQuestion();
+    renderHistoryList();
+    renderStepDots();
+    updateStatusUI();
+    updateSummaryScreen();
+    showScreen("home");
+}
+
+function resetSimulation() { openConfirmModal(); }
+
+function saveStateToStorage() {
+    const payload = {
+        currentIndex: state.currentIndex,
+        currentScreen: state.currentScreen,
+        answers:      state.answers,
+        results:      state.results,
+        score:        state.score,
+        streak:       state.streak,
+        bestStreak:   state.bestStreak,
+        theme:        state.theme,
+        audioRate:    state.audioRate
+    };
+    localStorage.setItem(SIM_CONFIG.storageKey, JSON.stringify(payload));
+}
+
+function loadStateFromStorage() {
+    const raw = localStorage.getItem(SIM_CONFIG.storageKey);
+    if (!raw) {
+        dom.html.setAttribute("data-theme", state.theme);
+        dom.themeToggleBtn.innerHTML = "&#127769; Dark";
+        return;
+    }
+    try {
+        const p = JSON.parse(raw);
+        state.currentIndex  = Number.isInteger(p.currentIndex) ? p.currentIndex : 0;
+        state.currentScreen = p.currentScreen || "home";
+        state.answers       = p.answers    || {};
+        state.results       = p.results    || {};
+        state.score         = Number(p.score       || 0);
+        state.streak        = Number(p.streak      || 0);
+        state.bestStreak    = Number(p.bestStreak  || 0);
+        state.theme         = p.theme === "light" ? "light" : "dark";
+        state.audioRate     = Number(p.audioRate   || 1);
+        dom.html.setAttribute("data-theme", state.theme);
+        dom.themeToggleBtn.innerHTML = state.theme === "dark" ? "&#127769; Dark" : "&#9728;&#65039; Light";
+        setAudioRate(state.audioRate);
+        showScreen(state.currentScreen);
+    } catch (e) {
+        clearSavedState();
+    }
+}
+
+function clearSavedState() {
+    localStorage.removeItem(SIM_CONFIG.storageKey);
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function containsBlockedLanguage(value) {
+    const cleaned = normalizeText(value);
+    return BLOCKED_LANGUAGE.some(function(term) { return cleaned.includes(normalizeText(term)); });
+}
+
+function normalizeText(value) {
+    return String(value || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .replace(/[^a-z0-9\s.\-_/]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function formatAnswerForDisplay(question, answer) {
+    if (answer === null || answer === undefined || answer === "") return "No answer saved";
+    if (question.type === "mcq") {
+        const idx = Number(answer);
+        const choice = question.choices && question.choices[idx];
+        if (choice) {
+            const tmp = document.createElement("div");
+            tmp.innerHTML = choice;
+            return tmp.textContent || String(answer);
+        }
+    }
+    return String(answer);
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+</script>
+</body>
+</html>
