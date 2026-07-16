@@ -1105,6 +1105,12 @@ const QUESTIONS = [
     {
         id: "q1",
         title: "Question 1",
+        passage: {
+            panelTitle: "&#128218; Passage",
+            text: "This is an example passage for Question 1. Replace this with your own reading text. It will appear in the left column alongside the question.",
+            footerText: "Read carefully before answering.",
+            audioSrc: ""
+        },
         prompt: `You must read this over the PA system: <br>"Please report to the main hall after lunch."<br>Which delivery plan is best?`,
         directions: "Choose one answer.",
         type: "mcq",
@@ -1203,7 +1209,8 @@ const QUESTIONS = [
         title: "Question 5",
         prompt: "Is the number 9 even or odd?",
         directions: "Click the correct answer.",
-        type: "button-choice",
+        type: "mcq",
+        choiceStyle: "buttons",
         choices: ["Even", "Odd"],
         difficulty: "medium",
         screenLabel: "Try It (Medium)",
@@ -1329,7 +1336,7 @@ initializeApp();
 function initializeApp() {
     applyConfigToUI();
     buildTeachScreen();
-    buildMiniScene();
+    /* passage is now rendered per-question inside renderQuestion() */
     renderInstructions();
     renderRules();
     bindEvents();
@@ -1453,10 +1460,17 @@ function buildTeachScreen() {
 /* ============================================================
    MINI-SCENE BUILDER
    ============================================================ */
-function buildMiniScene() {
-    if (!SIM_CONFIG.showMiniScene) return;
+function buildMiniScene(question) {
+    const ms = question && question.passage;
 
-    const ms = SIM_CONFIG.miniScene;
+    if (!ms || !ms.text) {
+        dom.miniScenePanel.classList.add("hidden");
+        dom.gameGrid.classList.remove("with-scene");
+        dom.gameGrid.classList.add("no-scene");
+        dom.toggleAudioBarBtn.classList.add("hidden");
+        dom.sceneAudio.src = "";
+        return;
+    }
 
     dom.miniScenePanel.classList.remove("hidden");
     dom.gameGrid.classList.remove("no-scene");
@@ -1469,6 +1483,9 @@ function buildMiniScene() {
     if (ms.audioSrc) {
         dom.sceneAudio.src = ms.audioSrc;
         dom.toggleAudioBarBtn.classList.remove("hidden");
+    } else {
+        dom.toggleAudioBarBtn.classList.add("hidden");
+        dom.sceneAudio.src = "";
     }
 }
 
@@ -1710,14 +1727,13 @@ function renderQuestion() {
         dom.screenLabelChip.classList.add("hidden");
     }
 
+    buildMiniScene(question);
+
     dom.answerArea.innerHTML = "";
 
     switch (question.type) {
         case "mcq":
             renderMultipleChoice(question, currentAnswer, isReviewMode, alreadyAnswered);
-            break;
-        case "button-choice":
-            renderButtonChoice(question, currentAnswer, isReviewMode, alreadyAnswered);
             break;
         case "textarea":
             renderTextarea(question, currentAnswer, isReviewMode, alreadyAnswered);
@@ -1764,46 +1780,70 @@ function makeBtn(cls, html, fn) {
 }
 
 function renderMultipleChoice(question, currentAnswer, isReviewMode, alreadyAnswered) {
+    const useButtons = question.choiceStyle === "buttons";
+    const locked = isReviewMode || alreadyAnswered;
+
     const wrapper = document.createElement("div");
-    wrapper.className = "choice-grid";
+    wrapper.className = useButtons ? "word-btn-grid" : "choice-grid";
 
     question.choices.forEach(function(choice, index) {
-        const label = document.createElement("label");
-        label.className = "choice-card" + (isReviewMode || alreadyAnswered ? " locked" : "");
+        const isSelected = String(currentAnswer) === String(index);
+        const isCorrect  = index === Number(question.grading.correctAnswer);
 
-        const input = document.createElement("input");
-        input.type     = "radio";
-        input.name     = "question-" + question.id;
-        input.value    = String(index);
-        input.checked  = (String(currentAnswer) === String(index));
-        input.disabled = isReviewMode || alreadyAnswered;
-        input.style.transform = "scale(1.2)";
-        input.style.marginTop = "3px";
-        input.style.accentColor = "var(--accent)";
-
-        const span = document.createElement("div");
-        span.className = "choice-text";
-        if (choice.includes("</") || choice.includes("<strong>")) {
-            span.innerHTML = choice;
+        if (useButtons) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "word-btn" + (locked ? " locked" : "") + (isSelected ? " selected" : "");
+            btn.dataset.index = String(index);
+            btn.disabled = locked;
+            if (choice.includes("</") || choice.includes("<strong>")) {
+                btn.innerHTML = choice;
+            } else {
+                btn.textContent = choice;
+            }
+            if (alreadyAnswered && isCorrect) btn.classList.add("reveal-correct");
+            if (!locked) {
+                btn.addEventListener("click", function() {
+                    wrapper.querySelectorAll(".word-btn").forEach(function(b) { b.classList.remove("selected"); });
+                    btn.classList.add("selected");
+                });
+            }
+            wrapper.appendChild(btn);
         } else {
-            span.textContent = choice;
+            const label = document.createElement("label");
+            label.className = "choice-card" + (locked ? " locked" : "");
+
+            const input = document.createElement("input");
+            input.type     = "radio";
+            input.name     = "question-" + question.id;
+            input.value    = String(index);
+            input.checked  = isSelected;
+            input.disabled = locked;
+            input.style.transform   = "scale(1.2)";
+            input.style.marginTop   = "3px";
+            input.style.accentColor = "var(--accent)";
+
+            const span = document.createElement("div");
+            span.className = "choice-text";
+            if (choice.includes("</") || choice.includes("<strong>")) {
+                span.innerHTML = choice;
+            } else {
+                span.textContent = choice;
+            }
+
+            label.appendChild(input);
+            label.appendChild(span);
+
+            if (alreadyAnswered && isCorrect) label.classList.add("reveal-correct");
+
+            if (!locked) {
+                input.addEventListener("change", function() {
+                    wrapper.querySelectorAll(".choice-card").forEach(function(c) { c.classList.remove("selected"); });
+                    label.classList.add("selected");
+                });
+            }
+            wrapper.appendChild(label);
         }
-
-        label.appendChild(input);
-        label.appendChild(span);
-
-        if (alreadyAnswered && index === Number(question.grading.correctAnswer)) {
-            label.classList.add("reveal-correct");
-        }
-
-        if (!isReviewMode && !alreadyAnswered) {
-            input.addEventListener("change", function() {
-                wrapper.querySelectorAll(".choice-card").forEach(function(c) { c.classList.remove("selected"); });
-                label.classList.add("selected");
-            });
-        }
-
-        wrapper.appendChild(label);
     });
 
     dom.answerArea.appendChild(wrapper);
@@ -1830,45 +1870,6 @@ function renderTextarea(question, currentAnswer, isReviewMode, alreadyAnswered) 
     dom.answerArea.appendChild(ta);
 }
 
-function renderButtonChoice(question, currentAnswer, isReviewMode, alreadyAnswered) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "word-btn-grid";
-
-    const locked = isReviewMode || alreadyAnswered;
-    const acceptableNorm = (question.grading && question.grading.mode === "exactText")
-        ? (question.grading.acceptableAnswers || []).map(normalizeText)
-        : [];
-
-    (question.choices || []).forEach(function(choice) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "word-btn" + (locked ? " locked" : "");
-        btn.textContent = choice;
-        btn.dataset.value = choice;
-        if (locked) btn.disabled = true;
-
-        const isSelected = currentAnswer != null &&
-            normalizeText(String(currentAnswer)) === normalizeText(choice);
-        if (isSelected) btn.classList.add("selected");
-
-        if (alreadyAnswered && acceptableNorm.includes(normalizeText(choice))) {
-            btn.classList.add("reveal-correct");
-        }
-
-        if (!locked) {
-            btn.addEventListener("click", function() {
-                wrapper.querySelectorAll(".word-btn").forEach(function(b) {
-                    b.classList.remove("selected");
-                });
-                btn.classList.add("selected");
-            });
-        }
-
-        wrapper.appendChild(btn);
-    });
-
-    dom.answerArea.appendChild(wrapper);
-}
 
 /* ============================================================
    ANSWER HANDLING
@@ -1920,12 +1921,12 @@ function handleAnswerSubmit(event) {
 
 function readAnswerFromUI(question) {
     if (question.type === "mcq") {
+        if (question.choiceStyle === "buttons") {
+            const sel = dom.answerArea.querySelector(".word-btn.selected");
+            return sel ? Number(sel.dataset.index) : null;
+        }
         const sel = dom.answerArea.querySelector("input[type=\"radio\"]:checked");
         return sel ? Number(sel.value) : null;
-    }
-    if (question.type === "button-choice") {
-        const sel = dom.answerArea.querySelector(".word-btn.selected");
-        return sel ? sel.dataset.value : null;
     }
     const input = document.getElementById("dynamicAnswerInput");
     return input ? input.value.trim() : null;
@@ -1938,13 +1939,10 @@ function lockChoices(question) {
         if (inp) inp.disabled = true;
         if (i === Number(question.grading.correctAnswer)) card.classList.add("reveal-correct");
     });
-    const acceptableNorm = (question.grading && question.grading.mode === "exactText")
-        ? (question.grading.acceptableAnswers || []).map(normalizeText)
-        : [];
     dom.answerArea.querySelectorAll(".word-btn").forEach(function(btn) {
         btn.classList.add("locked");
         btn.disabled = true;
-        if (acceptableNorm.includes(normalizeText(btn.dataset.value || ""))) {
+        if (Number(btn.dataset.index) === Number(question.grading.correctAnswer)) {
             btn.classList.add("reveal-correct");
         }
     });
@@ -1959,10 +1957,8 @@ function showWrongFeedback(question, studentAnswer, result) {
         dom.answerArea.querySelectorAll(".choice-card").forEach(function(card, i) {
             if (i === Number(studentAnswer)) card.classList.add("reveal-wrong");
         });
-    }
-    if (question.type === "button-choice") {
         dom.answerArea.querySelectorAll(".word-btn").forEach(function(btn) {
-            if (btn.dataset.value === String(studentAnswer)) btn.classList.add("reveal-wrong");
+            if (Number(btn.dataset.index) === Number(studentAnswer)) btn.classList.add("reveal-wrong");
         });
     }
 
