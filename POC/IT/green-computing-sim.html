@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Green Computing: Energy Saver Challenge</title>
+<style>
+/* ============================================================
+   GREEN COMPUTING ENERGY SAVER CHALLENGE
+   Single-file HTML/CSS/JS — offline friendly
+   Style scheme matches Sim_template_FixedV2.html
+   ============================================================ */
+:root {
+    color-scheme: dark;
+    --bg: #0f1222;
+    --bg-soft: #171b31;
+    --surface: #1d2340;
+    --surface-2: #252d52;
+    --text: #eef2ff;
+    --text-soft: #c7d0f0;
+    --muted: #98a4c8;
+    --border: rgba(255, 255, 255, 0.12);
+    --accent: #7dd3fc;
+    --accent-2: #a78bfa;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #fb7185;
+    --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    --radius-xl: 24px;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+    --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+html[data-theme="light"] {
+    color-scheme: light;
+    --bg: #f4f7ff;
+    --bg-soft: #e7edff;
+    --surface: #ffffff;
+    --surface-2: #eef3ff;
+    --text: #17203f;
+    --text-soft: #344267;
+    --muted: #5d6b95;
+    --border: rgba(23, 32, 63, 0.12);
+    --accent: #0ea5e9;
+    --accent-2: #7c3aed;
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #e11d48;
+    --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+    --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+}
+* { box-sizing: border-box; }
+html, body {
+    margin: 0;
+    min-height: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+        radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+        var(--bg);
+    color: var(--text);
+}
+body { min-height: 100vh; padding: 16px; }
+button, input { font: inherit; }
+button {
+    border: 0;
+    cursor: pointer;
+    transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+}
+button:hover { transform: translateY(-1px); }
+button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+button:focus-visible { outline: none; box-shadow: var(--focus); }
+
+.app-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    min-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+}
+.brand-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-badge {
+    width: 46px; height: 46px;
+    display: grid; place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white; font-weight: 700; font-size: 0.78rem;
+    text-align: center; line-height: 1.2;
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+}
+.brand-copy { min-width: 0; }
+.brand-copy h1, .brand-copy p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-copy h1 { font-size: 1.08rem; }
+.brand-copy p { color: var(--muted); margin-top: 2px; font-size: 0.92rem; }
+.controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+.control-btn, .primary-btn, .secondary-btn, .danger-btn {
+    border-radius: 999px;
+    padding: 10px 15px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+.control-btn, .secondary-btn {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.primary-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #ffffff;
+    box-shadow: var(--shadow);
+}
+.danger-btn {
+    background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+    color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.pulse-help { position: relative; }
+.pulse-help::after {
+    content: "";
+    position: absolute; inset: -4px;
+    border-radius: 999px;
+    border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+    animation: pulseRing 1.7s infinite;
+    pointer-events: none;
+}
+@keyframes pulseRing {
+    0%   { opacity: 0.9; transform: scale(0.98); }
+    70%  { opacity: 0; transform: scale(1.12); }
+    100% { opacity: 0; }
+}
+
+/* ── SCREENS ── */
+.screen { display: none; flex: 1; }
+.screen.active { display: flex; }
+.center-stage { flex: 1; display: grid; place-items: center; padding: 8px; }
+
+/* ── HOME ── */
+.hero-card {
+    width: min(100%, 920px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    padding: clamp(24px, 4vw, 42px);
+    text-align: center;
+}
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+    font-size: 0.88rem;
+}
+.hero-card h2 { margin: 0 0 12px; font-size: clamp(1.85rem, 3.5vw, 2.8rem); line-height: 1.1; }
+.hero-card > p {
+    width: min(100%, 700px);
+    margin: 0 auto;
+    color: var(--text-soft);
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+.hero-actions { margin-top: 26px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.howto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 26px;
+    text-align: left;
+}
+.howto-box {
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+}
+.howto-box h3 { margin: 0 0 8px; font-size: 0.95rem; color: var(--accent); }
+.howto-box p { margin: 0; color: var(--text-soft); font-size: 0.9rem; line-height: 1.6; }
+
+/* ── GAME ── */
+.game-layout { flex: 1; display: grid; place-items: start center; padding: 8px; }
+.game-card {
+    width: min(100%, 1120px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    padding: clamp(16px, 2.5vw, 24px);
+}
+.status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+.chip-group { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    font-weight: 700;
+    font-size: 0.88rem;
+}
+.chip.timer-warn { background: color-mix(in srgb, var(--danger) 22%, var(--surface)); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); animation: timerBlink 1s infinite; }
+@keyframes timerBlink { 50% { opacity: 0.55; } }
+
+.progress-shell { margin-bottom: 14px; }
+.progress-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+.progress-bar {
+    height: 14px; width: 100%;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+.progress-fill {
+    height: 100%; width: 0;
+    background: var(--progress);
+    transition: width 0.3s ease;
+}
+
+/* ── ROOM SVG ── */
+.room-wrap {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--bg-soft);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.room-wrap svg { display: block; width: 100%; height: auto; }
+.hotspot { cursor: pointer; }
+.hotspot.done { cursor: default; }
+.hotspot:not(.done):hover .glow-ring { opacity: 0.9; }
+.glow-ring {
+    fill: none;
+    stroke: var(--warning);
+    stroke-width: 2.5;
+    stroke-dasharray: 6 5;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    animation: ringSpin 6s linear infinite;
+    pointer-events: none;
+}
+@keyframes ringSpin { to { stroke-dashoffset: -110; } }
+.drag-charger { cursor: grab; }
+.drag-charger.dragging { cursor: grabbing; }
+
+/* ── FEEDBACK PANEL ── */
+.feedback-panel {
+    margin-top: 14px;
+    min-height: 62px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    line-height: 1.55;
+    background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+.feedback-panel.good { background: color-mix(in srgb, var(--success) 14%, var(--surface)); border-color: color-mix(in srgb, var(--success) 42%, transparent); }
+.feedback-panel.bad  { background: color-mix(in srgb, var(--danger) 12%, var(--surface)); border-color: color-mix(in srgb, var(--danger) 38%, transparent); }
+.feedback-icon { font-size: 1.6rem; flex-shrink: 0; }
+.feedback-text { margin: 0; color: var(--text-soft); font-size: 0.96rem; }
+.feedback-text strong { color: var(--text); }
+.pts-pop {
+    margin-left: auto;
+    font-weight: 800;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.pts-pop.plus { color: var(--success); }
+.pts-pop.minus { color: var(--danger); }
+
+.game-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+/* ── SUMMARY ── */
+.summary-layout { flex: 1; display: grid; place-items: center; padding: 8px; }
+.summary-card {
+    width: min(100%, 920px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    padding: clamp(22px, 4vw, 36px);
+}
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+}
+.summary-stat { padding: 16px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-2); }
+.summary-stat h4 { margin: 0 0 8px; color: var(--muted); font-size: 0.85rem; }
+.summary-stat p  { margin: 0; font-size: 1.45rem; font-weight: 800; }
+.rating-banner {
+    text-align: center;
+    padding: 18px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+    font-weight: 800;
+    margin: 18px 0;
+}
+.results-list { display: grid; gap: 10px; }
+.result-card {
+    padding: 13px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.result-card.missed { border-color: color-mix(in srgb, var(--danger) 38%, transparent); }
+.result-card.done-item { border-color: color-mix(in srgb, var(--success) 38%, transparent); }
+.result-card p { margin: 0; color: var(--text-soft); font-size: 0.94rem; line-height: 1.5; }
+.result-card .r-icon { font-size: 1.2rem; flex-shrink: 0; }
+.section-label { margin: 20px 0 10px; font-size: 1rem; color: var(--muted); }
+
+/* ── MODALS ── */
+.modal {
+    position: fixed; inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(6, 10, 20, 0.64);
+    z-index: 60;
+}
+.modal.show { display: flex; }
+.modal-card {
+    width: min(100%, 560px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    padding: clamp(18px, 3vw, 30px);
+    position: relative;
+}
+.close-btn {
+    position: absolute; top: 14px; right: 14px;
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+.modal-card h3 { margin: 0 0 16px; font-size: clamp(1.2rem, 2vw, 1.6rem); }
+.modal-card p, .modal-card li { color: var(--text-soft); line-height: 1.65; }
+.modal-card ul { padding-left: 20px; margin: 0 0 18px; }
+.modal-card li { margin-bottom: 6px; }
+.button-row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+
+.hidden { display: none !important; }
+.footer-note { text-align: center; color: var(--muted); padding-bottom: 4px; font-size: 0.9rem; }
+
+@media (max-width: 780px) {
+    body { padding: 10px; }
+    .controls { width: 100%; justify-content: flex-start; }
+    .brand-copy h1 { font-size: 0.92rem; }
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div class="brand-wrap">
+            <div class="brand-badge">ECO</div>
+            <div class="brand-copy">
+                <h1>Green Computing: Energy Saver Challenge</h1>
+                <p>You're the last one out — power down the ICT lab!</p>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">&#10067; Help</button>
+            <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">&#127769; Dark</button>
+            <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">&#9974; Full Screen</button>
+            <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">&#8634; Reset</button>
+        </div>
+    </header>
+
+    <!-- HOME SCREEN -->
+    <main class="screen active" id="homeScreen">
+        <div class="center-stage">
+            <section class="hero-card">
+                <div class="eyebrow">&#127793; ICT / Digital Literacy &middot; Forms 1&ndash;3</div>
+                <h2>The Lab Is Wasting Energy!</h2>
+                <p>
+                    Class is over and you're the last person in the ICT lab. Computers are humming,
+                    the projector is glowing, chargers are plugged in with nothing attached&hellip;
+                    Find every energy waster and deal with it before the bell rings. But be careful —
+                    some equipment should stay ON!
+                </p>
+                <div class="howto-grid">
+                    <div class="howto-box">
+                        <h3>&#128433;&#65039; Click</h3>
+                        <p>Click monitors, the printer, projector, AC and light switch to turn them off.</p>
+                    </div>
+                    <div class="howto-box">
+                        <h3>&#9995; Hold</h3>
+                        <p>Press and <strong>hold</strong> a PC's power button until it shuts down safely.</p>
+                    </div>
+                    <div class="howto-box">
+                        <h3>&#129305; Drag</h3>
+                        <p>Grab a charger and <strong>drag it out</strong> of the wall socket to stop phantom power drain.</p>
+                    </div>
+                    <div class="howto-box">
+                        <h3>&#9203; Beat the Bell</h3>
+                        <p>You have 2 minutes. When you're done, click <strong>Leave Room</strong> to get your rating.</p>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <button class="primary-btn" id="beginBtn">&#9654; Enter the Lab</button>
+                    <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- GAME SCREEN -->
+    <main class="screen" id="gameScreen">
+        <div class="game-layout">
+            <section class="game-card">
+
+                <div class="status-row">
+                    <div class="chip-group">
+                        <div class="chip" id="scoreChip">Score: 0</div>
+                        <div class="chip" id="itemsChip">Fixed: 0 / 19</div>
+                    </div>
+                    <div class="chip" id="timerChip">&#9203; 2:00</div>
+                </div>
+
+                <div class="progress-shell">
+                    <div class="progress-meta">
+                        <span id="progressLabel">Energy saved: 0%</span>
+                        <span id="progressSummary">The lab is still wasting power</span>
+                    </div>
+                    <div class="progress-bar" aria-hidden="true">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="room-wrap" id="roomWrap">
+                    <!-- SVG room injected by JS -->
+                </div>
+
+                <div class="feedback-panel" id="feedbackPanel">
+                    <span class="feedback-icon" id="feedbackIcon">&#128161;</span>
+                    <p class="feedback-text" id="feedbackText">
+                        Explore the lab. Wasteful equipment glows when you hover over it.
+                    </p>
+                    <span class="pts-pop" id="ptsPop"></span>
+                </div>
+
+                <div class="game-footer-row">
+                    <span class="chip" id="hintChip">&#128269; Tip: hold PC power buttons, drag chargers!</span>
+                    <button class="primary-btn" id="leaveBtn">&#128682; Leave Room</button>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- SUMMARY SCREEN -->
+    <main class="screen" id="summaryScreen">
+        <div class="summary-layout">
+            <section class="summary-card">
+                <div class="eyebrow" id="summaryEyebrow">&#127881; Room Report</div>
+                <h2 id="summaryTitle">You left the lab.</h2>
+                <div class="rating-banner" id="ratingBanner"></div>
+                <div class="summary-grid">
+                    <div class="summary-stat"><h4>Final Score</h4><p id="summaryScore">0 / 100</p></div>
+                    <div class="summary-stat"><h4>Items Fixed</h4><p id="summaryFixed">0</p></div>
+                    <div class="summary-stat"><h4>Items Missed</h4><p id="summaryMissed">0</p></div>
+                    <div class="summary-stat"><h4>Time Used</h4><p id="summaryTime">0:00</p></div>
+                </div>
+                <h3 class="section-label" id="missedLabel">&#10060; Still wasting energy:</h3>
+                <div class="results-list" id="missedList"></div>
+                <h3 class="section-label" id="doneLabel">&#9989; Great actions:</h3>
+                <div class="results-list" id="doneList"></div>
+                <div class="button-row" style="margin-top: 24px;">
+                    <button class="primary-btn" id="playAgainBtn">&#8634; Play Again</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="footer-note">Green Computing Energy Saver Challenge — runs fully offline, no installs needed.</div>
+
+</div><!-- /app-shell -->
+
+<!-- INSTRUCTIONS MODAL -->
+<div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+    <section class="modal-card">
+        <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">&#215;</button>
+        <h3 id="instructionsHeading">&#10067; How This Works</h3>
+        <ul>
+            <li><strong>Click</strong> monitors, the printer, the projector, the AC unit and the light switch to turn them off.</li>
+            <li><strong>Press and hold</strong> the round power button on each PC tower until the ring fills — that's a safe shutdown.</li>
+            <li><strong>Drag chargers downward</strong> out of the power strip. Chargers with no phone still drink power!</li>
+            <li>Changed your mind? <strong>Tap</strong> any switched-off device (including a PC's power button) to turn it <strong>back on</strong> — but you'll lose the points until you switch it off again!</li>
+            <li>Watch the <strong>Energy Saved</strong> bar — fill it to 100% by fixing all 19 wasters.</li>
+            <li>&#9888;&#65039; Some equipment must <strong>stay on</strong> — clicking it loses points. Think before you click!</li>
+            <li>You have <strong>2 minutes</strong> before the bell. Click <strong>Leave Room</strong> when you're done.</li>
+        </ul>
+        <div style="margin-top: 18px;">
+            <button class="primary-btn" id="gotItBtn">Got it</button>
+        </div>
+    </section>
+</div>
+
+<!-- RESET CONFIRM MODAL -->
+<div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmHeading">
+    <section class="modal-card" style="max-width: 460px;">
+        <h3 id="confirmHeading">&#8634; Reset Simulation</h3>
+        <p style="margin: 0 0 20px;">This will restart the whole challenge from the beginning. Are you sure?</p>
+        <div class="button-row">
+            <button class="danger-btn" id="confirmYesBtn">Yes, Reset</button>
+            <button class="secondary-btn" id="confirmNoBtn">Cancel</button>
+        </div>
+    </section>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const TIME_LIMIT = 120; // seconds
+const HOLD_TIME  = 1000; // ms to hold PC power button
+const DRAG_DIST  = 46;  // px (SVG units) to pull charger free
+
+/* Item catalogue. Points follow the plan doc, scaled to 100 at the end. */
+const ITEM_INFO = {
+    pc:       { pts: 10, label: "Shut down PC",        tip: "Safe shutdown! A desktop left on can waste up to 100W every hour." },
+    monitor:  { pts: 5,  label: "Turn off monitor",    tip: "Screens off! A monitor left glowing wastes energy even when nobody is looking." },
+    charger:  { pts: 8,  label: "Unplug charger",      tip: "Unplugged! Chargers with no phone still drain 'phantom' or 'vampire' power." },
+    printer:  { pts: 10, label: "Switch off printer",  tip: "Printers on standby still draw power — always switch off when not in use." },
+    projector:{ pts: 10, label: "Turn off projector",  tip: "Projector lamps are power-hungry AND wear out fast when left on. Big save!" },
+    ac:       { pts: 15, label: "Switch off AC",       tip: "Air conditioning is the biggest energy eater in the room. Huge save!" },
+    lights:   { pts: 5,  label: "Turn off lights",     tip: "Bonus! Lights off on the way out — a small habit that adds up all year." }
+};
+const DECOY_PENALTY = 10;
+const DECOY_TIP = "Whoa! The network router must STAY ON — it runs the school's internet and phone system all night. Leave it alone!";
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let state = null;
+let timerInterval = null;
+
+function freshState() {
+    return {
+        started: false,
+        finished: false,
+        timeLeft: TIME_LIMIT,
+        rawScore: 0,
+        items: {}   // id -> true when fixed
+    };
+}
+
+/* All fixable item ids (built when room renders) */
+let ALL_ITEMS = [];
+
+/* ============================================================
+   DOM
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const dom = {
+    homeScreen: $("homeScreen"), gameScreen: $("gameScreen"), summaryScreen: $("summaryScreen"),
+    beginBtn: $("beginBtn"), openInstructionsBtn: $("openInstructionsBtn"),
+    helpBtn: $("helpBtn"), themeToggleBtn: $("themeToggleBtn"), fullscreenBtn: $("fullscreenBtn"),
+    resetBtn: $("resetBtn"),
+    scoreChip: $("scoreChip"), itemsChip: $("itemsChip"), timerChip: $("timerChip"),
+    progressLabel: $("progressLabel"), progressSummary: $("progressSummary"), progressFill: $("progressFill"),
+    roomWrap: $("roomWrap"),
+    feedbackPanel: $("feedbackPanel"), feedbackIcon: $("feedbackIcon"),
+    feedbackText: $("feedbackText"), ptsPop: $("ptsPop"),
+    leaveBtn: $("leaveBtn"),
+    summaryTitle: $("summaryTitle"), ratingBanner: $("ratingBanner"),
+    summaryScore: $("summaryScore"), summaryFixed: $("summaryFixed"),
+    summaryMissed: $("summaryMissed"), summaryTime: $("summaryTime"),
+    missedList: $("missedList"), doneList: $("doneList"),
+    missedLabel: $("missedLabel"), doneLabel: $("doneLabel"),
+    playAgainBtn: $("playAgainBtn"),
+    instructionsModal: $("instructionsModal"), closeInstructionsBtn: $("closeInstructionsBtn"), gotItBtn: $("gotItBtn"),
+    confirmModal: $("confirmModal"), confirmYesBtn: $("confirmYesBtn"), confirmNoBtn: $("confirmNoBtn")
+};
+
+/* ============================================================
+   SVG ROOM BUILDER  (side view of the ICT lab)
+   ============================================================ */
+const NS = "http://www.w3.org/2000/svg";
+
+function el(name, attrs, children) {
+    const node = document.createElementNS(NS, name);
+    for (const k in attrs) node.setAttribute(k, attrs[k]);
+    (children || []).forEach(c => node.appendChild(c));
+    return node;
+}
+function txt(node, s) { node.textContent = s; return node; }
+
+function buildRoom() {
+    dom.roomWrap.innerHTML = "";
+    ALL_ITEMS = [];
+
+    const svg = el("svg", { viewBox: "0 0 1000 580", role: "img",
+        "aria-label": "Side view of an ICT lab with computers, chargers, printer, projector, AC and lights" });
+
+    /* room shading layers */
+    const defs = el("defs", {});
+    defs.innerHTML = `
+        <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#232a4e"/><stop offset="1" stop-color="#1b2140"/>
+        </linearGradient>
+        <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#151936"/><stop offset="1" stop-color="#101328"/>
+        </linearGradient>
+        <linearGradient id="beamGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="rgba(251,191,36,0.35)"/><stop offset="1" stop-color="rgba(251,191,36,0)"/>
+        </linearGradient>
+        <radialGradient id="lightPool" cx="0.5" cy="0" r="1">
+            <stop offset="0" stop-color="rgba(255,244,200,0.30)"/><stop offset="1" stop-color="rgba(255,244,200,0)"/>
+        </radialGradient>
+    `;
+    svg.appendChild(defs);
+
+    svg.appendChild(el("rect", { x: 0, y: 0, width: 1000, height: 440, fill: "url(#wallGrad)" }));
+    svg.appendChild(el("rect", { x: 0, y: 440, width: 1000, height: 140, fill: "url(#floorGrad)" }));
+    svg.appendChild(el("line", { x1: 0, y1: 440, x2: 1000, y2: 440, stroke: "rgba(255,255,255,0.15)", "stroke-width": 2 }));
+
+    /* darkness overlay — appears when lights go off */
+    const darkOverlay = el("rect", { id: "darkOverlay", x: 0, y: 0, width: 1000, height: 580,
+        fill: "rgba(4,6,16,0.45)", opacity: 0, "pointer-events": "none", style: "transition: opacity 0.6s ease" });
+
+    /* ceiling lights (2 fixtures) + glow pools */
+    const lightsGroup = el("g", { id: "lightsFx" });
+    [260, 640].forEach(x => {
+        lightsGroup.appendChild(el("rect", { x: x, y: 8, width: 150, height: 14, rx: 7, fill: "#fef3c7", class: "bulb" }));
+        lightsGroup.appendChild(el("rect", { x: x - 40, y: 22, width: 230, height: 190, fill: "url(#lightPool)", class: "pool" }));
+    });
+    svg.appendChild(lightsGroup);
+
+    /* whiteboard + projector screen */
+    svg.appendChild(el("rect", { x: 60, y: 90, width: 210, height: 130, rx: 8, fill: "#e8ecfa", stroke: "#5d6b95", "stroke-width": 3 }));
+
+    /* ── PROJECTOR (click) ── */
+    const projGroup = el("g", { class: "hotspot", "data-id": "projector", tabindex: 0, role: "button", "aria-label": "Projector — click to turn off" });
+    projGroup.appendChild(el("polygon", { id: "projBeam", points: "180,60 60,95 60,215 300,150", fill: "url(#beamGrad)" }));
+    projGroup.appendChild(el("rect", { x: 150, y: 34, width: 64, height: 30, rx: 8, fill: "#3a4370", stroke: "#98a4c8", "stroke-width": 1.5 }));
+    projGroup.appendChild(el("circle", { id: "projLens", cx: 156, cy: 49, r: 7, fill: "#fbbf24" }));
+    projGroup.appendChild(el("rect", { x: 178, y: 20, width: 8, height: 16, fill: "#3a4370" }));
+    projGroup.appendChild(el("circle", { class: "glow-ring", cx: 182, cy: 49, r: 44 }));
+    svg.appendChild(projGroup);
+    ALL_ITEMS.push({ id: "projector", type: "projector" });
+
+    /* ── AC UNIT (click) ── */
+    const acGroup = el("g", { class: "hotspot", "data-id": "ac", tabindex: 0, role: "button", "aria-label": "Air conditioner — click to switch off" });
+    acGroup.appendChild(el("rect", { x: 800, y: 46, width: 160, height: 54, rx: 12, fill: "#dfe6fb", stroke: "#5d6b95", "stroke-width": 2 }));
+    acGroup.appendChild(el("rect", { x: 812, y: 84, width: 136, height: 8, rx: 4, fill: "#aab6dd" }));
+    acGroup.appendChild(el("circle", { id: "acLed", cx: 946, cy: 58, r: 5, fill: "#34d399" }));
+    const acWaves = el("g", { id: "acWaves", stroke: "#7dd3fc", "stroke-width": 3, fill: "none", "stroke-linecap": "round" });
+    [0, 1, 2].forEach(i => {
+        acWaves.appendChild(el("path", { d: `M ${828 + i * 46} 108 q 6 14 0 28 q -6 14 0 26`, opacity: 0.8 }));
+    });
+    acGroup.appendChild(acWaves);
+    acGroup.appendChild(el("circle", { class: "glow-ring", cx: 880, cy: 74, r: 92 }));
+    svg.appendChild(acGroup);
+    ALL_ITEMS.push({ id: "ac", type: "ac" });
+
+    /* ── LIGHT SWITCH (click, bonus) ── */
+    const lsGroup = el("g", { class: "hotspot", "data-id": "lights", tabindex: 0, role: "button", "aria-label": "Light switch — click to turn lights off" });
+    lsGroup.appendChild(el("rect", { x: 962, y: 250, width: 30, height: 46, rx: 6, fill: "#e8ecfa", stroke: "#5d6b95", "stroke-width": 2 }));
+    lsGroup.appendChild(el("rect", { id: "switchNub", x: 971, y: 258, width: 12, height: 14, rx: 3, fill: "#5d6b95" }));
+    lsGroup.appendChild(el("circle", { class: "glow-ring", cx: 977, cy: 273, r: 34 }));
+    svg.appendChild(lsGroup);
+    ALL_ITEMS.push({ id: "lights", type: "lights" });
+
+    /* ── ROUTER on wall shelf (DECOY — must stay on) ── */
+    const routerGroup = el("g", { class: "hotspot", "data-id": "router", tabindex: 0, role: "button", "aria-label": "Network router — should it be touched?" });
+    routerGroup.appendChild(el("rect", { x: 452, y: 118, width: 120, height: 10, fill: "#4a557f" })); // shelf
+    routerGroup.appendChild(el("rect", { x: 470, y: 92, width: 84, height: 26, rx: 6, fill: "#2b3560", stroke: "#98a4c8", "stroke-width": 1.5 }));
+    routerGroup.appendChild(el("line", { x1: 482, y1: 92, x2: 482, y2: 72, stroke: "#98a4c8", "stroke-width": 3, "stroke-linecap": "round" }));
+    routerGroup.appendChild(el("line", { x1: 542, y1: 92, x2: 542, y2: 72, stroke: "#98a4c8", "stroke-width": 3, "stroke-linecap": "round" }));
+    ["#34d399", "#34d399", "#7dd3fc", "#34d399"].forEach((c, i) => {
+        const led = el("circle", { cx: 484 + i * 16, cy: 105, r: 3.5, fill: c, class: "routerLed" });
+        routerGroup.appendChild(led);
+    });
+    svg.appendChild(routerGroup);
+
+    /* wall clock (decoration) */
+    svg.appendChild(el("circle", { cx: 700, cy: 100, r: 26, fill: "#e8ecfa", stroke: "#5d6b95", "stroke-width": 3 }));
+    svg.appendChild(el("line", { x1: 700, y1: 100, x2: 700, y2: 82, stroke: "#17203f", "stroke-width": 3, "stroke-linecap": "round" }));
+    svg.appendChild(el("line", { x1: 700, y1: 100, x2: 712, y2: 106, stroke: "#17203f", "stroke-width": 2.5, "stroke-linecap": "round" }));
+
+    /* ── DESKS with 6 PCs (monitor click + tower hold) ── */
+    const deskY = 330;
+    const positions = [70, 220, 370, 520, 670, 820];
+    positions.forEach((dx, i) => {
+        const g = el("g", {});
+        /* desk */
+        g.appendChild(el("rect", { x: dx, y: deskY, width: 130, height: 12, rx: 4, fill: "#4a557f" }));
+        g.appendChild(el("rect", { x: dx + 8, y: deskY + 12, width: 10, height: 98, fill: "#3a4370" }));
+        g.appendChild(el("rect", { x: dx + 112, y: deskY + 12, width: 10, height: 98, fill: "#3a4370" }));
+
+        /* monitor (click) */
+        const monId = "monitor" + i;
+        const mon = el("g", { class: "hotspot", "data-id": monId, tabindex: 0, role: "button", "aria-label": "Monitor — click to turn off" });
+        mon.appendChild(el("rect", { x: dx + 14, y: deskY - 74, width: 74, height: 52, rx: 5, fill: "#10152e", stroke: "#98a4c8", "stroke-width": 2 }));
+        mon.appendChild(el("rect", { id: monId + "Screen", x: dx + 18, y: deskY - 70, width: 66, height: 44, rx: 3, fill: "#7dd3fc", opacity: 0.9 }));
+        mon.appendChild(el("rect", { x: dx + 44, y: deskY - 22, width: 14, height: 12, fill: "#3a4370" }));
+        mon.appendChild(el("rect", { x: dx + 32, y: deskY - 10, width: 38, height: 6, rx: 3, fill: "#3a4370" }));
+        mon.appendChild(el("circle", { class: "glow-ring", cx: dx + 51, cy: deskY - 46, r: 44 }));
+        g.appendChild(mon);
+        ALL_ITEMS.push({ id: monId, type: "monitor" });
+
+        /* PC tower under desk (hold power button) */
+        const pcId = "pc" + i;
+        const pc = el("g", { class: "hotspot", "data-id": pcId, "data-hold": "1", tabindex: 0, role: "button", "aria-label": "PC tower — press and hold power button to shut down" });
+        pc.appendChild(el("rect", { x: dx + 34, y: deskY + 24, width: 40, height: 82, rx: 6, fill: "#2b3560", stroke: "#98a4c8", "stroke-width": 1.5 }));
+        pc.appendChild(el("rect", { x: dx + 42, y: deskY + 34, width: 24, height: 5, rx: 2, fill: "#4a557f" }));
+        pc.appendChild(el("rect", { x: dx + 42, y: deskY + 44, width: 24, height: 5, rx: 2, fill: "#4a557f" }));
+        /* power button + LED */
+        pc.appendChild(el("circle", { id: pcId + "Btn", cx: dx + 54, cy: deskY + 84, r: 9, fill: "#171b31", stroke: "#34d399", "stroke-width": 2.5 }));
+        pc.appendChild(el("circle", { id: pcId + "Led", cx: dx + 54, cy: deskY + 84, r: 3.5, fill: "#34d399" }));
+        /* hold-progress ring */
+        const ring = el("circle", { id: pcId + "Ring", cx: dx + 54, cy: deskY + 84, r: 14, fill: "none",
+            stroke: "#fbbf24", "stroke-width": 4, "stroke-linecap": "round",
+            "stroke-dasharray": "88", "stroke-dashoffset": "88",
+            transform: `rotate(-90 ${dx + 54} ${deskY + 84})` });
+        pc.appendChild(ring);
+        pc.appendChild(el("circle", { class: "glow-ring", cx: dx + 54, cy: deskY + 66, r: 52 }));
+        g.appendChild(pc);
+        ALL_ITEMS.push({ id: pcId, type: "pc" });
+
+        svg.appendChild(g);
+    });
+
+    /* ── POWER STRIP with 3 draggable chargers ── */
+    const stripY = 508;
+    svg.appendChild(el("rect", { x: 330, y: stripY, width: 250, height: 26, rx: 8, fill: "#3a4370", stroke: "#98a4c8", "stroke-width": 1.5 }));
+    svg.appendChild(el("circle", { cx: 348, cy: stripY + 13, r: 4, fill: "#fb7185" })); // strip power LED
+    [0, 1, 2].forEach(i => {
+        const sx = 385 + i * 62;
+        /* socket holes */
+        svg.appendChild(el("rect", { x: sx - 12, y: stripY + 6, width: 24, height: 14, rx: 3, fill: "#171b31" }));
+        const chId = "charger" + i;
+        const ch = el("g", { class: "hotspot drag-charger", "data-id": chId, "data-drag": "1", id: chId + "G",
+            tabindex: 0, role: "button", "aria-label": "Phone charger — drag it out of the socket" });
+        /* plug body sticking up out of strip */
+        ch.appendChild(el("rect", { x: sx - 14, y: stripY - 34, width: 28, height: 36, rx: 6, fill: "#e8ecfa", stroke: "#5d6b95", "stroke-width": 2 }));
+        ch.appendChild(el("line", { x1: sx - 6, y1: stripY + 2, x2: sx - 6, y2: stripY + 14, stroke: "#aab6dd", "stroke-width": 4 }));
+        ch.appendChild(el("line", { x1: sx + 6, y1: stripY + 2, x2: sx + 6, y2: stripY + 14, stroke: "#aab6dd", "stroke-width": 4 }));
+        /* dangling cable with no phone */
+        ch.appendChild(el("path", { d: `M ${sx} ${stripY - 34} q -14 -26 4 -44`, fill: "none", stroke: "#98a4c8", "stroke-width": 3, "stroke-linecap": "round" }));
+        ch.appendChild(el("circle", { id: chId + "Led", cx: sx, cy: stripY - 26, r: 3, fill: "#fb7185" }));
+        ch.appendChild(el("circle", { class: "glow-ring", cx: sx, cy: stripY - 30, r: 34 }));
+        svg.appendChild(ch);
+        ALL_ITEMS.push({ id: chId, type: "charger" });
+    });
+
+    /* ── PRINTER on side table (click) ── */
+    const prGroup = el("g", { class: "hotspot", "data-id": "printer", tabindex: 0, role: "button", "aria-label": "Printer — click to switch off", transform: "translate(0 42)" });
+    prGroup.appendChild(el("rect", { x: 60, y: 470, width: 150, height: 10, rx: 4, fill: "#4a557f" }));
+    prGroup.appendChild(el("rect", { x: 68, y: 480, width: 8, height: 56, fill: "#3a4370" }));
+    prGroup.appendChild(el("rect", { x: 194, y: 480, width: 8, height: 56, fill: "#3a4370" }));
+    prGroup.appendChild(el("rect", { x: 82, y: 418, width: 106, height: 52, rx: 8, fill: "#2b3560", stroke: "#98a4c8", "stroke-width": 1.5 }));
+    prGroup.appendChild(el("rect", { x: 96, y: 408, width: 78, height: 14, rx: 3, fill: "#3a4370" }));
+    prGroup.appendChild(el("rect", { x: 92, y: 444, width: 86, height: 8, rx: 3, fill: "#171b31" }));
+    prGroup.appendChild(el("circle", { id: "printerLed", cx: 172, cy: 430, r: 4.5, fill: "#fbbf24" }));
+    prGroup.appendChild(el("circle", { class: "glow-ring", cx: 135, cy: 442, r: 62 }));
+    svg.appendChild(prGroup);
+    ALL_ITEMS.push({ id: "printer", type: "printer" });
+
+    /* darkness overlay goes last so it covers everything */
+    svg.appendChild(darkOverlay);
+
+    dom.roomWrap.appendChild(svg);
+    bindRoomEvents(svg);
+}
+
+/* ============================================================
+   INTERACTIONS
+   ============================================================ */
+let holdState = null;   // { id, start, raf }
+let dragState = null;   // { id, node, startY, moved }
+
+function bindRoomEvents(svg) {
+    svg.querySelectorAll(".hotspot").forEach(node => {
+        const id = node.getAttribute("data-id");
+        const isHold = node.hasAttribute("data-hold");
+        const isDrag = node.hasAttribute("data-drag");
+
+        if (isHold) {
+            node.addEventListener("pointerdown", (e) => { e.preventDefault(); startHold(id, node); });
+            node.addEventListener("pointerup", cancelHold);
+            node.addEventListener("pointerleave", cancelHold);
+            node.addEventListener("pointercancel", cancelHold);
+            /* keyboard: Enter/Space acts instantly */
+            node.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (state.items[id]) uncompleteItem(id); else completeItem(id); }
+            });
+        } else if (isDrag) {
+            node.addEventListener("pointerdown", (e) => { e.preventDefault(); startDrag(id, node, svg, e); });
+            node.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (state.items[id]) uncompleteItem(id); else completeItem(id); }
+            });
+        } else {
+            node.addEventListener("click", () => handleClick(id));
+            node.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(id); }
+            });
+        }
+    });
+
+    /* global drag handlers */
+    svg.addEventListener("pointermove", (e) => onDragMove(e, svg));
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+}
+
+function svgPoint(svg, e) {
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+/* ── CLICK items ── */
+function handleClick(id) {
+    if (!state.started || state.finished) return;
+    if (id === "router") { decoyHit(); return; }
+    if (state.items[id]) { uncompleteItem(id); return; }
+    completeItem(id);
+}
+
+/* ── HOLD (PC power button) — tap to power back on ── */
+function startHold(id, node) {
+    if (!state.started || state.finished) return;
+    if (state.items[id]) { uncompleteItem(id); return; }
+    const ring = $(id + "Ring");
+    holdState = { id, start: performance.now(), raf: null };
+    const step = (now) => {
+        if (!holdState || holdState.id !== id) return;
+        const p = Math.min((now - holdState.start) / HOLD_TIME, 1);
+        ring.setAttribute("stroke-dashoffset", String(88 * (1 - p)));
+        if (p >= 1) {
+            holdState = null;
+            ring.setAttribute("stroke-dashoffset", "88");
+            completeItem(id);
+        } else {
+            holdState.raf = requestAnimationFrame(step);
+        }
+    };
+    holdState.raf = requestAnimationFrame(step);
+}
+function cancelHold() {
+    if (!holdState) return;
+    const ring = $(holdState.id + "Ring");
+    if (ring) ring.setAttribute("stroke-dashoffset", "88");
+    if (holdState.raf) cancelAnimationFrame(holdState.raf);
+    if (state.started && !state.finished && !state.items[holdState.id]) {
+        showFeedback("bad", "&#9995;", "Keep holding! Press and <strong>hold</strong> the power button until the ring fills to shut down safely.", null, true);
+    }
+    holdState = null;
+}
+
+/* ── DRAG (chargers) — tap an unplugged charger to plug it back in ── */
+function startDrag(id, node, svg, e) {
+    if (!state.started || state.finished) return;
+    if (state.items[id]) { uncompleteItem(id); return; }
+    const p = svgPoint(svg, e);
+    dragState = { id, node, startY: p.y, moved: 0 };
+    node.classList.add("dragging");
+    try { node.setPointerCapture(e.pointerId); } catch (_) {}
+}
+function onDragMove(e, svg) {
+    if (!dragState) return;
+    const p = svgPoint(svg, e);
+    /* pull downward (or any direction — use distance) */
+    dragState.moved = Math.abs(p.y - dragState.startY);
+    const lift = Math.min(dragState.moved, DRAG_DIST);
+    dragState.node.setAttribute("transform", `translate(0 ${lift})`);
+    if (dragState.moved >= DRAG_DIST) {
+        const id = dragState.id;
+        dragState.node.classList.remove("dragging");
+        dragState.node.setAttribute("transform", `translate(0 ${DRAG_DIST + 8}) rotate(4)`);
+        dragState = null;
+        completeItem(id);
+    }
+}
+function endDrag() {
+    if (!dragState) return;
+    dragState.node.classList.remove("dragging");
+    dragState.node.setAttribute("transform", "");
+    if (state.started && !state.finished) {
+        showFeedback("bad", "&#129305;", "Almost! <strong>Drag the charger further</strong> to pull it out of the socket.", null, true);
+    }
+    dragState = null;
+}
+
+/* ============================================================
+   ITEM COMPLETION + VISUAL CHANGES
+   ============================================================ */
+function completeItem(id) {
+    if (!state.started || state.finished || state.items[id]) return;
+    const item = ALL_ITEMS.find(it => it.id === id);
+    if (!item) return;
+    const info = ITEM_INFO[item.type];
+
+    state.items[id] = true;
+    state.rawScore += info.pts;
+    applyVisual(id, item.type);
+
+    const node = document.querySelector(`[data-id="${id}"]`);
+    if (node) node.classList.add("done");
+
+    showFeedback("good", "&#9989;", `<strong>${info.label}!</strong> ${info.tip}`, `+${info.pts}`);
+    updateHUD();
+
+    if (fixedCount() === ALL_ITEMS.length) {
+        showFeedback("good", "&#127942;", "<strong>Everything is powered down!</strong> Click Leave Room to get your rating!", null);
+    }
+}
+
+function uncompleteItem(id) {
+    if (!state.started || state.finished || !state.items[id]) return;
+    const item = ALL_ITEMS.find(it => it.id === id);
+    if (!item) return;
+    const info = ITEM_INFO[item.type];
+
+    delete state.items[id];
+    state.rawScore = Math.max(0, state.rawScore - info.pts);
+    restoreVisual(id, item.type);
+
+    const node = document.querySelector(`[data-id="${id}"]`);
+    if (node) node.classList.remove("done");
+
+    showFeedback("bad", "&#9889;", `<strong>Back on!</strong> This is wasting energy again — turn it off before you leave.`, `-${info.pts}`);
+    updateHUD();
+}
+
+function restoreVisual(id, type) {
+    switch (type) {
+        case "monitor": {
+            const s = $(id + "Screen");
+            s.setAttribute("fill", "#7dd3fc");
+            s.setAttribute("opacity", "0.9");
+            break;
+        }
+        case "pc": {
+            $(id + "Led").setAttribute("fill", "#34d399");
+            $(id + "Btn").setAttribute("stroke", "#34d399");
+            break;
+        }
+        case "charger": {
+            $(id + "Led").setAttribute("fill", "#fb7185");
+            const g = $(id + "G");
+            if (g) g.setAttribute("transform", "");
+            break;
+        }
+        case "printer": {
+            $("printerLed").setAttribute("fill", "#fbbf24");
+            break;
+        }
+        case "projector": {
+            $("projBeam").setAttribute("opacity", "1");
+            $("projLens").setAttribute("fill", "#fbbf24");
+            break;
+        }
+        case "ac": {
+            $("acLed").setAttribute("fill", "#34d399");
+            $("acWaves").setAttribute("opacity", "1");
+            break;
+        }
+        case "lights": {
+            $("darkOverlay").setAttribute("opacity", "0");
+            document.querySelectorAll("#lightsFx .bulb").forEach(b => b.setAttribute("fill", "#fef3c7"));
+            document.querySelectorAll("#lightsFx .pool").forEach(p => p.setAttribute("opacity", "1"));
+            $("switchNub").setAttribute("y", "258");
+            break;
+        }
+    }
+}
+
+function decoyHit() {
+    state.rawScore = Math.max(0, state.rawScore - DECOY_PENALTY);
+    showFeedback("bad", "&#128683;", `<strong>Not that one!</strong> ${DECOY_TIP}`, `-${DECOY_PENALTY}`);
+    updateHUD();
+}
+
+function applyVisual(id, type) {
+    switch (type) {
+        case "monitor": {
+            const s = $(id + "Screen");
+            s.setAttribute("fill", "#10152e");
+            s.setAttribute("opacity", "1");
+            break;
+        }
+        case "pc": {
+            $(id + "Led").setAttribute("fill", "#3a4370");
+            $(id + "Btn").setAttribute("stroke", "#3a4370");
+            break;
+        }
+        case "charger": {
+            $(id + "Led").setAttribute("fill", "#3a4370");
+            break;
+        }
+        case "printer": {
+            $("printerLed").setAttribute("fill", "#3a4370");
+            break;
+        }
+        case "projector": {
+            $("projBeam").setAttribute("opacity", "0");
+            $("projLens").setAttribute("fill", "#3a4370");
+            break;
+        }
+        case "ac": {
+            $("acLed").setAttribute("fill", "#3a4370");
+            $("acWaves").setAttribute("opacity", "0");
+            break;
+        }
+        case "lights": {
+            $("darkOverlay").setAttribute("opacity", "1");
+            document.querySelectorAll("#lightsFx .bulb").forEach(b => b.setAttribute("fill", "#3a4370"));
+            document.querySelectorAll("#lightsFx .pool").forEach(p => p.setAttribute("opacity", "0"));
+            $("switchNub").setAttribute("y", "274");
+            break;
+        }
+    }
+}
+
+/* ============================================================
+   FEEDBACK + HUD
+   ============================================================ */
+let feedbackTimeout = null;
+function showFeedback(kind, icon, html, pts, transient) {
+    dom.feedbackPanel.classList.remove("good", "bad");
+    dom.feedbackPanel.classList.add(kind);
+    dom.feedbackIcon.innerHTML = icon;
+    dom.feedbackText.innerHTML = html;
+    dom.ptsPop.textContent = pts || "";
+    dom.ptsPop.className = "pts-pop " + (pts && pts.startsWith("+") ? "plus" : "minus");
+    if (feedbackTimeout) clearTimeout(feedbackTimeout);
+    if (transient) {
+        feedbackTimeout = setTimeout(() => {
+            dom.feedbackPanel.classList.remove("good", "bad");
+            dom.feedbackIcon.innerHTML = "&#128161;";
+            dom.feedbackText.textContent = "Explore the lab. Wasteful equipment glows when you hover over it.";
+            dom.ptsPop.textContent = "";
+        }, 2600);
+    }
+}
+
+function maxRawScore() {
+    return ALL_ITEMS.reduce((sum, it) => sum + ITEM_INFO[it.type].pts, 0);
+}
+function fixedCount() {
+    return Object.keys(state.items).length;
+}
+function scaledScore() {
+    return Math.round((state.rawScore / maxRawScore()) * 100);
+}
+
+function updateHUD() {
+    const fixed = fixedCount();
+    dom.scoreChip.textContent = "Score: " + scaledScore();
+    dom.itemsChip.textContent = `Fixed: ${fixed} / ${ALL_ITEMS.length}`;
+    const pct = Math.round((fixed / ALL_ITEMS.length) * 100);
+    dom.progressFill.style.width = pct + "%";
+    dom.progressLabel.textContent = "Energy saved: " + pct + "%";
+    dom.progressSummary.textContent =
+        pct === 100 ? "The lab is fully powered down! \u{1F31F}" :
+        pct >= 60  ? "Getting greener… keep going!" :
+        pct > 0    ? "Good start — more wasters remain" :
+                     "The lab is still wasting power";
+}
+
+/* ============================================================
+   TIMER
+   ============================================================ */
+function startTimer() {
+    stopTimer();
+    timerInterval = setInterval(() => {
+        state.timeLeft--;
+        renderTimer();
+        if (state.timeLeft <= 0) {
+            stopTimer();
+            endGame(true);
+        }
+    }, 1000);
+    renderTimer();
+}
+function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+function renderTimer() {
+    const m = Math.floor(Math.max(state.timeLeft, 0) / 60);
+    const s = Math.max(state.timeLeft, 0) % 60;
+    dom.timerChip.innerHTML = "&#9203; " + m + ":" + String(s).padStart(2, "0");
+    dom.timerChip.classList.toggle("timer-warn", state.timeLeft <= 20);
+}
+
+/* ============================================================
+   SCREENS + GAME FLOW
+   ============================================================ */
+function showScreen(name) {
+    [dom.homeScreen, dom.gameScreen, dom.summaryScreen].forEach(s => s.classList.remove("active"));
+    ({ home: dom.homeScreen, game: dom.gameScreen, summary: dom.summaryScreen })[name].classList.add("active");
+}
+
+function startGame() {
+    state = freshState();
+    state.started = true;
+    buildRoom();
+    updateHUD();
+    showFeedback("good", "&#128075;", "You're the last one here. <strong>Power down the lab</strong> before the bell rings!", null, true);
+    showScreen("game");
+    startTimer();
+}
+
+function endGame(bellRang) {
+    if (state.finished) return;
+    state.finished = true;
+    stopTimer();
+
+    const score = scaledScore();
+    const fixed = fixedCount();
+    const missed = ALL_ITEMS.filter(it => !state.items[it.id]);
+    const timeUsed = TIME_LIMIT - Math.max(state.timeLeft, 0);
+
+    dom.summaryTitle.textContent = bellRang
+        ? "⏰ The bell rang — time's up!"
+        : "You left the lab.";
+
+    let rating, color;
+    if (score >= 90)      { rating = "\u{1F3C6} Energy Champion";          color = "var(--success)"; }
+    else if (score >= 70) { rating = "✅ Green Guardian";              color = "var(--success)"; }
+    else if (score >= 50) { rating = "⚠️ Room Still Wasting Power"; color = "var(--warning)"; }
+    else                  { rating = "❌ Energy Offender";             color = "var(--danger)"; }
+    dom.ratingBanner.textContent = rating;
+    dom.ratingBanner.style.color = color;
+    dom.ratingBanner.style.borderColor = "color-mix(in srgb, " + color + " 45%, transparent)";
+
+    dom.summaryScore.textContent = score + " / 100";
+    dom.summaryFixed.textContent = String(fixed);
+    dom.summaryMissed.textContent = String(missed.length);
+    const tm = Math.floor(timeUsed / 60), ts = timeUsed % 60;
+    dom.summaryTime.textContent = tm + ":" + String(ts).padStart(2, "0");
+
+    /* missed list — group by type */
+    dom.missedList.innerHTML = "";
+    if (missed.length === 0) {
+        dom.missedLabel.classList.add("hidden");
+    } else {
+        dom.missedLabel.classList.remove("hidden");
+        const byType = {};
+        missed.forEach(it => { byType[it.type] = (byType[it.type] || 0) + 1; });
+        for (const type in byType) {
+            const info = ITEM_INFO[type];
+            const card = document.createElement("div");
+            card.className = "result-card missed";
+            card.innerHTML = `<span class="r-icon">❌</span><p><strong>${info.label}</strong>` +
+                (byType[type] > 1 ? ` (×${byType[type]})` : "") +
+                ` — ${info.tip}</p>`;
+            dom.missedList.appendChild(card);
+        }
+    }
+
+    /* done list — group by type */
+    dom.doneList.innerHTML = "";
+    const doneByType = {};
+    ALL_ITEMS.forEach(it => { if (state.items[it.id]) doneByType[it.type] = (doneByType[it.type] || 0) + 1; });
+    if (Object.keys(doneByType).length === 0) {
+        dom.doneLabel.classList.add("hidden");
+    } else {
+        dom.doneLabel.classList.remove("hidden");
+        for (const type in doneByType) {
+            const info = ITEM_INFO[type];
+            const card = document.createElement("div");
+            card.className = "result-card done-item";
+            card.innerHTML = `<span class="r-icon">✅</span><p><strong>${info.label}</strong>` +
+                (doneByType[type] > 1 ? ` (×${doneByType[type]})` : "") +
+                ` — +${info.pts} pts each</p>`;
+            dom.doneList.appendChild(card);
+        }
+    }
+
+    showScreen("summary");
+}
+
+/* ============================================================
+   TOP BAR + MODALS
+   ============================================================ */
+dom.beginBtn.addEventListener("click", startGame);
+dom.playAgainBtn.addEventListener("click", startGame);
+dom.leaveBtn.addEventListener("click", () => endGame(false));
+
+dom.helpBtn.addEventListener("click", () => dom.instructionsModal.classList.add("show"));
+dom.openInstructionsBtn.addEventListener("click", () => dom.instructionsModal.classList.add("show"));
+dom.closeInstructionsBtn.addEventListener("click", () => dom.instructionsModal.classList.remove("show"));
+dom.gotItBtn.addEventListener("click", () => dom.instructionsModal.classList.remove("show"));
+
+dom.resetBtn.addEventListener("click", () => dom.confirmModal.classList.add("show"));
+dom.confirmNoBtn.addEventListener("click", () => dom.confirmModal.classList.remove("show"));
+dom.confirmYesBtn.addEventListener("click", () => {
+    dom.confirmModal.classList.remove("show");
+    stopTimer();
+    state = freshState();
+    showScreen("home");
+});
+
+dom.themeToggleBtn.addEventListener("click", () => {
+    const html = document.documentElement;
+    const next = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    html.setAttribute("data-theme", next);
+    dom.themeToggleBtn.innerHTML = next === "dark" ? "&#127769; Dark" : "&#9728;&#65039; Light";
+});
+
+dom.fullscreenBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    else document.exitFullscreen();
+});
+
+/* init */
+state = freshState();
+</script>
+</body>
+</html>
