@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Tone Simulator</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#eef2f7;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.phone{
+    width:360px;
+    background:white;
+    border-radius:30px;
+    box-shadow:0 15px 40px rgba(0,0,0,.2);
+    overflow:hidden;
+}
+
+.header{
+    background:#4f8ef7;
+    color:white;
+    text-align:center;
+    padding:18px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.info{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 18px;
+    background:#f5f7fb;
+    font-weight:bold;
+}
+
+.chat{
+
+    background:#d9e9ff;
+
+    min-height:320px;
+
+    padding:20px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:12px;
+
+    overflow-y:auto;
+
+}
+
+.bubble{
+
+    background:white;
+
+    padding:12px 16px;
+
+    border-radius:18px;
+
+    max-width:80%;
+
+    box-shadow:0 3px 10px rgba(0,0,0,.15);
+
+    animation:pop .3s;
+
+}
+
+@keyframes pop{
+from{transform:scale(.7);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+.buttons{
+    padding:15px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+button{
+    border:none;
+    border-radius:10px;
+    padding:12px;
+    cursor:pointer;
+    font-size:15px;
+    transition:.25s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+.polite{background:#4CAF50;color:white;}
+.rude{background:#f44336;color:white;}
+.unclear{background:#FFC107;}
+.aggressive{background:#7B1FA2;color:white;}
+
+.feedback{
+    min-height:90px;
+    padding:15px;
+    background:#f7f7f7;
+    font-size:15px;
+    line-height:1.5;
+}
+
+.next{
+    width:100%;
+    background:#2196F3;
+    color:white;
+    padding:14px;
+    font-size:17px;
+}
+
+.hidden{
+    display:none;
+}
+
+.final{
+    text-align:center;
+    padding:20px;
+}
+
+.playAgain{
+    background:#4CAF50;
+    color:white;
+    margin-top:15px;
+    width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+<div class="header">
+Tone Detective
+</div>
+
+<div class="info">
+<span id="progress">1 / 10</span>
+<span id="score">Score: 0</span>
+</div>
+
+<div class="chat" id="chatArea">
+
+</div>
+
+<div class="buttons">
+
+<button class="polite" onclick="answer('Polite')">
+😊 Polite
+</button>
+
+<button class="rude" onclick="answer('Rude')">
+😠 Rude
+</button>
+
+<button class="unclear" onclick="answer('Unclear')">
+🤔 Unclear
+</button>
+
+<button class="aggressive" onclick="answer('Too Aggressive')">
+😡 Too Aggressive
+</button>
+
+</div>
+
+<div class="feedback" id="feedback">
+Choose the tone of the message.
+</div>
+
+<button class="next hidden" id="nextBtn" onclick="nextQuestion()">
+Next Message
+</button>
+
+</div>
+
+<script>
+
+const questions = [
+
+{
+conversation:[
+    {sender:"Alex", text:"Are you still coming tonight?"},
+    {sender:"You", text:"Yeah, I'll be there around 7."},
+    {sender:"Alex", text:"Fine."}
+],
+questionIndex:2,
+answer:"Unclear",
+feedback:"'Fine.' could be sincere or annoyed. Without more context, its tone is unclear."
+},
+
+{
+conversation:[
+    {sender:"Jordan", text:"Can you send me the assignment?"},
+    {sender:"You", text:"I'm finishing it now."},
+    {sender:"Jordan", text:"Thanks! I really appreciate it."}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"The speaker expresses appreciation, making the tone polite."
+},
+
+{
+conversation:[
+    {sender:"Taylor", text:"Did you remember to bring the forms?"},
+    {sender:"You", text:"I forgot them."},
+    {sender:"Taylor", text:"Seriously? You never remember anything."}
+],
+questionIndex:2,
+answer:"Rude",
+feedback:"The message attacks the person instead of addressing the situation."
+},
+
+{
+conversation:[
+    {sender:"Chris", text:"Can you send that now?"},
+    {sender:"You", text:"I'm in class."},
+    {sender:"Chris", text:"SEND IT NOW!"}
+],
+questionIndex:2,
+answer:"Too Aggressive",
+feedback:"Capital letters and commanding language make the message aggressive."
+},
+
+{
+conversation:[
+    {sender:"Emma", text:"Could you look over my presentation when you're free?"},
+    {sender:"You", text:"Sure! I'll take a look after lunch."},
+    {sender:"Emma", text:"Thank you so much!"}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"Expressing gratitude with 'Thank you so much!' shows appreciation and respect."
+},
+
+{
+conversation:[
+    {sender:"Liam", text:"Did you finish the group project?"},
+    {sender:"You", text:"I'm almost done."},
+    {sender:"Liam", text:"You always leave everything until the last minute."}
+],
+questionIndex:2,
+answer:"Rude",
+feedback:"The message criticizes the person rather than discussing the situation constructively."
+},
+
+{
+conversation:[
+    {sender:"Sophia", text:"Should I bring snacks tomorrow?"},
+    {sender:"You", text:"If you'd like."},
+    {sender:"Sophia", text:"Okay..."}
+],
+questionIndex:2,
+answer:"Unclear",
+feedback:"'Okay...' could mean agreement, disappointment, or uncertainty depending on context."
+},
+
+{
+conversation:[
+    {sender:"Noah", text:"Can you send me the file?"},
+    {sender:"You", text:"I'm still editing it."},
+    {sender:"Noah", text:"I SAID SEND IT NOW!"}
+],
+questionIndex:2,
+answer:"Too Aggressive",
+feedback:"Capital letters and demanding language make this message aggressive."
+},
+
+{
+conversation:[
+    {sender:"Olivia", text:"I appreciate you helping me study yesterday."},
+    {sender:"You", text:"Anytime!"},
+    {sender:"Olivia", text:"You're the best!"}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"The message is positive and appreciative, creating a respectful tone."
+},
+
+{
+conversation:[
+    {sender:"Mason", text:"I couldn't answer because I was driving."},
+    {sender:"You", text:"That's okay."},
+    {sender:"Mason", text:"Whatever."}
+],
+questionIndex:2,
+answer:"Rude",
+feedback:"'Whatever.' dismisses the conversation and can sound disrespectful."
+},
+
+{
+conversation:[
+    {sender:"Ava", text:"Do you want to join us later?"},
+    {sender:"You", text:"Maybe."},
+    {sender:"Ava", text:"Alright."}
+],
+questionIndex:2,
+answer:"Unclear",
+feedback:"'Alright.' doesn't clearly communicate whether the person is happy, disappointed, or simply acknowledging the response."
+},
+
+{
+conversation:[
+    {sender:"Ethan", text:"I forgot to reply yesterday."},
+    {sender:"You", text:"No worries."},
+    {sender:"Ethan", text:"GOOD. STOP BRINGING IT UP."}
+],
+questionIndex:2,
+answer:"Too Aggressive",
+feedback:"The use of capital letters and commanding language creates an aggressive tone."
+},
+
+{
+conversation:[
+    {sender:"Grace", text:"Could you help me move these boxes?"},
+    {sender:"You", text:"Of course."},
+    {sender:"Grace", text:"I really appreciate your help."}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"Showing appreciation makes the message warm and respectful."
+},
+
+{
+conversation:[
+    {sender:"Lucas", text:"I made a mistake on the report."},
+    {sender:"You", text:"We can fix it together."},
+    {sender:"Lucas", text:"I guess."}
+],
+questionIndex:2,
+answer:"Unclear",
+feedback:"'I guess.' can indicate hesitation, uncertainty, or reluctant agreement."
+},
+
+{
+conversation:[
+    {sender:"Chloe", text:"Can we meet after school?"},
+    {sender:"You", text:"Yes, around 3:30 works."},
+    {sender:"Chloe", text:"Perfect! See you then."}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"The response is friendly, positive, and confirms the plan respectfully."
+}
+
+];
+
+let current=0;
+let score=0;
+let answered=false;
+let gameQuestions=[];
+
+let message=document.getElementById("message");
+const feedback=document.getElementById("feedback");
+const progress=document.getElementById("progress");
+const scoreLabel=document.getElementById("score");
+const nextBtn=document.getElementById("nextBtn");
+
+
+function shuffleArray(array){
+ const arr=[...array];
+ for(let i=arr.length-1;i>0;i--){
+
+  const j=Math.floor(Math.random()*(i+1));
+
+  [arr[i],arr[j]]=[arr[j],arr[i]];
+
+ }
+ return arr;
+
+}
+
+function startGame(){
+
+ gameQuestions=shuffleArray(questions);
+
+ current=0;
+ score=0;
+ answered=false;
+
+ scoreLabel.textContent="Score: 0";
+
+ document.querySelector(".buttons").style.display="grid";
+
+ document.querySelector(".chat").innerHTML='<div class="bubble" id="message"></div>';
+
+ message=document.getElementById("message");
+
+ feedback.innerHTML="Choose the tone of the message.";
+
+ nextBtn.innerHTML="Next Message";
+
+ nextBtn.onclick=nextQuestion;
+
+ loadQuestion();
+}
+
+function loadQuestion(){
+
+    answered=false;
+
+    const q = gameQuestions[current];
+
+    const chat = document.getElementById("chatArea");
+
+    chat.innerHTML="";
+
+    q.conversation.forEach((msg,index)=>{
+
+        const bubble=document.createElement("div");
+
+        bubble.className="bubble";
+
+        if(msg.sender==="You"){
+
+            bubble.style.marginLeft="auto";
+            bubble.style.background="#DCF8C6";
+
+        }
+
+        bubble.innerHTML=
+        "<strong>"+msg.sender+"</strong><br>"+msg.text;
+
+        if(index===q.questionIndex){
+
+            bubble.style.border="3px solid #4f8ef7";
+
+        }
+
+        chat.appendChild(bubble);
+
+    });
+
+    feedback.innerHTML="Choose the tone of the highlighted message.";
+
+    nextBtn.classList.add("hidden");
+
+    progress.textContent=(current+1)+" / "+gameQuestions.length;
+
+}
+
+function answer(choice){
+
+if(answered)return;
+
+answered=true;
+
+const q=gameQuestions[current];
+
+if(choice===q.answer){
+
+score++;
+
+feedback.innerHTML=
+"<b>✅ Correct!</b><br><br>"+q.feedback;
+
+}else{
+
+feedback.innerHTML=
+"<b>❌ Not quite.</b><br><br>"+
+"Correct answer: <b>"+q.answer+"</b><br><br>"+
+q.feedback;
+
+}
+
+scoreLabel.textContent="Score: "+score;
+
+nextBtn.classList.remove("hidden");
+
+}
+
+function nextQuestion(){
+
+current++;
+
+if(current>=gameQuestions.length){
+
+document.querySelector(".chat").innerHTML=
+'<div class="final"><h2>Simulation Complete!</h2><br><h3>Your Score: '+score+' / '+gameQuestions.length+'</h3><br><p>Great job identifying the tone of different chat messages.</p></div>';
+
+document.querySelector(".buttons").style.display="none";
+
+feedback.innerHTML="";
+
+nextBtn.innerHTML="Play Again";
+
+nextBtn.onclick=restart;
+
+
+return;
+
+}
+
+loadQuestion();
+
+}
+
+function restart(){
+startGame();
+}
+
+startGame();
+
+</script>
+
+</body>
+</html>
