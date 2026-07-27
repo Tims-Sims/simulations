@@ -1,0 +1,337 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Computer Maintenance Task Match</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#eef4fb;
+    padding:30px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:#0d47a1;
+    margin-bottom:10px;
+}
+
+.instructions{
+    text-align:center;
+    margin-bottom:30px;
+    color:#444;
+}
+
+.game{
+    display:flex;
+    justify-content:space-between;
+    gap:30px;
+    flex-wrap:wrap;
+}
+
+.column{
+    flex:1;
+    min-width:320px;
+}
+
+.column h2{
+    text-align:center;
+    margin-bottom:15px;
+    color:#333;
+}
+
+.card{
+    background:white;
+    border:2px solid #1976d2;
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:15px;
+    cursor:grab;
+    user-select:none;
+    transition:.25s;
+    font-weight:bold;
+}
+
+.card:hover{
+    transform:scale(1.02);
+}
+
+.card.dragging{
+    opacity:.5;
+}
+
+.card.locked{
+    background:#c8f7d2;
+    border-color:#2e7d32;
+    cursor:default;
+}
+
+.dropzone{
+    background:white;
+    border:3px dashed #90a4ae;
+    border-radius:10px;
+    padding:18px;
+    margin-bottom:15px;
+    min-height:70px;
+    transition:.2s;
+}
+
+.dropzone.hover{
+    background:#e3f2fd;
+}
+
+.dropzone.correct{
+    border-color:#2e7d32;
+    background:#dcedc8;
+}
+
+.message{
+    text-align:center;
+    margin-top:30px;
+    font-size:24px;
+    color:#2e7d32;
+    font-weight:bold;
+}
+
+.resetBtn{
+    display:block;
+    margin:25px auto;
+    padding:12px 30px;
+    border:none;
+    background:#1565c0;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.resetBtn:hover{
+    background:#0d47a1;
+}
+
+.submitBtn{
+    display:block;
+    margin:15px auto;
+    padding:12px 30px;
+    border:none;
+    background:#2e7d32;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.submitBtn:hover{
+    background:#1b5e20;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Computer Maintenance Task Match</h1>
+
+<div class="instructions">
+Drag each maintenance task to its correct purpose.
+Correct matches stay in place.
+</div>
+
+<div class="game">
+
+<div class="column">
+
+<h2>Maintenance Tasks</h2>
+
+<div class="card" draggable="true" id="backup" data-match="backup">
+Backup Files
+</div>
+
+<div class="card" draggable="true" id="antivirus" data-match="antivirus">
+Update Antivirus
+</div>
+
+<div class="card" draggable="true" id="cleaning" data-match="cleaning">
+Clean Computer
+</div>
+
+<div class="card" draggable="true" id="defrag" data-match="defrag">
+Defragment Drive
+</div>
+
+</div>
+
+<div class="column">
+
+<h2>Purpose</h2>
+
+<div class="dropzone" data-accept="backup">
+Protects data in case files are lost.
+</div>
+
+<div class="dropzone" data-accept="antivirus">
+Helps prevent malware infections.
+</div>
+
+<div class="dropzone" data-accept="cleaning">
+Reduces dust buildup inside the computer.
+</div>
+
+<div class="dropzone" data-accept="defrag">
+Organizes files on storage for better efficiency.
+</div>
+
+</div>
+
+</div>
+
+<button class="resetBtn">Reset Activity</button>
+
+<button class="submitBtn">Submit Answers</button>
+
+<div class="message"></div>
+
+</div>
+
+<script>
+
+const cards=document.querySelectorAll(".card");
+const zones=document.querySelectorAll(".dropzone");
+const message=document.querySelector(".message");
+const reset=document.querySelector(".resetBtn");
+const submit=document.querySelector(".submitBtn");
+
+let dragged=null;
+let correct=0;
+
+cards.forEach(card=>{
+
+card.addEventListener("dragstart",e=>{
+
+if(card.classList.contains("locked")){
+e.preventDefault();
+return;
+}
+
+dragged=card;
+card.classList.add("dragging");
+
+});
+
+card.addEventListener("dragend",()=>{
+card.classList.remove("dragging");
+});
+
+});
+
+zones.forEach(zone=>{
+
+zone.addEventListener("dragover",e=>{
+e.preventDefault();
+zone.classList.add("hover");
+});
+
+zone.addEventListener("dragleave",()=>{
+zone.classList.remove("hover");
+});
+
+zone.addEventListener("drop",e=>{
+
+e.preventDefault();
+zone.classList.remove("hover");
+
+if(zone.classList.contains("correct")) return;
+
+// Only allow one card per drop zone
+if(zone.querySelector(".card")) return;
+
+// Move the card regardless of whether it is correct
+zone.appendChild(dragged);
+
+});
+
+});
+
+submit.addEventListener("click", () => {
+
+    let score = 0;
+
+    zones.forEach(zone => {
+
+        const card = zone.querySelector(".card");
+
+        if(!card){
+            zone.style.borderColor = "red";
+            return;
+        }
+
+        if(card.dataset.match === zone.dataset.accept){
+
+            score++;
+            zone.style.borderColor = "#2e7d32";
+            zone.style.background = "#dcedc8";
+
+        }else{
+
+            zone.style.borderColor = "#c62828";
+            zone.style.background = "#ffcdd2";
+
+        }
+
+    });
+
+    cards.forEach(card=>{
+        card.draggable = false;
+    });
+
+    message.innerHTML = `You scored ${score}/4`;
+});
+
+reset.addEventListener("click",()=>{
+
+const taskColumn=document.querySelectorAll(".column")[0];
+
+cards.forEach(card=>{
+
+taskColumn.appendChild(card);
+
+card.classList.remove("locked");
+card.draggable=true;
+
+});
+
+zones.forEach(zone=>{
+    zone.classList.remove("correct");
+    zone.style.borderColor = "";
+    zone.style.background = "";
+
+});
+
+cards.forEach(card=>{
+
+    card.draggable = true;
+
+});
+
+correct=0;
+message.innerHTML="";
+
+});
+
+</script>
+
+</body>
+</html>
