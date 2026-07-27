@@ -7,7 +7,7 @@ An interactive, game-based simulation for ICT / Digital Literacy students (Forms
 ## How to Play
 
 1. Click **Enter the Lab** on the home screen.
-2. You have **2 minutes** before the bell rings.
+2. A timer **counts up** to show how long you take — no time limit.
 3. Find all **19 energy wasters** in the side-view lab scene. Wasteful equipment glows when you hover over it.
 4. When you're done, click **Leave Room** to get your rating.
 
@@ -42,7 +42,7 @@ The end screen also lists everything still wasting energy (with the energy fact)
 
 ## Features
 
-- **Timer:** 2-minute countdown; blinks red in the last 20 seconds; the bell ends the game automatically.
+- **Timer:** counts up from 0:00 so students can see how long they took (shown on the end screen).
 - **Live HUD:** score chip, fixed-items counter, and an "Energy Saved" progress bar.
 - **Theme toggle:** dark / light mode. **Fullscreen** button. **Reset** with confirmation.
 - **Help modal** with full instructions, shown from the topbar at any time.
@@ -59,7 +59,6 @@ The end screen also lists everything still wasting energy (with the energy fact)
 
 Constants at the top of the `<script>` in the HTML file:
 
-- `TIME_LIMIT` — seconds on the clock (default `120`)
 - `HOLD_TIME` — ms to hold a PC power button (default `1000`)
 - `DRAG_DIST` — how far a charger must be dragged to unplug (default `46`)
 - `ITEM_INFO` — points and tooltip text per device type

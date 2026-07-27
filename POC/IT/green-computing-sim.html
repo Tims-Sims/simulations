@@ -226,8 +226,6 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
     font-weight: 700;
     font-size: 0.88rem;
 }
-.chip.timer-warn { background: color-mix(in srgb, var(--danger) 22%, var(--surface)); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); animation: timerBlink 1s infinite; }
-@keyframes timerBlink { 50% { opacity: 0.55; } }
 
 .progress-shell { margin-bottom: 8px; }
 .progress-meta {
@@ -447,7 +445,7 @@ body.in-game .footer-note { display: none; }
                 <p>
                     Class is over and you're the last person in the ICT lab. Computers are humming,
                     the projector is glowing, chargers are plugged in with nothing attached&hellip;
-                    Find every energy waster and deal with it before the bell rings. But be careful —
+                    Find every energy waster and deal with it — how fast can you go? But be careful —
                     some equipment should stay ON!
                 </p>
                 <div class="howto-grid">
@@ -464,8 +462,8 @@ body.in-game .footer-note { display: none; }
                         <p>Grab a charger and <strong>drag it out</strong> of the wall socket to stop phantom power drain.</p>
                     </div>
                     <div class="howto-box">
-                        <h3>&#9203; Beat the Bell</h3>
-                        <p>You have 2 minutes. When you're done, click <strong>Leave Room</strong> to get your rating.</p>
+                        <h3>&#9203; Race the Clock</h3>
+                        <p>The clock counts how long you take. When you're done, click <strong>Leave Room</strong> to get your rating.</p>
                     </div>
                 </div>
                 <div class="hero-actions">
@@ -486,7 +484,7 @@ body.in-game .footer-note { display: none; }
                         <div class="chip" id="scoreChip">Score: 0</div>
                         <div class="chip" id="itemsChip">Fixed: 0 / 19</div>
                     </div>
-                    <div class="chip" id="timerChip">&#9203; 2:00</div>
+                    <div class="chip" id="timerChip">&#9203; 0:00</div>
                 </div>
 
                 <div class="progress-shell">
@@ -560,7 +558,7 @@ body.in-game .footer-note { display: none; }
             <li>Changed your mind? <strong>Tap</strong> any switched-off device (including a PC's power button) to turn it <strong>back on</strong> — but you'll lose the points until you switch it off again!</li>
             <li>Watch the <strong>Energy Saved</strong> bar — fill it to 100% by fixing all 19 wasters.</li>
             <li>&#9888;&#65039; Some equipment must <strong>stay on</strong> — clicking it loses points. Think before you click!</li>
-            <li>You have <strong>2 minutes</strong> before the bell. Click <strong>Leave Room</strong> when you're done.</li>
+            <li>The timer <strong>counts up</strong> — it shows how long you take. Click <strong>Leave Room</strong> when you're done.</li>
         </ul>
         <div style="margin-top: 18px;">
             <button class="primary-btn" id="gotItBtn">Got it</button>
@@ -586,7 +584,6 @@ body.in-game .footer-note { display: none; }
 /* ============================================================
    CONFIG
    ============================================================ */
-const TIME_LIMIT = 120; // seconds
 const HOLD_TIME  = 1000; // ms to hold PC power button
 const DRAG_DIST  = 46;  // px (SVG units) to pull charger free
 
@@ -613,7 +610,7 @@ function freshState() {
     return {
         started: false,
         finished: false,
-        timeLeft: TIME_LIMIT,
+        timeElapsed: 0,
         rawScore: 0,
         items: {}   // id -> true when fixed
     };
@@ -1141,12 +1138,8 @@ function updateHUD() {
 function startTimer() {
     stopTimer();
     timerInterval = setInterval(() => {
-        state.timeLeft--;
+        state.timeElapsed++;
         renderTimer();
-        if (state.timeLeft <= 0) {
-            stopTimer();
-            endGame(true);
-        }
     }, 1000);
     renderTimer();
 }
@@ -1154,10 +1147,9 @@ function stopTimer() {
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 }
 function renderTimer() {
-    const m = Math.floor(Math.max(state.timeLeft, 0) / 60);
-    const s = Math.max(state.timeLeft, 0) % 60;
+    const m = Math.floor(state.timeElapsed / 60);
+    const s = state.timeElapsed % 60;
     dom.timerChip.innerHTML = "&#9203; " + m + ":" + String(s).padStart(2, "0");
-    dom.timerChip.classList.toggle("timer-warn", state.timeLeft <= 20);
 }
 
 /* ============================================================
@@ -1174,12 +1166,12 @@ function startGame() {
     state.started = true;
     buildRoom();
     updateHUD();
-    showFeedback("good", "&#128075;", "You're the last one here. <strong>Power down the lab</strong> before the bell rings!", null, true);
+    showFeedback("good", "&#128075;", "You're the last one here. <strong>Power down the lab</strong> — the clock is counting!", null, true);
     showScreen("game");
     startTimer();
 }
 
-function endGame(bellRang) {
+function endGame() {
     if (state.finished) return;
     state.finished = true;
     stopTimer();
@@ -1187,11 +1179,9 @@ function endGame(bellRang) {
     const score = scaledScore();
     const fixed = fixedCount();
     const missed = ALL_ITEMS.filter(it => !state.items[it.id]);
-    const timeUsed = TIME_LIMIT - Math.max(state.timeLeft, 0);
+    const timeUsed = state.timeElapsed;
 
-    dom.summaryTitle.textContent = bellRang
-        ? "⏰ The bell rang — time's up!"
-        : "You left the lab.";
+    dom.summaryTitle.textContent = "You left the lab.";
 
     let rating, color;
     if (score >= 90)      { rating = "\u{1F3C6} Energy Champion";          color = "var(--success)"; }
