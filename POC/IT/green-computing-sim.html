@@ -61,7 +61,7 @@ html, body {
         var(--bg);
     color: var(--text);
 }
-body { min-height: 100vh; padding: 16px; }
+body { min-height: 100vh; padding: 10px; }
 button, input { font: inherit; }
 button {
     border: 0;
@@ -75,10 +75,10 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
 .app-shell {
     max-width: 1180px;
     margin: 0 auto;
-    min-height: calc(100vh - 32px);
+    min-height: calc(100vh - 20px);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
 }
 
 /* ── TOPBAR ── */
@@ -206,7 +206,7 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow);
-    padding: clamp(16px, 2.5vw, 24px);
+    padding: 12px 16px;
 }
 .status-row {
     display: flex;
@@ -214,7 +214,7 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
     gap: 10px;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 14px;
+    margin-bottom: 8px;
 }
 .chip-group { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip {
@@ -229,14 +229,14 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
 .chip.timer-warn { background: color-mix(in srgb, var(--danger) 22%, var(--surface)); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); animation: timerBlink 1s infinite; }
 @keyframes timerBlink { 50% { opacity: 0.55; } }
 
-.progress-shell { margin-bottom: 14px; }
+.progress-shell { margin-bottom: 8px; }
 .progress-meta {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
 }
 .progress-bar {
     height: 14px; width: 100%;
@@ -261,7 +261,18 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
     user-select: none;
     -webkit-user-select: none;
 }
-.room-wrap svg { display: block; width: 100%; height: auto; }
+.room-wrap { display: flex; justify-content: center; }
+.room-wrap svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* keep the whole game screen inside one viewport:
+       cap the room's height by what's left after HUD + feedback + footer rows */
+    max-height: calc(100vh - 400px);
+    min-height: 240px;
+}
+/* footer note hidden during gameplay to keep everything in one view */
+body.in-game .footer-note { display: none; }
 .hotspot { cursor: pointer; }
 .hotspot.done { cursor: default; }
 .hotspot:not(.done):hover .glow-ring { opacity: 0.9; }
@@ -281,11 +292,11 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
 
 /* ── FEEDBACK PANEL ── */
 .feedback-panel {
-    margin-top: 14px;
-    min-height: 62px;
+    margin-top: 8px;
+    min-height: 50px;
     border-radius: 14px;
     border: 1px solid var(--border);
-    padding: 12px 16px;
+    padding: 8px 14px;
     line-height: 1.55;
     background: color-mix(in srgb, var(--surface-2) 55%, transparent);
     display: flex;
@@ -312,7 +323,7 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    margin-top: 16px;
+    margin-top: 8px;
     flex-wrap: wrap;
 }
 
@@ -1155,6 +1166,7 @@ function renderTimer() {
 function showScreen(name) {
     [dom.homeScreen, dom.gameScreen, dom.summaryScreen].forEach(s => s.classList.remove("active"));
     ({ home: dom.homeScreen, game: dom.gameScreen, summary: dom.summaryScreen })[name].classList.add("active");
+    document.body.classList.toggle("in-game", name === "game");
 }
 
 function startGame() {
