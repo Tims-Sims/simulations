@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICT Lab Safety Simulation</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#dfeaf3;
+}
+
+header{
+    background:#1d3557;
+    color:white;
+    padding:18px;
+    text-align:center;
+}
+
+.instructions{
+    text-align:center;
+    padding:15px;
+    background:white;
+}
+
+.hazard{
+    position:absolute;
+    width: 80px;
+    height:auto;
+    user-select:none;
+    cursor:pointer;
+    transition:.25s;
+}
+
+
+.found{
+    pointer-events:none;
+    opacity:0;
+    transform:scale(.3);
+    transition:.3s;
+}
+
+@keyframes found{
+
+100%{
+
+opacity:0;
+
+transform:scale(.3);
+
+}
+
+}
+
+.container{
+    display:flex;
+    gap:20px;
+    padding:20px;
+    flex-wrap:wrap;
+}
+
+.panel{
+
+width:300px;
+
+background:white;
+
+padding:20px;
+
+border-radius:10px;
+
+box-shadow:0 4px 10px rgba(0,0,0,.15);
+
+}
+
+.panel hr{
+
+margin:15px 0;
+
+}
+
+#foundList{
+
+padding-left:20px;
+
+margin-top:10px;
+
+}
+
+#hazardMessage{
+
+line-height:1.5;
+
+min-height:120px;
+
+}
+
+.scene{
+
+position:relative;
+
+width:900px;
+
+height:550px;
+
+overflow:hidden;
+
+}
+
+#background{
+
+width:100%;
+
+height:100%;
+
+display:block;
+
+}
+
+#hazards{
+
+position:absolute;
+
+left:0;
+
+top:0;
+
+width:100%;
+
+height:100%;
+
+}
+
+#completeScreen{
+
+display:none;
+
+position:fixed;
+
+left:0;
+
+top:0;
+
+width:100%;
+
+height:100%;
+
+background:rgba(0,0,0,.75);
+
+justify-content:center;
+
+align-items:center;
+
+z-index:1000;
+
+}
+
+.completeBox{
+
+background:white;
+
+padding:35px;
+
+width:420px;
+
+border-radius:12px;
+
+text-align:center;
+
+box-shadow:0 15px 40px rgba(0,0,0,.3);
+
+}
+
+.completeBox h1{
+
+color:#1d3557;
+
+margin-bottom:15px;
+
+}
+
+.completeBox p{
+
+line-height:1.6;
+
+}
+
+.completeBox button{
+
+margin-top:20px;
+
+padding:12px 28px;
+
+background:#1d3557;
+
+color:white;
+
+border:none;
+
+border-radius:6px;
+
+cursor:pointer;
+
+font-size:16px;
+
+}
+
+.completeBox button:hover{
+
+background:#27496d;
+
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>ICT Lab Safety Simulation</h1>
+</header>
+
+<div class="instructions">
+Find every unsafe item in the ICT laboratory. Click each hazard to learn why it is unsafe.
+</div>
+
+<div class="container">
+
+<div class="scene">
+
+    <img
+        src="Sim image/Bg.png"
+        id="background">
+
+    <div id="hazards"></div>
+
+</div>
+
+<div class="panel">
+
+    <h2>Inspection Panel</h2>
+
+    <p><strong>Score:</strong>
+    <span id="score">0</span>/5</p>
+
+    <hr>
+
+    <img id="hazardPreview"
+     src=""
+     style="
+        display:none;
+        width:90px;
+        margin:0 auto 15px;
+     ">
+
+    <h3 id="hazardTitle">
+        Click a hazard
+    </h3>
+
+    <p id="hazardMessage">
+        Information about the selected hazard will appear here.
+    </p>
+
+    <hr>
+
+    <h3>Hazards Found</h3>
+
+    <ul id="foundList"></ul>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const hazards=[
+
+{
+
+id:"backpack",
+
+image:"Sim image/backpack.png",
+
+width:110,
+
+title:"Backpack",
+
+message:"Backpacks left on the floor create trip hazards."
+
+},
+
+{
+
+id:"charger",
+
+image:"Sim image/charger.png",
+
+width:70,
+
+title:"Loose Charger",
+
+message:"Loose charging cables can cause trips."
+
+},
+
+{
+
+id:"mouse",
+
+image:"Sim image/mouse.png",
+
+width:45,
+
+title:"Mouse",
+
+message:"A mouse left near the edge of the desk may fall and become damaged."
+
+},
+
+{
+
+id:"paper",
+
+image:"Sim image/paper.png",
+
+width:70,
+
+title:"Paper",
+
+message:"Paper should not block vents or clutter workspaces."
+
+},
+
+{
+
+id:"water",
+
+image:"Sim image/water.png",
+
+width:80,
+
+title:"Open Water Bottle",
+
+message:"Liquids near computers can damage equipment."
+
+}
+
+];
+
+const positions={
+
+backpack:[
+
+{x:780,y:310},
+
+{x:260,y:370},
+
+{x:540,y:460}
+
+],
+
+charger:[
+
+{x:290,y:500},
+
+{x:560,y:420}
+
+],
+
+mouse:[
+
+{x:220,y:360},
+
+{x:500,y:310},
+
+{x:290,y:305}
+
+],
+
+paper:[
+
+{x:175,y:355},
+
+{x:740,y:430}
+
+],
+
+water:[
+
+{x:500,y:390},
+
+{x:640,y:320}
+
+]
+
+};
+
+const container=document.getElementById("hazards");
+
+hazards.forEach(h=>{
+
+const img=document.createElement("img");
+
+img.src=h.image;
+
+img.className = "hazard";
+
+img.style.width = h.width + "px";
+
+img.dataset.title=h.title;
+
+img.dataset.message=h.message;
+
+img.dataset.image=h.image;
+
+const choices=positions[h.id];
+
+const pos=choices[Math.floor(Math.random()*choices.length)];
+
+img.style.left=pos.x+"px";
+
+img.style.top=pos.y+"px";
+
+img.onclick = () => {
+
+    if(img.classList.contains("found")) return;
+
+    document.getElementById("hazardTitle").textContent = h.title;
+
+    document.getElementById("hazardMessage").textContent = h.message;
+
+    const preview = document.getElementById("hazardPreview");
+
+    preview.src = h.image;
+
+    preview.style.display = "block";
+
+    img.classList.add("found");
+
+    score++;
+
+    document.getElementById("score").textContent = score;
+
+    const li = document.createElement("li");
+
+    li.textContent = "✓ " + h.title;
+
+    document.getElementById("foundList").appendChild(li);
+
+    if(score === hazards.length){
+
+        showFinish();
+
+    }
+
+};
+
+container.appendChild(img);
+
+});
+
+let score=0;
+
+
+function showFinish(){
+
+document.getElementById("completeScreen").style.display="flex";
+
+}
+
+</script>
+
+</div>
+
+<div id="completeScreen">
+
+    <div class="completeBox">
+
+        <h1>🎉 Inspection Complete!</h1>
+
+        <p>
+
+            Excellent work!
+
+            <br><br>
+
+            You found every hazard in the ICT laboratory.
+
+        </p>
+
+        <button onclick="location.reload()">
+
+            Inspect Again
+
+        </button>
+
+    </div>
+
+</div>
+
+</body>
+</html>
