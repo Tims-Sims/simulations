@@ -73,7 +73,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 button:focus-visible { outline: none; box-shadow: var(--focus); }
 
 .app-shell {
-    max-width: 1180px;
+    max-width: 1560px;
     margin: 0 auto;
     min-height: calc(100vh - 20px);
     display: flex;
@@ -201,7 +201,7 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
 /* ── GAME ── */
 .game-layout { flex: 1; display: grid; place-items: start center; padding: 8px; }
 .game-card {
-    width: min(100%, 1120px);
+    width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-xl);
@@ -259,18 +259,40 @@ button:focus-visible { outline: none; box-shadow: var(--focus); }
     user-select: none;
     -webkit-user-select: none;
 }
+/* room left, feedback/actions right — lets the room use full remaining height */
+.game-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 12px;
+    align-items: stretch;
+}
 .room-wrap { display: flex; justify-content: center; }
 .room-wrap svg {
     display: block;
     width: 100%;
     height: auto;
     /* keep the whole game screen inside one viewport:
-       cap the room's height by what's left after HUD + feedback + footer rows */
-    max-height: calc(100vh - 400px);
-    min-height: 240px;
+       cap the room's height by what's left after topbar + HUD rows */
+    max-height: calc(100vh - 250px);
+    min-height: 300px;
 }
+.side-panel { display: flex; flex-direction: column; gap: 10px; }
+.side-panel .feedback-panel {
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-top: 0;
+}
+.side-panel .pts-pop { margin-left: 0; }
+.side-tip { text-align: left; line-height: 1.5; white-space: normal; }
+.leave-btn { width: 100%; padding: 13px 15px; }
 /* footer note hidden during gameplay to keep everything in one view */
 body.in-game .footer-note { display: none; }
+@media (max-width: 900px) {
+    .game-columns { grid-template-columns: 1fr; }
+    .side-panel .feedback-panel { flex-direction: row; align-items: center; }
+}
 .hotspot { cursor: pointer; }
 .hotspot.done { cursor: default; }
 .hotspot:not(.done):hover .glow-ring { opacity: 0.9; }
@@ -316,14 +338,6 @@ body.in-game .footer-note { display: none; }
 .pts-pop.plus { color: var(--success); }
 .pts-pop.minus { color: var(--danger); }
 
-.game-footer-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-top: 8px;
-    flex-wrap: wrap;
-}
 
 /* ── SUMMARY ── */
 .summary-layout { flex: 1; display: grid; place-items: center; padding: 8px; }
@@ -430,7 +444,7 @@ body.in-game .footer-note { display: none; }
         </div>
         <div class="controls">
             <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">&#10067; Help</button>
-            <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">&#127769; Dark</button>
+            <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">&#9728;&#65039; Light Mode</button>
             <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">&#9974; Full Screen</button>
             <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">&#8634; Reset</button>
         </div>
@@ -497,21 +511,21 @@ body.in-game .footer-note { display: none; }
                     </div>
                 </div>
 
-                <div class="room-wrap" id="roomWrap">
-                    <!-- SVG room injected by JS -->
-                </div>
-
-                <div class="feedback-panel" id="feedbackPanel">
-                    <span class="feedback-icon" id="feedbackIcon">&#128161;</span>
-                    <p class="feedback-text" id="feedbackText">
-                        Explore the lab. Wasteful equipment glows when you hover over it.
-                    </p>
-                    <span class="pts-pop" id="ptsPop"></span>
-                </div>
-
-                <div class="game-footer-row">
-                    <span class="chip" id="hintChip">&#128269; Tip: hold PC power buttons, drag chargers!</span>
-                    <button class="primary-btn" id="leaveBtn">&#128682; Leave Room</button>
+                <div class="game-columns">
+                    <div class="room-wrap" id="roomWrap">
+                        <!-- SVG room injected by JS -->
+                    </div>
+                    <aside class="side-panel">
+                        <div class="feedback-panel" id="feedbackPanel">
+                            <span class="feedback-icon" id="feedbackIcon">&#128161;</span>
+                            <p class="feedback-text" id="feedbackText">
+                                Explore the lab. Wasteful equipment glows when you hover over it.
+                            </p>
+                            <span class="pts-pop" id="ptsPop"></span>
+                        </div>
+                        <div class="chip side-tip" id="hintChip">&#128269; Tip: hold PC power buttons, drag chargers!</div>
+                        <button class="primary-btn leave-btn" id="leaveBtn">&#128682; Leave Room</button>
+                    </aside>
                 </div>
 
             </section>
@@ -557,7 +571,7 @@ body.in-game .footer-note { display: none; }
             <li><strong>Drag chargers downward</strong> out of the power strip. Chargers with no phone still drink power!</li>
             <li>Changed your mind? <strong>Tap</strong> any switched-off device (including a PC's power button) to turn it <strong>back on</strong> — but you'll lose the points until you switch it off again!</li>
             <li>Watch the <strong>Energy Saved</strong> bar — fill it to 100% by fixing all 19 wasters.</li>
-            <li>&#9888;&#65039; Some equipment must <strong>stay on</strong> — clicking it loses points. Think before you click!</li>
+            <li>&#9888;&#65039; Some equipment must <strong>stay on</strong> — clicking it gives you a warning. Think before you click!</li>
             <li>The timer <strong>counts up</strong> — it shows how long you take. Click <strong>Leave Room</strong> when you're done.</li>
         </ul>
         <div style="margin-top: 18px;">
@@ -597,7 +611,6 @@ const ITEM_INFO = {
     ac:       { pts: 15, label: "Switch off AC",       tip: "Air conditioning is the biggest energy eater in the room. Huge save!" },
     lights:   { pts: 5,  label: "Turn off lights",     tip: "Bonus! Lights off on the way out — a small habit that adds up all year." }
 };
-const DECOY_PENALTY = 10;
 const DECOY_TIP = "Whoa! The network router must STAY ON — it runs the school's internet and phone system all night. Leave it alone!";
 
 /* ============================================================
@@ -1040,9 +1053,7 @@ function restoreVisual(id, type) {
 }
 
 function decoyHit() {
-    state.rawScore = Math.max(0, state.rawScore - DECOY_PENALTY);
-    showFeedback("bad", "&#128683;", `<strong>Not that one!</strong> ${DECOY_TIP}`, `-${DECOY_PENALTY}`);
-    updateHUD();
+    showFeedback("bad", "&#128683;", `<strong>Not that one!</strong> ${DECOY_TIP}`, null);
 }
 
 function applyVisual(id, type) {
@@ -1264,7 +1275,8 @@ dom.themeToggleBtn.addEventListener("click", () => {
     const html = document.documentElement;
     const next = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
     html.setAttribute("data-theme", next);
-    dom.themeToggleBtn.innerHTML = next === "dark" ? "&#127769; Dark" : "&#9728;&#65039; Light";
+    /* label shows the mode you would switch TO */
+    dom.themeToggleBtn.innerHTML = next === "dark" ? "&#9728;&#65039; Light Mode" : "&#127769; Dark Mode";
 });
 
 dom.fullscreenBtn.addEventListener("click", () => {

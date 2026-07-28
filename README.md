@@ -24,7 +24,7 @@ An interactive, game-based simulation for ICT / Digital Literacy students (Forms
 | Lights (bonus) | Click the wall switch — the whole room goes dark | +5 |
 
 - **Turning things back on:** tap any switched-off device (including a PC's power button or an unplugged charger) to power it back up. The points come off your score until you switch it off again.
-- **Decoy — the network router (on the wall shelf) must STAY ON.** Clicking it costs **−10 points** and explains why (it runs the school's network overnight).
+- **Decoy — the network router (on the wall shelf) must STAY ON.** Clicking it shows a warning explaining why (it runs the school's network overnight) — no points are lost.
 - Every correct action shows a short **energy fact** in the feedback panel (phantom power drain, standby waste, etc.).
 
 ## Scoring & Ratings
@@ -62,4 +62,3 @@ Constants at the top of the `<script>` in the HTML file:
 - `HOLD_TIME` — ms to hold a PC power button (default `1000`)
 - `DRAG_DIST` — how far a charger must be dragged to unplug (default `46`)
 - `ITEM_INFO` — points and tooltip text per device type
-- `DECOY_PENALTY` — points lost for touching the router (default `10`)
