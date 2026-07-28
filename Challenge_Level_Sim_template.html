@@ -343,6 +343,7 @@
 
         .progress-shell {
             margin-bottom: 20px;
+            display: none;
         }
 
         .progress-meta {
@@ -829,12 +830,7 @@
                         Your developers can swap in their own questions, hints, explanations, scoring, and custom logic.
                     </p>
                     <div class="hero-actions">
-                        <div id="difficultySelector">
-                            <button class="primary-btn" onclick="startWithDifficulty('easy')">Easy</button>
-                            <button class="primary-btn" onclick="startWithDifficulty('medium')">Medium</button>
-                            <button class="primary-btn" onclick="startWithDifficulty('challenge')">Challenge</button>
-                        </div>
-                        <button class="primary-btn" id="beginBtn" style="visibility: hidden;">Begin</button>
+                        <button class="primary-btn" id="beginBtn">Begin</button>
                         <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
                     </div>
                 </section>
@@ -846,11 +842,11 @@
                 <section class="game-card">
                     <div class="status-row">
                         <div class="chip-group">
-                            <div class="chip" id="questionCounter">Question 1 of 1</div>
+                            <div class="chip" id="questionCounter" style="visibility: hidden;">Question 1 of 1</div>
                             <div class="chip" id="scoreChip">Score: 0</div>
                             <div class="chip" id="modeChip">Mode: Live Play</div>
                         </div>
-                        <div class="chip" id="streakChip">Streak: 0</div>
+                        <div class="chip" id="streakChip" style="visibility: hidden;">Streak: 0</div>
                     </div>
 
                     <div class="progress-shell">
@@ -977,12 +973,12 @@
            ============================================================ */
         const SIM_CONFIG = {
             simId: "simulation-template-shell",
-            title: "Editable Simulation Template",
-            subtitle: "Single-file shell for local student activities",
-            badgeText: "SIM",
+            title: "Password Strength Lab",
+            subtitle: "Data Protection and Physical/Software Security Issues",
+            badgeText: "IT",
             homeEyebrow: "Template Shell Ready",
             homeDescription:
-                "Use this shell to build a child-friendly maths, ELA, or general subject simulation. Replace the sample questions below with your own content and grading rules.",
+                "Students build passwords using character blocks or typed input. A strength meter gives feedback on length, variety, predictability, and avoiding personal information. Recommendations are given on how to improve password strength.",
             instructions: [
                 "Read the question carefully before answering.",
                 "Use the Hint button if you get stuck.",
@@ -1038,10 +1034,11 @@
             {
                 id: "q1",
                 difficulty: "easy",
-                title: "Question 1",
-                prompt: "Which choice shows the clearest sign of a confident speaker?",
-                directions: "Choose one answer.",
-                type: "mcq",
+                passwordStrength: true,
+                title: "Password Strength Lab",
+                prompt: "Please enter a strong password.",
+                directions: "",
+                type: "text",
                 choices: [
                     `Looking at the floor, mumbling, and speaking very fast`,
                     `Standing straight, using a steady pace, and looking at one friendly face`,
@@ -1051,7 +1048,7 @@
                 explanation: "A fraction tells us about parts of a whole. For example, 1/2 means one of two equal parts.",
                 points: 10,
                 grading: {
-                    mode: "mcq",
+                    mode: "custom",
                     correctAnswer: 1,
                     explanations: ["This is incorrect because the emphasis is on the wrong part of the sentence. It does not help the listener catch the correct day. To fix it, stress the word that carries the important correction.",
                         "You followed the rule because you stressed the detail that fixes the listener’s confusion.",
@@ -1452,6 +1449,116 @@
             input.disabled = isReviewMode || alreadyAnswered;
 
             dom.answerArea.appendChild(input);
+
+            if (question.passwordStrength) {
+                renderPasswordStrengthMeter(input, question);
+            }
+        }
+
+        function renderPasswordStrengthMeter(input, question) {
+
+            const meter = document.createElement("div");
+            meter.className = "password-meter";
+
+            const bar = document.createElement("div");
+            bar.className = "password-meter-bar";
+
+            const feedback = document.createElement("ul");
+            feedback.className = "password-feedback";
+
+            meter.appendChild(bar);
+
+            dom.answerArea.appendChild(meter);
+            dom.answerArea.appendChild(feedback);
+
+            input.addEventListener("input", function () {
+
+            const result = evaluatePassword(input.value);
+
+            bar.style.width = result.score + "%";
+            bar.className = "password-meter-bar " + result.level;
+
+            feedback.innerHTML = "";
+
+            result.messages.forEach(function(message) {
+                const li = document.createElement("li");
+                li.textContent = message;
+                feedback.appendChild(li);
+            });
+
+            });
+
+        }
+
+        function evaluatePassword(password) {
+
+            let score = 0;
+            const messages = [];
+            const COMMON_PASSWORDS = [
+                "password",
+                "password123",
+                "123456",
+                "12345678",
+                "123456789",
+                "qwerty",
+                "qwerty123",
+                "abc123",
+                "welcome",
+                "admin",
+                "letmein",
+                "football",
+                "iloveyou"
+            ];
+            // Length
+            if (password.length >= 12) {
+                score += 25;
+            } else {
+                messages.push("Use at least 12 characters.");
+            }
+
+            // Uppercase
+            if (/[A-Z]/.test(password)) {
+                score += 15;
+            } else {
+                messages.push("Include an uppercase letter.");
+            }
+
+            // Lowercase
+            if (/[a-z]/.test(password)) {
+                score += 15;
+            } else {
+                messages.push("Include a lowercase letter.");
+            }
+
+            // Number
+            if (/\d/.test(password)) {
+                score += 20;
+            } else {
+                messages.push("Include at least one number.");
+            }
+
+            // Symbol
+            if (/[^A-Za-z0-9]/.test(password)) {
+                score += 25;
+            } else {
+                messages.push("Include a special character.");
+            }
+
+            if (COMMON_PASSWORDS.includes(password.toLowerCase())) {
+                messages.push("This password is commonly used and can be guessed easily.");
+                score -= 40;
+            }
+
+            let level = "weak";
+
+            if (score >= 80) level = "strong";
+            else if (score >= 50) level = "medium";
+
+            return {
+                score,
+                level,
+                messages
+            };
         }
 
         function renderTextarea(question, currentAnswer, isReviewMode, alreadyAnswered) {
