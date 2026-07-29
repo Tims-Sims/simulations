@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Simulation Template Shell</title>
+    <title>Internet Parts Map</title>
     <style>
         /* ============================================================
            CHILD / TEEN SIMULATION TEMPLATE SHELL
@@ -796,6 +796,397 @@
                 font-size: 0.88rem;
             }
         }
+
+        /* ============================================================
+           INTERNET PARTS MAP — DRAG & DROP DIAGRAM STYLES
+           ============================================================ */
+        .diagram-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            width: 100%;
+            user-select: none;
+        }
+
+        .diagram-map {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            padding: 12px;
+            background: color-mix(in srgb, var(--surface-2) 30%, transparent);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            position: relative;
+            min-height: 320px;
+        }
+
+        .drop-zone {
+            position: relative;
+            min-height: 70px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px;
+            background: color-mix(in srgb, var(--surface) 60%, transparent);
+            transition: border-color 0.2s, background 0.2s, transform 0.15s;
+            cursor: pointer;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+            transform: scale(1.03);
+        }
+
+        .drop-zone.filled {
+            border-style: solid;
+            border-color: var(--muted);
+            background: color-mix(in srgb, var(--surface-2) 50%, transparent);
+        }
+
+        .drop-zone.filled.correct {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 14%, var(--surface));
+        }
+
+        .drop-zone.filled.wrong {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+        }
+
+        .drop-zone-label {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .drop-zone-slot {
+            font-size: 0.82rem;
+            color: var(--muted);
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .drop-zone-icon {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            pointer-events: none;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .drop-zone.filled .drop-zone-slot {
+            display: none;
+        }
+
+        .diagram-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .diagram-arrow-row {
+            display: contents;
+        }
+
+        .diagram-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 14px;
+            background: color-mix(in srgb, var(--surface-2) 30%, transparent);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            min-height: 58px;
+        }
+
+        .diagram-palette-label {
+            width: 100%;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+
+        .draggable-icon {
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: grab;
+            transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
+            touch-action: none;
+            user-select: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        .draggable-icon:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+        }
+
+        .draggable-icon:active,
+        .draggable-icon.dragging {
+            cursor: grabbing;
+            transform: scale(1.1);
+            opacity: 0.85;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+        }
+
+        .draggable-icon.placed {
+            opacity: 0.3;
+            pointer-events: none;
+            transform: scale(0.9);
+            filter: grayscale(0.7);
+        }
+
+        .draggable-icon.dragging-clone {
+            position: fixed;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0.9;
+            transform: scale(1.08);
+        }
+
+        .diagram-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .diagram-feedback {
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            line-height: 1.65;
+            display: none;
+            margin-top: 4px;
+        }
+
+        .diagram-feedback.show {
+            display: block;
+        }
+
+        .diagram-complete {
+            text-align: center;
+            padding: 16px;
+            margin-top: 6px;
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--success) 18%, var(--surface));
+            border: 2px solid var(--success);
+            animation: congratsPop 0.6s ease;
+        }
+
+        .diagram-complete h3 {
+            margin: 0 0 6px;
+            font-size: 1.3rem;
+            color: var(--success);
+        }
+
+        .diagram-complete p {
+            margin: 0;
+            color: var(--text-soft);
+        }
+
+        @keyframes congratsPop {
+            0% { transform: scale(0.85); opacity: 0; }
+            60% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pathPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+        }
+
+        .drop-zone.path-highlight {
+            animation: pathPulse 1.2s ease 3;
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 20%, var(--surface));
+        }
+
+        .diagram-feedback.correct {
+            background: color-mix(in srgb, var(--success) 16%, var(--surface));
+            border-color: color-mix(in srgb, var(--success) 40%, transparent);
+        }
+
+        .diagram-feedback.partial {
+            background: color-mix(in srgb, var(--warning) 16%, var(--surface));
+            border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+        }
+
+        .diagram-feedback.wrong {
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+            border-color: color-mix(in srgb, var(--danger) 36%, transparent);
+        }
+
+        .flow-explanation {
+            margin-top: 14px;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+            border: 1px solid var(--border);
+            line-height: 1.7;
+        }
+
+        .flow-explanation h4 {
+            margin: 0 0 8px;
+            color: var(--accent);
+        }
+
+        .flow-explanation p {
+            margin: 0;
+            color: var(--text-soft);
+        }
+
+        .flow-explanation .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0;
+            padding: 4px 0;
+        }
+
+        .flow-explanation .flow-step .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .flow-step {
+            transition: opacity 0.6s ease, transform 0.5s ease;
+        }
+
+        .draggable-icon[aria-disabled="true"] {
+            cursor: default;
+        }
+
+        @media (max-width: 640px) {
+            .diagram-map {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+            .drop-zone {
+                min-height: 44px;
+                padding: 5px;
+            }
+            .draggable-icon {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            .diagram-palette-label {
+                font-size: 0.75rem;
+            }
+            .diagram-palette {
+                gap: 6px;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 860px) and (min-width: 641px) {
+            .diagram-map {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .drop-zone {
+                min-height: 48px;
+                padding: 6px;
+            }
+            .draggable-icon {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            .diagram-arrow {
+                font-size: 0.9rem;
+            }
+            .diagram-palette-label {
+                font-size: 0.75rem;
+            }
+            .diagram-palette {
+                gap: 6px;
+                padding: 10px;
+            }
+        }
+
+        /* Confetti canvas overlay */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Data packet animation */
+        .packet-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            position: absolute;
+            z-index: 10;
+            box-shadow: 0 0 8px var(--accent);
+            pointer-events: none;
+            animation: packetTravel 2s ease-in-out forwards;
+        }
+
+        @keyframes packetTravel {
+            0% { opacity: 1; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(0.3); }
+        }
+
+        /* Timer chip pulse when under 30s */
+        .chip.timer-warning {
+            color: var(--warning);
+            border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+            animation: timerPulse 1s ease infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Guided hint glow */
+        .drop-zone.guide-hint {
+            animation: guideGlow 1s ease 3;
+            border-color: var(--warning);
+        }
+
+        @keyframes guideGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.5); }
+            50% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
+        }
     </style>
 </head>
 
@@ -813,6 +1204,7 @@
             <div class="controls">
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="muteBtn" aria-label="Toggle sounds">🔊 Sound</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Full Screen</button>
                 <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
                 <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
@@ -845,6 +1237,7 @@
                             <div class="chip" id="scoreChip">Score: 0</div>
                             <div class="chip" id="modeChip">Mode: Live Play</div>
                         </div>
+                        <div class="chip" id="timerChip">⏱ 0:00</div>
                         <div class="chip" id="streakChip">Streak: 0</div>
                     </div>
 
@@ -935,7 +1328,7 @@
         </main>
 
         <div class="footer-note">
-            Built as a local, editable shell. Swap the content, keep the structure, and your developers are good to go.
+            Internet Parts Map — Interactive Simulation. Drag, connect, and learn how information travels across the Internet.
         </div>
     </div>
 
@@ -971,21 +1364,50 @@
            Replace text in this object to rename and reskin the shell.
            ============================================================ */
         const SIM_CONFIG = {
-            simId: "simulation-template-shell",
-            title: "Editable Simulation Template",
-            subtitle: "Single-file shell for local student activities",
-            badgeText: "SIM",
-            homeEyebrow: "Template Shell Ready",
+            simId: "internet-parts-map",
+            title: "Internet Parts Map",
+            subtitle: "Connect the parts of the Internet — browser, URL, hyperlink, website, router, server, user device",
+            badgeText: "NET",
+            homeEyebrow: "Introduction to the Internet",
             homeDescription:
-                "Use this shell to build a child-friendly maths, ELA, or general subject simulation. Replace the sample questions below with your own content and grading rules.",
+                "Drag and connect the icons for browser, URL, hyperlink, website, router, server, and user device into a simple network diagram. The sim checks your connections and explains how information travels across the Internet.",
             instructions: [
-                "Read the question carefully before answering.",
-                "Use the Hint button if you get stuck.",
+                "Drag each icon to the correct position on the network diagram.",
+                "Connect related parts by drawing lines between them.",
+                "Use the Hint button if you get stuck on a connection.",
                 "Watch your score, streak, and progress bar as you go.",
                 "Use Review Memory to revisit completed answers and explanations.",
-                "Use the Reset button any time you want to restart from scratch.",
-                "This file runs completely offline in a browser. No internet is needed."
+                "Use the Reset button any time you want to restart from scratch."
             ],
+            showRulesModal: false,
+            rules: [
+                "Read the full question before choosing an answer.",
+                "Use the Hint if you are stuck — it will not cost points.",
+                "After a wrong answer, read the feedback carefully before trying again.",
+                "You can review any answered question using Review Memory."
+            ],
+            showTeachScreen: false,
+            teachContent: {
+                eyebrow: "Quick Reminder",
+                title: "How Information Travels",
+                subtitle: "Understand the path data takes across the Internet.",
+                columns: [
+                    {
+                        headingHTML: "🌟 <strong>Key Parts</strong>",
+                        headingColor: "var(--accent)",
+                        items: ["Browser, URL, and Website work together", "Routers direct data packets", "Servers store and serve content"]
+                    },
+                    {
+                        headingHTML: "🔗 <strong>Key Concepts</strong>",
+                        headingColor: "var(--accent-2)",
+                        items: ["Data is split into packets", "Each packet may take a different route", "Packets are reassembled at the destination"]
+                    }
+                ],
+                examples: [
+                    { text: "A browser uses a URL to request a website from a server.", labelHTML: "🌟 Browser flow", labelClass: "ex-accent" },
+                    { text: "Routers forward packets across the network to reach the destination.", labelHTML: "🔗 Router flow", labelClass: "ex-accent2" }
+                ]
+            },
             scoreLabels: {
                 correct: "Correct",
                 partial: "Partially Correct",
@@ -993,7 +1415,8 @@
             },
             showIntroModalOnLoad: true,
             allowSummaryPage: true,
-            storageKey: "simulation-template-shell-progress"
+            footerText: "Internet Parts Map — Interactive Simulation. Drag, connect, and learn how information travels across the Internet.",
+            storageKey: "internet-parts-map-progress"
         };
 
         /* ============================================================
@@ -1029,115 +1452,139 @@
              { status, scoreAwarded, explanation }
            where status is: "correct" | "partial" | "wrong"
            ============================================================ */
+        const DIAGRAM_DATA = {
+            zones: [
+                { id: "userdevice",  label: "User Device", emoji: "💻", correctIcon: "User Device",  row: 0, col: 0 },
+                { id: "browser",     label: "Browser",     emoji: "🌐", correctIcon: "Browser",     row: 1, col: 0 },
+                { id: "router",      label: "Router",      emoji: "📡", correctIcon: "Router",      row: 0, col: 1 },
+                { id: "server",      label: "Server",      emoji: "🖥️", correctIcon: "Server",      row: 0, col: 2 },
+                { id: "url",         label: "URL",         emoji: "🔗", correctIcon: "URL",         row: 2, col: 0 },
+                { id: "website",     label: "Website",     emoji: "📄", correctIcon: "Website",     row: 2, col: 1 },
+                { id: "hyperlink",   label: "Hyperlink",   emoji: "↗️", correctIcon: "Hyperlink",   row: 2, col: 2 }
+            ],
+            icons: [
+                { name: "User Device", emoji: "💻" },
+                { name: "Browser",     emoji: "🌐" },
+                { name: "Router",      emoji: "📡" },
+                { name: "Server",      emoji: "🖥️" },
+                { name: "URL",         emoji: "🔗" },
+                { name: "Website",     emoji: "📄" },
+                { name: "Hyperlink",   emoji: "↗️" }
+            ],
+            connections: [
+                { from: "userdevice", to: "router",     label: "sends data through" },
+                { from: "router",     to: "server",     label: "forwards to" },
+                { from: "userdevice", to: "browser",    label: "runs" },
+                { from: "browser",    to: "url",        label: "uses" },
+                { from: "url",        to: "website",    label: "loads" },
+                { from: "website",    to: "hyperlink",  label: "contains" }
+            ],
+            flowSteps: [
+                { icon: "Server",     emoji: "🖥️", desc: "Website files are stored on a Server." },
+                { icon: "Router",     emoji: "📡", desc: "Routers direct data packets across networks to your device." },
+                { icon: "User Device",emoji: "💻", desc: "Your device receives the data through its network connection." },
+                { icon: "Browser",    emoji: "🌐", desc: "The Browser assembles the received files into a webpage." },
+                { icon: "URL",        emoji: "🔗", desc: "The URL tells the browser which website to load." },
+                { icon: "Website",    emoji: "📄", desc: "You see and interact with the Website displayed in your browser." },
+                { icon: "Hyperlink",  emoji: "↗️", desc: "Hyperlinks connect pages within the website, letting you explore." }
+            ]
+        };
+
         const QUESTIONS = [
             {
+                id: "diagram",
+                title: "Build the Internet Parts Map",
+                prompt: `Drag each Internet part from the palette below into the correct position on the network diagram. Then click <strong>"Check Connections"</strong> to see how information travels.`,
+                directions: "",
+                type: "diagram",
+                hint: "Think about the real flow: hardware on top (User Device → Router → Server), software below (Browser → URL → Website → Hyperlink).",
+                points: 70,
+                grading: {
+                    mode: "diagram"
+                }
+            },
+            {
                 id: "q1",
-                title: "Question 1",
-                prompt: `You must read this over the PA system: <br>“Please report to the main hall after lunch.” <br>Which delivery plan is best?"`,
+                title: "Quiz: How DNS Works",
+                prompt: `When you type a URL like "example.com" into your browser, your device first needs to find the correct server. <br><br>What system translates the human-friendly domain name (example.com) into the numeric IP address the server uses?`,
                 directions: "Choose one answer.",
                 type: "mcq",
                 choices: [
-                    `Speak quickly so you finish fast. Make every word equally loud.`,
-                    `Speak at a steady pace, finish the ends of words, and put extra stress on <span style='font-weight: bold;'>main hall</span>.`,
-                    `Speak very slowly with a long pause after almost every word.`,
+                    `DNS (Domain Name System)`,
+                    `HTTP (HyperText Transfer Protocol)`,
+                    `ISP (Internet Service Provider)`,
                 ],
-                hint: "Choose the clearest sentence for formal speaking.",
-                explanation: "A fraction tells us about parts of a whole. For example, 1/2 means one of two equal parts.",
+                hint: "Think of it as the Internet's phonebook.",
+                explanation: "DNS (Domain Name System) translates domain names into IP addresses so browsers can locate and load web servers. After DNS resolves the address, your request can travel through routers to the correct server.",
                 points: 10,
                 grading: {
                     mode: "mcq",
-                    correctAnswer: 1,
-                    explanations: ["This is incorrect because the emphasis is on the wrong part of the sentence. It does not help the listener catch the correct day. To fix it, stress the word that carries the important correction.",
-                        "You followed the rule because you stressed the detail that fixes the listener’s confusion.",
-                        "This is incorrect because stressing <span style='font-weight: bold;'>Thursday</span> highlights the wrong day instead of the correct one. To fix it, put the strongest emphasis on the correct day the listener needs to remember."
+                    correctAnswer: 0,
+                    explanations: [
+                        "Correct! DNS is like a phonebook that turns domain names (example.com) into IP addresses (93.184.216.34) that routers can use to find the server.",
+                        "HTTP is the protocol used to transfer web pages, not the system that translates domain names to IP addresses.",
+                        "Your ISP provides your Internet connection, but DNS is the system that translates domain names into IP addresses."
                     ]
                 }
             },
             {
                 id: "q2",
-                title: "Sample Short Text",
-                prompt: "Type the word that names a person, place, animal, or thing.",
-                directions: "Use one word only.",
-                type: "text",
-                placeholder: "Type your answer here",
-                hint: "It starts with the letter N.",
-                explanation: "A noun names a person, place, animal, thing, or idea.",
+                title: "Quiz: Data Packets",
+                prompt: `When information travels across the Internet, large files are broken into smaller pieces for efficient transmission. <br><br>What are these smaller pieces called?`,
+                directions: "Choose one answer.",
+                type: "mcq",
+                choices: [
+                    `Data packets`,
+                    `Compressed files`,
+                    `Bandwidth chunks`,
+                ],
+                hint: "Think of sending a long letter as multiple postcards.",
+                explanation: "Data packets are small pieces of information that travel independently across the Internet. Each packet contains part of the data plus the destination address. Routers forward each packet individually, and they are reassembled at the destination.",
                 points: 10,
                 grading: {
-                    mode: "exactText",
-                    acceptableAnswers: ["noun"]
+                    mode: "mcq",
+                    correctAnswer: 0,
+                    explanations: [
+                        "Correct! Data is broken into packets that travel through routers and are reassembled at your device. This makes transmission efficient and fault-tolerant.",
+                        "Files are sometimes compressed to save space, but the term for the smaller transmission units is data packets, not compressed files.",
+                        "Bandwidth refers to the amount of data that can be transmitted per second, not the individual pieces of data."
+                    ]
                 }
             },
             {
                 id: "q3",
-                title: "Sample Number Question",
-                prompt: "What is 24 ÷ 6?",
-                directions: "Enter a number only.",
-                type: "number",
-                placeholder: "0",
-                hint: "Think of how many groups of 6 fit into 24.",
-                explanation: "24 divided by 6 equals 4.",
+                title: "Quiz: Protocols & Security",
+                prompt: `Many websites use a secure version of HTTP to protect your data during transmission. <br><br>What does the "S" in <strong>HTTPS</strong> stand for?`,
+                directions: "Choose one answer.",
+                type: "mcq",
+                choices: [
+                    `Streamlined`,
+                    `Secure`,
+                    `Server`,
+                ],
+                hint: "It protects your privacy when browsing.",
+                explanation: "The \"S\" in HTTPS stands for Secure. HTTPS encrypts the data sent between your browser and the web server, preventing anyone from reading private information like passwords or credit card numbers as it travels through routers across the Internet.",
                 points: 10,
                 grading: {
-                    mode: "exactNumber",
-                    correctAnswer: 4,
-                    tolerance: 0
-                }
-            },
-            {
-                id: "q4",
-                title: "Sample Long Response",
-                prompt: "Write one short sentence that explains why kindness matters in a classroom.",
-                directions: "A full sentence is best.",
-                type: "textarea",
-                placeholder: "Write your sentence here",
-                hint: "Think about respect, teamwork, or safety.",
-                explanation: "Kindness helps classrooms feel safe, respectful, and ready for learning.",
-                points: 15,
-                grading: {
-                    mode: "containsKeywords",
-                    keywords: ["respect", "help", "safe", "kind", "teamwork", "learn"],
-                    minimumForCorrect: 2,
-                    minimumForPartial: 1
-                }
-            },
-            {
-                id: "q5",
-                title: "Sample Custom Logic",
-                prompt: "Write either 'even' or 'odd' to describe the number 9.",
-                directions: "This example shows how custom grading can work.",
-                type: "text",
-                placeholder: "Type even or odd",
-                hint: "A number is odd when it cannot be split into two equal whole groups.",
-                explanation: "9 is an odd number.",
-                points: 10,
-                grading: {
-                    mode: "custom",
-                    grader(answer, question) {
-                        const cleaned = normalizeText(answer);
-                        if (cleaned === "odd") {
-                            return {
-                                status: "correct",
-                                scoreAwarded: question.points,
-                                explanation: question.explanation
-                            };
-                        }
-                        if (cleaned === "even") {
-                            return {
-                                status: "wrong",
-                                scoreAwarded: 0,
-                                explanation: "9 is not even. It is odd because it is not divisible by 2."
-                            };
-                        }
-                        return {
-                            status: "partial",
-                            scoreAwarded: Math.round(question.points * 0.3),
-                            explanation: "You used a different response. The expected answer here is 'odd'."
-                        };
-                    }
+                    mode: "mcq",
+                    correctAnswer: 1,
+                    explanations: [
+                        "Not quite — HTTPS is not about being streamlined. The S stands for Secure because the connection is encrypted.",
+                        "Correct! HTTPS (HyperText Transfer Protocol Secure) encrypts all data between your browser and the server, keeping your information safe as it travels across the Internet.",
+                        "HTTPS is related to servers, but the S actually stands for Secure, referring to the encryption layer."
+                    ]
                 }
             }
         ];
+
+        /* ============================================================
+           DIAGRAM STATE
+           ============================================================ */
+        const diagramState = {
+            placements: {},   // zoneId -> iconName
+            draggedIcon: null,
+            touchDrag: null
+        };
 
         /* ============================================================
            APPLICATION STATE
@@ -1151,7 +1598,11 @@
             streak: 0,
             bestStreak: 0,
             reviewModeIndex: null,
-            theme: "dark"
+            theme: "dark",
+            timerSeconds: 0,
+            timerInterval: null,
+            guidedTimeout: null,
+            soundMuted: false
         };
 
         /* ============================================================
@@ -1173,12 +1624,14 @@
             helpBtn: document.getElementById("helpBtn"),
             themeToggleBtn: document.getElementById("themeToggleBtn"),
             fullscreenBtn: document.getElementById("fullscreenBtn"),
+            muteBtn: document.getElementById("muteBtn"),
             historyBtn: document.getElementById("historyBtn"),
             resetBtn: document.getElementById("resetBtn"),
             questionCounter: document.getElementById("questionCounter"),
             scoreChip: document.getElementById("scoreChip"),
             modeChip: document.getElementById("modeChip"),
             streakChip: document.getElementById("streakChip"),
+            timerChip: document.getElementById("timerChip"),
             progressLabel: document.getElementById("progressLabel"),
             progressSummary: document.getElementById("progressSummary"),
             progressFill: document.getElementById("progressFill"),
@@ -1262,6 +1715,7 @@
             });
 
             dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.muteBtn.addEventListener("click", toggleMute);
             dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
             dom.historyBtn.addEventListener("click", openHistoryDrawer);
             dom.reviewFromSummaryBtn.addEventListener("click", openHistoryDrawer);
@@ -1325,6 +1779,8 @@
         function startGame() {
             showScreen("game");
             state.reviewModeIndex = null;
+            diagramState.placements = {};
+            startGameTimer();
             renderQuestion();
         }
 
@@ -1385,6 +1841,9 @@
                     break;
                 case "textarea":
                     renderTextarea(question, currentAnswer, isReviewMode, alreadyAnswered);
+                    break;
+                case "diagram":
+                    renderDiagram(question, isReviewMode, alreadyAnswered);
                     break;
                 default:
                     renderTextInput(question, currentAnswer, isReviewMode, alreadyAnswered);
@@ -1477,7 +1936,8 @@
            STATUS / PROGRESS
            ============================================================ */
         function updateStatusUI() {
-            const answeredCount = Object.keys(state.results).length;
+            const questionIds = QUESTIONS.map(q => q.id);
+            const answeredCount = Object.keys(state.results).filter(id => questionIds.includes(id)).length;
             const progressPercent = Math.round((answeredCount / QUESTIONS.length) * 100);
 
             dom.scoreChip.textContent = `Score: ${state.score}`;
@@ -1560,17 +2020,37 @@
             // 🔒 Disable submit immediately after answering
             dom.submitBtn.disabled = true;
 
+            if (question.type === "diagram") {
+                stopGameTimer();
+                clearGuidedTimer();
+                if (result.status === "correct") {
+                    setTimeout(() => {
+                        launchConfetti();
+                        setTimeout(() => animateDataPackets(), 800);
+                    }, 300);
+                }
+            }
+
             renderHistoryList();
             renderStepDots();
             updateStatusUI();
             updateSummaryScreen();
             saveStateToStorage();
+
+            // Re-render diagram to show correct zones and flow explanation
+            if (question.type === "diagram") {
+                renderQuestion();
+            }
         }
 
         function readAnswerFromUI(question) {
             if (question.type === "mcq") {
                 const selected = dom.answerArea.querySelector('input[type="radio"]:checked');
                 return selected ? Number(selected.value) : null;
+            }
+
+            if (question.type === "diagram") {
+                return JSON.stringify(diagramState.placements);
             }
 
             const input = document.getElementById("dynamicAnswerInput");
@@ -1588,6 +2068,8 @@
                     return gradeExactNumber(question, answer);
                 case "containsKeywords":
                     return gradeContainsKeywords(question, answer);
+                case "diagram":
+                    return gradeDiagram(question, answer);
                 case "custom":
                     return grading.grader(answer, question);
                 default:
@@ -1716,7 +2198,7 @@
             dom.reviewBox.innerHTML = `
                 <div class="feedback-label">🧠 Review Mode</div>
                 <p><span class="status-pill ${escapeHtml(result.status)}">${escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status)}</span>
-                Your saved answer: <strong style="font-weight: normal; font-style: oblique;">${question.choices[studentAnswer]}</strong></p>
+                Your saved answer: <strong style="font-weight: normal; font-style: oblique;">${escapeHtml(formattedAnswer)}</strong></p>
                 <p style="margin-top:8px;">Explanation: ${(result.explanation || question.explanation || "")}</p>
             `;
         }
@@ -1743,6 +2225,522 @@
         }
 
         /* ============================================================
+           DIAGRAM RENDERING & DRAG & DROP
+           ============================================================ */
+        function renderDiagram(question, isReviewMode, alreadyAnswered) {
+            dom.answerArea.innerHTML = "";
+            diagramState.placements = alreadyAnswered ? (state.answers[question.id] ? JSON.parse(state.answers[question.id]) : {}) : {};
+
+            const wrap = document.createElement("div");
+            wrap.className = "diagram-wrap";
+
+            // Network map: 3 rows x 3 columns. Arrows shown inside zone labels.
+            const map = document.createElement("div");
+            map.className = "diagram-map";
+
+            const rowOrder = [
+                ["userdevice", "router", "server"],
+                ["browser",    "url",    "website"],
+                [null,         "hyperlink", null]
+            ];
+
+            const zoneArrows = {
+                "userdevice": { right: "→ Router", down: "↓ Browser" },
+                "router":     { right: "→ Server" },
+                "browser":    { right: "→ URL",    down: "↓ URL" },
+                "url":        { right: "→ Website" },
+                "website":    { right: "→ Hyperlink" }
+            };
+
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 3; c++) {
+                    const zoneId = rowOrder[r][c];
+                    if (zoneId) {
+                        const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
+                        if (zone) {
+                            map.appendChild(createDropZone(zone, zoneArrows[zone.id] || null, isReviewMode, alreadyAnswered));
+                        }
+                    } else {
+                        const empty = document.createElement("div");
+                        map.appendChild(empty);
+                    }
+                }
+            }
+
+            wrap.appendChild(map);
+
+            const palette = document.createElement("div");
+            palette.className = "diagram-palette";
+
+            const palLabel = document.createElement("div");
+            palLabel.className = "diagram-palette-label";
+            palLabel.textContent = isReviewMode || alreadyAnswered ? "Placed Icons" : "Drag icons to the correct positions on the map above";
+            palette.appendChild(palLabel);
+
+            DIAGRAM_DATA.icons.forEach((iconItem) => {
+                const iconEl = document.createElement("div");
+                iconEl.className = "draggable-icon";
+                iconEl.textContent = `${iconItem.emoji} ${iconItem.name}`;
+                iconEl.draggable = !isReviewMode && !alreadyAnswered;
+                iconEl.dataset.iconName = iconItem.name;
+                iconEl.dataset.emoji = iconItem.emoji;
+                iconEl.setAttribute("role", "button");
+                iconEl.setAttribute("tabindex", isReviewMode || alreadyAnswered ? "-1" : "0");
+                iconEl.setAttribute("aria-label", `Drag ${iconItem.name} to the map`);
+
+                const placedIn = Object.entries(diagramState.placements).find(([, v]) => v === iconItem.name);
+                if (placedIn) {
+                    iconEl.classList.add("placed");
+                }
+
+                if (!isReviewMode && !alreadyAnswered) {
+                    iconEl.addEventListener("dragstart", onDragStart);
+                    iconEl.addEventListener("dragend", onDragEnd);
+                    iconEl.addEventListener("touchstart", onTouchStart, { passive: false });
+                    iconEl.addEventListener("touchmove", onTouchMove, { passive: false });
+                    iconEl.addEventListener("touchend", onTouchEnd);
+                    iconEl.addEventListener("keydown", onIconKeyDown);
+                }
+
+                palette.appendChild(iconEl);
+            });
+
+            wrap.appendChild(palette);
+
+            const actions = document.createElement("div");
+            actions.className = "diagram-actions";
+
+            if (!alreadyAnswered && !isReviewMode) {
+                const checkBtn = document.createElement("button");
+                checkBtn.type = "button";
+                checkBtn.className = "primary-btn";
+                checkBtn.textContent = "✓ Check Connections";
+                checkBtn.addEventListener("click", () => {
+                    dom.answerForm.dispatchEvent(new Event("submit"));
+                });
+                actions.appendChild(checkBtn);
+            }
+
+            if (!alreadyAnswered && !isReviewMode) {
+                const resetMapBtn = document.createElement("button");
+                resetMapBtn.type = "button";
+                resetMapBtn.className = "secondary-btn";
+                resetMapBtn.textContent = "↺ Reset Map";
+                resetMapBtn.addEventListener("click", resetDiagramMap);
+                actions.appendChild(resetMapBtn);
+            }
+
+            if (alreadyAnswered || isReviewMode) {
+                const result = state.results[question.id];
+                if (result) {
+                    const statusLabel = SIM_CONFIG.scoreLabels[result.status] || result.status;
+                    const statusIcon = result.status === "correct" ? "✅" : result.status === "partial" ? "🟡" : "❌";
+                    const fb = document.createElement("div");
+                    fb.className = `diagram-feedback show ${result.status}`;
+                    fb.innerHTML = `<div style="font-weight:800;margin-bottom:6px;">${statusIcon} ${statusLabel} · ${result.scoreAwarded} points</div><p style="margin:0;color:var(--text-soft);">${result.explanation || ""}</p>`;
+                    wrap.appendChild(fb);
+
+                    if (result.status === "correct") {
+                        const congrats = document.createElement("div");
+                        congrats.className = "diagram-complete";
+                        congrats.innerHTML = `<h3>🎉 Congratulations!</h3><p>You placed all 7 parts correctly. You've built the complete Internet Parts Map! Scroll down to see how information travels step by step.</p>`;
+                        wrap.appendChild(congrats);
+                        setTimeout(() => highlightPathStep(0), 500);
+                    }
+                }
+
+                const fb = document.createElement("div");
+                fb.className = "flow-explanation";
+                fb.id = "flowExplanation";
+                fb.innerHTML = `<h4>🌐 How Information Travels</h4>${DIAGRAM_DATA.flowSteps.map((step, i) =>
+                    `<div class="flow-step" data-step="${i}" style="opacity:${result && result.status === "correct" ? "0.3" : "1"};transition:opacity 0.6s ease;"><span class="step-num">${i + 1}</span> <strong>${step.emoji || ""} ${step.icon}</strong> — ${step.desc}</div>`
+                ).join("")}`;
+                wrap.appendChild(fb);
+            }
+
+            wrap.appendChild(actions);
+            dom.answerArea.appendChild(wrap);
+
+            dom.submitBtn.classList.add("hidden");
+            dom.hintBtn.classList.remove("hidden");
+
+            if (!alreadyAnswered && !isReviewMode) {
+                resetGuidedTimer();
+            }
+        }
+
+        function highlightPathStep(index) {
+            if (index >= DIAGRAM_DATA.flowSteps.length) return;
+            const step = document.querySelector(`.flow-step[data-step="${index}"]`);
+            if (step) {
+                step.style.opacity = "1";
+                step.style.transform = "translateX(0)";
+            }
+            const zoneId = DIAGRAM_DATA.zones[index]?.id;
+            if (zoneId) {
+                const zoneEl = document.querySelector(`.drop-zone[data-zone-id="${zoneId}"]`);
+                if (zoneEl) {
+                    zoneEl.classList.add("path-highlight");
+                    setTimeout(() => zoneEl.classList.remove("path-highlight"), 3800);
+                }
+            }
+            setTimeout(() => highlightPathStep(index + 1), 1200);
+        }
+
+        function resetDiagramMap() {
+            diagramState.placements = {};
+            renderQuestion();
+        }
+
+        function createDropZone(zone, arrows, isReviewMode, alreadyAnswered) {
+            const div = document.createElement("div");
+            div.className = "drop-zone";
+            div.dataset.zoneId = zone.id;
+
+            const label = document.createElement("div");
+            label.className = "drop-zone-label";
+            label.textContent = zone.label;
+            if (arrows && arrows.right) {
+                const arrowSpan = document.createElement("span");
+                arrowSpan.style.cssText = "color:var(--muted);margin-left:6px;font-size:0.7rem;";
+                arrowSpan.textContent = arrows.right;
+                label.appendChild(arrowSpan);
+            }
+            div.appendChild(label);
+
+            const slot = document.createElement("div");
+            slot.className = "drop-zone-slot";
+            slot.textContent = "⬚ Drop here";
+            div.appendChild(slot);
+
+            const placed = diagramState.placements[zone.id];
+            if (placed) {
+                const iconItem = DIAGRAM_DATA.icons.find(i => i.name === placed);
+                const iconEl = document.createElement("div");
+                iconEl.className = "drop-zone-icon";
+                iconEl.textContent = iconItem ? `${iconItem.emoji} ${iconItem.name}` : placed;
+                div.appendChild(iconEl);
+                div.classList.add("filled");
+                if (isReviewMode || alreadyAnswered) {
+                    const result = state.results[zone.id];
+                    if (result) {
+                        div.classList.add(result.status === "wrong" ? "wrong" : "correct");
+                    }
+                }
+            }
+
+            if (arrows && arrows.down) {
+                const downArrow = document.createElement("div");
+                downArrow.style.cssText = "color:var(--muted);font-size:0.7rem;margin-top:2px;pointer-events:none;";
+                downArrow.textContent = arrows.down;
+                div.appendChild(downArrow);
+            }
+
+            if (!isReviewMode && !alreadyAnswered) {
+                div.addEventListener("dragover", onDragOver);
+                div.addEventListener("dragleave", onDragLeave);
+                div.addEventListener("drop", onDrop);
+                div.addEventListener("touchstart", onZoneTouchStart, { passive: false });
+            }
+
+            return div;
+        }
+
+        /* Drag & Drop Handlers */
+        function onDragStart(event) {
+            const icon = event.target;
+            if (!icon.classList.contains("draggable-icon") || icon.classList.contains("placed")) return;
+            diagramState.draggedIcon = icon.dataset.iconName;
+            event.dataTransfer.setData("text/plain", icon.dataset.iconName);
+            event.dataTransfer.effectAllowed = "move";
+            icon.classList.add("dragging");
+        }
+
+        function onDragEnd(event) {
+            document.querySelectorAll(".draggable-icon").forEach(el => el.classList.remove("dragging"));
+            document.querySelectorAll(".drop-zone").forEach(el => el.classList.remove("drag-over"));
+            diagramState.draggedIcon = null;
+        }
+
+        function onDragOver(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            const zone = event.currentTarget;
+            if (!zone.classList.contains("filled")) {
+                zone.classList.add("drag-over");
+            }
+        }
+
+        function onDragLeave(event) {
+            event.currentTarget.classList.remove("drag-over");
+        }
+
+        function onDrop(event) {
+            event.preventDefault();
+            const zone = event.currentTarget;
+            zone.classList.remove("drag-over");
+            const zoneId = zone.dataset.zoneId;
+            const iconName = event.dataTransfer.getData("text/plain");
+            if (!iconName || !zoneId) return;
+            placeIcon(zoneId, iconName);
+        }
+
+        /* Touch Drag Support */
+        let touchClone = null;
+        function onTouchStart(event) {
+            const icon = event.currentTarget;
+            if (icon.classList.contains("placed")) return;
+            event.preventDefault();
+            const touch = event.touches[0];
+            diagramState.draggedIcon = icon.dataset.iconName;
+            diagramState.touchDrag = { iconName: icon.dataset.iconName, startX: touch.clientX, startY: touch.clientY };
+            touchClone = icon.cloneNode(true);
+            touchClone.className = "draggable-icon dragging-clone";
+            touchClone.textContent = icon.dataset.iconName;
+            touchClone.style.left = (touch.clientX - 60) + "px";
+            touchClone.style.top = (touch.clientY - 20) + "px";
+            document.body.appendChild(touchClone);
+            icon.classList.add("dragging");
+        }
+
+        function onTouchMove(event) {
+            if (!touchClone) return;
+            event.preventDefault();
+            const touch = event.touches[0];
+            touchClone.style.left = (touch.clientX - 60) + "px";
+            touchClone.style.top = (touch.clientY - 20) + "px";
+            touchClone.style.pointerEvents = "none";
+
+            document.querySelectorAll(".drop-zone").forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const isOver = touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                    touch.clientY >= rect.top && touch.clientY <= rect.bottom;
+                el.classList.toggle("drag-over", isOver && !el.classList.contains("filled"));
+            });
+        }
+
+        function onTouchEnd(event) {
+            if (touchClone) {
+                touchClone.remove();
+                touchClone = null;
+            }
+            document.querySelectorAll(".draggable-icon").forEach(el => el.classList.remove("dragging"));
+
+            const touch = event.changedTouches[0];
+            let targetZone = null;
+            document.querySelectorAll(".drop-zone").forEach(el => {
+                el.classList.remove("drag-over");
+                const rect = el.getBoundingClientRect();
+                if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                    touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                    targetZone = el;
+                }
+            });
+
+            if (targetZone && diagramState.draggedIcon) {
+                placeIcon(targetZone.dataset.zoneId, diagramState.draggedIcon);
+            }
+            diagramState.draggedIcon = null;
+            diagramState.touchDrag = null;
+        }
+
+        function onZoneTouchStart(event) {
+            if (event.currentTarget.classList.contains("filled")) return;
+        }
+
+        /* Keyboard Drag-and-Drop */
+        let keyboardSelectedIcon = null;
+
+        function onIconKeyDown(event) {
+            const icon = event.currentTarget;
+            if (icon.classList.contains("placed")) return;
+
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                if (keyboardSelectedIcon === icon.dataset.iconName) {
+                    clearKeyboardSelection();
+                    return;
+                }
+                clearKeyboardSelection();
+                keyboardSelectedIcon = icon.dataset.iconName;
+                icon.style.outline = "3px solid var(--accent)";
+                icon.style.outlineOffset = "2px";
+                document.querySelectorAll(".drop-zone:not(.filled)").forEach(z => {
+                    z.style.boxShadow = "0 0 0 2px var(--accent)";
+                    z.setAttribute("tabindex", "0");
+                    z.setAttribute("role", "button");
+                    z.setAttribute("aria-label", `Place ${keyboardSelectedIcon} here`);
+                    z.addEventListener("keydown", onZoneKeyDown);
+                });
+            }
+            if (event.key === "Escape") {
+                clearKeyboardSelection();
+            }
+        }
+
+        function onZoneKeyDown(event) {
+            const zone = event.currentTarget;
+            if (zone.classList.contains("filled")) return;
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                if (keyboardSelectedIcon) {
+                    placeIcon(zone.dataset.zoneId, keyboardSelectedIcon);
+                    clearKeyboardSelection();
+                }
+            }
+            if (event.key === "Escape") {
+                clearKeyboardSelection();
+            }
+        }
+
+        function clearKeyboardSelection() {
+            keyboardSelectedIcon = null;
+            document.querySelectorAll(".draggable-icon").forEach(el => {
+                el.style.outline = "";
+            });
+            document.querySelectorAll(".drop-zone").forEach(z => {
+                z.style.boxShadow = "";
+                z.removeAttribute("tabindex");
+                z.removeEventListener("keydown", onZoneKeyDown);
+            });
+        }
+
+        function placeIcon(zoneId, iconName) {
+            // Remove icon from any other zone
+            for (const zId of Object.keys(diagramState.placements)) {
+                if (diagramState.placements[zId] === iconName) {
+                    delete diagramState.placements[zId];
+                }
+            }
+            // If zone already has an icon, return it to palette
+            if (diagramState.placements[zoneId]) {
+                const oldIcon = diagramState.placements[zoneId];
+                diagramState.placements[zoneId] = iconName;
+                document.querySelectorAll(".draggable-icon").forEach(el => {
+                    if (el.dataset.iconName === oldIcon) {
+                        el.classList.remove("placed");
+                        el.draggable = true;
+                        el.setAttribute("tabindex", "0");
+                    }
+                });
+            } else {
+                diagramState.placements[zoneId] = iconName;
+            }
+
+            // Mark placed icon
+            document.querySelectorAll(".draggable-icon").forEach(el => {
+                const isPlaced = Object.values(diagramState.placements).includes(el.dataset.iconName);
+                el.classList.toggle("placed", isPlaced);
+                if (isPlaced) {
+                    el.setAttribute("tabindex", "-1");
+                    el.setAttribute("aria-disabled", "true");
+                } else {
+                    el.setAttribute("tabindex", "0");
+                    el.removeAttribute("aria-disabled");
+                }
+            });
+
+            playPlaceSound();
+            resetGuidedTimer();
+
+            // Update drop zone visuals
+            const map = document.querySelector(".diagram-map");
+            if (map) {
+                const zoneData = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
+                if (zoneData) {
+                    const zoneEl = Array.from(map.children).find(el =>
+                        el.classList && el.classList.contains("drop-zone") && el.dataset.zoneId === zoneId
+                    );
+                    if (zoneEl) {
+                        zoneEl.classList.add("filled");
+                        zoneEl.classList.remove("correct", "wrong");
+                        const existingIcon = zoneEl.querySelector(".drop-zone-icon");
+                        if (existingIcon) existingIcon.remove();
+                        const slot = zoneEl.querySelector(".drop-zone-slot");
+                        if (slot) slot.style.display = "none";
+                        const iconItem = DIAGRAM_DATA.icons.find(i => i.name === iconName);
+                        const iconEl = document.createElement("div");
+                        iconEl.className = "drop-zone-icon";
+                        iconEl.textContent = iconItem ? `${iconItem.emoji} ${iconItem.name}` : iconName;
+                        zoneEl.appendChild(iconEl);
+                        zoneEl.style.transition = "transform 0.2s ease, border-color 0.2s ease";
+                        zoneEl.style.transform = "scale(1.06)";
+                        setTimeout(() => { zoneEl.style.transform = ""; }, 200);
+                    }
+                }
+            }
+        }
+
+        /* ============================================================
+           DIAGRAM GRADING
+           ============================================================ */
+        function gradeDiagram(question, answerStr) {
+            let placements;
+            try {
+                placements = JSON.parse(answerStr);
+            } catch {
+                return { status: "wrong", scoreAwarded: 0, explanation: "Could not read your diagram placements." };
+            }
+
+            const totalZones = DIAGRAM_DATA.zones.length;
+            let correctCount = 0;
+            let wrongZones = [];
+            let correctZones = [];
+
+            DIAGRAM_DATA.zones.forEach((zone) => {
+                const placed = placements[zone.id];
+                const isCorrect = placed === zone.correctIcon;
+                if (isCorrect) {
+                    correctCount++;
+                    correctZones.push(zone.label);
+                } else if (placed) {
+                    wrongZones.push({ label: zone.label, got: placed, expected: zone.correctIcon });
+                }
+            });
+
+            const scorePerZone = Math.round(question.points / totalZones);
+            const scoreAwarded = correctCount * scorePerZone;
+
+            let explanation = "";
+            let status;
+
+            if (correctCount === totalZones) {
+                status = "correct";
+                explanation = `Perfect! All ${totalZones} parts are placed correctly. You've built the complete Internet Parts Map. Scroll down to see how information travels!`;
+            } else if (correctCount >= totalZones - 2) {
+                status = "partial";
+                explanation = `Almost there! ${correctCount} of ${totalZones} are correct.`;
+                if (wrongZones.length) {
+                    explanation += ` Check: ${wrongZones.map(z => `${z.label} should be "${z.expected}"`).join("; ")}.`;
+                }
+                explanation += " Try switching the incorrect icons.";
+            } else if (correctCount > 0) {
+                status = "partial";
+                explanation = `${correctCount} of ${totalZones} are correct.`;
+                if (wrongZones.length) {
+                    explanation += ` Fix: ${wrongZones.map(z => `${z.label} should be "${z.expected}"`).join("; ")}.`;
+                }
+                explanation += " Use the hint if you need help!";
+            } else {
+                status = "wrong";
+                explanation = "None of the parts are in the right place yet. Remember: hardware on top (User Device → Router → Server), software below (Browser → URL → Website). Hyperlink connects within the website.";
+            }
+
+            // Store per-zone results for review
+            DIAGRAM_DATA.zones.forEach((zone) => {
+                const placed = placements[zone.id];
+                const isCorrect = placed === zone.correctIcon;
+                state.results[zone.id] = {
+                    status: isCorrect ? "correct" : "wrong",
+                    scoreAwarded: isCorrect ? scorePerZone : 0,
+                    explanation: `${zone.label}: expected "${zone.correctIcon}", got "${placed || "nothing"}"`
+                };
+            });
+
+            return { status, scoreAwarded, explanation };
+        }
+
+        /* ============================================================
            HISTORY / MEMORY
            ============================================================ */
         function renderHistoryList() {
@@ -1760,14 +2758,15 @@
             answeredQuestions.forEach((question) => {
                 const result = state.results[question.id];
                 const answer = state.answers[question.id];
+                const formattedAnswer = formatAnswerForDisplay(question, answer);
                 const item = document.createElement("div");
                 item.className = "history-item";
 
                 item.innerHTML = `
                     <h4>${escapeHtml(question.title)}</h4>
                     <p><span class="status-pill ${escapeHtml(result.status)}">${escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status)}</span></p>
-                    <p class="muted" style="margin-top:8px;">Saved answer: ${(question, question.choices[answer])}</p>
-                    <p class="muted" style="margin-top:8px;">${(result.explanation || question.explanations[answer] || "")}</p>
+                    <p class="muted" style="margin-top:8px;">Saved answer: ${escapeHtml(formattedAnswer)}</p>
+                    <p class="muted" style="margin-top:8px;">${(result.explanation || "")}</p>
                 `;
 
                 const actions = document.createElement("div");
@@ -1840,7 +2839,10 @@
            SUMMARY
            ============================================================ */
         function updateSummaryScreen() {
-            const results = Object.values(state.results);
+            const questionIds = QUESTIONS.map(q => q.id);
+            const results = Object.entries(state.results)
+                .filter(([id]) => questionIds.includes(id))
+                .map(([, r]) => r);
             const totalPossible = QUESTIONS.reduce((sum, question) => sum + question.points, 0);
             const correctCount = results.filter((result) => result.status === "correct").length;
             const partialCount = results.filter((result) => result.status === "partial").length;
@@ -1854,7 +2856,32 @@
             dom.summaryWrong.textContent = String(wrongCount);
             dom.summaryStreak.textContent = String(state.bestStreak);
 
+            if (state.timerSeconds > 0) {
+                const timeStat = document.querySelector(".summary-stat:first-child");
+                if (timeStat) {
+                    const timeP = document.createElement("p");
+                    timeP.style.cssText = "font-size:1rem;color:var(--text-soft);margin:0;";
+                    timeP.textContent = `⏱ ${getTimerFormatted()}`;
+                    timeStat.appendChild(timeP);
+                }
+            }
+
             dom.summaryResults.innerHTML = "";
+
+            const quizBreakdown = document.createElement("div");
+            quizBreakdown.style.cssText = "margin-bottom:16px;padding:12px;background:var(--card-bg);border-radius:8px;border:1px solid var(--border);";
+            let html = "<h4 style='margin:0 0 8px 0;'>Results Breakdown</h4><table style='width:100%;border-collapse:collapse;font-size:0.9rem;'>";
+            QUESTIONS.forEach((q) => {
+                const r = state.results[q.id];
+                const icon = r?.status === "correct" ? "✅" : r?.status === "wrong" ? "❌" : r?.status === "partial" ? "🟡" : "⬜";
+                const pts = r ? `${r.scoreAwarded}/${q.points}` : "–";
+                const label = r ? SIM_CONFIG.scoreLabels[r.status] || r.status : "Unanswered";
+                html += `<tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">${icon}</td><td style="padding:6px 4px;">${escapeHtml(q.title)}</td><td style="padding:6px 4px;text-align:right;">${label} (${pts})</td></tr>`;
+            });
+            html += "</table>";
+            quizBreakdown.innerHTML = html;
+            dom.summaryResults.appendChild(quizBreakdown);
+
             QUESTIONS.forEach((question) => {
                 const result = state.results[question.id];
                 const card = document.createElement("div");
@@ -1869,14 +2896,25 @@
                     return;
                 }
 
+                const formattedAnswer = formatAnswerForDisplay(question, state.answers[question.id]);
                 card.innerHTML = `
                     <h4>${escapeHtml(question.title)}</h4>
                     <p><span class="status-pill ${escapeHtml(result.status)}">${escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status)}</span></p>
-                    <p style="margin-top:8px;">Answer: <strong style="font-weight: normal; font-style: oblique;">${(question, question.choices[state.answers[question.id]])}</strong></p>
+                    <p style="margin-top:8px;">Answer: <strong style="font-weight: normal; font-style: oblique;">${escapeHtml(formattedAnswer)}</strong></p>
                     <p style="margin-top:8px;">${(result.explanation || question.explanation || "")}</p>
                     <div class="result-meta">Score awarded: ${result.scoreAwarded} / ${question.points}</div>
                 `;
                 dom.summaryResults.appendChild(card);
+
+                if (question.type === "diagram" && result && result.status === "correct") {
+                    const flowBox = document.createElement("div");
+                    flowBox.className = "flow-explanation";
+                    flowBox.style.marginTop = "16px";
+                    flowBox.innerHTML = `<h4>🌐 Information Travel Path</h4>${DIAGRAM_DATA.flowSteps.map((step, i) =>
+                        `<div class="flow-step"><span class="step-num">${i + 1}</span> <strong>${step.emoji || ""} ${step.icon}</strong> — ${step.desc}</div>`
+                    ).join("")}`;
+                    card.after(flowBox);
+                }
             });
         }
 
@@ -1887,6 +2925,12 @@
             state.theme = state.theme === "dark" ? "light" : "dark";
             dom.html.setAttribute("data-theme", state.theme);
             dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+            saveStateToStorage();
+        }
+
+        function toggleMute() {
+            state.soundMuted = !state.soundMuted;
+            dom.muteBtn.textContent = state.soundMuted ? "🔇 Muted" : "🔊 Sound";
             saveStateToStorage();
         }
 
@@ -1951,6 +2995,8 @@
             state.streak = 0;
             state.bestStreak = 0;
             state.reviewModeIndex = null;
+            stopGameTimer();
+            clearGuidedTimer();
 
             clearSavedState();
             renderQuestion();
@@ -1980,6 +3026,7 @@
             if (!raw) {
                 dom.html.setAttribute("data-theme", state.theme);
                 dom.themeToggleBtn.textContent = "🌙 Dark";
+                dom.muteBtn.textContent = "🔊 Sound";
                 return;
             }
 
@@ -1992,9 +3039,11 @@
                 state.score = Number(parsed.score || 0);
                 state.streak = Number(parsed.streak || 0);
                 state.bestStreak = Number(parsed.bestStreak || 0);
+                state.soundMuted = parsed.soundMuted === true;
                 state.theme = parsed.theme === "light" ? "light" : "dark";
                 dom.html.setAttribute("data-theme", state.theme);
                 dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+                dom.muteBtn.textContent = state.soundMuted ? "🔇 Muted" : "🔊 Sound";
                 showScreen(state.currentScreen);
             } catch (error) {
                 console.error("Could not load saved simulation state:", error);
@@ -2004,6 +3053,181 @@
 
         function clearSavedState() {
             localStorage.removeItem(SIM_CONFIG.storageKey);
+        }
+
+        /* ============================================================
+           TIMER
+           ============================================================ */
+        function startGameTimer() {
+            state.timerSeconds = 0;
+            clearInterval(state.timerInterval);
+            state.timerInterval = setInterval(() => {
+                state.timerSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+            updateTimerDisplay();
+        }
+
+        function stopGameTimer() {
+            clearInterval(state.timerInterval);
+            state.timerInterval = null;
+        }
+
+        function updateTimerDisplay() {
+            const m = String(Math.floor(state.timerSeconds / 60)).padStart(2, "0");
+            const s = String(state.timerSeconds % 60).padStart(2, "0");
+            if (dom.timerChip) {
+                dom.timerChip.textContent = `⏱ ${m}:${s}`;
+                dom.timerChip.classList.toggle("timer-warning", state.timerSeconds > 120);
+            }
+        }
+
+        function getTimerFormatted() {
+            const m = String(Math.floor(state.timerSeconds / 60)).padStart(2, "0");
+            const s = String(state.timerSeconds % 60).padStart(2, "0");
+            return `${m}:${s}`;
+        }
+
+        /* ============================================================
+           PLACEMENT SOUND
+           ============================================================ */
+        function playPlaceSound() {
+            if (state.soundMuted) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 520;
+                osc.type = "sine";
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.13);
+                osc.onended = () => ctx.close();
+            } catch { /* no audio */ }
+        }
+
+        /* ============================================================
+           GUIDED MODE — hints if idle
+           ============================================================ */
+        function resetGuidedTimer() {
+            clearTimeout(state.guidedTimeout);
+            document.querySelectorAll(".drop-zone.guide-hint").forEach(el => el.classList.remove("guide-hint"));
+            state.guidedTimeout = setTimeout(() => {
+                const emptyZones = document.querySelectorAll(".drop-zone:not(.filled)");
+                if (emptyZones.length > 0) {
+                    const target = emptyZones[Math.floor(Math.random() * emptyZones.length)];
+                    target.classList.add("guide-hint");
+                }
+            }, 15000);
+        }
+
+        function clearGuidedTimer() {
+            clearTimeout(state.guidedTimeout);
+            document.querySelectorAll(".drop-zone.guide-hint").forEach(el => el.classList.remove("guide-hint"));
+        }
+
+        /* ============================================================
+           CONFETTI
+           ============================================================ */
+        function launchConfetti() {
+            const canvas = document.createElement("canvas");
+            canvas.id = "confettiCanvas";
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            document.body.appendChild(canvas);
+            const ctx = canvas.getContext("2d");
+            const particles = [];
+            const colors = ["#34d399","#7dd3fc","#a78bfa","#fbbf24","#fb7185","#f472b6"];
+
+            for (let i = 0; i < 120; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height * -1,
+                    w: Math.random() * 10 + 4,
+                    h: Math.random() * 6 + 3,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: Math.random() * 3 + 2,
+                    rot: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 8,
+                    opacity: 1
+                });
+            }
+
+            let frame = 0;
+            function draw() {
+                frame++;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.05;
+                    p.rot += p.rotSpeed;
+                    if (frame > 30) p.opacity = Math.max(0, p.opacity - 0.008);
+                    if (p.opacity > 0) alive = true;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot * Math.PI / 180);
+                    ctx.globalAlpha = p.opacity;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+                });
+                if (alive) {
+                    requestAnimationFrame(draw);
+                } else {
+                    canvas.remove();
+                }
+            }
+            draw();
+            setTimeout(() => { try { canvas.remove(); } catch {} }, 8000);
+        }
+
+        /* ============================================================
+           DATA PACKET ANIMATION
+           ============================================================ */
+        function animateDataPackets() {
+            const map = document.querySelector(".diagram-map");
+            if (!map) return;
+            const path = [
+                "server", "router", "userdevice", "browser", "url", "website", "hyperlink"
+            ];
+            let delay = 300;
+            path.forEach((zoneId, i) => {
+                setTimeout(() => {
+                    const zone = map.querySelector(`.drop-zone[data-zone-id="${zoneId}"]`);
+                    if (!zone) return;
+                    const rect = zone.getBoundingClientRect();
+                    const mapRect = map.getBoundingClientRect();
+                    const dot = document.createElement("div");
+                    dot.className = "packet-dot";
+                    dot.style.left = (rect.left - mapRect.left + rect.width / 2 - 5) + "px";
+                    dot.style.top = (rect.top - mapRect.top + rect.height / 2 - 5) + "px";
+                    map.appendChild(dot);
+                    setTimeout(() => dot.remove(), 2200);
+                }, delay * i);
+            });
+        }
+
+        /* ============================================================
+           SAVE TIMER TO SUMMARY
+           ============================================================ */
+        function updateSummaryTimerInfo() {
+            const summaryEl = document.querySelector("#summaryScore");
+            if (summaryEl && state.timerSeconds > 0) {
+                const timeStr = getTimerFormatted();
+                const existing = summaryEl.closest(".summary-stat")?.querySelector("h4");
+                if (existing && existing.textContent === "Total Score") {
+                    const timeInfo = document.createElement("p");
+                    timeInfo.style.cssText = "font-size:0.85rem;color:var(--muted);margin-top:4px;";
+                    timeInfo.textContent = `Time: ${timeStr}`;
+                    summaryEl.parentElement.appendChild(timeInfo);
+                }
+            }
         }
 
         /* ============================================================
@@ -2030,6 +3254,18 @@
             }
             if (question.type === "mcq") {
                 return question.choices?.[Number(answer)] || String(answer);
+            }
+            if (question.type === "diagram") {
+                try {
+                    const placements = JSON.parse(answer);
+                    const parts = Object.entries(placements).map(([zoneId, icon]) => {
+                        const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
+                        return `${zone ? zone.label : zoneId}: ${icon}`;
+                    });
+                    return parts.length ? parts.join("; ") : "No icons placed";
+                } catch {
+                    return "Diagram answer (saved)";
+                }
             }
             return String(answer);
         }
