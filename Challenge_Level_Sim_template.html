@@ -842,11 +842,11 @@
                 <section class="game-card">
                     <div class="status-row">
                         <div class="chip-group">
-                            <div class="chip" id="questionCounter" style="visibility: hidden;">Question 1 of 1</div>
+                            <div class="chip hidden" id="questionCounter">Question 1 of 1</div>
                             <div class="chip" id="scoreChip">Score: 0</div>
                             <div class="chip" id="modeChip">Mode: Live Play</div>
                         </div>
-                        <div class="chip" id="streakChip" style="visibility: hidden;">Streak: 0</div>
+                        <div class="chip hidden" id="streakChip">Streak: 0</div>
                     </div>
 
                     <div class="progress-shell">
@@ -869,7 +869,7 @@
                             <div class="answer-area" id="answerArea"></div>
 
                             <div class="button-row">
-                                <button type="button" class="secondary-btn" id="hintBtn">💡 Hint</button>
+                                <button type="button" class="secondary-btn hidden" id="hintBtn">💡 Hint</button>
                                 <button type="submit" class="primary-btn" id="submitBtn">Submit Answer</button>
                             </div>
                         </form>
@@ -1049,6 +1049,15 @@
                 points: 10,
                 grading: {
                     mode: "custom",
+                    grader: function(answer, question) {
+
+                        const result = evaluatePassword(answer);
+
+                        return {
+                            status: result.score >= 80 ? "correct" : "wrong",
+                            scoreAwarded: result.score >= 80 ? question.points : 0,
+                            explanation: result.messages.join("<br>")
+                        };},
                     correctAnswer: 1,
                     explanations: ["This is incorrect because the emphasis is on the wrong part of the sentence. It does not help the listener catch the correct day. To fix it, stress the word that carries the important correction.",
                         "You followed the rule because you stressed the detail that fixes the listener’s confusion.",
@@ -1440,7 +1449,7 @@
         function renderTextInput(question, currentAnswer, isReviewMode, alreadyAnswered) {
             const input = document.createElement("input");
             input.className = "input-field";
-            input.type = question.type === "number" ? "number" : "text";
+            input.type = question.passwordStrength ? "password" : "text";
             input.id = "dynamicAnswerInput";
             input.placeholder = question.placeholder || "Type your answer here";
             input.value = currentAnswer ?? "";
