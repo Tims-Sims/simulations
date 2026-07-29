@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Backup Mission Control</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1222;
+      --bg-soft: #171b31;
+      --surface: #1d2340;
+      --surface-2: #252d52;
+      --text: #eef2ff;
+      --text-soft: #c7d0f0;
+      --muted: #98a4c8;
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #7dd3fc;
+      --accent-2: #a78bfa;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #fb7185;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+      --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    html[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f4f7ff;
+      --bg-soft: #e7edff;
+      --surface: #ffffff;
+      --surface-2: #eef3ff;
+      --text: #17203f;
+      --text-soft: #344267;
+      --muted: #5d6b95;
+      --border: rgba(23, 32, 63, 0.12);
+      --accent: #0ea5e9;
+      --accent-2: #7c3aed;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #e11d48;
+      --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+      --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+        radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    body { min-height: 100vh; padding: 16px; }
+    button { font: inherit; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    button:focus-visible,
+    .match-card:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .app-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      min-height: calc(100vh - 32px);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .brand-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+    .brand-badge {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-weight: 700;
+      font-size: 1.15rem;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
+    .brand-copy { min-width: 0; }
+    .brand-copy h1, .brand-copy p {
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-copy h1 { font-size: 1.08rem; }
+    .brand-copy p { color: var(--muted); margin-top: 2px; font-size: 0.92rem; }
+
+    .controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+
+    .control-btn, .primary-btn, .secondary-btn, .danger-btn, .nav-btn {
+      border-radius: 999px;
+      padding: 10px 15px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .control-btn, .secondary-btn, .nav-btn {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .danger-btn {
+      background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+      color: var(--text);
+      border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+    }
+
+    .pulse-help { position: relative; }
+
+    .pulse-help::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 999px;
+      border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+      animation: pulseRing 1.7s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes pulseRing {
+      0% { opacity: 0.9; transform: scale(0.98); }
+      70% { opacity: 0; transform: scale(1.12); }
+      100% { opacity: 0; }
+    }
+
+    .screen { display: none; flex: 1; }
+    .screen.active { display: flex; }
+
+    .center-stage,
+    .summary-layout,
+    .game-layout {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 8px;
+    }
+
+    .game-layout { place-items: start center; }
+
+    .hero-card,
+    .teach-card,
+    .game-card,
+    .summary-card {
+      width: min(100%, 1120px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      width: min(100%, 920px);
+      padding: clamp(24px, 4vw, 42px);
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+
+    .hero-card h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.85rem, 3.5vw, 2.8rem);
+      line-height: 1.1;
+    }
+
+    .hero-card > p {
+      width: min(100%, 700px);
+      margin: 0 auto;
+      color: var(--text-soft);
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+
+    .hero-actions {
+      margin-top: 26px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .teach-card {
+      width: min(100%, 960px);
+      padding: clamp(20px, 3vw, 36px);
+    }
+
+    .teach-card h2 { margin: 0 0 4px; font-size: clamp(1.4rem, 2.5vw, 1.9rem); }
+    .teach-subtitle { color: var(--muted); margin: 0 0 22px; font-size: 0.93rem; }
+
+    .teach-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .teach-box {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .teach-box h3 { margin: 0 0 10px; font-size: 0.98rem; }
+    .teach-box ul { margin: 0; padding-left: 18px; }
+    .teach-box li { color: var(--text-soft); line-height: 1.78; font-size: 0.96rem; }
+
+    .teach-example {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+      margin-bottom: 10px;
+    }
+
+    .teach-example p { margin: 0; color: var(--text-soft); line-height: 1.6; }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .nav-row .spacer { flex: 1; }
+
+    .game-card { padding: clamp(16px, 2.5vw, 24px); }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .chip-group { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .chip {
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-soft);
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    .progress-shell { margin-bottom: 18px; }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .progress-bar {
+      height: 14px;
+      width: 100%;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: var(--progress);
+      transition: width 0.3s ease;
+    }
+
+    .backup-game-area { display: grid; gap: 18px; }
+
+    .mission-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(
+          135deg,
+          color-mix(in srgb, var(--accent) 10%, var(--surface)),
+          color-mix(in srgb, var(--accent-2) 10%, var(--surface))
+        );
+    }
+
+    .mission-heading h2 {
+      margin: 10px 0 6px;
+      font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+    }
+
+    .mission-heading p {
+      margin: 0;
+      max-width: 720px;
+      color: var(--text-soft);
+      line-height: 1.6;
+    }
+
+    .difficulty-badge {
+      display: inline-flex;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.79rem;
+      background: color-mix(in srgb, var(--success) 20%, var(--surface));
+      color: var(--success);
+    }
+
+    .mission-counter {
+      padding: 9px 15px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-soft);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .matching-board {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+      gap: 88px;
+      min-height: 580px;
+      padding: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(circle at center, color-mix(in srgb, var(--accent) 6%, transparent), transparent 48%),
+        color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+    }
+
+    .match-column { position: relative; z-index: 2; }
+
+    .match-column h3 {
+      margin: 0 0 14px;
+      color: var(--accent);
+      font-size: 1rem;
+    }
+
+    .match-list { display: grid; gap: 14px; }
+
+    .match-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      height: 116px;
+      padding: 15px 19px;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: 0 9px 22px rgba(0, 0, 0, 0.12);
+      transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+    }
+
+    .match-card:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+    }
+
+    .match-card.connected {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+    }
+
+    .match-card.correct {
+      border-color: var(--success);
+      background: color-mix(in srgb, var(--success) 12%, var(--surface));
+      animation: successBounce 0.45s ease;
+    }
+
+    .match-card.incorrect {
+      border-color: var(--danger);
+      background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+      animation: incorrectShake 0.4s ease;
+    }
+
+    .match-card.target-hover {
+      border-color: var(--accent-2);
+      background: color-mix(in srgb, var(--accent-2) 12%, var(--surface));
+      transform: scale(1.02);
+    }
+
+    .match-card.locked { pointer-events: none; }
+
+    .scenario-card {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .scenario-card:active { cursor: grabbing; }
+    .scenario-card.locked { cursor: default; }
+
+    .match-icon {
+      width: 50px;
+      height: 50px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: var(--surface-2);
+      font-size: 1.7rem;
+    }
+
+    .match-copy { flex: 1; min-width: 0; }
+    .match-copy h4 { margin: 0 0 5px; font-size: 0.98rem; }
+
+    .match-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      overflow: hidden;
+    }
+
+    .connection-point {
+      position: absolute;
+      z-index: 6;
+      width: 23px;
+      height: 23px;
+      padding: 0;
+      border: 4px solid var(--surface);
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow:
+        0 0 0 2px var(--accent),
+        0 0 14px color-mix(in srgb, var(--accent) 50%, transparent);
+      touch-action: none;
+    }
+
+    .source-point {
+      top: 50%;
+      right: -13px;
+      transform: translateY(-50%);
+      cursor: grab;
+    }
+
+    .source-point:hover { transform: translateY(-50%) scale(1.18); }
+
+    .target-point {
+      top: 50%;
+      left: -13px;
+      transform: translateY(-50%);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .target-point:hover { transform: translateY(-50%) scale(1.18); }
+
+    .connection-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .connection-path {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 5;
+      stroke-linecap: round;
+      filter: drop-shadow(0 3px 4px color-mix(in srgb, var(--accent) 32%, transparent));
+    }
+
+    .connection-path.preview {
+      stroke: var(--accent-2);
+      stroke-dasharray: 9 9;
+      animation: cableMove 0.7s linear infinite;
+    }
+
+    .connection-path.correct-path { stroke: var(--success); }
+    .connection-path.incorrect-path { stroke: var(--danger); }
+
+    .mission-message {
+      padding: 15px 17px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      line-height: 1.6;
+    }
+
+    .mission-message.success {
+      background: color-mix(in srgb, var(--success) 13%, var(--surface));
+      border-color: color-mix(in srgb, var(--success) 42%, transparent);
+    }
+
+    .mission-message.warning {
+      background: color-mix(in srgb, var(--warning) 13%, var(--surface));
+      border-color: color-mix(in srgb, var(--warning) 42%, transparent);
+    }
+
+    .mission-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .summary-card {
+      width: min(100%, 920px);
+      padding: clamp(22px, 4vw, 36px);
+    }
+
+    .summary-card h2 { margin-top: 0; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .summary-stat {
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .summary-stat h4 { margin: 0 0 8px; color: var(--muted); font-size: 0.85rem; }
+    .summary-stat p { margin: 0; font-size: 1.45rem; font-weight: 800; }
+
+    .results-list { display: grid; gap: 12px; }
+
+    .result-card {
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+    }
+
+    .result-card h4 { margin: 0 0 8px; }
+    .result-card p { margin: 6px 0; color: var(--text-soft); line-height: 1.55; }
+
+    .drawer {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 10, 20, 0.56);
+      display: none;
+      justify-content: flex-end;
+      z-index: 50;
+    }
+
+    .drawer.show { display: flex; }
+
+    .drawer-card {
+      width: min(100%, 440px);
+      height: 100%;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .history-list { display: grid; gap: 10px; }
+
+    .history-item {
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .history-item h4 { margin: 0 0 8px; }
+    .history-item p { margin: 5px 0; color: var(--text-soft); line-height: 1.5; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(6, 10, 20, 0.64);
+      z-index: 60;
+    }
+
+    .modal.show { display: flex; }
+
+    .modal-card {
+      width: min(100%, 560px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 30px);
+      position: relative;
+    }
+
+    .modal-card h3 { margin: 0 0 16px; }
+    .modal-card p, .modal-card li { color: var(--text-soft); line-height: 1.65; }
+
+    .close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .button-row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+    .hidden { display: none !important; }
+    .muted { color: var(--muted); }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      padding-bottom: 4px;
+      font-size: 0.9rem;
+    }
+
+    .celebration {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      width: 10px;
+      height: 18px;
+      border-radius: 3px;
+      animation: confettiFall 2.2s linear forwards;
+    }
+
+    @keyframes cableMove { to { stroke-dashoffset: -18; } }
+
+    @keyframes successBounce {
+      50% { transform: scale(1.025); }
+    }
+
+    @keyframes incorrectShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-7px); }
+      75% { transform: translateX(7px); }
+    }
+
+    @keyframes confettiFall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 780px) {
+      body { padding: 10px; }
+      .teach-grid { grid-template-columns: 1fr; }
+      .controls { width: 100%; justify-content: flex-start; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .matching-board {
+        grid-template-columns: 1fr;
+        gap: 46px;
+        overflow: visible;
+      }
+      .mission-heading { flex-direction: column; }
+      .mission-counter { width: 100%; text-align: center; }
+      .brand-copy h1 { font-size: 0.92rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="brand-wrap">
+      <div class="brand-badge">🛡️</div>
+      <div class="brand-copy">
+        <h1>Backup Mission Control</h1>
+        <p>Saving and Protecting Data</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="control-btn pulse-help" id="helpBtn">❓ Help</button>
+      <button class="control-btn" id="themeToggleBtn">☀️ Light</button>
+      <button class="control-btn" id="fullscreenBtn">⛶ Full Screen</button>
+      <button class="control-btn" id="historyBtn">🧠 Review Memory</button>
+      <button class="danger-btn" id="resetBtn">↻ Reset</button>
+    </div>
+  </header>
+
+  <main class="screen active" id="homeScreen">
+    <div class="center-stage">
+      <section class="hero-card">
+        <div class="eyebrow">🛡️ Saving and Protecting Data</div>
+        <h2>Backup Mission Control</h2>
+        <p>
+          Connect each situation to the most suitable backup medium.
+          Consider storage capacity, portability, internet access,
+          durability, compatibility and cost.
+        </p>
+        <div class="hero-actions">
+          <button class="primary-btn" id="beginBtn">▶ Begin Mission</button>
+          <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <main class="screen" id="teachScreen">
+    <div class="center-stage">
+      <section class="teach-card">
+        <div class="eyebrow">📘 Quick Reminder</div>
+        <h2>How Do You Choose Backup Media?</h2>
+        <p class="teach-subtitle">
+          Think about what the user needs before selecting a storage option.
+        </p>
+
+        <div class="teach-grid">
+          <div class="teach-box">
+            <h3 style="color: var(--accent);">⭐ Questions to Ask</h3>
+            <ul>
+              <li>How much data needs to be stored?</li>
+              <li>Does the user need to carry the files?</li>
+              <li>Will the files be accessed from different locations?</li>
+              <li>Is internet access available?</li>
+              <li>Does the device support the storage medium?</li>
+            </ul>
+          </div>
+
+          <div class="teach-box">
+            <h3 style="color: var(--accent-2);">◇ Important Trade-offs</h3>
+            <ul>
+              <li>Portable devices are convenient but can be lost.</li>
+              <li>High-capacity storage may cost more.</li>
+              <li>Cloud storage supports remote access but needs connectivity.</li>
+              <li>Optical discs require compatible readers and writers.</li>
+              <li>No single backup option is best for every situation.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="teach-example">
+          <p>
+            <strong>Mission tip:</strong> Match the needs in each scenario to the
+            strengths and limitations of the backup option.
+          </p>
+        </div>
+
+        <div class="nav-row">
+          <button class="nav-btn" id="backFromTeachBtn">← Back</button>
+          <div class="spacer"></div>
+          <button class="primary-btn" id="continueFromTeachBtn">Continue to Mission →</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <main class="screen" id="gameScreen">
+    <div class="game-layout">
+      <section class="game-card">
+
+        <div class="status-row">
+          <div class="chip-group">
+            <div class="chip" id="matchChip">Matches: 0 of 5</div>
+            <div class="chip" id="scoreChip">Score: —</div>
+            <div class="chip" id="modeChip">Mode: Live Play</div>
+          </div>
+          <div class="chip" id="missionStatusChip">Mission: In Progress</div>
+        </div>
+
+        <div class="progress-shell">
+          <div class="progress-meta">
+            <span id="progressLabel">0% complete</span>
+            <span id="progressSummary">0 connected</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <div class="backup-game-area">
+          <div class="mission-heading">
+            <div>
+              <span class="difficulty-badge">Saving and Protecting Data</span>
+              <h2>Choose the Best Backup Media</h2>
+              <p>
+                Drag a cable from each situation to the backup option that best
+                meets its needs. You may change a connection before submitting.
+              </p>
+            </div>
+
+            <div class="mission-counter" id="missionCounter">0 of 5 connected</div>
+          </div>
+
+          <div class="matching-board" id="matchingBoard">
+            <svg id="connectionLayer" class="connection-layer" aria-hidden="true"></svg>
+
+            <section class="match-column">
+              <h3>Data Scenarios</h3>
+              <div id="scenarioList" class="match-list"></div>
+            </section>
+
+            <section class="match-column">
+              <h3>Backup Media</h3>
+              <div id="mediaList" class="match-list"></div>
+            </section>
+          </div>
+
+          <div class="mission-message hidden" id="missionMessage"></div>
+
+          <div class="mission-actions">
+            <button type="button" class="secondary-btn" id="clearConnectionsBtn">
+              ↻ Reset Connections
+            </button>
+
+            <button type="button" class="primary-btn hidden" id="submitMissionBtn">
+              Submit Mission
+            </button>
+
+            <button type="button" class="primary-btn hidden" id="viewSummaryBtn">
+              View Mission Summary →
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <main class="screen" id="summaryScreen">
+    <div class="summary-layout">
+      <section class="summary-card">
+        <div class="eyebrow">🎉 Complete</div>
+        <h2 id="summaryTitle">Mission Complete</h2>
+        <p id="summaryDescription" style="color: var(--text-soft); line-height: 1.65;"></p>
+
+        <div class="summary-grid">
+          <div class="summary-stat"><h4>Score</h4><p id="summaryScore">0</p></div>
+          <div class="summary-stat"><h4>Accuracy</h4><p id="summaryAccuracy">0%</p></div>
+          <div class="summary-stat"><h4>Correct Matches</h4><p id="summaryCorrect">0</p></div>
+          <div class="summary-stat"><h4>Incorrect Matches</h4><p id="summaryWrong">0</p></div>
+          <div class="summary-stat"><h4>Media Reviewed</h4><p>5</p></div>
+          <div class="summary-stat"><h4>Mission Rating</h4><p id="summaryRating">—</p></div>
+        </div>
+
+        <div class="results-list" id="summaryResults"></div>
+
+        <div class="button-row" style="margin-top: 24px;">
+          <button class="secondary-btn" id="reviewFromSummaryBtn">🧠 Review Memory</button>
+          <button class="primary-btn" id="playAgainBtn">↻ Play Again</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="footer-note">
+    Backup Mission Control — local, editable and offline-ready.
+  </div>
+</div>
+
+<aside class="drawer" id="historyDrawer" aria-hidden="true">
+  <section class="drawer-card">
+    <div class="drawer-head">
+      <div>
+        <h3 style="margin:0;">Review Memory</h3>
+        <p class="muted" style="margin:4px 0 0; font-size:0.9rem;">
+          Review completed matches and explanations.
+        </p>
+      </div>
+      <button class="close-btn" id="closeHistoryBtn" aria-label="Close">×</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </section>
+</aside>
+
+<div class="modal" id="instructionsModal" role="dialog" aria-modal="true">
+  <section class="modal-card">
+    <button class="close-btn" id="closeInstructionsBtn" aria-label="Close">×</button>
+    <h3>❓ How This Works</h3>
+    <ul>
+      <li>Read each data-protection scenario carefully.</li>
+      <li>Drag from anywhere on a scenario card to a backup option.</li>
+      <li>You can replace a connection before submitting.</li>
+      <li>Each scenario connects to one backup option, and each backup option can only be used once.</li>
+      <li>The Submit Mission button appears after all five are connected.</li>
+      <li>After submitting, review the strengths and limitations of each option.</li>
+      <li>Reset Connections clears only the cables; the top Reset button restarts the full simulation.</li>
+    </ul>
+    <button class="primary-btn" id="gotItBtn">Got it</button>
+  </section>
+</div>
+
+<div class="modal" id="confirmModal" role="dialog" aria-modal="true">
+  <section class="modal-card" style="max-width: 460px;">
+    <h3>↻ Reset Simulation</h3>
+    <p>This will erase all progress and return to the home screen. Are you sure?</p>
+    <div class="button-row">
+      <button class="danger-btn" id="confirmYesBtn">Yes, Reset</button>
+      <button class="secondary-btn" id="confirmNoBtn">Cancel</button>
+    </div>
+  </section>
+</div>
+
+<div id="celebration" class="celebration" aria-hidden="true"></div>
+
+<script>
+"use strict";
+
+const GAME_DATA = {
+  scenarios: [
+    {
+      id: "school-files",
+      icon: "📄",
+      title: "Carry a Small School Project",
+      description: "A student needs to move a presentation and a few documents between computers.",
+      answer: "usb"
+    },
+    {
+      id: "video-library",
+      icon: "🎞️",
+      title: "Back Up a Large Video Collection",
+      description: "The media club needs a local backup for hundreds of large video files.",
+      answer: "external-drive"
+    },
+    {
+      id: "different-locations",
+      icon: "🏠",
+      title: "Access Work From Different Locations",
+      description: "A student wants to use assignments at school, home and the library.",
+      answer: "cloud"
+    },
+    {
+      id: "document-archive",
+      icon: "🗂️",
+      title: "Archive Documents at Low Cost",
+      description: "A small group of completed files must be stored offline and rarely changed.",
+      answer: "dvd"
+    },
+    {
+      id: "film-project",
+      icon: "🎬",
+      title: "Archive a Large HD Film",
+      description: "A completed high-definition film must be stored on an optical disc.",
+      answer: "bluray"
+    }
+  ],
+
+  media: [
+    {
+      id: "cloud",
+      icon: "☁️",
+      name: "Cloud Storage",
+      summary: "Online storage accessible from multiple devices.",
+      strength: "Files can be accessed from different locations and devices.",
+      limitation: "Usually depends on internet access and secure account management."
+    },
+    {
+      id: "dvd",
+      icon: "💿",
+      name: "DVD",
+      summary: "Low-cost optical storage with limited capacity.",
+      strength: "Useful for inexpensive offline archives of smaller files.",
+      limitation: "Stores less data and requires a compatible disc drive."
+    },
+    {
+      id: "external-drive",
+      icon: "🗄️",
+      name: "External Hard Drive",
+      summary: "High-capacity local backup storage.",
+      strength: "Can store large collections without requiring internet access.",
+      limitation: "May be damaged, stolen or lost."
+    },
+    {
+      id: "bluray",
+      icon: "🔵",
+      name: "Blu-ray Disc",
+      summary: "Higher-capacity optical storage.",
+      strength: "Stores more data than a standard DVD and suits large media projects.",
+      limitation: "Requires compatible Blu-ray reading and writing hardware."
+    },
+    {
+      id: "usb",
+      icon: "🔑",
+      name: "USB Flash Drive",
+      summary: "Small, portable solid-state storage.",
+      strength: "Convenient for moving small files between computers.",
+      limitation: "Easy to lose, damage or misplace."
+    }
+  ]
+};
+
+const STORAGE_KEY = "backup-mission-control-v1";
+
+const state = {
+  screen: "home",
+  theme: "dark",
+  matches: new Map(),
+  submitted: false,
+  score: null,
+  correctCount: 0,
+  activeScenarioId: null,
+  previewPath: null
+};
+
+const dom = {
+  html: document.documentElement,
+  homeScreen: document.getElementById("homeScreen"),
+  teachScreen: document.getElementById("teachScreen"),
+  gameScreen: document.getElementById("gameScreen"),
+  summaryScreen: document.getElementById("summaryScreen"),
+  beginBtn: document.getElementById("beginBtn"),
+  backFromTeachBtn: document.getElementById("backFromTeachBtn"),
+  continueFromTeachBtn: document.getElementById("continueFromTeachBtn"),
+  openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+  helpBtn: document.getElementById("helpBtn"),
+  themeToggleBtn: document.getElementById("themeToggleBtn"),
+  fullscreenBtn: document.getElementById("fullscreenBtn"),
+  historyBtn: document.getElementById("historyBtn"),
+  resetBtn: document.getElementById("resetBtn"),
+  scenarioList: document.getElementById("scenarioList"),
+  mediaList: document.getElementById("mediaList"),
+  matchingBoard: document.getElementById("matchingBoard"),
+  connectionLayer: document.getElementById("connectionLayer"),
+  matchChip: document.getElementById("matchChip"),
+  scoreChip: document.getElementById("scoreChip"),
+  modeChip: document.getElementById("modeChip"),
+  missionStatusChip: document.getElementById("missionStatusChip"),
+  progressLabel: document.getElementById("progressLabel"),
+  progressSummary: document.getElementById("progressSummary"),
+  progressFill: document.getElementById("progressFill"),
+  missionCounter: document.getElementById("missionCounter"),
+  missionMessage: document.getElementById("missionMessage"),
+  clearConnectionsBtn: document.getElementById("clearConnectionsBtn"),
+  submitMissionBtn: document.getElementById("submitMissionBtn"),
+  viewSummaryBtn: document.getElementById("viewSummaryBtn"),
+  instructionsModal: document.getElementById("instructionsModal"),
+  closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+  gotItBtn: document.getElementById("gotItBtn"),
+  confirmModal: document.getElementById("confirmModal"),
+  confirmYesBtn: document.getElementById("confirmYesBtn"),
+  confirmNoBtn: document.getElementById("confirmNoBtn"),
+  historyDrawer: document.getElementById("historyDrawer"),
+  closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+  historyList: document.getElementById("historyList"),
+  reviewFromSummaryBtn: document.getElementById("reviewFromSummaryBtn"),
+  playAgainBtn: document.getElementById("playAgainBtn"),
+  summaryTitle: document.getElementById("summaryTitle"),
+  summaryDescription: document.getElementById("summaryDescription"),
+  summaryScore: document.getElementById("summaryScore"),
+  summaryAccuracy: document.getElementById("summaryAccuracy"),
+  summaryCorrect: document.getElementById("summaryCorrect"),
+  summaryWrong: document.getElementById("summaryWrong"),
+  summaryRating: document.getElementById("summaryRating"),
+  summaryResults: document.getElementById("summaryResults"),
+  celebration: document.getElementById("celebration")
+};
+
+initialize();
+
+function initialize() {
+  bindEvents();
+  buildCards();
+  loadState();
+  applyTheme();
+  updateUI();
+  showScreen(state.screen || "home");
+
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    openModal(dom.instructionsModal);
+  }
+}
+
+function bindEvents() {
+  dom.beginBtn.addEventListener("click", () => showScreen("teach"));
+  dom.backFromTeachBtn.addEventListener("click", () => showScreen("home"));
+  dom.continueFromTeachBtn.addEventListener("click", () => showScreen("game"));
+
+  dom.openInstructionsBtn.addEventListener("click", () => openModal(dom.instructionsModal));
+  dom.helpBtn.addEventListener("click", () => {
+    dom.helpBtn.classList.remove("pulse-help");
+    openModal(dom.instructionsModal);
+  });
+
+  dom.closeInstructionsBtn.addEventListener("click", () => closeModal(dom.instructionsModal));
+  dom.gotItBtn.addEventListener("click", () => closeModal(dom.instructionsModal));
+  dom.instructionsModal.addEventListener("click", event => {
+    if (event.target === dom.instructionsModal) closeModal(dom.instructionsModal);
+  });
+
+  dom.themeToggleBtn.addEventListener("click", toggleTheme);
+  dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", updateFullscreenButton);
+
+  dom.historyBtn.addEventListener("click", openHistory);
+  dom.reviewFromSummaryBtn.addEventListener("click", openHistory);
+  dom.closeHistoryBtn.addEventListener("click", closeHistory);
+  dom.historyDrawer.addEventListener("click", event => {
+    if (event.target === dom.historyDrawer) closeHistory();
+  });
+
+  dom.resetBtn.addEventListener("click", () => openModal(dom.confirmModal));
+  dom.confirmYesBtn.addEventListener("click", resetSimulation);
+  dom.confirmNoBtn.addEventListener("click", () => closeModal(dom.confirmModal));
+  dom.confirmModal.addEventListener("click", event => {
+    if (event.target === dom.confirmModal) closeModal(dom.confirmModal);
+  });
+
+  dom.clearConnectionsBtn.addEventListener("click", clearConnections);
+  dom.submitMissionBtn.addEventListener("click", submitMission);
+  dom.viewSummaryBtn.addEventListener("click", showSummary);
+  dom.playAgainBtn.addEventListener("click", resetSimulation);
+
+  window.addEventListener("resize", () => {
+    if (!state.previewPath) drawConnections();
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeModal(dom.instructionsModal);
+      closeModal(dom.confirmModal);
+      closeHistory();
+    }
+  });
+}
+
+function buildCards() {
+  dom.scenarioList.innerHTML = "";
+  dom.mediaList.innerHTML = "";
+
+  GAME_DATA.scenarios.forEach((scenario, index) => {
+    const card = document.createElement("article");
+    card.className = "match-card scenario-card";
+    card.dataset.scenarioId = scenario.id;
+    card.tabIndex = 0;
+
+    card.innerHTML = `
+      <div class="match-icon" aria-hidden="true">${scenario.icon}</div>
+      <div class="match-copy">
+        <h4>${index + 1}. ${scenario.title}</h4>
+        <p>${scenario.description}</p>
+      </div>
+      <button
+        class="connection-point source-point"
+        type="button"
+        data-scenario-id="${scenario.id}"
+        aria-label="Connect ${scenario.title}"
+        title="Drag from anywhere on this card to a backup option"
+        tabindex="-1"
+      ></button>
+    `;
+
+    dom.scenarioList.appendChild(card);
+  });
+
+  GAME_DATA.media.forEach(media => {
+    const card = document.createElement("article");
+    card.className = "match-card media-card";
+    card.dataset.mediaId = media.id;
+    card.tabIndex = 0;
+
+    card.innerHTML = `
+      <span class="connection-point target-point" aria-hidden="true"></span>
+      <div class="match-icon" aria-hidden="true">${media.icon}</div>
+      <div class="match-copy">
+        <h4>${media.name}</h4>
+        <p>${media.summary}</p>
+      </div>
+    `;
+
+    dom.mediaList.appendChild(card);
+  });
+
+  document.querySelectorAll(".scenario-card").forEach(card => {
+    card.addEventListener("pointerdown", startConnection);
+    card.addEventListener("click", event => {
+      event.stopPropagation();
+      if (state.submitted) return;
+      selectScenario(card.dataset.scenarioId);
+    });
+  });
+
+  document.querySelectorAll(".media-card").forEach(card => {
+    card.addEventListener("click", () => {
+      if (!state.activeScenarioId || state.submitted) return;
+      createMatch(state.activeScenarioId, card.dataset.mediaId);
+      clearScenarioSelection();
+    });
+
+    card.addEventListener("keydown", event => {
+      if ((event.key === "Enter" || event.key === " ") && state.activeScenarioId && !state.submitted) {
+        event.preventDefault();
+        createMatch(state.activeScenarioId, card.dataset.mediaId);
+        clearScenarioSelection();
+      }
+    });
+  });
+}
+
+function showScreen(name) {
+  state.screen = name;
+  dom.homeScreen.classList.toggle("active", name === "home");
+  dom.teachScreen.classList.toggle("active", name === "teach");
+  dom.gameScreen.classList.toggle("active", name === "game");
+  dom.summaryScreen.classList.toggle("active", name === "summary");
+  saveState();
+  window.scrollTo(0, 0);
+
+  if (name === "game") {
+    requestAnimationFrame(drawConnections);
+  }
+}
+
+function selectScenario(scenarioId) {
+  clearScenarioSelection();
+  state.activeScenarioId = scenarioId;
+  const card = document.querySelector(`[data-scenario-id="${scenarioId}"]`);
+  card?.classList.add("connected");
+}
+
+function clearScenarioSelection() {
+  state.activeScenarioId = null;
+  document.querySelectorAll(".scenario-card").forEach(card => {
+    if (!state.matches.has(card.dataset.scenarioId)) {
+      card.classList.remove("connected");
+    }
+  });
+}
+
+function startConnection(event) {
+  if (state.submitted) return;
+
+  event.preventDefault();
+  const card = event.currentTarget;
+  const scenarioId = card.dataset.scenarioId;
+  state.activeScenarioId = scenarioId;
+
+  const anchor = card.querySelector(".source-point") || card;
+  const start = getElementCentre(anchor);
+  state.previewPath = createSvgPath("connection-path preview");
+  updatePath(state.previewPath, start.x, start.y, start.x, start.y);
+
+  document.addEventListener("pointermove", updatePreview);
+  document.addEventListener("pointerup", finishConnection, { once: true });
+}
+
+function updatePreview(event) {
+  if (!state.previewPath || !state.activeScenarioId) return;
+
+  const source = document.querySelector(
+    `.source-point[data-scenario-id="${state.activeScenarioId}"]`
+  );
+
+  const start = getElementCentre(source);
+  const boardRect = dom.matchingBoard.getBoundingClientRect();
+
+  updatePath(
+    state.previewPath,
+    start.x,
+    start.y,
+    event.clientX - boardRect.left,
+    event.clientY - boardRect.top
+  );
+
+  clearTargetHighlights();
+  document.elementFromPoint(event.clientX, event.clientY)
+    ?.closest(".media-card")
+    ?.classList.add("target-hover");
+}
+
+function finishConnection(event) {
+  document.removeEventListener("pointermove", updatePreview);
+  clearTargetHighlights();
+
+  const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".media-card");
+
+  state.previewPath?.remove();
+  state.previewPath = null;
+
+  if (target && state.activeScenarioId) {
+    createMatch(state.activeScenarioId, target.dataset.mediaId);
+  }
+
+  state.activeScenarioId = null;
+}
+
+function clearTargetHighlights() {
+  document.querySelectorAll(".media-card").forEach(card => {
+    card.classList.remove("target-hover");
+  });
+}
+
+function createMatch(scenarioId, mediaId) {
+  for (const [existingScenario, existingMedia] of state.matches.entries()) {
+    if (existingMedia === mediaId && existingScenario !== scenarioId) {
+      state.matches.delete(existingScenario);
+    }
+  }
+
+  state.matches.set(scenarioId, mediaId);
+  updateUI();
+  drawConnections();
+  saveState();
+}
+
+function getElementCentre(element) {
+  const elementRect = element.getBoundingClientRect();
+  const boardRect = dom.matchingBoard.getBoundingClientRect();
+
+  return {
+    x: elementRect.left - boardRect.left + elementRect.width / 2,
+    y: elementRect.top - boardRect.top + elementRect.height / 2
+  };
+}
+
+function createSvgPath(className) {
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("class", className);
+  dom.connectionLayer.appendChild(path);
+  return path;
+}
+
+function updatePath(path, startX, startY, endX, endY) {
+  const distance = Math.abs(endX - startX);
+  const curve = Math.max(45, distance * 0.42);
+
+  path.setAttribute(
+    "d",
+    `M ${startX} ${startY}
+     C ${startX + curve} ${startY},
+       ${endX - curve} ${endY},
+       ${endX} ${endY}`
+  );
+}
+
+function drawConnections() {
+  dom.connectionLayer.innerHTML = "";
+
+  state.matches.forEach((mediaId, scenarioId) => {
+    const source = document.querySelector(
+      `.source-point[data-scenario-id="${scenarioId}"]`
+    );
+
+    const target = document.querySelector(
+      `.media-card[data-media-id="${mediaId}"] .target-point`
+    );
+
+    if (!source || !target) return;
+
+    const start = getElementCentre(source);
+    const end = getElementCentre(target);
+
+    let className = "connection-path";
+
+    if (state.submitted) {
+      const scenario = GAME_DATA.scenarios.find(item => item.id === scenarioId);
+      className += scenario.answer === mediaId
+        ? " correct-path"
+        : " incorrect-path";
+    }
+
+    const path = createSvgPath(className);
+    updatePath(path, start.x, start.y, end.x, end.y);
+  });
+}
+
+function updateUI() {
+  const completed = state.matches.size;
+  const total = GAME_DATA.scenarios.length;
+  const percentage = Math.round((completed / total) * 100);
+
+  dom.matchChip.textContent = `Matches: ${completed} of ${total}`;
+  dom.progressLabel.textContent = `${percentage}% complete`;
+  dom.progressSummary.textContent = `${completed} connected`;
+  dom.progressFill.style.width = `${percentage}%`;
+  dom.missionCounter.textContent = `${completed} of ${total} connected`;
+
+  dom.submitMissionBtn.classList.toggle(
+    "hidden",
+    completed !== total || state.submitted
+  );
+
+  dom.clearConnectionsBtn.classList.toggle("hidden", state.submitted);
+  dom.viewSummaryBtn.classList.toggle("hidden", !state.submitted);
+
+  dom.scoreChip.textContent = state.score === null
+    ? "Score: —"
+    : `Score: ${state.score}`;
+
+  dom.modeChip.textContent = state.submitted
+    ? "Mode: Results"
+    : "Mode: Live Play";
+
+  dom.missionStatusChip.textContent = state.submitted
+    ? "Mission: Complete"
+    : "Mission: In Progress";
+
+  document.querySelectorAll(".scenario-card").forEach(card => {
+    const scenarioId = card.dataset.scenarioId;
+    card.classList.toggle("connected", state.matches.has(scenarioId));
+
+    if (!state.submitted) {
+      card.classList.remove("correct", "incorrect", "locked");
+      return;
+    }
+
+    const scenario = GAME_DATA.scenarios.find(item => item.id === scenarioId);
+    const isCorrect = state.matches.get(scenarioId) === scenario.answer;
+
+    card.classList.remove("connected");
+    card.classList.toggle("correct", isCorrect);
+    card.classList.toggle("incorrect", !isCorrect);
+    card.classList.add("locked");
+  });
+
+  document.querySelectorAll(".media-card").forEach(card => {
+    const connected = [...state.matches.values()].includes(card.dataset.mediaId);
+    card.classList.toggle("connected", connected && !state.submitted);
+    card.classList.toggle("locked", state.submitted);
+  });
+
+  if (!state.submitted) {
+    dom.missionMessage.className = "mission-message hidden";
+    dom.missionMessage.textContent = "";
+  }
+}
+
+function clearConnections() {
+  if (state.submitted) return;
+
+  state.matches.clear();
+  state.activeScenarioId = null;
+  dom.connectionLayer.innerHTML = "";
+  updateUI();
+  saveState();
+}
+
+function submitMission() {
+  if (state.submitted || state.matches.size !== GAME_DATA.scenarios.length) return;
+
+  let correct = 0;
+
+  GAME_DATA.scenarios.forEach(scenario => {
+    if (state.matches.get(scenario.id) === scenario.answer) correct += 1;
+  });
+
+  state.correctCount = correct;
+  state.score = correct * 20;
+  state.submitted = true;
+
+  renderMissionMessage();
+
+  updateUI();
+  drawConnections();
+  renderSummary();
+  saveState();
+
+  if (correct === GAME_DATA.scenarios.length) {
+    launchCelebration();
+  }
+}
+
+function renderMissionMessage() {
+  const total = GAME_DATA.scenarios.length;
+  const correct = state.correctCount;
+  const perfect = correct === total;
+
+  dom.missionMessage.className = `mission-message ${perfect ? "success" : "warning"}`;
+
+  dom.missionMessage.innerHTML = perfect
+    ? "<strong>🏆 Perfect mission!</strong> Every backup option was matched correctly. Review the explanations, then open the mission summary."
+    : `<strong>🛡️ Mission submitted.</strong> You matched ${correct} of ${total} correctly. Green cables are correct and red cables need review.`;
+}
+
+function showSummary() {
+  renderSummary();
+  showScreen("summary");
+}
+
+function renderSummary() {
+  const total = GAME_DATA.scenarios.length;
+  const correct = state.correctCount;
+  const wrong = total - correct;
+  const accuracy = Math.round((correct / total) * 100);
+
+  let rating = "Trainee";
+  if (accuracy === 100) rating = "Backup Expert";
+  else if (accuracy >= 80) rating = "Backup Specialist";
+  else if (accuracy >= 60) rating = "Data Defender";
+
+  dom.summaryTitle.textContent =
+    accuracy === 100 ? "Outstanding Backup Mission!" : "Backup Mission Complete";
+
+  dom.summaryDescription.textContent =
+    accuracy === 100
+      ? "You selected the most suitable backup option for every scenario."
+      : "Review each scenario below to strengthen your understanding of backup media.";
+
+  dom.summaryScore.textContent = `${state.score ?? 0}/100`;
+  dom.summaryAccuracy.textContent = `${accuracy}%`;
+  dom.summaryCorrect.textContent = correct;
+  dom.summaryWrong.textContent = wrong;
+  dom.summaryRating.textContent = rating;
+
+  dom.summaryResults.innerHTML = "";
+
+  GAME_DATA.scenarios.forEach(scenario => {
+    const selectedId = state.matches.get(scenario.id);
+    const selected = GAME_DATA.media.find(item => item.id === selectedId);
+    const correctMedia = GAME_DATA.media.find(item => item.id === scenario.answer);
+    const isCorrect = selectedId === scenario.answer;
+
+    const card = document.createElement("article");
+    card.className = "result-card";
+
+    card.innerHTML = `
+      <h4>${isCorrect ? "✅" : "❌"} ${scenario.title}</h4>
+      <p><strong>Your choice:</strong> ${selected?.name || "No answer"}</p>
+      ${isCorrect ? "" : `<p><strong>Best option:</strong> ${correctMedia.name}</p>`}
+      <p><strong>Strength:</strong> ${correctMedia.strength}</p>
+      <p><strong>Limitation:</strong> ${correctMedia.limitation}</p>
+    `;
+
+    dom.summaryResults.appendChild(card);
+  });
+}
+
+function openHistory() {
+  renderHistory();
+  dom.historyDrawer.classList.add("show");
+  dom.historyDrawer.setAttribute("aria-hidden", "false");
+}
+
+function closeHistory() {
+  dom.historyDrawer.classList.remove("show");
+  dom.historyDrawer.setAttribute("aria-hidden", "true");
+}
+
+function renderHistory() {
+  dom.historyList.innerHTML = "";
+
+  if (!state.submitted) {
+    dom.historyList.innerHTML = `
+      <div class="history-item">
+        <h4>No completed mission yet</h4>
+        <p>Submit all five matches to unlock the review explanations.</p>
+      </div>
+    `;
+    return;
+  }
+
+  GAME_DATA.scenarios.forEach(scenario => {
+    const selectedId = state.matches.get(scenario.id);
+    const selected = GAME_DATA.media.find(item => item.id === selectedId);
+    const correctMedia = GAME_DATA.media.find(item => item.id === scenario.answer);
+    const isCorrect = selectedId === scenario.answer;
+
+    const item = document.createElement("article");
+    item.className = "history-item";
+
+    item.innerHTML = `
+      <h4>${isCorrect ? "✅" : "❌"} ${scenario.title}</h4>
+      <p><strong>Your choice:</strong> ${selected?.name || "No answer"}</p>
+      ${isCorrect ? "" : `<p><strong>Best option:</strong> ${correctMedia.name}</p>`}
+      <p><strong>Strength:</strong> ${correctMedia.strength}</p>
+      <p><strong>Limitation:</strong> ${correctMedia.limitation}</p>
+    `;
+
+    dom.historyList.appendChild(item);
+  });
+}
+
+function resetSimulation() {
+  state.screen = "home";
+  state.matches.clear();
+  state.submitted = false;
+  state.score = null;
+  state.correctCount = 0;
+  state.activeScenarioId = null;
+  state.previewPath = null;
+
+  dom.connectionLayer.innerHTML = "";
+  dom.missionMessage.className = "mission-message hidden";
+  dom.missionMessage.textContent = "";
+
+  closeModal(dom.confirmModal);
+  closeHistory();
+  updateUI();
+  renderSummary();
+  saveState();
+  showScreen("home");
+}
+
+function toggleTheme() {
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  applyTheme();
+  saveState();
+  requestAnimationFrame(drawConnections);
+}
+
+function applyTheme() {
+  dom.html.setAttribute("data-theme", state.theme);
+  dom.themeToggleBtn.textContent =
+    state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.();
+  } else {
+    document.exitFullscreen?.();
+  }
+}
+
+function updateFullscreenButton() {
+  dom.fullscreenBtn.textContent =
+    document.fullscreenElement ? "↙ Exit Full Screen" : "⛶ Full Screen";
+}
+
+function openModal(modal) {
+  modal.classList.add("show");
+}
+
+function closeModal(modal) {
+  modal.classList.remove("show");
+}
+
+function saveState() {
+  const payload = {
+    screen: state.screen,
+    theme: state.theme,
+    matches: Object.fromEntries(state.matches),
+    submitted: state.submitted,
+    score: state.score,
+    correctCount: state.correctCount
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    if (!saved) return;
+
+    state.screen = saved.screen || "home";
+    state.theme = saved.theme || "dark";
+    state.matches = new Map(Object.entries(saved.matches || {}));
+    state.submitted = Boolean(saved.submitted);
+    state.score = saved.score ?? null;
+    state.correctCount = saved.correctCount || 0;
+
+    updateUI();
+    if (state.submitted) renderMissionMessage();
+    renderSummary();
+    requestAnimationFrame(drawConnections);
+  } catch (error) {
+    console.warn("Saved state could not be loaded.", error);
+  }
+}
+
+function launchCelebration() {
+  const colours = ["#7dd3fc", "#a78bfa", "#34d399", "#fbbf24", "#fb7185"];
+
+  for (let index = 0; index < 60; index += 1) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colours[Math.floor(Math.random() * colours.length)];
+    piece.style.animationDelay = `${Math.random() * 0.7}s`;
+    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+    dom.celebration.appendChild(piece);
+  }
+
+  window.setTimeout(() => {
+    dom.celebration.innerHTML = "";
+  }, 3200);
+}
+</script>
+</body>
+</html>
