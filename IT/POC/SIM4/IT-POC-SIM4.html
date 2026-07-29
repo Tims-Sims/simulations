@@ -415,7 +415,7 @@
       display: flex;
       align-items: center;
       gap: 13px;
-      min-height: 90px;
+      height: 116px;
       padding: 15px 19px;
       border: 2px solid var(--border);
       border-radius: 16px;
@@ -458,6 +458,14 @@
 
     .match-card.locked { pointer-events: none; }
 
+    .scenario-card {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .scenario-card:active { cursor: grabbing; }
+    .scenario-card.locked { cursor: default; }
+
     .match-icon {
       width: 50px;
       height: 50px;
@@ -469,7 +477,7 @@
       font-size: 1.7rem;
     }
 
-    .match-copy { flex: 1; }
+    .match-copy { flex: 1; min-width: 0; }
     .match-copy h4 { margin: 0 0 5px; font-size: 0.98rem; }
 
     .match-copy p {
@@ -477,6 +485,11 @@
       color: var(--muted);
       font-size: 0.88rem;
       line-height: 1.45;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      overflow: hidden;
     }
 
     .connection-point {
@@ -507,8 +520,11 @@
       top: 50%;
       left: -13px;
       transform: translateY(-50%);
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
     }
+
+    .target-point:hover { transform: translateY(-50%) scale(1.18); }
 
     .connection-layer {
       position: absolute;
@@ -764,9 +780,8 @@
     </div>
 
     <div class="controls">
-      <button class="control-btn" id="rulesBtn">📋 Rules</button>
       <button class="control-btn pulse-help" id="helpBtn">❓ Help</button>
-      <button class="control-btn" id="themeToggleBtn">🌙 Dark</button>
+      <button class="control-btn" id="themeToggleBtn">☀️ Light</button>
       <button class="control-btn" id="fullscreenBtn">⛶ Full Screen</button>
       <button class="control-btn" id="historyBtn">🧠 Review Memory</button>
       <button class="danger-btn" id="resetBtn">↻ Reset</button>
@@ -963,27 +978,14 @@
     <h3>❓ How This Works</h3>
     <ul>
       <li>Read each data-protection scenario carefully.</li>
-      <li>Drag from the connector beside a scenario to a backup option.</li>
+      <li>Drag from anywhere on a scenario card to a backup option.</li>
       <li>You can replace a connection before submitting.</li>
+      <li>Each scenario connects to one backup option, and each backup option can only be used once.</li>
       <li>The Submit Mission button appears after all five are connected.</li>
       <li>After submitting, review the strengths and limitations of each option.</li>
+      <li>Reset Connections clears only the cables; the top Reset button restarts the full simulation.</li>
     </ul>
     <button class="primary-btn" id="gotItBtn">Got it</button>
-  </section>
-</div>
-
-<div class="modal" id="rulesModal" role="dialog" aria-modal="true">
-  <section class="modal-card">
-    <button class="close-btn" id="closeRulesBtn" aria-label="Close">×</button>
-    <h3>📋 Quick Rules</h3>
-    <ul>
-      <li>Each scenario must connect to one backup option.</li>
-      <li>Each backup option can only be used once.</li>
-      <li>Think about capacity, access, portability and compatibility.</li>
-      <li>Reset Connections clears only the cables.</li>
-      <li>The top Reset button restarts the full simulation.</li>
-    </ul>
-    <button class="primary-btn" id="closeRulesBtn2">Close</button>
   </section>
 </div>
 
@@ -1110,7 +1112,6 @@ const dom = {
   continueFromTeachBtn: document.getElementById("continueFromTeachBtn"),
   openInstructionsBtn: document.getElementById("openInstructionsBtn"),
   helpBtn: document.getElementById("helpBtn"),
-  rulesBtn: document.getElementById("rulesBtn"),
   themeToggleBtn: document.getElementById("themeToggleBtn"),
   fullscreenBtn: document.getElementById("fullscreenBtn"),
   historyBtn: document.getElementById("historyBtn"),
@@ -1134,9 +1135,6 @@ const dom = {
   instructionsModal: document.getElementById("instructionsModal"),
   closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
   gotItBtn: document.getElementById("gotItBtn"),
-  rulesModal: document.getElementById("rulesModal"),
-  closeRulesBtn: document.getElementById("closeRulesBtn"),
-  closeRulesBtn2: document.getElementById("closeRulesBtn2"),
   confirmModal: document.getElementById("confirmModal"),
   confirmYesBtn: document.getElementById("confirmYesBtn"),
   confirmNoBtn: document.getElementById("confirmNoBtn"),
@@ -1188,13 +1186,6 @@ function bindEvents() {
     if (event.target === dom.instructionsModal) closeModal(dom.instructionsModal);
   });
 
-  dom.rulesBtn.addEventListener("click", () => openModal(dom.rulesModal));
-  dom.closeRulesBtn.addEventListener("click", () => closeModal(dom.rulesModal));
-  dom.closeRulesBtn2.addEventListener("click", () => closeModal(dom.rulesModal));
-  dom.rulesModal.addEventListener("click", event => {
-    if (event.target === dom.rulesModal) closeModal(dom.rulesModal);
-  });
-
   dom.themeToggleBtn.addEventListener("click", toggleTheme);
   dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
   document.addEventListener("fullscreenchange", updateFullscreenButton);
@@ -1225,7 +1216,6 @@ function bindEvents() {
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
       closeModal(dom.instructionsModal);
-      closeModal(dom.rulesModal);
       closeModal(dom.confirmModal);
       closeHistory();
     }
@@ -1253,7 +1243,8 @@ function buildCards() {
         type="button"
         data-scenario-id="${scenario.id}"
         aria-label="Connect ${scenario.title}"
-        title="Drag to a backup option"
+        title="Drag from anywhere on this card to a backup option"
+        tabindex="-1"
       ></button>
     `;
 
@@ -1278,12 +1269,12 @@ function buildCards() {
     dom.mediaList.appendChild(card);
   });
 
-  document.querySelectorAll(".source-point").forEach(connector => {
-    connector.addEventListener("pointerdown", startConnection);
-    connector.addEventListener("click", event => {
+  document.querySelectorAll(".scenario-card").forEach(card => {
+    card.addEventListener("pointerdown", startConnection);
+    card.addEventListener("click", event => {
       event.stopPropagation();
       if (state.submitted) return;
-      selectScenario(connector.dataset.scenarioId);
+      selectScenario(card.dataset.scenarioId);
     });
   });
 
@@ -1338,9 +1329,12 @@ function startConnection(event) {
   if (state.submitted) return;
 
   event.preventDefault();
-  state.activeScenarioId = event.currentTarget.dataset.scenarioId;
+  const card = event.currentTarget;
+  const scenarioId = card.dataset.scenarioId;
+  state.activeScenarioId = scenarioId;
 
-  const start = getElementCentre(event.currentTarget);
+  const anchor = card.querySelector(".source-point") || card;
+  const start = getElementCentre(anchor);
   state.previewPath = createSvgPath("connection-path preview");
   updatePath(state.previewPath, start.x, start.y, start.x, start.y);
 
@@ -1552,12 +1546,7 @@ function submitMission() {
   state.score = correct * 20;
   state.submitted = true;
 
-  dom.missionMessage.className =
-    `mission-message ${correct === GAME_DATA.scenarios.length ? "success" : "warning"}`;
-
-  dom.missionMessage.innerHTML = correct === GAME_DATA.scenarios.length
-    ? "<strong>🏆 Perfect mission!</strong> Every backup option was matched correctly. Review the explanations, then open the mission summary."
-    : `<strong>🛡️ Mission submitted.</strong> You matched ${correct} of ${GAME_DATA.scenarios.length} correctly. Green cables are correct and red cables need review.`;
+  renderMissionMessage();
 
   updateUI();
   drawConnections();
@@ -1567,6 +1556,18 @@ function submitMission() {
   if (correct === GAME_DATA.scenarios.length) {
     launchCelebration();
   }
+}
+
+function renderMissionMessage() {
+  const total = GAME_DATA.scenarios.length;
+  const correct = state.correctCount;
+  const perfect = correct === total;
+
+  dom.missionMessage.className = `mission-message ${perfect ? "success" : "warning"}`;
+
+  dom.missionMessage.innerHTML = perfect
+    ? "<strong>🏆 Perfect mission!</strong> Every backup option was matched correctly. Review the explanations, then open the mission summary."
+    : `<strong>🛡️ Mission submitted.</strong> You matched ${correct} of ${total} correctly. Green cables are correct and red cables need review.`;
 }
 
 function showSummary() {
@@ -1698,7 +1699,7 @@ function toggleTheme() {
 function applyTheme() {
   dom.html.setAttribute("data-theme", state.theme);
   dom.themeToggleBtn.textContent =
-    state.theme === "dark" ? "🌙 Dark" : "☀️ Light";
+    state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
 }
 
 function toggleFullscreen() {
@@ -1748,6 +1749,7 @@ function loadState() {
     state.correctCount = saved.correctCount || 0;
 
     updateUI();
+    if (state.submitted) renderMissionMessage();
     renderSummary();
     requestAnimationFrame(drawConnections);
   } catch (error) {
