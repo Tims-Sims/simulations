@@ -822,6 +822,7 @@
 
         .drop-zone {
             position: relative;
+            z-index: 2;
             min-height: 70px;
             border: 2px dashed var(--border);
             border-radius: var(--radius-md);
@@ -888,17 +889,25 @@
             display: none;
         }
 
-        .diagram-arrow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            color: var(--muted);
+        .diagram-connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
+            z-index: 1;
         }
 
-        .diagram-arrow-row {
-            display: contents;
+        .diagram-connector {
+            stroke: var(--accent);
+            stroke-width: 2;
+            stroke-linecap: round;
+            opacity: 0.6;
+        }
+
+        .diagram-connector-marker {
+            fill: var(--accent);
         }
 
         .diagram-palette {
@@ -923,12 +932,13 @@
         }
 
         .draggable-icon {
-            padding: 10px 18px;
+            padding: 10px 14px;
             border-radius: 999px;
             background: linear-gradient(135deg, var(--accent), var(--accent-2));
             color: #fff;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1.4rem;
+            line-height: 1;
             cursor: grab;
             transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
             touch-action: none;
@@ -2244,21 +2254,13 @@
                 [null,         "hyperlink", null]
             ];
 
-            const zoneArrows = {
-                "userdevice": { right: "→ Router", down: "↓ Browser" },
-                "router":     { right: "→ Server" },
-                "browser":    { right: "→ URL",    down: "↓ URL" },
-                "url":        { right: "→ Website" },
-                "website":    { right: "→ Hyperlink" }
-            };
-
             for (let r = 0; r < 3; r++) {
                 for (let c = 0; c < 3; c++) {
                     const zoneId = rowOrder[r][c];
                     if (zoneId) {
                         const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
                         if (zone) {
-                            map.appendChild(createDropZone(zone, zoneArrows[zone.id] || null, isReviewMode, alreadyAnswered));
+                            map.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered));
                         }
                     } else {
                         const empty = document.createElement("div");
@@ -2269,21 +2271,103 @@
 
             wrap.appendChild(map);
 
+            // Draw SVG connectors between zones
+            const svgNs = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNs, "svg");
+            svg.setAttribute("class", "diagram-connectors");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            svg.setAttribute("preserveAspectRatio", "none");
+            map.appendChild(svg);
+
+            requestAnimationFrame(() => {
+                const zones = map.querySelectorAll(".drop-zone");
+                const zoneMap = {};
+                zones.forEach(el => { zoneMap[el.dataset.zoneId] = el; });
+
+                const zoneCoords = {};
+                const mapRect = map.getBoundingClientRect();
+                DIAGRAM_DATA.zones.forEach(z => {
+                    const el = zoneMap[z.id];
+                    if (!el) return;
+                    const r = el.getBoundingClientRect();
+                    zoneCoords[z.id] = {
+                        left:   (r.left   - mapRect.left) / mapRect.width * 100,
+                        right:  (r.right  - mapRect.left) / mapRect.width * 100,
+                        top:    (r.top    - mapRect.top)  / mapRect.height * 100,
+                        bottom: (r.bottom - mapRect.top)  / mapRect.height * 100,
+                        cx:     (r.left + r.width / 2  - mapRect.left) / mapRect.width * 100,
+                        cy:     (r.top  + r.height / 2 - mapRect.top)  / mapRect.height * 100
+                    };
+                });
+
+                DIAGRAM_DATA.connections.forEach(conn => {
+                    const from = zoneCoords[conn.from];
+                    const to   = zoneCoords[conn.to];
+                    if (!from || !to) return;
+
+                    let x1, y1, x2, y2;
+                    const dr = Math.abs(to.cy - from.cy);
+                    const dc = Math.abs(to.cx - from.cx);
+
+                    if (dr < 5 && to.cx > from.cx) {
+                        // Same row, rightward
+                        x1 = from.right; y1 = from.cy;
+                        x2 = to.left;    y2 = to.cy;
+                    } else if (dc < 5 && to.cy > from.cy) {
+                        // Same column, downward
+                        x1 = from.cx; y1 = from.bottom;
+                        x2 = to.cx;   y2 = to.top;
+                    } else {
+                        // Diagonal: from source bottom to target top
+                        x1 = from.cx; y1 = from.bottom;
+                        x2 = to.cx;   y2 = to.top;
+                    }
+
+                    // Arrow line
+                    const line = document.createElementNS(svgNs, "line");
+                    line.setAttribute("x1", x1 + "%");
+                    line.setAttribute("y1", y1 + "%");
+                    line.setAttribute("x2", x2 + "%");
+                    line.setAttribute("y2", y2 + "%");
+                    line.setAttribute("class", "diagram-connector");
+                    svg.appendChild(line);
+
+                    // Arrowhead marker per connection
+                    const mid = conn.from + "-" + conn.to;
+                    const marker = document.createElementNS(svgNs, "marker");
+                    marker.setAttribute("id", mid);
+                    marker.setAttribute("viewBox", "0 0 10 10");
+                    marker.setAttribute("refX", "9");
+                    marker.setAttribute("refY", "5");
+                    marker.setAttribute("markerWidth", "6");
+                    marker.setAttribute("markerHeight", "6");
+                    marker.setAttribute("orient", "auto-start-reverse");
+                    const poly = document.createElementNS(svgNs, "polygon");
+                    poly.setAttribute("points", "0 0, 10 5, 0 10");
+                    poly.setAttribute("fill", "var(--accent)");
+                    marker.appendChild(poly);
+                    svg.appendChild(marker);
+                    line.setAttribute("marker-end", "url(#" + mid + ")");
+                });
+            });
+
             const palette = document.createElement("div");
             palette.className = "diagram-palette";
 
             const palLabel = document.createElement("div");
             palLabel.className = "diagram-palette-label";
-            palLabel.textContent = isReviewMode || alreadyAnswered ? "Placed Icons" : "Drag icons to the correct positions on the map above";
+            palLabel.textContent = isReviewMode || alreadyAnswered ? "Placed Icons" : "Match each icon to its correct position on the map";
             palette.appendChild(palLabel);
 
             DIAGRAM_DATA.icons.forEach((iconItem) => {
                 const iconEl = document.createElement("div");
                 iconEl.className = "draggable-icon";
-                iconEl.textContent = `${iconItem.emoji} ${iconItem.name}`;
+                iconEl.textContent = iconItem.emoji;
                 iconEl.draggable = !isReviewMode && !alreadyAnswered;
                 iconEl.dataset.iconName = iconItem.name;
                 iconEl.dataset.emoji = iconItem.emoji;
+                iconEl.title = iconItem.name;
                 iconEl.setAttribute("role", "button");
                 iconEl.setAttribute("tabindex", isReviewMode || alreadyAnswered ? "-1" : "0");
                 iconEl.setAttribute("aria-label", `Drag ${iconItem.name} to the map`);
@@ -2392,7 +2476,7 @@
             renderQuestion();
         }
 
-        function createDropZone(zone, arrows, isReviewMode, alreadyAnswered) {
+        function createDropZone(zone, isReviewMode, alreadyAnswered) {
             const div = document.createElement("div");
             div.className = "drop-zone";
             div.dataset.zoneId = zone.id;
@@ -2400,12 +2484,6 @@
             const label = document.createElement("div");
             label.className = "drop-zone-label";
             label.textContent = zone.label;
-            if (arrows && arrows.right) {
-                const arrowSpan = document.createElement("span");
-                arrowSpan.style.cssText = "color:var(--muted);margin-left:6px;font-size:0.7rem;";
-                arrowSpan.textContent = arrows.right;
-                label.appendChild(arrowSpan);
-            }
             div.appendChild(label);
 
             const slot = document.createElement("div");
@@ -2427,13 +2505,6 @@
                         div.classList.add(result.status === "wrong" ? "wrong" : "correct");
                     }
                 }
-            }
-
-            if (arrows && arrows.down) {
-                const downArrow = document.createElement("div");
-                downArrow.style.cssText = "color:var(--muted);font-size:0.7rem;margin-top:2px;pointer-events:none;";
-                downArrow.textContent = arrows.down;
-                div.appendChild(downArrow);
             }
 
             if (!isReviewMode && !alreadyAnswered) {
