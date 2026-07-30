@@ -900,11 +900,11 @@
 
         .diagram-connector {
             stroke: var(--accent);
-            stroke-width: 2.5;
+            stroke-width: 3;
             stroke-linecap: round;
             fill: none;
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .diagram-connectors.visible .diagram-connector {
             opacity: 0.85;
@@ -912,16 +912,17 @@
 
         .diagram-connector-label {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            font-size: 10px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             fill: var(--text);
             stroke: var(--surface);
-            stroke-width: 3px;
+            stroke-width: 4px;
             paint-order: stroke;
             text-anchor: middle;
             dominant-baseline: middle;
+            letter-spacing: 0.02em;
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .diagram-connectors.visible .diagram-connector-label {
             opacity: 1;
@@ -2698,8 +2699,8 @@
             marker.setAttribute("viewBox", "0 0 10 10");
             marker.setAttribute("refX", "8");
             marker.setAttribute("refY", "5");
-            marker.setAttribute("markerWidth", "8");
-            marker.setAttribute("markerHeight", "8");
+            marker.setAttribute("markerWidth", "10");
+            marker.setAttribute("markerHeight", "10");
             marker.setAttribute("orient", "auto");
             const accentHex = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#4488ff";
             const poly = document.createElementNS(svgNs, "polygon");
@@ -2719,11 +2720,15 @@
                 if (sameRow && to.cx > from.cx) {
                     x1 = from.right; y1 = from.cy;
                     x2 = to.left;    y2 = to.cy;
-                    cx1 = (x1 + x2) / 2; cy1 = from.cy - 18;
+                    const dist = Math.abs(x2 - x1);
+                    const arcH = Math.min(55, Math.max(28, dist * 0.25));
+                    cx1 = (x1 + x2) / 2; cy1 = from.cy - arcH;
                 } else {
                     x1 = from.cx; y1 = from.bottom;
                     x2 = to.cx;   y2 = to.top;
-                    cx1 = from.cx + 15; cy1 = (y1 + y2) / 2;
+                    const dist = Math.abs(y2 - y1);
+                    const curveW = Math.min(40, Math.max(18, dist * 0.15));
+                    cx1 = from.cx + curveW; cy1 = (y1 + y2) / 2;
                 }
 
                 const path = document.createElementNS(svgNs, "path");
@@ -2738,10 +2743,10 @@
                 let lx, ly;
                 if (sameRow) {
                     lx = (x1 + x2) / 2;
-                    ly = Math.max(10, from.top - 10);
+                    ly = Math.max(6, from.top - 16);
                 } else {
-                    lx = Math.max(x1, x2) + 16;
-                    ly = (y1 + y2) / 2;
+                    lx = Math.max(x1, x2) + 20;
+                    ly = (y1 + y2) / 2 + 4;
                 }
                 label.setAttribute("x", lx);
                 label.setAttribute("y", ly);
