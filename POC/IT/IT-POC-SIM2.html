@@ -2670,21 +2670,25 @@
             svg.setAttribute("height", "100%");
             mapEl.appendChild(svg);
 
-            const zoneMap = {};
-            mapEl.querySelectorAll(".drop-zone").forEach(el => { zoneMap[el.dataset.zoneId] = el; });
             const mapRect = mapEl.getBoundingClientRect();
+            svg.setAttribute("viewBox", `0 0 ${mapRect.width} ${mapRect.height}`);
+
+            const zones = mapEl.querySelectorAll(".drop-zone");
+            const zoneMap = {};
+            zones.forEach(el => { zoneMap[el.dataset.zoneId] = el; });
+
             const coords = {};
             DIAGRAM_DATA.zones.forEach(z => {
                 const el = zoneMap[z.id];
                 if (!el) return;
                 const r = el.getBoundingClientRect();
                 coords[z.id] = {
-                    left:   (r.left   - mapRect.left) / mapRect.width * 100,
-                    right:  (r.right  - mapRect.left) / mapRect.width * 100,
-                    top:    (r.top    - mapRect.top)  / mapRect.height * 100,
-                    bottom: (r.bottom - mapRect.top)  / mapRect.height * 100,
-                    cx:     (r.left + r.width/2  - mapRect.left) / mapRect.width * 100,
-                    cy:     (r.top  + r.height/2 - mapRect.top)  / mapRect.height * 100
+                    left:   r.left   - mapRect.left,
+                    right:  r.right  - mapRect.left,
+                    top:    r.top    - mapRect.top,
+                    bottom: r.bottom - mapRect.top,
+                    cx:     r.left + r.width/2  - mapRect.left,
+                    cy:     r.top  + r.height/2 - mapRect.top
                 };
             });
 
@@ -2692,10 +2696,10 @@
             const marker = document.createElementNS(svgNs, "marker");
             marker.setAttribute("id", "connectorArrow");
             marker.setAttribute("viewBox", "0 0 10 10");
-            marker.setAttribute("refX", "9");
+            marker.setAttribute("refX", "8");
             marker.setAttribute("refY", "5");
-            marker.setAttribute("markerWidth", "5");
-            marker.setAttribute("markerHeight", "5");
+            marker.setAttribute("markerWidth", "8");
+            marker.setAttribute("markerHeight", "8");
             marker.setAttribute("orient", "auto");
             const accentHex = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#4488ff";
             const poly = document.createElementNS(svgNs, "polygon");
@@ -2710,16 +2714,16 @@
                 const to   = coords[conn.to];
                 if (!from || !to) return;
 
-                const sameRow = Math.abs(to.cy - from.cy) < 8;
+                const sameRow = Math.abs(to.cy - from.cy) < mapRect.height * 0.08;
                 let x1, y1, x2, y2, cx1, cy1;
                 if (sameRow && to.cx > from.cx) {
                     x1 = from.right; y1 = from.cy;
                     x2 = to.left;    y2 = to.cy;
-                    cx1 = (x1 + x2) / 2; cy1 = from.cy - 6;
+                    cx1 = (x1 + x2) / 2; cy1 = from.cy - 18;
                 } else {
                     x1 = from.cx; y1 = from.bottom;
                     x2 = to.cx;   y2 = to.top;
-                    cx1 = from.cx + 4; cy1 = (y1 + y2) / 2;
+                    cx1 = from.cx + 15; cy1 = (y1 + y2) / 2;
                 }
 
                 const path = document.createElementNS(svgNs, "path");
@@ -2727,17 +2731,23 @@
                 path.setAttribute("d", d);
                 path.setAttribute("class", "diagram-connector");
                 path.setAttribute("marker-end", "url(#connectorArrow)");
-                path.style.transitionDelay = `${idx * 0.3}s`;
+                path.style.transitionDelay = `${idx * 0.25}s`;
                 svg.appendChild(path);
 
                 const label = document.createElementNS(svgNs, "text");
-                const lx = sameRow ? (x1 + x2) / 2 : (x1 + x2) / 2 + 8;
-                const ly = sameRow ? Math.max(1, from.top - 2) : (y1 + y2) / 2;
+                let lx, ly;
+                if (sameRow) {
+                    lx = (x1 + x2) / 2;
+                    ly = Math.max(10, from.top - 10);
+                } else {
+                    lx = Math.max(x1, x2) + 16;
+                    ly = (y1 + y2) / 2;
+                }
                 label.setAttribute("x", lx);
                 label.setAttribute("y", ly);
                 label.setAttribute("class", "diagram-connector-label");
                 label.textContent = conn.label;
-                label.style.transitionDelay = `${idx * 0.3 + 0.45}s`;
+                label.style.transitionDelay = `${idx * 0.25 + 0.35}s`;
                 svg.appendChild(label);
             });
 
