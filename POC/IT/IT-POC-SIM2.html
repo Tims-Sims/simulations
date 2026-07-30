@@ -833,14 +833,8 @@
             gap: 4px;
             padding: 8px;
             background: color-mix(in srgb, var(--surface) 60%, transparent);
-            transition: border-color 0.2s, background 0.2s, transform 0.15s;
-            cursor: pointer;
-        }
-
-        .drop-zone.drag-over {
-            border-color: var(--accent);
-            background: color-mix(in srgb, var(--accent) 12%, var(--surface));
-            transform: scale(1.03);
+            transition: border-color 0.2s, background 0.2s;
+            cursor: default;
         }
 
         .drop-zone.filled {
@@ -897,17 +891,36 @@
             height: 100%;
             pointer-events: none;
             z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .diagram-connectors.visible {
+            opacity: 1;
         }
 
         .diagram-connector {
             stroke: var(--accent);
             stroke-width: 2;
             stroke-linecap: round;
-            opacity: 0.6;
+            fill: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .diagram-connectors.visible .diagram-connector {
+            opacity: 0.65;
         }
 
-        .diagram-connector-marker {
-            fill: var(--accent);
+        .diagram-connector-label {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-size: 10px;
+            fill: var(--text-soft);
+            text-anchor: middle;
+            dominant-baseline: middle;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .diagram-connectors.visible .diagram-connector-label {
+            opacity: 1;
         }
 
         .diagram-palette {
@@ -1464,13 +1477,13 @@
            ============================================================ */
         const DIAGRAM_DATA = {
             zones: [
-                { id: "userdevice",  label: "User Device", emoji: "💻", correctIcon: "User Device",  row: 0, col: 0 },
-                { id: "browser",     label: "Browser",     emoji: "🌐", correctIcon: "Browser",     row: 1, col: 0 },
-                { id: "router",      label: "Router",      emoji: "📡", correctIcon: "Router",      row: 0, col: 1 },
-                { id: "server",      label: "Server",      emoji: "🖥️", correctIcon: "Server",      row: 0, col: 2 },
-                { id: "url",         label: "URL",         emoji: "🔗", correctIcon: "URL",         row: 2, col: 0 },
-                { id: "website",     label: "Website",     emoji: "📄", correctIcon: "Website",     row: 2, col: 1 },
-                { id: "hyperlink",   label: "Hyperlink",   emoji: "↗️", correctIcon: "Hyperlink",   row: 2, col: 2 }
+                { id: "userdevice",  label: "User Device", desc: "Your computer or phone that connects to the Internet", emoji: "💻", correctIcon: "User Device",  row: 0, col: 0 },
+                { id: "browser",     label: "Browser",     desc: "Opens and displays web pages from the web",            emoji: "🌐", correctIcon: "Browser",     row: 1, col: 0 },
+                { id: "router",      label: "Router",      desc: "Directs data packets between networks",              emoji: "📡", correctIcon: "Router",      row: 0, col: 1 },
+                { id: "server",      label: "Server",      desc: "Stores website files and delivers them on request",  emoji: "🖥️", correctIcon: "Server",      row: 0, col: 2 },
+                { id: "url",         label: "URL",         desc: "The web address that finds a specific page",          emoji: "🔗", correctIcon: "URL",         row: 2, col: 0 },
+                { id: "website",     label: "Website",     desc: "A collection of pages you view and interact with",    emoji: "📄", correctIcon: "Website",     row: 2, col: 1 },
+                { id: "hyperlink",   label: "Hyperlink",   desc: "A clickable link connecting one page to another",    emoji: "↗️", correctIcon: "Hyperlink",   row: 2, col: 2 }
             ],
             icons: [
                 { name: "User Device", emoji: "💻" },
@@ -2271,87 +2284,6 @@
 
             wrap.appendChild(map);
 
-            // Draw SVG connectors between zones
-            const svgNs = "http://www.w3.org/2000/svg";
-            const svg = document.createElementNS(svgNs, "svg");
-            svg.setAttribute("class", "diagram-connectors");
-            svg.setAttribute("width", "100%");
-            svg.setAttribute("height", "100%");
-            svg.setAttribute("preserveAspectRatio", "none");
-            map.appendChild(svg);
-
-            requestAnimationFrame(() => {
-                const zones = map.querySelectorAll(".drop-zone");
-                const zoneMap = {};
-                zones.forEach(el => { zoneMap[el.dataset.zoneId] = el; });
-
-                const zoneCoords = {};
-                const mapRect = map.getBoundingClientRect();
-                DIAGRAM_DATA.zones.forEach(z => {
-                    const el = zoneMap[z.id];
-                    if (!el) return;
-                    const r = el.getBoundingClientRect();
-                    zoneCoords[z.id] = {
-                        left:   (r.left   - mapRect.left) / mapRect.width * 100,
-                        right:  (r.right  - mapRect.left) / mapRect.width * 100,
-                        top:    (r.top    - mapRect.top)  / mapRect.height * 100,
-                        bottom: (r.bottom - mapRect.top)  / mapRect.height * 100,
-                        cx:     (r.left + r.width / 2  - mapRect.left) / mapRect.width * 100,
-                        cy:     (r.top  + r.height / 2 - mapRect.top)  / mapRect.height * 100
-                    };
-                });
-
-                DIAGRAM_DATA.connections.forEach(conn => {
-                    const from = zoneCoords[conn.from];
-                    const to   = zoneCoords[conn.to];
-                    if (!from || !to) return;
-
-                    let x1, y1, x2, y2;
-                    const dr = Math.abs(to.cy - from.cy);
-                    const dc = Math.abs(to.cx - from.cx);
-
-                    if (dr < 5 && to.cx > from.cx) {
-                        // Same row, rightward
-                        x1 = from.right; y1 = from.cy;
-                        x2 = to.left;    y2 = to.cy;
-                    } else if (dc < 5 && to.cy > from.cy) {
-                        // Same column, downward
-                        x1 = from.cx; y1 = from.bottom;
-                        x2 = to.cx;   y2 = to.top;
-                    } else {
-                        // Diagonal: from source bottom to target top
-                        x1 = from.cx; y1 = from.bottom;
-                        x2 = to.cx;   y2 = to.top;
-                    }
-
-                    // Arrow line
-                    const line = document.createElementNS(svgNs, "line");
-                    line.setAttribute("x1", x1 + "%");
-                    line.setAttribute("y1", y1 + "%");
-                    line.setAttribute("x2", x2 + "%");
-                    line.setAttribute("y2", y2 + "%");
-                    line.setAttribute("class", "diagram-connector");
-                    svg.appendChild(line);
-
-                    // Arrowhead marker per connection
-                    const mid = conn.from + "-" + conn.to;
-                    const marker = document.createElementNS(svgNs, "marker");
-                    marker.setAttribute("id", mid);
-                    marker.setAttribute("viewBox", "0 0 10 10");
-                    marker.setAttribute("refX", "9");
-                    marker.setAttribute("refY", "5");
-                    marker.setAttribute("markerWidth", "6");
-                    marker.setAttribute("markerHeight", "6");
-                    marker.setAttribute("orient", "auto-start-reverse");
-                    const poly = document.createElementNS(svgNs, "polygon");
-                    poly.setAttribute("points", "0 0, 10 5, 0 10");
-                    poly.setAttribute("fill", "var(--accent)");
-                    marker.appendChild(poly);
-                    svg.appendChild(marker);
-                    line.setAttribute("marker-end", "url(#" + mid + ")");
-                });
-            });
-
             const palette = document.createElement("div");
             palette.className = "diagram-palette";
 
@@ -2430,6 +2362,7 @@
                         congrats.innerHTML = `<h3>🎉 Congratulations!</h3><p>You placed all 7 parts correctly. You've built the complete Internet Parts Map! Scroll down to see how information travels step by step.</p>`;
                         wrap.appendChild(congrats);
                         setTimeout(() => highlightPathStep(0), 500);
+                        setTimeout(() => renderArrows(map), 300);
                     }
                 }
 
@@ -2483,7 +2416,8 @@
 
             const label = document.createElement("div");
             label.className = "drop-zone-label";
-            label.textContent = zone.label;
+            label.textContent = zone.desc || zone.label;
+            label.title = "Place the correct icon here";
             div.appendChild(label);
 
             const slot = document.createElement("div");
@@ -2508,8 +2442,7 @@
             }
 
             if (!isReviewMode && !alreadyAnswered) {
-                div.addEventListener("dragover", onDragOver);
-                div.addEventListener("dragleave", onDragLeave);
+                div.addEventListener("dragover", e => e.preventDefault());
                 div.addEventListener("drop", onDrop);
                 div.addEventListener("touchstart", onZoneTouchStart, { passive: false });
             }
@@ -2529,27 +2462,12 @@
 
         function onDragEnd(event) {
             document.querySelectorAll(".draggable-icon").forEach(el => el.classList.remove("dragging"));
-            document.querySelectorAll(".drop-zone").forEach(el => el.classList.remove("drag-over"));
             diagramState.draggedIcon = null;
-        }
-
-        function onDragOver(event) {
-            event.preventDefault();
-            event.dataTransfer.dropEffect = "move";
-            const zone = event.currentTarget;
-            if (!zone.classList.contains("filled")) {
-                zone.classList.add("drag-over");
-            }
-        }
-
-        function onDragLeave(event) {
-            event.currentTarget.classList.remove("drag-over");
         }
 
         function onDrop(event) {
             event.preventDefault();
             const zone = event.currentTarget;
-            zone.classList.remove("drag-over");
             const zoneId = zone.dataset.zoneId;
             const iconName = event.dataTransfer.getData("text/plain");
             if (!iconName || !zoneId) return;
@@ -2582,12 +2500,8 @@
             touchClone.style.top = (touch.clientY - 20) + "px";
             touchClone.style.pointerEvents = "none";
 
-            document.querySelectorAll(".drop-zone").forEach(el => {
-                const rect = el.getBoundingClientRect();
-                const isOver = touch.clientX >= rect.left && touch.clientX <= rect.right &&
-                    touch.clientY >= rect.top && touch.clientY <= rect.bottom;
-                el.classList.toggle("drag-over", isOver && !el.classList.contains("filled"));
-            });
+            // touch move indicator (no highlight needed)
+
         }
 
         function onTouchEnd(event) {
@@ -2600,7 +2514,6 @@
             const touch = event.changedTouches[0];
             let targetZone = null;
             document.querySelectorAll(".drop-zone").forEach(el => {
-                el.classList.remove("drag-over");
                 const rect = el.getBoundingClientRect();
                 if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
                     touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
@@ -2740,6 +2653,91 @@
                     }
                 }
             }
+        }
+
+        function renderArrows(mapEl) {
+            let svg = mapEl.querySelector(".diagram-connectors");
+            if (svg) svg.remove();
+
+            const svgNs = "http://www.w3.org/2000/svg";
+            svg = document.createElementNS(svgNs, "svg");
+            svg.setAttribute("class", "diagram-connectors");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            mapEl.appendChild(svg);
+
+            const zoneMap = {};
+            mapEl.querySelectorAll(".drop-zone").forEach(el => { zoneMap[el.dataset.zoneId] = el; });
+            const mapRect = mapEl.getBoundingClientRect();
+            const coords = {};
+            DIAGRAM_DATA.zones.forEach(z => {
+                const el = zoneMap[z.id];
+                if (!el) return;
+                const r = el.getBoundingClientRect();
+                coords[z.id] = {
+                    left:   (r.left   - mapRect.left) / mapRect.width * 100,
+                    right:  (r.right  - mapRect.left) / mapRect.width * 100,
+                    top:    (r.top    - mapRect.top)  / mapRect.height * 100,
+                    bottom: (r.bottom - mapRect.top)  / mapRect.height * 100,
+                    cx:     (r.left + r.width/2  - mapRect.left) / mapRect.width * 100,
+                    cy:     (r.top  + r.height/2 - mapRect.top)  / mapRect.height * 100
+                };
+            });
+
+            const defs = document.createElementNS(svgNs, "defs");
+            const marker = document.createElementNS(svgNs, "marker");
+            marker.setAttribute("id", "connectorArrow");
+            marker.setAttribute("viewBox", "0 0 10 10");
+            marker.setAttribute("refX", "9");
+            marker.setAttribute("refY", "5");
+            marker.setAttribute("markerWidth", "5");
+            marker.setAttribute("markerHeight", "5");
+            marker.setAttribute("orient", "auto");
+            const accentHex = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#4488ff";
+            const poly = document.createElementNS(svgNs, "polygon");
+            poly.setAttribute("points", "0 0, 10 5, 0 10");
+            poly.setAttribute("fill", accentHex);
+            marker.appendChild(poly);
+            defs.appendChild(marker);
+            svg.appendChild(defs);
+
+            DIAGRAM_DATA.connections.forEach((conn, idx) => {
+                const from = coords[conn.from];
+                const to   = coords[conn.to];
+                if (!from || !to) return;
+
+                const sameRow = Math.abs(to.cy - from.cy) < 8;
+                let x1, y1, x2, y2, cx1, cy1;
+                if (sameRow && to.cx > from.cx) {
+                    x1 = from.right; y1 = from.cy;
+                    x2 = to.left;    y2 = to.cy;
+                    cx1 = (x1 + x2) / 2; cy1 = from.cy - 6;
+                } else {
+                    x1 = from.cx; y1 = from.bottom;
+                    x2 = to.cx;   y2 = to.top;
+                    cx1 = from.cx + 4; cy1 = (y1 + y2) / 2;
+                }
+
+                const path = document.createElementNS(svgNs, "path");
+                const d = `M ${x1} ${y1} Q ${cx1} ${cy1}, ${x2} ${y2}`;
+                path.setAttribute("d", d);
+                path.setAttribute("class", "diagram-connector");
+                path.setAttribute("marker-end", "url(#connectorArrow)");
+                path.style.transitionDelay = `${idx * 0.3}s`;
+                svg.appendChild(path);
+
+                const label = document.createElementNS(svgNs, "text");
+                const lx = (x1 + x2) / 2;
+                const ly = sameRow ? Math.min(y1, y2) - 10 : (y1 + y2) / 2 - 8;
+                label.setAttribute("x", lx);
+                label.setAttribute("y", ly);
+                label.setAttribute("class", "diagram-connector-label");
+                label.textContent = conn.label;
+                label.style.transitionDelay = `${idx * 0.3 + 0.45}s`;
+                svg.appendChild(label);
+            });
+
+            requestAnimationFrame(() => svg.classList.add("visible"));
         }
 
         /* ============================================================
