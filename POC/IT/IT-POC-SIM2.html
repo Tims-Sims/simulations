@@ -1795,7 +1795,6 @@
             showScreen("game");
             state.reviewModeIndex = null;
             diagramState.placements = {};
-            diagramState.shuffledDescs = null;
             startGameTimer();
             renderQuestion();
         }
@@ -2260,21 +2259,6 @@
             dom.answerArea.innerHTML = "";
             diagramState.placements = alreadyAnswered ? (state.answers[question.id] ? JSON.parse(state.answers[question.id]) : {}) : {};
 
-            // Shuffle descriptions for this render (copy, not in-place)
-            let descMap = null;
-            if (!isReviewMode && !alreadyAnswered) {
-                const shuffled = DIAGRAM_DATA.zones.map(z => z.desc);
-                for (let i = shuffled.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                }
-                descMap = {};
-                DIAGRAM_DATA.zones.forEach((z, i) => { descMap[z.id] = shuffled[i]; });
-                diagramState.shuffledDescs = descMap;
-            } else if (diagramState.shuffledDescs) {
-                descMap = diagramState.shuffledDescs;
-            }
-
             const wrap = document.createElement("div");
             wrap.className = "diagram-wrap";
 
@@ -2294,8 +2278,7 @@
                     if (zoneId) {
                         const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
                         if (zone) {
-                            const zoneDesc = descMap ? descMap[zone.id] : zone.desc;
-                            map.appendChild(createDropZone(zone, zoneDesc, isReviewMode, alreadyAnswered));
+                            map.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered));
                         }
                     } else {
                         const empty = document.createElement("div");
@@ -2433,7 +2416,6 @@
 
         function resetDiagramMap() {
             diagramState.placements = {};
-            diagramState.shuffledDescs = null;
             const q = getCurrentQuestion();
             if (q) {
                 delete state.results[q.id];
@@ -2442,14 +2424,14 @@
             renderQuestion();
         }
 
-        function createDropZone(zone, desc, isReviewMode, alreadyAnswered) {
+        function createDropZone(zone, isReviewMode, alreadyAnswered) {
             const div = document.createElement("div");
             div.className = "drop-zone";
             div.dataset.zoneId = zone.id;
 
             const label = document.createElement("div");
             label.className = "drop-zone-label";
-            label.textContent = desc || zone.label;
+            label.textContent = zone.desc || zone.label;
             label.title = "Place the correct icon here";
             div.appendChild(label);
 
