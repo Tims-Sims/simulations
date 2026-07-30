@@ -1504,6 +1504,16 @@
             ]
         };
 
+        // Shuffle zone descriptions so students can't memorize positions
+        (function shuffleDescs() {
+            const descs = DIAGRAM_DATA.zones.map(z => z.desc);
+            for (let i = descs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [descs[i], descs[j]] = [descs[j], descs[i]];
+            }
+            DIAGRAM_DATA.zones.forEach((z, i) => { z.desc = descs[i]; });
+        })();
+
         const QUESTIONS = [
             {
                 id: "diagram",
@@ -2757,12 +2767,9 @@
             let correctCount = 0;
             let wrongZones = [];
             let correctZones = [];
-            let debugLog = [];
-
             DIAGRAM_DATA.zones.forEach((zone) => {
                 const placed = placements[zone.id];
                 const isCorrect = placed === zone.correctIcon;
-                debugLog.push(`${zone.id}: got="${placed}", expected="${zone.correctIcon}", match=${isCorrect}`);
                 if (isCorrect) {
                     correctCount++;
                     correctZones.push(zone.label);
@@ -2770,7 +2777,6 @@
                     wrongZones.push({ label: zone.label, got: placed, expected: zone.correctIcon });
                 }
             });
-            debugLog.unshift(`raw answerStr keys=[${Object.keys(placements).join(",")}]`);
 
             const scorePerZone = Math.round(question.points / totalZones);
             const scoreAwarded = correctCount * scorePerZone;
@@ -2799,8 +2805,6 @@
                 status = "wrong";
                 explanation = "None of the parts are in the right place yet. Remember: hardware on top (User Device → Router → Server), software below (Browser → URL → Website). Hyperlink connects within the website.";
             }
-            explanation += `  [DEBUG] ${debugLog.join(" | ")}`;
-
             // Store per-zone results for review
             DIAGRAM_DATA.zones.forEach((zone) => {
                 const placed = placements[zone.id];
