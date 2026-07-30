@@ -1663,6 +1663,7 @@
             alertBox: document.getElementById("alertBox"),
             previousBtn: document.getElementById("previousBtn"),
             nextBtn: document.getElementById("nextBtn"),
+            navigationRow: document.querySelector(".navigation-row"),
             summaryTitle: document.getElementById("summaryTitle"),
             summaryDescription: document.getElementById("summaryDescription"),
             summaryScore: document.getElementById("summaryScore"),
@@ -1847,6 +1848,12 @@
             // 🔒 Lock submit button if already answered
             dom.submitBtn.classList.toggle("hidden", isReviewMode);
             dom.submitBtn.disabled = alreadyAnswered || isReviewMode;
+
+            // Toggle visibility: show submit row before answering, nav row after
+            const submitRow = dom.submitBtn.parentElement;
+            const answered = alreadyAnswered || isReviewMode;
+            submitRow.classList.toggle("hidden", answered);
+            if (dom.navigationRow) dom.navigationRow.classList.toggle("hidden", !answered);
 
             dom.answerArea.innerHTML = "";
 
@@ -2052,6 +2059,11 @@
             updateStatusUI();
             updateSummaryScreen();
             saveStateToStorage();
+
+            // Hide submit row, show nav row after answering
+            const submitRow = dom.submitBtn.parentElement;
+            submitRow.classList.add("hidden");
+            if (dom.navigationRow) dom.navigationRow.classList.remove("hidden");
 
             // Re-render diagram to show correct zones and flow explanation
             if (question.type === "diagram") {
