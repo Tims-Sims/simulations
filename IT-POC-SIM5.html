@@ -815,7 +815,7 @@
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Full Screen</button>
-                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="control-btn hidden" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
                 <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
             </div>
         </header>
@@ -880,7 +880,7 @@
                         <div class="alert-box" id="alertBox"></div>
 
                         <div class="navigation-row">
-                            <button type="button" class="nav-btn" id="previousBtn">← Previous</button>
+                            <button type="button" class="nav-btn hidden" id="previousBtn">← Previous</button>
                             <div class="spacer"></div>
                             <button type="button" class="nav-btn" id="nextBtn">Next →</button>
                         </div>
@@ -928,7 +928,7 @@
                     <div class="results-list" id="summaryResults"></div>
 
                     <div class="button-row" style="margin-top: 24px;">
-                        <button class="secondary-btn" id="reviewFromSummaryBtn">🧠 Review Memory</button>
+                        <button class="secondary-btn hidden" id="reviewFromSummaryBtn">🧠 Review Memory</button>
                         <button class="primary-btn" id="playAgainBtn">Play Again</button>
                     </div>
                 </section>
@@ -976,7 +976,7 @@
             title: "Password Strength Lab",
             subtitle: "Data Protection and Physical/Software Security Issues",
             badgeText: "IT",
-            homeEyebrow: "Template Shell Ready",
+            homeEyebrow: "Form 1 IT Simulation",
             homeDescription:
                 "Students build passwords using character blocks or typed input. A strength meter gives feedback on length, variety, predictability, and avoiding personal information. Recommendations are given on how to improve password strength.",
             instructions: [
@@ -1039,11 +1039,6 @@
                 prompt: "Please enter a strong password.",
                 directions: "",
                 type: "text",
-                choices: [
-                    `Looking at the floor, mumbling, and speaking very fast`,
-                    `Standing straight, using a steady pace, and looking at one friendly face`,
-                    `Waving both hands constantly and laughing through every sentence`,
-                ],
                 hint: "Choose the clearest sentence for formal speaking.",
                 explanation: "A fraction tells us about parts of a whole. For example, 1/2 means one of two equal parts.",
                 points: 10,
@@ -1056,7 +1051,9 @@
                         return {
                             status: result.score >= 80 ? "correct" : "wrong",
                             scoreAwarded: result.score >= 80 ? question.points : 0,
-                            explanation: result.messages.join("<br>")
+                            explanation: result.score >= 80 ?
+                                "Excellent! Your password is long, uses a variety of character types, and avoids common predictable patterns."
+                                : result.messages.join("<br>")
                         };},
                     correctAnswer: 1,
                     explanations: ["This is incorrect because the emphasis is on the wrong part of the sentence. It does not help the listener catch the correct day. To fix it, stress the word that carries the important correction.",
@@ -1450,6 +1447,7 @@
             const input = document.createElement("input");
             input.className = "input-field";
             input.type = question.passwordStrength ? "password" : "text";
+            input.maxLength = 64;
             input.id = "dynamicAnswerInput";
             input.placeholder = question.placeholder || "Type your answer here";
             input.value = currentAnswer ?? "";
@@ -1521,6 +1519,7 @@
             // Length
             if (password.length >= 12) {
                 score += 25;
+                messages.push("✓ Good length (12+ characters).");
             } else {
                 messages.push("Use at least 12 characters.");
             }
@@ -1528,6 +1527,7 @@
             // Uppercase
             if (/[A-Z]/.test(password)) {
                 score += 15;
+                messages.push("✓ Contains an uppercase letter.");
             } else {
                 messages.push("Include an uppercase letter.");
             }
@@ -1535,6 +1535,7 @@
             // Lowercase
             if (/[a-z]/.test(password)) {
                 score += 15;
+                messages.push("✓ Contains a lowercase letter.");
             } else {
                 messages.push("Include a lowercase letter.");
             }
@@ -1542,6 +1543,7 @@
             // Number
             if (/\d/.test(password)) {
                 score += 20;
+                messages.push("✓ Contains a number.");
             } else {
                 messages.push("Include at least one number.");
             }
@@ -1549,6 +1551,7 @@
             // Symbol
             if (/[^A-Za-z0-9]/.test(password)) {
                 score += 25;
+                messages.push("✓ Contains a special character.");
             } else {
                 messages.push("Include a special character.");
             }
@@ -1889,7 +1892,7 @@
                 item.innerHTML = `
                     <h4>${escapeHtml(question.title)}</h4>
                     <p><span class="status-pill ${escapeHtml(result.status)}">${escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status)}</span></p>
-                    <p class="muted" style="margin-top:8px;">Saved answer: ${question, question.choices[answer]}</p>
+                    <p class="muted" style="margin-top:8px;">Saved answer: ${question, state.answers[question.id]}</p>
                     <p class="muted" style="margin-top:8px;">${(result.explanation || question.explanations[answer] || "")}</p>
                 `;
 
@@ -1995,7 +1998,7 @@
                 card.innerHTML = `
                     <h4>${escapeHtml(question.title)}</h4>
                     <p><span class="status-pill ${escapeHtml(result.status)}">${escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status)}</span></p>
-                    <p style="margin-top:8px;">Answer: <strong style="font-weight: normal; font-style: oblique;">${(question, question.choices[state.answers[question.id]])}</strong></p>
+                    <p style="margin-top:8px;">Answer: <strong style="font-weight: normal; font-style: oblique;">${(state.answers[question.id])}</strong></p>
                     <p style="margin-top:8px;">${(result.explanation || question.explanation || "")}</p>
                     <div class="result-meta">Score awarded: ${result.scoreAwarded} / ${question.points}</div>
                 `;
