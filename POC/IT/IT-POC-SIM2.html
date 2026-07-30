@@ -892,37 +892,23 @@
             pointer-events: none;
             z-index: 10;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.5s ease;
         }
         .diagram-connectors.visible {
             opacity: 1;
         }
 
-        .diagram-connector {
+        .diagram-connector-flow {
             stroke: var(--accent);
-            stroke-width: 3;
+            stroke-width: 2;
             stroke-linecap: round;
             fill: none;
-            opacity: 0;
-            transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .diagram-connectors.visible .diagram-connector {
-            opacity: 0.85;
+            stroke-dasharray: 6 5;
+            animation: flowMove 0.8s linear infinite;
         }
 
-        .diagram-connector-label {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            font-size: 12px;
-            font-weight: 700;
-            fill: var(--text);
-            stroke: var(--surface);
-            stroke-width: 4px;
-            paint-order: stroke;
-            text-anchor: middle;
-            dominant-baseline: middle;
-            letter-spacing: 0.02em;
-            opacity: 0;
-            transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        @keyframes flowMove {
+            to { stroke-dashoffset: -22; }
         }
         .diagram-connectors.visible .diagram-connector-label {
             opacity: 1;
@@ -2678,12 +2664,12 @@
             const zoneMap = {};
             zones.forEach(el => { zoneMap[el.dataset.zoneId] = el; });
 
-            const coords = {};
-            DIAGRAM_DATA.zones.forEach(z => {
-                const el = zoneMap[z.id];
+            const z = {};
+            DIAGRAM_DATA.zones.forEach(zone => {
+                const el = zoneMap[zone.id];
                 if (!el) return;
                 const r = el.getBoundingClientRect();
-                coords[z.id] = {
+                z[zone.id] = {
                     left:   r.left   - mapRect.left,
                     right:  r.right  - mapRect.left,
                     top:    r.top    - mapRect.top,
@@ -2697,10 +2683,10 @@
             const marker = document.createElementNS(svgNs, "marker");
             marker.setAttribute("id", "connectorArrow");
             marker.setAttribute("viewBox", "0 0 10 10");
-            marker.setAttribute("refX", "8");
+            marker.setAttribute("refX", "9");
             marker.setAttribute("refY", "5");
-            marker.setAttribute("markerWidth", "10");
-            marker.setAttribute("markerHeight", "10");
+            marker.setAttribute("markerWidth", "6");
+            marker.setAttribute("markerHeight", "6");
             marker.setAttribute("orient", "auto");
             const accentHex = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#4488ff";
             const poly = document.createElementNS(svgNs, "polygon");
@@ -2710,50 +2696,42 @@
             defs.appendChild(marker);
             svg.appendChild(defs);
 
-            DIAGRAM_DATA.connections.forEach((conn, idx) => {
-                const from = coords[conn.from];
-                const to   = coords[conn.to];
+            // Flow order matching the flowSteps: server → router → userdevice → browser → url → website → hyperlink
+            const flowOrder = [
+                { from: "server",     to: "router" },
+                { from: "router",     to: "userdevice" },
+                { from: "userdevice", to: "browser" },
+                { from: "browser",    to: "url" },
+                { from: "url",        to: "website" },
+                { from: "website",    to: "hyperlink" }
+            ];
+
+            flowOrder.forEach((seg, idx) => {
+                const from = z[seg.from];
+                const to   = z[seg.to];
                 if (!from || !to) return;
 
                 const sameRow = Math.abs(to.cy - from.cy) < mapRect.height * 0.08;
-                let x1, y1, x2, y2, cx1, cy1;
-                if (sameRow && to.cx > from.cx) {
-                    x1 = from.right; y1 = from.cy;
-                    x2 = to.left;    y2 = to.cy;
-                    const dist = Math.abs(x2 - x1);
-                    const arcH = Math.min(55, Math.max(28, dist * 0.25));
-                    cx1 = (x1 + x2) / 2; cy1 = from.cy - arcH;
+                let x1, y1, x2, y2;
+                if (sameRow) {
+                    if (to.cx > from.cx) {
+                        x1 = from.right; y1 = from.cy;
+                        x2 = to.left;    y2 = to.cy;
+                    } else {
+                        x1 = from.left; y1 = from.cy;
+                        x2 = to.right;  y2 = to.cy;
+                    }
                 } else {
                     x1 = from.cx; y1 = from.bottom;
                     x2 = to.cx;   y2 = to.top;
-                    const dist = Math.abs(y2 - y1);
-                    const curveW = Math.min(40, Math.max(18, dist * 0.15));
-                    cx1 = from.cx + curveW; cy1 = (y1 + y2) / 2;
                 }
 
                 const path = document.createElementNS(svgNs, "path");
-                const d = `M ${x1} ${y1} Q ${cx1} ${cy1}, ${x2} ${y2}`;
-                path.setAttribute("d", d);
-                path.setAttribute("class", "diagram-connector");
+                path.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
+                path.setAttribute("class", "diagram-connector-flow");
                 path.setAttribute("marker-end", "url(#connectorArrow)");
-                path.style.transitionDelay = `${idx * 0.25}s`;
+                path.style.animationDelay = `${idx * 0.25}s`;
                 svg.appendChild(path);
-
-                const label = document.createElementNS(svgNs, "text");
-                let lx, ly;
-                if (sameRow) {
-                    lx = (x1 + x2) / 2;
-                    ly = Math.max(6, from.top - 16);
-                } else {
-                    lx = Math.max(x1, x2) + 20;
-                    ly = (y1 + y2) / 2 + 4;
-                }
-                label.setAttribute("x", lx);
-                label.setAttribute("y", ly);
-                label.setAttribute("class", "diagram-connector-label");
-                label.textContent = conn.label;
-                label.style.transitionDelay = `${idx * 0.25 + 0.35}s`;
-                svg.appendChild(label);
             });
 
             requestAnimationFrame(() => svg.classList.add("visible"));
