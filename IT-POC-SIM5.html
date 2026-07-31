@@ -845,8 +845,23 @@
                         This is a professional offline-ready template for maths, ELA, and similar student simulations.
                         Your developers can swap in their own questions, hints, explanations, scoring, and custom logic.
                     </p>
+                    <br>
+                    <form>
+                        <p>Please enter your details to begin:</p>
+                        <label>First Name</label>
+                        <br>
+                        <input type="text" id="firstName">
+                        <br>
+                        <label>Last Name</label>
+                        <br>
+                        <input type="text" id="lastName">
+                        <br>
+                        <label>School</label>
+                        <br>
+                        <input type="text" id="school">
+                    </form>
                     <div class="hero-actions">
-                        <button class="primary-btn" id="beginBtn">Begin</button>
+                        <button class="primary-btn" id="beginBtn" disabled>Begin</button>
                         <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
                     </div>
                 </section>
@@ -1143,7 +1158,12 @@
             theme: "dark",
 
             selectedDifficulty: null,     // NEW
-            activeQuestions: []           // NEW
+            activeQuestions: [],           // NEW
+            userProfile: {
+                firstName: "",
+                lastName: "",
+                school: ""
+            }
         };
 
         /* ============================================================
@@ -1222,7 +1242,7 @@
             renderQuestion();
             updateStatusUI();
             updateSummaryScreen();
-
+            updateBeginButton();
             if (SIM_CONFIG.showIntroModalOnLoad) {
                 openInstructionsModal();
             }
@@ -1239,7 +1259,12 @@
         }
 
         function bindEvents() {
-            dom.beginBtn.addEventListener("click", () => startWithDifficulty("easy"));
+            dom.beginBtn.addEventListener("click", () => {
+                saveUserProfile();
+                startWithDifficulty("easy") });
+            ["firstName", "lastName", "school"].forEach(function(id) {
+                document.getElementById(id).addEventListener("input", updateBeginButton);
+            });
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
                 dom.helpBtn.classList.remove("pulse-help");
@@ -1575,6 +1600,22 @@
             if (COMMON_PASSWORDS.includes(password.toLowerCase())) {
                 messages.push("This password is commonly used and can be guessed easily.");
                 score -= 40;
+            }
+            if (containsPersonalInfo(password)) {
+
+                score -= 20;
+
+                messages.push(
+                    "❌ Avoid using your name or school in your password."
+                );
+
+            }
+            else {
+
+                messages.push(
+                    "✓ No personal information detected."
+                );
+
             }
 
             let level = "weak";
@@ -2190,6 +2231,56 @@
                 closeHistoryDrawer();
                 closeInstructionsModal();
             }
+        }
+        function updateBeginButton() {
+
+            const firstName = document.getElementById("firstName").value.trim();
+            const lastName = document.getElementById("lastName").value.trim();
+            const school = document.getElementById("school").value.trim();
+
+            document.getElementById("beginBtn").disabled =
+                firstName === "" ||
+                lastName === "" ||
+                school === "";
+        }
+        function saveUserProfile() {
+
+            state.userProfile.firstName =
+                document.getElementById("firstName").value.trim();
+
+            state.userProfile.lastName =
+                document.getElementById("lastName").value.trim();
+
+            state.userProfile.school =
+                document.getElementById("school").value.trim();
+        }
+
+        function containsPersonalInfo(password) {
+
+            const pw = password.toLowerCase();
+
+            return getPersonalKeywords().some(function(keyword) {
+                return pw.includes(keyword);
+            });
+
+        }
+        
+        function getPersonalKeywords() {
+
+            return [
+                state.userProfile.firstName,
+                state.userProfile.lastName,
+                state.userProfile.school
+            ]
+            .flatMap(function(value) {
+                return value
+                    .toLowerCase()
+                    .split(/[^a-z0-9]+/);   // split on spaces and punctuation
+            })
+            .filter(function(word) {
+                return word.length >= 3;    // ignore tiny words like "of", "st"
+            });
+
         }
     </script>
 </body>
