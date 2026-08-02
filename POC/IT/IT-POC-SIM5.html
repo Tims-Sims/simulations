@@ -831,7 +831,8 @@
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Full Screen</button>
-                <button class="control-btn hidden" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="control-btn hidden" id="historyBtn" aria-label="Open review memory">🧠 Review
+                    Memory</button>
                 <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
             </div>
         </header>
@@ -846,22 +847,8 @@
                         Your developers can swap in their own questions, hints, explanations, scoring, and custom logic.
                     </p>
                     <br>
-                    <form>
-                        <p>Please enter your details to begin:</p>
-                        <label>First Name</label>
-                        <br>
-                        <input type="text" id="firstName">
-                        <br>
-                        <label>Last Name</label>
-                        <br>
-                        <input type="text" id="lastName">
-                        <br>
-                        <label>School</label>
-                        <br>
-                        <input type="text" id="school">
-                    </form>
                     <div class="hero-actions">
-                        <button class="primary-btn" id="beginBtn" disabled>Begin</button>
+                        <button class="primary-btn" id="beginBtn">Begin</button>
                         <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
                     </div>
                 </section>
@@ -919,6 +906,37 @@
                 </section>
             </div>
         </main>
+
+        <section class="screen" id="screenProfile">
+            <div class="game-layout">
+                <form>
+                    <h2>Student Information</h2>
+                    <p>Please enter your details to begin:</p>
+                    <br>
+                    <label>First Name</label>
+                    <br>
+                    <br>
+                    <input type="text" id="firstName" maxlength="32" class="input-field">
+                    <br>
+                    <br>
+                    <label>Last Name</label>
+                    <br>
+                    <br>
+                    <input type="text" id="lastName" maxlength="32" class="input-field">
+                    <br>
+                    <br>
+                    <label>School</label>
+                    <br>
+                    <br>
+                    <input type="text" id="school" maxlength="32" class="input-field">
+                    <br>
+                    <br>
+                    <button type="button" id="profileStartBtn" class="primary-btn" disabled>
+                        Start Simulation
+                    </button>
+                </form>
+            </div>
+        </section>
 
         <main class="screen" id="summaryScreen">
             <div class="summary-layout">
@@ -1075,7 +1093,7 @@
                 points: 10,
                 grading: {
                     mode: "custom",
-                    grader: function(answer, question) {
+                    grader: function (answer, question) {
 
                         const result = evaluatePassword(answer);
 
@@ -1085,7 +1103,8 @@
                             explanation: result.score >= 80 ?
                                 "Excellent! Your password is long, uses a variety of character types, and avoids common predictable patterns."
                                 : result.messages.join("<br>")
-                        };},
+                        };
+                    },
                     correctAnswer: 1,
                     explanations: ["This is incorrect because the emphasis is on the wrong part of the sentence. It does not help the listener catch the correct day. To fix it, stress the word that carries the important correction.",
                         "You followed the rule because you stressed the detail that fixes the listener’s confusion.",
@@ -1180,6 +1199,7 @@
             homeScreen: document.getElementById("homeScreen"),
             gameScreen: document.getElementById("gameScreen"),
             summaryScreen: document.getElementById("summaryScreen"),
+            screenProfile: document.getElementById("screenProfile"),
             beginBtn: document.getElementById("beginBtn"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             helpBtn: document.getElementById("helpBtn"),
@@ -1242,7 +1262,7 @@
             renderQuestion();
             updateStatusUI();
             updateSummaryScreen();
-            updateBeginButton();
+            // updateBeginButton();
             if (SIM_CONFIG.showIntroModalOnLoad) {
                 openInstructionsModal();
             }
@@ -1260,11 +1280,13 @@
 
         function bindEvents() {
             dom.beginBtn.addEventListener("click", () => {
-                saveUserProfile();
-                startWithDifficulty("easy") });
-            ["firstName", "lastName", "school"].forEach(function(id) {
-                document.getElementById(id).addEventListener("input", updateBeginButton);
+                showScreen("profile");
+                // saveUserProfile();
+                // startWithDifficulty("easy")
             });
+            // ["firstName", "lastName", "school"].forEach(function (id) {
+            //     document.getElementById(id).addEventListener("input", updateBeginButton);
+            // });
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
                 dom.helpBtn.classList.remove("pulse-help");
@@ -1341,7 +1363,7 @@
            ============================================================ */
         function startWithDifficulty(level) {
             setDifficulty(level);
-            if(state.activeQuestions.length > 0) {
+            if (state.activeQuestions.length > 0) {
                 startGame();
             }
         }
@@ -1357,6 +1379,7 @@
             dom.homeScreen.classList.toggle("active", screenName === "home");
             dom.gameScreen.classList.toggle("active", screenName === "game");
             dom.summaryScreen.classList.toggle("active", screenName === "summary");
+            dom.screenProfile.classList.toggle("active", screenName === "profile");
         }
 
         function showSummaryScreen() {
@@ -1521,18 +1544,18 @@
 
             input.addEventListener("input", function () {
 
-            const result = evaluatePassword(input.value);
+                const result = evaluatePassword(input.value);
 
-            bar.style.width = result.score + "%";
-            bar.className = "password-meter-bar " + result.level;
+                bar.style.width = result.score + "%";
+                bar.className = "password-meter-bar " + result.level;
 
-            feedback.innerHTML = "";
+                feedback.innerHTML = "";
 
-            result.messages.forEach(function(message) {
-                const li = document.createElement("li");
-                li.textContent = message;
-                feedback.appendChild(li);
-            });
+                result.messages.forEach(function (message) {
+                    const li = document.createElement("li");
+                    li.textContent = message;
+                    feedback.appendChild(li);
+                });
 
             });
 
@@ -2232,17 +2255,17 @@
                 closeInstructionsModal();
             }
         }
-        function updateBeginButton() {
+        // function updateBeginButton() {
 
-            const firstName = document.getElementById("firstName").value.trim();
-            const lastName = document.getElementById("lastName").value.trim();
-            const school = document.getElementById("school").value.trim();
+        //     const firstName = document.getElementById("firstName").value.trim();
+        //     const lastName = document.getElementById("lastName").value.trim();
+        //     const school = document.getElementById("school").value.trim();
 
-            document.getElementById("beginBtn").disabled =
-                firstName === "" ||
-                lastName === "" ||
-                school === "";
-        }
+        //     document.getElementById("beginBtn").disabled =
+        //         firstName === "" ||
+        //         lastName === "" ||
+        //         school === "";
+        // }
         function saveUserProfile() {
 
             state.userProfile.firstName =
@@ -2259,12 +2282,12 @@
 
             const pw = password.toLowerCase();
 
-            return getPersonalKeywords().some(function(keyword) {
+            return getPersonalKeywords().some(function (keyword) {
                 return pw.includes(keyword);
             });
 
         }
-        
+
         function getPersonalKeywords() {
 
             return [
@@ -2272,14 +2295,14 @@
                 state.userProfile.lastName,
                 state.userProfile.school
             ]
-            .flatMap(function(value) {
-                return value
-                    .toLowerCase()
-                    .split(/[^a-z0-9]+/);   // split on spaces and punctuation
-            })
-            .filter(function(word) {
-                return word.length >= 3;    // ignore tiny words like "of", "st"
-            });
+                .flatMap(function (value) {
+                    return value
+                        .toLowerCase()
+                        .split(/[^a-z0-9]+/);   // split on spaces and punctuation
+                })
+                .filter(function (word) {
+                    return word.length >= 3;    // ignore tiny words like "of", "st"
+                });
 
         }
     </script>
