@@ -884,6 +884,28 @@
             opacity: 0.6;
         }
 
+        .drop-zone-step {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .drop-zone.filled.correct .drop-zone-step {
+            background: var(--success);
+        }
+
         .drop-zone-icon {
             font-size: 1.1rem;
             font-weight: 700;
@@ -914,7 +936,7 @@
 
         .diagram-connector-flow {
             stroke: var(--accent);
-            stroke-width: 2;
+            stroke-width: 2.5;
             stroke-linecap: round;
             fill: none;
             stroke-dasharray: 6 5;
@@ -1628,7 +1650,7 @@
             },
             {
                 id: "flow",
-                title: "The Flow of the Internet",
+                title: "Internet Parts Map",
                 prompt: `The diagram below shows how information travels across the Internet. The arrows show the order of the flow. Drag each Internet part from the palette into the spot where it belongs in the flow, then click <strong>"Check Connections"</strong>.`,
                 directions: "Place each part in the correct position in the flow.",
                 type: "diagram",
@@ -1641,8 +1663,8 @@
             },
             {
                 id: "q1",
-                title: "Quiz: How DNS Works",
-                prompt: `When you type a URL like "example.com" into your browser, your device first needs to find the correct server. <br><br>What system translates the human-friendly domain name (example.com) into the numeric IP address the server uses?`,
+                title: "Knowledge Check 1",
+                prompt: `When you type a website name like "example.com" into your browser, your device needs to locate that website's server before the page can load. <br><br>What does your device use to find the correct server?`,
                 directions: "Choose one answer.",
                 type: "mcq",
                 choices: [
@@ -1665,8 +1687,8 @@
             },
             {
                 id: "q2",
-                title: "Quiz: Data Packets",
-                prompt: `When information travels across the Internet, large files are broken into smaller pieces for efficient transmission. <br><br>What are these smaller pieces called?`,
+                title: "Knowledge Check 2",
+                prompt: `You're watching a video that is stored on a web server far away. The video's data has to travel across many networks to reach your device. <br><br>How does that data actually travel across the Internet?`,
                 directions: "Choose one answer.",
                 type: "mcq",
                 choices: [
@@ -1689,8 +1711,8 @@
             },
             {
                 id: "q3",
-                title: "Quiz: Protocols & Security",
-                prompt: `Many websites use a secure version of HTTP to protect your data during transmission. <br><br>What does the "S" in <strong>HTTPS</strong> stand for?`,
+                title: "Knowledge Check 3",
+                prompt: `You notice a website's address starts with "https://" instead of "http://". <br><br>What does the extra "S" in HTTPS stand for?`,
                 directions: "Choose one answer.",
                 type: "mcq",
                 choices: [
@@ -2480,11 +2502,18 @@
             const map = document.createElement("div");
             map.className = "diagram-map";
 
+            // Read left-to-right, top-to-bottom: matches DIAGRAM_DATA.flowSteps
             const rowOrder = [
-                ["userdevice", "router", "server"],
-                ["browser",    "url",    "website"],
-                [null,         "hyperlink", null]
+                ["server", "router", "userdevice"],
+                ["browser", "url", "website"],
+                [null, "hyperlink", null]
             ];
+
+            const stepByZone = {};
+            DIAGRAM_DATA.flowSteps.forEach((step, i) => {
+                const zone = DIAGRAM_DATA.zones.find(z => z.correctIcon === step.icon);
+                if (zone) stepByZone[zone.id] = i + 1;
+            });
 
             for (let r = 0; r < 3; r++) {
                 for (let c = 0; c < 3; c++) {
@@ -2494,7 +2523,8 @@
                         if (zone) {
                             map.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered, {
                                 labelMode: "none",
-                                questionId: question.id
+                                questionId: question.id,
+                                stepNumber: stepByZone[zone.id]
                             }));
                         }
                     } else {
@@ -2687,6 +2717,14 @@
 
             if (opts.definition) {
                 div.classList.add("definition");
+            }
+
+            if (opts.stepNumber) {
+                const stepEl = document.createElement("div");
+                stepEl.className = "drop-zone-step";
+                stepEl.textContent = String(opts.stepNumber);
+                stepEl.setAttribute("aria-hidden", "true");
+                div.appendChild(stepEl);
             }
 
             const slot = document.createElement("div");
