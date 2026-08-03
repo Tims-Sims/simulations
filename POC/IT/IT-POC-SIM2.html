@@ -853,6 +853,20 @@
             background: color-mix(in srgb, var(--danger) 10%, var(--surface));
         }
 
+        .drop-zone-correct {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--success);
+            pointer-events: none;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .drop-zone.filled.wrong .drop-zone-icon {
+            color: var(--danger);
+            text-decoration: line-through;
+        }
+
         .drop-zone-label {
             font-size: 0.72rem;
             color: var(--muted);
@@ -936,12 +950,15 @@
         }
 
         .draggable-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 10px 14px;
             border-radius: 999px;
             background: linear-gradient(135deg, var(--accent), var(--accent-2));
             color: #fff;
             font-weight: 700;
-            font-size: 1.4rem;
+            font-size: 0.95rem;
             line-height: 1;
             cursor: grab;
             transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
@@ -949,6 +966,15 @@
             user-select: none;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             white-space: nowrap;
+        }
+
+        .draggable-icon .draggable-emoji {
+            font-size: 1.35rem;
+            line-height: 1;
+        }
+
+        .draggable-icon .draggable-name {
+            font-weight: 700;
         }
 
         .draggable-icon:hover {
@@ -1100,6 +1126,84 @@
 
         .draggable-icon[aria-disabled="true"] {
             cursor: default;
+        }
+
+        /* Match-definitions layout */
+        .match-definitions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .drop-zone.definition {
+            min-height: 92px;
+            justify-content: flex-start;
+            padding: 12px;
+        }
+
+        .drop-zone.definition .drop-zone-label {
+            font-size: 0.88rem;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--text-soft);
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .diagram-flow-note {
+            margin: 0;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+
+        .hint-intro {
+            margin: 0 0 10px;
+        }
+
+        .hint-definitions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        @media (min-width: 640px) {
+            .hint-definitions {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .hint-def {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+            border: 1px solid var(--border);
+        }
+
+        .hint-def-emoji {
+            font-size: 1.3rem;
+            line-height: 1.2;
+        }
+
+        .hint-def-body {
+            line-height: 1.45;
+            color: var(--text-soft);
+        }
+
+        .hint-def-body strong {
+            color: var(--text);
+        }
+
+        @media (min-width: 700px) {
+            .match-definitions {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
         @media (max-width: 640px) {
@@ -1329,6 +1433,10 @@
                             <h4>Best Streak</h4>
                             <p id="summaryStreak">0</p>
                         </div>
+                        <div class="summary-stat">
+                            <h4>Time Taken</h4>
+                            <p id="summaryTime">—</p>
+                        </div>
                     </div>
 
                     <div class="results-list" id="summaryResults"></div>
@@ -1384,11 +1492,11 @@
             badgeText: "NET",
             homeEyebrow: "Introduction to the Internet",
             homeDescription:
-                "Drag and connect the icons for browser, URL, hyperlink, website, router, server, and user device into a simple network diagram. The sim checks your connections and explains how information travels across the Internet.",
+                "Match the icons for browser, URL, hyperlink, website, router, server, and user device to their definitions, then place each part into its correct position in the Internet flow diagram. The sim checks your answers and explains how information travels across the Internet.",
             instructions: [
-                "Drag each icon to the correct position on the network diagram.",
-                "Connect related parts by drawing lines between them.",
-                "Use the Hint button if you get stuck on a connection.",
+                "Match each Internet part icon to its correct definition.",
+                "Then place each part into its correct position in the Internet flow diagram.",
+                "Use the Hint button if you get stuck.",
                 "Watch your score, streak, and progress bar as you go.",
                 "Use Review Memory to revisit completed answers and explanations.",
                 "Use the Reset button any time you want to restart from scratch."
@@ -1506,13 +1614,27 @@
 
         const QUESTIONS = [
             {
-                id: "diagram",
-                title: "Build the Internet Parts Map",
-                prompt: `Drag each Internet part from the palette below into the correct position on the network diagram. Then click <strong>"Check Connections"</strong> to see how information travels.`,
-                directions: "",
+                id: "match",
+                title: "Match Internet Parts to Their Definitions",
+                prompt: `Each box below shows a definition of an Internet part. Drag each part from the palette onto the definition it matches. When you're done, click <strong>"Check Matches"</strong>.`,
+                directions: "Match all 7 parts to their correct definitions.",
                 type: "diagram",
-                hint: "Think about the real flow: hardware on top (User Device → Router → Server), software below (Browser → URL → Website → Hyperlink).",
-                points: 70,
+                variant: "match",
+                hint: "Read each definition carefully. Think about what each part does: hardware (User Device, Router, Server) and software (Browser, URL, Website, Hyperlink).",
+                points: 35,
+                grading: {
+                    mode: "diagram"
+                }
+            },
+            {
+                id: "flow",
+                title: "The Flow of the Internet",
+                prompt: `The diagram below shows how information travels across the Internet. The arrows show the order of the flow. Drag each Internet part from the palette into the spot where it belongs in the flow, then click <strong>"Check Connections"</strong>.`,
+                directions: "Place each part in the correct position in the flow.",
+                type: "diagram",
+                variant: "flow",
+                hint: "Follow the arrows from start to end. The part that stores website files comes first, and the clickable link that lets you explore comes last.",
+                points: 35,
                 grading: {
                     mode: "diagram"
                 }
@@ -1672,6 +1794,7 @@
             summaryPartial: document.getElementById("summaryPartial"),
             summaryWrong: document.getElementById("summaryWrong"),
             summaryStreak: document.getElementById("summaryStreak"),
+            summaryTime: document.getElementById("summaryTime"),
             summaryResults: document.getElementById("summaryResults"),
             reviewFromSummaryBtn: document.getElementById("reviewFromSummaryBtn"),
             playAgainBtn: document.getElementById("playAgainBtn"),
@@ -2206,7 +2329,15 @@
         function showHint() {
             const question = getCurrentQuestion();
             dom.hintBox.className = "hint-box show";
-            dom.hintBox.innerHTML = `<div class="feedback-label">💡 Hint</div><p>${escapeHtml(question.hint || "No hint has been added yet.")}</p>`;
+
+            if (question.variant === "match") {
+                const rows = DIAGRAM_DATA.zones.map(zone =>
+                    `<div class="hint-def"><span class="hint-def-emoji">${escapeHtml(zone.emoji)}</span><span class="hint-def-body"><strong>${escapeHtml(zone.label)}</strong><br>${escapeHtml(zone.desc)}</span></div>`
+                ).join("");
+                dom.hintBox.innerHTML = `<div class="feedback-label">💡 Hint</div><p class="hint-intro">Here are the Internet parts and the descriptions shown in the boxes above — match each icon to the definition it belongs to:</p><div class="hint-definitions">${rows}</div>`;
+            } else {
+                dom.hintBox.innerHTML = `<div class="feedback-label">💡 Hint</div><p>${escapeHtml(question.hint || "No hint has been added yet.")}</p>`;
+            }
         }
 
         function showFeedback(question, result, studentAnswer) {
@@ -2262,7 +2393,27 @@
             const wrap = document.createElement("div");
             wrap.className = "diagram-wrap";
 
-            // Network map: 3 rows x 3 columns. Arrows shown inside zone labels.
+            const variant = question.variant || "map";
+
+            if (variant === "match") {
+                buildMatchDiagram(wrap, question, isReviewMode, alreadyAnswered);
+            } else if (variant === "flow") {
+                buildFlowDiagram(wrap, question, isReviewMode, alreadyAnswered);
+            } else {
+                buildMapDiagram(wrap, question, isReviewMode, alreadyAnswered);
+            }
+
+            dom.answerArea.appendChild(wrap);
+
+            dom.submitBtn.classList.add("hidden");
+            dom.hintBtn.classList.remove("hidden");
+
+            if (!alreadyAnswered && !isReviewMode) {
+                resetGuidedTimer();
+            }
+        }
+
+        function buildMapDiagram(wrap, question, isReviewMode, alreadyAnswered) {
             const map = document.createElement("div");
             map.className = "diagram-map";
 
@@ -2278,23 +2429,103 @@
                     if (zoneId) {
                         const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
                         if (zone) {
-                            map.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered));
+                            map.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered, {
+                                labelMode: "description",
+                                questionId: question.id
+                            }));
                         }
                     } else {
-                        const empty = document.createElement("div");
-                        map.appendChild(empty);
+                        map.appendChild(document.createElement("div"));
                     }
                 }
             }
 
             wrap.appendChild(map);
 
+            const palLabel = isReviewMode || alreadyAnswered ? "Placed Icons" : "Match each icon to its correct position on the map";
+            wrap.appendChild(buildDiagramPalette(question, isReviewMode, alreadyAnswered, palLabel));
+            wrap.appendChild(buildDiagramActions(question, isReviewMode, alreadyAnswered));
+
+            buildPostAnswerFeedback(wrap, question, isReviewMode, alreadyAnswered, "map");
+        }
+
+        function buildMatchDiagram(wrap, question, isReviewMode, alreadyAnswered) {
+            const defs = DIAGRAM_DATA.zones.slice();
+            if (!isReviewMode && !alreadyAnswered) {
+                for (let i = defs.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [defs[i], defs[j]] = [defs[j], defs[i]];
+                }
+            }
+
+            const defGrid = document.createElement("div");
+            defGrid.className = "match-definitions";
+            defs.forEach((zone) => {
+                defGrid.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered, {
+                    labelMode: "description",
+                    definition: true,
+                    questionId: question.id
+                }));
+            });
+            wrap.appendChild(defGrid);
+
+            const palLabel = isReviewMode || alreadyAnswered ? "Placed Icons" : "Drag each icon onto the definition it matches";
+            wrap.appendChild(buildDiagramPalette(question, isReviewMode, alreadyAnswered, palLabel));
+            wrap.appendChild(buildDiagramActions(question, isReviewMode, alreadyAnswered, "✓ Check Matches", "↺ Reset"));
+
+            buildPostAnswerFeedback(wrap, question, isReviewMode, alreadyAnswered, "match");
+        }
+
+        function buildFlowDiagram(wrap, question, isReviewMode, alreadyAnswered) {
+            const map = document.createElement("div");
+            map.className = "diagram-map";
+
+            const rowOrder = [
+                ["userdevice", "router", "server"],
+                ["browser",    "url",    "website"],
+                [null,         "hyperlink", null]
+            ];
+
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 3; c++) {
+                    const zoneId = rowOrder[r][c];
+                    if (zoneId) {
+                        const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
+                        if (zone) {
+                            map.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered, {
+                                labelMode: "none",
+                                questionId: question.id
+                            }));
+                        }
+                    } else {
+                        map.appendChild(document.createElement("div"));
+                    }
+                }
+            }
+
+            wrap.appendChild(map);
+
+            const note = document.createElement("p");
+            note.className = "diagram-flow-note";
+            note.textContent = isReviewMode || alreadyAnswered ? "Follow the arrows to review the flow." : "Follow the arrows — each arrow shows the next step in the flow.";
+            wrap.appendChild(note);
+
+            const palLabel = isReviewMode || alreadyAnswered ? "Placed Icons" : "Place each part into the correct spot in the flow";
+            wrap.appendChild(buildDiagramPalette(question, isReviewMode, alreadyAnswered, palLabel));
+            wrap.appendChild(buildDiagramActions(question, isReviewMode, alreadyAnswered));
+
+            buildPostAnswerFeedback(wrap, question, isReviewMode, alreadyAnswered, "flow");
+
+            setTimeout(() => renderArrows(map), 0);
+        }
+
+        function buildDiagramPalette(question, isReviewMode, alreadyAnswered, palLabelText) {
             const palette = document.createElement("div");
             palette.className = "diagram-palette";
 
             const palLabel = document.createElement("div");
             palLabel.className = "diagram-palette-label";
-            palLabel.textContent = isReviewMode || alreadyAnswered ? "Placed Icons" : "Match each icon to its correct position on the map";
+            palLabel.textContent = palLabelText || "Match each icon to its correct position";
             palette.appendChild(palLabel);
 
             const paletteIcons = [...DIAGRAM_DATA.icons];
@@ -2305,8 +2536,15 @@
             paletteIcons.forEach((iconItem) => {
                 const iconEl = document.createElement("div");
                 iconEl.className = "draggable-icon";
-                iconEl.textContent = iconItem.emoji;
                 iconEl.draggable = !isReviewMode && !alreadyAnswered;
+                const emojiSpan = document.createElement("span");
+                emojiSpan.className = "draggable-emoji";
+                emojiSpan.textContent = iconItem.emoji;
+                const nameSpan = document.createElement("span");
+                nameSpan.className = "draggable-name";
+                nameSpan.textContent = iconItem.name;
+                iconEl.appendChild(emojiSpan);
+                iconEl.appendChild(nameSpan);
                 iconEl.dataset.iconName = iconItem.name;
                 iconEl.dataset.emoji = iconItem.emoji;
                 iconEl.title = iconItem.name;
@@ -2331,8 +2569,10 @@
                 palette.appendChild(iconEl);
             });
 
-            wrap.appendChild(palette);
+            return palette;
+        }
 
+        function buildDiagramActions(question, isReviewMode, alreadyAnswered, checkLabel, resetLabel) {
             const actions = document.createElement("div");
             actions.className = "diagram-actions";
 
@@ -2340,60 +2580,62 @@
                 const checkBtn = document.createElement("button");
                 checkBtn.type = "button";
                 checkBtn.className = "primary-btn";
-                checkBtn.textContent = "✓ Check Connections";
+                checkBtn.textContent = checkLabel || "✓ Check Connections";
                 checkBtn.addEventListener("click", () => {
                     dom.answerForm.dispatchEvent(new Event("submit"));
                 });
                 actions.appendChild(checkBtn);
-            }
 
-            if (!alreadyAnswered && !isReviewMode) {
                 const resetMapBtn = document.createElement("button");
                 resetMapBtn.type = "button";
                 resetMapBtn.className = "secondary-btn";
-                resetMapBtn.textContent = "↺ Reset Map";
+                resetMapBtn.textContent = resetLabel || "↺ Reset Map";
                 resetMapBtn.addEventListener("click", resetDiagramMap);
                 actions.appendChild(resetMapBtn);
             }
 
-            if (alreadyAnswered || isReviewMode) {
-                const result = state.results[question.id];
-                if (result) {
-                    const statusLabel = SIM_CONFIG.scoreLabels[result.status] || result.status;
-                    const statusIcon = result.status === "correct" ? "✅" : result.status === "partial" ? "🟡" : "❌";
-                    const fb = document.createElement("div");
-                    fb.className = `diagram-feedback show ${result.status}`;
-                    fb.innerHTML = `<div style="font-weight:800;margin-bottom:6px;">${statusIcon} ${statusLabel} · ${result.scoreAwarded} points</div><p style="margin:0;color:var(--text-soft);">${result.explanation || ""}</p>`;
-                    wrap.appendChild(fb);
+            return actions;
+        }
 
-                    if (result.status === "correct") {
-                        const congrats = document.createElement("div");
-                        congrats.className = "diagram-complete";
-                        congrats.innerHTML = `<h3>🎉 Congratulations!</h3><p>You placed all 7 parts correctly. You've built the complete Internet Parts Map! Scroll down to see how information travels step by step.</p>`;
-                        wrap.appendChild(congrats);
-                        setTimeout(() => highlightPathStep(0), 500);
+        function buildPostAnswerFeedback(wrap, question, isReviewMode, alreadyAnswered, variant) {
+            if (!alreadyAnswered && !isReviewMode) return;
+            const result = state.results[question.id];
+            if (!result) return;
+
+            const statusLabel = SIM_CONFIG.scoreLabels[result.status] || result.status;
+            const statusIcon = result.status === "correct" ? "✅" : result.status === "partial" ? "🟡" : "❌";
+            const fb = document.createElement("div");
+            fb.className = `diagram-feedback show ${result.status}`;
+            fb.innerHTML = `<div style="font-weight:800;margin-bottom:6px;">${statusIcon} ${statusLabel} · ${result.scoreAwarded} points</div><p style="margin:0;color:var(--text-soft);">${result.explanation || ""}</p>`;
+            wrap.appendChild(fb);
+
+            if (result.status === "correct") {
+                const congratsText = variant === "match"
+                    ? "You matched all 7 parts to their definitions. You know what each Internet part does!"
+                    : variant === "flow"
+                        ? "You placed all 7 parts in the correct order of the flow. You understand how information travels!"
+                        : "You placed all 7 parts correctly. You've built the complete Internet Parts Map!";
+                const congrats = document.createElement("div");
+                congrats.className = "diagram-complete";
+                congrats.innerHTML = `<h3>🎉 Congratulations!</h3><p>${congratsText} Scroll down to see how information travels step by step.</p>`;
+                wrap.appendChild(congrats);
+
+                if (variant !== "match") {
+                    setTimeout(() => highlightPathStep(0), 500);
+                    const map = wrap.querySelector(".diagram-map");
+                    if (map) {
                         setTimeout(() => renderArrows(map), 300);
                     }
                 }
-
-                const fb = document.createElement("div");
-                fb.className = "flow-explanation";
-                fb.id = "flowExplanation";
-                fb.innerHTML = `<h4>🌐 How Information Travels</h4>${DIAGRAM_DATA.flowSteps.map((step, i) =>
-                    `<div class="flow-step" data-step="${i}" style="opacity:${result && result.status === "correct" ? "0.3" : "1"};transition:opacity 0.6s ease;"><span class="step-num">${i + 1}</span> <strong>${step.emoji || ""} ${step.icon}</strong> — ${step.desc}</div>`
-                ).join("")}`;
-                wrap.appendChild(fb);
             }
 
-            wrap.appendChild(actions);
-            dom.answerArea.appendChild(wrap);
-
-            dom.submitBtn.classList.add("hidden");
-            dom.hintBtn.classList.remove("hidden");
-
-            if (!alreadyAnswered && !isReviewMode) {
-                resetGuidedTimer();
-            }
+            const flow = document.createElement("div");
+            flow.className = "flow-explanation";
+            flow.id = "flowExplanation";
+            flow.innerHTML = `<h4>🌐 How Information Travels</h4>${DIAGRAM_DATA.flowSteps.map((step, i) =>
+                `<div class="flow-step" data-step="${i}" style="opacity:${result.status === "correct" ? "0.3" : "1"};transition:opacity 0.6s ease;"><span class="step-num">${i + 1}</span> <strong>${step.emoji || ""} ${step.icon}</strong> — ${step.desc}</div>`
+            ).join("")}`;
+            wrap.appendChild(flow);
         }
 
         function highlightPathStep(index) {
@@ -2420,24 +2662,36 @@
             if (q) {
                 delete state.results[q.id];
                 delete state.answers[q.id];
+                DIAGRAM_DATA.zones.forEach(z => {
+                    delete state.results[q.id + "::" + z.id];
+                });
             }
             renderQuestion();
         }
 
-        function createDropZone(zone, isReviewMode, alreadyAnswered) {
+        function createDropZone(zone, isReviewMode, alreadyAnswered, opts) {
+            opts = opts || {};
             const div = document.createElement("div");
             div.className = "drop-zone";
             div.dataset.zoneId = zone.id;
 
-            const label = document.createElement("div");
-            label.className = "drop-zone-label";
-            label.textContent = zone.desc || zone.label;
-            label.title = "Place the correct icon here";
-            div.appendChild(label);
+            const labelMode = opts.labelMode || "description";
+
+            if (labelMode === "description") {
+                const label = document.createElement("div");
+                label.className = "drop-zone-label";
+                label.textContent = zone.desc || zone.label;
+                label.title = "Place the correct icon here";
+                div.appendChild(label);
+            }
+
+            if (opts.definition) {
+                div.classList.add("definition");
+            }
 
             const slot = document.createElement("div");
             slot.className = "drop-zone-slot";
-            slot.textContent = "⬚ Drop here";
+            slot.textContent = labelMode === "none" ? "⬚" : "⬚ Drop here";
             div.appendChild(slot);
 
             const placed = diagramState.placements[zone.id];
@@ -2448,10 +2702,21 @@
                 iconEl.textContent = iconItem ? `${iconItem.emoji} ${iconItem.name}` : placed;
                 div.appendChild(iconEl);
                 div.classList.add("filled");
-                if (isReviewMode || alreadyAnswered) {
-                    const result = state.results[zone.id];
-                    if (result) {
-                        div.classList.add(result.status === "wrong" ? "wrong" : "correct");
+            }
+
+            if (isReviewMode || alreadyAnswered) {
+                const result = state.results[opts.questionId + "::" + zone.id];
+                if (result) {
+                    if (result.status === "correct") {
+                        div.classList.add("correct");
+                    } else {
+                        div.classList.add("wrong");
+                        const correctEl = document.createElement("div");
+                        correctEl.className = "drop-zone-correct";
+                        correctEl.textContent = `✓ Correct: ${zone.correctIcon}`;
+                        div.appendChild(correctEl);
+                        const slot = div.querySelector(".drop-zone-slot");
+                        if (slot) slot.style.display = "none";
                     }
                 }
             }
@@ -2500,7 +2765,6 @@
             diagramState.touchDrag = { iconName: icon.dataset.iconName, startX: touch.clientX, startY: touch.clientY };
             touchClone = icon.cloneNode(true);
             touchClone.className = "draggable-icon dragging-clone";
-            touchClone.textContent = icon.dataset.iconName;
             touchClone.style.left = (touch.clientX - 60) + "px";
             touchClone.style.top = (touch.clientY - 20) + "px";
             document.body.appendChild(touchClone);
@@ -2643,29 +2907,24 @@
             resetGuidedTimer();
 
             // Update drop zone visuals
-            const map = document.querySelector(".diagram-map");
-            if (map) {
+            const zoneEl = document.querySelector(`.drop-zone[data-zone-id="${zoneId}"]`);
+            if (zoneEl) {
                 const zoneData = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
                 if (zoneData) {
-                    const zoneEl = Array.from(map.children).find(el =>
-                        el.classList && el.classList.contains("drop-zone") && el.dataset.zoneId === zoneId
-                    );
-                    if (zoneEl) {
-                        zoneEl.classList.add("filled");
-                        zoneEl.classList.remove("correct", "wrong");
-                        const existingIcon = zoneEl.querySelector(".drop-zone-icon");
-                        if (existingIcon) existingIcon.remove();
-                        const slot = zoneEl.querySelector(".drop-zone-slot");
-                        if (slot) slot.style.display = "none";
-                        const iconItem = DIAGRAM_DATA.icons.find(i => i.name === iconName);
-                        const iconEl = document.createElement("div");
-                        iconEl.className = "drop-zone-icon";
-                        iconEl.textContent = iconItem ? `${iconItem.emoji} ${iconItem.name}` : iconName;
-                        zoneEl.appendChild(iconEl);
-                        zoneEl.style.transition = "transform 0.2s ease, border-color 0.2s ease";
-                        zoneEl.style.transform = "scale(1.06)";
-                        setTimeout(() => { zoneEl.style.transform = ""; }, 200);
-                    }
+                    zoneEl.classList.add("filled");
+                    zoneEl.classList.remove("correct", "wrong");
+                    const existingIcon = zoneEl.querySelector(".drop-zone-icon");
+                    if (existingIcon) existingIcon.remove();
+                    const slot = zoneEl.querySelector(".drop-zone-slot");
+                    if (slot) slot.style.display = "none";
+                    const iconItem = DIAGRAM_DATA.icons.find(i => i.name === iconName);
+                    const iconEl = document.createElement("div");
+                    iconEl.className = "drop-zone-icon";
+                    iconEl.textContent = iconItem ? `${iconItem.emoji} ${iconItem.name}` : iconName;
+                    zoneEl.appendChild(iconEl);
+                    zoneEl.style.transition = "transform 0.2s ease, border-color 0.2s ease";
+                    zoneEl.style.transform = "scale(1.06)";
+                    setTimeout(() => { zoneEl.style.transform = ""; }, 200);
                 }
             }
         }
@@ -2772,18 +3031,22 @@
                 return { status: "wrong", scoreAwarded: 0, explanation: "Could not read your diagram placements." };
             }
 
+            const isMatch = question.variant === "match";
+            const isFlow = question.variant === "flow";
+
             const totalZones = DIAGRAM_DATA.zones.length;
+            const anyPlaced = Object.keys(placements).length > 0;
             let correctCount = 0;
-            let wrongZones = [];
-            let correctZones = [];
+            let corrections = [];
             DIAGRAM_DATA.zones.forEach((zone) => {
                 const placed = placements[zone.id];
                 const isCorrect = placed === zone.correctIcon;
                 if (isCorrect) {
                     correctCount++;
-                    correctZones.push(zone.label);
                 } else if (placed) {
-                    wrongZones.push({ label: zone.label, got: placed, expected: zone.correctIcon });
+                    corrections.push(`"${placed}" should be "${zone.correctIcon}"`);
+                } else {
+                    corrections.push(`the "${zone.label}" box should be "${zone.correctIcon}"`);
                 }
             });
 
@@ -2795,30 +3058,43 @@
 
             if (correctCount === totalZones) {
                 status = "correct";
-                explanation = `Perfect! All ${totalZones} parts are placed correctly. You've built the complete Internet Parts Map. Scroll down to see how information travels!`;
+                explanation = isMatch
+                    ? `Perfect! All ${totalZones} parts are matched to the correct definitions. You know what each part of the Internet does!`
+                    : isFlow
+                        ? `Perfect! All ${totalZones} parts are placed in the correct order of the flow. You understand how information travels across the Internet!`
+                        : `Perfect! All ${totalZones} parts are placed correctly. You've built the complete Internet Parts Map. Scroll down to see how information travels!`;
             } else if (correctCount >= totalZones - 2) {
                 status = "partial";
                 explanation = `Almost there! ${correctCount} of ${totalZones} are correct.`;
-                if (wrongZones.length) {
-                    explanation += ` Check: ${wrongZones.map(z => `${z.label} should be "${z.expected}"`).join("; ")}.`;
+                if (corrections.length) {
+                    explanation += ` Check: ${corrections.join("; ")}.`;
                 }
                 explanation += " Try switching the incorrect icons.";
             } else if (correctCount > 0) {
                 status = "partial";
                 explanation = `${correctCount} of ${totalZones} are correct.`;
-                if (wrongZones.length) {
-                    explanation += ` Fix: ${wrongZones.map(z => `${z.label} should be "${z.expected}"`).join("; ")}.`;
+                if (corrections.length) {
+                    explanation += ` Fix: ${corrections.join("; ")}.`;
                 }
                 explanation += " Use the hint if you need help!";
             } else {
                 status = "wrong";
-                explanation = "None of the parts are in the right place yet. Remember: hardware on top (User Device → Router → Server), software below (Browser → URL → Website). Hyperlink connects within the website.";
+                if (anyPlaced) {
+                    explanation = `None of your placements are correct yet. Correct answers: ${corrections.join("; ")}.`;
+                } else {
+                    explanation = isMatch
+                        ? "You haven't placed any parts yet. Drag each icon onto the definition it matches, then check your matches."
+                        : isFlow
+                            ? "You haven't placed any parts yet. Drag each icon into its spot in the flow, then check your connections."
+                            : "You haven't placed any parts yet. Drag each icon to its correct position on the map, then check your connections.";
+                }
             }
-            // Store per-zone results for review
+
+            // Store per-zone results for review (keyed by question id to avoid clashes)
             DIAGRAM_DATA.zones.forEach((zone) => {
                 const placed = placements[zone.id];
                 const isCorrect = placed === zone.correctIcon;
-                state.results[zone.id] = {
+                state.results[question.id + "::" + zone.id] = {
                     status: isCorrect ? "correct" : "wrong",
                     scoreAwarded: isCorrect ? scorePerZone : 0,
                     explanation: `${zone.label}: expected "${zone.correctIcon}", got "${placed || "nothing"}"`
@@ -2943,17 +3219,7 @@
             dom.summaryPartial.textContent = String(partialCount);
             dom.summaryWrong.textContent = String(wrongCount);
             dom.summaryStreak.textContent = String(state.bestStreak);
-
-            if (state.timerSeconds > 0) {
-                const timeStat = document.querySelector(".summary-stat:first-child");
-                if (timeStat) {
-                    timeStat.querySelectorAll("p").forEach(el => el.remove());
-                    const timeP = document.createElement("p");
-                    timeP.style.cssText = "font-size:1rem;color:var(--text-soft);margin:0;";
-                    timeP.textContent = `⏱ ${getTimerFormatted()}`;
-                    timeStat.appendChild(timeP);
-                }
-            }
+            dom.summaryTime.textContent = state.timerSeconds > 0 ? getTimerFormatted() : "—";
 
             dom.summaryResults.innerHTML = "";
 
@@ -3111,6 +3377,27 @@
             localStorage.setItem(SIM_CONFIG.storageKey, JSON.stringify(payload));
         }
 
+        function recomputeStoredResults() {
+            const questionIds = new Set(QUESTIONS.map((q) => q.id));
+            const keptResults = {};
+            Object.entries(state.results).forEach(([key, value]) => {
+                const baseId = key.split("::")[0];
+                if (questionIds.has(baseId) && value && typeof value === "object") {
+                    keptResults[key] = value;
+                }
+            });
+            state.results = keptResults;
+            let totalScore = 0;
+            QUESTIONS.forEach((question) => {
+                const storedAnswer = state.answers[question.id];
+                if (storedAnswer === undefined || storedAnswer === null || storedAnswer === "") return;
+                const result = gradeAnswer(question, String(storedAnswer));
+                state.results[question.id] = result;
+                totalScore += result.scoreAwarded || 0;
+            });
+            state.score = totalScore;
+        }
+
         function loadStateFromStorage() {
             const raw = localStorage.getItem(SIM_CONFIG.storageKey);
             if (!raw) {
@@ -3134,6 +3421,7 @@
                 dom.html.setAttribute("data-theme", state.theme);
                 dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
                 dom.muteBtn.textContent = state.soundMuted ? "🔇 Muted" : "🔊 Sound";
+                recomputeStoredResults();
                 showScreen(state.currentScreen);
             } catch (error) {
                 console.error("Could not load saved simulation state:", error);
@@ -3307,16 +3595,9 @@
            SAVE TIMER TO SUMMARY
            ============================================================ */
         function updateSummaryTimerInfo() {
-            const summaryEl = document.querySelector("#summaryScore");
+            const summaryEl = document.querySelector("#summaryTime");
             if (summaryEl && state.timerSeconds > 0) {
-                const timeStr = getTimerFormatted();
-                const existing = summaryEl.closest(".summary-stat")?.querySelector("h4");
-                if (existing && existing.textContent === "Total Score") {
-                    const timeInfo = document.createElement("p");
-                    timeInfo.style.cssText = "font-size:0.85rem;color:var(--muted);margin-top:4px;";
-                    timeInfo.textContent = `Time: ${timeStr}`;
-                    summaryEl.parentElement.appendChild(timeInfo);
-                }
+                summaryEl.textContent = getTimerFormatted();
             }
         }
 
