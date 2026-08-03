@@ -848,7 +848,41 @@
             background: color-mix(in srgb, var(--success) 14%, var(--surface));
         }
 
-        .drop-zone.filled.wrong {
+        .flowchart-map {
+            grid-template-columns: repeat(4, 1fr);
+            column-gap: 20px;
+            row-gap: 30px;
+            padding: 18px;
+            min-height: 340px;
+            width: 100%;
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .flowchart-map .drop-zone {
+            border-radius: 12px;
+            border-width: 2px;
+            min-height: 70px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+        }
+
+        .flowchart-map .drop-zone.filled {
+            border-style: solid;
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+        }
+
+        .flowchart-map .drop-zone.filled.correct {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 14%, var(--surface));
+        }
+
+        .flowchart-map .drop-zone.wrong {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+        }
+
+        .drop-zone.wrong {
             border-color: var(--danger);
             background: color-mix(in srgb, var(--danger) 10%, var(--surface));
         }
@@ -936,15 +970,11 @@
 
         .diagram-connector-flow {
             stroke: var(--accent);
-            stroke-width: 2.5;
+            stroke-width: 3;
             stroke-linecap: round;
+            stroke-linejoin: round;
             fill: none;
-            stroke-dasharray: 6 5;
-            animation: flowMove 0.8s linear infinite;
-        }
-
-        @keyframes flowMove {
-            to { stroke-dashoffset: -22; }
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
         }
         .diagram-connectors.visible .diagram-connector-label {
             opacity: 1;
@@ -2500,13 +2530,13 @@
 
         function buildFlowDiagram(wrap, question, isReviewMode, alreadyAnswered) {
             const map = document.createElement("div");
-            map.className = "diagram-map";
+            map.className = "diagram-map flowchart-map";
 
-            // Read left-to-right, top-to-bottom: matches DIAGRAM_DATA.flowSteps
+            // Stair-step flowchart: reads left-to-right, top-to-bottom with short wrap connectors
             const rowOrder = [
-                ["server", "router", "userdevice"],
-                ["browser", "url", "website"],
-                [null, "hyperlink", null]
+                ["server", "router", "userdevice", null],
+                [null, "browser", "url", "website"],
+                [null, null, "hyperlink", null]
             ];
 
             const stepByZone = {};
@@ -2515,8 +2545,8 @@
                 if (zone) stepByZone[zone.id] = i + 1;
             });
 
-            for (let r = 0; r < 3; r++) {
-                for (let c = 0; c < 3; c++) {
+            for (let r = 0; r < rowOrder.length; r++) {
+                for (let c = 0; c < rowOrder[r].length; c++) {
                     const zoneId = rowOrder[r][c];
                     if (zoneId) {
                         const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
@@ -3033,22 +3063,36 @@
                 if (!from || !to) return;
 
                 const sameRow = Math.abs(to.cy - from.cy) < mapRect.height * 0.08;
-                let x1, y1, x2, y2;
+                let d;
+
                 if (sameRow) {
                     if (to.cx > from.cx) {
-                        x1 = from.right; y1 = from.cy;
-                        x2 = to.left;    y2 = to.cy;
+                        d = `M ${from.right} ${from.cy} L ${to.left} ${to.cy}`;
                     } else {
-                        x1 = from.left; y1 = from.cy;
-                        x2 = to.right;  y2 = to.cy;
+                        d = `M ${from.left} ${from.cy} L ${to.right} ${to.cy}`;
                     }
                 } else {
-                    x1 = from.cx; y1 = from.bottom;
-                    x2 = to.cx;   y2 = to.top;
+                    const fromX = from.cx;
+                    const fromY = from.bottom;
+                    const toX = to.cx;
+                    const toY = to.top;
+                    if (Math.abs(toX - fromX) < 2) {
+                        d = `M ${fromX} ${fromY} L ${toX} ${toY}`;
+                    } else {
+                        const midY = (fromY + toY) / 2;
+                        const radius = Math.max(3, Math.min(10, (toY - fromY) / 4));
+                        const dir = toX > fromX ? 1 : -1;
+                        d = `M ${fromX} ${fromY} ` +
+                            `V ${midY - radius} ` +
+                            `Q ${fromX} ${midY} ${fromX + dir * radius} ${midY} ` +
+                            `H ${toX - dir * radius} ` +
+                            `Q ${toX} ${midY} ${toX} ${midY + radius} ` +
+                            `V ${toY}`;
+                    }
                 }
 
                 const path = document.createElementNS(svgNs, "path");
-                path.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
+                path.setAttribute("d", d);
                 path.setAttribute("class", "diagram-connector-flow");
                 path.setAttribute("marker-end", "url(#connectorArrow)");
                 path.style.animationDelay = `${idx * 0.25}s`;
