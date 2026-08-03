@@ -1012,6 +1012,14 @@
             </div>
         </section>
     </div>
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetHeading"><section class="modal-card" style="max-width:460px">
+        <h3 id="resetHeading">↻ Reset activity</h3>
+        <p>This clears saved progress and starts a new round.</p>
+        <div class="button-row">
+            <button class="danger-btn" id="confirmResetBtn">Yes, Reset</button>
+            <button class="secondary-btn" id="cancelResetBtn">Cancel</button></div>
+        </section>
+    </div>
 
     <script>
         "use strict";
@@ -1201,12 +1209,18 @@
             summaryScreen: document.getElementById("summaryScreen"),
             screenProfile: document.getElementById("screenProfile"),
             beginBtn: document.getElementById("beginBtn"),
+            firstName: document.getElementById("firstName"),
+            lastName: document.getElementById("lastName"),
+            school: document.getElementById("school"),
+            profileStartBtn: document.getElementById("profileStartBtn"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             helpBtn: document.getElementById("helpBtn"),
             themeToggleBtn: document.getElementById("themeToggleBtn"),
             fullscreenBtn: document.getElementById("fullscreenBtn"),
             historyBtn: document.getElementById("historyBtn"),
             resetBtn: document.getElementById("resetBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
             questionCounter: document.getElementById("questionCounter"),
             scoreChip: document.getElementById("scoreChip"),
             modeChip: document.getElementById("modeChip"),
@@ -1287,6 +1301,24 @@
             // ["firstName", "lastName", "school"].forEach(function (id) {
             //     document.getElementById(id).addEventListener("input", updateBeginButton);
             // });
+            [dom.firstName, dom.lastName, dom.school]
+            .forEach(function(input) {
+                input.addEventListener("input", validateProfile);
+            });
+            dom.profileStartBtn.addEventListener("click", function () {
+
+                state.userProfile.firstName =
+                    dom.firstName.value.trim();
+
+                state.userProfile.lastName =
+                    dom.lastName.value.trim();
+
+                state.userProfile.school =
+                    dom.school.value.trim();
+
+                startWithDifficulty("easy");
+
+            });
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
                 dom.helpBtn.classList.remove("pulse-help");
@@ -1311,12 +1343,14 @@
                 }
             });
 
-            dom.resetBtn.addEventListener("click", resetSimulation);
+            dom.resetBtn.addEventListener("click", () => document.getElementById("resetModal").classList.add("show"));
+            dom.cancelResetBtn.addEventListener("click",()=>document.getElementById("resetModal").classList.remove("show"));
+            dom.confirmResetBtn.addEventListener("click",resetRound);
             dom.hintBtn.addEventListener("click", showHint);
             dom.answerForm.addEventListener("submit", handleAnswerSubmit);
             dom.previousBtn.addEventListener("click", goPrevious);
             dom.nextBtn.addEventListener("click", goNext);
-            dom.playAgainBtn.addEventListener("click", resetSimulation);
+            dom.playAgainBtn.addEventListener("click", () => document.getElementById("resetModal").classList.add("show"));
             document.addEventListener("fullscreenchange", updateFullscreenButton);
             document.addEventListener("keydown", handleKeyShortcuts);
         }
@@ -1621,7 +1655,7 @@
             }
 
             if (COMMON_PASSWORDS.includes(password.toLowerCase())) {
-                messages.push("This password is commonly used and can be guessed easily.");
+                messages.push("❌ This password is commonly used and can be guessed easily.");
                 score -= 40;
             }
             if (containsPersonalInfo(password)) {
@@ -2167,6 +2201,30 @@
             showScreen("home");
         }
 
+        function clearState(){
+            try{localStorage.removeItem(STORAGE_KEY);
+
+            }catch(error){
+                /* Storage may be blocked. */
+            }}
+
+        function freshState(){
+            state.currentIndex=0;state.attemptHistory={};
+            state.unsafeEncountered={};
+            state.keyboardTarget=null;
+            state.score=0;
+            state.streak=0;
+            state.bestStreak=0;
+            state.currentScreen="home";
+        }
+
+        function resetRound(){
+            freshState();
+            clearState();
+            document.getElementById("resetModal").classList.remove("show");
+            showScreen("home");
+        }
+
         function saveStateToStorage() {
             const payload = {
                 currentIndex: state.currentIndex,
@@ -2303,6 +2361,22 @@
                 .filter(function (word) {
                     return word.length >= 3;    // ignore tiny words like "of", "st"
                 });
+
+        }
+
+        function validateProfile() {
+
+            const first =
+                dom.firstName.value.trim();
+
+            const last =
+                dom.lastName.value.trim();
+
+            const school =
+                dom.school.value.trim();
+
+            profileStartBtn.disabled =
+                !(first && last && school);
 
         }
     </script>
