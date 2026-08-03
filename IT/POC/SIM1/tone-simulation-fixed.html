@@ -264,6 +264,11 @@ body{
 
     border-radius:10px;
 
+    transition:
+        background .3s ease,
+        border-left .3s ease;
+
+
 }
 
 #feedbackBox p{
@@ -279,6 +284,41 @@ body{
     margin:0;
 
     font-size:22px;
+
+    padding:20px 40px;
+
+
+}
+
+#feedbackBox.correct{
+
+    background:#dff6dd;
+
+    border-left:6px solid #2e7d32;
+
+}
+
+#feedbackBox.incorrect{
+
+    background:#fde2e2;
+
+    border-left:6px solid #c62828;
+
+}
+
+body.dark #feedbackBox.correct{
+
+    background:#23402b;
+
+    border-left:6px solid #66bb6a;
+
+}
+
+body.dark #feedbackBox.incorrect{
+
+    background:#4a2222;
+
+    border-left:6px solid #ef5350;
 
 }
 
@@ -361,13 +401,63 @@ to{transform:scale(1);opacity:1;}
     gap:10px;
 }
 
-button{
+.answerButton{
     border:none;
     border-radius:10px;
     padding:12px;
     cursor:pointer;
     font-size:15px;
     transition:.25s;
+}
+
+.answerButton.choice{
+
+    background:#4f8ef7;
+
+    color:white;
+
+    border:2px solid #2f6fe0;
+
+    transform:scale(1.02);
+
+    box-shadow:0 4px 12px rgba(79,142,247,.35);
+
+}
+
+.answerButton.correctchoice{
+
+    background:#4CAF50;
+
+    color:white;
+
+}
+
+.answerButton.incorrectchoice{
+
+    background:#e53935;
+
+    color:white;
+
+}
+
+.answerButton.dimmed{
+
+    background:#d9d9d9;
+
+    color:#777;
+
+    opacity:.65;
+
+    cursor:not-allowed;
+
+}
+
+body.dark .answerButton.dimmed{
+
+    background:#444;
+
+    color:#aaa;
+
 }
 
 .secondaryButton{
@@ -440,6 +530,10 @@ button{
 
 }
 
+.answerButton:hover{
+    transform:translateY(-2px);
+}
+
 button:hover{
     transform:translateY(-2px);
 }
@@ -459,11 +553,16 @@ button:hover{
 
 
 .next{
+    border:none;
     width:100%;
     background:#2196F3;
     color:var(--text-color);
     padding:14px;
     font-size:17px;
+}
+
+.next:hover{
+    transform:translateY(-0.5px);
 }
 
 .hidden{
@@ -978,19 +1077,19 @@ Tone Detective
 
 <div class="buttons">
 
-<button class="polite" onclick="answer('Polite')">
+<button class="answerButton polite" onclick="answer('Polite')">
 😊 Polite
 </button>
 
-<button class="rude" onclick="answer('Rude')">
+<button class="answerButton rude" onclick="answer('Rude')">
 😠 Rude
 </button>
 
-<button class="unclear" onclick="answer('Unclear')">
+<button class="answerButton unclear" onclick="answer('Unclear')">
 🤔 Unclear
 </button>
 
-<button class="aggressive" onclick="answer('Too Aggressive')">
+<button class="answerButton aggressive" onclick="answer('Too Aggressive')">
 😡 Too Aggressive
 </button>
 
@@ -1373,6 +1472,24 @@ function startGame(){
 
 function loadQuestion(){
 
+    const feedbackBox = document.getElementById("feedbackBox");
+
+feedbackBox.classList.remove("correct","incorrect");
+
+    const buttons = document.querySelectorAll(".answerButton");
+
+buttons.forEach(button=>{
+
+    button.disabled = false;
+
+    button.classList.remove("correctchoice");
+
+    button.classList.remove("incorrectchoice");
+
+    button.classList.remove("dimmed");
+
+});
+
     answered=false;
 
     const q = gameQuestions[current];
@@ -1451,15 +1568,52 @@ function loadQuestion(){
 
     nextBtn.classList.remove("hidden");
 
+    
+
 }
+
+
 
 }
 
 function answer(choice){
 
+    const feedbackBox = document.getElementById("feedbackBox");
+
+feedbackBox.classList.remove("correct","incorrect");
+
+    const buttons = document.querySelectorAll(".answerButton");
+
+buttons.forEach(button => {
+
+    button.disabled = true;
+
+    if(button.textContent.includes(choice)){
+
+        if(choice === gameQuestions[current].answer){
+
+    button.classList.add("correctchoice");
+    feedbackBox.classList.add("correct");
+
+}else{
+
+    button.classList.add("incorrectchoice");
+    feedbackBox.classList.add("incorrect");
+}
+
+    }else{
+
+        button.classList.add("dimmed");
+
+    }
+
+});
+
 if(answered)return;
 
 answered=true;
+
+
 
 const q=gameQuestions[current];
 
