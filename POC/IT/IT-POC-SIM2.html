@@ -849,10 +849,9 @@
         }
 
         .flowchart-map {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 16px;
             padding: 40px 48px;
             width: 100%;
             max-width: 960px;
@@ -864,16 +863,11 @@
             position: relative;
         }
 
-        .flowchart-row {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
         .flowchart-map .drop-zone {
             border-radius: 14px;
             border-width: 2px;
-            min-width: 180px;
+            min-width: 0;
+            width: 100%;
             min-height: 90px;
             padding: 16px 20px;
             border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
@@ -1383,9 +1377,13 @@
         }
 
         @media (max-width: 640px) {
-            .diagram-map {
+            .diagram-map:not(.flowchart-map) {
                 grid-template-columns: 1fr;
                 gap: 6px;
+            }
+            .flowchart-map {
+                grid-template-columns: repeat(6, 118px);
+                overflow-x: auto;
             }
             .drop-zone {
                 min-height: 44px;
@@ -1405,7 +1403,7 @@
         }
 
         @media (max-width: 860px) and (min-width: 641px) {
-            .diagram-map {
+            .diagram-map:not(.flowchart-map) {
                 grid-template-columns: 1fr 1fr;
                 gap: 8px;
             }
@@ -2656,43 +2654,31 @@
             const map = document.createElement("div");
             map.className = "diagram-map flowchart-map";
 
-            // Row 1: User Device → Browser → URL → Router
-            const row1 = document.createElement("div");
-            row1.className = "flowchart-row";
-            const row1Ids = ["userdevice", "browser", "url", "router"];
-            row1Ids.forEach(id => {
-                const zone = DIAGRAM_DATA.zones.find(z => z.id === id);
-                if (zone) {
-                    row1.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered, {
-                        labelMode: "none",
-                        questionId: question.id
-                    }));
-                }
+            // Descending staircase: Row 1 reads left-to-right, Row 2 starts under Router
+            // so the flow drops straight down and continues left-to-right.
+            const rowOrder = [
+                ["userdevice", "browser", "url", "router", null, null],
+                [null, null, null, "server", "website", "hyperlink"]
+            ];
+            rowOrder.forEach(row => {
+                row.forEach(zoneId => {
+                    if (zoneId) {
+                        const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
+                        if (zone) {
+                            const stepNumber = 1 + DIAGRAM_DATA.flowSteps.findIndex(fs => fs.icon === zone.label);
+                            map.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered, {
+                                labelMode: "none",
+                                stepNumber: stepNumber > 0 ? stepNumber : undefined,
+                                questionId: question.id
+                            }));
+                        }
+                    } else {
+                        map.appendChild(document.createElement("div"));
+                    }
+                });
             });
 
-            // Row 2: Server → Website → Hyperlink
-            const row2 = document.createElement("div");
-            row2.className = "flowchart-row";
-            const row2Ids = ["server", "website", "hyperlink"];
-            row2Ids.forEach(id => {
-                const zone = DIAGRAM_DATA.zones.find(z => z.id === id);
-                if (zone) {
-                    row2.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered, {
-                        labelMode: "none",
-                        questionId: question.id
-                    }));
-                }
-            });
-
-            map.appendChild(row1);
-            map.appendChild(row2);
             wrap.appendChild(map);
-
-            const feedbackNote = document.createElement("p");
-            feedbackNote.className = "diagram-flow-note";
-            feedbackNote.style.cssText = "text-align:center; font-style:italic; opacity:0.7; margin:4px 0 2px;";
-            feedbackNote.textContent = "↻ Website loads back into Browser";
-            wrap.appendChild(feedbackNote);
 
             const note = document.createElement("p");
             note.className = "diagram-flow-note";
@@ -3272,20 +3258,20 @@
                 status = "partial";
                 explanation = `Almost there! ${correctCount} of ${totalZones} are correct.`;
                 if (corrections.length) {
-                    explanation += ` Check: ${corrections.join("; ")}.`;
+                    explanation += `<br><br>Check:<br>• ${corrections.join("<br>• ")}.`;
                 }
                 explanation += " Try switching the incorrect icons.";
             } else if (correctCount > 0) {
                 status = "partial";
                 explanation = `${correctCount} of ${totalZones} are correct.`;
                 if (corrections.length) {
-                    explanation += ` Fix: ${corrections.join("; ")}.`;
+                    explanation += `<br><br>Fix:<br>• ${corrections.join("<br>• ")}.`;
                 }
                 explanation += " Use the hint if you need help!";
             } else {
                 status = "wrong";
                 if (anyPlaced) {
-                    explanation = `None of your placements are correct yet. Correct answers: ${corrections.join("; ")}.`;
+                    explanation = `None of your placements are correct yet.<br><br>Correct answers:<br>• ${corrections.join("<br>• ")}.`;
                 } else {
                     explanation = isMatch
                         ? "You haven't placed any parts yet. Drag each icon onto the definition it matches, then check your matches."
