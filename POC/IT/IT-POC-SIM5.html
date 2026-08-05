@@ -928,6 +928,7 @@
                 <form id="profileForm" class="game-card">
                     <h2>Student Information</h2>
                     <p>Please enter your details to begin:</p>
+                    <div class="alert-box" id="alertBoxProfile"></div>
                     <br>
                     <label>First Name</label>
                     <br>
@@ -1034,6 +1035,77 @@
     <script>
         "use strict";
 
+        const FORBIDDEN_WORDS = ["fuk",
+                "phuck",
+                "clitoris",
+                "basterd",
+                "bastard",
+                "boobs",
+                "tits",
+                "titty",
+                "boobies",
+                "titties",
+                "muff",
+                "nutsack",
+                "scrotum",
+                "dumbass",
+                "jackass",
+                "motherfucker",
+                "motherfucking",
+                "boner",
+                "cocksucker",
+                "shit",
+                "fuck",
+                "sht",
+                "fcuk",
+                "cock",
+                "dick",
+                "penis",
+                "bitch",
+                "whore",
+                "prick",
+                "wank",
+                "cum",
+                "semen",
+                "Hitler",
+                "Hitler",
+                "Stalin",
+                "jizz",
+                "orgasm",
+                "thatass",
+                "slave",
+                "dyke",
+                "cunt",
+                "kunt",
+                "nympho",
+                "skank",
+                "slut",
+                "tramp",
+                "twat",
+                "whore",
+                "kill",
+                "kys",
+                "pussy",
+                "queef",
+                "porn",
+                "sex",
+                "gay",
+                "faggot",
+                "anal",
+                "anus",
+                "asshole",
+                "herpes",
+                "std",
+                "suck",
+                "blowjob",
+                "fellatio",
+                "handjob",
+                "rimjob",
+                "creampie",
+                "kkk",
+                "nazi",
+                "retard"
+                ];
         /* ============================================================
            DEVELOPER EDIT AREA 1: SIMULATION CONFIGURATION
            Replace text in this object to rename and reskin the shell.
@@ -1175,6 +1247,7 @@
             firstName: document.getElementById("firstName"),
             lastName: document.getElementById("lastName"),
             school: document.getElementById("school"),
+            alertBoxProfile: document.getElementById("alertBoxProfile"),
             profileStartBtn: document.getElementById("profileStartBtn"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             helpBtn: document.getElementById("helpBtn"),
@@ -1578,7 +1651,15 @@
             dom.answerArea.appendChild(feedback);
 
             input.addEventListener("input", function () {
+                clearAlert();
+                const profanity = findProfanity(input.value);
+                if (profanity) {
+                    const regex = new RegExp(profanity, "gi");
+                    input.value = input.value.replace(regex, "");
 
+                    input.focus();
+                    showAlert("Do not use inappropriate language!");
+                }
                 const result = evaluatePassword(input.value);
 
                 bar.style.width = result.score + "%";
@@ -1971,6 +2052,11 @@
         }
 
         function showAlert(message) {
+            if(state.currentScreen == "profile") {
+                dom.alertBoxProfile.className = "alert-box show";
+                dom.alertBoxProfile.innerHTML = `<div class="feedback-label">⚠️ Warning!</div><p>${escapeHtml(message)}</p>`;
+                return;
+            }
             dom.alertBox.className = "alert-box show";
             dom.alertBox.innerHTML = `<div class="feedback-label">⚠️ Check this</div><p>${escapeHtml(message)}</p>`;
         }
@@ -1978,6 +2064,8 @@
         function clearAlert() {
             dom.alertBox.className = "alert-box";
             dom.alertBox.innerHTML = "";
+            dom.alertBoxProfile.className = "alert-box";
+            dom.alertBoxProfile.innerHTML = "";
         }
 
         function clearMessageBoxes() {
@@ -2379,7 +2467,6 @@
         }
 
         function validateProfile() {
-
             const first =
                 dom.firstName.value.trim();
 
@@ -2389,10 +2476,36 @@
             const school =
                 dom.school.value.trim();
 
+            const profanityDetected =
+                findProfanity(dom.firstName.value.trim()) ||
+                findProfanity(dom.lastName.value.trim()) ||
+                findProfanity(dom.school.value.trim());
+
+            if(profanityDetected){
+                showAlert("Do not use inappropriate language!");
+                const regex = new RegExp(profanityDetected, "gi");
+                dom.firstName.value = dom.firstName.value.replace(regex, "");
+                dom.lastName.value = dom.lastName.value.replace(regex, "");
+                dom.school.value = dom.school.value.replace(regex, "");
+            }
+            else {
+                clearAlert();
+            }
+
             profileStartBtn.disabled =
-                !(first && last && school);
+                !(first && last && school) || profanityDetected;
 
             profileStartBtn.classList.toggle("hidden", !(first && last && school));
+
+        }
+
+        function findProfanity(text) {
+
+            const lower = text.toLowerCase();
+
+            return FORBIDDEN_WORDS.find(function(word) {
+                return lower.includes(word);
+            });
 
         }
     </script>
