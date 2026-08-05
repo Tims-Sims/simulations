@@ -850,9 +850,9 @@
 
         .flowchart-map {
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
-            gap: 16px;
-            padding: 40px 48px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            padding: 40px 32px;
             width: 100%;
             max-width: 960px;
             margin: 0 auto;
@@ -866,15 +866,12 @@
         .flowchart-map .drop-zone {
             border-radius: 14px;
             border-width: 2px;
-            min-width: 0;
-            width: 100%;
             min-height: 90px;
-            padding: 16px 20px;
+            padding: 16px 14px;
             border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
             background: var(--surface);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-            justify-self: stretch;
             text-align: center;
         }
 
@@ -1382,12 +1379,17 @@
                 gap: 6px;
             }
             .flowchart-map {
-                grid-template-columns: repeat(6, 118px);
-                overflow-x: auto;
+                padding: 20px 16px;
             }
-            .drop-zone {
-                min-height: 44px;
-                padding: 5px;
+            .flowchart-row {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .flowchart-map .drop-zone {
+                min-width: 100px;
+                min-height: 70px;
+                padding: 10px 8px;
+            }
             }
             .draggable-icon {
                 padding: 6px 12px;
@@ -2654,26 +2656,21 @@
             const map = document.createElement("div");
             map.className = "diagram-map flowchart-map";
 
-            // Descending staircase: Row 1 reads left-to-right, Row 2 starts under Router
-            // so the flow drops straight down and continues left-to-right.
+            // 4-column grid layout:
+            // Row 1: User Device → Browser → URL → Router
+            // Row 2: Server → Website → Hyperlink
             const rowOrder = [
-                ["userdevice", "browser", "url", "router", null, null],
-                [null, null, null, "server", "website", "hyperlink"]
+                ["userdevice", "browser", "url", "router"],
+                ["server", "website", "hyperlink"]
             ];
             rowOrder.forEach(row => {
                 row.forEach(zoneId => {
-                    if (zoneId) {
-                        const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
-                        if (zone) {
-                            const stepNumber = 1 + DIAGRAM_DATA.flowSteps.findIndex(fs => fs.icon === zone.label);
-                            map.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered, {
-                                labelMode: "none",
-                                stepNumber: stepNumber > 0 ? stepNumber : undefined,
-                                questionId: question.id
-                            }));
-                        }
-                    } else {
-                        map.appendChild(document.createElement("div"));
+                    const zone = DIAGRAM_DATA.zones.find(z => z.id === zoneId);
+                    if (zone) {
+                        map.appendChild(createDropZone(zone, isReviewMode, alreadyAnswered, {
+                            labelMode: "none",
+                            questionId: question.id
+                        }));
                     }
                 });
             });
@@ -3176,19 +3173,12 @@
 
                 let d;
 
-                if (seg.feedback) {
-                    // Feedback: Website → Browser goes left and up
-                    const fromX = from.left;
-                    const fromY = from.cy;
-                    const toX = to.left;
-                    const toY = to.cy;
-                    const offsetX = -50;
-                    d = `M ${fromX} ${fromY} H ${fromX + offsetX} V ${toY} H ${toX}`;
-                } else if (Math.abs(to.cy - from.cy) < mapRect.height * 0.15) {
-                    // Same row: simple left-to-right
+                if (Math.abs(to.cy - from.cy) < mapRect.height * 0.2) {
+                    // Same row: simple left-to-right arrow
                     d = `M ${from.right} ${from.cy} L ${to.left} ${to.cy}`;
                 } else {
                     // Different rows: Router (end of row 1) → Server (start of row 2)
+                    // Goes down from Router, then left to Server
                     const fromX = from.cx;
                     const fromY = from.bottom;
                     const toX = to.cx;
@@ -3199,13 +3189,7 @@
 
                 const path = document.createElementNS(svgNs, "path");
                 path.setAttribute("d", d);
-
-                if (seg.feedback) {
-                    path.setAttribute("class", "diagram-connector-feedback");
-                } else {
-                    path.setAttribute("class", "diagram-connector-flow");
-                }
-
+                path.setAttribute("class", "diagram-connector-flow");
                 path.setAttribute("marker-end", "url(#connectorArrow)");
                 svg.appendChild(path);
             });
