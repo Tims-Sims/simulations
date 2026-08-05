@@ -786,23 +786,19 @@
         }
 
         .password-input-wrapper {
-            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .password-input-wrapper .input-field {
-            width: 100%;
-            padding-right: 3rem;
+            flex: 1;
         }
 
         .password-toggle-btn {
-            position: absolute;
-            top: 50%;
-            right: 0.5rem;
-            transform: translateY(-50%);
-            border: none;
-            background: transparent;
+            white-space: nowrap;
+            padding: 0.5rem 0.75rem;
             cursor: pointer;
-            font-size: 1rem;
         }
 
         @media (max-width: 760px) {
@@ -1579,11 +1575,17 @@
             input.id = "dynamicAnswerInput";
             input.placeholder = question.placeholder || "Type your answer here";
             input.value = currentAnswer ?? "";
+            // 🔒 Disable after answering
+            input.disabled = isReviewMode || alreadyAnswered;
+
+            wrapper.appendChild(input);
+            dom.answerArea.appendChild(wrapper);
             if (question.passwordStrength) {
 
             const toggleBtn = document.createElement("button");
             toggleBtn.type = "button";     // Prevent form submission
             toggleBtn.className = "password-toggle-btn";
+            toggleBtn.classList.add("secondary-btn");
             toggleBtn.textContent = "👁 Show";
 
             toggleBtn.addEventListener("click", function () {
@@ -1600,11 +1602,6 @@
 
             wrapper.appendChild(toggleBtn);
             }
-            // 🔒 Disable after answering
-            input.disabled = isReviewMode || alreadyAnswered;
-
-            wrapper.appendChild(input);
-            dom.answerArea.appendChild(wrapper);
 
             if (question.passwordStrength) {
                 renderPasswordStrengthMeter(input, question);
