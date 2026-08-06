@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Simulation Template Shell</title>
+    <title>IT-POC-SIM5 — Password Strength Lab</title>
     <style>
         /* ============================================================
            CHILD / TEEN SIMULATION TEMPLATE SHELL
@@ -179,6 +179,17 @@
             border-radius: 999px;
             padding: 11px 16px;
             font-weight: 700;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .control-btn,
@@ -568,34 +579,28 @@
             padding: clamp(22px, 4vw, 36px);
         }
 
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
+        .result-score-big {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 8px;
             margin: 20px 0 26px;
-        }
-
-        .summary-stat {
-            padding: 16px;
-            border-radius: 18px;
+            padding: 14px 20px;
+            border-radius: var(--radius-lg);
             border: 1px solid var(--border);
             background: var(--surface-2);
         }
 
-        .summary-stat h4,
-        .summary-stat p {
-            margin: 0;
-        }
-
-        .summary-stat h4 {
-            color: var(--muted);
-            font-size: 0.92rem;
-            margin-bottom: 8px;
-        }
-
-        .summary-stat p {
-            font-size: 1.45rem;
+        .result-score-num {
+            font-size: 1.5rem;
             font-weight: 800;
+            color: var(--text);
+        }
+
+        .result-score-unit {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--muted);
         }
 
         .results-list {
@@ -762,13 +767,6 @@
             background: color-mix(in srgb, var(--danger) 14%, var(--surface));
         }
 
-        .footer-note {
-            text-align: center;
-            color: var(--muted);
-            padding-bottom: 4px;
-            font-size: 0.9rem;
-        }
-
         .password-meter {
             width: 100%;
             height: 12px;
@@ -805,6 +803,43 @@
             -webkit-text-security: disc;
         }
 
+        .input-error {
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 25%, transparent) !important;
+            animation: shake 0.35s ease;
+        }
+
+        @keyframes shake {
+
+            20%,
+            60% {
+                transform: translateX(-6px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(6px);
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .input-error {
+                animation-duration: 0.01ms !important;
+            }
+        }
+
         @media (max-width: 760px) {
             body {
                 padding: 12px;
@@ -833,11 +868,246 @@
                 font-size: 0.88rem;
             }
         }
+
+        /* Hero polish (item 1) */
+        .hero-card p {
+            width: min(100%, 55ch);
+        }
+
+        .hero-actions {
+            margin-top: 24px;
+        }
+
+        /* Strength meter (item 3) */
+        .pw-strength {
+            margin-top: 12px;
+        }
+
+        .pw-strength-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            min-height: 1.1em;
+            margin-bottom: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-soft);
+        }
+
+        .pw-strength-label {
+            color: var(--muted);
+        }
+
+        .pw-strength-meta {
+            text-align: right;
+        }
+
+        .pw-strength-track {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .pw-strength-fill {
+            position: relative;
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: var(--danger);
+            transition: width .4s ease, background-color .4s ease;
+        }
+
+        /* Sliding sheen while the meter has any score (TASK 2c). */
+        .pw-strength-fill.has-score::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.35) 50%, transparent 80%);
+            background-size: 220% 100%;
+            animation: pwSheen 1.8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pwSheen {
+            0% { background-position: 220% 0; }
+            100% { background-position: -220% 0; }
+        }
+
+        /* Brief glow pulse on tier change (TASK 2c). */
+        .pw-strength-fill.tier-bump {
+            animation: pwGlow .5s ease;
+        }
+
+        @keyframes pwGlow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+            40% { box-shadow: 0 0 12px 2px rgba(255, 255, 255, 0.55); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        /* Criteria chips (item 4 / 7) */
+        .criteria-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .criteria-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            transition: background-color .25s ease, color .25s ease, border-color .25s ease;
+        }
+
+        .criteria-chip .chip-ic {
+            font-size: 0.95em;
+            line-height: 1;
+        }
+
+        .criteria-chip.satisfied {
+            background: color-mix(in srgb, var(--success) 18%, var(--surface));
+            border-color: color-mix(in srgb, var(--success) 42%, transparent);
+            color: var(--text);
+        }
+
+        .criteria-chip.violated {
+            background: color-mix(in srgb, var(--danger) 16%, var(--surface));
+            border-color: color-mix(in srgb, var(--danger) 42%, transparent);
+            color: var(--text);
+        }
+
+        .criteria-chip.pop {
+            animation: chipPop .25s ease;
+        }
+
+        @keyframes chipPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .criteria-chip.chip-enter {
+            animation: chipEnter .3s ease both;
+            animation-delay: calc(var(--i, 0) * 40ms);
+        }
+
+        @keyframes chipEnter {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .criteria-chip.pop { animation: none; }
+            .pw-strength-fill { transition: none; }
+            .pw-strength-fill.has-score::after { animation: none; }
+            .pw-strength-fill.tier-bump { animation: none; }
+            .criteria-chip.chip-enter { animation: none; }
+        }
+
+        /* Screen entrance transition (TASK 3c). */
+        .screen.screen-enter {
+            animation: screenEnter .3s ease-out both;
+        }
+
+        @keyframes screenEnter {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        /* Confetti burst (TASK 3a). */
+        .confetti-layer {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            top: 0;
+            width: 8px;
+            height: 12px;
+            border-radius: 2px;
+            opacity: 0;
+            animation: confettiFall 1.2s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translate(0, -10px) rotate(0deg); }
+            100% { opacity: 0; transform: translate(var(--dx, 0), 140px) rotate(var(--rot, 180deg)); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .screen.screen-enter { animation: none; }
+            .confetti-piece { animation: none; display: none; }
+        }
+
+        /* Feedback layout (item 6) */
+        .feedback-score {
+            margin-bottom: 8px;
+            font-weight: 800;
+            color: var(--text-soft);
+        }
+
+        /* Results card (item 7) */
+        .result-verdict {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .result-verdict.correct {
+            background: color-mix(in srgb, var(--success) 20%, var(--surface));
+        }
+
+        .result-verdict.partial {
+            background: color-mix(in srgb, var(--warning) 20%, var(--surface));
+        }
+
+        .result-verdict.wrong {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+        }
+
+        .result-answer-label {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin: 8px 0 6px;
+        }
+
+        .code-box {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            word-break: break-all;
+            color: var(--text);
+        }
+
     </style>
 </head>
 
 <body>
     <div class="app-shell">
+        <div class="sr-only" id="liveRegion" aria-live="assertive" aria-atomic="true"></div>
         <header class="topbar">
             <div class="brand-wrap">
                 <div class="brand-badge" id="brandBadge">SIM</div>
@@ -850,10 +1120,11 @@
             <div class="controls">
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
-                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Full Screen</button>
+                <button class="control-btn" id="soundToggleBtn" aria-label="Mute sounds"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
                 <button class="control-btn hidden" id="historyBtn" aria-label="Open review memory">🧠 Review
                     Memory</button>
-                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
             </div>
         </header>
 
@@ -866,10 +1137,8 @@
                         This is a professional offline-ready template for maths, ELA, and similar student simulations.
                         Your developers can swap in their own questions, hints, explanations, scoring, and custom logic.
                     </p>
-                    <br>
                     <div class="hero-actions">
                         <button class="primary-btn" id="beginBtn">Begin</button>
-                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
                     </div>
                 </section>
             </div>
@@ -881,8 +1150,6 @@
                     <div class="status-row">
                         <div class="chip-group">
                             <div class="chip hidden" id="questionCounter">Question 1 of 1</div>
-                            <div class="chip" id="scoreChip">Score: 0</div>
-                            <div class="chip" id="modeChip">Mode: Live Play</div>
                         </div>
                         <div class="chip hidden" id="streakChip">Streak: 0</div>
                     </div>
@@ -970,23 +1237,9 @@
                         Great work. Review your answers, see what you got right, and learn from anything you missed.
                     </p>
 
-                    <div class="summary-grid">
-                        <div class="summary-stat">
-                            <h4>Total Score</h4>
-                            <p id="summaryScore">0</p>
-                        </div>
-                        <div class="summary-stat">
-                            <h4>Accuracy</h4>
-                            <p id="summaryAccuracy">0%</p>
-                        </div>
-                        <div class="summary-stat">
-                            <h4>Correct</h4>
-                            <p id="summaryCorrect">0</p>
-                        </div>
-                        <div class="summary-stat">
-                            <h4>Wrong</h4>
-                            <p id="summaryWrong">0</p>
-                        </div>
+                    <div class="result-score-big">
+                        <span class="result-score-num" id="resultScoreBig">0 / 0</span>
+                        <span class="result-score-unit">points</span>
                     </div>
 
                     <div class="results-list" id="summaryResults"></div>
@@ -999,9 +1252,6 @@
             </div>
         </main>
 
-        <div class="footer-note hidden">
-            Built as a local, editable shell. Swap the content, keep the structure, and your developers are good to go.
-        </div>
     </div>
 
     <aside class="drawer" id="historyDrawer" aria-hidden="true">
@@ -1029,7 +1279,7 @@
     </div>
     <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetHeading">
         <section class="modal-card" style="max-width:460px">
-            <h3 id="resetHeading">↻ Reset activity</h3>
+            <h3 id="resetHeading"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset activity</h3>
             <p>This clears saved progress and starts a new round.</p>
             <div class="button-row">
                 <button class="danger-btn" id="confirmResetBtn">Yes, Reset</button>
@@ -1041,72 +1291,230 @@
     <script>
         "use strict";
 
-        const FORBIDDEN_WORDS = ["fuk",
-            "phuck",
-            "clitoris",
-            "basterd",
-            "bastard",
-            "boobs",
-            "tits",
-            "titty",
-            "boobies",
-            "titties",
-            "muff",
-            "nutsack",
-            "scrotum",
-            "dumbass",
-            "jackass",
-            "motherfucker",
-            "motherfucking",
-            "boner",
-            "cocksucker",
-            "shit",
-            "fuck",
-            "sht",
-            "fcuk",
-            "cock",
-            "dick",
-            "penis",
-            "bitch",
-            "whore",
-            "prick",
-            "wank",
-            "semen",
-            "Hitler",
-            "Hitler",
-            "Stalin",
-            "jizz",
-            "orgasm",
-            "thatass",
-            "slave",
-            "dyke",
-            "cunt",
-            "kunt",
-            "nympho",
-            "skank",
-            "slut",
-            "tramp",
-            "twat",
-            "whore",
-            "kys",
-            "pussy",
-            "queef",
-            "porn",
-            "faggot",
-            "anus",
-            "asshole",
-            "herpes",
-            "std",
-            "suck",
-            "blowjob",
-            "fellatio",
-            "handjob",
-            "rimjob",
-            "creampie",
-            "kkk",
-            "nazi",
-            "retard"
+        const PROFANITY_FILTER_ENABLED = true;
+
+        const PROFANITY_LIST = [
+            "2g1c", "2 girls 1 cup", "acrotomophilia", "alabama hot pocket", "alaskan pipeline", "anal", "anilingus", "anus", "apeshit", "arsehole",
+            "ass", "asshole", "assmunch", "auto erotic", "autoerotic", "babeland", "baby batter", "baby juice", "ball gag", "ball gravy",
+            "ball kicking", "ball licking", "ball sack", "ball sucking", "bangbros", "bangbus", "bareback", "barely legal", "barenaked", "bastard",
+            "bastardo", "bastinado", "bbw", "bdsm", "beaner", "beaners", "beaver cleaver", "beaver lips", "beastiality", "bestiality",
+            "big black", "big breasts", "big knockers", "big tits", "bimbos", "birdlock", "bitch", "bitches", "black cock", "blonde action",
+            "blonde on blonde action", "blowjob", "blow job", "blow your load", "blue waffle", "blumpkin", "bollocks", "bondage", "boner", "boob",
+            "boobs", "booty call", "brown showers", "brunette action", "bukkake", "bulldyke", "bullet vibe", "bullshit", "bung hole", "bunghole",
+            "busty", "butt", "buttcheeks", "butthole", "camel toe", "camgirl", "camslut", "camwhore", "carpet muncher", "carpetmuncher",
+            "chocolate rosebuds", "cialis", "circlejerk", "cleveland steamer", "clit", "clitoris", "clover clamps", "clusterfuck", "cock", "cocks",
+            "coprolagnia", "coprophilia", "cornhole", "coon", "coons", "creampie", "cum", "cumming", "cumshot", "cumshots",
+            "cunnilingus", "cunt", "darkie", "date rape", "daterape", "deep throat", "deepthroat", "dendrophilia", "dick", "dildo",
+            "dingleberry", "dingleberries", "dirty pillows", "dirty sanchez", "doggie style", "doggiestyle", "doggy style", "doggystyle", "dog style", "dolcett",
+            "domination", "dominatrix", "dommes", "donkey punch", "double dong", "double penetration", "dp action", "dry hump", "dvda", "eat my ass",
+            "ecchi", "ejaculation", "erotic", "erotism", "escort", "eunuch", "fag", "faggot", "fecal", "felch",
+            "fellatio", "feltch", "female squirting", "femdom", "figging", "fingerbang", "fingering", "fisting", "foot fetish", "footjob",
+            "frotting", "fuck", "fuck buttons", "fuckin", "fucking", "fucktards", "fudge packer", "fudgepacker", "futanari", "gangbang",
+            "gang bang", "gay sex", "genitals", "giant cock", "girl on", "girl on top", "girls gone wild", "goatcx", "goatse", "god damn",
+            "gokkun", "golden shower", "goodpoop", "goo girl", "goregasm", "grope", "group sex", "g-spot", "guro", "hand job",
+            "handjob", "hard core", "hardcore", "hentai", "hoe", "homoerotic", "honkey", "hooker", "horny", "hot carl", "hot chick",
+            "how to kill", "how to murder", "huge fat", "humping", "incest", "intercourse", "jack off", "jail bait", "jailbait", "jelly donut",
+            "jerk off", "jigaboo", "jiggaboo", "jiggerboo", "jizz", "juggs", "kike", "kinbaku", "kinkster", "kinky",
+            "knobbing", "leather restraint", "leather straight jacket", "lemon party", "livesex", "lolita", "lovemaking", "make me come", "male squirting", "masturbate",
+            "masturbating", "masturbation", "menage a trois", "milf", "missionary position", "mong", "motherfucker", "mound of venus", "mr hands", "muff diver",
+            "muffdiving", "nambla", "nawashi", "negro", "neonazi", "nigga", "nigger", "nig nog", "nimphomania", "nipple",
+            "nipples", "nsfw", "nsfw images", "nude", "nudity", "nutten", "nympho", "nymphomania", "octopussy", "omorashi",
+            "one cup two girls", "one guy one jar", "orgasm", "orgy", "paedophile", "paki", "panties", "panty", "pedobear", "pedophile",
+            "pegging", "penis", "phone sex", "piece of shit", "pikey", "pissing", "piss pig", "pisspig", "playboy", "pleasure chest",
+            "pole smoker", "ponyplay", "poof", "poon", "poontang", "punany", "poop chute", "poopchute", "porn", "porno",
+            "pornography", "prince albert piercing", "pthc", "pubes", "pussy", "queaf", "queef", "quim", "raghead", "raging boner",
+            "rape", "raping", "rapist", "rectum", "reverse cowgirl", "rimjob", "rimming", "rosy palm", "rosy palm and her 5 sisters", "rusty trombone",
+            "sadism", "santorum", "scat", "schlong", "scissoring", "semen", "sex", "sexcam", "sexo", "sexy",
+            "sexual", "sexually", "sexuality", "shaved beaver", "shaved pussy", "shemale", "shibari", "shit", "shitblimp", "shitty",
+            "shota", "shrimping", "skeet", "slanteye", "slut", "s&m", "smut", "snatch", "snowballing", "sodomize",
+            "sodomy", "spastic", "spic", "splooge", "splooge moose", "spooge", "spread legs", "spunk", "strap on", "strapon",
+            "strappado", "strip club", "style doggy", "suck", "sucks", "suicide girls", "sultry women", "swastika", "swinger", "tainted love",
+            "taste my", "tea bagging", "threesome", "throating", "thumbzilla", "tied up", "tight white", "tit", "tits", "titties",
+            "titty", "tongue in a", "topless", "tosser", "towelhead", "tranny", "tribadism", "tub girl", "tubgirl", "tushy",
+            "twat", "twink", "twinkie", "two girls one cup", "undressing", "upskirt", "urethra play", "urophilia", "vagina", "venus mound",
+            "viagra", "vibrator", "violet wand", "vorarephilia", "voyeur", "voyeurweb", "voyuer", "vulva", "wank", "wetback",
+            "wet dream", "white power", "whore", "worldsex", "wrapping men", "wrinkled starfish", "xx", "xxx", "yaoi", "yellow showers",
+            "yiffy", "zoophilia", "🖕"
         ];
+
+        // Dev-extendable: legitimate words that embed a >=4-char profanity
+        // entry and must never be flagged. Lowercase, punctuation-free.
+        const PROFANITY_ALLOWLIST = [
+            "class", "classic", "classes", "assassin", "assume", "bass",
+            "pass", "grass", "glass", "massachusetts", "scunthorpe", "shitake",
+            "analysis", "analyst", "analyse", "analyze", "analog", "analogue",
+            "canal", "banal", "raccoon", "tycoon", "cocoon", "cocktail",
+            "cockpit", "peacock", "hancock", "shuttlecock", "grape", "grapes",
+            "grapefruit", "therapist", "therapists", "therapy", "scrape",
+            "scraped", "scraping", "drape", "draped", "drapes", "assess",
+            "assessment", "dickens", "dickinson", "dickson", "hooker", "matthew",
+            "cummings", "essex", "sussex", "middlesex",
+            "password", "passwords", "passage", "passing", "passion",
+            "classic", "classroom", "associate", "assign", "assignment",
+            "assist", "assistant", "asset", "assets", "hoedown",
+            "assembly", "assault", "assure", "assured", "assorted",
+            "association", "associations", "title", "titles", "titan",
+            "titanic", "titus", "titration", "sexton", "sextet",
+            "tahoe", "cucumber", "cumber", "cumberbatch", "cumulative",
+            "accumulate"
+        ];
+        const PROFANITY_ALLOWLIST_SET = new Set(PROFANITY_ALLOWLIST);
+
+        // Word-boundary regexes, used for the < 4 char tier.
+        const PROFANITY_REGEXES = PROFANITY_LIST.map((entry) => {
+            const escaped = entry.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            // Entries with word characters get \b boundaries; entries with
+            // no word characters at their edges (e.g. emoji, symbols) get
+            // whitespace/edge anchors instead, since \b cannot apply.
+            if (/^\w[\s\S]*\w$|^\w$/.test(entry)) {
+                return new RegExp("\\b" + escaped.replace(/\s+/g, "\\s+") + "\\b", "i");
+            }
+            return new RegExp("(?:^|\\s)" + escaped + "(?:$|\\s)", "i");
+        });
+
+        // Short profanity entries (< 4 chars, letters only) used by the
+        // compound/chained tier to catch tokens that start or end with them.
+        const shortEntries = PROFANITY_LIST.filter((e) => e.length < 4 && /^[a-z]+$/.test(e));
+        function compoundHit(hay) {
+            const tokens = hay.split(/[^a-z]+/);
+            for (const token of tokens) {
+                if (token.length < 5 || PROFANITY_ALLOWLIST_SET.has(token)) continue;
+                for (const entry of shortEntries) {
+                    if ((token.startsWith(entry) || token.endsWith(entry)) && token.length - entry.length >= 2) return entry;
+                }
+            }
+            return null;
+        }
+
+        // Leetspeak normalizer: substitutes common digit/symbol stand-ins
+        // for letters so e.g. "sh1t" / "f4ck" / "5hit" match the filter.
+        function deLeet(text) {
+            return String(text || "")
+                .toLowerCase()
+                .replace(/[@4]/g, "a")
+                .replace(/[3€]/g, "e")
+                .replace(/[1!|]/g, "i")
+                .replace(/[0]/g, "o")
+                .replace(/[5$]/g, "s")
+                .replace(/[7+]/g, "t")
+                .replace(/[8]/g, "b")
+                .replace(/[9]/g, "g");
+        }
+
+        // Returns the whitespace-delimited token in `hay` that contains the
+        // character at `pos`, lowercased with punctuation stripped — used to
+        // consult PROFANITY_ALLOWLIST for the substring tier.
+        function profanityContainingToken(hay, pos) {
+            let start = pos;
+            let end = pos;
+            while (start > 0 && !/\s/.test(hay[start - 1])) start--;
+            while (end < hay.length && !/\s/.test(hay[end])) end++;
+            return hay.slice(start, end).replace(/[^a-z0-9]/g, "");
+        }
+
+        function findProfanity(text, opts) {
+            if (!PROFANITY_FILTER_ENABLED) return null;
+            const useCompound = !(opts && opts.compound === false);
+            // Collapse runs of whitespace so multi-word entries still match
+            // and token extraction is stable.
+            const rawPass = String(text).toLowerCase().replace(/\s+/g, " ");
+            const leetPass = deLeet(text).replace(/\s+/g, " ");
+            const passes = [rawPass, leetPass];
+
+            for (let p = 0; p < passes.length; p++) {
+                const hay = passes[p];
+                for (let i = 0; i < PROFANITY_LIST.length; i++) {
+                    const entry = PROFANITY_LIST[i];
+                    // Leet pass skips entries under 3 chars to avoid false
+                    // positives from normalized text (e.g. "xx").
+                    if (p === 1 && entry.length < 3) continue;
+
+                    if (entry.length >= 4) {
+                        // Substring tier with allowlisted-token guard.
+                        let from = 0;
+                        let pos;
+                        while ((pos = hay.indexOf(entry, from)) !== -1) {
+                            const token = profanityContainingToken(hay, pos);
+                            if (!PROFANITY_ALLOWLIST_SET.has(token)) {
+                                return entry;
+                            }
+                            from = pos + 1;
+                        }
+                    } else if (PROFANITY_REGEXES[i].test(hay)) {
+                        // Word-boundary tier for short entries.
+                        return entry;
+                    }
+                }
+                // Compound/chained tier: tokens that start or end with a
+                // short entry (e.g. "asshoe", "dumbass", "hoebag").
+                if (useCompound) {
+                    const compound = compoundHit(hay);
+                    if (compound) return compound;
+                }
+            }
+            return null;
+        }
+
+        // Non-destructive error flash: re-triggers the shake animation and
+        // clears the error styling as soon as the user edits the field.
+        function markInputError(inputEl) {
+            if (!inputEl) return;
+            Sound.error();
+            inputEl.classList.remove("input-error");
+            void inputEl.offsetWidth;
+            inputEl.classList.add("input-error");
+            const clear = () => {
+                inputEl.classList.remove("input-error");
+                inputEl.removeEventListener("input", clear);
+            };
+            inputEl.addEventListener("input", clear);
+        }
+
+        // Honors the OS "reduce motion" setting for all delight animations.
+        function prefersReducedMotion() {
+            return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+        }
+
+        // One-shot confetti burst layered over `hostEl` (TASK 3a). ~24 pieces,
+        // palette colors, ~1.2s fall/fade, DOM cleaned afterward. Skipped when
+        // the user prefers reduced motion.
+        function launchConfetti(hostEl) {
+            if (!hostEl || prefersReducedMotion()) return;
+            const colors = ["var(--accent)", "var(--accent-2)", "var(--success)", "var(--warning)", "var(--danger)"];
+            const layer = document.createElement("div");
+            layer.className = "confetti-layer";
+            layer.setAttribute("aria-hidden", "true");
+            for (let i = 0; i < 24; i++) {
+                const piece = document.createElement("span");
+                piece.className = "confetti-piece";
+                piece.style.left = (Math.random() * 100).toFixed(1) + "%";
+                piece.style.background = colors[i % colors.length];
+                piece.style.setProperty("--dx", (Math.random() * 120 - 60).toFixed(0) + "px");
+                piece.style.setProperty("--rot", (Math.random() * 540 - 270).toFixed(0) + "deg");
+                piece.style.animationDelay = (Math.random() * 0.15).toFixed(2) + "s";
+                layer.appendChild(piece);
+            }
+            if (getComputedStyle(hostEl).position === "static") hostEl.style.position = "relative";
+            hostEl.appendChild(layer);
+            setTimeout(function () { layer.remove(); }, 1500);
+        }
+
+        // Animates `el` text from 0 -> target over ~600ms (TASK 3b). Instant
+        // under reduced motion.
+        function countUpScore(el, target, total) {
+            if (!el) return;
+            if (prefersReducedMotion()) { el.textContent = `${target} / ${total}`; return; }
+            const dur = 600;
+            const start = performance.now();
+            function frame(now) {
+                const t = Math.min(1, (now - start) / dur);
+                const val = Math.round(target * (1 - Math.pow(1 - t, 3)));
+                el.textContent = `${val} / ${total}`;
+                if (t < 1) requestAnimationFrame(frame);
+                else el.textContent = `${target} / ${total}`;
+            }
+            requestAnimationFrame(frame);
+        }
         /* ============================================================
            DEVELOPER EDIT AREA 1: SIMULATION CONFIGURATION
            Replace text in this object to rename and reskin the shell.
@@ -1137,16 +1545,7 @@
             storageKey: "IT-POC-SIM5-progress"
         };
 
-        /* ============================================================
-           DEVELOPER EDIT AREA 2: LANGUAGE FILTER PLACEHOLDER
-           Expand or replace this list with your organization's policy.
-           The check is intentionally simple so teams can customize it.
-           ============================================================ */
-        const BLOCKED_LANGUAGE = [
-            "placeholderbadword1",
-            "placeholderbadword2",
-            "placeholderslur1"
-        ];
+        const SCHEMA_VERSION = 1;
 
         /* ============================================================
            DEVELOPER EDIT AREA 3: QUESTION DATA
@@ -1187,19 +1586,18 @@
                     grader: function (answer, question) {
 
                         const result = evaluatePassword(answer);
+                        const status = result.score >= 80 ? "correct" : result.score >= 40 ? "partial" : "wrong";
 
                         return {
-                            status: result.score >= 80 ? "correct" : "wrong",
+                            status: status,
                             scoreAwarded: Math.round(question.points * result.score / 100),
-                            explanation: result.score >= 80 ?
+                            explanation: status === "correct" ?
                                 "Excellent! Your password is long, uses a variety of character types, and avoids common predictable patterns."
                                 : result.messages.join("<br>")
                         };
                     },
-                    correctAnswer: 1,
-                    explanations: ["This is incorrect because the emphasis is on the wrong part of the sentence. It does not help the listener catch the correct day. To fix it, stress the word that carries the important correction.",
-                        "You followed the rule because you stressed the detail that fixes the listener’s confusion.",
-                        "This is incorrect because stressing <span style='font-weight: bold;'>Thursday</span> highlights the wrong day instead of the correct one. To fix it, put the strongest emphasis on the correct day the listener needs to remember."
+                    explanations: [
+                        "A strong password uses 12+ characters mixing uppercase, lowercase, numbers, and symbols, avoids common words and personal information, and doesn't rely on predictable patterns."
                     ]
                 }
             },
@@ -1250,9 +1648,9 @@
             school: document.getElementById("school"),
             alertBoxProfile: document.getElementById("alertBoxProfile"),
             profileStartBtn: document.getElementById("profileStartBtn"),
-            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             helpBtn: document.getElementById("helpBtn"),
             themeToggleBtn: document.getElementById("themeToggleBtn"),
+            soundToggleBtn: document.getElementById("soundToggleBtn"),
             fullscreenBtn: document.getElementById("fullscreenBtn"),
             historyBtn: document.getElementById("historyBtn"),
             resetModal: document.getElementById("resetModal"),
@@ -1260,8 +1658,6 @@
             cancelResetBtn: document.getElementById("cancelResetBtn"),
             confirmResetBtn: document.getElementById("confirmResetBtn"),
             questionCounter: document.getElementById("questionCounter"),
-            scoreChip: document.getElementById("scoreChip"),
-            modeChip: document.getElementById("modeChip"),
             streakChip: document.getElementById("streakChip"),
             progressLabel: document.getElementById("progressLabel"),
             progressSummary: document.getElementById("progressSummary"),
@@ -1282,12 +1678,7 @@
             nextBtn: document.getElementById("nextBtn"),
             summaryTitle: document.getElementById("summaryTitle"),
             summaryDescription: document.getElementById("summaryDescription"),
-            summaryScore: document.getElementById("summaryScore"),
-            summaryAccuracy: document.getElementById("summaryAccuracy"),
-            summaryCorrect: document.getElementById("summaryCorrect"),
-            summaryPartial: document.getElementById("summaryPartial"),
-            summaryWrong: document.getElementById("summaryWrong"),
-            summaryStreak: document.getElementById("summaryStreak"),
+            resultScoreBig: document.getElementById("resultScoreBig"),
             summaryResults: document.getElementById("summaryResults"),
             reviewFromSummaryBtn: document.getElementById("reviewFromSummaryBtn"),
             playAgainBtn: document.getElementById("playAgainBtn"),
@@ -1297,33 +1688,43 @@
             instructionsModal: document.getElementById("instructionsModal"),
             instructionsBody: document.getElementById("instructionsBody"),
             closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
-            gotItBtn: document.getElementById("gotItBtn")
+            gotItBtn: document.getElementById("gotItBtn"),
+            liveRegion: document.getElementById("liveRegion")
         };
 
         /* ============================================================
            INITIALIZATION
            ============================================================ */
         document.addEventListener("DOMContentLoaded", () => {
-            resetSimulation();
-            initializeApp();
-            showScreen("home");
+            const stateWasLoaded = initializeApp();
+            if (!stateWasLoaded) {
+                resetSimulation();
+                showScreen("home");
+            }
         })
 
-        initializeApp();
+        function loadHelpSeen() {
+            if (storageGet(SIM_CONFIG.simId + "-help-seen") === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
 
         function initializeApp() {
             applyConfigToUI();
             bindEvents();
-            loadStateFromStorage();
+            loadHelpSeen();
+            loadTheme();
+            loadSoundSetting();
+            const stateWasLoaded = loadStateFromStorage();
             renderInstructions();
             renderStepDots();
             renderQuestion();
             updateStatusUI();
             updateSummaryScreen();
-            // updateBeginButton();
             if (SIM_CONFIG.showIntroModalOnLoad) {
                 openInstructionsModal();
             }
+            return stateWasLoaded;
         }
 
         function applyConfigToUI() {
@@ -1338,18 +1739,16 @@
 
         function bindEvents() {
             dom.beginBtn.addEventListener("click", () => {
+                Sound.click();
                 showScreen("profile");
-                // saveUserProfile();
                 // startWithDifficulty("easy")
             });
-            // ["firstName", "lastName", "school"].forEach(function (id) {
-            //     document.getElementById(id).addEventListener("input", updateBeginButton);
-            // });
             [dom.firstName, dom.lastName, dom.school]
                 .forEach(function (input) {
                     input.addEventListener("input", validateProfile);
                 });
             dom.profileStartBtn.addEventListener("click", function () {
+                Sound.click();
 
                 state.userProfile.firstName =
                     dom.firstName.value.trim();
@@ -1364,9 +1763,9 @@
                 dom.profileStartBtn.classList.add("hidden");
 
             });
-            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
                 dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
                 openInstructionsModal();
             });
             dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
@@ -1378,6 +1777,7 @@
             });
 
             dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.soundToggleBtn.addEventListener("click", toggleSound);
             dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
             dom.historyBtn.addEventListener("click", openHistoryDrawer);
             dom.reviewFromSummaryBtn.addEventListener("click", openHistoryDrawer);
@@ -1400,7 +1800,7 @@
             dom.answerForm.addEventListener("submit", handleAnswerSubmit);
             dom.previousBtn.addEventListener("click", goPrevious);
             dom.nextBtn.addEventListener("click", goNext);
-            dom.playAgainBtn.addEventListener("click", () => document.getElementById("resetModal").classList.add("show"));
+            dom.playAgainBtn.addEventListener("click", playAgain);
             document.addEventListener("fullscreenchange", updateFullscreenButton);
             document.addEventListener("keydown", handleKeyShortcuts);
         }
@@ -1427,8 +1827,8 @@
         }
 
         function closeInstructionsModal() {
+            Sound.click();
             dom.instructionsModal.classList.remove("show");
-            dom.helpBtn.classList.add("pulse-help");
         }
 
         function openHistoryDrawer() {
@@ -1465,11 +1865,26 @@
             dom.summaryScreen.classList.toggle("active", screenName === "summary");
             dom.screenProfile.classList.toggle("active", screenName === "profile");
             window.scrollTo(0, 0);
+
+            // Fade + slide-up entrance on the incoming screen (TASK 3c).
+            if (!prefersReducedMotion()) {
+                const incoming = { home: dom.homeScreen, game: dom.gameScreen, summary: dom.summaryScreen, profile: dom.screenProfile }[screenName];
+                if (incoming) {
+                    incoming.classList.remove("screen-enter");
+                    void incoming.offsetWidth;
+                    incoming.classList.add("screen-enter");
+                }
+            }
         }
 
         function showSummaryScreen() {
             updateSummaryScreen();
             showScreen("summary");
+            // Count the big score up 0 -> N (TASK 3b).
+            if (dom.resultScoreBig) {
+                countUpScore(dom.resultScoreBig, Number(dom.resultScoreBig.dataset.target || 0), Number(dom.resultScoreBig.dataset.total || 0));
+            }
+            Sound.finish();
         }
 
         function setDifficulty(level) {
@@ -1529,7 +1944,6 @@
                 dom.questionPrompt.textContent = question.prompt;
             }
             dom.questionDirections.textContent = question.directions || "";
-            dom.modeChip.textContent = isReviewMode ? "Mode: Review" : "Mode: Live Play";
 
             // 🔒 Lock submit button if already answered
             dom.submitBtn.classList.toggle("hidden", isReviewMode);
@@ -1603,10 +2017,15 @@
 
             const input = document.createElement("input");
             input.className = "input-field";
+            const maskFallback = !CSS.supports("-webkit-text-security", "disc");
             if (question.passwordStrength) {
                 input.classList.add("password-field-hide");
             }
             input.type = "text";
+            if (question.passwordStrength && maskFallback) {
+                input.type = "password";
+                input.setAttribute("autocomplete", "new-password");
+            }
             input.maxLength = 64;
             input.id = "dynamicAnswerInput";
             input.placeholder = question.placeholder || "Type your answer here";
@@ -1622,16 +2041,25 @@
                 toggleBtn.type = "button";     // Prevent form submission
                 toggleBtn.className = "password-toggle-btn";
                 toggleBtn.classList.add("secondary-btn");
-                toggleBtn.textContent = "👁 Show";
+                toggleBtn.innerHTML = EYE_OPEN_SVG;
+                toggleBtn.setAttribute("aria-label", "Show password");
 
                 toggleBtn.addEventListener("click", function () {
 
                     if (input.classList.contains("password-field-hide")) {
                         input.classList.remove("password-field-hide");
-                        toggleBtn.textContent = "🙈 Hide";
+                        if (maskFallback) {
+                            input.type = "text";
+                        }
+                        toggleBtn.innerHTML = EYE_OFF_SVG;
+                        toggleBtn.setAttribute("aria-label", "Hide password");
                     } else {
                         input.classList.add("password-field-hide");
-                        toggleBtn.textContent = "👁 Show";
+                        if (maskFallback) {
+                            input.type = "password";
+                        }
+                        toggleBtn.innerHTML = EYE_OPEN_SVG;
+                        toggleBtn.setAttribute("aria-label", "Show password");
                     }
 
                 });
@@ -1644,73 +2072,256 @@
             }
         }
 
+        // Feather-style eye icons for the show/hide password toggle (item 5).
+        const EYE_OPEN_SVG = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+        const EYE_OFF_SVG = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+        // Criteria chip definitions (item 4). kind "positive": satisfied = green,
+        // else muted outline. kind "penalty": clean/good = green, violated = danger.
+        const CRITERIA_CHIPS = [
+            { key: "length", label: "Length 12+", kind: "positive" },
+            { key: "upper", label: "Uppercase", kind: "positive" },
+            { key: "lower", label: "Lowercase", kind: "positive" },
+            { key: "number", label: "Number", kind: "positive" },
+            { key: "symbol", label: "Symbol", kind: "positive" },
+            { key: "personal", label: "No personal info", kind: "penalty" },
+            { key: "common", label: "Not a common password", kind: "penalty" },
+            { key: "predictable", label: "No repeats/sequences", kind: "penalty" }
+        ];
+
+        // Builds the wrap-flex grid of criteria chips. `prev` supplies the last
+        // criteria snapshot so a chip that just became good gets a one-shot pop.
+        function buildCriteriaChips(criteria, prev, stagger) {
+            const wrap = document.createElement("div");
+            wrap.className = "criteria-chips";
+
+            CRITERIA_CHIPS.forEach(function (c, index) {
+                const good = !!criteria[c.key];
+                const chip = document.createElement("span");
+                chip.className = "criteria-chip";
+
+                // One-time staggered entrance on first render (TASK 3d).
+                if (stagger) {
+                    chip.classList.add("chip-enter");
+                    chip.style.setProperty("--i", String(index));
+                }
+
+                let icon;
+                if (good) {
+                    chip.classList.add("satisfied");
+                    icon = "✓";
+                    if (prev && prev[c.key] === false) { chip.classList.add("pop"); Sound.pop(); }
+                } else if (c.kind === "penalty") {
+                    chip.classList.add("violated");
+                    icon = "!";
+                    // Penalty criterion just went good->violated (true->false): warn.
+                    if (prev && prev[c.key] === true) { Sound.warn(); }
+                } else {
+                    icon = "○";
+                }
+
+                const ic = document.createElement("span");
+                ic.className = "chip-ic";
+                ic.setAttribute("aria-hidden", "true");
+                ic.textContent = icon;
+
+                const txt = document.createElement("span");
+                txt.textContent = c.label;
+
+                chip.appendChild(ic);
+                chip.appendChild(txt);
+                wrap.appendChild(chip);
+            });
+
+            return wrap;
+        }
+
         function renderPasswordStrengthMeter(input, question) {
 
-            const meter = document.createElement("div");
-            meter.className = "password-meter";
+            const strength = document.createElement("div");
+            strength.className = "pw-strength";
 
-            const bar = document.createElement("div");
-            bar.className = "password-meter-bar";
+            const head = document.createElement("div");
+            head.className = "pw-strength-head";
+            // Permanent left label (TASK 2b); tier text stays right-aligned.
+            const labelEl = document.createElement("span");
+            labelEl.className = "pw-strength-label";
+            labelEl.textContent = "Password Strength";
+            const metaEl = document.createElement("span");
+            metaEl.className = "pw-strength-meta";
+            head.appendChild(labelEl);
+            head.appendChild(metaEl);
 
-            const feedback = document.createElement("ul");
-            feedback.className = "password-feedback";
+            const track = document.createElement("div");
+            track.className = "pw-strength-track";
+            const fill = document.createElement("div");
+            fill.className = "pw-strength-fill";
+            track.appendChild(fill);
 
-            meter.appendChild(bar);
+            strength.appendChild(head);
+            strength.appendChild(track);
 
-            dom.answerArea.appendChild(meter);
-            dom.answerArea.appendChild(feedback);
+            const chipsHost = document.createElement("div");
+
+            dom.answerArea.appendChild(strength);
+            dom.answerArea.appendChild(chipsHost);
+
+            let prevCriteria = null;
+            let prevTier = null;
+            let hasStaggered = false;
+
+            // Applies meter width/color/label/chips for a given value. Extracted
+            // so it can run once on init to FREEZE the bar at the submitted
+            // password's score: after submit the input is disabled, so no input
+            // event fires and the meter keeps its last state (TASK 2a).
+            function applyMeter(value, stagger) {
+                const result = evaluatePassword(value);
+                fill.style.width = result.score + "%";
+
+                let color, label, tier;
+                if (result.score < 40) {
+                    color = "var(--danger)";
+                    label = "Weak";
+                    tier = "weak";
+                } else if (result.score < 80) {
+                    color = "#f59e0b";
+                    label = "Medium";
+                    tier = "medium";
+                } else {
+                    color = "var(--success, #22c55e)";
+                    label = "Strong";
+                    tier = "strong";
+                }
+                fill.style.backgroundColor = color;
+                fill.classList.toggle("has-score", result.score > 0);
+
+                // Glow pulse when the tier changes (weak->medium->strong).
+                if (result.score > 0 && prevTier !== null && prevTier !== tier) {
+                    fill.classList.remove("tier-bump");
+                    void fill.offsetWidth;
+                    fill.classList.add("tier-bump");
+                }
+                prevTier = result.score > 0 ? tier : null;
+
+                metaEl.textContent = result.score > 0 ? (label + " · " + result.score) : "";
+
+                chipsHost.replaceChildren(buildCriteriaChips(result.criteria, prevCriteria, stagger));
+                prevCriteria = result.criteria;
+            }
 
             input.addEventListener("input", function () {
                 clearAlert();
                 const profanity = findProfanity(input.value);
                 if (profanity) {
-                    const regex = new RegExp(profanity, "gi");
-                    input.value = input.value.replace(regex, "");
-
-                    input.focus();
+                    markInputError(input);
+                    announce("Inappropriate language detected — please remove it.");
                     showAlert("Do not use inappropriate language!");
                 }
-                const result = evaluatePassword(input.value);
-
-                bar.style.width = result.score + "%";
-
-                // 0 = red, 120 = green
-                const hue = (result.score / 100) * 120;
-                bar.style.backgroundColor = `hsl(${hue}, 85%, 45%)`;
-
-
-                bar.className = "password-meter-bar " + result.level;
-
-                feedback.innerHTML = "";
-
-                result.messages.forEach(function (message) {
-                    const li = document.createElement("li");
-                    li.textContent = message;
-                    feedback.appendChild(li);
-                });
-
+                applyMeter(input.value, !hasStaggered);
+                hasStaggered = true;
             });
 
+            // Initialize immediately so a preserved value (after submit or
+            // navigation) renders its meter instead of going blank.
+            if (input.value) {
+                applyMeter(input.value, true);
+                hasStaggered = true;
+            }
         }
 
         function evaluatePassword(password) {
 
+            password = String(password || "").trim();
             let score = 0;
             const messages = [];
-            const COMMON_PASSWORDS = [
-                "password",
-                "password123",
-                "123456",
-                "12345678",
-                "123456789",
-                "qwerty",
-                "qwerty123",
-                "abc123",
-                "welcome",
-                "admin",
-                "letmein",
-                "football",
-                "iloveyou"
+            // Common-password lists sourced from SecLists Pwdb_top-1000 (10M-password corpus).
+            // Length >= 6 -> substring match; length < 6 -> exact match (avoids false hits).
+            const COMMON_PASSWORDS_SUBSTRING = [
+                "123456", "123456789", "password", "qwerty", "12345678", "123123", "111111", "1234567890", "1234567", "abc123", "1q2w3e4r5t", "q1w2e3r4t5y6",
+                "iloveyou", "000000", "123321", "1q2w3e4r", "qwertyuiop", "yuantuo2012", "654321", "qwerty123", "1qaz2wsx3edc", "password1", "1qaz2wsx", "666666",
+                "dragon", "ashley", "princess", "987654321", "123qwe", "159753", "monkey", "q1w2e3r4", "zxcvbnm", "123123123", "asdfghjkl", "pokemon",
+                "football", "killer", "112233", "michael", "shadow", "121212", "daniel", "asdasd", "qazwsx", "1234qwer", "superman", "123456a",
+                "azerty", "qwe123", "master", "7777777", "sunshine", "n0=acc3ss", "1q2w3e", "abcd1234", "1234561", "computer", "fuckyou", "aaaaaa",
+                "555555", "asdfgh", "asd123", "baseball", "0123456789", "charlie", "123654", "qwer1234", "naruto", "a123456", "jessica", "status",
+                "soccer", "jordan", "liverpool", "thomas", "lol123", "michelle", "123abc", "nicole", "11111111", "starwars", "samsung", "secret",
+                "joshua", "123456789a", "andrew", "222222", "q1w2e3r4t5", "147258369", "hunter", "qazwsxedc", "lovely", "999999", "jennifer", "letmein",
+                "tigger", "asdf1234", "hannah", "purple", "justin", "qwerty1", "anthony", "welcome", "159357", "789456123", "aa123456", "qweasdzxc",
+                "internet", "robert", "minecraft", "super123", "batman", "trustno1", "matthew", "789456", "88888888", "5201314", "chocolate", "flower",
+                "cookie", "d1lakiss", "william", "102030", "cheese", "buster", "pakistan", "chelsea", "alexander", "888888", "12341234", "987654",
+                "andrea", "777777", "samantha", "1234567891", "blink182", "freedom", "matrix", "george", "amanda", "1qazxsw2", "forever", "martin",
+                "patrick", "iloveu", "babygirl", "summer", "friends", "whatever", "12qwaszx", "pepper", "zaq12wsx", "212121", "butterfly", "orange",
+                "jasmine", "joseph", "maggie", "banana", "arsenal", "mustang", "monster", "passw0rd", "jonathan", "snoopy", "0987654321", "family",
+                "changeme", "131313", "123qweasd", "ginger", "junior", "diamond", "asdfasdf", "taylor", "eminem", "oliver", "exigent", "147258",
+                "basketball", "sophie", "loveme", "mother", "benjamin", "silver", "333333", "101010", "harley", "spiderman", "chicken", "a123456789",
+                "asshole", "123654789", "12345678910", "696969", "qweasd", "yellow", "melissa", "qwertyui", "christian", "nathan", "anhyeuem", "brandon",
+                "richard", "nks230kjs82", "rr123456rr", "metallica", "00000000", "123hfjdk147", "lovers", "mercedes", "123456abc", "gabriel", "password123", "loveyou",
+                "mickey", "147852369", "1111111", "010203", "bailey", "hello123", "sandra", "london", "qwerty12", "zxcvbn", "q1w2e3", "slipknot",
+                "741852963", "qwerty12345", "prince", "hockey", "angels", "peanut", "victoria", "12344321", "angela", "rainbow", "abcdef", "ferrari",
+                "google", "cocacola", "1111111111", "hahaha", "carlos", "gfhjkm", "qweqwe", "456789", "12345qwert", "jordan23", "11223344", "bubbles",
+                "steven", "samuel", "rental", "xxxxxx", "0123456", "barbie", "morgan", "asdasdasd", "alexis", "elizabeth", "michael1", "austin",
+                "nicholas", "school", "1q2w3e4r5t6y", "lollol", "barcelona", "pokemon1", "iloveyou1", "147852", "87654321", "diablo", "jasper", "liverpool1",
+                "phoenix", "madison", "vanessa", "jackson", "123qweasdzxc", "danielle", "marina", "xbox360", "pretty", "thunder", "bandit", "indya123",
+                "a1b2c3d4", "232323", "adidas", "dennis", "edward", "ronaldo", "adrian", "rachel", "tennis", "destiny", "fuckoff", "startfinding",
+                "friendster", "lauren", "qqqqqq", "456123", "<password>", "darkness", "nicolas", "nirvana", "mylove", "scooter", "fashion", "merlin",
+                "qazwsx123", "sakura", "charlie1", "vincent", "casper", "asdfghjk", "november", "juventus", "lizottes", "spider", "smokey", "1234abcd",
+                "abcdefg", "december", "lalala", "spongebob", "booboo", "chester", "loulou", "heather", "america", "yamaha", "princess1", "123789",
+                "monica", "victor", "canada", "scorpion", "friend", "antonio", "sebastian", "nintendo", "awesome", "nikita", "rebecca", "sabrina",
+                "midnight", "sweety", "testing", "passwort", "852456", "azertyuiop", "hg0209", "groupd2013", "olivia", "johnny", "patricia", "warcraft",
+                "stella", "comeon11", "guitar", "jeremy", "playboy", "charles", "creative", "elephant", "football1", "r9lw4j8khx", "fucker", "caroline",
+                "12345a", "123qwe123", "crystal", "louise", "success", "compaq", "cameron", "inuyasha", "maverick", "scooby", "alexandra", "garfield",
+                "apples", "123456aa", "gemini", "lovelove", "dolphin", "dakota", "september", "logitech", "a12345", "qwaszx", "hotmail", "444444",
+                "qazxsw", "sasuke", "sparky", "hallo123", "aaaaaaaa", "twilight", "tweety", "shannon", "myspace1", "beautiful", "stephanie", "asdasd123",
+                "swordfish", "jessie", "tinkerbell", "2012comeer", "flowers", "0000000000", "doudou", "cooper", "charlotte", "dallas", "999999999", "hellokitty",
+                "winner", "159951", "1a2b3c4d", "love123", "nothing", "abc123456", "test123", "111222", "badboy", "heaven", "qwert123", "windows",
+                "hardcore", "qwertyu", "muffin", "252525", "tigers", "manchester", "yankees", "123456q", "jackie", "popcorn", "cherry", "marseille",
+                "welcome1", "marlboro", "poohbear", "kitten", "fuckme", "newyork", "753951", "fuckyou1", "slayer", "qaz123", "sayang", "142536",
+                "rabbit", "1234554321", "ranger", "barney", "icecream", "12121212", "veronica", "a1b2c3", "dexter", "melanie", "kimberly", "123456789q",
+                "precious", "marvin", "lakers", "natasha", "lollipop", "scorpio", "123451", "albert", "zzzzzz", "tiffany", "hello1", "peaches",
+                "rangers", "murphy", "carolina", "soleil", "india123", "august", "christine", "disney", "jessica1", "greenday", "portugal", "hacker",
+                "bonnie", "brandy", "newpass", "951753", "9876543210", "camille", "winter", "qq123456", "boomer", "jesus1", "246810", "leonardo",
+                "october", "superman1", "beauty", "124578", "1234567a", "daniela", "poopoo", "samson", "cristina", "winston", "angelo", "741852",
+                "123asd", "coffee", "manuel", "zxc123", "player", "bismillah", "4815162342", "a1234567", "fluffy", "parola", "alyssa", "claudia",
+                "134679", "456456", "genius", "horses", "hiphop", "angel1", "jackass", "steelers", "asd123456", "monkey1", "arthur", "runescape",
+                "matthew1", "qwerty123456", "golden", "simpsons", "denise", "red123", "tintin", "toyota", "vegeta", "963852741", "sydney", "isabella",
+                "francis", "porsche", "1314520", "miguel", "sterling", "turtle", "pikachu", "arsenal1", "hottie", "blabla", "stupid", "anthony1",
+                "police", "chelsea1", "mahalkita", "softball", "snickers", "catherine", "trinity", "vampire", "cassie", "fantasy", "kenneth", "rockstar",
+                "12345qwerty", "bonjour", "eagles", "snowball", "pumpkin", "corvette", "maxwell", "marine", "jakjak", "wilson", "7654321", "willow",
+                "gateway", "motorola", "098765", "simple", "cookies", "dancer", "hammer", "12345678a", "1029384756", "connor", "fernando", "abc12345",
+                "carmen", "natalie", "florida", "falcon", "polska", "remember", "woaini", "biteme", "321321", "fender", "emmanuel", "simone",
+                "qwertz", "brittany", "blahblah", "barbara", "alicia", "pookie", "qwerty1234", "knight", "sniper", "shopping", "isabelle", "parker",
+                "freddy", "youbye123", "marcus", "please", "superstar", "computer1", "hotdog", "cambiami", "pass123", "sanane", "monika", "christ",
+                "123698745", "fishing", "kawasaki", "6v21wbgad", "iceman", "cowboy", "1122334455", "courtney", "pamela", "krishna", "julian", "aobo2010",
+                "21212121", "qqww1122", "password12", "penguin", "valentina", "miller", "010101", "fuckyou2", "brooklyn", "50cent", "warrior", "boston",
+                "lolipop", "jerome", "qwerasdf", "shorty", "scarface", "pa55word", "people", "claire", "william1", "pogiako", "chicago", "456852",
+                "1123581321", "johnson", "chris1", "demon1q2w3e", "123123a", "wizard", "angelina", "williams", "stephen", "christopher", "7758521", "iloveyou2",
+                "shelby", "bulldog", "undertaker", "fatima", "cowboys", "jasmin", "linkinpark", "drowssap", "teresa", "sierra", "angelica", "tucker",
+                "lolita", "online", "mexico", "demon1q2w3e4r", "007007", "sunshine1", "bullshit", "202020", "ghbdtn", "1464688081", "pierre", "blessed",
+                "manutd", "012345", "cricket", "qazqaz", "asdqwe123", "winnie", "butter", "nonmember", "sweetie", "baseball1", "iloveme", "passion",
+                "a1s2d3f4", "xavier", "dolphins", "paradise", "skyline", "redsox", "demon1q2w3e4r5t", "1a2b3c", "genesis", "mmmmmm", "135790", "lincogo1",
+                "gandalf", "159753qq", "nascar", "chouchou", "zxcvbnm123", "password2", "ihateyou", "qwert12345", "stefan", "stargate", "12345q", "microsoft",
+                "january", "chance", "christina", "dragonball", "gangster", "potter", "roberto", "killer123", "speedy", "spencer", "147896325", "alejandro",
+                "martina", "santiago", "jeffrey", "teacher", "rosebud", "raymond", "nissan", "nelson", "qweasd123", "cupcake", "sophia", "nigger",
+                "natalia", "kristina", "bananas", "legolas", "indian", "jaguar", "calvin", "lorenzo", "access", "strawberry", "sunflower", "sharon",
+                "bigdaddy", "blink123", "travis", "united", "bianca", "cme2012", "assassin", "telechargement", "1234512345", "champion", "justine", "avatar",
+                "151515", "brandon1", "abcdefgh", "mnbvcxz", "raiders", "1234560", "panther", "mamapapa", "donald", "starwars1", "harrypotter", "141414",
+                "legend", "samsung1", "789789", "zachary", "westside", "ssssss", "a12345678", "dragon1", "kingkong", "facebook", "carter", "skater",
+                "motdepasse", "gundam", "phantom", "bearshare", "doctor", "karina", "asdf123", "asdf12345", "montana", "loverboy", "alexandre", "celtic",
+                "megaparol12345", "orlando", "bond007", "pokemon123", "minnie", "maryjane", "ragnarok", "millie", "savannah", "159159", "walter", "mahalko",
+                "kissme", "damian", "anderson", "element", "hamster", "abigail", "animal", "jasmine1", "786786", "california", "system", "helpme",
+                "apollo", "gracie", "ladybug", "australia", "valentin", "pauline", "frankie", "cancer", "siemens", "realmadrid", "zxcvbnm1", "justinbieber",
+                "megaman", "admin123", "baili123com", "wow12345", "rush2112", "einstein", "marley", "321654", "timothy", "startrek", "qwerty321", "unicorn",
+                "audrey", "maganda", "golfcourse", "rafael", "france", "security", "tristan", "dreams", "harvey", "pk3x7w9w", "hitman", "ficken",
+                "coucou", "8675309", "debbie", "1qa2ws3ed", "andreas", "freedom1", "hesoyam", "florian", "nyq28giz1z", "cheyenne", "celine", "florence",
+                "0000000", "spirit", "test1234", "tamara", "maximus", "ricardo", "lucky1", "copper", "jupiter", "marcel", "andrei", "chicken1",
+                "domino", "oblivion", "crossfire", "bestfriend", "pantera", "brenda", "camaro", "pass1234", "rocket", "g13916055158"
+            ];
+            const COMMON_PASSWORDS_EXACT = [
+                "12345", "1234", "123", "1111", "love", "hello", "0000", "11111", "angel", "never", "55555", "asdf",
+                "00000", "jesus", "david", "qwert", "bhf", "qwe", "james", "magic", "test", "money", "111", "lol",
+                "pass", "chris", "p", "alex", "54321", "music", "aaaa", "honey", "1212", "happy", "hallo", "mar",
+                "aaaaa", "pussy", "maria", "sarah", "n", "asdfg", "lucky", "kevin", "tiger", "ryan", "fuck", "admin",
+                "poop", "apple", "jason", "black", "i", "sexy", "baby", "green", "asd", "mike", "john", "7777",
+                "m", "cool", "4444", "peter", "qwer", "kitty", "5555", "100", "2222", "marie", "bitch", "buddy"
             ];
             // Length
             if (password.length >= 12) {
@@ -1744,29 +2355,66 @@
                 messages.push("Include at least one number.");
             }
 
-            // Symbol
-            if (/[^A-Za-z0-9]/.test(password)) {
+            // Symbol (ASCII punctuation/symbols only; emoji and whitespace do not count)
+            if (/[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/.test(password)) {
                 score += 25;
                 messages.push("✓ Contains a special character.");
             } else {
                 messages.push("Include a special character.");
             }
 
-            // Predictability
-            if (/(.)\1{3,}/.test(password)) {
+            // Predictability (code-point-aware so emoji repeats count too)
+            const cps = Array.from(password);
+            let maxRun = 1;
+            let run = 1;
+            for (let i = 1; i < cps.length; i++) {
+                if (cps[i] === cps[i - 1]) {
+                    run++;
+                    if (run > maxRun) maxRun = run;
+                } else {
+                    run = 1;
+                }
+            }
+            let sequenceHit = false;
+            let blockHit = false;
+            if (maxRun >= 4) {
                 score -= 25;
                 messages.push("❌ Avoid repeating the same character many times.");
             }
+            else if (maxRun === 3) {
+                score -= 10;
+                messages.push("❌ Avoid repeating the same character several times.");
+            }
+            else {
+                // Repeated-block pattern: a 2- or 3-char block repeated 3+ times
+                // back-to-back (e.g. abab, 121212, xyzxyzxyz). Guarded to the
+                // no-same-char-run path so it never stacks with the run penalty.
+                if (/(.{2})\1{2,}/i.test(password) || /(.{3})\1{2,}/i.test(password)) {
+                    blockHit = true;
+                    score -= 15;
+                    messages.push("❌ Avoid repeating patterns like abab or 123123.");
+                }
+            }
             if (/(?:0123|1234|2345|3456|4567|5678|6789|abcd|qwer|asdf)/i.test(password)) {
+                sequenceHit = true;
                 score -= 15;
                 messages.push("❌ Avoid keyboard sequences like 1234 or qwerty.");
             }
 
-            if (COMMON_PASSWORDS.some((c) => password.toLowerCase().includes(c))) {
+            const lowerPw = password.toLowerCase();
+            const isCommonBased = COMMON_PASSWORDS_EXACT.includes(lowerPw) ||
+                COMMON_PASSWORDS_SUBSTRING.some((c) => {
+                    if (lowerPw === c) return true;
+                    if (lowerPw.startsWith(c)) return /^[^a-z]*$/.test(lowerPw.slice(c.length));
+                    if (lowerPw.endsWith(c)) return /^[^a-z]*$/.test(lowerPw.slice(0, lowerPw.length - c.length));
+                    return false;
+                });
+            if (isCommonBased) {
                 messages.push("❌ This password is commonly used and can be guessed easily.");
                 score -= 40;
             }
-            if (containsPersonalInfo(password)) {
+            const personalViolated = containsPersonalInfo(password);
+            if (personalViolated) {
 
                 score -= 20;
 
@@ -1792,7 +2440,17 @@
             return {
                 score,
                 level,
-                messages
+                messages,
+                criteria: {
+                    length: password.length >= 12,
+                    upper: /[A-Z]/.test(password),
+                    lower: /[a-z]/.test(password),
+                    number: /\d/.test(password),
+                    symbol: /[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/.test(password),
+                    personal: !personalViolated,
+                    common: !isCommonBased,
+                    predictable: !(maxRun >= 3 || sequenceHit || blockHit)
+                }
             };
         }
 
@@ -1826,9 +2484,9 @@
            ============================================================ */
         function updateStatusUI() {
             const answeredCount = Object.keys(state.results).length;
-            const progressPercent = Math.round((answeredCount / state.activeQuestions.length) * 100);
+            const total = state.activeQuestions.length || 1;
+            const progressPercent = Math.round((answeredCount / total) * 100);
 
-            dom.scoreChip.textContent = `Score: ${state.score}`;
             dom.streakChip.textContent = `Streak: ${state.streak}`;
             dom.progressLabel.textContent = `${progressPercent}% complete`;
             dom.progressSummary.textContent = `${answeredCount} answered`;
@@ -1895,8 +2553,11 @@
             }
 
             if (question.type === "text" || question.type === "textarea") {
-                if (containsBlockedLanguage(studentAnswer)) {
-                    showAlert("That response contains blocked language.");
+                if (findProfanity(studentAnswer)) {
+                    const answerInput = document.getElementById("dynamicAnswerInput");
+                    markInputError(answerInput);
+                    announce("Inappropriate language detected — please remove it.");
+                    showAlert("Do not use inappropriate language!");
                     return;
                 }
             }
@@ -1905,6 +2566,11 @@
             recordResult(question, studentAnswer, result);
             renderQuestion();
             showFeedback(question, result);
+
+            // Celebrate a correct answer with a one-shot confetti burst (TASK 3a).
+            if (result.status === "correct") {
+                launchConfetti(dom.feedbackBox);
+            }
 
             // 🔒 Disable submit immediately after answering
             dom.submitBtn.disabled = true;
@@ -2053,21 +2719,28 @@
             const statusLabel = SIM_CONFIG.scoreLabels[result.status] || result.status;
             const icon = result.status === "correct" ? "✅" : result.status === "partial" ? "🟡" : "❌";
             dom.feedbackBox.className = `feedback-box show ${result.status}`;
+            // Password questions: the live criteria chips already itemize what
+            // to improve, so replace the joined messages with one muted pointer.
+            const explanationHtml = question.passwordStrength
+                ? '<p class="feedback-explanation muted">Check the criteria bubbles above to see what to improve.</p>'
+                : `<p class="feedback-explanation">${(result.explanation || (question.explanations && question.explanations[0]) || "")}</p>`;
             dom.feedbackBox.innerHTML = `
-                <div class="feedback-label">${icon} ${escapeHtml(statusLabel)} · +${result.scoreAwarded} point${result.scoreAwarded === 1 ? "" : "s"}</div>
-                <p class="feedback-explanation">${(result.explanation || question.explanations[studentAnswer] || "")}</p>
+                <div class="feedback-label">${icon} ${escapeHtml(statusLabel)}</div>
+                <div class="feedback-score">Score: ${result.scoreAwarded} / ${question.points} points</div>
+                ${explanationHtml}
             `;
             playFeedbackSound(result.status);
         }
 
         function showReviewBox(question, studentAnswer, result) {
-            const formattedAnswer = formatAnswerForDisplay(question, studentAnswer);
             dom.reviewBox.className = "review-box show";
             dom.reviewBox.innerHTML = `
                 <div class="feedback-label">🧠 Review Mode</div>
                 <p><span class="status-pill ${escapeHtml(result.status)}">${escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status)}</span>
-                Your saved answer: <strong style="font-weight: normal; font-style: oblique;">${question.choices[studentAnswer]}</strong></p>
-                <p style="margin-top:8px;">Explanation: ${(result.explanation || question.explanation || "")}</p>
+                Your saved answer: <strong style="font-weight: normal; font-style: oblique;">${question.choices ? question.choices[studentAnswer] : escapeHtml(studentAnswer)}</strong></p>
+                ${question.passwordStrength && result.status !== "correct"
+                    ? `<p style="margin-top:8px;">Explanation: See the criteria checklist for what this password was missing.</p>`
+                    : `<p style="margin-top:8px;">Explanation: ${(result.explanation || question.explanation || "")}</p>`}
             `;
         }
 
@@ -2079,6 +2752,12 @@
             }
             dom.alertBox.className = "alert-box show";
             dom.alertBox.innerHTML = `<div class="feedback-label">⚠️ Check this</div><p>${escapeHtml(message)}</p>`;
+        }
+
+        function announce(message) {
+            if (!dom.liveRegion) return;
+            dom.liveRegion.textContent = "";
+            window.setTimeout(() => { dom.liveRegion.textContent = message; }, 20);
         }
 
         function clearAlert() {
@@ -2120,11 +2799,16 @@
                 const item = document.createElement("div");
                 item.className = "history-item";
 
+                const historyExplanation = question.passwordStrength
+                    ? "Check the criteria bubbles above to see what to improve."
+                    : (result.explanation || (question.explanations && question.explanations[0]) || "");
+
                 item.innerHTML = `
                     <h4>${escapeHtml(question.title)}</h4>
                     <p><span class="status-pill ${escapeHtml(result.status)}">${escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status)}</span></p>
                     <p class="muted" style="margin-top:8px;">Saved answer: ${escapeHtml(state.answers[question.id])}</p>
-                    <p class="muted" style="margin-top:8px;">${(result.explanation || question.explanations[answer] || "")}</p>
+                    <p class="muted" style="margin-top:8px;">Score: ${result.scoreAwarded} / ${question.points} points</p>
+                    <p class="muted" style="margin-top:8px;">${historyExplanation}</p>
                 `;
 
                 const actions = document.createElement("div");
@@ -2199,17 +2883,11 @@
         function updateSummaryScreen() {
             const results = Object.values(state.results);
             const totalPossible = state.activeQuestions.reduce((sum, question) => sum + question.points, 0);
-            const correctCount = results.filter((result) => result.status === "correct").length;
-            const partialCount = results.filter((result) => result.status === "partial").length;
-            const wrongCount = results.filter((result) => result.status === "wrong").length;
-            const accuracy = totalPossible === 0 ? 0 : Math.round((state.score / totalPossible) * 100);
-
-            dom.summaryScore.textContent = `${state.score} / ${totalPossible}`;
-            dom.summaryAccuracy.textContent = `${accuracy}%`;
-            dom.summaryCorrect.textContent = String(correctCount);
-            // dom.summaryPartial.textContent = String(partialCount);
-            dom.summaryWrong.textContent = String(wrongCount);
-            // dom.summaryStreak.textContent = String(state.bestStreak);
+            if (dom.resultScoreBig) {
+                dom.resultScoreBig.dataset.target = String(state.score);
+                dom.resultScoreBig.dataset.total = String(totalPossible);
+                dom.resultScoreBig.textContent = `${state.score} / ${totalPossible}`;
+            }
 
             dom.summaryResults.innerHTML = "";
             state.activeQuestions.forEach((question) => {
@@ -2226,12 +2904,22 @@
                     return;
                 }
 
+                const answerVal = state.answers[question.id];
+                let chipsHtml = "";
+                if (question.passwordStrength) {
+                    const evalRes = evaluatePassword(answerVal);
+                    chipsHtml = buildCriteriaChips(evalRes.criteria, null).outerHTML;
+                }
+
                 card.innerHTML = `
+                    <span class="result-verdict ${escapeHtml(result.status)}">${escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status)}</span>
                     <h4>${escapeHtml(question.title)}</h4>
-                    <p><span class="status-pill ${escapeHtml(result.status)}">${escapeHtml(SIM_CONFIG.scoreLabels[result.status] || result.status)}</span></p>
-                    <p style="margin-top:8px;">Answer: <strong style="font-weight: normal; font-style: oblique;">${escapeHtml(state.answers[question.id])}</strong></p>
-                    <p style="margin-top:8px;">${(result.explanation || question.explanation || "")}</p>
-                    <div class="result-meta">Score awarded: ${result.scoreAwarded} / ${question.points}</div>
+                    <div class="result-answer-label">Your password:</div>
+                    <div class="code-box">${escapeHtml(answerVal)}</div>
+                    ${chipsHtml}
+                    ${question.passwordStrength && result.status !== "correct"
+                        ? ""
+                        : `<p style="margin-top:12px;">${(result.explanation || question.explanation || "")}</p>`}
                 `;
                 dom.summaryResults.appendChild(card);
             });
@@ -2241,10 +2929,11 @@
            THEMES / FULLSCREEN / SOUND
            ============================================================ */
         function toggleTheme() {
+            Sound.click();
             state.theme = state.theme === "dark" ? "light" : "dark";
             dom.html.setAttribute("data-theme", state.theme);
             dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
-            saveStateToStorage();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
         }
 
         async function toggleFullscreen() {
@@ -2259,36 +2948,196 @@
             }
         }
 
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
         function updateFullscreenButton() {
-            dom.fullscreenBtn.textContent = document.fullscreenElement ? "🡽 Exit Full Screen" : "⛶ Full Screen";
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
         }
 
-        function playFeedbackSound(status) {
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContextClass) {
-                return;
+        /* ============================================================
+           SOUND SYNTH MODULE
+           Offline-safe. Web Audio only, no audio files or URLs.
+           Lazy single AudioContext (autoplay policy), master gain ~0.15,
+           short synthesized tones with exponential-decay envelopes.
+           Every play is wrapped in try/catch so audio never breaks the sim.
+           ============================================================ */
+        const Sound = (function () {
+            let ctx = null;
+            let master = null;
+            let enabled = true;
+            let lastPop = 0;
+            let lastError = 0;
+            let lastWarn = 0;
+
+            function init() {
+                if (ctx) return;
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                ctx = new AC();
+                master = ctx.createGain();
+                master.gain.value = 0.15;
+                master.connect(ctx.destination);
             }
 
-            const context = new AudioContextClass();
-            const oscillator = context.createOscillator();
-            const gain = context.createGain();
-            oscillator.connect(gain);
-            gain.connect(context.destination);
+            // Lazy-init on first gesture; reuse; resume if suspended.
+            function ready() {
+                if (!enabled) return false;
+                init();
+                if (!ctx) return false;
+                if (ctx.state === "suspended") { try { ctx.resume(); } catch (e) {} }
+                return true;
+            }
 
-            const settings = {
-                correct: { frequency: 660, duration: 0.18 },
-                partial: { frequency: 440, duration: 0.14 },
-                wrong: { frequency: 240, duration: 0.22 }
-            }[status] || { frequency: 320, duration: 0.14 };
+            // One oscillator tone with a 2ms attack and exponential decay.
+            function tone(freq, startAt, dur, type) {
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = type || "sine";
+                osc.frequency.setValueAtTime(freq, startAt);
+                osc.connect(g);
+                g.connect(master);
+                g.gain.setValueAtTime(0.0001, startAt);
+                g.gain.exponentialRampToValueAtTime(1, startAt + 0.002);
+                g.gain.exponentialRampToValueAtTime(0.0001, startAt + dur);
+                osc.start(startAt);
+                osc.stop(startAt + dur + 0.02);
+            }
 
-            oscillator.frequency.value = settings.frequency;
-            oscillator.type = "sine";
-            gain.gain.setValueAtTime(0.0001, context.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.12, context.currentTime + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + settings.duration);
-            oscillator.start();
-            oscillator.stop(context.currentTime + settings.duration + 0.01);
-            oscillator.onended = () => context.close();
+            return {
+                setEnabled: function (v) { enabled = !!v; },
+                isEnabled: function () { return enabled; },
+                // 60ms ~600Hz triangle blip.
+                click: function () {
+                    try {
+                        if (!ready()) return;
+                        tone(600, ctx.currentTime, 0.06, "triangle");
+                    } catch (e) {}
+                },
+                // 80ms sine rising 400->800Hz. Throttled to one per 150ms.
+                pop: function () {
+                    try {
+                        if (!ready()) return;
+                        const now = (window.performance && performance.now) ? performance.now() : Date.now();
+                        if (now - lastPop < 150) return;
+                        lastPop = now;
+                        const t = ctx.currentTime;
+                        const osc = ctx.createOscillator();
+                        const g = ctx.createGain();
+                        osc.type = "sine";
+                        osc.frequency.setValueAtTime(400, t);
+                        osc.frequency.exponentialRampToValueAtTime(800, t + 0.08);
+                        osc.connect(g);
+                        g.connect(master);
+                        g.gain.setValueAtTime(0.0001, t);
+                        g.gain.exponentialRampToValueAtTime(1, t + 0.002);
+                        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+                        osc.start(t);
+                        osc.stop(t + 0.1);
+                    } catch (e) {}
+                },
+                // Two-note major: 523Hz -> 784Hz, 120ms each.
+                correct: function () {
+                    try {
+                        if (!ready()) return;
+                        const t = ctx.currentTime;
+                        tone(523, t, 0.12, "sine");
+                        tone(784, t + 0.12, 0.12, "sine");
+                    } catch (e) {}
+                },
+                // Single mid note: 440Hz, 150ms.
+                partial: function () {
+                    try {
+                        if (!ready()) return;
+                        tone(440, ctx.currentTime, 0.15, "sine");
+                    } catch (e) {}
+                },
+                // Gentle descending minor: 330Hz -> 247Hz, 150ms each.
+                wrong: function () {
+                    try {
+                        if (!ready()) return;
+                        const t = ctx.currentTime;
+                        tone(330, t, 0.15, "sine");
+                        tone(247, t + 0.15, 0.15, "sine");
+                    } catch (e) {}
+                },
+                // Penalty warning: two quick descending mid notes 520->392Hz,
+                // ~90ms each, triangle, softer than wrong. Throttled one per 400ms.
+                warn: function () {
+                    try {
+                        if (!ready()) return;
+                        const now = (window.performance && performance.now) ? performance.now() : Date.now();
+                        if (now - lastWarn < 400) return;
+                        lastWarn = now;
+                        const t = ctx.currentTime;
+                        [[520, t], [392, t + 0.09]].forEach(function (pair) {
+                            const osc = ctx.createOscillator();
+                            const g = ctx.createGain();
+                            osc.type = "triangle";
+                            osc.frequency.setValueAtTime(pair[0], pair[1]);
+                            osc.connect(g);
+                            g.connect(master);
+                            g.gain.setValueAtTime(0.0001, pair[1]);
+                            g.gain.exponentialRampToValueAtTime(0.5, pair[1] + 0.002);
+                            g.gain.exponentialRampToValueAtTime(0.0001, pair[1] + 0.09);
+                            osc.start(pair[1]);
+                            osc.stop(pair[1] + 0.11);
+                        });
+                    } catch (e) {}
+                },
+                // Low thud: 150Hz, 100ms. Throttled to one per 300ms.
+                error: function () {
+                    try {
+                        if (!ready()) return;
+                        const now = (window.performance && performance.now) ? performance.now() : Date.now();
+                        if (now - lastError < 300) return;
+                        lastError = now;
+                        tone(150, ctx.currentTime, 0.1, "sine");
+                    } catch (e) {}
+                },
+                // 3-note arpeggio: 523/659/784Hz, 100ms each.
+                finish: function () {
+                    try {
+                        if (!ready()) return;
+                        const t = ctx.currentTime;
+                        tone(523, t, 0.1, "sine");
+                        tone(659, t + 0.1, 0.1, "sine");
+                        tone(784, t + 0.2, 0.1, "sine");
+                    } catch (e) {}
+                }
+            };
+        })();
+
+        // Routes correct/partial/wrong statuses through the synth module.
+        function playFeedbackSound(status) {
+            if (status === "correct") Sound.correct();
+            else if (status === "partial") Sound.partial();
+            else Sound.wrong();
+        }
+
+        function loadSoundSetting() {
+            const saved = storageGet(SIM_CONFIG.simId + "-sound");
+            const on = saved === null ? true : saved !== "false";
+            Sound.setEnabled(on);
+            updateSoundButton();
+        }
+
+        function toggleSound() {
+            const on = !Sound.isEnabled();
+            Sound.setEnabled(on);
+            storageSet(SIM_CONFIG.simId + "-sound", on ? "true" : "false");
+            updateSoundButton();
+            if (on) Sound.click();
+        }
+
+        const SND_ON_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+        const SND_OFF_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+
+        function updateSoundButton() {
+            if (!dom.soundToggleBtn) return;
+            const on = Sound.isEnabled();
+            dom.soundToggleBtn.innerHTML = on ? SND_ON_HTML : SND_OFF_HTML;
+            dom.soundToggleBtn.setAttribute("aria-label", on ? "Mute sounds" : "Unmute sounds");
         }
 
         /* ============================================================
@@ -2308,7 +3157,7 @@
                 lastName: "",
                 school: ""
             };
-            profileForm.reset();
+            dom.profileForm.reset();
 
             clearSavedState();
             renderQuestion();
@@ -2319,19 +3168,8 @@
             showScreen("home");
         }
 
-        function clearState() {
-            try {
-                localStorage.removeItem(STORAGE_KEY);
-
-            } catch (error) {
-                /* Storage may be blocked. */
-            }
-        }
-
         function freshState() {
-            state.currentIndex = 0; state.attemptHistory = {};
-            state.unsafeEncountered = {};
-            state.keyboardTarget = null;
+            state.currentIndex = 0;
             state.score = 0;
             state.streak = 0;
             state.bestStreak = 0;
@@ -2340,17 +3178,54 @@
 
         function resetRound() {
             freshState();
-            clearState();
             document.getElementById("resetModal").classList.remove("show");
             dom.profileStartBtn.disabled = true;
             dom.profileStartBtn.classList.add("hidden");
-            profileForm.reset();
+            dom.profileForm.reset();
             resetSimulation();
             showScreen("home");
         }
 
+        // Play Again (summary screen): keep the student profile and the profile
+        // form values, wipe only question progress, and drop straight back into
+        // the game — skipping the home and profile screens. Rebuilds the active
+        // question set using the difficulty already selected for this session.
+        function playAgain() {
+            Sound.click();
+            const level = state.selectedDifficulty || "easy";
+            setDifficulty(level); // resets progress + rebuilds activeQuestions; leaves userProfile intact
+            state.reviewModeIndex = null;
+            state.currentScreen = "game";
+            clearMessageBoxes();
+            showScreen("game");
+            renderQuestion();
+            renderStepDots();
+            updateStatusUI();
+            updateSummaryScreen();
+            saveStateToStorage();
+        }
+
+        function storageGet(key) {
+            try { return localStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { localStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+        function storageRemove(key) {
+            try { localStorage.removeItem(key); } catch (err) { /* storage unavailable */ }
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            state.theme = saved === "light" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
         function saveStateToStorage() {
             const payload = {
+                simId: SIM_CONFIG.simId,
+                version: SCHEMA_VERSION,
                 currentIndex: state.currentIndex,
                 currentScreen: state.currentScreen,
                 answers: state.answers,
@@ -2358,49 +3233,116 @@
                 score: state.score,
                 streak: state.streak,
                 bestStreak: state.bestStreak,
-                theme: state.theme
+                userProfile: state.userProfile,
+                selectedDifficulty: state.selectedDifficulty
             };
-            localStorage.setItem(SIM_CONFIG.storageKey, JSON.stringify(payload));
+            storageSet(SIM_CONFIG.storageKey, JSON.stringify(payload));
         }
 
         function loadStateFromStorage() {
-            const raw = localStorage.getItem(SIM_CONFIG.storageKey);
+            const raw = storageGet(SIM_CONFIG.storageKey);
             if (!raw) {
-                dom.html.setAttribute("data-theme", state.theme);
-                dom.themeToggleBtn.textContent = state.theme === 'dark' ? "☀️ Light" : "🌙 Dark";
-                return;
+                return false;
             }
 
+            let parsed = null;
             try {
-                const parsed = JSON.parse(raw);
-                state.currentIndex = Number.isInteger(parsed.currentIndex) ? parsed.currentIndex : 0;
-                state.currentScreen = parsed.currentScreen || "home";
-                state.answers = parsed.answers || {};
-                state.results = parsed.results || {};
-                state.score = Number(parsed.score || 0);
-                state.streak = Number(parsed.streak || 0);
-                state.bestStreak = Number(parsed.bestStreak || 0);
-                state.theme = parsed.theme === "light" ? "light" : "dark";
-                dom.html.setAttribute("data-theme", state.theme);
-                dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
-                showScreen(state.currentScreen);
+                parsed = JSON.parse(raw);
             } catch (error) {
                 console.error("Could not load saved simulation state:", error);
                 clearSavedState();
+                return false;
             }
+
+            // Reject payloads that are missing, malformed, from a different
+            // sim, or from an incompatible schema version.
+            if (!parsed || typeof parsed !== "object"
+                || parsed.simId !== SIM_CONFIG.simId
+                || parsed.version !== SCHEMA_VERSION) {
+                clearSavedState();
+                return false;
+            }
+
+            // A previously FINISHED run (reached the summary screen) must not
+            // strand the student on the summary forever: wipe and boot fresh.
+            if (parsed.currentScreen === "summary") {
+                clearSavedState();
+                return false;
+            }
+
+            const screen = parsed.currentScreen || "home";
+
+            // Validate userProfile: object with 3 string fields.
+            const profile = parsed.userProfile;
+            const profileValid = !!profile && typeof profile === "object"
+                && typeof profile.firstName === "string"
+                && typeof profile.lastName === "string"
+                && typeof profile.school === "string";
+            const profileEmpty = !profileValid
+                || (profile.firstName.trim() === "" && profile.lastName.trim() === "" && profile.school.trim() === "");
+
+            // Validate selectedDifficulty: must map to at least one question.
+            const difficulty = parsed.selectedDifficulty;
+            const difficultyValid = typeof difficulty === "string"
+                && QUESTIONS.some((q) => q.difficulty === difficulty);
+
+            // Mid-game restore needs a real profile and a valid difficulty.
+            if (screen === "game") {
+                if (!profileValid || profileEmpty || !difficultyValid) {
+                    clearSavedState();
+                    return false;
+                }
+            } else if (!profileValid && screen !== "home") {
+                clearSavedState();
+                return false;
+            }
+
+            // Rebuild the active question set with the existing builder
+            // (setDifficulty also resets progress, so restore fields AFTER).
+            if (difficultyValid) {
+                setDifficulty(difficulty);
+            }
+
+            state.userProfile = profileValid
+                ? { firstName: profile.firstName, lastName: profile.lastName, school: profile.school }
+                : { firstName: "", lastName: "", school: "" };
+
+            // Repopulate the profile form inputs so they aren't blank if the
+            // user navigates back to the profile screen.
+            dom.firstName.value = state.userProfile.firstName;
+            dom.lastName.value = state.userProfile.lastName;
+            dom.school.value = state.userProfile.school;
+
+            // Never drop the student straight back into the question screen
+            // on reopen — an interrupted round restarts from home with the
+            // profile kept prefilled; the unfinished progress is discarded.
+            if (screen === "game") {
+                clearSavedState();
+                state.currentScreen = "home";
+                showScreen("home");
+                return true;
+            }
+
+            const index = Number(parsed.currentIndex);
+            const maxIndex = state.activeQuestions.length || QUESTIONS.length;
+            state.currentIndex = Number.isInteger(index) && index >= 0 && index < maxIndex ? index : 0;
+            state.currentScreen = screen;
+            state.answers = (parsed.answers && typeof parsed.answers === "object") ? parsed.answers : {};
+            state.results = (parsed.results && typeof parsed.results === "object") ? parsed.results : {};
+            state.score = Number(parsed.score) || 0;
+            state.streak = Number(parsed.streak) || 0;
+            state.bestStreak = Number(parsed.bestStreak) || 0;
+            showScreen(state.currentScreen);
+            return true;
         }
 
         function clearSavedState() {
-            localStorage.removeItem(SIM_CONFIG.storageKey);
+            storageRemove(SIM_CONFIG.storageKey);
         }
 
         /* ============================================================
            HELPERS
            ============================================================ */
-        function containsBlockedLanguage(value) {
-            const cleaned = normalizeText(value);
-            return BLOCKED_LANGUAGE.some((term) => cleaned.includes(normalizeText(term)));
-        }
 
         function normalizeText(value) {
             return String(value || "")
@@ -2410,16 +3352,6 @@
                 .replace(/[^a-z0-9\s.\-_/]/g, "")
                 .replace(/\s+/g, " ")
                 .trim();
-        }
-
-        function formatAnswerForDisplay(question, answer) {
-            if (answer === null || answer === undefined || answer === "") {
-                return "No answer saved";
-            }
-            if (question.type === "mcq") {
-                return question.choices?.[Number(answer)] || String(answer);
-            }
-            return String(answer);
         }
 
         function escapeHtml(value) {
@@ -2438,37 +3370,21 @@
                 document.getElementById("resetModal").classList.remove("show");
             }
         }
-        // function updateBeginButton() {
-
-        //     const firstName = document.getElementById("firstName").value.trim();
-        //     const lastName = document.getElementById("lastName").value.trim();
-        //     const school = document.getElementById("school").value.trim();
-
-        //     document.getElementById("beginBtn").disabled =
-        //         firstName === "" ||
-        //         lastName === "" ||
-        //         school === "";
-        // }
-        function saveUserProfile() {
-
-            state.userProfile.firstName =
-                dom.firstName.value.trim();
-
-            state.userProfile.lastName =
-                dom.lastName.value.trim();
-
-            state.userProfile.school =
-                dom.school.value.trim();
-        }
-
         function containsPersonalInfo(password) {
 
             const pw = password.toLowerCase();
 
-            const deLeet = pw.replace(/4/g, "a").replace(/3/g, "e").replace(/1|!/g, "i").replace(/0/g, "o").replace(/5|$/g, "s").replace(/7/g, "t");
+            const deLeetBase = pw
+                .replace(/4|@/g, "a")
+                .replace(/3/g, "e")
+                .replace(/0/g, "o")
+                .replace(/5|\$/g, "s")
+                .replace(/7/g, "t");
+            const deLeetI = deLeetBase.replace(/1|!/g, "i");
+            const deLeetL = deLeetBase.replace(/1|!/g, "l");
 
             return getPersonalKeywords().some(function (keyword) {
-                return pw.includes(keyword) || deLeet.includes(keyword);
+                return pw.includes(keyword) || deLeetI.includes(keyword) || deLeetL.includes(keyword);
             });
 
         }
@@ -2501,17 +3417,17 @@
             const school =
                 dom.school.value.trim();
 
-            const profanityDetected =
-                findProfanity(dom.firstName.value.trim()) ||
-                findProfanity(dom.lastName.value.trim()) ||
-                findProfanity(dom.school.value.trim());
+            const firstNameBad = findProfanity(dom.firstName.value.trim(), { compound: false });
+            const lastNameBad = findProfanity(dom.lastName.value.trim(), { compound: false });
+            const schoolBad = findProfanity(dom.school.value.trim(), { compound: false });
+            const profanityDetected = firstNameBad || lastNameBad || schoolBad;
 
             if (profanityDetected) {
-                showAlert("Do not use inappropriate language!");
-                const regex = new RegExp(profanityDetected, "gi");
-                dom.firstName.value = dom.firstName.value.replace(regex, "");
-                dom.lastName.value = dom.lastName.value.replace(regex, "");
-                dom.school.value = dom.school.value.replace(regex, "");
+                showAlert("Please remove inappropriate language.");
+                announce("Inappropriate language detected — please remove it.");
+                if (firstNameBad) markInputError(dom.firstName);
+                if (lastNameBad) markInputError(dom.lastName);
+                if (schoolBad) markInputError(dom.school);
             }
             else {
                 clearAlert();
@@ -2521,17 +3437,6 @@
                 !(first && last && school) || profanityDetected;
 
             profileStartBtn.classList.toggle("hidden", !(first && last && school));
-
-        }
-
-        function findProfanity(text) {
-
-            const lower = text.toLowerCase();
-            const lowerFW = FORBIDDEN_WORDS.map(word => word.toLowerCase())
-
-            return lowerFW.find(function (word) {
-                return lower.includes(word);
-            });
 
         }
     </script>
