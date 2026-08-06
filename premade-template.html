@@ -1,0 +1,3401 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     PREMADE QUESTION-ENGINE SIMULATION TEMPLATE
+     Master DEV-EDIT map — search "DEV-EDIT" to find all 6 zones:
+       1. DEV-EDIT: PAGE TITLE
+       2. DEV-EDIT: SIM CONFIG
+       3. DEV-EDIT: QUESTIONS        (question schemas + examples)
+       4. DEV-EDIT: INPUT LIMITS & FILTER
+       5. DEV-EDIT: SIM STYLES       (empty — add your CSS)
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome + question engine
+     (theme/fullscreen/help/reset/grading) — DO NOT EDIT
+     unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Premade Question Simulation Template</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.48;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           QUESTION ENGINE STYLES
+           Progress, step dots, chips, answer widgets, dragSort bins,
+           matching chips, feedback boxes, summary screen.
+           ============================================================ */
+
+        .status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chip {
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+            font-weight: 700;
+        }
+
+        .progress-shell {
+            margin-bottom: 20px;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+            color: var(--muted);
+            font-size: 0.94rem;
+        }
+
+        .progress-bar {
+            height: 14px;
+            width: 100%;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.3s ease;
+        }
+
+        .step-dots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .step-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text-soft);
+        }
+
+        .step-dot.current {
+            outline: 3px solid color-mix(in srgb, var(--accent) 30%, transparent);
+        }
+
+        .step-dot.correct {
+            background: color-mix(in srgb, var(--success) 18%, var(--surface));
+            border-color: color-mix(in srgb, var(--success) 40%, transparent);
+        }
+
+        .step-dot.partial {
+            background: color-mix(in srgb, var(--warning) 18%, var(--surface));
+            border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+        }
+
+        .step-dot.wrong {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .question-panel {
+            padding: clamp(18px, 3vw, 28px);
+            background: color-mix(in srgb, var(--surface-2) 38%, transparent);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+        }
+
+        .question-title {
+            margin: 0;
+            font-size: clamp(1.35rem, 2vw, 1.75rem);
+        }
+
+        .question-prompt {
+            color: var(--text-soft);
+            line-height: 1.7;
+            margin: 12px 0 18px;
+            font-size: 1.04rem;
+        }
+
+        .answer-area {
+            display: grid;
+            gap: 14px;
+        }
+
+        .input-field,
+        .textarea-field {
+            width: 100%;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .textarea-field {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.55;
+        }
+
+        .char-counter {
+            text-align: right;
+            color: var(--muted);
+            font-size: 0.86rem;
+            margin-top: -8px;
+        }
+
+        .char-counter.over {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        /* Optional masked-input style. Use class="masked-input" on a
+           type="text" input if a dev wants visually hidden characters.
+           NEVER use type="password" — it triggers browser save-password
+           prompts (tester-reported bug). */
+        .masked-input {
+            -webkit-text-security: disc;
+        }
+
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none;
+        }
+
+        .choice-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .choice-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .choice-card input {
+            margin-top: 2px;
+            transform: scale(1.15);
+        }
+
+        .choice-text {
+            line-height: 1.55;
+            color: var(--text-soft);
+        }
+
+        .feedback-box,
+        .hint-box,
+        .alert-box {
+            margin-top: 16px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            line-height: 1.65;
+            display: none;
+        }
+
+        .feedback-box.show,
+        .hint-box.show,
+        .alert-box.show {
+            display: block;
+        }
+
+        .feedback-box.correct {
+            background: color-mix(in srgb, var(--success) 16%, var(--surface));
+            border-color: color-mix(in srgb, var(--success) 40%, transparent);
+        }
+
+        .feedback-box.partial {
+            background: color-mix(in srgb, var(--warning) 16%, var(--surface));
+            border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+        }
+
+        .feedback-box.wrong,
+        .alert-box {
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+            border-color: color-mix(in srgb, var(--danger) 36%, transparent);
+        }
+
+        .hint-box {
+            background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+        }
+
+        .feedback-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .feedback-explanation,
+        .hint-box p,
+        .alert-box p {
+            margin: 0;
+            color: var(--text-soft);
+        }
+
+        .feedback-list,
+        .result-list {
+            margin: 0;
+            padding-left: 20px;
+            list-style: disc;
+        }
+
+        .feedback-list li,
+        .result-list li {
+            margin: 4px 0;
+            color: var(--text-soft);
+        }
+
+        /* dragSort question type */
+        .dragsort-layout {
+            display: grid;
+            gap: 16px;
+        }
+
+        .drag-tray {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 64px;
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px dashed var(--border);
+            background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+        }
+
+        .drag-tray.drag-target,
+        .drag-tray.keyboard-target {
+            border-style: solid;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 23%, transparent);
+        }
+
+        .dragsort-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .drag-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 15px;
+            border-radius: 14px;
+            border: 2px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+            background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 13%, var(--surface)), var(--surface));
+            color: var(--text);
+            font-weight: 700;
+            touch-action: none;
+            user-select: none;
+            cursor: grab;
+        }
+
+        .drag-item.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+        }
+
+        .drag-item.dragging {
+            position: fixed;
+            z-index: 30;
+            pointer-events: none;
+            cursor: grabbing;
+            transition: none;
+            opacity: 0.92;
+            transform: scale(1.04);
+        }
+
+        .drag-item.drop-away {
+            animation: dropAway 0.3s ease forwards;
+        }
+
+        .drag-item.rebound {
+            animation: rebound 0.35s ease;
+        }
+
+        .drag-item.result-correct {
+            border-color: color-mix(in srgb, var(--success) 60%, var(--border));
+        }
+
+        .drag-item.result-wrong {
+            border-color: color-mix(in srgb, var(--danger) 60%, var(--border));
+        }
+
+        .bin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .bin {
+            position: relative;
+            min-height: 128px;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 18px;
+            background: var(--surface);
+            color: var(--text);
+            text-align: left;
+            overflow: hidden;
+        }
+
+        .bin:hover {
+            border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+        }
+
+        .bin.drag-target,
+        .bin.keyboard-target {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 23%, transparent);
+        }
+
+        .bin.keyboard-target::after {
+            content: "Target";
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: var(--accent);
+            color: #17203f;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .bin.shake {
+            animation: shake 0.38s ease;
+        }
+
+        .input-error {
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 25%, transparent) !important;
+            animation: shake 0.35s ease;
+        }
+
+        .bin.lid-bounce::before {
+            content: "";
+            position: absolute;
+            left: 18%;
+            top: 9px;
+            width: 64%;
+            height: 7px;
+            border-radius: 7px;
+            background: currentColor;
+            opacity: 0.48;
+            animation: lid 0.35s ease;
+        }
+
+        .bin-icon {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .bin strong {
+            display: block;
+            font-size: 1rem;
+        }
+
+        .bin-desc {
+            display: block;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            line-height: 1.3;
+        }
+
+        .bin-contents {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .bin-chip {
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        @keyframes shake {
+
+            20%,
+            60% {
+                transform: translateX(-6px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(6px);
+            }
+        }
+
+        @keyframes lid {
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        @keyframes dropAway {
+            to {
+                opacity: 0;
+                transform: translateY(80px) scale(0.68);
+            }
+        }
+
+        @keyframes rebound {
+            30% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(0);
+            }
+        }
+
+        /* matching question type */
+        .matching-layout {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .match-column h4 {
+            margin: 0 0 10px;
+            color: var(--muted);
+            font-size: 0.88rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .match-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .match-card {
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 15px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .match-card:hover {
+            border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+        }
+
+        .match-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+        }
+
+        .match-card.paired {
+            border-color: color-mix(in srgb, var(--accent-2) 55%, var(--border));
+        }
+
+        .match-card.result-correct {
+            border-color: color-mix(in srgb, var(--success) 60%, var(--border));
+            background: color-mix(in srgb, var(--success) 10%, var(--surface));
+        }
+
+        .match-card.result-wrong {
+            border-color: color-mix(in srgb, var(--danger) 60%, var(--border));
+            background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+        }
+
+        .pair-badge {
+            flex: none;
+            min-width: 26px;
+            height: 26px;
+            display: inline-grid;
+            place-items: center;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent-2) 30%, var(--surface-2));
+            color: var(--text);
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .pair-badge.empty {
+            background: var(--surface-2);
+            color: var(--muted);
+        }
+
+        .match-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* summary screen */
+        .summary-card {
+            width: min(100%, 960px);
+            padding: clamp(22px, 4vw, 36px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin: 20px 0 26px;
+        }
+
+        .summary-stat {
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+        }
+
+        .summary-stat h4,
+        .summary-stat p {
+            margin: 0;
+        }
+
+        .summary-stat h4 {
+            color: var(--muted);
+            font-size: 0.92rem;
+            margin-bottom: 8px;
+        }
+
+        .summary-stat p {
+            font-size: 1.45rem;
+            font-weight: 800;
+        }
+
+        .results-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .result-card {
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+        }
+
+        .result-card h4,
+        .result-card p {
+            margin: 0;
+        }
+
+        .result-card h4 {
+            margin-bottom: 8px;
+        }
+
+        .result-meta {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 0.94rem;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .status-pill.correct {
+            background: color-mix(in srgb, var(--success) 18%, var(--surface));
+        }
+
+        .status-pill.partial {
+            background: color-mix(in srgb, var(--warning) 18%, var(--surface));
+        }
+
+        .status-pill.wrong {
+            background: color-mix(in srgb, var(--danger) 14%, var(--surface));
+        }
+
+        .status-pill.ungraded {
+            background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+        }
+
+        @media (max-width: 760px) {
+            .step-dot {
+                width: 34px;
+                height: 34px;
+                font-size: 0.88rem;
+            }
+
+            .matching-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome or
+           engine CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a premade question-engine template. Edit the QUESTIONS array to build your simulation.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <div class="status-row">
+                        <div class="chip-group">
+                            <div class="chip" id="questionCounter">Question 1 of 1</div>
+                            <div class="chip" id="scoreChip">Score: 0</div>
+                        </div>
+                        <div class="chip" id="streakChip">Streak: 0</div>
+                    </div>
+
+                    <div class="progress-shell">
+                        <div class="progress-meta">
+                            <span id="progressLabel">0% complete</span>
+                            <span id="progressSummary">0 answered</span>
+                        </div>
+                        <div class="progress-bar" aria-hidden="true">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="step-dots" id="stepDots"></div>
+                    </div>
+
+                    <section class="question-panel">
+                        <h2 class="question-title" id="questionTitle">Question title</h2>
+                        <p class="question-prompt" id="questionPrompt">Prompt will appear here.</p>
+
+                        <form id="answerForm" novalidate>
+                            <div class="answer-area" id="answerArea"></div>
+
+                            <div class="button-row">
+                                <button type="button" class="secondary-btn" id="hintBtn">💡 Hint</button>
+                                <button type="submit" class="primary-btn" id="submitBtn">Submit Answer</button>
+                                <!-- Shown in place of Submit once the current question is
+                                     graded (answered). Label becomes "Finish →" on the
+                                     last question. Revisit step dots to reach answered
+                                     questions; there is no Previous button. -->
+                                <button type="button" class="primary-btn hidden" id="nextBtn">Next Question →</button>
+                            </div>
+                        </form>
+
+                        <div class="hint-box" id="hintBox"></div>
+                        <div class="feedback-box" id="feedbackBox"></div>
+                        <div class="alert-box" id="alertBox"></div>
+                    </section>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="summaryScreen">
+            <div class="sim-layout">
+                <section class="summary-card">
+                    <div class="eyebrow">Final Results</div>
+                    <h2 id="summaryTitle">You finished the simulation.</h2>
+                    <p class="question-prompt">
+                        Great work. Review your answers, see what you got right, and learn from anything you missed.
+                    </p>
+
+                    <div class="summary-grid">
+                        <div class="summary-stat">
+                            <h4>Total Score</h4>
+                            <p id="summaryScore">0</p>
+                        </div>
+                        <div class="summary-stat">
+                            <h4>Accuracy</h4>
+                            <p id="summaryAccuracy">0%</p>
+                        </div>
+                        <div class="summary-stat">
+                            <h4>Correct</h4>
+                            <p id="summaryCorrect">0</p>
+                        </div>
+                        <div class="summary-stat">
+                            <h4>Wrong</h4>
+                            <p id="summaryWrong">0</p>
+                        </div>
+                        <div class="summary-stat">
+                            <h4>Best Streak</h4>
+                            <p id="summaryStreak">0</p>
+                        </div>
+                    </div>
+
+                    <div class="results-list" id="summaryResults"></div>
+
+                    <div class="button-row" style="margin-top: 24px;">
+                        <button class="primary-btn" id="playAgainBtn">Play Again</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Built as a local, editable shell. Swap the content, keep the structure, and your developers are good to go.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="sr-only" id="liveRegion" aria-live="polite" aria-atomic="true"></div>
+
+    <script>
+        "use strict";
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               localStorage key prefix (theme, help-seen,
+                               quiz progress). Colliding simIds will
+                               clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+             pointsPerQuestion - score awarded for a fully correct answer.
+           ============================================================ */
+        const SIM_CONFIG = {
+            simId: "premade-question-template",
+            title: "Premade Question Simulation Template",
+            subtitle: "Single-file quiz engine for local student activities",
+            badgeText: "SIM",
+            homeEyebrow: "Question Engine Ready",
+            homeDescription:
+                "This premade template ships with a full question engine: multiple choice, exact text, exact number, keywords, short answer, drag-and-drop sorting, and matching pairs. Replace the demo questions in the QUESTIONS array with your own.",
+            instructions: [
+                "Read each question carefully before answering.",
+                "Use the Hint button if you get stuck.",
+                "For sorting questions, drag each item into a bin, or click an item then click a bin. Drag a placed item (or click it) to send it back to the tray, or use Reset items to start over. Keyboard: focus an item, press Enter, use arrow keys to target the tray or a bin, press Enter to drop.",
+                "For matching questions, click a card on the left, then click its match on the right.",
+                "Watch your score, streak, and progress bar as you go.",
+                "Use the Reset button any time you want to restart from scratch.",
+                "This file runs completely offline in a browser. No internet is needed."
+            ],
+            pointsPerQuestion: 10
+        };
+
+        /* ============================================================
+           DEV-EDIT: INPUT LIMITS & FILTER
+           Global input-safety configuration.
+
+           INPUT_LIMITS.maxTextLength     - max characters for single-line
+                                             text/number answers (default 200).
+           INPUT_LIMITS.maxTextareaLength - max characters for shortAnswer
+                                             textareas (default 1000).
+           Any question may override with its own `maxLength` field.
+           Limits are enforced BOTH via the maxlength attribute AND a JS
+           clamp, with a live "123/200" character counter.
+
+           PROFANITY_FILTER_ENABLED - set false to disable the profanity
+           check on typed answers. Matching is TWO-TIER: entries >= 4 chars
+           use SUBSTRING matching (so chains like "shitface"/"fuckyou" are
+           caught), and entries < 4 chars (e.g. "ass") use WORD-BOUNDARY
+           matching (so assassin / assume / pass / bass stay allowed).
+           Edit PROFANITY_LIST below to fit your policy. All entries must be
+           lowercase. Leetspeak (e.g. "sh1t", "f4ck") is normalized before
+           matching so substitutions can't bypass the filter; entries under
+           3 chars are skipped for the leetspeak pass to avoid false
+           positives.
+
+           PROFANITY_ALLOWLIST (defined next to findProfanity below) is
+           DEV-EXTENDABLE: add any legitimate word that embeds a >= 4-char
+           entry and gets wrongly flagged by the substring tier (for
+           example "analysis" embeds "anal", "raccoon" embeds "coon"). An
+           allowlisted token is skipped even when it contains a match.
+           ============================================================ */
+        const INPUT_LIMITS = {
+            maxTextLength: 200,
+            maxTextareaLength: 1000
+        };
+
+        const PROFANITY_FILTER_ENABLED = true;
+
+        const PROFANITY_LIST = [
+            "2g1c", "2 girls 1 cup", "acrotomophilia", "alabama hot pocket", "alaskan pipeline", "anal", "anilingus", "anus", "apeshit", "arsehole",
+            "ass", "asshole", "assmunch", "auto erotic", "autoerotic", "babeland", "baby batter", "baby juice", "ball gag", "ball gravy",
+            "ball kicking", "ball licking", "ball sack", "ball sucking", "bangbros", "bangbus", "bareback", "barely legal", "barenaked", "bastard",
+            "bastardo", "bastinado", "bbw", "bdsm", "beaner", "beaners", "beaver cleaver", "beaver lips", "beastiality", "bestiality",
+            "big black", "big breasts", "big knockers", "big tits", "bimbos", "birdlock", "bitch", "bitches", "black cock", "blonde action",
+            "blonde on blonde action", "blowjob", "blow job", "blow your load", "blue waffle", "blumpkin", "bollocks", "bondage", "boner", "boob",
+            "boobs", "booty call", "brown showers", "brunette action", "bukkake", "bulldyke", "bullet vibe", "bullshit", "bung hole", "bunghole",
+            "busty", "butt", "buttcheeks", "butthole", "camel toe", "camgirl", "camslut", "camwhore", "carpet muncher", "carpetmuncher",
+            "chocolate rosebuds", "cialis", "circlejerk", "cleveland steamer", "clit", "clitoris", "clover clamps", "clusterfuck", "cock", "cocks",
+            "coprolagnia", "coprophilia", "cornhole", "coon", "coons", "creampie", "cum", "cumming", "cumshot", "cumshots",
+            "cunnilingus", "cunt", "darkie", "date rape", "daterape", "deep throat", "deepthroat", "dendrophilia", "dick", "dildo",
+            "dingleberry", "dingleberries", "dirty pillows", "dirty sanchez", "doggie style", "doggiestyle", "doggy style", "doggystyle", "dog style", "dolcett",
+            "domination", "dominatrix", "dommes", "donkey punch", "double dong", "double penetration", "dp action", "dry hump", "dvda", "eat my ass",
+            "ecchi", "ejaculation", "erotic", "erotism", "escort", "eunuch", "fag", "faggot", "fecal", "felch",
+            "fellatio", "feltch", "female squirting", "femdom", "figging", "fingerbang", "fingering", "fisting", "foot fetish", "footjob",
+            "frotting", "fuck", "fuck buttons", "fuckin", "fucking", "fucktards", "fudge packer", "fudgepacker", "futanari", "gangbang",
+            "gang bang", "gay sex", "genitals", "giant cock", "girl on", "girl on top", "girls gone wild", "goatcx", "goatse", "god damn",
+            "gokkun", "golden shower", "goodpoop", "goo girl", "goregasm", "grope", "group sex", "g-spot", "guro", "hand job",
+            "handjob", "hard core", "hardcore", "hentai", "homoerotic", "honkey", "hooker", "horny", "hot carl", "hot chick",
+            "how to kill", "how to murder", "huge fat", "humping", "incest", "intercourse", "jack off", "jail bait", "jailbait", "jelly donut",
+            "jerk off", "jigaboo", "jiggaboo", "jiggerboo", "jizz", "juggs", "kike", "kinbaku", "kinkster", "kinky",
+            "knobbing", "leather restraint", "leather straight jacket", "lemon party", "livesex", "lolita", "lovemaking", "make me come", "male squirting", "masturbate",
+            "masturbating", "masturbation", "menage a trois", "milf", "missionary position", "mong", "motherfucker", "mound of venus", "mr hands", "muff diver",
+            "muffdiving", "nambla", "nawashi", "negro", "neonazi", "nigga", "nigger", "nig nog", "nimphomania", "nipple",
+            "nipples", "nsfw", "nsfw images", "nude", "nudity", "nutten", "nympho", "nymphomania", "octopussy", "omorashi",
+            "one cup two girls", "one guy one jar", "orgasm", "orgy", "paedophile", "paki", "panties", "panty", "pedobear", "pedophile",
+            "pegging", "penis", "phone sex", "piece of shit", "pikey", "pissing", "piss pig", "pisspig", "playboy", "pleasure chest",
+            "pole smoker", "ponyplay", "poof", "poon", "poontang", "punany", "poop chute", "poopchute", "porn", "porno",
+            "pornography", "prince albert piercing", "pthc", "pubes", "pussy", "queaf", "queef", "quim", "raghead", "raging boner",
+            "rape", "raping", "rapist", "rectum", "reverse cowgirl", "rimjob", "rimming", "rosy palm", "rosy palm and her 5 sisters", "rusty trombone",
+            "sadism", "santorum", "scat", "schlong", "scissoring", "semen", "sex", "sexcam", "sexo", "sexy",
+            "sexual", "sexually", "sexuality", "shaved beaver", "shaved pussy", "shemale", "shibari", "shit", "shitblimp", "shitty",
+            "shota", "shrimping", "skeet", "slanteye", "slut", "s&m", "smut", "snatch", "snowballing", "sodomize",
+            "sodomy", "spastic", "spic", "splooge", "splooge moose", "spooge", "spread legs", "spunk", "strap on", "strapon",
+            "strappado", "strip club", "style doggy", "suck", "sucks", "suicide girls", "sultry women", "swastika", "swinger", "tainted love",
+            "taste my", "tea bagging", "threesome", "throating", "thumbzilla", "tied up", "tight white", "tit", "tits", "titties",
+            "titty", "tongue in a", "topless", "tosser", "towelhead", "tranny", "tribadism", "tub girl", "tubgirl", "tushy",
+            "twat", "twink", "twinkie", "two girls one cup", "undressing", "upskirt", "urethra play", "urophilia", "vagina", "venus mound",
+            "viagra", "vibrator", "violet wand", "vorarephilia", "voyeur", "voyeurweb", "voyuer", "vulva", "wank", "wetback",
+            "wet dream", "white power", "whore", "worldsex", "wrapping men", "wrinkled starfish", "xx", "xxx", "yaoi", "yellow showers",
+            "yiffy", "zoophilia", "🖕"
+        ];
+
+        /* ============================================================
+           DEV-EDIT: QUESTIONS
+           This is the main content zone. Every entry in QUESTIONS is one
+           question. All questions share these common fields:
+
+             id          - unique string, used to store answers/results.
+             type        - one of: "multipleChoice", "exactText",
+                           "exactNumber", "keywords", "shortAnswer",
+                           "dragSort", "matching".
+             title       - heading shown above the prompt.
+             prompt      - the question text (plain text; rendered safely).
+             hint        - shown when the student clicks the Hint button.
+             explanation - shown in feedback after submitting.
+             maxLength   - (optional) overrides the global INPUT_LIMITS
+                           character cap for typed answers.
+
+           TYPE-SPECIFIC FIELDS (see the demo question of each type
+           below for a complete working example):
+
+           multipleChoice:
+             choices           - array of answer strings.
+             correctIndex      - index (0-based) of the correct choice.
+             perChoiceFeedback - (optional) array of feedback strings,
+                                 one per choice, shown for the chosen one.
+
+           exactText:
+             answer        - the accepted answer string.
+             caseSensitive - true/false (default false).
+
+           exactNumber:
+             answer    - the correct number.
+             tolerance - (optional) accepted +/- range, default 0.
+
+           keywords:
+             keywords   - array of keyword strings to look for.
+             minMatches - how many keywords must appear to be correct.
+                          (half of minMatches, rounded up, earns partial)
+
+           shortAnswer (textarea):
+             keywords   - (optional) keyword grading like "keywords" type.
+             minMatches - (optional) used with keywords.
+             ungraded   - set true for manual/ungraded reflection answers
+                          (recorded, not scored).
+
+           dragSort:
+             items - array of { id, label, icon, correctBin } objects.
+             bins  - array of { id, label, icon, description } objects.
+             Students drag items into bins (pointer), click item then
+             bin, or use keyboard (Enter to pick up, arrows to target the
+             tray or a bin, Enter to drop). A placed item can be dragged
+             or clicked back out to the tray, and a "Reset items" button
+             clears all placements — both only before submit. Graded per
+             item on submit; every item must be placed first.
+
+           matching:
+             pairs - array of { left, right } objects. Correct pairing
+             is left[i] <-> right[i]; right-side cards are shuffled on
+             screen. Students click a left card, then a right card, to
+             join them. Graded on submit; every left card must be
+             paired first.
+           ============================================================ */
+        const QUESTIONS = [
+            // --- DEMO 1: multipleChoice ------------------------------------
+            // choices[] + correctIndex + optional perChoiceFeedback[].
+            {
+                id: "demo-mc",
+                type: "multipleChoice",
+                title: "Multiple Choice Demo",
+                prompt: "How many sides does a triangle have?",
+                hint: "Count the straight edges of the shape.",
+                explanation: "A triangle always has exactly three sides and three corners.",
+                choices: ["Two", "Three", "Four", "Five"],
+                correctIndex: 1,
+                perChoiceFeedback: [
+                    "Two sides cannot close a shape.",
+                    "Right — three sides make a triangle.",
+                    "Four sides make a quadrilateral, not a triangle.",
+                    "Five sides make a pentagon, not a triangle."
+                ]
+            },
+            // --- DEMO 2: exactText -----------------------------------------
+            // answer string + caseSensitive flag (false = ignore case).
+            {
+                id: "demo-text",
+                type: "exactText",
+                title: "Exact Text Demo",
+                prompt: "Type the name of the shape that has exactly four equal sides and four right angles.",
+                hint: "It is a special kind of rectangle.",
+                explanation: "A square has four equal sides and four right angles.",
+                answer: "square",
+                caseSensitive: false
+            },
+            // --- DEMO 3: exactNumber ---------------------------------------
+            // answer number + optional tolerance (accepted +/- range).
+            {
+                id: "demo-number",
+                type: "exactNumber",
+                title: "Exact Number Demo",
+                prompt: "A hexagon has how many sides? Enter the number.",
+                hint: "It is more than five and fewer than seven.",
+                explanation: "A hexagon has 6 sides.",
+                answer: 6,
+                tolerance: 0
+            },
+            // --- DEMO 4: keywords ------------------------------------------
+            // keywords[] + minMatches for a correct answer.
+            {
+                id: "demo-keywords",
+                type: "keywords",
+                title: "Keywords Demo",
+                prompt: "In one sentence, describe a circle. Try to mention its edge and its centre.",
+                hint: "Think about how far every point on the edge is from the middle.",
+                explanation: "A circle is a round shape where every point on the edge is the same distance from the centre.",
+                keywords: ["round", "edge", "centre", "center", "distance"],
+                minMatches: 2
+            },
+            // --- DEMO 5: shortAnswer (textarea) ----------------------------
+            // Optional keywords grading, or ungraded: true for manual review.
+            {
+                id: "demo-shortanswer",
+                type: "shortAnswer",
+                title: "Short Answer Demo",
+                prompt: "Write a few sentences: which shape is your favourite, and why?",
+                hint: "There is no wrong answer here — explain your thinking.",
+                explanation: "This reflection answer is recorded for your teacher to read. It is not scored.",
+                ungraded: true
+            },
+            // --- DEMO 6: dragSort ------------------------------------------
+            // items[{id,label,icon,correctBin}] + bins[{id,label,icon,description}].
+            {
+                id: "demo-dragsort",
+                type: "dragSort",
+                title: "Drag and Drop Sorting Demo",
+                prompt: "Sort each shape into the bin that matches its number of sides.",
+                hint: "Count the sides in each shape's name: tri = 3, quad = 4.",
+                explanation: "Triangles have 3 sides, squares and rectangles have 4, pentagons have 5.",
+                items: [
+                    { id: "shape-triangle", label: "Triangle", icon: "🔺", correctBin: "bin-3" },
+                    { id: "shape-square", label: "Square", icon: "🟦", correctBin: "bin-4" },
+                    { id: "shape-rectangle", label: "Rectangle", icon: "▭", correctBin: "bin-4" },
+                    { id: "shape-pentagon", label: "Pentagon", icon: "⬠", correctBin: "bin-5" }
+                ],
+                bins: [
+                    { id: "bin-3", label: "3 sides", icon: "3️⃣", description: "Shapes with three sides." },
+                    { id: "bin-4", label: "4 sides", icon: "4️⃣", description: "Shapes with four sides." },
+                    { id: "bin-5", label: "5 sides", icon: "5️⃣", description: "Shapes with five sides." }
+                ]
+            },
+            // --- DEMO 7: matching ------------------------------------------
+            // pairs[{left,right}] — left[i] matches right[i]; right side is shuffled.
+            {
+                id: "demo-matching",
+                type: "matching",
+                title: "Matching Pairs Demo",
+                prompt: "Match each country to its capital city. Click a country, then click its capital.",
+                hint: "Paris is in Europe; Tokyo is in Asia; Ottawa is north of the USA; Canberra is in the southern hemisphere.",
+                explanation: "France–Paris, Japan–Tokyo, Canada–Ottawa, Australia–Canberra.",
+                pairs: [
+                    { left: "France", right: "Paris" },
+                    { left: "Japan", right: "Tokyo" },
+                    { left: "Canada", right: "Ottawa" },
+                    { left: "Australia", right: "Canberra" }
+                ]
+            }
+        ];
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           App state and DOM references.
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark",
+            started: false,
+            currentIndex: 0,
+            answers: {},   // questionId -> raw answer (index, string, map)
+            results: {},   // questionId -> { status, explanation }
+            hintsUsed: {}, // questionId -> true once the hint has been revealed
+            finished: false, // set true when the summary screen is reached
+            score: 0,
+            streak: 0,
+            bestStreak: 0,
+            // transient per-question interaction state (not persisted)
+            interaction: null,
+            // re-entrancy guard for the submit path (not persisted)
+            isSubmitting: false
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            questionCounter: document.getElementById("questionCounter"),
+            scoreChip: document.getElementById("scoreChip"),
+            streakChip: document.getElementById("streakChip"),
+            progressLabel: document.getElementById("progressLabel"),
+            progressSummary: document.getElementById("progressSummary"),
+            progressFill: document.getElementById("progressFill"),
+            stepDots: document.getElementById("stepDots"),
+            questionTitle: document.getElementById("questionTitle"),
+            questionPrompt: document.getElementById("questionPrompt"),
+            answerForm: document.getElementById("answerForm"),
+            answerArea: document.getElementById("answerArea"),
+            hintBtn: document.getElementById("hintBtn"),
+            submitBtn: document.getElementById("submitBtn"),
+            hintBox: document.getElementById("hintBox"),
+            feedbackBox: document.getElementById("feedbackBox"),
+            alertBox: document.getElementById("alertBox"),
+            nextBtn: document.getElementById("nextBtn"),
+            summaryScore: document.getElementById("summaryScore"),
+            summaryAccuracy: document.getElementById("summaryAccuracy"),
+            summaryCorrect: document.getElementById("summaryCorrect"),
+            summaryWrong: document.getElementById("summaryWrong"),
+            summaryStreak: document.getElementById("summaryStreak"),
+            summaryResults: document.getElementById("summaryResults"),
+            playAgainBtn: document.getElementById("playAgainBtn"),
+            liveRegion: document.getElementById("liveRegion")
+        };
+
+        function initializeApp() {
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            loadQuizProgress();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                closeResetConfirmModal();
+                // A reset returns to a clean home screen and, like any fresh
+                // boot, re-opens the instructions/help modal.
+                bootFresh();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+
+            dom.answerForm.addEventListener("submit", handleAnswerSubmit);
+            dom.hintBtn.addEventListener("click", showHint);
+            dom.nextBtn.addEventListener("click", goNext);
+            dom.playAgainBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("sim");
+                devInit();
+            });
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return localStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { localStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+        function storageRemove(key) {
+            try { localStorage.removeItem(key); } catch (err) { /* storage unavailable */ }
+        }
+
+        function announce(message) {
+            dom.liveRegion.textContent = "";
+            window.setTimeout(() => { dom.liveRegion.textContent = message; }, 20);
+        }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           PROFANITY FILTER — two-tier matching to stop chaining bypass
+           ("shitface", "fuckyou") while keeping legitimate words allowed.
+
+             - Entries >= 4 chars use SUBSTRING matching so concatenations
+               and embeddings are caught. Before flagging, the whitespace-
+               delimited token that contains the match is checked against
+               PROFANITY_ALLOWLIST (lowercased, punctuation-stripped); an
+               allowlisted token is skipped. DEVS: extend PROFANITY_ALLOWLIST
+               below with any legitimate word that embeds a >=4 entry and is
+               wrongly flagged (e.g. "analysis" embeds "anal").
+             - Entries < 4 chars (e.g. "ass", "xx") use WORD-BOUNDARY ONLY,
+               protecting words like assassin / assume / pass / bass.
+
+           Both rules run over the raw lowercased text AND a leetspeak-
+           normalized pass (so "sh1tface" is caught). The leet pass skips
+           entries under 3 chars to avoid normalized false positives.
+           ============================================================ */
+        // Dev-extendable: legitimate words that embed a >=4-char profanity
+        // entry and must never be flagged. Lowercase, punctuation-free.
+        const PROFANITY_ALLOWLIST = [
+            "class", "classic", "classes", "assassin", "assume", "bass",
+            "pass", "grass", "glass", "massachusetts", "scunthorpe", "shitake",
+            "analysis", "analyst", "analyse", "analyze", "analog", "analogue",
+            "canal", "banal", "raccoon", "tycoon", "cocoon", "cocktail",
+            "cockpit", "peacock", "hancock", "shuttlecock", "grape", "grapes",
+            "grapefruit", "therapist", "therapists", "therapy", "scrape",
+            "scraped", "scraping", "drape", "draped", "drapes", "assess",
+            "assessment", "dickens", "dickinson", "hooker", "matthew",
+            "cummings", "essex", "sussex", "middlesex"
+        ];
+        const PROFANITY_ALLOWLIST_SET = new Set(PROFANITY_ALLOWLIST);
+
+        // Word-boundary regexes, used for the < 4 char tier.
+        const PROFANITY_REGEXES = PROFANITY_LIST.map((entry) => {
+            const escaped = entry.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            // Entries with word characters get \b boundaries; entries with
+            // no word characters at their edges (e.g. emoji, symbols) get
+            // whitespace/edge anchors instead, since \b cannot apply.
+            if (/^\w[\s\S]*\w$|^\w$/.test(entry)) {
+                return new RegExp("\\b" + escaped.replace(/\s+/g, "\\s+") + "\\b", "i");
+            }
+            return new RegExp("(?:^|\\s)" + escaped + "(?:$|\\s)", "i");
+        });
+
+        // Leetspeak normalizer: substitutes common digit/symbol stand-ins
+        // for letters so e.g. "sh1t" / "f4ck" / "5hit" match the filter.
+        function deLeet(text) {
+            return String(text || "")
+                .toLowerCase()
+                .replace(/[@4]/g, "a")
+                .replace(/[3€]/g, "e")
+                .replace(/[1!|]/g, "i")
+                .replace(/[0]/g, "o")
+                .replace(/[5$]/g, "s")
+                .replace(/[7+]/g, "t")
+                .replace(/[8]/g, "b")
+                .replace(/[9]/g, "g");
+        }
+
+        // Returns the whitespace-delimited token in `hay` that contains the
+        // character at `pos`, lowercased with punctuation stripped — used to
+        // consult PROFANITY_ALLOWLIST for the substring tier.
+        function profanityContainingToken(hay, pos) {
+            let start = pos;
+            let end = pos;
+            while (start > 0 && !/\s/.test(hay[start - 1])) start--;
+            while (end < hay.length && !/\s/.test(hay[end])) end++;
+            return hay.slice(start, end).replace(/[^a-z0-9]/g, "");
+        }
+
+        function findProfanity(text) {
+            if (!PROFANITY_FILTER_ENABLED) return null;
+            // Collapse runs of whitespace so multi-word entries still match
+            // and token extraction is stable.
+            const rawPass = String(text).toLowerCase().replace(/\s+/g, " ");
+            const leetPass = deLeet(text).replace(/\s+/g, " ");
+            const passes = [rawPass, leetPass];
+
+            for (let p = 0; p < passes.length; p++) {
+                const hay = passes[p];
+                for (let i = 0; i < PROFANITY_LIST.length; i++) {
+                    const entry = PROFANITY_LIST[i];
+                    // Leet pass skips entries under 3 chars to avoid false
+                    // positives from normalized text (e.g. "xx").
+                    if (p === 1 && entry.length < 3) continue;
+
+                    if (entry.length >= 4) {
+                        // Substring tier with allowlisted-token guard.
+                        let from = 0;
+                        let pos;
+                        while ((pos = hay.indexOf(entry, from)) !== -1) {
+                            const token = profanityContainingToken(hay, pos);
+                            if (!PROFANITY_ALLOWLIST_SET.has(token)) {
+                                return entry;
+                            }
+                            from = pos + 1;
+                        }
+                    } else if (PROFANITY_REGEXES[i].test(hay)) {
+                        // Word-boundary tier for short entries.
+                        return entry;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           QUIZ PROGRESS PERSISTENCE (via storageGet/storageSet under the
+           SIM_CONFIG.simId prefix).
+           ============================================================ */
+        const PROGRESS_KEY = SIM_CONFIG.simId + "-progress";
+
+        function saveQuizProgress() {
+            const payload = {
+                started: state.started,
+                currentIndex: state.currentIndex,
+                answers: state.answers,
+                results: state.results,
+                hintsUsed: state.hintsUsed,
+                finished: state.finished === true,
+                score: state.score,
+                streak: state.streak,
+                bestStreak: state.bestStreak,
+                currentScreen: state.currentScreen
+            };
+            storageSet(PROGRESS_KEY, JSON.stringify(payload));
+        }
+
+        // Fresh boot: a clean home screen that ALWAYS re-opens the
+        // instructions/help modal (per user request "they always come up
+        // with a help screen"). The help-seen flag no longer gates this —
+        // it only controls the attention pulse on the Help button. Theme
+        // preference is never touched here.
+        function bootFresh() {
+            showScreen("home");
+            openInstructionsModal();
+        }
+
+        function loadQuizProgress() {
+            const raw = storageGet(PROGRESS_KEY);
+            if (!raw) { bootFresh(); return; }
+
+            let payload = null;
+            try {
+                payload = JSON.parse(raw);
+            } catch (err) {
+                payload = null; // corrupted save
+            }
+            if (!payload || typeof payload !== "object") {
+                clearQuizProgress();
+                bootFresh();
+                return;
+            }
+
+            // A previously FINISHED quiz must not strand the student on the
+            // summary screen forever: wipe the stored progress and boot
+            // completely fresh (theme preference is preserved because it
+            // lives under a separate key that we never remove).
+            if (payload.finished === true) {
+                clearQuizProgress();
+                bootFresh();
+                return;
+            }
+
+            state.started = payload.started === true;
+            state.answers = (payload.answers && typeof payload.answers === "object") ? payload.answers : {};
+            state.results = (payload.results && typeof payload.results === "object") ? payload.results : {};
+            state.hintsUsed = (payload.hintsUsed && typeof payload.hintsUsed === "object") ? payload.hintsUsed : {};
+            state.finished = false;
+            state.score = Number(payload.score) || 0;
+            state.streak = Number(payload.streak) || 0;
+            state.bestStreak = Number(payload.bestStreak) || 0;
+            const index = Number(payload.currentIndex);
+            state.currentIndex = Number.isInteger(index) && index >= 0 && index < QUESTIONS.length ? index : 0;
+
+            // Mid-sim close + reopen: restore exactly where they were.
+            if (state.started && payload.currentScreen === "sim") {
+                showScreen("sim");
+                renderQuestion();
+            } else {
+                // No live in-progress question to restore — treat as a fresh
+                // boot so the help screen comes up.
+                bootFresh();
+            }
+        }
+
+        function clearQuizProgress() {
+            storageRemove(PROGRESS_KEY);
+        }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           QUESTION ENGINE — rendering, input limits, submission,
+           grading, navigation, summary.
+           ============================================================ */
+        function currentQuestion() {
+            return QUESTIONS[state.currentIndex];
+        }
+
+        function isAnswered(questionId) {
+            return Boolean(state.results[questionId]);
+        }
+
+        function maxLengthFor(question) {
+            if (Number.isFinite(question.maxLength)) return question.maxLength;
+            return question.type === "shortAnswer" ? INPUT_LIMITS.maxTextareaLength : INPUT_LIMITS.maxTextLength;
+        }
+
+        function renderQuestion() {
+            const question = currentQuestion();
+            if (!question) return;
+
+            state.interaction = null;
+            clearMessageBoxes();
+
+            const answered = isAnswered(question.id);
+            dom.questionCounter.textContent = "Question " + (state.currentIndex + 1) + " of " + QUESTIONS.length;
+            dom.questionTitle.textContent = question.title || "";
+            dom.questionPrompt.textContent = question.prompt || "";
+            // Submit vs Next visibility is handled by updateNavigationButtons().
+            dom.answerArea.replaceChildren();
+
+            switch (question.type) {
+                case "multipleChoice":
+                    renderMultipleChoice(question, answered);
+                    break;
+                case "exactText":
+                case "exactNumber":
+                case "keywords":
+                    renderTextInput(question, answered);
+                    break;
+                case "shortAnswer":
+                    renderTextarea(question, answered);
+                    break;
+                case "dragSort":
+                    renderDragSort(question, answered);
+                    break;
+                case "matching":
+                    renderMatching(question, answered);
+                    break;
+                default: {
+                    const warning = document.createElement("p");
+                    warning.className = "muted";
+                    warning.textContent = "Unknown question type: " + question.type;
+                    dom.answerArea.appendChild(warning);
+                }
+            }
+
+            if (answered) {
+                showStoredFeedback(question);
+            }
+
+            // A used hint is always shown (open + locked) on every visit.
+            if (state.hintsUsed[question.id]) {
+                renderUsedHint(question);
+            }
+
+            updateNavigationButtons();
+            updateStatusUI();
+            renderStepDots();
+        }
+
+        function attachCharCounter(input, limit) {
+            const counter = document.createElement("div");
+            counter.className = "char-counter";
+            counter.setAttribute("aria-hidden", "true");
+
+            function refresh() {
+                // JS clamp in addition to the maxlength attribute
+                if (input.value.length > limit) {
+                    input.value = input.value.slice(0, limit);
+                }
+                counter.textContent = input.value.length + "/" + limit;
+                counter.classList.toggle("over", input.value.length >= limit);
+            }
+
+            input.addEventListener("input", refresh);
+            refresh();
+            return counter;
+        }
+
+        function renderMultipleChoice(question, answered) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "choice-grid";
+            const savedAnswer = state.answers[question.id];
+
+            question.choices.forEach((choice, index) => {
+                const label = document.createElement("label");
+                label.className = "choice-card";
+
+                const input = document.createElement("input");
+                input.type = "radio";
+                input.name = "question-" + question.id;
+                input.value = String(index);
+                input.checked = Number(savedAnswer) === index;
+                input.disabled = answered;
+
+                const span = document.createElement("div");
+                span.className = "choice-text";
+                span.textContent = choice;
+
+                label.appendChild(input);
+                label.appendChild(span);
+                wrapper.appendChild(label);
+            });
+
+            dom.answerArea.appendChild(wrapper);
+        }
+
+        function renderTextInput(question, answered) {
+            const limit = maxLengthFor(question);
+            const input = document.createElement("input");
+            input.className = "input-field";
+            input.type = "text";
+            input.inputMode = question.type === "exactNumber" ? "decimal" : "text";
+            input.id = "dynamicAnswerInput";
+            input.placeholder = question.type === "exactNumber" ? "Type a number" : "Type your answer here";
+            input.autocomplete = "off";
+            input.maxLength = limit;
+            input.value = state.answers[question.id] != null ? String(state.answers[question.id]) : "";
+            input.disabled = answered;
+
+            dom.answerArea.appendChild(input);
+            dom.answerArea.appendChild(attachCharCounter(input, limit));
+        }
+
+        function renderTextarea(question, answered) {
+            const limit = maxLengthFor(question);
+            const textarea = document.createElement("textarea");
+            textarea.className = "textarea-field";
+            textarea.id = "dynamicAnswerInput";
+            textarea.placeholder = "Write your answer here";
+            textarea.autocomplete = "off";
+            textarea.maxLength = limit;
+            textarea.value = state.answers[question.id] != null ? String(state.answers[question.id]) : "";
+            textarea.disabled = answered;
+
+            dom.answerArea.appendChild(textarea);
+            dom.answerArea.appendChild(attachCharCounter(textarea, limit));
+        }
+
+        /* ------------------------------------------------------------
+           dragSort rendering + interaction (pointer drag from sim8,
+           plus click-to-select fallback and keyboard support).
+           ------------------------------------------------------------ */
+        function renderDragSort(question, answered) {
+            const placements = Object.assign({}, state.answers[question.id] || {});
+            state.interaction = {
+                type: "dragSort",
+                placements: placements,
+                selectedItemId: null,
+                keyboardTargetBin: null,
+                dragging: null
+            };
+
+            const layout = document.createElement("div");
+            layout.className = "dragsort-layout";
+
+            const trayLabel = document.createElement("p");
+            trayLabel.className = "muted";
+            trayLabel.style.margin = "0";
+            trayLabel.textContent = answered
+                ? "Your placements are shown in the bins below."
+                : "Drag an item to a bin, or click an item then click a bin. Drag a placed item (or click it) to send it back to the tray. Keyboard: focus an item, press Enter to pick it up, use arrow keys to target the tray or a bin, press Enter to drop. Use Reset items to start over.";
+            layout.appendChild(trayLabel);
+
+            const tray = document.createElement("div");
+            tray.className = "drag-tray";
+            tray.setAttribute("aria-label", "Items to sort. Drop a placed item here to un-assign it.");
+            layout.appendChild(tray);
+
+            const binGrid = document.createElement("div");
+            binGrid.className = "bin-grid";
+            binGrid.setAttribute("role", "list");
+            binGrid.setAttribute("aria-label", "Sorting bins");
+            layout.appendChild(binGrid);
+
+            // Per-question reset (no native dialog). Returns all placed items
+            // to the tray and clears any in-progress selection. Pre-submit only.
+            if (!answered) {
+                const actions = document.createElement("div");
+                actions.className = "dragsort-actions";
+                const resetItemsBtn = document.createElement("button");
+                resetItemsBtn.type = "button";
+                resetItemsBtn.className = "secondary-btn";
+                resetItemsBtn.textContent = "↺ Reset items";
+                resetItemsBtn.addEventListener("click", () => {
+                    const inter = state.interaction;
+                    if (!inter || inter.type !== "dragSort" || inter.locked) return;
+                    inter.placements = {};
+                    inter.selectedItemId = null;
+                    inter.keyboardTargetBin = null;
+                    clearAlert();
+                    renderDragSortBoard();
+                    announce("All items returned to the tray.");
+                });
+                actions.appendChild(resetItemsBtn);
+                layout.appendChild(actions);
+                state.interaction.resetItemsBtn = resetItemsBtn;
+            }
+
+            dom.answerArea.appendChild(layout);
+            state.interaction.tray = tray;
+            state.interaction.binGrid = binGrid;
+            state.interaction.question = question;
+            state.interaction.locked = answered;
+
+            renderDragSortBoard();
+        }
+
+        function renderDragSortBoard() {
+            const inter = state.interaction;
+            if (!inter || inter.type !== "dragSort") return;
+            const question = inter.question;
+            const result = state.results[question.id];
+
+            inter.tray.replaceChildren();
+            inter.binGrid.replaceChildren();
+            // Tray can be a keyboard drop target (to un-assign a placed item).
+            inter.tray.classList.toggle("keyboard-target", inter.keyboardTargetBin === "tray");
+
+            question.bins.forEach((bin) => {
+                const binEl = document.createElement("div");
+                binEl.className = "bin" + (inter.keyboardTargetBin === bin.id ? " keyboard-target" : "");
+                binEl.dataset.binId = bin.id;
+                binEl.setAttribute("role", "listitem");
+                binEl.setAttribute("aria-label", bin.label + ". " + (bin.description || ""));
+
+                const icon = document.createElement("span");
+                icon.className = "bin-icon";
+                icon.textContent = bin.icon || "";
+                const strong = document.createElement("strong");
+                strong.textContent = bin.label;
+                const desc = document.createElement("span");
+                desc.className = "bin-desc";
+                desc.textContent = bin.description || "";
+                const contents = document.createElement("div");
+                contents.className = "bin-contents";
+
+                question.items.forEach((item) => {
+                    if (inter.placements[item.id] === bin.id) {
+                        // Locked (post-submit) chips are static buttons. Pre-submit
+                        // chips are full drag-items: click or drag them back to the
+                        // tray, or use the keyboard (Enter to pick up, arrows to
+                        // target the tray/another bin, Enter to drop).
+                        const chip = document.createElement(inter.locked ? "button" : "div");
+                        chip.className = "bin-chip drag-item";
+                        chip.textContent = (item.icon ? item.icon + " " : "") + item.label;
+                        if (result && result.perItem) {
+                            chip.classList.add(result.perItem[item.id] ? "result-correct" : "result-wrong");
+                            chip.style.borderColor = result.perItem[item.id]
+                                ? "color-mix(in srgb, var(--success) 60%, var(--border))"
+                                : "color-mix(in srgb, var(--danger) 60%, var(--border))";
+                        }
+                        if (inter.locked) {
+                            chip.type = "button";
+                            chip.disabled = true;
+                        } else {
+                            chip.dataset.itemId = item.id;
+                            chip.tabIndex = 0;
+                            chip.setAttribute("role", "button");
+                            if (inter.selectedItemId === item.id) chip.classList.add("selected");
+                            chip.setAttribute("aria-label",
+                                item.label + " in " + bin.label + ". Click to return it to the tray, or press Enter to pick it up, then use arrow keys to target the tray or a bin and Enter to drop.");
+                            chip.addEventListener("click", () => {
+                                if (inter.locked) return;
+                                delete inter.placements[item.id];
+                                inter.selectedItemId = null;
+                                inter.keyboardTargetBin = null;
+                                renderDragSortBoard();
+                                announce(item.label + " returned to the tray.");
+                            });
+                            chip.addEventListener("keydown", (event) => handleDragItemKeydown(event, item));
+                            chip.addEventListener("pointerdown", (event) => dragPointerDown(event, chip, item));
+                            chip.addEventListener("pointermove", (event) => dragPointerMove(event, chip));
+                            chip.addEventListener("pointerup", (event) => dragPointerEnd(event, chip, item));
+                            chip.addEventListener("pointercancel", (event) => dragPointerEnd(event, chip, item));
+                        }
+                        contents.appendChild(chip);
+                    }
+                });
+
+                binEl.append(icon, strong, desc, contents);
+
+                if (!inter.locked) {
+                    binEl.addEventListener("click", () => {
+                        if (inter.selectedItemId) {
+                            placeDragItem(inter.selectedItemId, bin.id);
+                        }
+                    });
+                }
+
+                inter.binGrid.appendChild(binEl);
+            });
+
+            let unplacedCount = 0;
+            question.items.forEach((item) => {
+                if (inter.placements[item.id]) return;
+                unplacedCount++;
+                const itemEl = document.createElement("div");
+                itemEl.className = "drag-item" + (inter.selectedItemId === item.id ? " selected" : "");
+                itemEl.dataset.itemId = item.id;
+                itemEl.tabIndex = inter.locked ? -1 : 0;
+                itemEl.setAttribute("role", "button");
+                itemEl.setAttribute("aria-label",
+                    "Sort " + item.label + ". Press Enter to pick up, then use arrow keys to target a bin and Enter to drop.");
+                itemEl.textContent = (item.icon ? item.icon + " " : "") + item.label;
+
+                if (!inter.locked) {
+                    itemEl.addEventListener("click", () => {
+                        inter.selectedItemId = inter.selectedItemId === item.id ? null : item.id;
+                        inter.keyboardTargetBin = null;
+                        renderDragSortBoard();
+                        announce(inter.selectedItemId
+                            ? item.label + " selected. Click a bin to place it."
+                            : "Selection cleared.");
+                    });
+                    itemEl.addEventListener("keydown", (event) => handleDragItemKeydown(event, item));
+                    itemEl.addEventListener("pointerdown", (event) => dragPointerDown(event, itemEl, item));
+                    itemEl.addEventListener("pointermove", (event) => dragPointerMove(event, itemEl));
+                    itemEl.addEventListener("pointerup", (event) => dragPointerEnd(event, itemEl, item));
+                    itemEl.addEventListener("pointercancel", (event) => dragPointerEnd(event, itemEl, item));
+                }
+
+                inter.tray.appendChild(itemEl);
+            });
+
+            if (unplacedCount === 0) {
+                const message = document.createElement("p");
+                message.className = "muted";
+                message.style.margin = "0";
+                message.textContent = inter.locked ? "All items placed." : "All items placed. Submit your answer, or click an item chip in a bin to move it back.";
+                inter.tray.appendChild(message);
+            }
+        }
+
+        // Ordered keyboard targets for a picked-up item: the tray (un-assign)
+        // followed by every bin. Labels are used for screen-reader announces.
+        function dragTargets(inter) {
+            const targets = [{ id: "tray", label: "the tray" }];
+            inter.question.bins.forEach((bin) => targets.push({ id: bin.id, label: bin.label }));
+            return targets;
+        }
+
+        function dropOnDragTarget(itemId, targetId) {
+            if (targetId === "tray") {
+                returnDragItemToTray(itemId);
+            } else {
+                placeDragItem(itemId, targetId);
+            }
+        }
+
+        function returnDragItemToTray(itemId) {
+            const inter = state.interaction;
+            if (!inter || inter.type !== "dragSort" || inter.locked) return;
+            const item = inter.question.items.find((entry) => entry.id === itemId);
+            delete inter.placements[itemId];
+            inter.selectedItemId = null;
+            inter.keyboardTargetBin = null;
+            renderDragSortBoard();
+            focusDragItem(itemId);
+            announce((item ? item.label : "Item") + " returned to the tray.");
+        }
+
+        function handleDragItemKeydown(event, item) {
+            const inter = state.interaction;
+            if (!inter || inter.type !== "dragSort" || inter.locked) return;
+            const targets = dragTargets(inter);
+
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                if (inter.selectedItemId !== item.id) {
+                    inter.selectedItemId = item.id;
+                    // A placed item defaults to targeting the tray (to un-assign);
+                    // a tray item defaults to the first bin.
+                    inter.keyboardTargetBin = inter.placements[item.id] ? "tray" : inter.question.bins[0].id;
+                    const target = targets.find((t) => t.id === inter.keyboardTargetBin) || targets[0];
+                    renderDragSortBoard();
+                    focusDragItem(item.id);
+                    announce(item.label + " picked up. " + target.label + " targeted. Use arrow keys to change target, Enter to drop.");
+                } else if (inter.keyboardTargetBin) {
+                    dropOnDragTarget(item.id, inter.keyboardTargetBin);
+                }
+            } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+                if (inter.selectedItemId !== item.id) return;
+                event.preventDefault();
+                const currentIdx = targets.findIndex((t) => t.id === inter.keyboardTargetBin);
+                const delta = event.key === "ArrowRight" ? 1 : targets.length - 1;
+                const nextIdx = currentIdx < 0 ? 0 : (currentIdx + delta) % targets.length;
+                inter.keyboardTargetBin = targets[nextIdx].id;
+                renderDragSortBoard();
+                focusDragItem(item.id);
+                announce(targets[nextIdx].label + " targeted. Press Enter to drop.");
+            } else if (event.key === "Escape") {
+                inter.selectedItemId = null;
+                inter.keyboardTargetBin = null;
+                renderDragSortBoard();
+                focusDragItem(item.id);
+                announce("Selection cleared.");
+            }
+        }
+
+        function focusDragItem(itemId) {
+            window.requestAnimationFrame(() => {
+                const el = dom.answerArea.querySelector('[data-item-id="' + itemId + '"]');
+                if (el) el.focus({ preventScroll: true });
+            });
+        }
+
+        function placeDragItem(itemId, binId) {
+            const inter = state.interaction;
+            if (!inter || inter.type !== "dragSort" || inter.locked) return;
+            inter.placements[itemId] = binId;
+            inter.selectedItemId = null;
+            inter.keyboardTargetBin = null;
+            const item = inter.question.items.find((entry) => entry.id === itemId);
+            const bin = inter.question.bins.find((entry) => entry.id === binId);
+            const binEl = inter.binGrid.querySelector('[data-bin-id="' + binId + '"]');
+            if (binEl) binEl.classList.add("lid-bounce");
+            window.setTimeout(() => renderDragSortBoard(), 120);
+            announce((item ? item.label : "Item") + " placed in " + (bin ? bin.label : "bin") + ".");
+        }
+
+        function dragPointerDown(event, itemEl, item) {
+            const inter = state.interaction;
+            if (!inter || inter.type !== "dragSort" || inter.locked || inter.dragging) return;
+            if (event.button !== undefined && event.button !== 0) return;
+            event.preventDefault();
+            const rect = itemEl.getBoundingClientRect();
+            inter.dragging = {
+                pointerId: event.pointerId,
+                itemId: item.id,
+                // Origin bin (if any) — a placed item dragged anywhere other
+                // than a bin is returned to the tray (un-assigned).
+                fromBin: inter.placements[item.id] || null,
+                offsetX: event.clientX - rect.left,
+                offsetY: event.clientY - rect.top,
+                moved: false
+            };
+            itemEl.setPointerCapture(event.pointerId);
+            itemEl.style.width = rect.width + "px";
+            itemEl.style.left = rect.left + "px";
+            itemEl.style.top = rect.top + "px";
+        }
+
+        function dragPointerMove(event, itemEl) {
+            const inter = state.interaction;
+            if (!inter || !inter.dragging || event.pointerId !== inter.dragging.pointerId) return;
+            if (!inter.dragging.moved) {
+                inter.dragging.moved = true;
+                itemEl.classList.add("dragging");
+            }
+            itemEl.style.left = (event.clientX - inter.dragging.offsetX) + "px";
+            itemEl.style.top = (event.clientY - inter.dragging.offsetY) + "px";
+            const target = document.elementFromPoint(event.clientX, event.clientY);
+            const bin = target && target.closest("[data-bin-id]");
+            const overTray = target && target.closest(".drag-tray");
+            inter.binGrid.querySelectorAll(".bin.drag-target").forEach((node) => node.classList.remove("drag-target"));
+            inter.tray.classList.remove("drag-target");
+            if (bin) bin.classList.add("drag-target");
+            else if (overTray) inter.tray.classList.add("drag-target");
+        }
+
+        function dragPointerEnd(event, itemEl, item) {
+            const inter = state.interaction;
+            if (!inter || !inter.dragging || event.pointerId !== inter.dragging.pointerId) return;
+            const wasDrag = inter.dragging.moved;
+            const fromBin = inter.dragging.fromBin;
+            const target = document.elementFromPoint(event.clientX, event.clientY);
+            const bin = target && target.closest("[data-bin-id]");
+            const overTray = target && target.closest(".drag-tray");
+            inter.binGrid.querySelectorAll(".bin.drag-target").forEach((node) => node.classList.remove("drag-target"));
+            inter.tray.classList.remove("drag-target");
+            itemEl.classList.remove("dragging");
+            itemEl.style.left = "";
+            itemEl.style.top = "";
+            itemEl.style.width = "";
+            inter.dragging = null;
+            if (wasDrag) {
+                if (bin) {
+                    placeDragItem(item.id, bin.dataset.binId);
+                } else if (fromBin) {
+                    // A placed item dropped on the tray (or anywhere off a bin)
+                    // is un-assigned back to the tray.
+                    returnDragItemToTray(item.id);
+                } else {
+                    // A tray item dropped nowhere rebounds back into the tray.
+                    itemEl.classList.add("rebound");
+                    window.setTimeout(() => itemEl.classList.remove("rebound"), 390);
+                    announce(item.label + " returned to the tray.");
+                }
+            }
+        }
+
+        /* ------------------------------------------------------------
+           matching rendering + interaction (click-to-pair from sim4,
+           simplified: click a left card, then a right card, to join
+           them as numbered chip pairs).
+           ------------------------------------------------------------ */
+        function shuffledIndices(length, seedString) {
+            // Deterministic shuffle per question id so restored sessions
+            // keep the same right-column order.
+            const indices = Array.from({ length: length }, (_, i) => i);
+            let seed = 0;
+            for (let i = 0; i < seedString.length; i++) {
+                seed = (seed * 31 + seedString.charCodeAt(i)) >>> 0;
+            }
+            for (let i = indices.length - 1; i > 0; i--) {
+                seed = (seed * 1103515245 + 12345) >>> 0;
+                const j = seed % (i + 1);
+                const swap = indices[i];
+                indices[i] = indices[j];
+                indices[j] = swap;
+            }
+            return indices;
+        }
+
+        function renderMatching(question, answered) {
+            const pairsMap = Object.assign({}, state.answers[question.id] || {});
+            state.interaction = {
+                type: "matching",
+                pairs: pairsMap,          // leftIndex (string) -> rightIndex (number)
+                selectedLeft: null,
+                question: question,
+                locked: answered
+            };
+
+            const layout = document.createElement("div");
+            layout.className = "matching-layout";
+
+            const leftCol = document.createElement("div");
+            leftCol.className = "match-column";
+            const leftHead = document.createElement("h4");
+            leftHead.textContent = "Match these";
+            const leftList = document.createElement("div");
+            leftList.className = "match-list";
+            leftCol.append(leftHead, leftList);
+
+            const rightCol = document.createElement("div");
+            rightCol.className = "match-column";
+            const rightHead = document.createElement("h4");
+            rightHead.textContent = "…with these";
+            const rightList = document.createElement("div");
+            rightList.className = "match-list";
+            rightCol.append(rightHead, rightList);
+
+            const actions = document.createElement("div");
+            actions.className = "match-actions";
+            const clearBtn = document.createElement("button");
+            clearBtn.type = "button";
+            clearBtn.className = "ghost-btn";
+            clearBtn.textContent = "Clear pairs";
+            clearBtn.disabled = answered;
+            clearBtn.addEventListener("click", () => {
+                const inter = state.interaction;
+                if (!inter || inter.locked) return;
+                inter.pairs = {};
+                inter.selectedLeft = null;
+                renderMatchingBoard();
+                announce("All pairs cleared.");
+            });
+            actions.appendChild(clearBtn);
+
+            layout.append(leftCol, rightCol, actions);
+            dom.answerArea.appendChild(layout);
+
+            state.interaction.leftList = leftList;
+            state.interaction.rightList = rightList;
+            state.interaction.rightOrder = shuffledIndices(question.pairs.length, question.id);
+
+            renderMatchingBoard();
+        }
+
+        function renderMatchingBoard() {
+            const inter = state.interaction;
+            if (!inter || inter.type !== "matching") return;
+            const question = inter.question;
+            const result = state.results[question.id];
+
+            // pairNumber per left index for chip badges
+            const pairNumbers = {};
+            let counter = 0;
+            question.pairs.forEach((pair, leftIdx) => {
+                if (inter.pairs[leftIdx] != null) {
+                    counter++;
+                    pairNumbers[leftIdx] = counter;
+                }
+            });
+
+            inter.leftList.replaceChildren();
+            inter.rightList.replaceChildren();
+
+            question.pairs.forEach((pair, leftIdx) => {
+                const card = document.createElement("button");
+                card.type = "button";
+                card.className = "match-card";
+                card.disabled = inter.locked && !result;
+                if (inter.selectedLeft === leftIdx) card.classList.add("selected");
+                if (inter.pairs[leftIdx] != null) card.classList.add("paired");
+                if (result && result.perItem) {
+                    card.classList.add(result.perItem[leftIdx] ? "result-correct" : "result-wrong");
+                    card.disabled = true;
+                }
+
+                const badge = document.createElement("span");
+                badge.className = "pair-badge" + (pairNumbers[leftIdx] ? "" : " empty");
+                badge.textContent = pairNumbers[leftIdx] ? String(pairNumbers[leftIdx]) : "•";
+                const text = document.createElement("span");
+                text.textContent = pair.left;
+                card.append(badge, text);
+                card.setAttribute("aria-label",
+                    pair.left + (inter.pairs[leftIdx] != null
+                        ? ". Paired with " + question.pairs[findLeftPairRightSource(question, inter.pairs[leftIdx])].right + "."
+                        : ". Not paired yet. Press Enter to select, then choose a card in the right column."));
+
+                if (!inter.locked) {
+                    card.addEventListener("click", () => {
+                        inter.selectedLeft = inter.selectedLeft === leftIdx ? null : leftIdx;
+                        renderMatchingBoard();
+                        announce(inter.selectedLeft !== null
+                            ? pair.left + " selected. Now choose its match on the right."
+                            : "Selection cleared.");
+                    });
+                }
+
+                inter.leftList.appendChild(card);
+            });
+
+            inter.rightOrder.forEach((rightIdx) => {
+                const card = document.createElement("button");
+                card.type = "button";
+                card.className = "match-card";
+                card.disabled = inter.locked && !result;
+
+                // find which left (if any) is paired to this right index
+                let pairedLeft = null;
+                Object.keys(inter.pairs).forEach((key) => {
+                    if (inter.pairs[key] === rightIdx) pairedLeft = Number(key);
+                });
+                if (pairedLeft !== null) card.classList.add("paired");
+                if (result && result.perItem && pairedLeft !== null) {
+                    card.classList.add(result.perItem[pairedLeft] ? "result-correct" : "result-wrong");
+                    card.disabled = true;
+                }
+
+                const badge = document.createElement("span");
+                badge.className = "pair-badge" + (pairedLeft !== null && pairNumbers[pairedLeft] ? "" : " empty");
+                badge.textContent = pairedLeft !== null && pairNumbers[pairedLeft] ? String(pairNumbers[pairedLeft]) : "•";
+                const text = document.createElement("span");
+                text.textContent = inter.question.pairs[rightIdx].right;
+                card.append(badge, text);
+                card.setAttribute("aria-label",
+                    inter.question.pairs[rightIdx].right + (pairedLeft !== null
+                        ? ". Paired with " + inter.question.pairs[pairedLeft].left + "."
+                        : ". Not paired yet."));
+
+                if (!inter.locked) {
+                    card.addEventListener("click", () => {
+                        if (inter.selectedLeft === null) {
+                            announce("Choose a card in the left column first.");
+                            return;
+                        }
+                        // unpair any left already using this right card
+                        Object.keys(inter.pairs).forEach((key) => {
+                            if (inter.pairs[key] === rightIdx) delete inter.pairs[key];
+                        });
+                        inter.pairs[inter.selectedLeft] = rightIdx;
+                        const leftLabel = inter.question.pairs[inter.selectedLeft].left;
+                        inter.selectedLeft = null;
+                        renderMatchingBoard();
+                        announce(leftLabel + " paired with " + inter.question.pairs[rightIdx].right + ".");
+                    });
+                }
+
+                inter.rightList.appendChild(card);
+            });
+        }
+
+        function findLeftPairRightSource(question, rightIdx) {
+            return rightIdx; // pairs[rightIdx].right is the right-side text source
+        }
+
+        /* ------------------------------------------------------------
+           Answer collection + validation.
+           ------------------------------------------------------------ */
+        function readAnswerFromUI(question) {
+            switch (question.type) {
+                case "multipleChoice": {
+                    const selected = dom.answerArea.querySelector('input[type="radio"]:checked');
+                    return selected ? Number(selected.value) : null;
+                }
+                case "dragSort":
+                    return Object.assign({}, state.interaction && state.interaction.placements);
+                case "matching":
+                    return Object.assign({}, state.interaction && state.interaction.pairs);
+                default: {
+                    const input = document.getElementById("dynamicAnswerInput");
+                    return input ? input.value.trim() : null;
+                }
+            }
+        }
+
+        function markInputError(inputEl) {
+            inputEl.classList.remove("input-error");
+            void inputEl.offsetWidth;
+            inputEl.classList.add("input-error");
+            const clear = () => {
+                inputEl.classList.remove("input-error");
+                inputEl.removeEventListener("input", clear);
+            };
+            inputEl.addEventListener("input", clear);
+        }
+
+        // Rejection exit for the submit path: an answer was NOT accepted
+        // (empty / incomplete / profanity / already-answered). Re-enable the
+        // Submit button and clear the re-entrancy flag so the student can
+        // correct and resubmit. Accepted grades never call this — Submit is
+        // hidden by renderQuestion() and only the flag is cleared.
+        function rejectSubmit() {
+            state.isSubmitting = false;
+            dom.submitBtn.disabled = false;
+        }
+
+        function handleAnswerSubmit(event) {
+            event.preventDefault();
+            // Anti spam / double-tap: one shared guarded path for both the
+            // click and the keyboard (Enter) form-submit. Re-entrant calls are
+            // dropped; the button is disabled immediately on entry.
+            if (state.isSubmitting) return;
+            state.isSubmitting = true;
+            dom.submitBtn.disabled = true;
+
+            const question = currentQuestion();
+            if (!question) { rejectSubmit(); return; }
+
+            clearAlert();
+
+            if (isAnswered(question.id)) {
+                showAlert("You have already answered this question.");
+                rejectSubmit();
+                return;
+            }
+
+            const answer = readAnswerFromUI(question);
+
+            // completeness checks
+            if (question.type === "multipleChoice" && answer === null) {
+                showAlert("Please select an answer before submitting.");
+                rejectSubmit();
+                return;
+            }
+            if ((question.type === "exactText" || question.type === "exactNumber" ||
+                question.type === "keywords" || question.type === "shortAnswer") &&
+                (answer === null || answer === "")) {
+                showAlert("Please enter an answer before submitting.");
+                rejectSubmit();
+                return;
+            }
+            if (question.type === "dragSort") {
+                const unplaced = question.items.filter((item) => !answer[item.id]);
+                if (unplaced.length > 0) {
+                    showAlert("Place every item in a bin before submitting. Still in the tray: " +
+                        unplaced.map((item) => item.label).join(", ") + ".");
+                    rejectSubmit();
+                    return;
+                }
+            }
+            if (question.type === "matching") {
+                const unpaired = question.pairs.filter((pair, idx) => answer[idx] == null);
+                if (unpaired.length > 0) {
+                    showAlert("Pair every card before submitting. Still unpaired: " +
+                        unpaired.map((pair) => pair.left).join(", ") + ".");
+                    rejectSubmit();
+                    return;
+                }
+            }
+
+            // profanity filter on typed answers (word-boundary, inline warning)
+            if (typeof answer === "string") {
+                const hit = findProfanity(answer);
+                if (hit) {
+                    showAlert("Please remove inappropriate language from your answer before submitting.");
+                    announce("Answer blocked: inappropriate language detected.");
+                    const profanityInput = document.getElementById("dynamicAnswerInput");
+                    if (profanityInput) markInputError(profanityInput);
+                    rejectSubmit();
+                    return;
+                }
+            }
+
+            // Accepted (graded — right or wrong). renderQuestion() hides Submit
+            // and reveals Next, so there is no button to re-enable; just clear
+            // the re-entrancy flag.
+            const result = gradeAnswer(question, answer);
+            recordResult(question, answer, result);
+            renderQuestion();
+            if (result.status === "wrong" && (question.type === "exactText" || question.type === "exactNumber" ||
+                question.type === "keywords" || question.type === "shortAnswer")) {
+                const wrongInput = document.getElementById("dynamicAnswerInput");
+                if (wrongInput) markInputError(wrongInput);
+            }
+            showFeedback(question, result);
+            saveQuizProgress();
+            state.isSubmitting = false;
+        }
+
+        /* ------------------------------------------------------------
+           Graders. Each returns { status, explanation, perItem? }.
+           status: "correct" | "partial" | "wrong" | "ungraded"
+           ------------------------------------------------------------ */
+        function normalizeText(value) {
+            return String(value).trim().toLowerCase().replace(/\s+/g, " ");
+        }
+
+        function gradeAnswer(question, answer) {
+            switch (question.type) {
+                case "multipleChoice": {
+                    const isCorrect = Number(answer) === Number(question.correctIndex);
+                    const perChoice = Array.isArray(question.perChoiceFeedback)
+                        ? question.perChoiceFeedback[Number(answer)]
+                        : null;
+                    return {
+                        status: isCorrect ? "correct" : "wrong",
+                        explanation: perChoice || question.explanation || ""
+                    };
+                }
+                case "exactText": {
+                    const isCorrect = question.caseSensitive
+                        ? String(answer).trim() === String(question.answer).trim()
+                        : normalizeText(answer) === normalizeText(question.answer);
+                    return {
+                        status: isCorrect ? "correct" : "wrong",
+                        explanation: question.explanation || ""
+                    };
+                }
+                case "exactNumber": {
+                    const numeric = Number(String(answer).replace(",", "."));
+                    const tolerance = Number(question.tolerance || 0);
+                    const isCorrect = Number.isFinite(numeric) &&
+                        Math.abs(numeric - Number(question.answer)) <= tolerance;
+                    return {
+                        status: isCorrect ? "correct" : "wrong",
+                        explanation: question.explanation || ""
+                    };
+                }
+                case "keywords":
+                    return gradeKeywords(question, answer, question.keywords || [], Number(question.minMatches || 1));
+                case "shortAnswer": {
+                    if (question.ungraded || !Array.isArray(question.keywords)) {
+                        return {
+                            status: "ungraded",
+                            explanation: question.explanation || "Your answer has been recorded."
+                        };
+                    }
+                    return gradeKeywords(question, answer, question.keywords, Number(question.minMatches || 1));
+                }
+                case "dragSort": {
+                    const perItem = {};
+                    let correctCount = 0;
+                    question.items.forEach((item) => {
+                        const ok = answer[item.id] === item.correctBin;
+                        perItem[item.id] = ok;
+                        if (ok) correctCount++;
+                    });
+                    const total = question.items.length;
+                    return {
+                        status: correctCount === total ? "correct" : correctCount > 0 ? "partial" : "wrong",
+                        explanation: (question.explanation || "") + " You placed " + correctCount + " of " + total + " items correctly.",
+                        perItem: perItem,
+                        correctCount: correctCount,
+                        total: total
+                    };
+                }
+                case "matching": {
+                    const perItem = {};
+                    let correctCount = 0;
+                    question.pairs.forEach((pair, leftIdx) => {
+                        const ok = Number(answer[leftIdx]) === leftIdx;
+                        perItem[leftIdx] = ok;
+                        if (ok) correctCount++;
+                    });
+                    const total = question.pairs.length;
+                    return {
+                        status: correctCount === total ? "correct" : correctCount > 0 ? "partial" : "wrong",
+                        explanation: (question.explanation || "") + " You matched " + correctCount + " of " + total + " pairs correctly.",
+                        perItem: perItem,
+                        correctCount: correctCount,
+                        total: total
+                    };
+                }
+                default:
+                    return { status: "wrong", explanation: "No valid grader for this question type." };
+            }
+        }
+
+        function gradeKeywords(question, answer, keywords, minMatches) {
+            const cleaned = normalizeText(answer);
+            const matched = keywords.filter((keyword) => {
+                const escaped = normalizeText(keyword).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+                return new RegExp("\\b" + escaped + "\\b", "i").test(cleaned);
+            });
+            const partialThreshold = Math.max(1, Math.ceil(minMatches / 2));
+            const status = matched.length >= minMatches ? "correct"
+                : matched.length >= partialThreshold ? "partial"
+                    : "wrong";
+            return {
+                status: status,
+                explanation: (question.explanation || "") +
+                    (matched.length ? " Matched ideas: " + matched.join(", ") + "." : " No expected keywords were found.")
+            };
+        }
+
+        function scoreForStatus(status) {
+            if (status === "correct") return SIM_CONFIG.pointsPerQuestion;
+            if (status === "partial") return Math.max(1, Math.round(SIM_CONFIG.pointsPerQuestion / 2));
+            return 0;
+        }
+
+        function recordResult(question, answer, result) {
+            state.answers[question.id] = answer;
+            state.results[question.id] = {
+                status: result.status,
+                explanation: result.explanation,
+                perItem: result.perItem || null,
+                scoreAwarded: result.status === "ungraded" ? 0 : scoreForStatus(result.status)
+            };
+            state.score += state.results[question.id].scoreAwarded;
+            if (result.status === "correct") {
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+            } else if (result.status !== "ungraded") {
+                state.streak = 0;
+            }
+        }
+
+        /* ------------------------------------------------------------
+           Feedback / hint / alert boxes (no native dialogs anywhere).
+           ------------------------------------------------------------ */
+        const STATUS_LABELS = {
+            correct: "Correct",
+            partial: "Partially Correct",
+            wrong: "Not Quite",
+            ungraded: "Recorded"
+        };
+
+        function statusIcon(status) {
+            return status === "correct" ? "✅" : status === "partial" ? "🟡" : status === "ungraded" ? "📝" : "❌";
+        }
+
+        // Correct-answer text (static, question-authored) — safe for textContent.
+        // Only defined for question types with a single canonical answer.
+        function getCorrectAnswerText(question) {
+            switch (question.type) {
+                case "multipleChoice":
+                    return question.choices[Number(question.correctIndex)] != null
+                        ? String(question.choices[Number(question.correctIndex)]) : null;
+                case "exactText":
+                case "exactNumber":
+                    return question.answer != null ? String(question.answer) : null;
+                default:
+                    return null;
+            }
+        }
+
+        // Per-item result lines for dragSort/matching, rendered as one
+        // vertical bullet per item (no comma run-ons). Static labels only,
+        // safe for textContent.
+        function dragSortResultLines(question, answer) {
+            return question.items.map((item) => {
+                const placedBin = question.bins.find((b) => b.id === (answer && answer[item.id]));
+                const correctBin = question.bins.find((b) => b.id === item.correctBin);
+                const placedLabel = placedBin ? placedBin.label : "(unplaced)";
+                const correctLabel = correctBin ? correctBin.label : String(item.correctBin);
+                const ok = answer && answer[item.id] === item.correctBin;
+                return ok
+                    ? item.label + " → " + placedLabel + " ✓"
+                    : item.label + " → placed: " + placedLabel + ", correct: " + correctLabel + " ✗";
+            });
+        }
+
+        function matchingResultLines(question, answer) {
+            return question.pairs.map((pair, leftIdx) => {
+                const rightIdx = answer ? answer[leftIdx] : null;
+                const chosen = (rightIdx != null && question.pairs[rightIdx]) ? question.pairs[rightIdx].right : "(unpaired)";
+                const ok = Number(rightIdx) === leftIdx;
+                return ok
+                    ? pair.left + " → " + pair.right + " ✓"
+                    : pair.left + " → placed: " + chosen + ", correct: " + pair.right + " ✗";
+            });
+        }
+
+        // Appends per-item vertical bullets for dragSort/matching to a <ul>.
+        // No-op for other question types.
+        function appendResultLines(listEl, question) {
+            let lines = null;
+            if (question.type === "dragSort") {
+                lines = dragSortResultLines(question, state.answers[question.id]);
+            } else if (question.type === "matching") {
+                lines = matchingResultLines(question, state.answers[question.id]);
+            }
+            if (!lines) return;
+            lines.forEach((line) => {
+                const li = document.createElement("li");
+                li.textContent = line;
+                listEl.appendChild(li);
+            });
+        }
+
+        function showFeedback(question, result) {
+            const stored = state.results[question.id];
+            dom.feedbackBox.className = "feedback-box show " +
+                (result.status === "ungraded" ? "correct" : result.status);
+            dom.feedbackBox.replaceChildren();
+
+            const label = document.createElement("div");
+            label.className = "feedback-label";
+            label.textContent = statusIcon(result.status) + " " + (STATUS_LABELS[result.status] || result.status) +
+                (result.status === "ungraded" ? "" : " · +" + stored.scoreAwarded + " point" + (stored.scoreAwarded === 1 ? "" : "s"));
+
+            const list = document.createElement("ul");
+            list.className = "feedback-list";
+
+            if (result.status !== "correct" && result.status !== "ungraded") {
+                const correctAnswerText = getCorrectAnswerText(question);
+                if (correctAnswerText) {
+                    const item = document.createElement("li");
+                    item.textContent = "Correct answer: " + correctAnswerText;
+                    list.appendChild(item);
+                }
+            }
+
+            // dragSort/matching: one vertical bullet per item.
+            appendResultLines(list, question);
+
+            if (result.explanation) {
+                const item = document.createElement("li");
+                item.textContent = result.explanation;
+                list.appendChild(item);
+            }
+
+            if (dom.hintBox.classList.contains("show") && question.hint) {
+                const item = document.createElement("li");
+                item.textContent = "Hint: " + question.hint;
+                list.appendChild(item);
+            }
+
+            dom.feedbackBox.append(label, list);
+            announce((STATUS_LABELS[result.status] || result.status) + ". " + (result.explanation || ""));
+        }
+
+        function showStoredFeedback(question) {
+            const result = state.results[question.id];
+            if (!result) return;
+            const answer = state.answers[question.id];
+            dom.feedbackBox.className = "feedback-box show " +
+                (result.status === "ungraded" ? "correct" : result.status);
+            dom.feedbackBox.replaceChildren();
+
+            const label = document.createElement("div");
+            label.className = "feedback-label";
+            label.textContent = statusIcon(result.status) + " " + (STATUS_LABELS[result.status] || result.status);
+
+            const list = document.createElement("ul");
+            list.className = "feedback-list";
+
+            if (result.status !== "correct" && result.status !== "ungraded") {
+                const correctAnswerText = getCorrectAnswerText(question);
+                if (correctAnswerText) {
+                    const item = document.createElement("li");
+                    item.textContent = "Correct answer: " + correctAnswerText;
+                    list.appendChild(item);
+                }
+            }
+
+            // dragSort/matching: one vertical bullet per item.
+            appendResultLines(list, question);
+
+            if (result.explanation) {
+                const item = document.createElement("li");
+                item.textContent = result.explanation;
+                list.appendChild(item);
+            }
+
+            // Echo typed answers safely (textContent — never raw HTML).
+            if (typeof answer === "string" && answer !== "") {
+                const item = document.createElement("li");
+                item.textContent = "Your answer: " + answer;
+                list.appendChild(item);
+            }
+
+            dom.feedbackBox.append(label, list);
+        }
+
+        // Renders the hint box open and locked-visible for a question whose
+        // hint has been used. There is no way to hide it once used; the label
+        // is marked "(used)". Called both on the live Hint click and on every
+        // revisit (live or review) of a question with a used hint.
+        function renderUsedHint(question) {
+            dom.hintBox.className = "hint-box show";
+            dom.hintBox.replaceChildren();
+            const label = document.createElement("div");
+            label.className = "feedback-label";
+            label.textContent = "💡 Hint (used)";
+            const body = document.createElement("p");
+            body.textContent = question.hint || "No hint has been added yet.";
+            dom.hintBox.append(label, body);
+        }
+
+        function showHint() {
+            const question = currentQuestion();
+            if (!question) return;
+            // Once used, a hint stays used forever (persisted with progress).
+            state.hintsUsed[question.id] = true;
+            renderUsedHint(question);
+            announce("Hint: " + (question.hint || "No hint has been added yet."));
+            saveQuizProgress();
+        }
+
+        function showAlert(message) {
+            dom.alertBox.className = "alert-box show";
+            dom.alertBox.replaceChildren();
+            const label = document.createElement("div");
+            label.className = "feedback-label";
+            label.textContent = "⚠️ Check this";
+            const body = document.createElement("p");
+            body.textContent = message;
+            dom.alertBox.append(label, body);
+        }
+
+        function clearAlert() {
+            dom.alertBox.className = "alert-box";
+            dom.alertBox.replaceChildren();
+        }
+
+        function clearMessageBoxes() {
+            dom.hintBox.className = "hint-box";
+            dom.feedbackBox.className = "feedback-box";
+            dom.alertBox.className = "alert-box";
+            dom.hintBox.replaceChildren();
+            dom.feedbackBox.replaceChildren();
+            dom.alertBox.replaceChildren();
+        }
+
+        /* ------------------------------------------------------------
+           Navigation, progress, step dots.
+           ------------------------------------------------------------ */
+        function goNext() {
+            const question = currentQuestion();
+            if (!isAnswered(question.id)) {
+                showAlert("Submit an answer before moving on.");
+                return;
+            }
+            // Anti spam / double-tap: disable immediately, before navigation
+            // renders. The next renderQuestion() (or summary) re-establishes
+            // button state; on the last question Next stays hidden.
+            dom.nextBtn.disabled = true;
+            if (state.currentIndex >= QUESTIONS.length - 1) {
+                // Finish: mark the run finished so the next page load wipes
+                // this progress and boots fresh instead of re-showing summary.
+                state.finished = true;
+                showScreen("summary");
+                renderSummary();
+                saveQuizProgress();
+                return;
+            }
+            state.currentIndex++;
+            renderQuestion();
+            saveQuizProgress();
+        }
+
+        // Submit is shown only while the current question is unanswered. Once
+        // it is graded (answered), Submit hides and Next/Finish takes its place.
+        // Revisiting an answered question via the step dots also shows Next.
+        function updateNavigationButtons() {
+            const answered = isAnswered(currentQuestion().id);
+            const isLast = state.currentIndex === QUESTIONS.length - 1;
+            dom.submitBtn.classList.toggle("hidden", answered);
+            dom.submitBtn.disabled = false;
+            dom.nextBtn.classList.toggle("hidden", !answered);
+            dom.nextBtn.disabled = false;
+            dom.nextBtn.textContent = isLast ? "Finish →" : "Next Question →";
+        }
+
+        function updateStatusUI() {
+            const answeredCount = Object.keys(state.results).length;
+            const progressPercent = QUESTIONS.length ? Math.round((answeredCount / QUESTIONS.length) * 100) : 0;
+            dom.scoreChip.textContent = "Score: " + state.score;
+            dom.streakChip.textContent = "Streak: " + state.streak;
+            dom.progressLabel.textContent = progressPercent + "% complete";
+            dom.progressSummary.textContent = answeredCount + " answered";
+            dom.progressFill.style.width = progressPercent + "%";
+        }
+
+        function renderStepDots() {
+            dom.stepDots.replaceChildren();
+            QUESTIONS.forEach((question, index) => {
+                const dot = document.createElement("button");
+                dot.type = "button";
+                dot.className = "step-dot";
+                dot.textContent = isAnswered(question.id) ? "✓" : String(index + 1);
+                dot.setAttribute("aria-label", "Go to question " + (index + 1));
+                if (index === state.currentIndex) dot.classList.add("current");
+                const result = state.results[question.id];
+                if (result) {
+                    dot.classList.add(result.status === "ungraded" ? "correct" : result.status);
+                }
+                // Clickable: answered questions, or any question up to the
+                // first unanswered one.
+                const firstUnanswered = QUESTIONS.findIndex((q) => !isAnswered(q.id));
+                const reachable = isAnswered(question.id) || index <= (firstUnanswered === -1 ? QUESTIONS.length - 1 : firstUnanswered);
+                dot.disabled = !reachable;
+                dot.addEventListener("click", () => {
+                    state.currentIndex = index;
+                    showScreen("sim");
+                    renderQuestion();
+                    saveQuizProgress();
+                });
+                dom.stepDots.appendChild(dot);
+            });
+        }
+
+        /* ------------------------------------------------------------
+           Summary screen — every user answer echoed via escapeHtml /
+           textContent only.
+           ------------------------------------------------------------ */
+        function formatAnswerForSummary(question, answer) {
+            if (answer == null) return "(no answer)";
+            switch (question.type) {
+                case "multipleChoice":
+                    return question.choices[Number(answer)] != null ? String(question.choices[Number(answer)]) : "(no answer)";
+                case "dragSort":
+                    return question.items.map((item) => {
+                        const bin = question.bins.find((entry) => entry.id === answer[item.id]);
+                        return item.label + " → " + (bin ? bin.label : "(unplaced)");
+                    }).join("; ");
+                case "matching":
+                    return question.pairs.map((pair, leftIdx) => {
+                        const rightIdx = answer[leftIdx];
+                        return pair.left + " → " + (rightIdx != null && question.pairs[rightIdx] ? question.pairs[rightIdx].right : "(unpaired)");
+                    }).join("; ");
+                default:
+                    return String(answer);
+            }
+        }
+
+        function renderSummary() {
+            let correct = 0;
+            let wrong = 0;
+            let graded = 0;
+            QUESTIONS.forEach((question) => {
+                const result = state.results[question.id];
+                if (!result || result.status === "ungraded") return;
+                graded++;
+                if (result.status === "correct") correct++;
+                else wrong++;
+            });
+
+            dom.summaryScore.textContent = String(state.score);
+            dom.summaryAccuracy.textContent = graded ? Math.round((correct / graded) * 100) + "%" : "—";
+            dom.summaryCorrect.textContent = String(correct);
+            dom.summaryWrong.textContent = String(wrong);
+            dom.summaryStreak.textContent = String(state.bestStreak);
+
+            dom.summaryResults.replaceChildren();
+            QUESTIONS.forEach((question, index) => {
+                const result = state.results[question.id];
+                const card = document.createElement("article");
+                card.className = "result-card";
+
+                const heading = document.createElement("h4");
+                heading.textContent = (index + 1) + ". " + (question.title || "Question");
+
+                const statusLine = document.createElement("p");
+                const pill = document.createElement("span");
+                const status = result ? result.status : "wrong";
+                pill.className = "status-pill " + status;
+                pill.textContent = statusIcon(status) + " " + (result ? (STATUS_LABELS[status] || status) : "Not answered");
+                statusLine.appendChild(pill);
+
+                // User-entered text is rendered via escapeHtml (belt) inside
+                // textContent assignment (braces) — never as raw HTML.
+                const list = document.createElement("ul");
+                list.className = "result-list";
+
+                if (question.type === "dragSort" || question.type === "matching") {
+                    // One vertical bullet per item — no horizontal run-ons.
+                    appendResultLines(list, question);
+                } else {
+                    const answerItem = document.createElement("li");
+                    answerItem.textContent = "Your answer: " + formatAnswerForSummary(question, state.answers[question.id]);
+                    list.appendChild(answerItem);
+                }
+
+                if (result && result.status !== "correct" && result.status !== "ungraded") {
+                    const correctAnswerText = getCorrectAnswerText(question);
+                    if (correctAnswerText) {
+                        const correctItem = document.createElement("li");
+                        correctItem.textContent = "Correct answer: " + correctAnswerText;
+                        list.appendChild(correctItem);
+                    }
+                }
+
+                const explanationText = result && result.explanation ? result.explanation : (question.explanation || "");
+                if (explanationText) {
+                    const explanationItem = document.createElement("li");
+                    explanationItem.textContent = explanationText;
+                    list.appendChild(explanationItem);
+                }
+
+                if (result && result.status !== "ungraded") {
+                    const pointsItem = document.createElement("li");
+                    pointsItem.textContent = "Points: +" + result.scoreAwarded;
+                    list.appendChild(pointsItem);
+                }
+
+                if (state.hintsUsed[question.id]) {
+                    const hintItem = document.createElement("li");
+                    hintItem.textContent = "Hint used: yes";
+                    list.appendChild(hintItem);
+                }
+
+                card.append(heading, statusLine, list);
+                dom.summaryResults.appendChild(card);
+            });
+        }
+
+        /* ------------------------------------------------------------
+           Engine entry points wired into the chrome Start/Reset flow.
+           ------------------------------------------------------------ */
+        function devInit() {
+            state.started = true;
+            state.finished = false;
+            renderQuestion();
+            saveQuizProgress();
+        }
+
+        function devReset() {
+            state.started = false;
+            state.currentIndex = 0;
+            state.answers = {};
+            state.results = {};
+            state.hintsUsed = {};
+            state.finished = false;
+            state.score = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.interaction = null;
+            clearMessageBoxes();
+            clearQuizProgress();
+        }
+
+        /* Boot the app after all engine constants above are initialized. */
+        initializeApp();
+    </script>
+</body>
+
+</html>
