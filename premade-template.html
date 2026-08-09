@@ -439,6 +439,37 @@
             display: none !important;
         }
 
+        /* Builder testing mode: warning strip + per-question answer key box. */
+        .test-mode-banner {
+            margin-bottom: 16px;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--warning) 22%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--warning) 48%, transparent);
+            color: var(--text);
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .answer-key {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+            border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        .answer-key .feedback-label {
+            color: var(--text);
+        }
+
+        .answer-key ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
         .button-row {
             margin-top: 18px;
             display: flex;
@@ -1199,6 +1230,12 @@
         <main class="screen" id="simScreen">
             <div class="sim-layout">
                 <section class="sim-card" id="simContainer">
+                    <!-- Shown only while SIM_CONFIG.TEST_MODE is true. Warns the
+                         builder that answers are visible and progress is not saved. -->
+                    <div class="test-mode-banner hidden" id="testModeBanner" role="status">
+                        ⚠️ TEST MODE — answers visible, progress not saved
+                    </div>
+
                     <div class="status-row">
                         <div class="chip-group">
                             <div class="chip" id="questionCounter">Question 1 of 1</div>
@@ -1233,6 +1270,10 @@
                                      last question. Revisit step dots to reach answered
                                      questions; there is no Previous button. -->
                                 <button type="button" class="primary-btn hidden" id="nextBtn">Next Question →</button>
+                                <!-- Shown after a wrong/partial answer when attempts
+                                     remain (SIM_CONFIG.attemptsPerQuestion). Clicking it
+                                     re-enables the inputs so the student can try again. -->
+                                <button type="button" class="secondary-btn hidden" id="tryAgainBtn">↺ Try Again</button>
                             </div>
                         </form>
 
@@ -1359,7 +1400,19 @@
                 "Use the Reset button any time you want to restart from scratch.",
                 "This file runs completely offline in a browser. No internet is needed."
             ],
-            pointsPerQuestion: 10
+            pointsPerQuestion: 10,
+
+            /* ---- Extra settings (added in template 2.2.1) ----
+               Plain-language notes for each are on the same line. */
+            templateVersion: "2.2.1",      // do not change — identifies which template base this sim was built from
+            TEST_MODE: false,              // true = builder testing mode: answers shown, free navigation, progress not saved. ALWAYS set back to false before giving to students!
+            shuffleQuestions: false,       // true = questions appear in random order each run
+            shuffleChoices: false,         // true = answer choices shuffled (multiple-choice/true-false ordering etc where applicable)
+            attemptsPerQuestion: 1,        // 1, 2, 3 ... or "unlimited" — wrong answers below the limit show a Try Again button
+
+            /* ---- Question bank settings (see the QUESTION BANK section below) ---- */
+            useQuestionBank: false,        // true = ignore QUESTIONS and draw a random set from the QUESTION_BANK pool instead
+            bankDrawCount: 5               // how many questions to randomly draw from the bank each run (used only when useQuestionBank is true)
         };
 
         /* ============================================================
@@ -1609,6 +1662,31 @@
         ];
 
         /* ============================================================
+           DEV-EDIT: QUESTION BANK (OPTIONAL)
+           Two ways to build your quiz:
+
+             (1) DEFAULT — type your questions into the QUESTIONS array
+                 above. They appear to students in exactly that order
+                 (unless you turn on shuffleQuestions in SIM_CONFIG).
+
+             (2) QUESTION BANK — set useQuestionBank: true in SIM_CONFIG
+                 and put a LARGER pool of questions in QUESTION_BANK below.
+                 Each run then randomly draws bankDrawCount questions from
+                 this pool, and the QUESTIONS array above is ignored.
+
+           A bank question uses the exact same fields as a QUESTIONS entry
+           (same types, same rules). Leave QUESTION_BANK empty ([]) if you
+           are not using it. Example of a filled bank:
+
+             const QUESTION_BANK = [
+                 { id: "bank-1", type: "exactNumber", title: "...",
+                   prompt: "...", answer: 12 },
+                 // ...many more...
+             ];
+           ============================================================ */
+        const QUESTION_BANK = [];
+
+        /* ============================================================
            DEV-EDIT: AUDIO
            Sound effects for this sim. Everything here works fully
            OFFLINE — no internet and no external files are required.
@@ -1809,6 +1887,302 @@
         }
 
         /* ============================================================
+           CONFIG VALIDATOR — DO NOT EDIT
+           Before the sim starts, this checks your SIM_CONFIG settings
+           and every question for common mistakes (missing fields, wrong
+           types, a sorting item pointing at a bin id that does not exist,
+           and so on). If it finds problems it lists them ALL on the home
+           screen in plain language instead of starting the sim, so you
+           can fix them. When there are no problems the sim starts as
+           normal. Testing mode does not skip these checks.
+           ============================================================ */
+
+        // Fisher-Yates shuffle. Returns a NEW array; never changes the original.
+        function shuffle(array) {
+            const copy = array.slice();
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const swap = copy[i];
+                copy[i] = copy[j];
+                copy[j] = swap;
+            }
+            return copy;
+        }
+
+        // Plain-language name for each question type (used in error messages).
+        const TYPE_LABELS = {
+            multipleChoice: "multiple choice",
+            exactText: "exact text",
+            exactNumber: "exact number",
+            keywords: "keywords",
+            shortAnswer: "short answer",
+            dragSort: "sorting",
+            matching: "matching"
+        };
+
+        function isPlainObject(v) { return v != null && typeof v === "object" && !Array.isArray(v); }
+        function isNonEmptyString(v) { return typeof v === "string" && v.trim() !== ""; }
+
+        // Validates one list of questions (QUESTIONS or QUESTION_BANK).
+        // `label` prefixes each problem, e.g. "Question" or "Bank question".
+        // Problems are pushed onto `errors`.
+        function validateQuestionList(list, label, errors) {
+            if (!Array.isArray(list)) {
+                errors.push(label + " list is not a list of questions.");
+                return;
+            }
+            const seenIds = {};
+            list.forEach((q, i) => {
+                const where = label + " " + (i + 1);
+                if (!isPlainObject(q)) { errors.push(where + ": this question is not set up correctly."); return; }
+                const typeName = TYPE_LABELS[q.type] ? " (" + TYPE_LABELS[q.type] + ")" : "";
+                const at = where + typeName;
+
+                // Shared fields: id (unique) and a known type.
+                if (!isNonEmptyString(q.id)) {
+                    errors.push(where + ": missing a unique 'id' (a short text label).");
+                } else if (seenIds[q.id]) {
+                    errors.push(where + ": id '" + q.id + "' is used more than once — every id must be unique.");
+                } else {
+                    seenIds[q.id] = true;
+                }
+                if (!TYPE_LABELS[q.type]) {
+                    errors.push(where + ": unknown type '" + q.type + "'. Use one of: " + Object.keys(TYPE_LABELS).join(", ") + ".");
+                    return; // cannot check type-specific fields without a known type
+                }
+
+                switch (q.type) {
+                    case "multipleChoice": {
+                        if (!Array.isArray(q.choices) || q.choices.length === 0) {
+                            errors.push(at + ": needs a non-empty 'choices' list.");
+                        } else if (!q.choices.every(isNonEmptyString)) {
+                            errors.push(at + ": every entry in 'choices' must be text.");
+                        }
+                        if (!Number.isInteger(q.correctIndex)) {
+                            errors.push(at + ": 'correctIndex' must be a whole number (0 for the first choice).");
+                        } else if (Array.isArray(q.choices) && (q.correctIndex < 0 || q.correctIndex >= q.choices.length)) {
+                            errors.push(at + ": 'correctIndex' is " + q.correctIndex + " but there " +
+                                (q.choices.length === 1 ? "is only 1 choice" : "are only " + q.choices.length + " choices") +
+                                " (use 0 to " + (q.choices.length - 1) + ").");
+                        }
+                        if (q.perChoiceFeedback != null) {
+                            if (!Array.isArray(q.perChoiceFeedback)) {
+                                errors.push(at + ": 'perChoiceFeedback' must be a list (one message per choice).");
+                            } else if (Array.isArray(q.choices) && q.perChoiceFeedback.length !== q.choices.length) {
+                                errors.push(at + ": 'perChoiceFeedback' has " + q.perChoiceFeedback.length +
+                                    " messages but there are " + q.choices.length + " choices — they must match.");
+                            }
+                        }
+                        break;
+                    }
+                    case "exactText": {
+                        if (!isNonEmptyString(q.answer)) errors.push(at + ": needs an 'answer' (the accepted text).");
+                        if (q.caseSensitive != null && typeof q.caseSensitive !== "boolean") errors.push(at + ": 'caseSensitive' must be true or false.");
+                        break;
+                    }
+                    case "exactNumber": {
+                        if (typeof q.answer !== "number" || !Number.isFinite(q.answer)) errors.push(at + ": 'answer' must be a number.");
+                        if (q.tolerance != null && (typeof q.tolerance !== "number" || !Number.isFinite(q.tolerance) || q.tolerance < 0)) errors.push(at + ": 'tolerance' must be a number of 0 or more.");
+                        break;
+                    }
+                    case "keywords": {
+                        if (!Array.isArray(q.keywords) || q.keywords.length === 0) {
+                            errors.push(at + ": needs a non-empty 'keywords' list.");
+                        } else if (!q.keywords.every(isNonEmptyString)) {
+                            errors.push(at + ": every entry in 'keywords' must be text.");
+                        }
+                        if (!Number.isInteger(q.minMatches) || q.minMatches < 1) {
+                            errors.push(at + ": 'minMatches' must be a whole number of 1 or more.");
+                        } else if (Array.isArray(q.keywords) && q.minMatches > q.keywords.length) {
+                            errors.push(at + ": 'minMatches' is " + q.minMatches + " but there are only " + q.keywords.length + " keywords.");
+                        }
+                        break;
+                    }
+                    case "shortAnswer": {
+                        if (q.ungraded != null && typeof q.ungraded !== "boolean") errors.push(at + ": 'ungraded' must be true or false.");
+                        if (!q.ungraded && q.keywords != null) {
+                            if (!Array.isArray(q.keywords) || q.keywords.length === 0) {
+                                errors.push(at + ": 'keywords' must be a non-empty list (or remove it for a reflection answer).");
+                            } else if (!q.keywords.every(isNonEmptyString)) {
+                                errors.push(at + ": every entry in 'keywords' must be text.");
+                            } else if (!Number.isInteger(q.minMatches) || q.minMatches < 1) {
+                                errors.push(at + ": when using 'keywords', 'minMatches' must be a whole number of 1 or more.");
+                            }
+                        }
+                        break;
+                    }
+                    case "dragSort": {
+                        const binIds = {};
+                        if (!Array.isArray(q.bins) || q.bins.length === 0) {
+                            errors.push(at + ": needs a non-empty 'bins' list.");
+                        } else {
+                            q.bins.forEach((bin, bi) => {
+                                if (!isPlainObject(bin) || !isNonEmptyString(bin.id)) { errors.push(at + ": bin " + (bi + 1) + " needs an 'id'."); return; }
+                                if (binIds[bin.id]) errors.push(at + ": bin id '" + bin.id + "' is used more than once.");
+                                else binIds[bin.id] = true;
+                                if (!isNonEmptyString(bin.label)) errors.push(at + ": bin '" + bin.id + "' needs a 'label'.");
+                            });
+                        }
+                        const itemIds = {};
+                        if (!Array.isArray(q.items) || q.items.length === 0) {
+                            errors.push(at + ": needs a non-empty 'items' list.");
+                        } else {
+                            q.items.forEach((item, ii) => {
+                                if (!isPlainObject(item) || !isNonEmptyString(item.id)) { errors.push(at + ": item " + (ii + 1) + " needs an 'id'."); return; }
+                                if (itemIds[item.id]) errors.push(at + ": item id '" + item.id + "' is used more than once.");
+                                else itemIds[item.id] = true;
+                                if (!isNonEmptyString(item.label)) errors.push(at + ": item '" + item.id + "' needs a 'label'.");
+                                if (!isNonEmptyString(item.correctBin)) {
+                                    errors.push(at + ": item '" + item.id + "' needs a 'correctBin'.");
+                                } else if (!binIds[item.correctBin]) {
+                                    errors.push(at + ": item '" + item.id + "' points to bin '" + item.correctBin + "' — no bin has that id.");
+                                }
+                            });
+                        }
+                        break;
+                    }
+                    case "matching": {
+                        if (!Array.isArray(q.pairs) || q.pairs.length === 0) {
+                            errors.push(at + ": needs a non-empty 'pairs' list.");
+                        } else {
+                            q.pairs.forEach((pair, pi) => {
+                                if (!isPlainObject(pair) || !isNonEmptyString(pair.left) || !isNonEmptyString(pair.right)) {
+                                    errors.push(at + ": pair " + (pi + 1) + " needs both a 'left' and a 'right' text value.");
+                                }
+                            });
+                        }
+                        break;
+                    }
+                }
+            });
+        }
+
+        // Validates SIM_CONFIG's own settings. Problems pushed onto `errors`.
+        function validateSimConfig(errors) {
+            ["TEST_MODE", "shuffleQuestions", "shuffleChoices", "useQuestionBank"].forEach((f) => {
+                if (typeof SIM_CONFIG[f] !== "boolean") errors.push("SIM_CONFIG." + f + " must be true or false.");
+            });
+            const a = SIM_CONFIG.attemptsPerQuestion;
+            const attemptsOk = a === "unlimited" || (typeof a === "number" && Number.isInteger(a) && a >= 1);
+            if (!attemptsOk) errors.push('SIM_CONFIG.attemptsPerQuestion must be a whole number of 1 or more, or the word "unlimited".');
+            if (typeof SIM_CONFIG.pointsPerQuestion !== "number" || !Number.isFinite(SIM_CONFIG.pointsPerQuestion) || SIM_CONFIG.pointsPerQuestion <= 0) {
+                errors.push("SIM_CONFIG.pointsPerQuestion must be a number greater than 0.");
+            }
+            if (SIM_CONFIG.useQuestionBank === true) {
+                if (!Array.isArray(QUESTION_BANK) || QUESTION_BANK.length === 0) {
+                    errors.push("SIM_CONFIG.useQuestionBank is true but the QUESTION_BANK is empty — add questions to the bank, or set useQuestionBank back to false.");
+                } else if (!Number.isInteger(SIM_CONFIG.bankDrawCount) || SIM_CONFIG.bankDrawCount < 1) {
+                    errors.push("SIM_CONFIG.bankDrawCount must be a whole number of 1 or more.");
+                } else if (SIM_CONFIG.bankDrawCount > QUESTION_BANK.length) {
+                    errors.push("SIM_CONFIG.bankDrawCount is " + SIM_CONFIG.bankDrawCount + " but the QUESTION_BANK only has " +
+                        QUESTION_BANK.length + " question" + (QUESTION_BANK.length === 1 ? "" : "s") + ".");
+                }
+            }
+        }
+
+        // Runs every check and returns an array of plain-language problem
+        // strings. An empty array means everything is OK.
+        function validateConfig() {
+            const errors = [];
+            validateSimConfig(errors);
+            // Validate whichever question list will actually run; if a bank
+            // is present we validate it too (both), so mistakes are caught
+            // no matter which mode is switched on.
+            validateQuestionList(QUESTIONS, "Question", errors);
+            if (Array.isArray(QUESTION_BANK) && QUESTION_BANK.length > 0) {
+                validateQuestionList(QUESTION_BANK, "Bank question", errors);
+            }
+            const usingBank = SIM_CONFIG.useQuestionBank === true && Array.isArray(QUESTION_BANK) && QUESTION_BANK.length > 0;
+            const activePool = usingBank ? QUESTION_BANK : QUESTIONS;
+            if (!Array.isArray(activePool) || activePool.length === 0) {
+                errors.push("There are no questions to show. Add at least one question.");
+            }
+            return errors;
+        }
+
+        // Renders the list of configuration problems full-screen into the
+        // home area (reusing the normal card styling) instead of starting.
+        function renderConfigErrors(errors) {
+            const stage = dom.homeScreen.querySelector(".center-stage");
+            if (!stage) return;
+            const card = document.createElement("section");
+            card.className = "hero-card";
+
+            const eyebrow = document.createElement("div");
+            eyebrow.className = "eyebrow";
+            eyebrow.textContent = "Setup needs a fix";
+
+            const heading = document.createElement("h2");
+            heading.textContent = "This simulation cannot start yet";
+
+            const intro = document.createElement("p");
+            intro.textContent = "Please fix the following in the code, then reload this page. Every problem found is listed here:";
+
+            const box = document.createElement("div");
+            box.className = "feedback-box show wrong";
+            const list = document.createElement("ul");
+            list.className = "feedback-list";
+            errors.forEach((message) => {
+                const li = document.createElement("li");
+                li.textContent = message;
+                list.appendChild(li);
+            });
+            box.appendChild(list);
+
+            card.append(eyebrow, heading, intro, box);
+            stage.replaceChildren(card);
+            showScreen("home");
+        }
+
+        /* ============================================================
+           ACTIVE QUESTION LIST — DO NOT EDIT
+           `activeQuestions` is the list of questions actually being run.
+           It starts as the plain QUESTIONS array and is rebuilt at the
+           start of each fresh run so that shuffleQuestions and the
+           question bank can change which questions appear and in what
+           order. The chosen order is saved (as ids) so a resumed session
+           shows exactly the same questions in the same order.
+           ============================================================ */
+        let activeQuestions = QUESTIONS;
+
+        // A lookup of every possible question (QUESTIONS + QUESTION_BANK)
+        // by id, used to rebuild the active list from saved ids on resume.
+        function allKnownQuestionsById() {
+            const map = {};
+            QUESTIONS.forEach((q) => { if (q && q.id != null) map[q.id] = q; });
+            if (Array.isArray(QUESTION_BANK)) QUESTION_BANK.forEach((q) => { if (q && q.id != null) map[q.id] = q; });
+            return map;
+        }
+
+        // Turns a saved list of question ids back into question objects.
+        function resolveQuestionOrder(orderIds) {
+            if (!Array.isArray(orderIds)) return [];
+            const byId = allKnownQuestionsById();
+            return orderIds.map((id) => byId[id]).filter(Boolean);
+        }
+
+        // Builds the question list for a brand-new run, honouring the
+        // question bank and the shuffle settings. Never mutates the source.
+        function buildActiveQuestions() {
+            const usingBank = SIM_CONFIG.useQuestionBank === true && Array.isArray(QUESTION_BANK) && QUESTION_BANK.length > 0;
+            let list;
+            if (usingBank) {
+                // Randomly draw bankDrawCount questions from the pool.
+                const count = Math.max(1, Math.min(Number(SIM_CONFIG.bankDrawCount) || 1, QUESTION_BANK.length));
+                list = shuffle(QUESTION_BANK).slice(0, count);
+            } else {
+                list = QUESTIONS.slice();
+                if (SIM_CONFIG.shuffleQuestions === true) list = shuffle(list);
+            }
+            return list;
+        }
+
+        // True when builder testing mode is switched on.
+        function isTestMode() {
+            return SIM_CONFIG.TEST_MODE === true;
+        }
+
+        /* ============================================================
            CHROME — DO NOT EDIT
            App state and DOM references.
            ============================================================ */
@@ -1820,6 +2194,9 @@
             answers: {},   // questionId -> raw answer (index, string, map)
             results: {},   // questionId -> { status, explanation }
             hintsUsed: {}, // questionId -> true once the hint has been revealed
+            order: [],     // question ids in the order this run uses (shuffle/bank aware) — persisted for consistent resume
+            attempts: {},  // questionId -> number of grading attempts used so far — persisted
+            choiceOrder: {}, // questionId -> array of original choice indices in display order (shuffleChoices) — persisted
             finished: false, // set true when the summary screen is reached
             score: 0,
             streak: 0,
@@ -1874,6 +2251,8 @@
             feedbackBox: document.getElementById("feedbackBox"),
             alertBox: document.getElementById("alertBox"),
             nextBtn: document.getElementById("nextBtn"),
+            tryAgainBtn: document.getElementById("tryAgainBtn"),
+            testModeBanner: document.getElementById("testModeBanner"),
             summaryScore: document.getElementById("summaryScore"),
             summaryAccuracy: document.getElementById("summaryAccuracy"),
             summaryCorrect: document.getElementById("summaryCorrect"),
@@ -1885,12 +2264,24 @@
         };
 
         function initializeApp() {
+            // Validate the builder's config FIRST. If anything is wrong we
+            // show the full problem list instead of starting the sim (theme
+            // still loads so the error page is readable in the right mode).
+            const configErrors = validateConfig();
+            if (configErrors.length > 0) {
+                applyConfigToUI();
+                loadTheme();
+                renderConfigErrors(configErrors);
+                return;
+            }
             applyConfigToUI();
             bindEvents();
             renderInstructions();
             loadTheme();
             loadHelpSeen();
             loadAudioSetting();
+            // Testing mode: show the warning strip on the sim screen.
+            if (isTestMode()) dom.testModeBanner.classList.remove("hidden");
             loadQuizProgress();
         }
 
@@ -1959,6 +2350,7 @@
             dom.answerForm.addEventListener("submit", handleAnswerSubmit);
             dom.hintBtn.addEventListener("click", showHint);
             dom.nextBtn.addEventListener("click", goNext);
+            dom.tryAgainBtn.addEventListener("click", tryAgain);
             dom.playAgainBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
                 devReset();
@@ -2197,12 +2589,18 @@
         const PROGRESS_KEY = SIM_CONFIG.simId + "-progress";
 
         function saveQuizProgress() {
+            // Testing mode never saves quiz progress (theme and audio
+            // preferences live under other keys and still save normally).
+            if (isTestMode()) return;
             const payload = {
                 started: state.started,
                 currentIndex: state.currentIndex,
                 answers: state.answers,
                 results: state.results,
                 hintsUsed: state.hintsUsed,
+                order: state.order,
+                attempts: state.attempts,
+                choiceOrder: state.choiceOrder,
                 finished: state.finished === true,
                 score: state.score,
                 streak: state.streak,
@@ -2223,6 +2621,9 @@
         }
 
         function loadQuizProgress() {
+            // Testing mode never restores saved progress — every load is a
+            // fresh run (matching "progress not saved").
+            if (isTestMode()) { bootFresh(); return; }
             const raw = storageGet(PROGRESS_KEY);
             if (!raw) { bootFresh(); return; }
 
@@ -2252,12 +2653,33 @@
             state.answers = (payload.answers && typeof payload.answers === "object") ? payload.answers : {};
             state.results = (payload.results && typeof payload.results === "object") ? payload.results : {};
             state.hintsUsed = (payload.hintsUsed && typeof payload.hintsUsed === "object") ? payload.hintsUsed : {};
+            state.attempts = (payload.attempts && typeof payload.attempts === "object") ? payload.attempts : {};
+            state.choiceOrder = (payload.choiceOrder && typeof payload.choiceOrder === "object") ? payload.choiceOrder : {};
             state.finished = false;
             state.score = Number(payload.score) || 0;
             state.streak = Number(payload.streak) || 0;
             state.bestStreak = Number(payload.bestStreak) || 0;
+
+            // Restore the exact question order this run was using (shuffle /
+            // bank draws stay consistent across a close-and-reopen). If the
+            // saved order cannot be matched to the current questions, the
+            // save is stale — wipe it and boot fresh.
+            const restored = resolveQuestionOrder(payload.order);
+            if (restored.length > 0 && restored.length === (Array.isArray(payload.order) ? payload.order.length : -1)) {
+                activeQuestions = restored;
+                state.order = payload.order;
+            } else if (payload.order != null) {
+                clearQuizProgress();
+                bootFresh();
+                return;
+            } else {
+                // Older save without an order: fall back to the plain list.
+                activeQuestions = QUESTIONS;
+                state.order = QUESTIONS.map((q) => q.id);
+            }
+
             const index = Number(payload.currentIndex);
-            state.currentIndex = Number.isInteger(index) && index >= 0 && index < QUESTIONS.length ? index : 0;
+            state.currentIndex = Number.isInteger(index) && index >= 0 && index < activeQuestions.length ? index : 0;
 
             // Mid-sim close + reopen: restore exactly where they were.
             if (state.started && payload.currentScreen === "sim") {
@@ -2280,7 +2702,7 @@
            grading, navigation, summary.
            ============================================================ */
         function currentQuestion() {
-            return QUESTIONS[state.currentIndex];
+            return activeQuestions[state.currentIndex];
         }
 
         function isAnswered(questionId) {
@@ -2300,7 +2722,7 @@
             clearMessageBoxes();
 
             const answered = isAnswered(question.id);
-            dom.questionCounter.textContent = "Question " + (state.currentIndex + 1) + " of " + QUESTIONS.length;
+            dom.questionCounter.textContent = "Question " + (state.currentIndex + 1) + " of " + activeQuestions.length;
             dom.questionTitle.textContent = question.title || "";
             dom.questionPrompt.textContent = question.prompt || "";
             // Submit vs Next visibility is handled by updateNavigationButtons().
@@ -2330,6 +2752,12 @@
                     warning.textContent = "Unknown question type: " + question.type;
                     dom.answerArea.appendChild(warning);
                 }
+            }
+
+            // Testing mode: show the answer key for this question so the
+            // builder can check their content without solving it.
+            if (isTestMode()) {
+                renderAnswerKey(question);
             }
 
             if (answered) {
@@ -2366,12 +2794,35 @@
             return counter;
         }
 
+        // Display order for a question's choices: the original positions in
+        // the order they should appear on screen. With shuffleChoices ON the
+        // order is shuffled ONCE per run per question and saved in
+        // state.choiceOrder, so revisits and resumed sessions look the same.
+        // The original question config is never changed; each radio button
+        // carries its ORIGINAL index as its value, so grading, saved answers
+        // and summaries all keep working on original indices.
+        function choiceDisplayOrder(question) {
+            if (SIM_CONFIG.shuffleChoices !== true) {
+                return question.choices.map((_, index) => index);
+            }
+            let order = state.choiceOrder[question.id];
+            const valid = Array.isArray(order) && order.length === question.choices.length &&
+                order.slice().sort((a, b) => a - b).every((v, i) => v === i);
+            if (!valid) {
+                order = shuffle(question.choices.map((_, index) => index));
+                state.choiceOrder[question.id] = order;
+            }
+            return order;
+        }
+
         function renderMultipleChoice(question, answered) {
             const wrapper = document.createElement("div");
             wrapper.className = "choice-grid";
             const savedAnswer = state.answers[question.id];
+            const displayOrder = choiceDisplayOrder(question);
 
-            question.choices.forEach((choice, index) => {
+            displayOrder.forEach((index) => {
+                const choice = question.choices[index];
                 const label = document.createElement("label");
                 label.className = "choice-card";
 
@@ -3083,6 +3534,25 @@
             // and reveals Next, so there is no button to re-enable; just clear
             // the re-entrancy flag.
             const result = gradeAnswer(question, answer);
+
+            // Multiple attempts: a wrong OR partial grade counts as one used
+            // attempt. While attempts remain (attemptsPerQuestion), the answer
+            // is NOT locked in — the student sees feedback with the attempts
+            // left and a Try Again button instead of Next.
+            state.attempts[question.id] = (state.attempts[question.id] || 0) + 1;
+            if ((result.status === "wrong" || result.status === "partial") && attemptsRemaining(question.id) > 0) {
+                state.answers[question.id] = answer; // keep their work visible on retry/resume
+                lockAnswerInputs(question);
+                dom.submitBtn.classList.add("hidden");
+                dom.tryAgainBtn.classList.remove("hidden");
+                showRetryFeedback(question, result);
+                if (result.status === "partial") playSound("partial");
+                else playSound("wrong");
+                saveQuizProgress();
+                state.isSubmitting = false;
+                return;
+            }
+
             recordResult(question, answer, result);
             justGraded = true; // sound: allow per-pair result tones for this render only
             renderQuestion();
@@ -3303,6 +3773,118 @@
             });
         }
 
+        /* ------------------------------------------------------------
+           Multiple attempts (SIM_CONFIG.attemptsPerQuestion) + Try Again.
+           ------------------------------------------------------------ */
+        // How many attempts the student still has for a question AFTER the
+        // attempts already used. Infinity when set to "unlimited".
+        function attemptsRemaining(questionId) {
+            const limit = SIM_CONFIG.attemptsPerQuestion;
+            if (limit === "unlimited") return Infinity;
+            return Math.max(0, Number(limit) - (state.attempts[questionId] || 0));
+        }
+
+        // Disables the current question's inputs in place (used while the
+        // retry feedback + Try Again button are showing).
+        function lockAnswerInputs(question) {
+            dom.answerArea.querySelectorAll("input, textarea, button").forEach((el) => { el.disabled = true; });
+            if (state.interaction) state.interaction.locked = true;
+        }
+
+        // Feedback for a wrong/partial answer that can still be retried:
+        // no points line, no correct-answer reveal — just the status and
+        // how many attempts are left.
+        function showRetryFeedback(question, result) {
+            const remaining = attemptsRemaining(question.id);
+            const remainingText = remaining === Infinity
+                ? "you can try again as many times as you like"
+                : remaining + " attempt" + (remaining === 1 ? "" : "s") + " left";
+            dom.feedbackBox.className = "feedback-box show " + result.status;
+            dom.feedbackBox.replaceChildren();
+
+            const label = document.createElement("div");
+            label.className = "feedback-label";
+            label.textContent = statusIcon(result.status) + " " +
+                (result.status === "partial" ? "Partially correct" : "Not quite") + " — " + remainingText;
+
+            const body = document.createElement("p");
+            body.textContent = "Press Try Again to change your answer.";
+
+            dom.feedbackBox.append(label, body);
+            announce((result.status === "partial" ? "Partially correct. " : "Not quite. ") +
+                (remaining === Infinity ? "You can try again." : remaining + " attempts left.") +
+                " Press Try Again to change your answer.");
+        }
+
+        // Try Again button: re-renders the question with inputs enabled so
+        // the student can adjust their previous answer and resubmit. No extra
+        // sound here beyond the wrong/partial tone already played on submit.
+        function tryAgain() {
+            dom.tryAgainBtn.classList.add("hidden");
+            renderQuestion();
+        }
+
+        /* ------------------------------------------------------------
+           Testing mode answer key (SIM_CONFIG.TEST_MODE) — a small box
+           under each question showing the correct answer(s).
+           ------------------------------------------------------------ */
+        function renderAnswerKey(question) {
+            const box = document.createElement("div");
+            box.className = "answer-key";
+
+            const label = document.createElement("div");
+            label.className = "feedback-label";
+            label.textContent = "🔑 Answer key (testing mode)";
+            box.appendChild(label);
+
+            const list = document.createElement("ul");
+            const addLine = (text) => {
+                const li = document.createElement("li");
+                li.textContent = text;
+                list.appendChild(li);
+            };
+
+            switch (question.type) {
+                case "multipleChoice":
+                    addLine("Correct choice: " + String(question.choices[Number(question.correctIndex)]));
+                    break;
+                case "exactText":
+                    addLine("Accepted answer: " + String(question.answer) +
+                        (question.caseSensitive ? " (case sensitive)" : ""));
+                    break;
+                case "exactNumber":
+                    addLine("Correct number: " + String(question.answer) +
+                        (Number(question.tolerance || 0) > 0 ? " (± " + question.tolerance + ")" : ""));
+                    break;
+                case "keywords":
+                    addLine("Keywords: " + question.keywords.join(", "));
+                    addLine("Needed for correct: " + Number(question.minMatches || 1));
+                    break;
+                case "shortAnswer":
+                    if (question.ungraded || !Array.isArray(question.keywords)) {
+                        addLine("Ungraded reflection — any answer is recorded, none is scored.");
+                    } else {
+                        addLine("Keywords: " + question.keywords.join(", "));
+                        addLine("Needed for correct: " + Number(question.minMatches || 1));
+                    }
+                    break;
+                case "dragSort":
+                    question.items.forEach((item) => {
+                        const bin = question.bins.find((b) => b.id === item.correctBin);
+                        addLine(item.label + " → " + (bin ? bin.label : String(item.correctBin)));
+                    });
+                    break;
+                case "matching":
+                    question.pairs.forEach((pair) => {
+                        addLine(pair.left + " ↔ " + pair.right);
+                    });
+                    break;
+            }
+
+            box.appendChild(list);
+            dom.answerArea.appendChild(box);
+        }
+
         function showFeedback(question, result) {
             const stored = state.results[question.id];
             dom.feedbackBox.className = "feedback-box show " +
@@ -3444,7 +4026,8 @@
            ------------------------------------------------------------ */
         function goNext() {
             const question = currentQuestion();
-            if (!isAnswered(question.id)) {
+            // Testing mode: move on (and reach the summary) at any time.
+            if (!isTestMode() && !isAnswered(question.id)) {
                 showAlert("Submit an answer before moving on.");
                 return;
             }
@@ -3453,7 +4036,7 @@
             // button state; on the last question Next stays hidden.
             dom.nextBtn.disabled = true;
             playSound("click"); // sound: button press
-            if (state.currentIndex >= QUESTIONS.length - 1) {
+            if (state.currentIndex >= activeQuestions.length - 1) {
                 // Finish: mark the run finished so the next page load wipes
                 // this progress and boots fresh instead of re-showing summary.
                 state.finished = true;
@@ -3473,17 +4056,22 @@
         // Revisiting an answered question via the step dots also shows Next.
         function updateNavigationButtons() {
             const answered = isAnswered(currentQuestion().id);
-            const isLast = state.currentIndex === QUESTIONS.length - 1;
+            const isLast = state.currentIndex === activeQuestions.length - 1;
             dom.submitBtn.classList.toggle("hidden", answered);
             dom.submitBtn.disabled = false;
-            dom.nextBtn.classList.toggle("hidden", !answered);
+            // Testing mode: Next is always available so the builder can page
+            // through freely and reach the summary at any time.
+            dom.nextBtn.classList.toggle("hidden", !answered && !isTestMode());
             dom.nextBtn.disabled = false;
             dom.nextBtn.textContent = isLast ? "Finish →" : "Next Question →";
+            // Try Again only appears via the retry path in handleAnswerSubmit;
+            // every fresh render starts with it hidden.
+            dom.tryAgainBtn.classList.add("hidden");
         }
 
         function updateStatusUI() {
             const answeredCount = Object.keys(state.results).length;
-            const progressPercent = QUESTIONS.length ? Math.round((answeredCount / QUESTIONS.length) * 100) : 0;
+            const progressPercent = activeQuestions.length ? Math.round((answeredCount / activeQuestions.length) * 100) : 0;
             dom.scoreChip.textContent = "Score: " + state.score;
             dom.streakChip.textContent = "Streak: " + state.streak;
             dom.progressLabel.textContent = progressPercent + "% complete";
@@ -3493,7 +4081,7 @@
 
         function renderStepDots() {
             dom.stepDots.replaceChildren();
-            QUESTIONS.forEach((question, index) => {
+            activeQuestions.forEach((question, index) => {
                 const dot = document.createElement("button");
                 dot.type = "button";
                 dot.className = "step-dot";
@@ -3505,9 +4093,10 @@
                     dot.classList.add(result.status === "ungraded" ? "correct" : result.status);
                 }
                 // Clickable: answered questions, or any question up to the
-                // first unanswered one.
-                const firstUnanswered = QUESTIONS.findIndex((q) => !isAnswered(q.id));
-                const reachable = isAnswered(question.id) || index <= (firstUnanswered === -1 ? QUESTIONS.length - 1 : firstUnanswered);
+                // first unanswered one. Testing mode unlocks every dot for
+                // free navigation.
+                const firstUnanswered = activeQuestions.findIndex((q) => !isAnswered(q.id));
+                const reachable = isTestMode() || isAnswered(question.id) || index <= (firstUnanswered === -1 ? activeQuestions.length - 1 : firstUnanswered);
                 dot.disabled = !reachable;
                 dot.addEventListener("click", () => {
                     state.currentIndex = index;
@@ -3547,7 +4136,7 @@
             let correct = 0;
             let wrong = 0;
             let graded = 0;
-            QUESTIONS.forEach((question) => {
+            activeQuestions.forEach((question) => {
                 const result = state.results[question.id];
                 if (!result || result.status === "ungraded") return;
                 graded++;
@@ -3562,7 +4151,7 @@
             dom.summaryStreak.textContent = String(state.bestStreak);
 
             dom.summaryResults.replaceChildren();
-            QUESTIONS.forEach((question, index) => {
+            activeQuestions.forEach((question, index) => {
                 const result = state.results[question.id];
                 const card = document.createElement("article");
                 card.className = "result-card";
@@ -3628,6 +4217,13 @@
            Engine entry points wired into the chrome Start/Reset flow.
            ------------------------------------------------------------ */
         function devInit() {
+            // A brand-new run (not a resume): build the question list fresh
+            // so the question bank draw and shuffleQuestions take effect,
+            // and remember the order (as ids) for consistent resume.
+            if (!state.started) {
+                activeQuestions = buildActiveQuestions();
+                state.order = activeQuestions.map((q) => q.id);
+            }
             state.started = true;
             state.finished = false;
             renderQuestion();
@@ -3640,6 +4236,9 @@
             state.answers = {};
             state.results = {};
             state.hintsUsed = {};
+            state.order = [];
+            state.attempts = {};
+            state.choiceOrder = {};
             state.finished = false;
             state.score = 0;
             state.streak = 0;
