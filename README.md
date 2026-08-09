@@ -14,7 +14,7 @@
 
 **blank-template.html** is a stripped-down, minimal starting point for building simulations from scratch. Unlike premade-template.html (which includes a full question engine with built-in scaffolding, grading, and scoring), blank-template.html provides only the essential chrome: dark/light theme switching with persistence, a start screen, a help/instructions modal, fullscreen capability, and a styled reset confirmation modal. The simulation area itself is empty—you add all content here.
 
-Use blank-template.html when you want complete control over what your simulation does. There are no built-in questions, grading systems, audio, history tracking, or student profiles. You decide the behavior and structure.
+Use blank-template.html when you want complete control over what your simulation does. There are no built-in questions, grading systems, history tracking, or student profiles (an optional, removable sound engine is included — see the Sound engine section below). You decide the behavior and structure.
 
 ### How to use blank-template.html
 
@@ -113,4 +113,57 @@ Sections marked `CHROME — DO NOT EDIT` (chrome CSS and chrome JavaScript) must
 - **No native dialogs** — all messages use styled modals.
 - **No type=password** — password masking is available via documented `.masked-input` CSS class.
 - **XSS-safe** — all user text is escaped before rendering.
+
+---
+
+## Sound engine (audio in the templates)
+
+### What it is
+
+Both templates ship with a built-in, fully offline audio engine: a speaker icon in the header toggles all sound on/off (persisted to localStorage), a set of default sounds are synthesized in-browser with no audio files required, and the Help modal shows a per-category volume slider for whatever sound categories your simulation uses.
+
+### Using it
+
+Call `playSound("name")` from your simulation logic (inside `devInit()`, `devReset()`, or any function you add in the DEV-EDIT: SIM LOGIC zone). The built-in sound names are:
+
+- `click` — general button/option clicks
+- `correct` — learner answers correctly
+- `wrong` — learner answers incorrectly
+- `typing` — per-keystroke or per-character reveal
+- `complete` — simulation/activity finishes
+
+You can add your own sound names to `SOUND_FILES` (e.g. `levelUp: ""`) and call `playSound("levelUp")` anywhere.
+
+Every sound belongs to a category in `SOUND_CATEGORIES`. All built-in sounds are in the `effects` category, which always gets a volume slider in the Help window. Give a sound you add a different category name (for example `voice` for narration) and it automatically gets its own labelled slider — if nothing uses a category, no slider appears for it. Optional friendlier slider labels live in `CATEGORY_LABELS`.
+
+### Adding your own MP3/WAV fully inside the HTML
+
+Encode the audio file to base64 text, then paste it into `SOUND_FILES` as a data URI—this keeps the sound baked into the single HTML file with nothing else to ship.
+
+PowerShell:
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("mysound.mp3")) | Set-Clipboard
+```
+
+macOS/Linux:
+```bash
+base64 -w0 mysound.mp3
+```
+
+Then in `SOUND_FILES`:
+```js
+mysound: "data:audio/mp3;base64,PASTE_HERE"
+```
+
+And add it to its own category in `SOUND_CATEGORIES` so it gets a dedicated slider:
+```js
+mysound: "voice"
+```
+A "Voice / narration" slider then appears automatically in Help.
+
+Base64 encoding makes the file roughly 1.37x its original size, so this is best for short sound effects, not music or long narration. If you have several files or longer clips, ship them next to the HTML instead and reference a relative path, e.g. `"sounds/mysound.mp3"`—but then remember to ship that file alongside the HTML.
+
+### Removing audio
+
+Delete the `#audioBtn` button in the header (search "OPTIONAL: AUDIO TOGGLE BUTTON") and the entire `DEV-EDIT: AUDIO (OPTIONAL)` script section (the file's audio comment banner notes exactly where this section starts and ends). Everything else in the chrome checks for the audio elements being absent and stays safe if you remove them.
 

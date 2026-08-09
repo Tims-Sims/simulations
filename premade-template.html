@@ -392,6 +392,34 @@
             font-size: clamp(1.35rem, 2vw, 1.8rem);
         }
 
+        .volume-sliders {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 4px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .volume-row label {
+            flex: 0 0 auto;
+            min-width: 130px;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1 1 auto;
+            accent-color: var(--accent);
+        }
+
         .modal-card p,
         .modal-card li {
             color: var(--text-soft);
@@ -1609,9 +1637,46 @@
             complete: "",  // summary screen reached (sim finished)
         };
 
+        /* Each sound belongs to a category. The "effects" category always gets a
+           volume slider in the Help window. Any OTHER category name you use here
+           (for example "voice" for narration you add yourself) automatically gets
+           its own labelled slider — and if no sound uses it, no slider appears. */
+        const SOUND_CATEGORIES = {
+          click: "effects",
+          typing: "effects",
+          correct: "effects",
+          partial: "effects",
+          wrong: "effects",
+          hint: "effects",
+          drop: "effects",
+          complete: "effects",
+          // narration: "voice",   // example: your own added sound in its own category
+        };
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
         let audioCtx = null;
         let audioEnabled = true;
         const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+
+        const channelVolumes = {};   // category -> 0..1
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+          const cats = new Set(["effects"]);
+          Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+          return [...cats];
+        }
+        function loadVolumes() {
+          getCategories().forEach((cat) => {
+            const raw = storageGet(VOL_STORAGE_KEY(cat));
+            const n = raw === null || raw === "" ? 100 : Number(raw);
+            channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+          });
+        }
+        function volumeFor(name) {
+          const cat = SOUND_CATEGORIES[name] || "effects";
+          return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
 
         function ensureAudioCtx() {
             if (!audioCtx) {
@@ -1638,14 +1703,14 @@
         }
 
         const SYNTH_SOUNDS = {
-            click:    () => playTone(600, 60, "square", 0.06),
-            typing:   () => playTone(420, 30, "square", 0.04),
-            correct:  () => { playTone(523, 120, "sine", 0.15); playTone(784, 180, "sine", 0.15, 110); },
-            partial:  () => { playTone(523, 120, "sine", 0.13); playTone(587, 160, "sine", 0.13, 110); },
-            wrong:    () => playTone(180, 250, "sawtooth", 0.12),
-            hint:     () => playTone(880, 90, "triangle", 0.08),
-            drop:     () => playTone(320, 50, "square", 0.07),
-            complete: () => { playTone(523, 120, "sine", 0.15); playTone(659, 120, "sine", 0.15, 120); playTone(784, 250, "sine", 0.15, 240); },
+            click:    (v) => playTone(600, 60, "square", 0.06 * v),
+            typing:   (v) => playTone(420, 30, "square", 0.04 * v),
+            correct:  (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(784, 180, "sine", 0.15 * v, 110); },
+            partial:  (v) => { playTone(523, 120, "sine", 0.13 * v); playTone(587, 160, "sine", 0.13 * v, 110); },
+            wrong:    (v) => playTone(180, 250, "sawtooth", 0.12 * v),
+            hint:     (v) => playTone(880, 90, "triangle", 0.08 * v),
+            drop:     (v) => playTone(320, 50, "square", 0.07 * v),
+            complete: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(659, 120, "sine", 0.15 * v, 120); playTone(784, 250, "sine", 0.15 * v, 240); },
         };
 
         // True only for the render triggered by a fresh grading in
@@ -1655,13 +1720,15 @@
 
         function playSound(name) {
             if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
             const src = SOUND_FILES[name];
             if (src) {
-                try { new Audio(src).play().catch(() => {}); } catch (err) { /* ignore */ }
+                try { const a = new Audio(src); a.volume = v; a.play().catch(() => {}); } catch (err) { /* ignore */ }
                 return;
             }
             const synth = SYNTH_SOUNDS[name];
-            if (synth) { try { synth(); } catch (err) { /* ignore */ } }
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
         }
 
         function updateAudioButton() {
@@ -1683,8 +1750,62 @@
         }
 
         function loadAudioSetting() {
+            loadVolumes();
             audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
             updateAudioButton();
+        }
+
+        // Builds (or rebuilds) the per-category volume sliders inside the Help
+        // window. Called each time the Help/instructions modal opens.
+        function renderVolumeSliders() {
+            const body = document.getElementById("instructionsBody");
+            if (!body) return;
+            const existing = document.getElementById("volumeSliders");
+            if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+
+            const wrap = document.createElement("div");
+            wrap.id = "volumeSliders";
+            wrap.className = "volume-sliders";
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            wrap.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                const cur = channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+                input.value = String(Math.round(cur * 100));
+
+                input.addEventListener("input", () => {
+                    const value = Number(input.value);
+                    channelVolumes[cat] = value / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), value);
+                });
+                input.addEventListener("change", () => {
+                    // Play a representative sound so the user hears the new level.
+                    let rep = "click";
+                    for (const key in SOUND_CATEGORIES) {
+                        if (SOUND_CATEGORIES[key] === cat) { rep = key; break; }
+                    }
+                    playSound(rep);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                wrap.appendChild(row);
+            });
+
+            body.appendChild(wrap);
         }
 
         /* ============================================================
@@ -1862,6 +1983,7 @@
 
         function openInstructionsModal() {
             dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* ignore */ }
         }
 
         function closeInstructionsModal() {

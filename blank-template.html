@@ -396,6 +396,33 @@
             margin-top: 10px;
         }
 
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
         .muted {
             color: var(--muted);
         }
@@ -613,10 +640,45 @@
             // call playSound("levelUp") from your DEV-EDIT: SIM LOGIC code.
         };
 
+        /* Each sound belongs to a category. The "effects" category always gets a
+           volume slider in the Help window. Any OTHER category name you use here
+           (for example "voice" for narration you add yourself) automatically gets
+           its own labelled slider in the Help window — and if no sound uses it,
+           no slider appears. */
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects",
+            // narration: "voice",   // example: your own added sound in its own category
+        };
+        /* Optional nicer slider labels. Category name used if missing. */
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
         /* ---- Audio engine below. Safe to leave untouched. ---- */
         let audioCtx = null;
         let audioEnabled = true;
         const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};   // category -> 0..1
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
 
         function ensureAudioCtx() {
             if (!audioCtx) {
@@ -643,22 +705,28 @@
         }
 
         const SYNTH_SOUNDS = {
-            click:    () => playTone(600, 60, "square", 0.06),
-            typing:   () => playTone(420, 30, "square", 0.04),
-            correct:  () => { playTone(523, 120, "sine", 0.15); playTone(784, 180, "sine", 0.15, 110); },
-            wrong:    () => playTone(180, 250, "sawtooth", 0.12),
-            complete: () => { playTone(523, 120, "sine", 0.15); playTone(659, 120, "sine", 0.15, 120); playTone(784, 250, "sine", 0.15, 240); },
+            click:    (v) => playTone(600, 60, "square", 0.06 * v),
+            typing:   (v) => playTone(420, 30, "square", 0.04 * v),
+            correct:  (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(784, 180, "sine", 0.15 * v, 110); },
+            wrong:    (v) => playTone(180, 250, "sawtooth", 0.12 * v),
+            complete: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(659, 120, "sine", 0.15 * v, 120); playTone(784, 250, "sine", 0.15 * v, 240); },
         };
 
         function playSound(name) {
             if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
             const src = SOUND_FILES[name];
             if (src) {
-                try { new Audio(src).play().catch(() => {}); } catch (err) { /* ignore */ }
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
                 return;
             }
             const synth = SYNTH_SOUNDS[name];
-            if (synth) { try { synth(); } catch (err) { /* ignore */ } }
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
         }
         // Example usage from your own sim logic:
         // playSound("correct"); // call anywhere in your DEV-EDIT: SIM LOGIC code
@@ -689,8 +757,54 @@
         }
 
         function loadAudioSetting() {
+            loadVolumes();
             audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
             updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), input.value);
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
         }
 
         /* ============================================================
@@ -812,6 +926,7 @@
 
         function openInstructionsModal() {
             dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
         }
 
         function closeInstructionsModal() {
