@@ -117,7 +117,9 @@
         button:focus-visible,
         input:focus-visible,
         textarea:focus-visible,
-        select:focus-visible {
+        select:focus-visible,
+        [role="button"]:focus-visible,
+        [tabindex]:focus-visible {
             outline: none;
             box-shadow: var(--focus);
         }
@@ -1379,7 +1381,7 @@
                 <section class="sim-card" id="simContainer">
                     <!-- Shown only while SIM_CONFIG.TEST_MODE is true. Warns the
                          builder that answers are visible and progress is not saved. -->
-                    <div class="test-mode-banner hidden" id="testModeBanner" role="status">
+                    <div class="test-mode-banner hidden" id="testModeBanner" role="status" aria-live="polite">
                         ⚠️ TEST MODE — answers visible, progress not saved
                     </div>
 
@@ -1396,14 +1398,20 @@
                             <span id="progressLabel">0% complete</span>
                             <span id="progressSummary">0 answered</span>
                         </div>
-                        <div class="progress-bar" aria-hidden="true">
+                        <div class="progress-bar" id="progressBar" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                             <div class="progress-fill" id="progressFill"></div>
                         </div>
                         <div class="step-dots" id="stepDots"></div>
                     </div>
 
                     <section class="question-panel">
-                        <h2 class="question-title" id="questionTitle">Question title</h2>
+                        <!-- Keyboard flows (all question types are keyboard-completable):
+                             MC/True-False = arrow keys within the radio group; dragSort/matching =
+                             focus a chip/card, Enter/Space to pick up/select, arrow keys to target a
+                             bin/pair, Enter to drop (Escape cancels); ordering = ▲/▼ buttons;
+                             imageHotspot = Tab to a region + Enter. Submit moves focus to the feedback
+                             box (role=status) so results are announced. -->
+                        <h2 class="question-title" id="questionTitle" tabindex="-1">Question title</h2>
                         <p class="question-prompt" id="questionPrompt">Prompt will appear here.</p>
 
                         <form id="answerForm" novalidate>
@@ -1425,7 +1433,7 @@
                         </form>
 
                         <div class="hint-box" id="hintBox"></div>
-                        <div class="feedback-box" id="feedbackBox"></div>
+                        <div class="feedback-box" id="feedbackBox" role="status" aria-live="polite" tabindex="-1"></div>
                         <div class="alert-box" id="alertBox"></div>
                     </section>
                 </section>
@@ -2628,6 +2636,7 @@
             progressLabel: document.getElementById("progressLabel"),
             progressSummary: document.getElementById("progressSummary"),
             progressFill: document.getElementById("progressFill"),
+            progressBar: document.getElementById("progressBar"),
             stepDots: document.getElementById("stepDots"),
             questionTitle: document.getElementById("questionTitle"),
             questionPrompt: document.getElementById("questionPrompt"),
@@ -2761,21 +2770,71 @@
             dom.instructionsBody.replaceChildren(intro, list);
         }
 
+        // --- Modal accessibility: focus first control on open, trap Tab
+        // inside the dialog, and return focus to the opener on close. ---
+        let modalReturnFocus = null;
+        let activeModalEl = null;
+
+        function modalFocusables(modalEl) {
+            return Array.prototype.filter.call(
+                modalEl.querySelectorAll(
+                    'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'),
+                (el) => el.offsetParent !== null || el === document.activeElement);
+        }
+
+        function trapModalTab(event) {
+            if (event.key !== "Tab" || !activeModalEl) return;
+            const focusables = modalFocusables(activeModalEl);
+            if (focusables.length === 0) return;
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        function openModalA11y(modalEl) {
+            modalReturnFocus = document.activeElement;
+            activeModalEl = modalEl;
+            const focusables = modalFocusables(modalEl);
+            if (focusables.length) focusables[0].focus({ preventScroll: true });
+            document.addEventListener("keydown", trapModalTab, true);
+        }
+
+        function closeModalA11y() {
+            document.removeEventListener("keydown", trapModalTab, true);
+            activeModalEl = null;
+            if (modalReturnFocus && typeof modalReturnFocus.focus === "function") {
+                modalReturnFocus.focus({ preventScroll: true });
+            }
+            modalReturnFocus = null;
+        }
+
         function openInstructionsModal() {
             dom.instructionsModal.classList.add("show");
             try { renderVolumeSliders(); } catch (err) { /* ignore */ }
+            openModalA11y(dom.instructionsModal);
         }
 
         function closeInstructionsModal() {
+            if (!dom.instructionsModal.classList.contains("show")) return;
             dom.instructionsModal.classList.remove("show");
+            closeModalA11y();
         }
 
         function openResetConfirmModal() {
             dom.resetConfirmModal.classList.add("show");
+            openModalA11y(dom.resetConfirmModal);
         }
 
         function closeResetConfirmModal() {
+            if (!dom.resetConfirmModal.classList.contains("show")) return;
             dom.resetConfirmModal.classList.remove("show");
+            closeModalA11y();
         }
 
         function showScreen(screenName) {
@@ -3222,6 +3281,8 @@
         function renderMultipleChoice(question, answered) {
             const wrapper = document.createElement("div");
             wrapper.className = "choice-grid";
+            wrapper.setAttribute("role", "radiogroup");
+            wrapper.setAttribute("aria-label", question.prompt || question.title || "Answer choices");
             const savedAnswer = state.answers[question.id];
             const displayOrder = choiceDisplayOrder(question);
 
@@ -3327,6 +3388,8 @@
         function renderTrueFalse(question, answered) {
             const wrapper = document.createElement("div");
             wrapper.className = "choice-grid";
+            wrapper.setAttribute("role", "radiogroup");
+            wrapper.setAttribute("aria-label", question.prompt || question.title || "True or false");
             const saved = state.answers[question.id]; // boolean or undefined
             [{ v: true, label: "True" }, { v: false, label: "False" }].forEach((opt) => {
                 const label = document.createElement("label");
@@ -3658,6 +3721,7 @@
                             chip.dataset.itemId = item.id;
                             chip.tabIndex = 0;
                             chip.setAttribute("role", "button");
+                            chip.setAttribute("aria-pressed", inter.selectedItemId === item.id ? "true" : "false");
                             if (inter.selectedItemId === item.id) chip.classList.add("selected");
                             chip.setAttribute("aria-label",
                                 item.label + " in " + bin.label + ". Click to return it to the tray, or press Enter to pick it up, then use arrow keys to target the tray or a bin and Enter to drop.");
@@ -3701,6 +3765,7 @@
                 itemEl.dataset.itemId = item.id;
                 itemEl.tabIndex = inter.locked ? -1 : 0;
                 itemEl.setAttribute("role", "button");
+                itemEl.setAttribute("aria-pressed", inter.selectedItemId === item.id ? "true" : "false");
                 itemEl.setAttribute("aria-label",
                     "Sort " + item.label + ". Press Enter to pick up, then use arrow keys to target a bin and Enter to drop.");
                 itemEl.textContent = (item.icon ? item.icon + " " : "") + item.label;
@@ -3995,6 +4060,7 @@
                 card.type = "button";
                 card.className = "match-card";
                 card.disabled = inter.locked && !result;
+                card.setAttribute("aria-pressed", inter.selectedLeft === leftIdx ? "true" : "false");
                 if (inter.selectedLeft === leftIdx) card.classList.add("selected");
                 if (inter.pairs[leftIdx] != null) card.classList.add("paired");
                 if (result && result.perItem) {
@@ -4243,6 +4309,7 @@
                 dom.submitBtn.classList.add("hidden");
                 dom.tryAgainBtn.classList.remove("hidden");
                 showRetryFeedback(question, result);
+                dom.feedbackBox.focus({ preventScroll: false }); // land keyboard/SR users on the result
                 if (result.status === "partial") playSound("partial");
                 else playSound("wrong");
                 saveQuizProgress();
@@ -4260,6 +4327,7 @@
                 if (wrongInput) markInputError(wrongInput);
             }
             showFeedback(question, result);
+            dom.feedbackBox.focus({ preventScroll: false }); // land keyboard/SR users on the result
             // sound: grade outcome (ungraded plays nothing)
             if (result.status === "correct") playSound("correct");
             else if (result.status === "partial") playSound("partial");
@@ -4628,6 +4696,15 @@
         function tryAgain() {
             dom.tryAgainBtn.classList.add("hidden");
             renderQuestion();
+            focusFirstAnswerControl(); // return keyboard focus to the first input/choice
+        }
+
+        // Moves focus to the first interactive answer control (input, radio,
+        // chip, card, or button) inside the answer area. Used after Try Again.
+        function focusFirstAnswerControl() {
+            const el = dom.answerArea.querySelector(
+                'input:not([disabled]), textarea:not([disabled]), button:not([disabled]), [role="button"]:not([disabled]), [tabindex="0"]');
+            if (el) el.focus({ preventScroll: true });
         }
 
         /* ------------------------------------------------------------
@@ -4872,6 +4949,7 @@
             }
             state.currentIndex++;
             renderQuestion();
+            dom.questionTitle.focus({ preventScroll: false }); // land keyboard/SR users on the new question heading
             saveQuizProgress();
         }
 
@@ -4901,6 +4979,10 @@
             dom.progressLabel.textContent = progressPercent + "% complete";
             dom.progressSummary.textContent = answeredCount + " answered";
             dom.progressFill.style.width = progressPercent + "%";
+            if (dom.progressBar) {
+                dom.progressBar.setAttribute("aria-valuenow", String(progressPercent));
+                dom.progressBar.setAttribute("aria-valuetext", progressPercent + "% complete");
+            }
         }
 
         function renderStepDots() {
@@ -4910,8 +4992,11 @@
                 dot.type = "button";
                 dot.className = "step-dot";
                 dot.textContent = isAnswered(question.id) ? "✓" : String(index + 1);
-                dot.setAttribute("aria-label", "Go to question " + (index + 1));
-                if (index === state.currentIndex) dot.classList.add("current");
+                dot.setAttribute("aria-label", "Question " + (index + 1) + " of " + activeQuestions.length);
+                if (index === state.currentIndex) {
+                    dot.classList.add("current");
+                    dot.setAttribute("aria-current", "true");
+                }
                 const result = state.results[question.id];
                 if (result) {
                     dot.classList.add(result.status === "ungraded" ? "correct" : result.status);
