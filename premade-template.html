@@ -1110,7 +1110,88 @@
             text-align: center;
         }
 
-        /* --- ordering (put in order with arrows) --- */
+        /* --- fillBlank word bank (list + drag modes) --- */
+        .fillblank-bank {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px dashed var(--border);
+            background: var(--surface-2);
+        }
+        .fillblank-bank-items {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .fillblank-bank-title {
+            font-weight: 800;
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-right: 4px;
+        }
+        .fillblank-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+            background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 13%, var(--surface)), var(--surface));
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.9rem;
+            touch-action: none;
+            user-select: none;
+            cursor: grab;
+        }
+        .fillblank-chip.is-static {
+            cursor: default;
+            border-style: solid;
+        }
+        .fillblank-chip.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+        }
+        .fillblank-chip.dragging {
+            position: fixed;
+            z-index: 30;
+            pointer-events: none;
+            cursor: grabbing;
+            opacity: 0.92;
+            transform: scale(1.04);
+        }
+        .fillblank-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 9ch;
+            min-height: 34px;
+            padding: 2px 8px;
+            margin: 0 3px;
+            vertical-align: middle;
+            border-radius: 10px;
+            border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--border));
+            background: var(--surface);
+            cursor: pointer;
+        }
+        .fillblank-slot.filled {
+            border-style: solid;
+        }
+        .fillblank-slot.drag-target,
+        .fillblank-slot.keyboard-target {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+        }
+        .fillblank-slot:focus-visible {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+        }
+
+        /* --- ordering (drag a block, or arrow keys, to reorder) --- */
         .ordering-list {
             display: grid;
             gap: 10px;
@@ -1123,6 +1204,32 @@
             border-radius: 16px;
             border: 1px solid var(--border);
             background: var(--surface);
+            user-select: none;
+            touch-action: none;
+            cursor: grab;
+        }
+        .ordering-row:focus-visible {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+        }
+        .ordering-row.dragging {
+            cursor: grabbing;
+            position: relative;
+            z-index: 30;
+            transition: none;
+            border-color: var(--accent);
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
+        }
+        .ordering-grip {
+            flex: none;
+            display: inline-grid;
+            place-items: center;
+            color: var(--muted);
+            cursor: grab;
+        }
+        .ordering-grip svg {
+            fill: currentColor;
         }
         .ordering-row .ordering-label {
             flex: 1;
@@ -1140,29 +1247,6 @@
             color: var(--muted);
             font-size: 0.82rem;
             font-weight: 800;
-        }
-        .ordering-arrows {
-            display: inline-flex;
-            gap: 6px;
-        }
-        .ordering-arrow {
-            width: 34px;
-            height: 34px;
-            display: inline-grid;
-            place-items: center;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--surface-2);
-            color: var(--text);
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        .ordering-arrow:hover:not(:disabled) {
-            border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
-        }
-        .ordering-arrow:disabled {
-            opacity: 0.4;
-            cursor: default;
         }
 
         /* --- imageHotspot (click the right region of a picture) --- */
@@ -1730,13 +1814,24 @@
                                 answer2: { accept: ["earth", "the earth"] } }
              Each {token} becomes an inline text box. All blanks right =
              correct, some = partial, none = wrong.
+             wordBank    - (optional) "none" (default) = type the answers;
+                       "list" = show a read-only word-bank row above the
+                       sentence and still type the answers; "drag" = the
+                       blanks become drop slots and the words become draggable
+                       chips (drag, click-to-select, or keyboard to place).
+             extraWords  - (optional) extra decoy words added to the bank in
+                       "list" / "drag" mode to make it harder, e.g.
+                       extraWords: ["sun", "mars"]. The bank always includes
+                       the first accepted answer of each blank (one chip per
+                       blank, duplicates counted) plus these, all shuffled.
 
            ordering:
              items        - array of { id, label } objects.
              correctOrder - array of item ids in the right order.
-             The items appear shuffled; the student reorders them with the
-             up/down arrow buttons next to each row. Exact order = correct,
-             at least half the items in the right spot = partial, else wrong.
+             The items appear shuffled; the student reorders them by dragging
+             a block (grab it anywhere) or by focusing a block and pressing
+             ArrowUp / ArrowDown. Exact order = correct, at least half the
+             items in the right spot = partial, else wrong.
 
            imageHotspot:
              image      - the picture to click on (same three formats as the
@@ -1891,9 +1986,28 @@
                 hint: "The Moon goes around the Earth.",
                 explanation: "The Moon orbits the Earth, and the Earth orbits the Sun.",
                 text: "The {answer1} orbits the {answer2}.",
+                wordBank: "list",
                 blanks: {
                     answer1: { accept: ["moon", "the moon"], caseSensitive: false },
                     answer2: { accept: ["earth", "the earth"] }
+                }
+            },
+            // --- DEMO 9b: fillBlank (drag word bank) -----------------------
+            // wordBank "drag" turns the blanks into drop slots and the words
+            // into draggable chips; extraWords adds decoys.
+            {
+                id: "demo-fillblank-drag",
+                type: "fillBlank",
+                title: "Fill in the Blanks (Drag) Demo",
+                prompt: "Drag the right words into the sentence about our planet.",
+                hint: "Water covers most of the Earth; plants are green.",
+                explanation: "Most of the Earth is covered by water, and healthy leaves are green.",
+                text: "Most of the Earth is covered by {answer1}, and leaves are usually {answer2}.",
+                wordBank: "drag",
+                extraWords: ["sand", "blue"],
+                blanks: {
+                    answer1: { accept: ["water"], caseSensitive: false },
+                    answer2: { accept: ["green"], caseSensitive: false }
                 }
             },
             // --- DEMO 10: ordering -----------------------------------------
@@ -1932,9 +2046,13 @@
                 imageAlt: "A blue square on the left, a yellow circle in the middle, and a green triangle on the right.",
                 multiSelect: false,
                 hotspots: [
-                    { id: "hs-square", label: "Square", x: 4, y: 22, w: 24, h: 56, correct: false },
+                    // Boxes centred on each shape with even margin, computed from
+                    // the SVG viewBox (0 0 300 120). Square spans x 20-80, y 30-90
+                    // → 6.667-26.667% / 25-75%; triangle spans x 215-285, y 30-90
+                    // → 71.667-95% / 25-75%. Each box adds ~2% x / 3% y padding.
+                    { id: "hs-square", label: "Square", x: 4.667, y: 22, w: 24, h: 56, correct: false },
                     { id: "hs-circle", label: "Circle", x: 38, y: 18, w: 24, h: 64, correct: false },
-                    { id: "hs-triangle", label: "Triangle", x: 69, y: 22, w: 25, h: 56, correct: true }
+                    { id: "hs-triangle", label: "Triangle", x: 69.667, y: 22, w: 27.333, h: 56, correct: true }
                 ]
             }
         ];
@@ -2384,6 +2502,21 @@
                                 errors.push(at + ": 'blanks' has an entry '" + key + "' but the text has no {" + key + "} — remove it or add the blank.");
                             }
                         });
+                        // optional word bank (drag / list) + decoy words
+                        if (q.wordBank != null && q.wordBank !== "drag" && q.wordBank !== "list" && q.wordBank !== "none") {
+                            errors.push(at + ": 'wordBank' must be \"drag\", \"list\", or \"none\".");
+                        }
+                        if (q.extraWords != null && (!Array.isArray(q.extraWords) || !q.extraWords.every(isNonEmptyString))) {
+                            errors.push(at + ": 'extraWords' must be a list of non-empty words.");
+                        }
+                        if (q.wordBank === "drag") {
+                            tokens.forEach((tok) => {
+                                const entry = q.blanks[tok];
+                                if (isPlainObject(entry) && (!Array.isArray(entry.accept) || entry.accept.length === 0 || !isNonEmptyString(entry.accept[0]))) {
+                                    errors.push(at + ": wordBank \"drag\" needs blank '" + tok + "' to have a first accepted answer to use as its chip.");
+                                }
+                            });
+                        }
                         break;
                     }
                     case "ordering": {
@@ -3411,12 +3544,65 @@
         }
 
         /* ------------------------------------------------------------
-           fillBlank rendering. Splits the sentence on its {tokens} and
-           drops an inline text box where each blank is. Typed answers are
-           kept in state.answers as { token: value }.
+           fillBlank rendering. Splits the sentence on its {tokens}.
+
+           wordBank controls how the blanks are filled:
+             "none" (default) — each blank is an inline text box the student
+                       types into. Answers kept in state.answers as
+                       { token: value }.
+             "list" — same typed boxes, plus a non-interactive "Word bank:"
+                       row above the sentence listing the available words.
+             "drag" — the blanks become drop slots; the word bank is a row of
+                       draggable chips. Drag a chip into a slot, or select a
+                       chip (click / Enter) then a slot to place it. Answers
+                       are still kept as { token: word } so grading is
+                       unchanged.
+           Bank words = the first accepted answer of each blank
+           (blanks[token].accept[0]) plus any extraWords decoys, one chip per
+           blank (duplicates counted), all shuffled together.
            ------------------------------------------------------------ */
         function renderFillBlank(question, answered) {
+            const mode = (question.wordBank === "drag" || question.wordBank === "list") ? question.wordBank : "none";
             const saved = state.answers[question.id] || {};
+            const tokens = (String(question.text).match(/\{(\w+)\}/g) || []).map((t) => t.slice(1, -1));
+
+            // Build the bank word list (list + drag modes). One chip per blank
+            // using its first accepted answer, plus extraWords, then shuffled.
+            let bankWords = null;
+            if (mode !== "none") {
+                bankWords = [];
+                tokens.forEach((tok) => {
+                    const entry = (question.blanks && question.blanks[tok]) || {};
+                    const first = Array.isArray(entry.accept) && entry.accept.length ? entry.accept[0] : "";
+                    bankWords.push(String(first));
+                });
+                (Array.isArray(question.extraWords) ? question.extraWords : []).forEach((w) => bankWords.push(String(w)));
+                bankWords = shuffle(bankWords);
+            }
+
+            if (mode === "drag") { renderFillBlankDrag(question, answered, tokens, bankWords, saved); return; }
+
+            // --- "list": a read-only reference row above the sentence ---
+            if (mode === "list") {
+                const bank = document.createElement("div");
+                bank.className = "fillblank-bank";
+                bank.setAttribute("role", "group");
+                bank.setAttribute("aria-label", "Word bank");
+                const title = document.createElement("span");
+                title.className = "fillblank-bank-title";
+                title.textContent = "Word bank:";
+                bank.appendChild(title);
+                bankWords.forEach((w) => {
+                    const chip = document.createElement("span");
+                    chip.className = "fillblank-chip is-static";
+                    chip.setAttribute("role", "text");
+                    chip.textContent = w;
+                    bank.appendChild(chip);
+                });
+                dom.answerArea.appendChild(bank);
+            }
+
+            // --- typed inputs (both "none" and "list") ---
             const p = document.createElement("p");
             p.className = "fillblank-text";
             const parts = String(question.text).split(/(\{\w+\})/);
@@ -3443,11 +3629,261 @@
         }
 
         /* ------------------------------------------------------------
-           ordering rendering. A vertical list the student reorders with
-           the up/down arrow buttons on each row (keyboard-friendly, no
-           dragging). The items start shuffled (never exactly the correct
-           order when there are more than two). The current arrangement is
-           saved in state.answers as an array of item ids.
+           fillBlank "drag" mode. Chips (word bank) drop into slots that sit
+           where the blanks are in the sentence. Pointer drag, click-to-
+           select, and keyboard (Enter to select a chip, Enter on a slot to
+           place) all supported — mirrors the dragSort conventions. Slots
+           carry data-blank + data-word so readAnswerFromUI reads them the
+           same way as typed inputs.
+           ------------------------------------------------------------ */
+        function renderFillBlankDrag(question, answered, tokens, bankWords, saved) {
+            const chips = bankWords.map((w, i) => ({ id: "fbchip-" + i, word: w }));
+            const inter = {
+                type: "fillBlank",
+                mode: "drag",
+                question: question,
+                tokens: tokens,
+                chips: chips,
+                placement: {},        // token -> chipId
+                selectedChipId: null,
+                locked: answered,
+                dragging: null,
+                slotEls: {}
+            };
+            state.interaction = inter;
+
+            // Rebuild placements from a saved { token: word } answer (Try Again /
+            // refresh): consume one unplaced chip whose word matches each blank.
+            tokens.forEach((tok) => {
+                const want = saved[tok];
+                if (want == null || String(want) === "") return;
+                const chip = chips.find((c) => c.word === String(want) && Object.values(inter.placement).indexOf(c.id) === -1);
+                if (chip) inter.placement[tok] = chip.id;
+            });
+
+            // Instructions.
+            const help = document.createElement("p");
+            help.className = "muted";
+            help.style.margin = "0 0 10px";
+            help.textContent = answered
+                ? "Your placed words are shown in the sentence below."
+                : "Drag a word into a blank, or select a word then select a blank. Click a placed word to send it back to the bank. Keyboard: focus a word, press Enter to pick it up, focus a blank and press Enter to drop.";
+            dom.answerArea.appendChild(help);
+
+            // Word bank row.
+            const bank = document.createElement("div");
+            bank.className = "fillblank-bank";
+            bank.setAttribute("role", "group");
+            bank.setAttribute("aria-label", "Word bank");
+            const title = document.createElement("span");
+            title.className = "fillblank-bank-title";
+            title.textContent = "Word bank:";
+            bank.appendChild(title);
+            const bankItems = document.createElement("span");
+            bankItems.className = "fillblank-bank-items";
+            bank.appendChild(bankItems);
+            inter.bankEl = bankItems;
+            dom.answerArea.appendChild(bank);
+
+            // Sentence with drop slots where the blanks are.
+            const p = document.createElement("p");
+            p.className = "fillblank-text";
+            const parts = String(question.text).split(/(\{\w+\})/);
+            parts.forEach((part) => {
+                const m = part.match(/^\{(\w+)\}$/);
+                if (m) {
+                    const token = m[1];
+                    const slot = document.createElement("span");
+                    slot.className = "fillblank-slot";
+                    slot.setAttribute("data-blank", token);
+                    slot.setAttribute("data-slot", token);
+                    slot.setAttribute("data-word", "");
+                    slot.setAttribute("role", "button");
+                    slot.setAttribute("aria-label", "Blank " + token + ", empty");
+                    slot.tabIndex = answered ? -1 : 0;
+                    if (!answered) {
+                        slot.addEventListener("click", () => onSlotActivate(token));
+                        slot.addEventListener("keydown", (event) => {
+                            if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSlotActivate(token); }
+                        });
+                    }
+                    inter.slotEls[token] = slot;
+                    p.appendChild(slot);
+                } else if (part !== "") {
+                    p.appendChild(document.createTextNode(part));
+                }
+            });
+            dom.answerArea.appendChild(p);
+
+            function chipWord(id) { const c = chips.find((x) => x.id === id); return c ? c.word : ""; }
+
+            function makeChipEl(chip, inSlotToken) {
+                const el = document.createElement(inter.locked ? "span" : "button");
+                el.className = "fillblank-chip drag-item";
+                el.textContent = chip.word;
+                if (inter.locked) return el;
+                el.type = "button";
+                el.dataset.chipId = chip.id;
+                el.tabIndex = 0;
+                el.setAttribute("role", "button");
+                el.setAttribute("aria-pressed", inter.selectedChipId === chip.id ? "true" : "false");
+                if (inter.selectedChipId === chip.id) el.classList.add("selected");
+                el.setAttribute("aria-label", inSlotToken
+                    ? chip.word + " placed in blank " + inSlotToken + ". Click to return it to the bank."
+                    : "Word " + chip.word + ". Press Enter to pick it up, then choose a blank and press Enter to drop.");
+                if (inSlotToken) {
+                    el.addEventListener("click", (event) => { event.stopPropagation(); returnChip(inSlotToken); });
+                } else {
+                    el.addEventListener("click", () => toggleSelect(chip.id));
+                    el.addEventListener("keydown", (event) => onChipKeydown(event, chip.id));
+                }
+                el.addEventListener("pointerdown", (event) => chipPointerDown(event, el, chip, inSlotToken || null));
+                el.addEventListener("pointermove", (event) => chipPointerMove(event, el));
+                el.addEventListener("pointerup", (event) => chipPointerEnd(event, el, chip, inSlotToken || null));
+                el.addEventListener("pointercancel", (event) => chipPointerEnd(event, el, chip, inSlotToken || null));
+                return el;
+            }
+
+            function rebuild() {
+                const placedIds = Object.values(inter.placement);
+                inter.bankEl.replaceChildren();
+                chips.forEach((chip) => {
+                    if (placedIds.indexOf(chip.id) !== -1) return;
+                    inter.bankEl.appendChild(makeChipEl(chip, null));
+                });
+                if (placedIds.length === chips.length && !inter.locked) {
+                    const done = document.createElement("span");
+                    done.className = "muted";
+                    done.textContent = "All words placed.";
+                    inter.bankEl.appendChild(done);
+                }
+                tokens.forEach((tok) => {
+                    const slot = inter.slotEls[tok];
+                    slot.replaceChildren();
+                    const chipId = inter.placement[tok];
+                    if (chipId) {
+                        const chip = chips.find((c) => c.id === chipId);
+                        slot.setAttribute("data-word", chip.word);
+                        slot.classList.add("filled");
+                        slot.setAttribute("aria-label", "Blank " + tok + ", contains " + chip.word);
+                        slot.appendChild(makeChipEl(chip, tok));
+                    } else {
+                        slot.setAttribute("data-word", "");
+                        slot.classList.remove("filled");
+                        slot.setAttribute("aria-label", "Blank " + tok + ", empty");
+                    }
+                    slot.classList.toggle("keyboard-target", inter.selectedChipId != null && !inter.locked);
+                });
+                const ans = {};
+                tokens.forEach((tok) => { const id = inter.placement[tok]; if (id) ans[tok] = chipWord(id); });
+                state.answers[question.id] = ans;
+            }
+
+            function toggleSelect(chipId) {
+                if (inter.locked) return;
+                inter.selectedChipId = inter.selectedChipId === chipId ? null : chipId;
+                rebuild();
+                announce(inter.selectedChipId ? chipWord(chipId) + " selected. Choose a blank to place it." : "Selection cleared.");
+            }
+
+            function onChipKeydown(event, chipId) {
+                if (inter.locked) return;
+                if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleSelect(chipId); }
+                else if (event.key === "Escape") { inter.selectedChipId = null; rebuild(); announce("Selection cleared."); }
+            }
+
+            function onSlotActivate(token) {
+                if (inter.locked) return;
+                if (inter.selectedChipId) { placeChip(inter.selectedChipId, token); }
+                else if (inter.placement[token]) { returnChip(token); }
+            }
+
+            // Place a chip into a slot. If the slot already holds a chip it goes
+            // back to the bank; the chip is removed from any slot it was in.
+            function placeChip(chipId, token) {
+                if (inter.locked) return;
+                Object.keys(inter.placement).forEach((tok) => { if (inter.placement[tok] === chipId) delete inter.placement[tok]; });
+                inter.placement[token] = chipId;
+                inter.selectedChipId = null;
+                playSound("drop"); // sound: word placed
+                rebuild();
+                if (inter.slotEls[token]) inter.slotEls[token].focus({ preventScroll: true });
+                announce(chipWord(chipId) + " placed in blank " + token + ".");
+                saveQuizProgress();
+            }
+
+            function returnChip(token) {
+                if (inter.locked) return;
+                const chipId = inter.placement[token];
+                if (!chipId) return;
+                delete inter.placement[token];
+                inter.selectedChipId = null;
+                rebuild();
+                announce(chipWord(chipId) + " returned to the bank.");
+                saveQuizProgress();
+            }
+
+            // --- pointer drag (float the chip, drop on a slot) ---
+            function chipPointerDown(event, el, chip, fromToken) {
+                if (inter.locked || inter.dragging) return;
+                if (event.button !== undefined && event.button !== 0) return;
+                event.preventDefault();
+                const rect = el.getBoundingClientRect();
+                inter.dragging = {
+                    pointerId: event.pointerId,
+                    chipId: chip.id,
+                    fromToken: fromToken,
+                    offsetX: event.clientX - rect.left,
+                    offsetY: event.clientY - rect.top,
+                    moved: false
+                };
+                el.setPointerCapture(event.pointerId);
+                el.style.width = rect.width + "px";
+                el.style.left = rect.left + "px";
+                el.style.top = rect.top + "px";
+            }
+
+            function chipPointerMove(event, el) {
+                if (!inter.dragging || event.pointerId !== inter.dragging.pointerId) return;
+                if (!inter.dragging.moved) { inter.dragging.moved = true; el.classList.add("dragging"); }
+                el.style.left = (event.clientX - inter.dragging.offsetX) + "px";
+                el.style.top = (event.clientY - inter.dragging.offsetY) + "px";
+                const target = document.elementFromPoint(event.clientX, event.clientY);
+                const slot = target && target.closest("[data-slot]");
+                p.querySelectorAll(".fillblank-slot.drag-target").forEach((n) => n.classList.remove("drag-target"));
+                if (slot) slot.classList.add("drag-target");
+            }
+
+            function chipPointerEnd(event, el, chip, fromToken) {
+                if (!inter.dragging || event.pointerId !== inter.dragging.pointerId) return;
+                const wasDrag = inter.dragging.moved;
+                const target = document.elementFromPoint(event.clientX, event.clientY);
+                const slot = target && target.closest("[data-slot]");
+                p.querySelectorAll(".fillblank-slot.drag-target").forEach((n) => n.classList.remove("drag-target"));
+                el.classList.remove("dragging");
+                el.style.left = ""; el.style.top = ""; el.style.width = "";
+                inter.dragging = null;
+                if (!wasDrag) return; // treated as a click by the click handler
+                if (slot) {
+                    placeChip(chip.id, slot.getAttribute("data-slot"));
+                } else if (fromToken) {
+                    returnChip(fromToken);
+                } else {
+                    rebuild(); // rebounds into the bank
+                    announce(chip.word + " returned to the bank.");
+                }
+            }
+
+            rebuild();
+        }
+
+        /* ------------------------------------------------------------
+           ordering rendering. A vertical list the student reorders by
+           dragging a block anywhere (pointer) or by focusing a block and
+           pressing ArrowUp / ArrowDown (keyboard). No arrow buttons. The
+           items start shuffled (never exactly the correct order when there
+           are more than two). The current arrangement is saved in
+           state.answers as an array of item ids.
            ------------------------------------------------------------ */
         function renderOrdering(question, answered) {
             const allIds = question.items.map((it) => it.id);
@@ -3463,64 +3899,151 @@
                     }
                 }
             }
-            state.interaction = { type: "ordering", order: order.slice(), locked: answered };
+            state.interaction = { type: "ordering", order: order.slice(), locked: answered, dragging: null };
             state.answers[question.id] = order.slice(); // keep the same start on refresh
 
             const list = document.createElement("div");
             list.className = "ordering-list";
+            list.setAttribute("role", "list");
 
-            function move(from, to) {
-                if (state.interaction.locked) return;
+            // Same node object is reused across reorders so pointer capture
+            // survives a live reflow (we re-append nodes, never recreate the
+            // one being dragged).
+            const nodes = {};
+
+            const gripSvg = "<svg viewBox='0 0 16 16' width='16' height='16' aria-hidden='true' focusable='false'>" +
+                "<circle cx='5' cy='3' r='1.4'/><circle cx='11' cy='3' r='1.4'/>" +
+                "<circle cx='5' cy='8' r='1.4'/><circle cx='11' cy='8' r='1.4'/>" +
+                "<circle cx='5' cy='13' r='1.4'/><circle cx='11' cy='13' r='1.4'/></svg>";
+
+            function labelFor(id) {
+                const item = question.items.find((it) => it.id === id);
+                return item ? item.label : id;
+            }
+
+            function buildNode(id) {
+                const row = document.createElement("div");
+                row.className = "ordering-row";
+                row.dataset.itemId = id;
+                row.setAttribute("role", "listitem");
+                row.tabIndex = answered ? -1 : 0;
+
+                const grip = document.createElement("span");
+                grip.className = "ordering-grip";
+                grip.innerHTML = gripSvg; // trusted inline icon
+
+                const posBadge = document.createElement("span");
+                posBadge.className = "ordering-position";
+
+                const lab = document.createElement("span");
+                lab.className = "ordering-label";
+                lab.textContent = labelFor(id);
+
+                row.append(grip, posBadge, lab);
+
+                if (!answered) {
+                    row.addEventListener("keydown", (event) => onOrderKeydown(event, id));
+                    row.addEventListener("pointerdown", (event) => onOrderPointerDown(event, id));
+                    row.addEventListener("pointermove", (event) => onOrderPointerMove(event, id));
+                    row.addEventListener("pointerup", (event) => onOrderPointerEnd(event, id));
+                    row.addEventListener("pointercancel", (event) => onOrderPointerEnd(event, id));
+                }
+                return row;
+            }
+
+            // Re-append nodes in the working order and refresh each block's
+            // position number and aria-label.
+            function rebuild() {
+                const total = state.interaction.order.length;
+                state.interaction.order.forEach((id, pos) => {
+                    let node = nodes[id];
+                    if (!node) { node = nodes[id] = buildNode(id); }
+                    node.querySelector(".ordering-position").textContent = String(pos + 1);
+                    node.setAttribute("aria-label",
+                        labelFor(id) + " — position " + (pos + 1) + " of " + total + ", use arrow keys to move");
+                    list.appendChild(node); // appendChild moves an existing node
+                });
+            }
+
+            function moveTo(id, toIndex) {
                 const arr = state.interaction.order;
-                if (to < 0 || to >= arr.length) return;
-                const tmp = arr[from]; arr[from] = arr[to]; arr[to] = tmp;
+                const from = arr.indexOf(id);
+                if (from === -1 || toIndex < 0 || toIndex >= arr.length || toIndex === from) return false;
+                arr.splice(from, 1);
+                arr.splice(toIndex, 0, id);
                 state.answers[question.id] = arr.slice();
+                return true;
+            }
+
+            function onOrderKeydown(event, id) {
+                if (state.interaction.locked) return;
+                if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+                event.preventDefault();
+                const from = state.interaction.order.indexOf(id);
+                const to = event.key === "ArrowUp" ? from - 1 : from + 1;
+                if (!moveTo(id, to)) return;
                 playSound("drop"); // sound: item moved
                 rebuild();
+                nodes[id].focus({ preventScroll: true }); // keep focus on the moved block
+                announce(labelFor(id) + " moved to position " + (to + 1) + " of " + state.interaction.order.length + ".");
                 saveQuizProgress();
             }
 
-            function rebuild() {
-                list.replaceChildren();
-                state.interaction.order.forEach((id, pos) => {
-                    const item = question.items.find((it) => it.id === id);
-                    const row = document.createElement("div");
-                    row.className = "ordering-row";
+            // --- pointer drag: grab a block anywhere, list reflows live ---
+            function onOrderPointerDown(event, id) {
+                const inter = state.interaction;
+                if (inter.locked || inter.dragging) return;
+                if (event.button !== undefined && event.button !== 0) return;
+                event.preventDefault();
+                const node = nodes[id];
+                node.setPointerCapture(event.pointerId);
+                node.classList.add("dragging");
+                inter.dragging = { pointerId: event.pointerId, id: id };
+                applyDragOffset(node, event.clientY);
+            }
 
-                    const posBadge = document.createElement("span");
-                    posBadge.className = "ordering-position";
-                    posBadge.textContent = String(pos + 1);
+            // Centre the lifted block under the pointer within its current slot.
+            function applyDragOffset(node, clientY) {
+                const rect = node.getBoundingClientRect();
+                const dy = clientY - (rect.top + rect.height / 2);
+                node.style.transform = "translateY(" + dy + "px) scale(1.02)";
+            }
 
-                    const lab = document.createElement("span");
-                    lab.className = "ordering-label";
-                    lab.textContent = item ? item.label : id;
-
-                    const arrows = document.createElement("span");
-                    arrows.className = "ordering-arrows";
-
-                    const up = document.createElement("button");
-                    up.type = "button";
-                    up.className = "ordering-arrow";
-                    up.textContent = "▲";
-                    up.setAttribute("aria-label", "Move " + (item ? item.label : id) + " up");
-                    up.disabled = answered || pos === 0;
-                    up.addEventListener("click", () => move(pos, pos - 1));
-
-                    const down = document.createElement("button");
-                    down.type = "button";
-                    down.className = "ordering-arrow";
-                    down.textContent = "▼";
-                    down.setAttribute("aria-label", "Move " + (item ? item.label : id) + " down");
-                    down.disabled = answered || pos === state.interaction.order.length - 1;
-                    down.addEventListener("click", () => move(pos, pos + 1));
-
-                    arrows.appendChild(up);
-                    arrows.appendChild(down);
-                    row.appendChild(posBadge);
-                    row.appendChild(lab);
-                    row.appendChild(arrows);
-                    list.appendChild(row);
+            function onOrderPointerMove(event, id) {
+                const inter = state.interaction;
+                if (!inter.dragging || event.pointerId !== inter.dragging.pointerId) return;
+                event.preventDefault();
+                const node = nodes[id];
+                // Desired index = how many other blocks have their midpoint above
+                // the pointer. As the dragged block's centre crosses a sibling,
+                // the sibling shifts and we re-render the working order.
+                const y = event.clientY;
+                let desired = 0;
+                inter.order.forEach((otherId) => {
+                    if (otherId === id) return;
+                    const r = nodes[otherId].getBoundingClientRect();
+                    if (y > r.top + r.height / 2) desired++;
                 });
+                const curIdx = inter.order.indexOf(id);
+                if (desired !== curIdx) {
+                    moveTo(id, desired);
+                    rebuild();
+                }
+                applyDragOffset(node, y); // follow the pointer after any reflow
+            }
+
+            function onOrderPointerEnd(event, id) {
+                const inter = state.interaction;
+                if (!inter.dragging || event.pointerId !== inter.dragging.pointerId) return;
+                const node = nodes[id];
+                node.classList.remove("dragging");
+                node.style.transform = "";
+                inter.dragging = null;
+                playSound("drop"); // sound: item dropped
+                rebuild();
+                node.focus({ preventScroll: true });
+                announce(labelFor(id) + " dropped at position " + (inter.order.indexOf(id) + 1) + " of " + inter.order.length + ".");
+                saveQuizProgress();
             }
 
             rebuild();
@@ -4166,9 +4689,14 @@
                     return picked ? (picked.value === "true") : null;
                 }
                 case "fillBlank": {
+                    // Typed blanks are <input data-blank>; drag-mode blanks are
+                    // slots carrying data-blank + data-word (the placed word).
                     const values = {};
-                    dom.answerArea.querySelectorAll("input[data-blank]").forEach((el) => {
-                        values[el.getAttribute("data-blank")] = el.value.trim();
+                    dom.answerArea.querySelectorAll("[data-blank]").forEach((el) => {
+                        const v = el.tagName === "INPUT"
+                            ? el.value.trim()
+                            : (el.getAttribute("data-word") || "").trim();
+                        values[el.getAttribute("data-blank")] = v;
                     });
                     return values;
                 }

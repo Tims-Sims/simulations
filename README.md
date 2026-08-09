@@ -133,8 +133,8 @@ Every question also supports an optional `hint` and an optional `image` (see "Im
 | **dragSort** (a.k.a. sorting) | Drags items into bins (or clicks item then bin, or uses the keyboard) | `items` (`id`, `label`, `icon`, `correctBin`), `bins` (`id`, `label`, `icon`, `description`) |
 | **matching** | Clicks a left card, then its matching right card | `pairs` (array of `{ left, right }`) |
 | **trueFalse** | Picks True or False | `correctAnswer`, optional `feedbackCorrect`/`feedbackWrong` |
-| **fillBlank** | Types answers into inline blanks within a sentence | `text` (with `{tokens}`), `blanks` (per-token `accept` list, optional `caseSensitive`) |
-| **ordering** | Reorders a shuffled list into the correct sequence using up/down arrows | `items` (`id`, `label`), `correctOrder` (array of item ids) |
+| **fillBlank** | Fills inline blanks within a sentence — typed, typed with a word bank shown, or drag-the-word-into-the-blank | `text` (with `{tokens}`), `blanks` (per-token `accept` list, optional `caseSensitive`), optional `wordBank` (`"none"`/`"list"`/`"drag"`), optional `extraWords` decoys |
+| **ordering** | Reorders a shuffled list into the correct sequence by grabbing and dragging blocks (keyboard: arrow keys on a focused block) | `items` (`id`, `label`), `correctOrder` (array of item ids) |
 | **imageHotspot** | Clicks the correct region(s) of a picture | `image`, `imageAlt`, `hotspots` (`id`, `label`, `x`, `y`, `w`, `h`, `correct`), optional `multiSelect` |
 
 ## Images in questions
@@ -177,7 +177,7 @@ Recommended workflow when building a sim:
 
 ## Accessibility
 
-- Fully keyboard-playable: Tab and Enter/Space work throughout, including drag-and-drop questions (Enter to pick up, arrow keys to target a bin or the tray, Enter to drop) and ordering questions (arrow buttons to move items up/down).
+- Fully keyboard-playable: Tab and Enter/Space work throughout, including drag-and-drop questions (Enter to pick up, arrow keys to target a bin or the tray, Enter to drop) and ordering questions (ArrowUp/ArrowDown on a focused block moves it); drag-mode fill-in-the-blank also works by clicking or pressing Enter on a word chip, then on a blank.
 - Feedback and status changes are announced to screen readers via a live region.
 - `imageAlt` is required on any question with an image, so screen reader users get a description of the picture.
 
