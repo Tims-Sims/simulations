@@ -1062,6 +1062,153 @@
             flex-wrap: wrap;
         }
 
+        /* --- Per-question picture (all question types) --- */
+        .question-image {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 16px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+        }
+        /* When the picture is an inline SVG we wrap it so it centres and
+           scales the same way a normal image would. */
+        .question-image-wrap {
+            display: block;
+            margin: 0 auto 16px;
+            max-width: 100%;
+            text-align: center;
+        }
+        .question-image-wrap svg {
+            max-width: 100%;
+            height: auto;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        /* --- fillBlank (fill in the blanks) --- */
+        .fillblank-text {
+            line-height: 2.2;
+            font-size: 1.05rem;
+            color: var(--text-soft);
+        }
+        .fillblank-input {
+            display: inline-block;
+            width: 9ch;
+            min-width: 60px;
+            padding: 4px 10px;
+            margin: 0 3px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font: inherit;
+            text-align: center;
+        }
+
+        /* --- ordering (put in order with arrows) --- */
+        .ordering-list {
+            display: grid;
+            gap: 10px;
+        }
+        .ordering-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+        }
+        .ordering-row .ordering-label {
+            flex: 1;
+            color: var(--text-soft);
+            line-height: 1.5;
+        }
+        .ordering-position {
+            flex: none;
+            min-width: 26px;
+            height: 26px;
+            display: inline-grid;
+            place-items: center;
+            border-radius: 999px;
+            background: var(--surface-2);
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+        .ordering-arrows {
+            display: inline-flex;
+            gap: 6px;
+        }
+        .ordering-arrow {
+            width: 34px;
+            height: 34px;
+            display: inline-grid;
+            place-items: center;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .ordering-arrow:hover:not(:disabled) {
+            border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+        }
+        .ordering-arrow:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        /* --- imageHotspot (click the right region of a picture) --- */
+        .hotspot-stage {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+            line-height: 0;
+        }
+        .hotspot-stage img,
+        .hotspot-stage svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+        }
+        .hotspot {
+            position: absolute;
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            /* Always faintly visible so students know a region is clickable. */
+            border: 1px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .hotspot:hover:not(:disabled),
+        .hotspot:focus-visible {
+            border: 2px dashed var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+            outline: none;
+        }
+        .hotspot.selected {
+            border: 2px solid var(--accent);
+            background: color-mix(in srgb, var(--accent) 18%, transparent);
+        }
+        .hotspot.result-correct {
+            border: 2px solid var(--success);
+            background: color-mix(in srgb, var(--success) 18%, transparent);
+        }
+        .hotspot.result-wrong {
+            border: 2px solid var(--danger);
+            background: color-mix(in srgb, var(--danger) 16%, transparent);
+        }
+
         /* summary screen */
         .summary-card {
             width: min(100%, 960px);
@@ -1407,7 +1554,7 @@
             templateVersion: "2.2.1",      // do not change — identifies which template base this sim was built from
             TEST_MODE: false,              // true = builder testing mode: answers shown, free navigation, progress not saved. ALWAYS set back to false before giving to students!
             shuffleQuestions: false,       // true = questions appear in random order each run
-            shuffleChoices: false,         // true = answer choices shuffled (multiple-choice/true-false ordering etc where applicable)
+            shuffleChoices: false,         // true = MULTIPLE-CHOICE answer choices shuffled each run (only multiple choice; true/false stays True-then-False, and ordering shuffles on its own regardless of this)
             attemptsPerQuestion: 1,        // 1, 2, 3 ... or "unlimited" — wrong answers below the limit show a Try Again button
 
             /* ---- Question bank settings (see the QUESTION BANK section below) ---- */
@@ -1503,7 +1650,8 @@
              id          - unique string, used to store answers/results.
              type        - one of: "multipleChoice", "exactText",
                            "exactNumber", "keywords", "shortAnswer",
-                           "dragSort", "matching".
+                           "dragSort", "matching", "trueFalse",
+                           "fillBlank", "ordering", "imageHotspot".
              title       - heading shown above the prompt.
              prompt      - the question text (plain text; rendered safely).
              hint        - shown when the student clicks the Hint button.
@@ -1555,6 +1703,59 @@
              screen. Students click a left card, then a right card, to
              join them. Graded on submit; every left card must be
              paired first.
+
+           trueFalse:
+             correctAnswer   - true or false.
+             feedbackCorrect - (optional) message shown for a right answer.
+             feedbackWrong   - (optional) message shown for a wrong answer.
+             Two big buttons (True / False) are shown; the student picks
+             one then presses Submit. shuffleChoices never reorders these
+             — True is always first, False second.
+
+           fillBlank:
+             text   - a sentence with {tokens} where the blanks go, e.g.
+                      "The {answer1} orbits the {answer2}."
+             blanks - an object with one entry per {token}. Each entry has
+                      accept: [list of accepted answers] and an optional
+                      caseSensitive: true/false (default false). Example:
+                      blanks: { answer1: { accept: ["moon"] },
+                                answer2: { accept: ["earth", "the earth"] } }
+             Each {token} becomes an inline text box. All blanks right =
+             correct, some = partial, none = wrong.
+
+           ordering:
+             items        - array of { id, label } objects.
+             correctOrder - array of item ids in the right order.
+             The items appear shuffled; the student reorders them with the
+             up/down arrow buttons next to each row. Exact order = correct,
+             at least half the items in the right spot = partial, else wrong.
+
+           imageHotspot:
+             image      - the picture to click on (same three formats as the
+                          "image" field below — data URI, inline SVG, or file
+                          path). See the picture guide below.
+             imageAlt   - required description of the picture (screen readers).
+             hotspots   - array of clickable regions, each:
+                          { id, label, x, y, w, h, correct: true|false }.
+                          x, y, w, h are PERCENTAGES (0-100) of the picture
+                          box: x/y = top-left corner, w/h = width/height.
+             multiSelect - (optional) false (default) = picking one region
+                          clears the others; true = each click toggles a region.
+             Selecting all correct regions and no wrong ones = correct;
+             some correct and no wrong (or a mix) = partial; none = wrong.
+
+           ADDING A PICTURE TO ANY QUESTION
+           Every question can have:  image: "...", imageAlt: "what the picture shows",
+           Three ways to fill image:
+           1. Embedded file (recommended, works offline in this one file):
+              image: "data:image/png;base64,PASTE-BASE64-HERE"
+              (see README "Images in questions" for the copy-paste commands)
+           2. Inline SVG you drew/generated:  image: "<svg viewBox='0 0 100 60'>...</svg>"
+              (WARNING: an inline SVG is injected as-is, so only paste SVG you
+               trust — your own drawings or ones you generated, never random
+               SVG from the internet.)
+           3. A file next to this HTML:  image: "pictures/diagram.png"
+           imageAlt is required — it is what screen readers read out.
            ============================================================ */
         const QUESTIONS = [
             // --- DEMO 1: multipleChoice ------------------------------------
@@ -1657,6 +1858,75 @@
                     { left: "Japan", right: "Tokyo" },
                     { left: "Canada", right: "Ottawa" },
                     { left: "Australia", right: "Canberra" }
+                ]
+            },
+            // --- DEMO 8: trueFalse -----------------------------------------
+            // correctAnswer (true/false) + optional feedbackCorrect/feedbackWrong.
+            {
+                id: "demo-truefalse",
+                type: "trueFalse",
+                title: "True or False Demo",
+                prompt: "A triangle has three sides.",
+                hint: "Think about the shape's name: 'tri' means three.",
+                explanation: "A triangle always has exactly three sides.",
+                correctAnswer: true,
+                feedbackCorrect: "Correct — 'tri' means three, so a triangle has three sides.",
+                feedbackWrong: "Not quite — a triangle does have three sides."
+            },
+            // --- DEMO 9: fillBlank -----------------------------------------
+            // text with {tokens} + a blanks entry (accept list) for each token.
+            {
+                id: "demo-fillblank",
+                type: "fillBlank",
+                title: "Fill in the Blanks Demo",
+                prompt: "Complete the sentence about our solar system.",
+                hint: "The Moon goes around the Earth.",
+                explanation: "The Moon orbits the Earth, and the Earth orbits the Sun.",
+                text: "The {answer1} orbits the {answer2}.",
+                blanks: {
+                    answer1: { accept: ["moon", "the moon"], caseSensitive: false },
+                    answer2: { accept: ["earth", "the earth"] }
+                }
+            },
+            // --- DEMO 10: ordering -----------------------------------------
+            // items[{id,label}] + correctOrder[ids]. Reordered with arrow buttons.
+            {
+                id: "demo-ordering",
+                type: "ordering",
+                title: "Put in Order Demo",
+                prompt: "Put these steps for making tea in the correct order, first at the top.",
+                hint: "You cannot pour water before it has boiled.",
+                explanation: "Boil the water, pour it over the tea bag, let it steep, then add milk.",
+                items: [
+                    { id: "step-boil", label: "Boil the water" },
+                    { id: "step-pour", label: "Pour water over the tea bag" },
+                    { id: "step-steep", label: "Let the tea steep" },
+                    { id: "step-milk", label: "Add milk and stir" }
+                ],
+                correctOrder: ["step-boil", "step-pour", "step-steep", "step-milk"]
+            },
+            // --- DEMO 11: imageHotspot -------------------------------------
+            // image (here a small inline SVG) + hotspots[{id,label,x,y,w,h,correct}].
+            // x/y/w/h are PERCENTAGES (0-100) of the picture box.
+            {
+                id: "demo-hotspot",
+                type: "imageHotspot",
+                title: "Click the Picture Demo",
+                prompt: "Three shapes are drawn below. Click the triangle.",
+                hint: "A triangle is the shape with three straight sides and a pointed top.",
+                explanation: "The triangle is the pointed shape on the right.",
+                image: "<svg viewBox='0 0 300 120' xmlns='http://www.w3.org/2000/svg'>" +
+                    "<rect x='0' y='0' width='300' height='120' fill='#eef3ff'/>" +
+                    "<rect x='20' y='30' width='60' height='60' fill='#7dd3fc'/>" +
+                    "<circle cx='150' cy='60' r='34' fill='#fbbf24'/>" +
+                    "<polygon points='250,30 285,90 215,90' fill='#34d399'/>" +
+                    "</svg>",
+                imageAlt: "A blue square on the left, a yellow circle in the middle, and a green triangle on the right.",
+                multiSelect: false,
+                hotspots: [
+                    { id: "hs-square", label: "Square", x: 4, y: 22, w: 24, h: 56, correct: false },
+                    { id: "hs-circle", label: "Circle", x: 38, y: 18, w: 24, h: 64, correct: false },
+                    { id: "hs-triangle", label: "Triangle", x: 69, y: 22, w: 25, h: 56, correct: true }
                 ]
             }
         ];
@@ -1917,7 +2187,11 @@
             keywords: "keywords",
             shortAnswer: "short answer",
             dragSort: "sorting",
-            matching: "matching"
+            matching: "matching",
+            trueFalse: "true / false",
+            fillBlank: "fill in the blanks",
+            ordering: "put in order",
+            imageHotspot: "click the picture"
         };
 
         function isPlainObject(v) { return v != null && typeof v === "object" && !Array.isArray(v); }
@@ -1949,6 +2223,17 @@
                 if (!TYPE_LABELS[q.type]) {
                     errors.push(where + ": unknown type '" + q.type + "'. Use one of: " + Object.keys(TYPE_LABELS).join(", ") + ".");
                     return; // cannot check type-specific fields without a known type
+                }
+
+                // Shared: any question may carry a picture. If it does, an
+                // imageAlt description is required (screen readers read it out).
+                if (q.image != null) {
+                    if (!isNonEmptyString(q.image)) {
+                        errors.push(at + ": 'image' must be text (a data URI, an inline <svg ...> string, or a file path).");
+                    }
+                    if (!isNonEmptyString(q.imageAlt)) {
+                        errors.push(at + ": has an 'image' but no 'imageAlt' — add a short description of the picture so screen readers can read it out.");
+                    }
                 }
 
                 switch (q.type) {
@@ -2051,6 +2336,109 @@
                                 }
                             });
                         }
+                        break;
+                    }
+                    case "trueFalse": {
+                        if (typeof q.correctAnswer !== "boolean") {
+                            errors.push(at + ": 'correctAnswer' must be true or false.");
+                        }
+                        if (q.feedbackCorrect != null && typeof q.feedbackCorrect !== "string") errors.push(at + ": 'feedbackCorrect' must be text.");
+                        if (q.feedbackWrong != null && typeof q.feedbackWrong !== "string") errors.push(at + ": 'feedbackWrong' must be text.");
+                        break;
+                    }
+                    case "fillBlank": {
+                        if (!isNonEmptyString(q.text)) {
+                            errors.push(at + ": needs a 'text' sentence with at least one {blank}.");
+                            break;
+                        }
+                        const tokens = (q.text.match(/\{(\w+)\}/g) || []).map((t) => t.slice(1, -1));
+                        if (tokens.length === 0) {
+                            errors.push(at + ": the 'text' has no {blanks} — write at least one, e.g. \"The {answer1} orbits the {answer2}.\"");
+                        }
+                        if (!isPlainObject(q.blanks)) {
+                            errors.push(at + ": needs a 'blanks' object with one entry per {blank} in the text.");
+                            break;
+                        }
+                        // every {token} in the text has a blanks entry
+                        tokens.forEach((tok) => {
+                            const entry = q.blanks[tok];
+                            if (!isPlainObject(entry)) {
+                                errors.push(at + ": the text uses {" + tok + "} but 'blanks' has no entry named '" + tok + "'.");
+                            } else if (!Array.isArray(entry.accept) || entry.accept.length === 0 || !entry.accept.every(isNonEmptyString)) {
+                                errors.push(at + ": blank '" + tok + "' needs a non-empty 'accept' list of accepted answers.");
+                            } else if (entry.caseSensitive != null && typeof entry.caseSensitive !== "boolean") {
+                                errors.push(at + ": blank '" + tok + "' has a 'caseSensitive' that must be true or false.");
+                            }
+                        });
+                        // every blanks entry is used by a {token} in the text
+                        Object.keys(q.blanks).forEach((key) => {
+                            if (tokens.indexOf(key) === -1) {
+                                errors.push(at + ": 'blanks' has an entry '" + key + "' but the text has no {" + key + "} — remove it or add the blank.");
+                            }
+                        });
+                        break;
+                    }
+                    case "ordering": {
+                        const itemIds = {};
+                        if (!Array.isArray(q.items) || q.items.length === 0) {
+                            errors.push(at + ": needs a non-empty 'items' list.");
+                        } else {
+                            q.items.forEach((item, ii) => {
+                                if (!isPlainObject(item) || !isNonEmptyString(item.id)) { errors.push(at + ": item " + (ii + 1) + " needs an 'id'."); return; }
+                                if (itemIds[item.id]) errors.push(at + ": item id '" + item.id + "' is used more than once.");
+                                else itemIds[item.id] = true;
+                                if (!isNonEmptyString(item.label)) errors.push(at + ": item '" + item.id + "' needs a 'label'.");
+                            });
+                        }
+                        if (!Array.isArray(q.correctOrder) || q.correctOrder.length === 0) {
+                            errors.push(at + ": needs a 'correctOrder' list of item ids in the right order.");
+                        } else if (Object.keys(itemIds).length > 0) {
+                            const seen = {};
+                            q.correctOrder.forEach((id) => {
+                                if (seen[id]) errors.push(at + ": 'correctOrder' lists '" + id + "' more than once.");
+                                else seen[id] = true;
+                                if (!itemIds[id]) errors.push(at + ": 'correctOrder' has '" + id + "' but no item has that id.");
+                            });
+                            Object.keys(itemIds).forEach((id) => {
+                                if (!seen[id]) errors.push(at + ": item '" + id + "' is missing from 'correctOrder'.");
+                            });
+                        }
+                        break;
+                    }
+                    case "imageHotspot": {
+                        if (!isNonEmptyString(q.image)) {
+                            errors.push(at + ": needs an 'image' (a data URI, an inline <svg ...> string, or a file path).");
+                        }
+                        if (!isNonEmptyString(q.imageAlt)) {
+                            errors.push(at + ": needs an 'imageAlt' description of the picture.");
+                        }
+                        const hotIds = {};
+                        if (!Array.isArray(q.hotspots) || q.hotspots.length === 0) {
+                            errors.push(at + ": needs a non-empty 'hotspots' list.");
+                        } else {
+                            let anyCorrect = false;
+                            q.hotspots.forEach((hs, hi) => {
+                                if (!isPlainObject(hs) || !isNonEmptyString(hs.id)) { errors.push(at + ": hotspot " + (hi + 1) + " needs an 'id'."); return; }
+                                if (hotIds[hs.id]) errors.push(at + ": hotspot id '" + hs.id + "' is used more than once.");
+                                else hotIds[hs.id] = true;
+                                if (typeof hs.correct !== "boolean") errors.push(at + ": hotspot '" + hs.id + "' needs 'correct' set to true or false.");
+                                if (hs.correct === true) anyCorrect = true;
+                                ["x", "y", "w", "h"].forEach((k) => {
+                                    const v = hs[k];
+                                    if (typeof v !== "number" || !Number.isFinite(v) || v < 0 || v > 100) {
+                                        errors.push(at + ": hotspot '" + hs.id + "' needs '" + k + "' as a number from 0 to 100 (a percentage).");
+                                    }
+                                });
+                                if (typeof hs.x === "number" && typeof hs.w === "number" && hs.x + hs.w > 100) {
+                                    errors.push(at + ": hotspot '" + hs.id + "' runs off the right edge (x + w must be 100 or less).");
+                                }
+                                if (typeof hs.y === "number" && typeof hs.h === "number" && hs.y + hs.h > 100) {
+                                    errors.push(at + ": hotspot '" + hs.id + "' runs off the bottom edge (y + h must be 100 or less).");
+                                }
+                            });
+                            if (!anyCorrect) errors.push(at + ": at least one hotspot must have 'correct: true'.");
+                        }
+                        if (q.multiSelect != null && typeof q.multiSelect !== "boolean") errors.push(at + ": 'multiSelect' must be true or false.");
                         break;
                     }
                 }
@@ -2728,6 +3116,10 @@
             // Submit vs Next visibility is handled by updateNavigationButtons().
             dom.answerArea.replaceChildren();
 
+            // Optional picture, shown between the prompt and the answer area.
+            // (imageHotspot draws its own picture, so skip the shared one there.)
+            if (question.type !== "imageHotspot") renderQuestionImage(question);
+
             switch (question.type) {
                 case "multipleChoice":
                     renderMultipleChoice(question, answered);
@@ -2745,6 +3137,18 @@
                     break;
                 case "matching":
                     renderMatching(question, answered);
+                    break;
+                case "trueFalse":
+                    renderTrueFalse(question, answered);
+                    break;
+                case "fillBlank":
+                    renderFillBlank(question, answered);
+                    break;
+                case "ordering":
+                    renderOrdering(question, answered);
+                    break;
+                case "imageHotspot":
+                    renderImageHotspot(question, answered);
                     break;
                 default: {
                     const warning = document.createElement("p");
@@ -2875,6 +3279,263 @@
 
             dom.answerArea.appendChild(textarea);
             dom.answerArea.appendChild(attachCharCounter(textarea, limit));
+        }
+
+        /* ------------------------------------------------------------
+           Per-question picture (all question types).
+           renderQuestionImage() adds the optional picture between the
+           prompt and the answer inputs. buildImageElement() turns the
+           image string into a DOM node: an inline SVG string is injected
+           as-is (author-trusted only — see the picture guide), anything
+           else becomes an <img src> (data URI or file path).
+           ------------------------------------------------------------ */
+        function buildImageElement(imageStr) {
+            if (typeof imageStr !== "string" || imageStr.trim() === "") return null;
+            if (imageStr.trim().slice(0, 4).toLowerCase() === "<svg") {
+                const holder = document.createElement("span");
+                holder.innerHTML = imageStr; // trusted, author-supplied SVG only
+                return holder.querySelector("svg");
+            }
+            const img = document.createElement("img");
+            img.src = imageStr;
+            return img;
+        }
+
+        function renderQuestionImage(question) {
+            if (!question.image) return;
+            const node = buildImageElement(question.image);
+            if (!node) return;
+            if (node.tagName && node.tagName.toLowerCase() === "svg") {
+                node.setAttribute("role", "img");
+                if (question.imageAlt) node.setAttribute("aria-label", question.imageAlt);
+                const wrap = document.createElement("div");
+                wrap.className = "question-image-wrap";
+                wrap.appendChild(node);
+                dom.answerArea.appendChild(wrap);
+            } else {
+                node.className = "question-image";
+                node.alt = question.imageAlt || "";
+                dom.answerArea.appendChild(node);
+            }
+        }
+
+        /* ------------------------------------------------------------
+           trueFalse rendering. Two big radio-style buttons (True / False),
+           picked like multiple choice then Submit. Order is ALWAYS True
+           then False — shuffleChoices never touches these.
+           ------------------------------------------------------------ */
+        function renderTrueFalse(question, answered) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "choice-grid";
+            const saved = state.answers[question.id]; // boolean or undefined
+            [{ v: true, label: "True" }, { v: false, label: "False" }].forEach((opt) => {
+                const label = document.createElement("label");
+                label.className = "choice-card";
+                const input = document.createElement("input");
+                input.type = "radio";
+                input.name = "question-" + question.id;
+                input.value = opt.v ? "true" : "false";
+                input.checked = saved === opt.v;
+                input.disabled = answered;
+                const span = document.createElement("div");
+                span.className = "choice-text";
+                span.textContent = opt.label;
+                label.appendChild(input);
+                label.appendChild(span);
+                wrapper.appendChild(label);
+            });
+            dom.answerArea.appendChild(wrapper);
+        }
+
+        /* ------------------------------------------------------------
+           fillBlank rendering. Splits the sentence on its {tokens} and
+           drops an inline text box where each blank is. Typed answers are
+           kept in state.answers as { token: value }.
+           ------------------------------------------------------------ */
+        function renderFillBlank(question, answered) {
+            const saved = state.answers[question.id] || {};
+            const p = document.createElement("p");
+            p.className = "fillblank-text";
+            const parts = String(question.text).split(/(\{\w+\})/);
+            parts.forEach((part) => {
+                const m = part.match(/^\{(\w+)\}$/);
+                if (m) {
+                    const token = m[1];
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.className = "fillblank-input";
+                    input.setAttribute("data-blank", token);
+                    input.setAttribute("aria-label", "Blank: " + token);
+                    input.autocomplete = "off";
+                    input.maxLength = maxLengthFor(question);
+                    input.value = saved[token] != null ? String(saved[token]) : "";
+                    input.disabled = answered;
+                    input.addEventListener("input", () => playSound("typing")); // sound: typing tick
+                    p.appendChild(input);
+                } else if (part !== "") {
+                    p.appendChild(document.createTextNode(part));
+                }
+            });
+            dom.answerArea.appendChild(p);
+        }
+
+        /* ------------------------------------------------------------
+           ordering rendering. A vertical list the student reorders with
+           the up/down arrow buttons on each row (keyboard-friendly, no
+           dragging). The items start shuffled (never exactly the correct
+           order when there are more than two). The current arrangement is
+           saved in state.answers as an array of item ids.
+           ------------------------------------------------------------ */
+        function renderOrdering(question, answered) {
+            const allIds = question.items.map((it) => it.id);
+            let order = state.answers[question.id];
+            const validSaved = Array.isArray(order) && order.length === allIds.length &&
+                order.slice().sort().join("|") === allIds.slice().sort().join("|");
+            if (!validSaved) {
+                order = shuffle(allIds);
+                if (allIds.length > 2) {
+                    let guard = 0;
+                    while (order.join("|") === question.correctOrder.join("|") && guard++ < 20) {
+                        order = shuffle(order);
+                    }
+                }
+            }
+            state.interaction = { type: "ordering", order: order.slice(), locked: answered };
+            state.answers[question.id] = order.slice(); // keep the same start on refresh
+
+            const list = document.createElement("div");
+            list.className = "ordering-list";
+
+            function move(from, to) {
+                if (state.interaction.locked) return;
+                const arr = state.interaction.order;
+                if (to < 0 || to >= arr.length) return;
+                const tmp = arr[from]; arr[from] = arr[to]; arr[to] = tmp;
+                state.answers[question.id] = arr.slice();
+                playSound("drop"); // sound: item moved
+                rebuild();
+                saveQuizProgress();
+            }
+
+            function rebuild() {
+                list.replaceChildren();
+                state.interaction.order.forEach((id, pos) => {
+                    const item = question.items.find((it) => it.id === id);
+                    const row = document.createElement("div");
+                    row.className = "ordering-row";
+
+                    const posBadge = document.createElement("span");
+                    posBadge.className = "ordering-position";
+                    posBadge.textContent = String(pos + 1);
+
+                    const lab = document.createElement("span");
+                    lab.className = "ordering-label";
+                    lab.textContent = item ? item.label : id;
+
+                    const arrows = document.createElement("span");
+                    arrows.className = "ordering-arrows";
+
+                    const up = document.createElement("button");
+                    up.type = "button";
+                    up.className = "ordering-arrow";
+                    up.textContent = "▲";
+                    up.setAttribute("aria-label", "Move " + (item ? item.label : id) + " up");
+                    up.disabled = answered || pos === 0;
+                    up.addEventListener("click", () => move(pos, pos - 1));
+
+                    const down = document.createElement("button");
+                    down.type = "button";
+                    down.className = "ordering-arrow";
+                    down.textContent = "▼";
+                    down.setAttribute("aria-label", "Move " + (item ? item.label : id) + " down");
+                    down.disabled = answered || pos === state.interaction.order.length - 1;
+                    down.addEventListener("click", () => move(pos, pos + 1));
+
+                    arrows.appendChild(up);
+                    arrows.appendChild(down);
+                    row.appendChild(posBadge);
+                    row.appendChild(lab);
+                    row.appendChild(arrows);
+                    list.appendChild(row);
+                });
+            }
+
+            rebuild();
+            dom.answerArea.appendChild(list);
+        }
+
+        /* ------------------------------------------------------------
+           imageHotspot rendering. Draws the picture, then lays transparent
+           <button> regions over it (real buttons, so Tab + Enter work).
+           x/y/w/h are percentages of the picture box. Selections are kept
+           in state.answers as an array of hotspot ids.
+           ------------------------------------------------------------ */
+        function renderImageHotspot(question, answered) {
+            const saved = Array.isArray(state.answers[question.id]) ? state.answers[question.id].slice() : [];
+            state.interaction = {
+                type: "imageHotspot",
+                selected: saved,
+                multiSelect: question.multiSelect === true,
+                locked: answered
+            };
+
+            const stage = document.createElement("div");
+            stage.className = "hotspot-stage";
+            const node = buildImageElement(question.image);
+            if (node) {
+                if (node.tagName && node.tagName.toLowerCase() === "svg") {
+                    node.setAttribute("role", "img");
+                    if (question.imageAlt) node.setAttribute("aria-label", question.imageAlt);
+                } else {
+                    node.alt = question.imageAlt || "";
+                }
+                stage.appendChild(node);
+            }
+
+            const correctSet = {};
+            question.hotspots.forEach((h) => { if (h.correct) correctSet[h.id] = true; });
+
+            question.hotspots.forEach((h) => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "hotspot";
+                btn.style.left = h.x + "%";
+                btn.style.top = h.y + "%";
+                btn.style.width = h.w + "%";
+                btn.style.height = h.h + "%";
+                btn.setAttribute("data-hs", h.id);
+                btn.setAttribute("aria-label", h.label);
+                const isSel = state.interaction.selected.indexOf(h.id) !== -1;
+                btn.setAttribute("aria-pressed", isSel ? "true" : "false");
+                if (isSel) btn.classList.add("selected");
+                btn.disabled = answered;
+                // After grading, tint the regions the student picked by correctness.
+                if (answered && isSel) btn.classList.add(correctSet[h.id] ? "result-correct" : "result-wrong");
+
+                btn.addEventListener("click", () => {
+                    if (state.interaction.locked) return;
+                    const sel = state.interaction.selected;
+                    const idx = sel.indexOf(h.id);
+                    if (state.interaction.multiSelect) {
+                        if (idx === -1) sel.push(h.id); else sel.splice(idx, 1);
+                    } else {
+                        sel.length = 0;
+                        if (idx === -1) sel.push(h.id);
+                    }
+                    state.answers[question.id] = sel.slice();
+                    playSound("drop"); // sound: region selected
+                    stage.querySelectorAll(".hotspot").forEach((el) => {
+                        const on = sel.indexOf(el.getAttribute("data-hs")) !== -1;
+                        el.classList.toggle("selected", on);
+                        el.setAttribute("aria-pressed", on ? "true" : "false");
+                    });
+                    saveQuizProgress();
+                });
+
+                stage.appendChild(btn);
+            });
+
+            dom.answerArea.appendChild(stage);
         }
 
         /* ------------------------------------------------------------
@@ -3434,6 +4095,23 @@
                     return Object.assign({}, state.interaction && state.interaction.placements);
                 case "matching":
                     return Object.assign({}, state.interaction && state.interaction.pairs);
+                case "trueFalse": {
+                    const picked = dom.answerArea.querySelector('input[type="radio"]:checked');
+                    return picked ? (picked.value === "true") : null;
+                }
+                case "fillBlank": {
+                    const values = {};
+                    dom.answerArea.querySelectorAll("input[data-blank]").forEach((el) => {
+                        values[el.getAttribute("data-blank")] = el.value.trim();
+                    });
+                    return values;
+                }
+                case "ordering":
+                    return state.interaction && Array.isArray(state.interaction.order)
+                        ? state.interaction.order.slice() : [];
+                case "imageHotspot":
+                    return state.interaction && Array.isArray(state.interaction.selected)
+                        ? state.interaction.selected.slice() : [];
                 default: {
                     const input = document.getElementById("dynamicAnswerInput");
                     return input ? input.value.trim() : null;
@@ -3515,6 +4193,25 @@
                     rejectSubmit();
                     return;
                 }
+            }
+            if (question.type === "trueFalse" && answer === null) {
+                showAlert("Please choose True or False before submitting.");
+                rejectSubmit();
+                return;
+            }
+            if (question.type === "fillBlank") {
+                const tokens = (String(question.text).match(/\{(\w+)\}/g) || []).map((t) => t.slice(1, -1));
+                const empty = tokens.filter((tok) => !answer[tok] || String(answer[tok]).trim() === "");
+                if (empty.length > 0) {
+                    showAlert("Please fill in every blank before submitting.");
+                    rejectSubmit();
+                    return;
+                }
+            }
+            if (question.type === "imageHotspot" && (!Array.isArray(answer) || answer.length === 0)) {
+                showAlert("Click a region on the picture before submitting.");
+                rejectSubmit();
+                return;
             }
 
             // profanity filter on typed answers (word-boundary, inline warning)
@@ -3655,6 +4352,63 @@
                         total: total
                     };
                 }
+                case "trueFalse": {
+                    const isCorrect = answer === question.correctAnswer;
+                    return {
+                        status: isCorrect ? "correct" : "wrong",
+                        explanation: (isCorrect ? question.feedbackCorrect : question.feedbackWrong) || question.explanation || ""
+                    };
+                }
+                case "fillBlank": {
+                    const tokens = (String(question.text).match(/\{(\w+)\}/g) || []).map((t) => t.slice(1, -1));
+                    const perItem = {};
+                    let correctCount = 0;
+                    tokens.forEach((tok) => {
+                        const entry = (question.blanks && question.blanks[tok]) || { accept: [] };
+                        const given = answer && answer[tok] != null ? String(answer[tok]).trim() : "";
+                        const cs = entry.caseSensitive === true;
+                        const ok = (entry.accept || []).some((acc) =>
+                            cs ? String(acc).trim() === given : normalizeText(acc) === normalizeText(given));
+                        perItem[tok] = ok;
+                        if (ok) correctCount++;
+                    });
+                    const total = tokens.length;
+                    return {
+                        status: correctCount === total ? "correct" : correctCount > 0 ? "partial" : "wrong",
+                        explanation: (question.explanation || "") + " You filled " + correctCount + " of " + total + " blank" + (total === 1 ? "" : "s") + " correctly.",
+                        perItem: perItem,
+                        correctCount: correctCount,
+                        total: total
+                    };
+                }
+                case "ordering": {
+                    const given = Array.isArray(answer) ? answer : [];
+                    const total = question.correctOrder.length;
+                    let inPlace = 0;
+                    question.correctOrder.forEach((id, i) => { if (given[i] === id) inPlace++; });
+                    const status = inPlace === total ? "correct" : (inPlace >= Math.ceil(total / 2) ? "partial" : "wrong");
+                    return {
+                        status: status,
+                        explanation: (question.explanation || "") + " " + inPlace + " of " + total + " items are in the right place.",
+                        correctCount: inPlace,
+                        total: total
+                    };
+                }
+                case "imageHotspot": {
+                    const selected = Array.isArray(answer) ? answer : [];
+                    const correctIds = question.hotspots.filter((h) => h.correct).map((h) => h.id);
+                    const correctSelected = selected.filter((id) => correctIds.indexOf(id) !== -1);
+                    const incorrectSelected = selected.filter((id) => correctIds.indexOf(id) === -1);
+                    const allCorrect = correctIds.length > 0 && correctSelected.length === correctIds.length && incorrectSelected.length === 0;
+                    const status = allCorrect ? "correct" : (correctSelected.length > 0 ? "partial" : "wrong");
+                    return {
+                        status: status,
+                        explanation: (question.explanation || "") + " You selected " + correctSelected.length + " of " + correctIds.length + " correct region" + (correctIds.length === 1 ? "" : "s") +
+                            (incorrectSelected.length ? " and " + incorrectSelected.length + " wrong one" + (incorrectSelected.length === 1 ? "" : "s") : "") + ".",
+                        correctCount: correctSelected.length,
+                        total: correctIds.length
+                    };
+                }
                 default:
                     return { status: "wrong", explanation: "No valid grader for this question type." };
             }
@@ -3724,6 +4478,8 @@
                 case "exactText":
                 case "exactNumber":
                     return question.answer != null ? String(question.answer) : null;
+                case "trueFalse":
+                    return question.correctAnswer ? "True" : "False";
                 default:
                     return null;
             }
@@ -3756,14 +4512,64 @@
             });
         }
 
-        // Appends per-item vertical bullets for dragSort/matching to a <ul>.
-        // No-op for other question types.
+        function fillBlankResultLines(question, answer) {
+            const tokens = (String(question.text).match(/\{(\w+)\}/g) || []).map((t) => t.slice(1, -1));
+            return tokens.map((tok) => {
+                const entry = (question.blanks && question.blanks[tok]) || { accept: [] };
+                const given = answer && answer[tok] != null ? String(answer[tok]).trim() : "";
+                const cs = entry.caseSensitive === true;
+                const ok = (entry.accept || []).some((acc) =>
+                    cs ? String(acc).trim() === given : normalizeText(acc) === normalizeText(given));
+                const shown = given === "" ? "(blank)" : given;
+                return ok
+                    ? tok + ": " + shown + " ✓"
+                    : tok + ": your answer: " + shown + ", accepted: " + (entry.accept || []).join(" / ") + " ✗";
+            });
+        }
+
+        function orderingResultLines(question, answer) {
+            const given = Array.isArray(answer) ? answer : [];
+            return question.correctOrder.map((id, i) => {
+                const correctItem = question.items.find((it) => it.id === id);
+                const givenItem = question.items.find((it) => it.id === given[i]);
+                const correctLabel = correctItem ? correctItem.label : id;
+                const givenLabel = givenItem ? givenItem.label : "(none)";
+                return given[i] === id
+                    ? (i + 1) + ". " + correctLabel + " ✓"
+                    : (i + 1) + ". your answer: " + givenLabel + ", correct: " + correctLabel + " ✗";
+            });
+        }
+
+        function imageHotspotResultLines(question, answer) {
+            const selected = Array.isArray(answer) ? answer : [];
+            const lines = [];
+            question.hotspots.forEach((h) => {
+                const picked = selected.indexOf(h.id) !== -1;
+                if (h.correct) {
+                    lines.push(h.label + (picked ? " — correct region, selected ✓" : " — correct region, missed ✗"));
+                } else if (picked) {
+                    lines.push(h.label + " — wrong region, selected ✗");
+                }
+            });
+            if (lines.length === 0) lines.push("Nothing selected.");
+            return lines;
+        }
+
+        // Appends per-item vertical bullets for dragSort/matching (and the
+        // new fillBlank/ordering/imageHotspot types) to a <ul>. No-op for
+        // other question types.
         function appendResultLines(listEl, question) {
             let lines = null;
             if (question.type === "dragSort") {
                 lines = dragSortResultLines(question, state.answers[question.id]);
             } else if (question.type === "matching") {
                 lines = matchingResultLines(question, state.answers[question.id]);
+            } else if (question.type === "fillBlank") {
+                lines = fillBlankResultLines(question, state.answers[question.id]);
+            } else if (question.type === "ordering") {
+                lines = orderingResultLines(question, state.answers[question.id]);
+            } else if (question.type === "imageHotspot") {
+                lines = imageHotspotResultLines(question, state.answers[question.id]);
             }
             if (!lines) return;
             lines.forEach((line) => {
@@ -3878,6 +4684,24 @@
                     question.pairs.forEach((pair) => {
                         addLine(pair.left + " ↔ " + pair.right);
                     });
+                    break;
+                case "trueFalse":
+                    addLine("Correct answer: " + (question.correctAnswer ? "True" : "False"));
+                    break;
+                case "fillBlank":
+                    (String(question.text).match(/\{(\w+)\}/g) || []).map((t) => t.slice(1, -1)).forEach((tok) => {
+                        const entry = (question.blanks && question.blanks[tok]) || { accept: [] };
+                        addLine(tok + " → " + (entry.accept || []).join(" / "));
+                    });
+                    break;
+                case "ordering":
+                    question.correctOrder.forEach((id, i) => {
+                        const it = question.items.find((x) => x.id === id);
+                        addLine((i + 1) + ". " + (it ? it.label : id));
+                    });
+                    break;
+                case "imageHotspot":
+                    addLine("Correct region(s): " + question.hotspots.filter((h) => h.correct).map((h) => h.label).join(", "));
                     break;
             }
 
@@ -4127,6 +4951,21 @@
                         const rightIdx = answer[leftIdx];
                         return pair.left + " → " + (rightIdx != null && question.pairs[rightIdx] ? question.pairs[rightIdx].right : "(unpaired)");
                     }).join("; ");
+                case "trueFalse":
+                    return answer === true ? "True" : answer === false ? "False" : "(no answer)";
+                case "fillBlank":
+                    return (String(question.text).match(/\{(\w+)\}/g) || []).map((t) => t.slice(1, -1))
+                        .map((tok) => tok + "=" + (answer && answer[tok] != null && String(answer[tok]).trim() !== "" ? answer[tok] : "(blank)")).join("; ");
+                case "ordering":
+                    return (Array.isArray(answer) ? answer : []).map((id, i) => {
+                        const it = question.items.find((x) => x.id === id);
+                        return (i + 1) + ". " + (it ? it.label : id);
+                    }).join("; ");
+                case "imageHotspot":
+                    return (Array.isArray(answer) ? answer : []).map((id) => {
+                        const h = question.hotspots.find((x) => x.id === id);
+                        return h ? h.label : id;
+                    }).join(", ") || "(nothing selected)";
                 default:
                     return String(answer);
             }
@@ -4171,7 +5010,9 @@
                 const list = document.createElement("ul");
                 list.className = "result-list";
 
-                if (question.type === "dragSort" || question.type === "matching") {
+                if (question.type === "dragSort" || question.type === "matching" ||
+                    question.type === "fillBlank" || question.type === "ordering" ||
+                    question.type === "imageHotspot") {
                     // One vertical bullet per item — no horizontal run-ons.
                     appendResultLines(list, question);
                 } else {
