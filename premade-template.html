@@ -1141,6 +1141,10 @@
             </div>
 
             <div class="controls">
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
@@ -1577,6 +1581,113 @@
         ];
 
         /* ============================================================
+           DEV-EDIT: AUDIO
+           Sound effects for this sim. Everything here works fully
+           OFFLINE — no internet and no external files are required.
+
+           Each slot in SOUND_FILES below can be one of three things:
+             1. ""  (empty string)  -> use the built-in synthesized
+                tone for that event (generated live with the Web Audio
+                API; nothing to download, works offline).
+             2. A base64 data URI, e.g. "data:audio/mp3;base64,AAAA..."
+                -> embeds a REAL audio file directly inside this HTML.
+                No internet and no separate files are needed. Note that
+                base64 grows the file to ~1.37x the audio's byte size,
+                so this is best for short effects.
+             3. A relative path, e.g. "sounds/correct.mp3" -> loads a
+                file shipped alongside this HTML (only works if you keep
+                those files next to the HTML when you hand it out).
+           ============================================================ */
+        const SOUND_FILES = {
+            click: "",     // any button press (start, next, hint, play again, etc.)
+            typing: "",    // soft tick while typing in an answer box
+            correct: "",   // answer graded fully correct
+            partial: "",   // answer graded partially correct
+            wrong: "",     // answer graded wrong
+            hint: "",      // hint revealed
+            drop: "",      // drag-and-drop item placed / matching pair attempted
+            complete: "",  // summary screen reached (sim finished)
+        };
+
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        const SYNTH_SOUNDS = {
+            click:    () => playTone(600, 60, "square", 0.06),
+            typing:   () => playTone(420, 30, "square", 0.04),
+            correct:  () => { playTone(523, 120, "sine", 0.15); playTone(784, 180, "sine", 0.15, 110); },
+            partial:  () => { playTone(523, 120, "sine", 0.13); playTone(587, 160, "sine", 0.13, 110); },
+            wrong:    () => playTone(180, 250, "sawtooth", 0.12),
+            hint:     () => playTone(880, 90, "triangle", 0.08),
+            drop:     () => playTone(320, 50, "square", 0.07),
+            complete: () => { playTone(523, 120, "sine", 0.15); playTone(659, 120, "sine", 0.15, 120); playTone(784, 250, "sine", 0.15, 240); },
+        };
+
+        // True only for the render triggered by a fresh grading in
+        // handleAnswerSubmit; per-pair result tones are suppressed on any
+        // other render (navigation, restore, step-dot revisits).
+        let justGraded = false;
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try { new Audio(src).play().catch(() => {}); } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(); } catch (err) { /* ignore */ } }
+        }
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (onIcon) onIcon.style.display = audioEnabled ? "" : "none";
+            if (offIcon) offIcon.style.display = audioEnabled ? "none" : "";
+            btn.title = audioEnabled ? "Audio on" : "Audio muted";
+            btn.setAttribute("aria-label", audioEnabled ? "Audio on" : "Audio muted");
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1");
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
+            updateAudioButton();
+        }
+
+        /* ============================================================
            CHROME — DO NOT EDIT
            App state and DOM references.
            ============================================================ */
@@ -1612,6 +1723,7 @@
             simContainer: document.getElementById("simContainer"),
             startBtn: document.getElementById("startBtn"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"),
             helpBtn: document.getElementById("helpBtn"),
             themeToggleBtn: document.getElementById("themeToggleBtn"),
             fullscreenBtn: document.getElementById("fullscreenBtn"),
@@ -1657,6 +1769,7 @@
             renderInstructions();
             loadTheme();
             loadHelpSeen();
+            loadAudioSetting();
             loadQuizProgress();
         }
 
@@ -1679,11 +1792,16 @@
 
         function bindEvents() {
             dom.startBtn.addEventListener("click", () => {
+                playSound("click"); // sound: button press
                 showScreen("sim");
                 devInit();
             });
-            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.openInstructionsBtn.addEventListener("click", () => {
+                playSound("click"); // sound: button press
+                openInstructionsModal();
+            });
             dom.helpBtn.addEventListener("click", () => {
+                playSound("click"); // sound: button press
                 dom.helpBtn.classList.remove("pulse-help");
                 storageSet(SIM_CONFIG.simId + "-help-seen", "true");
                 openInstructionsModal();
@@ -1696,6 +1814,7 @@
                 }
             });
 
+            dom.audioBtn.addEventListener("click", toggleAudio);
             dom.themeToggleBtn.addEventListener("click", toggleTheme);
             dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
             dom.resetBtn.addEventListener("click", openResetConfirmModal);
@@ -1720,6 +1839,7 @@
             dom.hintBtn.addEventListener("click", showHint);
             dom.nextBtn.addEventListener("click", goNext);
             dom.playAgainBtn.addEventListener("click", () => {
+                playSound("click"); // sound: button press
                 devReset();
                 showScreen("sim");
                 devInit();
@@ -2119,6 +2239,7 @@
             }
 
             input.addEventListener("input", refresh);
+            input.addEventListener("input", () => playSound("typing")); // sound: typing tick
             refresh();
             return counter;
         }
@@ -2454,6 +2575,7 @@
         function placeDragItem(itemId, binId) {
             const inter = state.interaction;
             if (!inter || inter.type !== "dragSort" || inter.locked) return;
+            playSound("drop"); // sound: item placed in a bin
             inter.placements[itemId] = binId;
             inter.selectedItemId = null;
             inter.keyboardTargetBin = null;
@@ -2644,6 +2766,7 @@
                 if (result && result.perItem) {
                     card.classList.add(result.perItem[leftIdx] ? "result-correct" : "result-wrong");
                     card.disabled = true;
+                    if (justGraded) playSound(result.perItem[leftIdx] ? "correct" : "wrong"); // sound: per-pair result (fresh grade only)
                 }
 
                 const badge = document.createElement("span");
@@ -2709,6 +2832,7 @@
                             if (inter.pairs[key] === rightIdx) delete inter.pairs[key];
                         });
                         inter.pairs[inter.selectedLeft] = rightIdx;
+                        playSound("drop"); // sound: matching pair attempted
                         const leftLabel = inter.question.pairs[inter.selectedLeft].left;
                         inter.selectedLeft = null;
                         renderMatchingBoard();
@@ -2753,6 +2877,7 @@
                 inputEl.removeEventListener("input", clear);
             };
             inputEl.addEventListener("input", clear);
+            inputEl.addEventListener("input", () => playSound("typing")); // sound: typing tick
         }
 
         // Rejection exit for the submit path: an answer was NOT accepted
@@ -2837,13 +2962,19 @@
             // the re-entrancy flag.
             const result = gradeAnswer(question, answer);
             recordResult(question, answer, result);
+            justGraded = true; // sound: allow per-pair result tones for this render only
             renderQuestion();
+            justGraded = false;
             if (result.status === "wrong" && (question.type === "exactText" || question.type === "exactNumber" ||
                 question.type === "keywords" || question.type === "shortAnswer")) {
                 const wrongInput = document.getElementById("dynamicAnswerInput");
                 if (wrongInput) markInputError(wrongInput);
             }
             showFeedback(question, result);
+            // sound: grade outcome (ungraded plays nothing)
+            if (result.status === "correct") playSound("correct");
+            else if (result.status === "partial") playSound("partial");
+            else if (result.status === "wrong") playSound("wrong");
             saveQuizProgress();
             state.isSubmitting = false;
         }
@@ -3156,6 +3287,7 @@
             // Once used, a hint stays used forever (persisted with progress).
             state.hintsUsed[question.id] = true;
             renderUsedHint(question);
+            playSound("hint"); // sound: hint revealed
             announce("Hint: " + (question.hint || "No hint has been added yet."));
             saveQuizProgress();
         }
@@ -3198,12 +3330,14 @@
             // renders. The next renderQuestion() (or summary) re-establishes
             // button state; on the last question Next stays hidden.
             dom.nextBtn.disabled = true;
+            playSound("click"); // sound: button press
             if (state.currentIndex >= QUESTIONS.length - 1) {
                 // Finish: mark the run finished so the next page load wipes
                 // this progress and boots fresh instead of re-showing summary.
                 state.finished = true;
                 showScreen("summary");
                 renderSummary();
+                playSound("complete"); // sound: summary screen reached
                 saveQuizProgress();
                 return;
             }
