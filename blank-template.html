@@ -584,7 +584,7 @@
 
            Field notes:
              simId          - must be UNIQUE per sim. Used as the
-                               localStorage key prefix (theme, help-seen,
+                               sessionStorage key prefix (theme, help-seen,
                                and any state you persist). Colliding
                                simIds will clobber each other's saved data.
              title           - shown in <title>, topbar, and home screen.
@@ -860,6 +860,14 @@
         initializeApp();
 
         function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
             applyConfigToUI();
             bindEvents();
             renderInstructions();
@@ -1023,10 +1031,10 @@
         }
 
         function storageGet(key) {
-            try { return localStorage.getItem(key); } catch (err) { return null; }
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
         }
         function storageSet(key, value) {
-            try { localStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
         }
 
         /* ============================================================

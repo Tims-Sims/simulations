@@ -1485,6 +1485,7 @@
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="control-btn" id="reviewBtn" aria-label="Review your answers"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h5"/></svg> Review</button>
                 <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
             </div>
         </header>
@@ -1635,10 +1636,21 @@
         <section class="modal-card">
             <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
             <h3 id="resetConfirmHeading">Reset simulation?</h3>
-            <p>This will clear your current progress and return you to the home screen.</p>
+            <p id="resetConfirmMessage">This will clear your current progress and return you to the home screen.</p>
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
                 <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
                 <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeReviewBtn" aria-label="Close review">×</button>
+            <h3 id="reviewHeading">Your Answers So Far</h3>
+            <div class="results-list" id="reviewBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="closeReviewFooterBtn">Close</button>
             </div>
         </section>
     </div>
@@ -1665,7 +1677,7 @@
 
            Field notes:
              simId          - must be UNIQUE per sim. Used as the
-                               localStorage key prefix (theme, help-seen,
+                               sessionStorage key prefix (theme, help-seen,
                                quiz progress). Colliding simIds will
                                clobber each other's saved data.
              title           - shown in <title>, topbar, and home screen.
@@ -2819,6 +2831,13 @@
             closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
             gotItBtn: document.getElementById("gotItBtn"),
             resetConfirmModal: document.getElementById("resetConfirmModal"),
+            resetConfirmHeading: document.getElementById("resetConfirmHeading"),
+            resetConfirmMessage: document.getElementById("resetConfirmMessage"),
+            reviewBtn: document.getElementById("reviewBtn"),
+            reviewModal: document.getElementById("reviewModal"),
+            reviewBody: document.getElementById("reviewBody"),
+            closeReviewBtn: document.getElementById("closeReviewBtn"),
+            closeReviewFooterBtn: document.getElementById("closeReviewFooterBtn"),
             closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
             cancelResetBtn: document.getElementById("cancelResetBtn"),
             confirmResetBtn: document.getElementById("confirmResetBtn"),
@@ -2853,6 +2872,14 @@
         };
 
         function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
             // Validate the builder's config FIRST. If anything is wrong we
             // show the full problem list instead of starting the sim (theme
             // still loads so the error page is readable in the right mode).
@@ -2918,19 +2945,34 @@
             dom.audioBtn.addEventListener("click", toggleAudio);
             dom.themeToggleBtn.addEventListener("click", toggleTheme);
             dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
-            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.resetBtn.addEventListener("click", () => openResetConfirmModal("reset"));
             dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
             dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
             dom.confirmResetBtn.addEventListener("click", () => {
+                const action = resetConfirmAction;
                 devReset();
                 closeResetConfirmModal();
-                // A reset returns to a clean home screen and, like any fresh
-                // boot, re-opens the instructions/help modal.
-                bootFresh();
+                if (action === "playAgain") {
+                    // Play Again restarts straight into a fresh run.
+                    showScreen("sim");
+                    devInit();
+                } else {
+                    // A reset returns to a clean home screen and, like any fresh
+                    // boot, re-opens the instructions/help modal.
+                    bootFresh();
+                }
             });
             dom.resetConfirmModal.addEventListener("click", (event) => {
                 if (event.target === dom.resetConfirmModal) {
                     closeResetConfirmModal();
+                }
+            });
+            dom.reviewBtn.addEventListener("click", openReviewModal);
+            dom.closeReviewBtn.addEventListener("click", closeReviewModal);
+            dom.closeReviewFooterBtn.addEventListener("click", closeReviewModal);
+            dom.reviewModal.addEventListener("click", (event) => {
+                if (event.target === dom.reviewModal) {
+                    closeReviewModal();
                 }
             });
             document.addEventListener("fullscreenchange", updateFullscreenButton);
@@ -2942,9 +2984,9 @@
             dom.tryAgainBtn.addEventListener("click", tryAgain);
             dom.playAgainBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
-                devReset();
-                showScreen("sim");
-                devInit();
+                // Play Again wipes recorded answers, so it confirms first,
+                // exactly like Reset.
+                openResetConfirmModal("playAgain");
             });
         }
 
@@ -3018,7 +3060,21 @@
             closeModalA11y();
         }
 
-        function openResetConfirmModal() {
+        // What the shared confirm dialog will do when confirmed:
+        // "reset" (header Reset button) or "playAgain" (summary screen).
+        let resetConfirmAction = "reset";
+
+        function openResetConfirmModal(action) {
+            resetConfirmAction = action === "playAgain" ? "playAgain" : "reset";
+            if (resetConfirmAction === "playAgain") {
+                dom.resetConfirmHeading.textContent = "Play again?";
+                dom.resetConfirmMessage.textContent = "This will clear your current answers and score and start a fresh run.";
+                dom.confirmResetBtn.textContent = "Play Again";
+            } else {
+                dom.resetConfirmHeading.textContent = "Reset simulation?";
+                dom.resetConfirmMessage.textContent = "This will clear your current progress and return you to the home screen.";
+                dom.confirmResetBtn.textContent = "Reset";
+            }
             dom.resetConfirmModal.classList.add("show");
             openModalA11y(dom.resetConfirmModal);
         }
@@ -3027,6 +3083,38 @@
             if (!dom.resetConfirmModal.classList.contains("show")) return;
             dom.resetConfirmModal.classList.remove("show");
             closeModalA11y();
+        }
+
+        function openReviewModal() {
+            playSound("click"); // sound: button press
+            renderReview();
+            dom.reviewModal.classList.add("show");
+            openModalA11y(dom.reviewModal);
+        }
+
+        function closeReviewModal() {
+            if (!dom.reviewModal.classList.contains("show")) return;
+            dom.reviewModal.classList.remove("show");
+            closeModalA11y();
+        }
+
+        // Review/History: list every question answered so far using the same
+        // result cards as the final summary. Answered questions are locked,
+        // so revealing the correct answer here leaks nothing attemptable.
+        function renderReview() {
+            dom.reviewBody.replaceChildren();
+            let shown = 0;
+            (activeQuestions || []).forEach((question, index) => {
+                if (!isAnswered(question.id)) return;
+                dom.reviewBody.appendChild(buildResultCard(question, index));
+                shown++;
+            });
+            if (shown === 0) {
+                const empty = document.createElement("p");
+                empty.className = "muted";
+                empty.textContent = "No answers recorded yet. Answer a question and it will appear here.";
+                dom.reviewBody.appendChild(empty);
+            }
         }
 
         function showScreen(screenName) {
@@ -3085,6 +3173,7 @@
             if (event.key === "Escape") {
                 closeInstructionsModal();
                 closeResetConfirmModal();
+                closeReviewModal();
             }
         }
 
@@ -3097,14 +3186,17 @@
                 .replace(/'/g, "&#039;");
         }
 
+        /* sessionStorage (not localStorage): survives a refresh so progress
+           resumes mid-session, but clears when the tab closes — so on shared
+           laptops the next learner starts clean and sees the instructions. */
         function storageGet(key) {
-            try { return localStorage.getItem(key); } catch (err) { return null; }
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
         }
         function storageSet(key, value) {
-            try { localStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
         }
         function storageRemove(key) {
-            try { localStorage.removeItem(key); } catch (err) { /* storage unavailable */ }
+            try { sessionStorage.removeItem(key); } catch (err) { /* storage unavailable */ }
         }
 
         function announce(message) {
@@ -3190,15 +3282,20 @@
             // and token extraction is stable.
             const rawPass = String(text).toLowerCase().replace(/\s+/g, " ");
             const leetPass = deLeet(text).replace(/\s+/g, " ");
-            const passes = [rawPass, leetPass];
+            // Separator-stripped passes catch punctuation spellings like
+            // "s.w.e.a.r": dots/dashes/underscores/stars BETWEEN letters are
+            // removed. Spaces are untouched, so adjacent clean words never
+            // merge into a false match ("grass hit" stays two words).
+            const stripSeparators = (s) => s.replace(/([a-z0-9])[.\-_*+']+(?=[a-z0-9])/g, "$1");
+            const passes = [rawPass, leetPass, stripSeparators(rawPass), stripSeparators(leetPass)];
 
             for (let p = 0; p < passes.length; p++) {
                 const hay = passes[p];
                 for (let i = 0; i < PROFANITY_LIST.length; i++) {
                     const entry = PROFANITY_LIST[i];
-                    // Leet pass skips entries under 3 chars to avoid false
-                    // positives from normalized text (e.g. "xx").
-                    if (p === 1 && entry.length < 3) continue;
+                    // Leet-normalized passes skip entries under 3 chars to
+                    // avoid false positives from normalized text (e.g. "xx").
+                    if ((p === 1 || p === 3) && entry.length < 3) continue;
 
                     if (entry.length >= 4) {
                         // Substring tier with allowlisted-token guard.
@@ -5182,14 +5279,62 @@
                 return;
             }
 
-            // profanity filter on typed answers (word-boundary, inline warning)
+            // Type mismatch guards — reject with guidance instead of grading
+            // (grading would silently consume an attempt).
+            if (question.type === "exactNumber" && typeof answer === "string" &&
+                !Number.isFinite(Number(answer.replace(",", ".")))) {
+                showAlert("Please enter a number (digits only, e.g. 6).");
+                const numInput = document.getElementById("dynamicAnswerInput");
+                if (numInput) markInputError(numInput);
+                rejectSubmit();
+                return;
+            }
+            // (exactText is exempt when the configured answer is itself
+            // numeric — a builder may legitimately ask for "7".)
+            if ((question.type === "keywords" || question.type === "shortAnswer" ||
+                 (question.type === "exactText" && !/^[\d\s.,+-]+$/.test(String(question.answer || "")))) &&
+                typeof answer === "string" && /^[\d\s.,+-]+$/.test(answer)) {
+                showAlert("Please write your answer in words, not just numbers.");
+                const txtInput = document.getElementById("dynamicAnswerInput");
+                if (txtInput) markInputError(txtInput);
+                rejectSubmit();
+                return;
+            }
+
+            // Profanity filter on typed answers. A hit warns AND clears only
+            // the offending field(s); clean fields keep their content.
             if (typeof answer === "string") {
                 const hit = findProfanity(answer);
                 if (hit) {
                     showAlert("Please remove inappropriate language from your answer before submitting.");
-                    announce("Answer blocked: inappropriate language detected.");
+                    announce("Answer blocked: inappropriate language detected. The field was cleared.");
                     const profanityInput = document.getElementById("dynamicAnswerInput");
-                    if (profanityInput) markInputError(profanityInput);
+                    if (profanityInput) {
+                        profanityInput.value = "";
+                        profanityInput.dispatchEvent(new Event("input", { bubbles: true }));
+                        markInputError(profanityInput);
+                    }
+                    rejectSubmit();
+                    return;
+                }
+            }
+            // fillBlank typed answers are an object of per-blank strings —
+            // check each blank and clear only the ones that contain a hit.
+            if (question.type === "fillBlank" && answer && typeof answer === "object") {
+                let anyHit = false;
+                Object.keys(answer).forEach((tok) => {
+                    if (typeof answer[tok] !== "string" || !findProfanity(answer[tok])) return;
+                    anyHit = true;
+                    const blankInput = dom.answerArea.querySelector('.fillblank-input[data-blank="' + tok + '"]');
+                    if (blankInput) {
+                        blankInput.value = "";
+                        blankInput.dispatchEvent(new Event("input", { bubbles: true }));
+                        markInputError(blankInput);
+                    }
+                });
+                if (anyHit) {
+                    showAlert("Please remove inappropriate language from your answer before submitting.");
+                    announce("Answer blocked: inappropriate language detected. The affected blanks were cleared.");
                     rejectSubmit();
                     return;
                 }
@@ -5978,6 +6123,13 @@
 
             dom.summaryResults.replaceChildren();
             activeQuestions.forEach((question, index) => {
+                dom.summaryResults.appendChild(buildResultCard(question, index));
+            });
+        }
+
+        // One per-question result card, shared by the final summary screen
+        // and the Review modal.
+        function buildResultCard(question, index) {
                 const result = state.results[question.id];
                 const card = document.createElement("article");
                 card.className = "result-card";
@@ -6037,8 +6189,7 @@
                 }
 
                 card.append(heading, statusLine, list);
-                dom.summaryResults.appendChild(card);
-            });
+                return card;
         }
 
         /* ------------------------------------------------------------
