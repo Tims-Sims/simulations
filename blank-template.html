@@ -396,6 +396,33 @@
             margin-top: 10px;
         }
 
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
         .muted {
             color: var(--muted);
         }
@@ -456,6 +483,14 @@
             </div>
 
             <div class="controls">
+                <!-- ===== OPTIONAL: AUDIO TOGGLE BUTTON =====
+                     Delete this button (and the DEV-EDIT: AUDIO script section below)
+                     if you do not want sound in your sim. -->
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <!-- ===== END AUDIO TOGGLE BUTTON ===== -->
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
@@ -548,6 +583,7 @@
                                 in the Help/Instructions modal.
            ============================================================ */
         const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
             simId: "blank-simulation-template",
             title: "Editable Simulation Template",
             subtitle: "Single-file shell for local student activities",
@@ -562,6 +598,215 @@
                 "This file runs completely offline in a browser. No internet is needed."
             ]
         };
+
+        /* ============================================================
+           DEV-EDIT: AUDIO (OPTIONAL)
+           Audio is completely optional. If you don't want sound in your
+           sim, delete this whole section AND the #audioBtn button in the
+           header above (search "OPTIONAL: AUDIO TOGGLE BUTTON").
+
+           All sounds here work fully offline - no internet connection
+           is ever needed. There are two ways to give a sound to a slot
+           in SOUND_FILES below:
+
+             1. Leave it as "" (empty string) to use a built-in
+                synthesized "beep" tone instead of a real audio file.
+                This needs no file at all and always works offline.
+
+             2. Paste a base64 "data URI" string, like:
+                "data:audio/mp3;base64,AAAA..."
+                To make one: convert your .mp3 or .wav file to base64
+                text (many free online converters do this, or your
+                own audio editor), then paste that text after the
+                "data:audio/mp3;base64," prefix shown above. This keeps
+                the sound baked directly into this one HTML file, so
+                there is nothing else to ship and nothing to break if
+                the file is moved. Note it makes the file bigger
+                (roughly 1.37x the size of the original audio), so this
+                is best for short sound effects, not music or narration.
+
+             3. Alternatively, point to a separate audio file next to
+                this HTML file, e.g. "sounds/correct.mp3" - but then you
+                must remember to ship that file alongside this one.
+
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+        const SOUND_FILES = {
+            click: "",     // played on general button/option clicks
+            correct: "",   // played when the learner answers correctly
+            wrong: "",     // played when the learner answers incorrectly
+            typing: "",    // played per-keystroke or per-character reveal
+            complete: ""   // played when the simulation/activity finishes
+            // Feel free to add your own keys here (e.g. levelUp: "") and
+            // call playSound("levelUp") from your DEV-EDIT: SIM LOGIC code.
+        };
+
+        /* Each sound belongs to a category. The "effects" category always gets a
+           volume slider in the Help window. Any OTHER category name you use here
+           (for example "voice" for narration you add yourself) automatically gets
+           its own labelled slider in the Help window — and if no sound uses it,
+           no slider appears. */
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects",
+            // narration: "voice",   // example: your own added sound in its own category
+        };
+        /* Optional nicer slider labels. Category name used if missing. */
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
+        /* ---- Audio engine below. Safe to leave untouched. ---- */
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};   // category -> 0..1
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        const SYNTH_SOUNDS = {
+            click:    (v) => playTone(600, 60, "square", 0.06 * v),
+            typing:   (v) => playTone(420, 30, "square", 0.04 * v),
+            correct:  (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(784, 180, "sine", 0.15 * v, 110); },
+            wrong:    (v) => playTone(180, 250, "sawtooth", 0.12 * v),
+            complete: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(659, 120, "sine", 0.15 * v, 120); playTone(784, 250, "sine", 0.15 * v, 240); },
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+        // Example usage from your own sim logic:
+        // playSound("correct"); // call anywhere in your DEV-EDIT: SIM LOGIC code
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1");
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), input.value);
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
 
         /* ============================================================
            CHROME — DO NOT EDIT
@@ -584,6 +829,7 @@
             simContainer: document.getElementById("simContainer"),
             startBtn: document.getElementById("startBtn"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
             helpBtn: document.getElementById("helpBtn"),
             themeToggleBtn: document.getElementById("themeToggleBtn"),
             fullscreenBtn: document.getElementById("fullscreenBtn"),
@@ -606,6 +852,7 @@
             renderInstructions();
             loadTheme();
             loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
         }
 
         function loadHelpSeen() {
@@ -626,6 +873,7 @@
         }
 
         function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
             dom.startBtn.addEventListener("click", () => {
                 showScreen("sim");
                 devInit();
@@ -679,6 +927,7 @@
 
         function openInstructionsModal() {
             dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
         }
 
         function closeInstructionsModal() {
@@ -775,6 +1024,15 @@
            Add your functions below this banner.
            Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
+
+        /* --- HANDY UTILITIES (examples — uncomment what you need) --- */
+        // function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        // function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        // function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        // Example: const order = shuffle([1, 2, 3, 4]);  const dice = randInt(1, 6);
+        // Sound: playSound("correct"), playSound("levelUp"), etc. are available (see DEV-EDIT: AUDIO).
+        // Storage: storageGet/storageSet are available for saving progress, keyed like `sim:${SIM_CONFIG.simId}:mydata`.
+
         function devInit() {
             // Build your simulation UI/logic inside dom.simContainer here.
         }
