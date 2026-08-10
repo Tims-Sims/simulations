@@ -373,6 +373,10 @@
         .modal-card {
             padding: clamp(18px, 3vw, 30px);
             position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
         }
 
         .close-btn {
@@ -1643,6 +1647,16 @@
 
     <script>
         "use strict";
+
+        /* Safety net: never allow a native form submission. The quiz's
+           submit handler is only attached once the config validates, so a
+           config error (or any earlier script failure) would otherwise leave
+           the form free to navigate the page to its own URL — which Chrome
+           blocks with an "Unsafe attempt to load URL" error when the file
+           runs from file:// inside an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
 
         /* ============================================================
            DEV-EDIT: SIM CONFIG
