@@ -364,6 +364,10 @@
         .modal-card {
             padding: clamp(18px, 3vw, 30px);
             position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
         }
 
         .close-btn {
@@ -564,6 +568,15 @@
     <script>
         "use strict";
 
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
         /* ============================================================
            DEV-EDIT: SIM CONFIG
            Change title, subtitle, description, instructions here.
@@ -571,7 +584,7 @@
 
            Field notes:
              simId          - must be UNIQUE per sim. Used as the
-                               localStorage key prefix (theme, help-seen,
+                               sessionStorage key prefix (theme, help-seen,
                                and any state you persist). Colliding
                                simIds will clobber each other's saved data.
              title           - shown in <title>, topbar, and home screen.
@@ -847,6 +860,14 @@
         initializeApp();
 
         function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
             applyConfigToUI();
             bindEvents();
             renderInstructions();
@@ -1010,10 +1031,10 @@
         }
 
         function storageGet(key) {
-            try { return localStorage.getItem(key); } catch (err) { return null; }
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
         }
         function storageSet(key, value) {
-            try { localStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
         }
 
         /* ============================================================
