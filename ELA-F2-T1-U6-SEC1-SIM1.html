@@ -2050,7 +2050,7 @@
                 "Use the Reset button any time to restart from scratch.",
                 "This file runs completely offline in a browser. No internet is needed."
             ],
-            pointsPerQuestion: 10,
+            pointsPerQuestion: 25,
 
             /* ---- Extra settings (added in template 2.2.1) ----
                Plain-language notes for each are on the same line. */
@@ -2293,7 +2293,7 @@
                 explanation: "Kareem helps his classmates, and when he needs support the class stays to help him. The theme is that people who support others often receive support in return.",
                 revealRing: "message",
                 choices: [
-                    "cooperation",
+                    "Cooperation",
                     "People who support others often receive support in return",
                     "School projects are difficult"
                 ],
@@ -2382,6 +2382,7 @@
                 hint: "The Message is the exact theme from earlier. The Evidence cards are the details you already sorted. Only one real-life option truly echoes the theme.",
                 explanation: "Message: people who support others often receive support in return. Evidence: Kareem shares his notes, and the class later stays to help him. Real Life: group members divide tasks and help someone who falls behind. The other options go against the theme — hiding information and ignoring an absent student.",
                 echoClear: true,
+                shuffleItems: true,
                 items: [
                     { id: "echo-theme", label: "People who support others often receive support in return", correctBin: "bin-message" },
                     { id: "echo-ev-notes", label: "shared his notes", correctBin: "bin-evidence" },
@@ -3084,6 +3085,7 @@
             order: [],     // question ids in the order this run uses (shuffle/bank aware) — persisted for consistent resume
             attempts: {},  // questionId -> number of grading attempts used so far — persisted
             choiceOrder: {}, // questionId -> array of original choice indices in display order (shuffleChoices) — persisted
+            dragOrder: {}, // questionId -> array of item ids in display order (shuffled dragSort) — persisted
             firstTry: {},  // questionId -> true when the question was correct on the FIRST grading attempt — persisted
             missedSkills: [], // names of the focus skills not achieved by the end of the run — persisted
             startedAt: null, // timestamp when the run began (for time on task) — persisted
@@ -3601,6 +3603,7 @@
                 order: state.order,
                 attempts: state.attempts,
                 choiceOrder: state.choiceOrder,
+                dragOrder: state.dragOrder,
                 firstTry: state.firstTry,
                 missedSkills: state.missedSkills,
                 startedAt: state.startedAt,
@@ -3659,6 +3662,7 @@
             state.hintsUsed = (payload.hintsUsed && typeof payload.hintsUsed === "object") ? payload.hintsUsed : {};
             state.attempts = (payload.attempts && typeof payload.attempts === "object") ? payload.attempts : {};
             state.choiceOrder = (payload.choiceOrder && typeof payload.choiceOrder === "object") ? payload.choiceOrder : {};
+            state.dragOrder = (payload.dragOrder && typeof payload.dragOrder === "object") ? payload.dragOrder : {};
             state.firstTry = (payload.firstTry && typeof payload.firstTry === "object") ? payload.firstTry : {};
             state.missedSkills = Array.isArray(payload.missedSkills) ? payload.missedSkills : [];
             state.startedAt = payload.startedAt || null;
@@ -4904,6 +4908,22 @@
                 dragging: null
             };
 
+            // shuffleItems dragSorts show their draggable cards in a per-run
+            // random order. The arrangement is computed ONCE and persisted in
+            // state.dragOrder so revisits and resumed sessions keep the same
+            // layout (re-rendering the board on every click must not reshuffle).
+            if (question.shuffleItems === true) {
+                const itemIds = question.items.map((it) => it.id);
+                let trayOrder = state.dragOrder[question.id];
+                const valid = Array.isArray(trayOrder) && trayOrder.length === itemIds.length &&
+                    trayOrder.slice().sort().join("|") === itemIds.slice().sort().join("|");
+                if (!valid) {
+                    trayOrder = shuffle(itemIds);
+                    state.dragOrder[question.id] = trayOrder;
+                }
+                state.interaction.trayOrder = trayOrder.slice();
+            }
+
             const layout = document.createElement("div");
             layout.className = "dragsort-layout";
 
@@ -4965,6 +4985,11 @@
             const question = inter.question;
             const result = state.results[question.id];
 
+            // Render items in the shuffled display order when one exists.
+            const orderedItems = (Array.isArray(inter.trayOrder) && inter.trayOrder.length === question.items.length)
+                ? inter.trayOrder.map((id) => question.items.find((it) => it.id === id)).filter(Boolean)
+                : question.items;
+
             inter.tray.replaceChildren();
             inter.binGrid.replaceChildren();
             // Tray can be a keyboard drop target (to un-assign a placed item).
@@ -4988,7 +5013,7 @@
                 const contents = document.createElement("div");
                 contents.className = "bin-contents";
 
-                question.items.forEach((item) => {
+                orderedItems.forEach((item) => {
                     if (inter.placements[item.id] === bin.id) {
                         // Locked (post-submit) chips are static buttons. Pre-submit
                         // chips are full drag-items: click or drag them back to the
@@ -5046,7 +5071,7 @@
             });
 
             let unplacedCount = 0;
-            question.items.forEach((item) => {
+            orderedItems.forEach((item) => {
                 if (inter.placements[item.id]) return;
                 unplacedCount++;
                 const itemEl = document.createElement("div");
@@ -6812,6 +6837,7 @@
             state.order = [];
             state.attempts = {};
             state.choiceOrder = {};
+            state.dragOrder = {};
             state.firstTry = {};
             state.missedSkills = [];
             state.startedAt = null;
