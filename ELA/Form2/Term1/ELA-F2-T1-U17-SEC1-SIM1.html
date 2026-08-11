@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Simulation Template Shell</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ===== LETTER LAUNCHPAD SIM STYLES ===== */
+        @media (max-width:760px){
+            .ll-stage-visual{min-height:420px;margin-top:14px}
+            .ll-stage-visual svg{left:-8%;top:-8%;width:116%;height:116%}
+            .ll-stage-slots{width:52%;gap:8px}
+            .ll-stage-slots .ll-slot{min-height:94px;padding:8px}
+            .ll-slot-title{font-size:.68rem;margin-bottom:4px}
+            .ll-slot-content{font-size:.76rem;line-height:1.25}
+            .ll-stage-visual.stage-1 .ll-stage-slots{top:50%;bottom:auto;transform:translate(-50%,-50%)}
+            .ll-stage-visual.stage-2 .ll-stage-slots,.ll-stage-visual.stage-3 .ll-stage-slots{top:50%}
+        }
+
+        .ll-wrap{display:flex;flex-direction:column;gap:16px}
+        .ll-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+        .ll-progress{flex:1;min-width:260px}
+        .ll-progress-label{display:flex;justify-content:space-between;font-weight:700;color:var(--text-soft);font-size:.9rem;margin-bottom:7px}
+        .ll-bar{height:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;overflow:hidden}
+        .ll-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .3s ease}
+        .ll-stage{padding:18px;border:1px solid var(--border);background:color-mix(in srgb,var(--surface-2) 55%,var(--surface));border-radius:18px}
+        .ll-stage h2{margin:0 0 7px;font-size:1.35rem}
+        .ll-stage p{margin:6px 0;color:var(--text-soft);line-height:1.55}
+        .ll-rocket-preview{width:min(100%,300px);margin:18px auto;display:flex;flex-direction:column;align-items:center;gap:0;opacity:.9}
+        .ll-rocket-preview svg{display:block;width:100%;height:auto}
+        .ll-stage-visual{position:relative;width:min(100%,900px);margin:18px auto 4px;min-height:480px;display:flex;justify-content:center;align-items:center;overflow:hidden;border-radius:22px}
+        .ll-stage-visual svg{position:absolute;left:-15%;top:-15%;width:130%;height:130%;z-index:0;pointer-events:none}
+        .ll-stage-visual.stage-1 .ll-stage-slots{position:absolute;bottom:100px;left:50%;transform:translateX(-50%)}
+        .ll-stage-visual.stage-2 .ll-stage-slots,.ll-stage-visual.stage-3 .ll-stage-slots{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+        .ll-stage-slots{z-index:1;width:min(60%,500px);display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:center}
+        .ll-stage-slots .ll-slot{min-height:118px;background:color-mix(in srgb,var(--surface) 91%,transparent);backdrop-filter:blur(3px)}
+        .ll-slot{min-height:96px;border:2px dashed var(--border);border-radius:15px;padding:10px;background:var(--surface);transition:.2s ease}
+        .ll-slot.active{border-color:var(--accent);box-shadow:var(--focus)}
+        .ll-slot.locked{border-style:solid;border-color:var(--success);background:color-mix(in srgb,var(--success) 10%,var(--surface))}
+        .ll-slot-title{font-weight:800;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px}
+        .ll-slot-content{font-size:.88rem;line-height:1.35;color:var(--text-soft)}
+        .ll-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+        .ll-choice{min-height:72px;text-align:left;padding:13px 15px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font-weight:600;line-height:1.4;cursor:grab}
+        .ll-choice:hover{border-color:var(--accent)}
+        .ll-choice:active{cursor:grabbing}
+        .ll-choice.used{opacity:.35;cursor:not-allowed}
+        .ll-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content: space-between;margin-top:14px}
+        .ll-actions-left,.ll-actions-right{display:flex;gap:10px;flex-wrap:wrap}
+        .ll-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);font-size:.82rem;color:var(--text-soft)}
+        .ll-checklist{display:grid;gap:10px;margin-top:14px}
+        .ll-check{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface)}
+        .ll-check input{width:20px;height:20px;margin-top:1px;accent-color:var(--success)}
+        .ll-check label{line-height:1.4;color:var(--text-soft)}
+        .ll-launch{display:flex;align-items:center;justify-content:center;gap:16px;padding:24px;border:1px solid var(--border);border-radius:18px;background:var(--surface-2)}
+        .ll-launch img{width:170px;max-width:35vw}
+        .ll-launch h2{margin:0 0 6px}
+        .ll-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+        .ll-stat{padding:12px;border-radius:13px;background:var(--surface);border:1px solid var(--border);text-align:center}
+        .ll-stat b{display:block;font-size:1.2rem}
+        .ll-mini{font-size:.82rem;color:var(--muted)}
+        .ll-format{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+        .ll-format button{text-align:left;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text)}
+        .ll-format button.selected{border-color:var(--success);box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 20%,transparent)}
+        @media(max-width:760px){
+          .ll-stage-visual{min-height:430px}
+          .ll-stage-slots{width:46%;grid-template-columns:1fr;gap:8px}
+          .ll-stage-slots .ll-slot{min-height:93px;padding:8px;border-radius:11px}
+          .ll-slot-title{font-size:.66rem;margin-bottom:4px}
+          .ll-slot-content{font-size:.72rem;line-height:1.2}
+          .ll-choice-grid,.ll-format,.ll-stat-grid{grid-template-columns:1fr}
+          .ll-stage-visual.stage-1 .ll-stage-slots { top: 50%; bottom: auto; transform: translate(-50%, -50%); }
+        }
+
+        /* ===== ROCKET LAUNCH ANIMATION ===== */
+        .ll-launch-anim-container {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .ll-anim-rocket {
+            position: relative;
+            width: min(100%, 300px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ll-anim-part {
+            width: 100%;
+            transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1s ease;
+        }
+
+        /* Initial separated state */
+        .ll-anim-top { transform: translateY(-60px); opacity: 0; }
+        .ll-anim-middle { transform: translateY(0); opacity: 0; }
+        .ll-anim-base { transform: translateY(60px); opacity: 0; }
+
+        /* Assembled state (parts come together) */
+        .ll-anim-rocket.assemble .ll-anim-top,
+        .ll-anim-rocket.assemble .ll-anim-base,
+        .ll-anim-rocket.assemble .ll-anim-middle {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Takeoff state (whole rocket shoots up) */
+        .ll-anim-rocket.takeoff {
+            transform: translateY(-800px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions" style="display: none;">📖 Read Instructions</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <div class="ll-wrap">
+                        <div class="ll-top">
+                            <div>
+                                <div class="ll-chip">🚀 Letter Launchpad</div>
+                                <div class="ll-mini" id="llStageHint">Build the formal message one module at a time.</div>
+                            </div>
+                            <div class="ll-progress" aria-label="Mission progress">
+                                <div class="ll-progress-label"><span id="llProgressText">Mission progress</span><span id="llProgressPct">0%</span></div>
+                                <div class="ll-bar"><div id="llProgressBar"></div></div>
+                            </div>
+                        </div>
+                        <div id="llContent"></div>
+                        <div class="ll-actions">
+                            <div class="ll-actions-left">
+                                <button class="secondary-btn" id="llBackBtn">← Back</button>
+                                <button class="ghost-btn" id="llRulesBtn">Rules</button>
+                                <button class="ghost-btn" id="llHintBtn">💡 Hint</button>
+                                <button class="ghost-btn" id="llTryBtn">Try Again</button>
+                            </div>
+                            <div class="ll-actions-right">
+                                <span class="ll-chip" id="llAttemptChip">Attempts: 0</span>
+                                <span class="ll-chip" id="llHintChip">Hints: 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <div class="footer-note">
+            Letter Launchpad • Formal request mission • Offline student simulation
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="feedbackModal" role="dialog" aria-modal="true" aria-labelledby="feedbackHeading">
+        <section class="modal-card" style="max-width: 560px;">
+            <button class="close-btn" id="closeFeedbackBtn" aria-label="Close feedback window">×</button>
+            <h3 id="feedbackHeading" style="margin-top: 4px;">Feedback</h3>
+            <div id="feedbackBody"></div>
+            <div class="button-row" style="margin-top: 20px; justify-content: flex-end;">
+                <button class="primary-btn" id="dismissFeedbackBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1",
+            simId: "letter-launchpad-u17",
+            title: "Letter Launchpad",
+            subtitle: "Build, check and launch a formal request",
+            badgeText: "LL",
+            homeEyebrow: "Term 1 • Unit 17",
+            homeDescription:
+                "Assemble a formal request to the principal. Each accurate section locks into the launch vehicle; the message launches only when the format, purpose, organisation and tone are exact.",
+            instructions: [
+                "Mission: request permission from the principal to use the school hall for a student reading evening.",
+                "Default format: formal email. Choose supplied sections and drag each approved section into its matching rocket module.",
+                "Use respectful Standard English and keep the message in logical order.",
+                "Wrong choices explain what is wrong, why it matters, how to fix it and show a corrected model.",
+                "Use Hint when needed. You can retry without permanent failure.",
+                "Before launch, complete every final check: audience and purpose, specific subject, date/time, formal tone, logical order, privacy and accurate spelling/punctuation.",
+                "This simulation is fully usable without audio."
+            ]
+        };
+
+        const SOUND_FILES = {
+            click: "",
+            correct: "",
+            wrong: "",
+            typing: "",
+            complete: ""
+        };
+
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects",
+        };
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        const SYNTH_SOUNDS = {
+            click:    (v) => playTone(600, 60, "square", 0.06 * v),
+            typing:   (v) => playTone(420, 30, "square", 0.04 * v),
+            correct:  (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(784, 180, "sine", 0.15 * v, 110); },
+            wrong:    (v) => playTone(180, 250, "sawtooth", 0.12 * v),
+            complete: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(659, 120, "sine", 0.15 * v, 120); playTone(784, 250, "sine", 0.15 * v, 240); },
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1");
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), input.value);
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            feedbackModal: document.getElementById("feedbackModal"),
+            feedbackHeading: document.getElementById("feedbackHeading"),
+            feedbackBody: document.getElementById("feedbackBody"),
+            closeFeedbackBtn: document.getElementById("closeFeedbackBtn"),
+            dismissFeedbackBtn: document.getElementById("dismissFeedbackBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+            showScreen("home");
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+
+            dom.closeFeedbackBtn.addEventListener("click", closeFeedbackModal);
+            dom.dismissFeedbackBtn.addEventListener("click", closeFeedbackModal);
+            dom.feedbackModal.addEventListener("click", (event) => {
+                if (event.target === dom.feedbackModal) {
+                    closeFeedbackModal();
+                }
+            });
+
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function closeFeedbackModal() {
+            if (dom.feedbackModal) dom.feedbackModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            if (dom.helpBtn) {
+                dom.helpBtn.style.display = screenName === "home" ? "none" : "";
+            }
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+                closeFeedbackModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable */ }
+        }
+
+        const EMBEDDED_SVG = {
+            rocketTop: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" aria-hidden="true">
+                <defs><linearGradient id="llTopGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7dd3fc"/><stop offset="1" stop-color="#a78bfa"/></linearGradient></defs>
+                <path d="M380 18 C270 55 190 150 145 315 L615 315 C570 150 490 55 380 18Z" fill="url(#llTopGrad)" stroke="#eef2ff" stroke-width="6"/>
+                <path d="M145 315H615" stroke="#eef2ff" stroke-width="8" stroke-linecap="round"/>
+                <circle cx="380" cy="135" r="52" fill="#1d2340" stroke="#eef2ff" stroke-width="6"/>
+                <circle cx="380" cy="135" r="29" fill="#7dd3fc"/>
+                <path d="M205 290H555" stroke="#eef2ff" stroke-width="5" opacity=".55"/>
+            </svg>`,
+            rocketMiddle: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" aria-hidden="true">
+                <defs><linearGradient id="llMiddleGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#7dd3fc"/></linearGradient></defs>
+                <path d="M185 25H575L620 335H140Z" fill="url(#llMiddleGrad)" stroke="#eef2ff" stroke-width="6" stroke-linejoin="round"/>
+                <path d="M185 25H575" stroke="#eef2ff" stroke-width="8"/>
+                <path d="M140 335H620" stroke="#eef2ff" stroke-width="8"/>
+                <circle cx="225" cy="92" r="25" fill="#1d2340" stroke="#eef2ff" stroke-width="5"/>
+                <circle cx="535" cy="92" r="25" fill="#1d2340" stroke="#eef2ff" stroke-width="5"/>
+                <path d="M250 245H510" stroke="#eef2ff" stroke-width="6" stroke-linecap="round" opacity=".6"/>
+            </svg>`,
+            rocketBase: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" aria-hidden="true">
+                <defs><linearGradient id="llBaseGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7dd3fc"/><stop offset="1" stop-color="#a78bfa"/></linearGradient></defs>
+                <path d="M205 25H555L610 285H150Z" fill="url(#llBaseGrad)" stroke="#eef2ff" stroke-width="6" stroke-linejoin="round"/>
+                <path d="M205 25H555" stroke="#eef2ff" stroke-width="8"/>
+                <path d="M150 285L75 335L165 335L210 285Z" fill="#a78bfa" stroke="#eef2ff" stroke-width="6"/>
+                <path d="M610 285L685 335L595 335L550 285Z" fill="#a78bfa" stroke="#eef2ff" stroke-width="6"/>
+                <path d="M330 285L380 345L430 285Z" fill="#fb7185" stroke="#eef2ff" stroke-width="5"/>
+                <path d="M350 285L380 330L410 285Z" fill="#fbbf24"/>
+            </svg>`,
+            sentEnvelope: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300">
+                <rect x="25" y="55" width="450" height="190" rx="24" fill="#fff" stroke="#7dd3fc" stroke-width="10"/>
+                <path d="M30 70l220 150L470 70" fill="#eef3ff" stroke="#7dd3fc" stroke-width="10" stroke-linejoin="round"/>
+                <path d="M30 240l150-120M470 240L320 120" fill="none" stroke="#a78bfa" stroke-width="8"/>
+                <path d="M205 245h90" stroke="#34d399" stroke-width="12" stroke-linecap="round"/>
+            </svg>`
+        };
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC — LETTER LAUNCHPAD
+           ============================================================ */
+        const LL = {
+            stage: 1,
+            attempts: 0,
+            hints: 0,
+            firstAttempted: {},
+            firstAttemptCorrect: 0,
+            firstAttemptTotal: 0,
+            mastered: 0,
+            startTime: 0,
+            wrongSkills: {},
+            locked: {},
+            format: "email",
+            finalChecks: [false,false,false,false,false,false],
+            cards: {
+                header: [
+                    {id:"h1", text:"To: principal@school.edu.tt\nSubject: Request to Use the School Hall for Reading Evening", correct:true},
+                    {id:"h2", text:"To: principal@school.edu.tt\nSubject: Hi", correct:false},
+                    {id:"h3", text:"To: principal@school.edu.tt\nSubject: Important!!!", correct:false}
+                ],
+                salutation: [
+                    {id:"s2", text:"Hi Principal!", correct:false},
+                    {id:"s1", text:"Dear Principal Joseph,", correct:true},
+                    {id:"s3", text:"Hey Joseph,", correct:false}
+                ],
+                intro: [
+                    {id:"i2", text:"We want the hall because it would be cool.", correct:false},
+                    {id:"i1", text:"I am writing on behalf of the Form 2 Reading Club to request permission to use the school hall.", correct:true}
+                ],
+                details: [
+                    {id:"d1", text:"The event is planned for Friday 22 November from 5:00 p.m. to 7:00 p.m. and will include supervised readings and a book exchange.", correct:true},
+                    {id:"d2", text:"We will probably do some reading and other stuff sometime after school.", correct:false}
+                ],
+                request: [
+                    {id:"r2", text:"Can we just use the hall? We promise it will be fine.", correct:false},
+                    {id:"r1", text:"Could you please approve the booking and advise us of any safety or supervision requirements?\n\nThe club will follow the school’s rules and remove all materials after the event.", correct:true}
+                ],
+                closing: [
+                    {id:"c1", text:"Yours sincerely,\nAmara Singh, Form 2 Reading Club Secretary", correct:true},
+                    {id:"c2", text:"Thanks!\nAmara", correct:false}
+                ]
+            }
+        };
+
+        const LL_STAGE_DATA = [
+            {title:"Address Module", desc:"Build the rocket nose with the correct recipient, specific subject and formal salutation.", keys:["header","salutation"]},
+            {title:"Purpose and Detail Modules", desc:"Add the exact purpose and the information the principal needs to make a decision.", keys:["intro","details"]},
+            {title:"Request and Responsibility Modules", desc:"State the requested action, show responsibility, then finish with the correct formal closing.", keys:["request","closing"]}
+        ];
+        const LL_ORDER = ["header","salutation","intro","details","request","closing"];
+        const LL_LABELS = {
+            header:"To / Subject", salutation:"Salutation", intro:"Introduction",
+            details:"Details", request:"Request / Responsibility", closing:"Closing / Signature"
+        };
+
+        function llResetState(){
+            LL.stage=1; LL.attempts=0; LL.hints=0; LL.firstAttempted={}; LL.firstAttemptCorrect=0; LL.firstAttemptTotal=0;
+            LL.mastered=0; LL.startTime=Date.now(); LL.wrongSkills={}; LL.locked={};
+            LL.format="email"; LL.finalChecks=[false,false,false,false,false,false];
+        }
+
+        function llEsc(s){ return escapeHtml(s).replace(/\n/g,"<br>"); }
+
+        function llSetFeedback(type,title,why,fix,model){
+            if (!dom.feedbackModal) return;
+            dom.feedbackHeading.textContent = title;
+            dom.feedbackHeading.style.color = type === "wrong" ? "var(--danger)" : "var(--accent)";
+            
+            let html = "";
+            if (why) html += `<p><b>Why:</b> ${escapeHtml(why)}</p>`;
+            if (fix) html += `<p><b>How to fix:</b> ${escapeHtml(fix)}</p>`;
+            if (model) html += `<p><b>Correct model:</b> ${llEsc(model)}</p>`;
+            
+            dom.feedbackBody.innerHTML = html;
+            dom.feedbackModal.classList.add("show");
+        }
+
+        function llClearFeedback(){
+            closeFeedbackModal();
+        }
+
+        function llProgress(){
+            const done=Object.keys(LL.locked).length;
+            const pct=Math.round((done/6)*100);
+            document.getElementById("llProgressPct").textContent=pct+"%";
+            document.getElementById("llProgressBar").style.width=pct+"%";
+            document.getElementById("llAttemptChip").textContent="Attempts: "+LL.attempts;
+            document.getElementById("llHintChip").textContent="Hints: "+LL.hints;
+        }
+
+        function llRenderStageVisual(stage){
+            const data=LL_STAGE_DATA[stage-1];
+            const svg = stage===1 ? EMBEDDED_SVG.rocketTop : stage===2 ? EMBEDDED_SVG.rocketMiddle : EMBEDDED_SVG.rocketBase;
+            const slots=data.keys.map(k=>{
+                const item=LL.locked[k];
+                return `<div class="ll-slot ${item?"locked":""}" data-slot="${k}">
+                    <div class="ll-slot-title">${LL_LABELS[k]}</div>
+                    <div class="ll-slot-content">${item?llEsc(item.text):"Drag the approved section here"}</div>
+                </div>`;
+            }).join("");
+            return `<div class="ll-stage-visual stage-${stage}" aria-label="Rocket ${stage===1?"top":stage===2?"middle":"base"} assembly area">
+                ${svg}
+                <div class="ll-stage-slots">${slots}</div>
+            </div>`;
+        }
+
+        function llRenderRocketPreview(){
+            return `<div class="ll-rocket-preview" aria-label="Rocket assembly preview">
+                <div>${EMBEDDED_SVG.rocketTop}</div>
+                <div>${EMBEDDED_SVG.rocketMiddle}</div>
+                <div>${EMBEDDED_SVG.rocketBase}</div>
+            </div>`;
+        }
+
+        function llCard(k,item){
+            const used=LL.locked[k]?.id===item.id;
+            return `<button class="ll-choice ${used?"used":""}" draggable="${!used}" data-key="${k}" data-id="${item.id}" type="button">${llEsc(item.text)}</button>`;
+        }
+
+        function llRenderStage(){
+            const stage=LL.stage;
+            const data=LL_STAGE_DATA[stage-1];
+            document.getElementById("llStageHint").textContent=data.desc;
+            let html=`<section class="ll-stage">
+                <h2>Stage ${stage} — ${data.title}</h2>
+                <p>${escapeHtml(data.desc)}</p>
+                ${stage===1?`<div class="ll-format">
+                    <button class="selected" type="button" disabled><b>Default format: Formal email</b><br><span class="ll-mini">Fits the principal as the audience and the request as the purpose.</span></button>
+                    <button type="button" disabled><b>Print letter</b><br><span class="ll-mini">Not selected for this mission.</span></button>
+                </div>`:""}
+                ${llRenderStageVisual(stage)}
+                ${data.keys.map(k=>`<div style="margin-top:15px"><div class="ll-slot-title">${LL_LABELS[k]} — drag the correct section into its target slot</div>
+                    <div class="ll-choice-grid">${LL.cards[k].map(x=>llCard(k,x)).join("")}</div></div>`).join("")}
+            </section>`;
+            document.getElementById("llContent").innerHTML=html;
+            llBindCards();
+            llProgress();
+        }
+
+        function llBindCards(){
+            document.querySelectorAll(".ll-choice").forEach(btn=>{
+                btn.addEventListener("dragstart",e=>{
+                    if(btn.classList.contains("used")) return;
+                    e.dataTransfer.setData("text/plain",JSON.stringify({key:btn.dataset.key,id:btn.dataset.id}));
+                });
+                btn.addEventListener("click", () => {
+                    if (btn.classList.contains("used")) return;
+                    llSetFeedback("wrong", "Drag and Drop Required", "Clicking is disabled for selection.", "Drag and drop the choice directly into the target slot box above.", "Click and drag the card into the slot.");
+                });
+            });
+            document.querySelectorAll(".ll-slot:not(.locked)").forEach(slot=>{
+                slot.addEventListener("dragover",e=>{e.preventDefault();slot.classList.add("active")});
+                slot.addEventListener("dragleave",()=>slot.classList.remove("active"));
+                slot.addEventListener("drop",e=>{
+                    e.preventDefault();slot.classList.remove("active");
+                    try{
+                        const d=JSON.parse(e.dataTransfer.getData("text/plain"));
+                        if(d.key===slot.dataset.slot) llAttempt(d.key,d.id);
+                        else llWrong("Module in wrong position");
+                    }catch(_){}
+                });
+            });
+        }
+
+        function llWrong(skill){
+            LL.attempts++;
+            LL.wrongSkills[skill]=(LL.wrongSkills[skill]||0)+1;
+            playSound("wrong");
+            const messages={
+                "Module in wrong position":["Module in wrong position","Formal-letter sections follow a logical external structure.","Place subject and salutation before the body, and closing before the signature.","To/Subject → Dear Principal Joseph → body → Yours sincerely → signature."],
+                header:["Header choice is not exact","The recipient and subject must clearly identify the audience and purpose.","Use the school contact and the specific request subject.","To: principal@school.edu.tt; Subject: Request to Use the School Hall for Reading Evening"],
+                salutation:["Tone is too informal","The wording does not suit a principal or official request.","Use respectful Standard English.","Dear Principal Joseph,"],
+                intro:["Purpose is not clear enough","A formal request should state who is writing and exactly what permission is requested.","State the Reading Club, the hall and the request directly.","I am writing on behalf of the Form 2 Reading Club to request permission to use the school hall."],
+                details:["Request lacks key detail","The reader cannot decide without date, time, purpose or responsibility information.","Include the planned schedule and supervised activity.","Friday 22 November, 5:00–7:00 p.m., supervised readings and a book exchange."],
+                request:["Request or responsibility is too informal","A formal request should ask directly and show responsibility.","Use respectful wording and include the club's responsibility.","Could you please approve the booking and advise us of any safety or supervision requirements?"],
+                closing:["Closing is not formal","The closing and signature should match a formal request.","Use the recognised closing and full supplied role.","Yours sincerely, Amara Singh, Form 2 Reading Club Secretary"]
+            };
+            const m=messages[skill]||messages.header;
+            llSetFeedback("wrong",m[0],m[1],m[2],m[3]);
+            llProgress();
+        }
+
+        function llAttempt(key,id){
+            if(LL.locked[key]) return;
+            const item=LL.cards[key].find(x=>x.id===id);
+            if(!item) return;
+
+            if(!LL.firstAttempted[key]){
+                LL.firstAttempted[key]=true;
+                LL.firstAttemptTotal++;
+                if(item.correct) LL.firstAttemptCorrect++;
+            }
+
+            if(item.correct){
+                LL.locked[key]=item;
+                LL.mastered++;
+                LL.attempts++;
+                playSound("correct");
+                llClearFeedback();
+                llRenderStage();
+                if(Object.keys(LL.locked).length===2 && LL.stage===1){LL.stage=2; llRenderStage();}
+                else if(Object.keys(LL.locked).length===4 && LL.stage===2){LL.stage=3; llRenderStage();}
+                else if(Object.keys(LL.locked).length===6){LL.stage=4; llRenderFinal();}
+            }else{
+                llWrong(key);
+            }
+        }
+
+        function llRenderFinal(){
+            document.getElementById("llStageHint").textContent="Final launch check: every condition must be exact.";
+            document.getElementById("llProgressPct").textContent="100%";
+            document.getElementById("llProgressBar").style.width="100%";
+            document.getElementById("llContent").innerHTML=llRenderRocketPreview()+`
+            <section class="ll-stage">
+              <h2>Stage 4 — Final Launch Check</h2>
+              <p>Check the completed formal email before launch. All six checks must be selected.</p>
+              <div class="ll-stage" style="margin-top:14px; margin-bottom:18px;">
+                <div class="ll-slot-title">Final exact email</div>
+                <p><b>To:</b> principal@school.edu.tt<br><b>Subject:</b> Request to Use the School Hall for Reading Evening</p>
+                <p><b>Dear Principal Joseph,</b></p>
+                <p>I am writing on behalf of the Form 2 Reading Club to request permission to use the school hall.</p>
+                <p>The event is planned for Friday 22 November from 5:00 p.m. to 7:00 p.m. and will include supervised readings and a book exchange.</p>
+                <p>Could you please approve the booking and advise us of any safety or supervision requirements?</p>
+                <p>The club will follow the school’s rules and remove all materials after the event.</p>
+                <p>Yours sincerely,<br>Amara Singh, Form 2 Reading Club Secretary</p>
+              </div>
+              <div class="ll-checklist">
+                ${["Audience and purpose are clear.","The subject line is specific.","The date and time are included.","The tone is formal and respectful.","The paragraphs are in logical order.","No private information beyond the school contact is included; spelling and punctuation are accurate."].map((x,i)=>`<div class="ll-check"><input id="llc${i}" type="checkbox" ${LL.finalChecks[i]?"checked":""}><label for="llc${i}">${x}</label></div>`).join("")}
+              </div>
+              <div class="button-row"><button class="primary-btn" id="llLaunchBtn">🚀 Launch Message</button></div>
+            </section>`;
+            document.querySelectorAll(".ll-check input").forEach((x,i)=>x.addEventListener("change",()=>LL.finalChecks[i]=x.checked));
+            document.getElementById("llLaunchBtn").addEventListener("click",llLaunch);
+            document.getElementById("llBackBtn").disabled=false;
+        }
+
+        function llLaunch() {
+            // 1. Verify checks before launching
+            if (!LL.finalChecks.every(Boolean)) {
+                llSetFeedback("wrong", "Launch blocked", "Every final check must be confirmed before the message can launch.", "Tick all six checks, then launch again.", "All six final checks selected.");
+                LL.attempts++; 
+                llProgress(); 
+                return;
+            }
+
+            // 2. Hide buttons and update the header
+            document.querySelector(".ll-actions").style.display = "none";
+            document.getElementById("llStageHint").textContent = "Initiating launch sequence...";
+
+            // 3. Inject the animation container with the three SVG parts
+            document.getElementById("llContent").innerHTML = `
+                <section class="ll-stage" style="border: none; background: transparent; box-shadow: none;">
+                    <div class="ll-launch-anim-container">
+                        <div class="ll-rocket-preview ll-anim-rocket" id="launchRocket">
+                            <div class="ll-anim-part ll-anim-top">${EMBEDDED_SVG.rocketTop}</div>
+                            <div class="ll-anim-part ll-anim-middle">${EMBEDDED_SVG.rocketMiddle}</div>
+                            <div class="ll-anim-part ll-anim-base">${EMBEDDED_SVG.rocketBase}</div>
+                        </div>
+                    </div>
+                </section>
+            `;
+
+            const rocket = document.getElementById("launchRocket");
+
+            // 4. Phase 1: Assemble the rocket (100ms delay to allow DOM to render)
+            setTimeout(() => {
+                rocket.classList.add("assemble");
+            }, 100);
+
+            // 5. Phase 2: Launch the rocket upwards (wait 1.6s for assembly to finish)
+            setTimeout(() => {
+                rocket.classList.add("takeoff");
+                playSound("complete");
+            }, 1600); 
+
+            // 6. Phase 3: Show the final success screen (wait 1.2s for rocket to clear the screen)
+            setTimeout(() => {
+                const seconds = Math.round((Date.now() - LL.startTime) / 1000);
+                const first = LL.firstAttemptTotal > 0 ? Math.round((LL.firstAttemptCorrect / LL.firstAttemptTotal) * 100) : 100;
+                
+                document.getElementById("llContent").innerHTML = `
+                    <section class="ll-launch">
+                        <span role="img" aria-label="Sent envelope">${EMBEDDED_SVG.sentEnvelope}</span>
+                        <div>
+                            <h2>Formal message sent</h2>
+                            <p>The letter rocket reached its destination.</p>
+                            <div class="ll-stat-grid">
+                                <div class="ll-stat"><b>${first}%</b><span class="ll-mini">First-attempt accuracy</span></div>
+                                <div class="ll-stat"><b>${LL.mastered}/6</b><span class="ll-mini">Final mastery</span></div>
+                                <div class="ll-stat"><b>${seconds}s</b><span class="ll-mini">Time on task</span></div>
+                            </div>
+                        </div>
+                    </section>
+                    <div class="ll-stage" style="margin-top:14px">
+                        <h2>Mission complete</h2>
+                        <p>You applied formal-letter format and chose clear, respectful wording for a digital request.</p>
+                    </div>
+                `;
+                
+                document.getElementById("llStageHint").textContent = "Mission complete";
+            }, 2800);
+        }
+
+        function llHint(){
+            LL.hints++;
+            const hints={
+                1:"For the address module, look for the exact school email and a subject that states the requested action. The salutation names the principal respectfully.",
+                2:"The introduction says who is writing and what permission is requested. The details give Friday 22 November, 5:00–7:00 p.m., supervised readings and a book exchange.",
+                3:"The request uses 'Could you please...' and the responsibility line promises to follow school rules and remove materials. Finish with 'Yours sincerely,' and the supplied name and role."
+            };
+            llSetFeedback("hint","Hint",hints[LL.stage]||"Check every final launch condition.","Choose the supplied wording that matches the mission exactly.","Use the exact model wording shown in the mission.");
+        }
+
+        function llTryAgain(){
+            llResetState();
+            llClearFeedback();
+            LL.stage=1;
+            llRenderStage();
+        }
+
+        function llBack(){
+            if(LL.stage<=1) return;
+            if(LL.stage===2){delete LL.locked.intro;delete LL.locked.details;LL.stage=1}
+            else if(LL.stage===3){delete LL.locked.request;delete LL.locked.closing;LL.stage=2}
+            else {LL.stage=3}
+            llClearFeedback(); llRenderStage();
+        }
+
+        function llRules(){
+            openInstructionsModal();
+        }
+
+        function devInit(){
+            llResetState();
+            document.querySelector(".ll-actions").style.display="";
+            document.getElementById("llBackBtn").onclick=llBack;
+            document.getElementById("llRulesBtn").onclick=llRules;
+            document.getElementById("llHintBtn").onclick=llHint;
+            document.getElementById("llTryBtn").onclick=llTryAgain;
+            document.getElementById("llStageHint").textContent="Mission brief";
+            document.getElementById("llContent").innerHTML=`
+              <section class="ll-stage">
+                <h2>Screen 1 — Mission Brief</h2>
+                <p><b>Mission:</b> Request permission from the principal to use the school hall for a student reading evening.</p>
+                <p><b>Default format:</b> formal email. Build the launch vehicle by dragging each exact section into its target slot.</p>
+                <p>Every correct move locks a module. You can retry mistakes, and no speed or lives are required.</p>
+                ${llRenderRocketPreview()}
+                <div class="button-row"><button class="primary-btn" id="llBeginBtn">Begin Assembly →</button></div>
+              </section>`;
+            document.getElementById("llBeginBtn").onclick=()=>{LL.stage=1;llRenderStage();};
+            llProgress();
+        }
+        function devReset(){
+            llResetState();
+            document.querySelector(".ll-actions").style.display="";
+        }
+    </script>
+</body>
+
+</html>
