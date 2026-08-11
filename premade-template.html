@@ -769,6 +769,11 @@
             color: var(--text-soft);
         }
 
+        .feedback-mistake-label {
+            color: var(--text);
+            font-weight: 800;
+        }
+
         /* dragSort question type */
         .dragsort-layout {
             display: grid;
@@ -1511,6 +1516,10 @@
         }
 
         .skills-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
             margin: 10px 0;
             padding: 12px 18px;
             border-radius: 12px;
@@ -1523,8 +1532,43 @@
 
         .skills-list li::before {
             content: "✦";
-            margin-right: 10px;
+            margin-right: 4px;
             color: var(--accent);
+            flex: none;
+        }
+
+        .skills-list li .skill-name {
+            flex: 1;
+        }
+
+        .skills-list li.achieved::before {
+            color: var(--success);
+        }
+
+        .skills-list li.needs-practice::before {
+            color: var(--warning);
+        }
+
+        .skill-status {
+            flex: none;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .skills-list li.achieved .skill-status {
+            color: var(--success);
+            background: color-mix(in srgb, var(--success) 14%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
+        }
+
+        .skills-list li.needs-practice .skill-status {
+            color: var(--warning);
+            background: color-mix(in srgb, var(--warning) 14%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
         }
 
         .echo-chamber {
@@ -1633,6 +1677,21 @@
         .ring.revealed .ring-label {
             color: var(--text);
             border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+        }
+
+        /* Ring whose linked question was answered only partially: it catches
+           the echo but does not fully glow. */
+        .ring.partial {
+            opacity: 0.55;
+            border-style: dashed;
+            border-color: var(--warning);
+            box-shadow: 0 0 14px color-mix(in srgb, var(--warning) 32%, transparent);
+            animation: ring-appear 0.7s ease both;
+        }
+
+        .ring.partial .ring-label {
+            color: var(--text-soft);
+            border-color: color-mix(in srgb, var(--warning) 45%, var(--border));
         }
 
         @keyframes ring-appear {
@@ -1785,8 +1844,8 @@
                         <div class="echo-clear-badge" id="briefClearEcho" hidden>Clear theme echo</div>
                     </div>
                     <ul class="skills-list" id="briefSkills" hidden>
-                        <li>Identifying a complete theme statement</li>
-                        <li>Linking character choices and evidence to theme</li>
+                        <li data-skill="theme"><span class="skill-name">Identifying a complete theme statement</span><span class="skill-status"></span></li>
+                        <li data-skill="link"><span class="skill-name">Linking character choices and evidence to theme</span><span class="skill-status"></span></li>
                     </ul>
                     <div class="button-row">
                         <button class="primary-btn" id="briefContinueBtn">Step In</button>
@@ -2235,9 +2294,18 @@
                 ],
                 correctIndex: 1,
                 perChoiceFeedback: [
-                    "Not quite — \"cooperation\" is only the topic (what the story is about), not the theme. A theme is the complete idea the story teaches.",
+                    "",
                     "Correct. Kareem shares his notes, and when he needs help the class stays to support him — people who support others often receive support in return.",
                     "Not quite — the project is just the setting. The story's real message is about how helping others comes back around."
+                ],
+                // Scenario feedback: choosing the topic instead of the theme.
+                mistakeFeedback: [
+                    {
+                        choiceIndex: 0,
+                        why: "“Cooperation” names a subject but does not state the story's message.",
+                        howToFix: "Choose the full statement that explains what the story suggests about cooperation.",
+                        correctModel: "“People who support others often receive support in return.”"
+                    }
                 ]
             },
             // --- Q2: evidence cards (fills the Evidence ring) ---------------
@@ -2261,6 +2329,15 @@
                 bins: [
                     { id: "bin-evidence", label: "Evidence", icon: "⭐", description: "Details that show someone giving or receiving support." },
                     { id: "bin-not-evidence", label: "Not Evidence", icon: "🚫", description: "Details that do not support the theme." }
+                ],
+                // Scenario feedback: a time/object detail treated as evidence.
+                mistakeFeedback: [
+                    {
+                        wrongItems: ["ev-afternoon", "ev-project"],
+                        why: "The card names time or an object but not a meaningful action.",
+                        howToFix: "Select the actions that show giving and receiving support.",
+                        correctModel: "“shared his notes” and “the class stayed to help him”"
+                    }
                 ]
             },
             // --- Q3: build the chain (fills the Real Life ring) -------------
@@ -2312,6 +2389,15 @@
                     { id: "bin-evidence", label: "Evidence", icon: "🔍", description: "Details from the story that support the theme." },
                     { id: "bin-reallife", label: "Real Life", icon: "🌍", description: "A real-life situation that echoes the theme." },
                     { id: "bin-reject", label: "Not the Echo", icon: "🚫", description: "Options that go against the theme." }
+                ],
+                // Scenario feedback: the real-life link does not echo the theme.
+                mistakeFeedback: [
+                    {
+                        wrongItems: ["echo-reallife", "echo-bad-hide", "echo-bad-ignore"],
+                        why: "The situation does not demonstrate cooperation.",
+                        howToFix: "Choose a real situation where people share responsibility and support.",
+                        correctModel: "Group members divide tasks and help someone who falls behind."
+                    }
                 ]
             },
         ];
@@ -3597,7 +3683,10 @@
             if (!target) return;
             target.rings.forEach((id) => {
                 const el = document.getElementById(id);
-                if (el) el.classList.add("revealed");
+                if (el) {
+                    el.classList.remove("partial");
+                    el.classList.add("revealed");
+                }
             });
             const dot = document.getElementById(target.dot);
             if (dot) dot.classList.add("lit");
@@ -3606,27 +3695,62 @@
             }
         }
 
+        // Marks a ring as only partially caught — the linked question was
+        // answered with "partial" grading (see .ring.partial styling).
+        function setRingPartial(key, opts) {
+            const options = opts || {};
+            const target = RING_TARGETS[normalizeRingKey(key)];
+            if (!target) return;
+            target.rings.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.remove("revealed");
+                    el.classList.add("partial");
+                }
+            });
+            const dot = document.getElementById(target.dot);
+            if (dot) dot.classList.remove("lit");
+            if (options.announce !== false) {
+                announce("Ring partially caught: " + target.label + ".");
+            }
+        }
+
+        // The result status of the question that feeds a given ring, or null
+        // when no question is linked to it (or it has not been answered).
+        function ringStatusFor(key) {
+            const norm = normalizeRingKey(key);
+            const question = activeQuestions.find((q) => q.revealRing && normalizeRingKey(q.revealRing) === norm);
+            if (!question) return null;
+            const result = state.results[question.id];
+            return result ? result.status : null;
+        }
+
         function hideAllRings() {
             Object.keys(RING_TARGETS).forEach((key) => {
                 const target = RING_TARGETS[key];
                 target.rings.forEach((id) => {
                     const el = document.getElementById(id);
-                    if (el) el.classList.remove("revealed");
+                    if (el) {
+                        el.classList.remove("revealed", "partial");
+                    }
                 });
                 const dot = document.getElementById(target.dot);
                 if (dot) dot.classList.remove("lit");
             });
         }
 
-        // Re-apply the revealed state from stored results, so the chambers
-        // always match progress on resume and after a reset.
+        // Re-apply the revealed/partial state from stored results, so the
+        // chambers always match progress on resume and after a reset.
         function syncRings() {
             hideAllRings();
             activeQuestions.forEach((question) => {
                 if (!question.revealRing) return;
                 const result = state.results[question.id];
-                if (result && result.status === "correct") {
+                if (!result) return;
+                if (result.status === "correct") {
                     revealRing(question.revealRing, { announce: false });
+                } else if (result.status === "partial") {
+                    setRingPartial(question.revealRing, { announce: false });
                 }
             });
             syncEchoClear();
@@ -3655,28 +3779,86 @@
             });
         }
 
+        // How the completed chamber turned out: how many of the three rings
+        // were fully caught, partially caught, or left empty.
+        function ringCounts() {
+            const counts = { correct: 0, partial: 0, empty: 0 };
+            ["message", "evidence", "realLife"].forEach((key) => {
+                const status = ringStatusFor(key);
+                if (status === "correct") counts.correct++;
+                else if (status === "partial") counts.partial++;
+                else counts.empty++;
+            });
+            return counts;
+        }
+
+        // Is a skill considered achieved? "theme" is earned when its ring
+        // question is fully correct; "link" needs both the evidence and the
+        // real-life rings fully caught.
+        function skillAchieved(kind) {
+            if (kind === "theme") {
+                return ringStatusFor("message") === "correct";
+            }
+            if (kind === "link") {
+                return ringStatusFor("evidence") === "correct" && ringStatusFor("realLife") === "correct";
+            }
+            return false;
+        }
+
+        // Completion copy adapts to how many rings actually caught the echo,
+        // so a partially-correct or incorrect run is acknowledged honestly.
+        function buildCompletionCopy(counts) {
+            if (counts.correct === 3) {
+                return "The still room holds its answer now. All three rings glow — the message, the evidence that carries it, and how the theme echoes into real life.";
+            }
+            if (counts.correct === 2) {
+                return "Two rings glow and one is still quiet. The chamber is almost whole — revisit the ring that has not fully caught the echo.";
+            }
+            if (counts.correct === 1) {
+                return "One ring has caught the echo. Two still wait in silence — revisit them to let the message ring.";
+            }
+            return "The echo has not yet taken hold. Each quiet ring marks an idea still to find — take another look and let the message ring.";
+        }
+
         // Renders the briefing screen's text, skills, and button for its two
         // states: the pre-run briefing (empty rings, "Step In") and the
-        // completed chamber shown after the final question (all three rings
-        // lit, the skills list, and an "Exit to Home" button).
+        // completed chamber shown after the final question (rings lit
+        // according to how each one was answered, the skills list with
+        // achieved/needs-practice status, and an "Exit to Home" button).
         function renderBriefScreen() {
             const complete = state.finished === true;
             dom.briefTitle.textContent = complete
                 ? "The Silent Echo Chamber — Complete"
                 : "The Silent Echo Chamber";
-            dom.briefDescription.textContent = complete
-                ? "The still room holds its answer now. All three rings glow — the message, the evidence that carries it, and how the theme echoes into real life."
-                : "Step into the still room. The air holds its breath. Three empty rings wait, ready for a message to drop into the quiet — and for what it echoes, through evidence, into real life.";
-            dom.briefSkills.hidden = !complete;
+            if (complete) {
+                dom.briefDescription.textContent = buildCompletionCopy(ringCounts());
+                dom.briefSkills.hidden = false;
+                dom.briefSkills.querySelectorAll("li[data-skill]").forEach((li) => {
+                    const achieved = skillAchieved(li.dataset.skill);
+                    li.classList.toggle("achieved", achieved);
+                    li.classList.toggle("needs-practice", !achieved);
+                    const chip = li.querySelector(".skill-status");
+                    if (chip) chip.textContent = achieved ? "Achieved" : "Needs practice";
+                });
+            } else {
+                dom.briefDescription.textContent = "Step into the still room. The air holds its breath. Three empty rings wait, ready for a message to drop into the quiet — and for what it echoes, through evidence, into real life.";
+                dom.briefSkills.hidden = true;
+            }
             dom.briefContinueBtn.textContent = complete ? "Exit to Home" : "Step In";
         }
 
-        // Completes the run back at the briefing screen: every ring lights,
-        // the skills list appears, and the "Clear theme echo" badge shows if
-        // the final synthesis was answered correctly.
+        // Completes the run back at the briefing screen: each ring lights
+        // (or stays quiet/partial) according to how its question was
+        // answered, the skills list shows achieved vs needs-practice, and the
+        // "Clear theme echo" badge shows if the final synthesis was correct.
         function showCompletedBrief() {
             state.finished = true;
-            ["message", "evidence", "realLife"].forEach((key) => revealRing(key, { announce: false }));
+            hideAllRings();
+            ["message", "evidence", "realLife"].forEach((key) => {
+                const status = ringStatusFor(key);
+                if (status === "correct") revealRing(key, { announce: false });
+                else if (status === "partial") setRingPartial(key, { announce: false });
+            });
             syncEchoClear();
             renderBriefScreen();
             showScreen("brief");
@@ -5602,9 +5784,14 @@
             }
 
             recordResult(question, answer, result);
-            // A correctly identified idea makes its echo-chamber ring appear.
-            if (result.status === "correct" && question.revealRing) {
-                revealRing(question.revealRing);
+            // A correctly identified idea makes its echo-chamber ring appear;
+            // a partially identified one makes the ring catch but not glow.
+            if (question.revealRing) {
+                if (result.status === "correct") {
+                    revealRing(question.revealRing);
+                } else if (result.status === "partial") {
+                    setRingPartial(question.revealRing);
+                }
             }
             // The final synthesis question completing makes the chamber show
             // "Clear theme echo" once all parts are connected.
@@ -5637,16 +5824,53 @@
             return String(value).trim().toLowerCase().replace(/\s+/g, " ");
         }
 
+        // Which bin an item belongs in (used by mistake matching).
+        function correctBinOf(question, itemId) {
+            const item = question.items.find((it) => it.id === itemId);
+            return item ? item.correctBin : null;
+        }
+
+        // Scenario feedback: a question can list the common wrong answers it
+        // wants explained with Why / How to fix / Correct model bullets.
+        //   mistakeFeedback: [
+        //     { choiceIndex: 2, why, howToFix, correctModel },       // multipleChoice
+        //     { wrongItems: ["a", "b"], why, howToFix, correctModel } // dragSort — fires when any listed item is misplaced
+        //   ]
+        // The first matching entry wins; a match replaces the generic
+        // explanation so only the targeted feedback shows.
+        function matchMistakeFeedback(question, context) {
+            if (!Array.isArray(question.mistakeFeedback)) return null;
+            for (const entry of question.mistakeFeedback) {
+                if (!entry || typeof entry !== "object") continue;
+                if (entry.choiceIndex != null) {
+                    if (context.choice === entry.choiceIndex) return entry;
+                    continue;
+                }
+                if (Array.isArray(entry.wrongItems) && context.placed) {
+                    const misplaced = entry.wrongItems.some((id) => {
+                        const placed = context.placed[id];
+                        return placed != null && placed !== correctBinOf(question, id);
+                    });
+                    if (misplaced) return entry;
+                    continue;
+                }
+            }
+            return null;
+        }
+
         function gradeAnswer(question, answer) {
             switch (question.type) {
                 case "multipleChoice": {
-                    const isCorrect = Number(answer) === Number(question.correctIndex);
+                    const choice = Number(answer);
+                    const isCorrect = choice === Number(question.correctIndex);
                     const perChoice = Array.isArray(question.perChoiceFeedback)
-                        ? question.perChoiceFeedback[Number(answer)]
+                        ? question.perChoiceFeedback[choice]
                         : null;
+                    const mistake = matchMistakeFeedback(question, { choice: choice });
                     return {
                         status: isCorrect ? "correct" : "wrong",
-                        explanation: perChoice || question.explanation || ""
+                        explanation: mistake ? "" : (perChoice || question.explanation || ""),
+                        mistake: mistake
                     };
                 }
                 case "exactText": {
@@ -5688,12 +5912,14 @@
                         if (ok) correctCount++;
                     });
                     const total = question.items.length;
+                    const mistake = matchMistakeFeedback(question, { placed: answer || {} });
                     return {
                         status: correctCount === total ? "correct" : correctCount > 0 ? "partial" : "wrong",
-                        explanation: (question.explanation || "") + " You placed " + correctCount + " of " + total + " items correctly.",
+                        explanation: mistake ? "" : (question.explanation || "") + " You placed " + correctCount + " of " + total + " items correctly.",
                         perItem: perItem,
                         correctCount: correctCount,
-                        total: total
+                        total: total,
+                        mistake: mistake
                     };
                 }
                 case "matching": {
@@ -5804,6 +6030,7 @@
                 status: result.status,
                 explanation: result.explanation,
                 perItem: result.perItem || null,
+                mistake: result.mistake || null,
                 scoreAwarded: result.status === "ungraded" ? 0 : scoreForStatus(result.status)
             };
             state.score += state.results[question.id].scoreAwarded;
@@ -6080,6 +6307,27 @@
             dom.answerArea.appendChild(box);
         }
 
+        // Renders the scenario feedback (Why / How to fix / Correct model)
+        // as three bullets when the submitted answer matched a listed mistake.
+        function appendMistakeFeedback(list, mistake) {
+            if (!mistake) return;
+            const rows = [
+                ["Why", mistake.why],
+                ["How to fix", mistake.howToFix],
+                ["Correct model", mistake.correctModel]
+            ];
+            rows.forEach(([name, text]) => {
+                if (!text) return;
+                const item = document.createElement("li");
+                const strong = document.createElement("span");
+                strong.className = "feedback-mistake-label";
+                strong.textContent = name + ": ";
+                item.appendChild(strong);
+                item.appendChild(document.createTextNode(text));
+                list.appendChild(item);
+            });
+        }
+
         function showFeedback(question, result) {
             const stored = state.results[question.id];
             dom.feedbackBox.className = "feedback-box show " +
@@ -6094,9 +6342,11 @@
             const list = document.createElement("ul");
             list.className = "feedback-list";
 
+            // A matched mistake replaces the generic "Correct answer" line and
+            // explanation with the targeted Why / How to fix / Correct model.
             if (result.status !== "correct" && result.status !== "ungraded") {
                 const correctAnswerText = getCorrectAnswerText(question);
-                if (correctAnswerText) {
+                if (correctAnswerText && !result.mistake) {
                     const item = document.createElement("li");
                     item.textContent = "Correct answer: " + correctAnswerText;
                     list.appendChild(item);
@@ -6106,7 +6356,9 @@
             // dragSort/matching: one vertical bullet per item.
             appendResultLines(list, question);
 
-            if (result.explanation) {
+            if (result.mistake) {
+                appendMistakeFeedback(list, result.mistake);
+            } else if (result.explanation) {
                 const item = document.createElement("li");
                 item.textContent = result.explanation;
                 list.appendChild(item);
@@ -6119,7 +6371,10 @@
             }
 
             dom.feedbackBox.append(label, list);
-            announce((STATUS_LABELS[result.status] || result.status) + ". " + (result.explanation || ""));
+            const spoken = result.mistake
+                ? result.mistake.why + " " + result.mistake.howToFix
+                : (result.explanation || "");
+            announce((STATUS_LABELS[result.status] || result.status) + ". " + spoken);
         }
 
         function showStoredFeedback(question) {
@@ -6139,7 +6394,7 @@
 
             if (result.status !== "correct" && result.status !== "ungraded") {
                 const correctAnswerText = getCorrectAnswerText(question);
-                if (correctAnswerText) {
+                if (correctAnswerText && !result.mistake) {
                     const item = document.createElement("li");
                     item.textContent = "Correct answer: " + correctAnswerText;
                     list.appendChild(item);
@@ -6149,7 +6404,9 @@
             // dragSort/matching: one vertical bullet per item.
             appendResultLines(list, question);
 
-            if (result.explanation) {
+            if (result.mistake) {
+                appendMistakeFeedback(list, result.mistake);
+            } else if (result.explanation) {
                 const item = document.createElement("li");
                 item.textContent = result.explanation;
                 list.appendChild(item);
