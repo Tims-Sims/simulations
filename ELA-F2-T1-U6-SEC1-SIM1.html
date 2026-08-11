@@ -1808,6 +1808,7 @@
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
                 <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+                <button class="control-btn hidden" id="reviewHistoryBtn" aria-label="Review answer history">Review Answers</button>
                 <button class="control-btn hidden" id="exitBtn" aria-label="Exit to home screen">Exit</button>
             </div>
         </header>
@@ -1935,30 +1936,30 @@
         <main class="screen" id="summaryScreen">
             <div class="sim-layout">
                 <section class="summary-card">
-                    <div class="eyebrow">Final Results</div>
+                    <div class="eyebrow" id="summaryEyebrow">Final Results</div>
                     <h2 id="summaryTitle">You finished the simulation.</h2>
-                    <p class="question-prompt">
+                    <p class="question-prompt" id="summaryPrompt">
                         Great work. Review your answers, see what you got right, and learn from anything you missed.
                     </p>
 
                     <div class="summary-grid">
-                        <div class="summary-stat">
+                        <div class="summary-stat" id="statScore">
                             <h4>Total Score</h4>
                             <p id="summaryScore">0</p>
                         </div>
-                        <div class="summary-stat">
+                        <div class="summary-stat" id="statAccuracy">
                             <h4>Accuracy</h4>
                             <p id="summaryAccuracy">0%</p>
                         </div>
-                        <div class="summary-stat">
+                        <div class="summary-stat" id="statCorrect">
                             <h4>Correct</h4>
                             <p id="summaryCorrect">0</p>
                         </div>
-                        <div class="summary-stat">
+                        <div class="summary-stat" id="statWrong">
                             <h4>Wrong</h4>
                             <p id="summaryWrong">0</p>
                         </div>
-                        <div class="summary-stat">
+                        <div class="summary-stat" id="statStreak">
                             <h4>Best Streak</h4>
                             <p id="summaryStreak">0</p>
                         </div>
@@ -1967,7 +1968,7 @@
                     <div class="results-list" id="summaryResults"></div>
 
                     <div class="button-row" style="margin-top: 24px;">
-                        <button class="secondary-btn" id="backToBriefBtn">Back to Chamber</button>
+                        <button class="secondary-btn" id="summaryBackBtn">Back to Chamber</button>
                         <button class="primary-btn" id="playAgainBtn">Play Again</button>
                     </div>
                 </section>
@@ -3155,8 +3156,15 @@
             summaryWrong: document.getElementById("summaryWrong"),
             summaryStreak: document.getElementById("summaryStreak"),
             summaryResults: document.getElementById("summaryResults"),
+            summaryTitle: document.getElementById("summaryTitle"),
+            summaryEyebrow: document.getElementById("summaryEyebrow"),
+            summaryPrompt: document.getElementById("summaryPrompt"),
+            statScore: document.getElementById("statScore"),
+            statAccuracy: document.getElementById("statAccuracy"),
+            statStreak: document.getElementById("statStreak"),
             playAgainBtn: document.getElementById("playAgainBtn"),
-            backToBriefBtn: document.getElementById("backToBriefBtn"),
+            summaryBackBtn: document.getElementById("summaryBackBtn"),
+            reviewHistoryBtn: document.getElementById("reviewHistoryBtn"),
             reviewAnswersBtn: document.getElementById("reviewAnswersBtn"),
             liveRegion: document.getElementById("liveRegion")
         };
@@ -3215,8 +3223,8 @@
                     showScreen("home");
                     return;
                 }
-                showScreen("sim");
                 devInit();
+                showScreen("sim");
             });
             dom.openInstructionsBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
@@ -3268,15 +3276,27 @@
             dom.playAgainBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
                 devReset();
-                showScreen("sim");
                 devInit();
+                showScreen("sim");
             });
-            dom.backToBriefBtn.addEventListener("click", () => {
+            dom.summaryBackBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
-                renderBriefScreen();
-                showScreen("brief");
+                if (state.finished) {
+                    // Completed run: head back to the lit echo chamber.
+                    renderBriefScreen();
+                    showScreen("brief");
+                } else {
+                    // Mid-run review: resume where the student left off.
+                    renderQuestion();
+                    showScreen("sim");
+                }
             });
             dom.reviewAnswersBtn.addEventListener("click", () => {
+                playSound("click"); // sound: button press
+                renderSummary();
+                showScreen("summary");
+            });
+            dom.reviewHistoryBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
                 renderSummary();
                 showScreen("summary");
@@ -3372,6 +3392,9 @@
             dom.summaryScreen.classList.toggle("active", screenName === "summary");
             // Exit is only meaningful while playing, not on the home screen.
             dom.exitBtn.classList.toggle("hidden", screenName === "home");
+            // Review Answers is available once a run is in progress (it is
+            // redundant on the summary screen itself, so hide it there).
+            dom.reviewHistoryBtn.classList.toggle("hidden", screenName === "home" || screenName === "summary" || !state.started);
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
 
@@ -6655,6 +6678,23 @@
         }
 
         function renderSummary() {
+            const finished = state.finished === true;
+            dom.summaryBackBtn.textContent = finished ? "Back to Chamber" : "Resume";
+            // Play Again restarts the whole run, so it only makes sense once
+            // every question is answered. Hiding it during a mid-run review
+            // protects the student's in-progress answers from an accidental wipe.
+            dom.playAgainBtn.classList.toggle("hidden", !finished);
+            // Mid-run review is a progress check, not a final report: no
+            // completion copy, and only the Correct / Wrong counts (score,
+            // accuracy and streak stay hidden until the run is complete).
+            dom.summaryEyebrow.textContent = finished ? "Final Results" : "Progress Review";
+            dom.summaryTitle.textContent = finished ? "You finished the simulation." : "Review your answers so far.";
+            dom.summaryPrompt.textContent = finished
+                ? "Great work. Review your answers, see what you got right, and learn from anything you missed."
+                : "See what you got right and learn from anything you missed.";
+            dom.statScore.classList.toggle("hidden", !finished);
+            dom.statAccuracy.classList.toggle("hidden", !finished);
+            dom.statStreak.classList.toggle("hidden", !finished);
             let correct = 0;
             let wrong = 0;
             let graded = 0;
@@ -6675,6 +6715,8 @@
             dom.summaryResults.replaceChildren();
             activeQuestions.forEach((question, index) => {
                 const result = state.results[question.id];
+                // A mid-run review only lists the questions answered so far.
+                if (!finished && (!result || result.status === "ungraded")) return;
                 const card = document.createElement("article");
                 card.className = "result-card";
 
