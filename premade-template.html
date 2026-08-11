@@ -1290,6 +1290,38 @@
             font-weight: 800;
         }
 
+        /* Reject cards that must NOT go into the ordered chain: shown as a
+           fixed, non-draggable tray beneath the list. */
+        .ordering-tray {
+            margin-top: 20px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border);
+            display: grid;
+            gap: 10px;
+        }
+        .ordering-tray-label {
+            margin: 0;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--text-soft);
+        }
+        .ordering-row.ordering-distractor {
+            cursor: default;
+            touch-action: auto;
+            border-style: dashed;
+            border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+            background: color-mix(in srgb, var(--danger) 6%, var(--surface));
+        }
+        .ordering-row.ordering-distractor .ordering-position {
+            color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 14%, var(--surface-2));
+        }
+        .ordering-row.ordering-distractor .ordering-grip {
+            cursor: default;
+            opacity: 0.45;
+        }
+
         /* --- imageHotspot (click the right region of a picture) --- */
         .hotspot-stage {
             position: relative;
@@ -2090,6 +2122,10 @@
            ordering:
              items        - array of { id, label } objects.
              correctOrder - array of item ids in the right order.
+             distractors  - (optional) array of { id, label } reject cards.
+                        These are shown beneath the chain in a fixed,
+                        non-draggable tray ("not part of the chain"); they
+                        are ignored by grading.
              The items appear shuffled; the student reorders them by dragging
              a block (grab it anywhere) or by focusing a block and pressing
              ArrowUp / ArrowDown. Exact order = correct, at least half the
@@ -2170,29 +2206,27 @@
                     { id: "bin-not-evidence", label: "Not Evidence", icon: "🚫", description: "Details that do not support the theme." }
                 ]
             },
-            // --- Q3: language card (keeps the Evidence ring bright) ---------
-            // The word that most strongly carries the theme of giving/receiving
-            // support is "shared" — it is the action that connects the two.
+            // --- Q3: build the chain (fills the Real Life ring) -------------
+            // Arrange cause -> effect -> message. The reject card says the
+            // opposite of the story and must be left out of the chain.
+            // Correctly ordering all three cards makes the Real Life ring
+            // appear, so all three echo rings glow.
             {
-                id: "evidence-language",
-                type: "multipleChoice",
-                title: "Choose the Word",
-                prompt: "The theme is that people who support others often receive support in return. Which word from the story most strongly reinforces this theme?",
-                hint: "Listen for the word that shows the support happening, not a time, object, or person.",
-                explanation: "\"shared\" is the word that most strongly reinforces the theme — it shows Kareem giving his support to others.",
-                revealRing: "evidence",
-                choices: [
-                    "shared",
-                    "afternoon",
-                    "project",
-                    "classmates"
+                id: "chain-real-life",
+                type: "ordering",
+                title: "Build the Chain",
+                prompt: "Arrange the three cards to build the chain that connects the story to real life: first what Kareem does, then what happens to him, then the message the events develop. Leave the reject card out of the chain.",
+                hint: "Think cause then effect: Kareem acts first, his classmates respond later, and the message only appears once both events have happened.",
+                explanation: "Kareem chooses to share resources → his classmates later support him → the events develop the message that cooperation can be returned. The reject card — \"Kareem works alone, so cooperation is unimportant\" — is the opposite of what happens in the story, so it is not part of the chain.",
+                revealRing: "realLife",
+                items: [
+                    { id: "chain-share", label: "Kareem chooses to share resources." },
+                    { id: "chain-support", label: "Classmates later support Kareem." },
+                    { id: "chain-message", label: "The events develop the message that cooperation can be returned." }
                 ],
-                correctIndex: 0,
-                perChoiceFeedback: [
-                    "Correct — \"shared\" shows Kareem giving his support to his classmates, which is the heart of the theme.",
-                    "Not quite — \"afternoon\" is just a time detail. It does not carry the theme.",
-                    "Not quite — \"project\" is an object in the story, not the action that reinforces the theme.",
-                    "Not quite — \"classmates\" tells who the people are, but \"shared\" is the word that shows the support itself."
+                correctOrder: ["chain-share", "chain-support", "chain-message"],
+                distractors: [
+                    { id: "chain-alone", label: "Kareem works alone, so cooperation is unimportant." }
                 ]
             },
             // --- DEMO 2: exactText -----------------------------------------
@@ -2858,6 +2892,13 @@
                             });
                             Object.keys(itemIds).forEach((id) => {
                                 if (!seen[id]) errors.push(at + ": item '" + id + "' is missing from 'correctOrder'.");
+                            });
+                        }
+                        if (Array.isArray(q.distractors)) {
+                            q.distractors.forEach((d, di) => {
+                                if (!isPlainObject(d) || !isNonEmptyString(d.id)) { errors.push(at + ": distractor " + (di + 1) + " needs an 'id'."); return; }
+                                if (itemIds[d.id]) errors.push(at + ": distractor id '" + d.id + "' clashes with an item id.");
+                                if (!isNonEmptyString(d.label)) errors.push(at + ": distractor '" + d.id + "' needs a 'label'.");
                             });
                         }
                         break;
@@ -4523,6 +4564,41 @@
 
             rebuild();
             dom.answerArea.appendChild(list);
+
+            // Reject cards: fixed, non-draggable tray beneath the chain.
+            if (Array.isArray(question.distractors) && question.distractors.length > 0) {
+                const tray = document.createElement("div");
+                tray.className = "ordering-tray";
+                const trayLabel = document.createElement("p");
+                trayLabel.className = "ordering-tray-label";
+                trayLabel.textContent = question.distractors.length === 1
+                    ? "Reject card — not part of the chain:"
+                    : "Reject cards — not part of the chain:";
+                tray.appendChild(trayLabel);
+                question.distractors.forEach((d) => {
+                    const chip = document.createElement("div");
+                    chip.className = "ordering-row ordering-distractor";
+                    chip.setAttribute("role", "listitem");
+                    chip.setAttribute("aria-label", d.label + " — reject card, not part of the chain");
+                    chip.tabIndex = -1;
+
+                    const grip = document.createElement("span");
+                    grip.className = "ordering-grip";
+                    grip.innerHTML = gripSvg; // trusted inline icon
+
+                    const posBadge = document.createElement("span");
+                    posBadge.className = "ordering-position";
+                    posBadge.textContent = "✗";
+
+                    const lab = document.createElement("span");
+                    lab.className = "ordering-label";
+                    lab.textContent = d.label;
+
+                    chip.append(grip, posBadge, lab);
+                    tray.appendChild(chip);
+                });
+                dom.answerArea.appendChild(tray);
+            }
         }
 
         /* ------------------------------------------------------------
