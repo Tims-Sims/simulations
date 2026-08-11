@@ -1385,6 +1385,24 @@
             gap: 12px;
         }
 
+        .summary-reveal {
+            padding: 18px 20px;
+            margin: 0 0 22px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+        }
+
+        .summary-reveal h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .summary-reveal .reveal-paragraph {
+            margin: 0;
+            line-height: 1.65;
+        }
+
         .result-card {
             padding: 16px;
             border-radius: 18px;
@@ -1802,10 +1820,10 @@
                         <div class="story-eyebrow">🏁 A Short Story Race</div>
                         <h2 class="story-title">The Last Bicycle</h2>
                         <p class="story-copy">
-                            The town's very last bicycle is stuck at the starting line — and your words are its engine.
-                            The story race has stalled, so it is waiting for you. At each of the four pit stops below,
+                            The town's last bicycle is chained outside the closed shop while the floodwater rises.
+                            The story race has stalled — and your words are its engine. At each of the four pit stops below,
                             swap one weak sentence for the exact, stronger sentence. Fix the story at every stop and
-                            the bicycle will roar across the finish line.
+                            the bicycle will roll free across the finish line.
                         </p>
                         <div class="story-stage">
                             <div class="story-big-car" id="storyBigCar"></div>
@@ -1917,6 +1935,16 @@
                         </div>
                     </div>
 
+                    <section class="summary-reveal">
+                        <h3>The Bicycle Crosses the Finish Line</h3>
+                        <p class="reveal-paragraph">
+                            “Rain hammered the galvanised roof as Jalen stared at the bicycle chained outside the closed shop.
+                            ‘The drain is rising,’ Maya shouted, grabbing the bolt cutters. ‘Help me free the bicycle before the
+                            water reaches the chain.’ The floodwater coiled like a dark rope around the tyres. ‘Move back,’ Jalen
+                            warned. Jalen had freed the bicycle, but Maya was still pulling the chain.”
+                        </p>
+                    </section>
+
                     <div class="results-list" id="summaryResults"></div>
 
                     <div class="button-row" style="margin-top: 24px;">
@@ -2007,16 +2035,17 @@
         const SIM_CONFIG = {
             simId: "last-bicycle-story-race",
             title: "The Last Bicycle — Story Race",
-            subtitle: "Swap weak sentences to keep the story bicycle racing",
-            badgeText: "🏁",
+            subtitle: "Repair the story at every pit stop to free the bicycle",
+            badgeText: "ELA",
             homeEyebrow: "A Short Story Race",
             homeDescription:
-                "The town's last bicycle has stalled at the starting line, and your words are its engine. At each of the four pit stops — Opening, Action, Imagery, Final Check — swap one weak sentence for the exact, stronger sentence. Fix the story at every stop and the bicycle will cross the finish line.",
+                "The town's last bicycle is chained outside the closed shop while the floodwater rises. The story race has stalled — and your words are its engine. At each of the four pit stops — Opening, Action, Imagery, Final Check — swap one weak sentence for the exact, stronger sentence. Fix the story at every stop and the bicycle will roll free across the finish line.",
             instructions: [
                 "Read the short story race setup on the intro screen, then press Start the Race.",
                 "You will visit four pit stops in order: Opening, Action, Imagery, Final Check.",
-                "At each pit stop, read the weak sentence, then type the exact, stronger sentence that repairs the story.",
-                "Spelling, punctuation, and word order matter — but capital letters and extra spaces are forgiven.",
+                "At each pit stop, read the weak sentence, then tap the exact, stronger sentence that repairs the story.",
+                "At the Imagery stop, drag the exact word or phrase into each blank.",
+                "At the Final Check stop, match each checklist item to the sentence that proves it passes.",
                 "Use the Hint button if you get stuck.",
                 "Watch the car on the race track as it moves to each pit stop.",
                 "This file runs completely offline in a browser. No internet is needed."
@@ -2029,7 +2058,7 @@
             TEST_MODE: false,              // true = builder testing mode: answers shown, free navigation, progress not saved. ALWAYS set back to false before giving to students!
             shuffleQuestions: false,       // true = questions appear in random order each run
             shuffleChoices: false,         // true = MULTIPLE-CHOICE answer choices shuffled each run (only multiple choice; true/false stays True-then-False, and ordering shuffles on its own regardless of this)
-            attemptsPerQuestion: 1,        // 1, 2, 3 ... or "unlimited" — wrong answers below the limit show a Try Again button
+            attemptsPerQuestion: 2,        // 1, 2, 3 ... or "unlimited" — wrong answers below the limit show a Try Again button
 
             /* ---- Question bank settings (see the QUESTION BANK section below) ---- */
             useQuestionBank: false,        // true = ignore QUESTIONS and draw a random set from the QUESTION_BANK pool instead
@@ -2253,56 +2282,82 @@
            ============================================================ */
         const QUESTIONS = [
             // --- PIT STOP 1: Opening ---------------------------------------
-            // The story race can't start without a strong first line.
+            // Tap the exact, stronger opening line that replaces the weak one.
             {
                 id: "pitstop-opening",
-                type: "exactText",
+                type: "multipleChoice",
                 title: "Pit Stop 1 · Opening",
-                prompt: "The race cannot start without a strong opening. Swap this weak sentence for the exact, stronger sentence: “A bicycle sat in a shed.”",
-                hint: "Why does this bicycle matter? Make it feel last in the town, and let its wheels long for the road.",
-                explanation: "A strong opening sets up the stakes. \"The last bicycle in town\" tells us instantly that this machine is special — and that something is missing.",
-                answer: "The last bicycle in town waited in the dusty shed, its wheels hungry for the road.",
-                caseSensitive: false,
-                maxLength: 120
+                prompt: "The story cannot start with this weak line: “It was a day and Jalen had a bicycle.” Tap the exact, stronger sentence that repairs the opening.",
+                hint: "A strong opening sets the scene and the tension quickly. Where is Jalen, what is happening around him, and why does the bicycle matter?",
+                explanation: "A strong opening introduces setting, character and tension quickly.",
+                choices: [
+                    "Rain hammered the galvanised roof as Jalen stared at the bicycle chained outside the closed shop.",
+                    "Jalen was there.",
+                    "Bicycles have wheels."
+                ],
+                correctIndex: 0,
+                perChoiceFeedback: [
+                    "Strong opening! The rain, the closed shop and the chained bicycle introduce the setting, the character and the tension all at once.",
+                    "Why: “Jalen was there” still tells us almost nothing — no setting, no stakes, no movement. How to fix: choose the sentence with specific sensory and action details. Correct model: “Rain hammered the galvanised roof as Jalen stared at the bicycle chained outside the closed shop.”",
+                    "Why: “Bicycles have wheels” is a fact, not a story opening — it does not set the scene or raise any tension. How to fix: choose the sentence that shows where Jalen is and why the bicycle matters. Correct model: “Rain hammered the galvanised roof as Jalen stared at the bicycle chained outside the closed shop.”"
+                ]
             },
-            // --- PIT STOP 2: Action -----------------------------------------
-            // Swap a flat action for one with energy.
+            // --- PIT STOP 2: Dialogue and Action -----------------------------
+            // Tap the exact, stronger line that pairs dialogue with action.
             {
                 id: "pitstop-action",
-                type: "exactText",
+                type: "multipleChoice",
                 title: "Pit Stop 2 · Action",
-                prompt: "The story stalled — now make it move. Swap this weak sentence for the exact, stronger sentence: “It went down the road fast.”",
-                hint: "Strong verbs beat weak ones. What does a bicycle do as it races down a road at night?",
-                explanation: "\"Tore\" is far livelier than \"went\", and the hissing chain and kissing tires let the reader hear and feel the action.",
-                answer: "It tore down the moonlit road, chain hissing and tires kissing the gravel.",
-                caseSensitive: false,
-                maxLength: 120
+                prompt: "This line does not move the plot: “‘We should do something,’ Maya said.” Tap the exact, stronger line that shows dialogue AND action.",
+                hint: "Dialogue moves the plot when it is tied to a decision and an action. What does Maya do as she speaks?",
+                explanation: "Dialogue and action should change the situation or reveal character.",
+                choices: [
+                    "“The drain is rising,” Maya shouted, grabbing the bolt cutters. “Help me free the bicycle before the water reaches the chain.”",
+                    "“Okay,” Maya said.",
+                    "Maya explained everything for three paragraphs."
+                ],
+                correctIndex: 0,
+                perChoiceFeedback: [
+                    "Excellent! The line pairs dialogue with action — Maya shouts, grabs the bolt cutters and gives a clear order — so the plot moves forward.",
+                    "Why: “Okay” is a flat reply; it does not change the situation or show a decision. How to fix: choose dialogue tied to an immediate action. Correct model: “The drain is rising,” Maya shouted, grabbing the bolt cutters. “Help me free the bicycle before the water reaches the chain.”",
+                    "Why: this line only tells us that Maya spoke at length — no dialogue, no action, and it slows the story down. How to fix: choose a line with a decision and a movement. Correct model: “The drain is rising,” Maya shouted, grabbing the bolt cutters. “Help me free the bicycle before the water reaches the chain.”"
+                ]
             },
             // --- PIT STOP 3: Imagery ----------------------------------------
-            // Swap a flat description for one the reader can feel.
+            // Drag the exact simile into the frame and punctuate the warning
+            // exactly. Two blanks in one fillBlank question (drag mode).
             {
                 id: "pitstop-imagery",
-                type: "exactText",
+                type: "fillBlank",
+                wordBank: "drag",
                 title: "Pit Stop 3 · Imagery",
-                prompt: "The reader needs to feel this ride. Swap this weak sentence for the exact, stronger sentence: “The wind was strong and cold.”",
-                hint: "Show the wind doing something. What could it claw at, and what might it sing through?",
-                explanation: "\"Clawed\" and \"sang through the spinning spokes\" turn a boring weather note into a moment the reader can almost feel and hear.",
-                answer: "Cold wind clawed at the rider and sang through the spinning spokes.",
-                caseSensitive: false,
-                maxLength: 120
+                prompt: "The reader needs to feel this flood. Drag the exact simile into its blank, and drag the exactly punctuated warning into its blank.",
+                hint: "A simile compares two things using “like” or “as” — the dark water moves like a rope. The warning needs quotation marks and a comma before the tag: ‘Move back,’ Jalen warned.",
+                explanation: "The simile “coiled like a dark rope” makes the floodwater feel alive and dangerous, while “sang a happy birthday song” does not fit the storm scene. The exact punctuation is ‘Move back,’ Jalen warned — quotation marks around the words and a comma before the dialogue tag.",
+                text: "The floodwater {simile} around the tyres, then {dialogue} Jalen warned.",
+                blanks: {
+                    simile: { accept: ["coiled like a dark rope"] },
+                    dialogue: { accept: ["'Move back,'"] }
+                },
+                extraWords: ["was water", "sang a happy birthday song", "'Move back'", "Move back"]
             },
             // --- PIT STOP 4: Final Check ------------------------------------
-            // Swap a flat ending for one that lands.
+            // Approve the revision checklist by matching each item to the
+            // sentence that proves the revised paragraph passes it. The
+            // corrected verb ("Maya was") is embedded in the tense pair.
             {
                 id: "pitstop-finalcheck",
-                type: "exactText",
+                type: "matching",
                 title: "Pit Stop 4 · Final Check",
-                prompt: "Last stop — the ending must land. Swap this weak sentence for the exact, stronger sentence: “It reached the end at last.”",
-                hint: "Endings reward the effort. The letter is delivered — and what happens to the town?",
-                explanation: "A strong ending pays off the story's promise: the letter arrives and the town is saved, so the long ride finally means something.",
-                answer: "At last the bicycle rolled to a stop — the letter delivered, the town saved.",
-                caseSensitive: false,
-                maxLength: 120
+                prompt: "Final stop — the revised paragraph still hides one error: “Jalen had freed the bicycle, but Maya are still pulling the chain.” Approve the checklist: drag each checklist item to the sentence that proves the paragraph passes it.",
+                hint: "Check the verb: “Maya are” does not agree with its subject. Find the sentence that uses the corrected verb “was”.",
+                explanation: "The checklist is fully approved: the sequence is clear, the dialogue moves the action, the simile fits the scene, and the tense and punctuation are accurate. The hidden error was the verb: “Maya are” should be “Maya was” because Maya is one person — so the corrected line reads “Jalen had freed the bicycle, but Maya was still pulling the chain.”",
+                pairs: [
+                    { left: "Sequence is clear", right: "The rain hammers down, the drain rises, and then the bicycle is freed." },
+                    { left: "Dialogue moves the action forward", right: "'Help me free the bicycle before the water reaches the chain.'" },
+                    { left: "The simile fits the scene", right: "The floodwater coiled like a dark rope around the tyres." },
+                    { left: "Tense and punctuation are accurate", right: "'Move back,' Jalen warned. Maya was still pulling the chain." }
+                ]
             }
         ];
 
