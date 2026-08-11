@@ -1624,6 +1624,32 @@
             }
         }
 
+        /* Badge shown in the centre of the chamber once the final question
+           is answered correctly: the echo is complete. */
+        .echo-clear-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+            color: var(--text);
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+            box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 45%, transparent);
+            animation: ring-appear 0.7s ease both;
+        }
+
+        .echo-clear-badge-track {
+            font-size: 0.7rem;
+            padding: 6px 10px;
+        }
+
         /* Compact echo chamber shown on the question screen so the rings
            visibly fill in as the message, evidence, and real-life link are
            identified. Mirrors the briefing screen's echo chamber. */
@@ -1731,6 +1757,7 @@
                         <div class="ring ring-outer" id="ringRealLife"><span class="ring-label">Real Life</span></div>
                         <div class="ring ring-mid" id="ringEvidence"><span class="ring-label">Evidence</span></div>
                         <div class="ring ring-inner" id="ringMessage"><span class="ring-label">Message</span></div>
+                        <div class="echo-clear-badge" id="briefClearEcho" hidden>Clear theme echo</div>
                     </div>
                     <div class="button-row">
                         <button class="primary-btn" id="briefContinueBtn">Step In</button>
@@ -1771,6 +1798,7 @@
                         <div class="ring ring-outer" id="trackRingRealLife"><span class="ring-label">Real Life</span></div>
                         <div class="ring ring-mid" id="trackRingEvidence"><span class="ring-label">Evidence</span></div>
                         <div class="ring ring-inner" id="trackRingMessage"><span class="ring-label">Message</span></div>
+                        <div class="echo-clear-badge echo-clear-badge-track" id="trackClearEcho" hidden>Clear theme echo</div>
                     </div>
                     <div class="echo-tracker-legend" aria-hidden="true">
                         <span><span class="legend-dot" id="legendDotMessage"></span>Message</span>
@@ -2196,10 +2224,10 @@
                 explanation: "\"shared his notes\" and \"the class stayed to help him\" both show people supporting each other — that is the evidence for the theme. \"every afternoon\" is just a time detail and \"a project\" is just an object, so neither supports the theme.",
                 revealRing: "evidence",
                 items: [
-                    { id: "ev-notes", label: "shared his notes", icon: "📝", correctBin: "bin-evidence" },
-                    { id: "ev-stayed", label: "the class stayed to help him", icon: "🤝", correctBin: "bin-evidence" },
-                    { id: "ev-afternoon", label: "every afternoon", icon: "⏰", correctBin: "bin-not-evidence" },
-                    { id: "ev-project", label: "a project", icon: "📂", correctBin: "bin-not-evidence" }
+                    { id: "ev-notes", label: "shared his notes", correctBin: "bin-evidence" },
+                    { id: "ev-stayed", label: "the class stayed to help him", correctBin: "bin-evidence" },
+                    { id: "ev-afternoon", label: "every afternoon", correctBin: "bin-not-evidence" },
+                    { id: "ev-project", label: "a project", correctBin: "bin-not-evidence" }
                 ],
                 bins: [
                     { id: "bin-evidence", label: "Evidence", icon: "⭐", description: "Details that show someone giving or receiving support." },
@@ -2229,182 +2257,34 @@
                     { id: "chain-alone", label: "Kareem works alone, so cooperation is unimportant." }
                 ]
             },
-            // --- DEMO 2: exactText -----------------------------------------
-            // answer string + caseSensitive flag (false = ignore case).
+            // --- Q4: complete the echo (final synthesis) --------------------
+            // One view assembles the whole chamber: the exact theme statement,
+            // the two evidence cards, and the real-life echo. The two wrong
+            // real-life options are excluded as "Not the Echo". When this is
+            // sorted correctly the chamber shows "Clear theme echo".
             {
-                id: "demo-text",
-                type: "exactText",
-                title: "Exact Text Demo",
-                prompt: "Type the name of the shape that has exactly four equal sides and four right angles.",
-                hint: "It is a special kind of rectangle.",
-                explanation: "A square has four equal sides and four right angles.",
-                answer: "square",
-                caseSensitive: false
-            },
-            // --- DEMO 3: exactNumber ---------------------------------------
-            // answer number + optional tolerance (accepted +/- range).
-            {
-                id: "demo-number",
-                type: "exactNumber",
-                title: "Exact Number Demo",
-                prompt: "A hexagon has how many sides? Enter the number.",
-                hint: "It is more than five and fewer than seven.",
-                explanation: "A hexagon has 6 sides.",
-                answer: 6,
-                tolerance: 0
-            },
-            // --- DEMO 4: keywords ------------------------------------------
-            // keywords[] + minMatches for a correct answer.
-            {
-                id: "demo-keywords",
-                type: "keywords",
-                title: "Keywords Demo",
-                prompt: "In one sentence, describe a circle. Try to mention its edge and its centre.",
-                hint: "Think about how far every point on the edge is from the middle.",
-                explanation: "A circle is a round shape where every point on the edge is the same distance from the centre.",
-                keywords: ["round", "edge", "centre", "center", "distance"],
-                minMatches: 2
-            },
-            // --- DEMO 5: shortAnswer (textarea) ----------------------------
-            // Optional keywords grading, or ungraded: true for manual review.
-            {
-                id: "demo-shortanswer",
-                type: "shortAnswer",
-                title: "Short Answer Demo",
-                prompt: "Write a few sentences: which shape is your favourite, and why?",
-                hint: "There is no wrong answer here — explain your thinking.",
-                explanation: "This reflection answer is recorded for your teacher to read. It is not scored.",
-                ungraded: true
-            },
-            // --- DEMO 6: dragSort ------------------------------------------
-            // items[{id,label,icon,correctBin}] + bins[{id,label,icon,description}].
-            {
-                id: "demo-dragsort",
+                id: "echo-complete",
                 type: "dragSort",
-                title: "Drag and Drop Sorting Demo",
-                prompt: "Sort each shape into the bin that matches its number of sides.",
-                hint: "Count the sides in each shape's name: tri = 3, quad = 4.",
-                explanation: "Triangles have 3 sides, squares and rectangles have 4, pentagons have 5.",
+                title: "Complete the Echo",
+                prompt: "The chamber is nearly whole. Place each card in the ring it belongs to: the Message (the theme), the Evidence (details from the story that support it), the Real Life echo (how the theme shows up in real life), or Not the Echo (options that go against the theme).",
+                hint: "The Message is the exact theme from earlier. The Evidence cards are the details you already sorted. Only one real-life option truly echoes the theme.",
+                explanation: "Message: people who support others often receive support in return. Evidence: Kareem shares his notes, and the class later stays to help him. Real Life: group members divide tasks and help someone who falls behind. The other options go against the theme — hiding information and ignoring an absent student.",
+                echoClear: true,
                 items: [
-                    { id: "shape-triangle", label: "Triangle", icon: "🔺", correctBin: "bin-3" },
-                    { id: "shape-square", label: "Square", icon: "🟦", correctBin: "bin-4" },
-                    { id: "shape-rectangle", label: "Rectangle", icon: "▭", correctBin: "bin-4" },
-                    { id: "shape-pentagon", label: "Pentagon", icon: "⬠", correctBin: "bin-5" }
+                    { id: "echo-theme", label: "People who support others often receive support in return", correctBin: "bin-message" },
+                    { id: "echo-ev-notes", label: "shared his notes", correctBin: "bin-evidence" },
+                    { id: "echo-ev-stayed", label: "the class stayed to help him", correctBin: "bin-evidence" },
+                    { id: "echo-reallife", label: "Group members divide tasks and help someone who falls behind.", correctBin: "bin-reallife" },
+                    { id: "echo-bad-hide", label: "One member hides information to gain credit.", correctBin: "bin-reject" },
+                    { id: "echo-bad-ignore", label: "A class ignores a student who was absent.", correctBin: "bin-reject" }
                 ],
                 bins: [
-                    { id: "bin-3", label: "3 sides", icon: "3️⃣", description: "Shapes with three sides." },
-                    { id: "bin-4", label: "4 sides", icon: "4️⃣", description: "Shapes with four sides." },
-                    { id: "bin-5", label: "5 sides", icon: "5️⃣", description: "Shapes with five sides." }
+                    { id: "bin-message", label: "Message", icon: "💬", description: "The theme — the big idea the story teaches." },
+                    { id: "bin-evidence", label: "Evidence", icon: "🔍", description: "Details from the story that support the theme." },
+                    { id: "bin-reallife", label: "Real Life", icon: "🌍", description: "A real-life situation that echoes the theme." },
+                    { id: "bin-reject", label: "Not the Echo", icon: "🚫", description: "Options that go against the theme." }
                 ]
             },
-            // --- DEMO 7: matching ------------------------------------------
-            // pairs[{left,right}] — left[i] matches right[i]; right side is shuffled.
-            {
-                id: "demo-matching",
-                type: "matching",
-                title: "Matching Pairs Demo",
-                prompt: "Match each country to its capital city. Click a country, then click its capital.",
-                hint: "Paris is in Europe; Tokyo is in Asia; Ottawa is north of the USA; Canberra is in the southern hemisphere.",
-                explanation: "France–Paris, Japan–Tokyo, Canada–Ottawa, Australia–Canberra.",
-                pairs: [
-                    { left: "France", right: "Paris" },
-                    { left: "Japan", right: "Tokyo" },
-                    { left: "Canada", right: "Ottawa" },
-                    { left: "Australia", right: "Canberra" }
-                ]
-            },
-            // --- DEMO 8: trueFalse -----------------------------------------
-            // correctAnswer (true/false) + optional feedbackCorrect/feedbackWrong.
-            {
-                id: "demo-truefalse",
-                type: "trueFalse",
-                title: "True or False Demo",
-                prompt: "A triangle has three sides.",
-                hint: "Think about the shape's name: 'tri' means three.",
-                explanation: "A triangle always has exactly three sides.",
-                correctAnswer: true,
-                feedbackCorrect: "Correct — 'tri' means three, so a triangle has three sides.",
-                feedbackWrong: "Not quite — a triangle does have three sides."
-            },
-            // --- DEMO 9: fillBlank -----------------------------------------
-            // text with {tokens} + a blanks entry (accept list) for each token.
-            {
-                id: "demo-fillblank",
-                type: "fillBlank",
-                title: "Fill in the Blanks Demo",
-                prompt: "Complete the sentence about our solar system.",
-                hint: "The Moon goes around the Earth.",
-                explanation: "The Moon orbits the Earth, and the Earth orbits the Sun.",
-                text: "The {answer1} orbits the {answer2}.",
-                wordBank: "list",
-                blanks: {
-                    answer1: { accept: ["moon", "the moon"], caseSensitive: false },
-                    answer2: { accept: ["earth", "the earth"] }
-                }
-            },
-            // --- DEMO 9b: fillBlank (drag word bank) -----------------------
-            // wordBank "drag" turns the blanks into drop slots and the words
-            // into draggable chips; extraWords adds decoys.
-            {
-                id: "demo-fillblank-drag",
-                type: "fillBlank",
-                title: "Fill in the Blanks (Drag) Demo",
-                prompt: "Drag the right words into the sentence about our planet.",
-                hint: "Water covers most of the Earth; plants are green.",
-                explanation: "Most of the Earth is covered by water, and healthy leaves are green.",
-                text: "Most of the Earth is covered by {answer1}, and leaves are usually {answer2}.",
-                wordBank: "drag",
-                extraWords: ["sand", "blue"],
-                blanks: {
-                    answer1: { accept: ["water"], caseSensitive: false },
-                    answer2: { accept: ["green"], caseSensitive: false }
-                }
-            },
-            // --- DEMO 10: ordering -----------------------------------------
-            // items[{id,label}] + correctOrder[ids]. Reordered with arrow buttons.
-            {
-                id: "demo-ordering",
-                type: "ordering",
-                title: "Put in Order Demo",
-                prompt: "Put these steps for making tea in the correct order, first at the top.",
-                hint: "You cannot pour water before it has boiled.",
-                explanation: "Boil the water, pour it over the tea bag, let it steep, then add milk.",
-                items: [
-                    { id: "step-boil", label: "Boil the water" },
-                    { id: "step-pour", label: "Pour water over the tea bag" },
-                    { id: "step-steep", label: "Let the tea steep" },
-                    { id: "step-milk", label: "Add milk and stir" }
-                ],
-                correctOrder: ["step-boil", "step-pour", "step-steep", "step-milk"]
-            },
-            // --- DEMO 11: imageHotspot -------------------------------------
-            // image (here a small inline SVG) + hotspots[{id,label,x,y,w,h,correct}].
-            // x/y/w/h are PERCENTAGES (0-100) of the picture box.
-            {
-                id: "demo-hotspot",
-                type: "imageHotspot",
-                title: "Click the Picture Demo",
-                prompt: "Three shapes are drawn below. Click the triangle.",
-                hint: "A triangle is the shape with three straight sides and a pointed top.",
-                explanation: "The triangle is the pointed shape on the right.",
-                image: "<svg viewBox='0 0 300 120' xmlns='http://www.w3.org/2000/svg'>" +
-                    "<rect x='0' y='0' width='300' height='120' fill='#eef3ff'/>" +
-                    "<rect x='20' y='30' width='60' height='60' fill='#7dd3fc'/>" +
-                    "<circle cx='150' cy='60' r='34' fill='#fbbf24'/>" +
-                    "<polygon points='250,30 285,90 215,90' fill='#34d399'/>" +
-                    "</svg>",
-                imageAlt: "A blue square on the left, a yellow circle in the middle, and a green triangle on the right.",
-                multiSelect: false,
-                hotspots: [
-                    // Boxes centred on each shape with even margin, computed from
-                    // the SVG viewBox (0 0 300 120). Square spans x 20-80, y 30-90
-                    // → 6.667-26.667% / 25-75%; triangle spans x 215-285, y 30-90
-                    // → 71.667-95% / 25-75%. Each box adds ~2% x / 3% y padding.
-                    { id: "hs-square", label: "Square", x: 4.667, y: 22, w: 24, h: 56, correct: false },
-                    { id: "hs-circle", label: "Circle", x: 38, y: 18, w: 24, h: 64, correct: false },
-                    { id: "hs-triangle", label: "Triangle", x: 69.667, y: 22, w: 27.333, h: 56, correct: true }
-                ]
-            }
         ];
 
         /* ============================================================
@@ -3708,6 +3588,30 @@
                 if (result && result.status === "correct") {
                     revealRing(question.revealRing, { announce: false });
                 }
+            });
+            syncEchoClear();
+        }
+
+        // "Clear theme echo": once the final synthesis question is answered
+        // correctly, both chambers show the badge in their centre. The echo
+        // is complete — message, evidence and real life all connected.
+        function syncEchoClear() {
+            const complete = activeQuestions.some((question) => {
+                if (!question.echoClear) return false;
+                const result = state.results[question.id];
+                return Boolean(result && result.status === "correct");
+            });
+            const badgeIds = ["briefClearEcho", "trackClearEcho"];
+            badgeIds.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.hidden = !complete;
+            });
+        }
+
+        function hideEchoClear() {
+            ["briefClearEcho", "trackClearEcho"].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.hidden = true;
             });
         }
 
@@ -5635,6 +5539,11 @@
             if (result.status === "correct" && question.revealRing) {
                 revealRing(question.revealRing);
             }
+            // The final synthesis question completing makes the chamber show
+            // "Clear theme echo" once all parts are connected.
+            if (result.status === "correct") {
+                syncEchoClear();
+            }
             justGraded = true; // sound: allow per-pair result tones for this render only
             renderQuestion();
             justGraded = false;
@@ -6490,6 +6399,7 @@
             state.interaction = null;
             clearMessageBoxes();
             hideAllRings();
+            hideEchoClear();
             clearQuizProgress();
         }
 
