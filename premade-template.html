@@ -373,10 +373,6 @@
         .modal-card {
             padding: clamp(18px, 3vw, 30px);
             position: relative;
-            /* Keep tall modals usable on short screens: cap the card height
-               and let its body scroll so the footer buttons stay reachable. */
-            max-height: min(90vh, 90dvh);
-            overflow-y: auto;
         }
 
         .close-btn {
@@ -1463,6 +1459,190 @@
            Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
 
+        /* --- Brief screen: the silent echo chamber --- */
+        .brief-card {
+            text-align: center;
+        }
+
+        .brief-card .question-prompt {
+            max-width: 640px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .echo-chamber {
+            position: relative;
+            width: min(460px, 78vw);
+            aspect-ratio: 1 / 1;
+            margin: 34px auto 6px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 48%),
+                color-mix(in srgb, var(--surface-2) 35%, var(--bg));
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            display: grid;
+            place-items: center;
+        }
+
+        /* Silent echo ripples — soft rings rolling out from the centre. */
+        .echo-chamber::before,
+        .echo-chamber::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+            animation: echo-ripple 4.5s ease-out infinite;
+            pointer-events: none;
+        }
+
+        .echo-chamber::after {
+            animation-delay: 2.25s;
+        }
+
+        @keyframes echo-ripple {
+            0% {
+                transform: scale(0.55);
+                opacity: 0;
+            }
+
+            35% {
+                opacity: 0.45;
+            }
+
+            100% {
+                transform: scale(1.18);
+                opacity: 0;
+            }
+        }
+
+        .ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px dashed var(--border);
+        }
+
+        .ring-inner {
+            width: 30%;
+            height: 30%;
+        }
+
+        .ring-mid {
+            width: 56%;
+            height: 56%;
+        }
+
+        .ring-outer {
+            width: 82%;
+            height: 82%;
+        }
+
+        .ring-label {
+            position: absolute;
+            top: 6%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        /* Rings start as faint, empty outlines ("three empty rings wait").
+           When the matching idea is identified, the ring pops in solid and
+           glowing (see the .revealed state wired up in the engine). */
+        .ring {
+            opacity: 0.12;
+            transition: opacity 0.5s ease;
+        }
+
+        .ring.revealed {
+            opacity: 1;
+            border-style: solid;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 38%, transparent);
+            animation: ring-appear 0.7s ease both;
+        }
+
+        .ring.revealed .ring-label {
+            color: var(--text);
+            border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+        }
+
+        @keyframes ring-appear {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+
+            60% {
+                transform: translate(-50%, -50%) scale(1.07);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* Compact echo chamber shown on the question screen so the rings
+           visibly fill in as the message, evidence, and real-life link are
+           identified. Mirrors the briefing screen's echo chamber. */
+        .echo-tracker {
+            position: relative;
+            width: min(190px, 46vw);
+            aspect-ratio: 1 / 1;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 48%),
+                color-mix(in srgb, var(--surface-2) 35%, var(--bg));
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            flex: none;
+        }
+
+        .echo-tracker .ring-label {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+        }
+
+        .echo-tracker-legend {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin: -8px 0 18px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: var(--text-soft);
+        }
+
+        .echo-tracker-legend .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+            border-radius: 50%;
+            border: 1px dashed var(--border);
+            vertical-align: middle;
+        }
+
+        .echo-tracker-legend .legend-dot.lit {
+            border-style: solid;
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 35%, transparent);
+            box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
+        }
+
     </style>
 </head>
 
@@ -1485,7 +1665,6 @@
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
-                <button class="control-btn" id="reviewBtn" aria-label="Review your answers"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h5"/></svg> Review</button>
                 <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
             </div>
         </header>
@@ -1501,6 +1680,28 @@
                     <div class="hero-actions">
                         <button class="primary-btn" id="startBtn">Start</button>
                         <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="briefScreen">
+            <div class="sim-layout">
+                <section class="sim-card brief-card">
+                    <div class="eyebrow">Briefing</div>
+                    <h2 class="question-title" id="briefTitle">The Silent Echo Chamber</h2>
+                    <p class="question-prompt" id="briefDescription">
+                        Step into the still room. The air holds its breath. Three empty rings wait,
+                        ready for a message to drop into the quiet — and for what it echoes, through
+                        evidence, into real life.
+                    </p>
+                    <div class="echo-chamber" role="img" aria-label="A silent echo chamber. Three empty concentric rings, labelled from the centre outwards: Message, Evidence, Real Life.">
+                        <div class="ring ring-outer" id="ringRealLife"><span class="ring-label">Real Life</span></div>
+                        <div class="ring ring-mid" id="ringEvidence"><span class="ring-label">Evidence</span></div>
+                        <div class="ring ring-inner" id="ringMessage"><span class="ring-label">Message</span></div>
+                    </div>
+                    <div class="button-row">
+                        <button class="primary-btn" id="briefContinueBtn">Step In</button>
                     </div>
                 </section>
             </div>
@@ -1532,6 +1733,17 @@
                             <div class="progress-fill" id="progressFill"></div>
                         </div>
                         <div class="step-dots" id="stepDots"></div>
+                    </div>
+
+                    <div class="echo-tracker" id="echoTracker" role="img" aria-label="The silent echo chamber. A ring appears for each part you identify: the message, the evidence, and how it connects to real life.">
+                        <div class="ring ring-outer" id="trackRingRealLife"><span class="ring-label">Real Life</span></div>
+                        <div class="ring ring-mid" id="trackRingEvidence"><span class="ring-label">Evidence</span></div>
+                        <div class="ring ring-inner" id="trackRingMessage"><span class="ring-label">Message</span></div>
+                    </div>
+                    <div class="echo-tracker-legend" aria-hidden="true">
+                        <span><span class="legend-dot" id="legendDotMessage"></span>Message</span>
+                        <span><span class="legend-dot" id="legendDotEvidence"></span>Evidence</span>
+                        <span><span class="legend-dot" id="legendDotRealLife"></span>Real Life</span>
                     </div>
 
                     <section class="question-panel">
@@ -1636,21 +1848,10 @@
         <section class="modal-card">
             <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
             <h3 id="resetConfirmHeading">Reset simulation?</h3>
-            <p id="resetConfirmMessage">This will clear your current progress and return you to the home screen.</p>
+            <p>This will clear your current progress and return you to the home screen.</p>
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
                 <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
                 <button class="danger-btn" id="confirmResetBtn">Reset</button>
-            </div>
-        </section>
-    </div>
-
-    <div class="modal" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewHeading">
-        <section class="modal-card">
-            <button class="close-btn" id="closeReviewBtn" aria-label="Close review">×</button>
-            <h3 id="reviewHeading">Your Answers So Far</h3>
-            <div class="results-list" id="reviewBody"></div>
-            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
-                <button class="primary-btn" id="closeReviewFooterBtn">Close</button>
             </div>
         </section>
     </div>
@@ -1660,16 +1861,6 @@
     <script>
         "use strict";
 
-        /* Safety net: never allow a native form submission. The quiz's
-           submit handler is only attached once the config validates, so a
-           config error (or any earlier script failure) would otherwise leave
-           the form free to navigate the page to its own URL — which Chrome
-           blocks with an "Unsafe attempt to load URL" error when the file
-           runs from file:// inside an iframe. Capture-phase, unconditional. */
-        document.addEventListener("submit", function (event) {
-            event.preventDefault();
-        }, true);
-
         /* ============================================================
            DEV-EDIT: SIM CONFIG
            Change title, subtitle, description, instructions here.
@@ -1677,7 +1868,7 @@
 
            Field notes:
              simId          - must be UNIQUE per sim. Used as the
-                               sessionStorage key prefix (theme, help-seen,
+                               localStorage key prefix (theme, help-seen,
                                quiz progress). Colliding simIds will
                                clobber each other's saved data.
              title           - shown in <title>, topbar, and home screen.
@@ -1932,22 +2123,28 @@
            imageAlt is required — it is what screen readers read out.
            ============================================================ */
         const QUESTIONS = [
-            // --- DEMO 1: multipleChoice ------------------------------------
-            // choices[] + correctIndex + optional perChoiceFeedback[].
+            // --- Q1: identify the theme (fills the Message ring) -------------
+            // Choices: "cooperation" is rejected as only a topic, not a theme.
+            // Answering this correctly makes the Message ring appear on the
+            // brief screen (see revealRing in the engine wiring).
             {
-                id: "demo-mc",
+                id: "message-theme",
                 type: "multipleChoice",
-                title: "Multiple Choice Demo",
-                prompt: "How many sides does a triangle have?",
-                hint: "Count the straight edges of the shape.",
-                explanation: "A triangle always has exactly three sides and three corners.",
-                choices: ["Two", "Three", "Four", "Five"],
+                title: "Find the Theme",
+                prompt: "Every afternoon, Kareem shares his notes with classmates who had missed school. When Kareem later struggled with a project, the class stayed to help him finish.\n\nWhat is the theme of this story?",
+                hint: "A theme is a big idea about life that the story shows through what happens — not just a single word for the topic.",
+                explanation: "Kareem helps his classmates, and when he needs support the class stays to help him. The theme is that people who support others often receive support in return.",
+                revealRing: "message",
+                choices: [
+                    "cooperation",
+                    "People who support others often receive support in return",
+                    "School projects are difficult"
+                ],
                 correctIndex: 1,
                 perChoiceFeedback: [
-                    "Two sides cannot close a shape.",
-                    "Right — three sides make a triangle.",
-                    "Four sides make a quadrilateral, not a triangle.",
-                    "Five sides make a pentagon, not a triangle."
+                    "Not quite — \"cooperation\" is only the topic (what the story is about), not the theme. A theme is the complete idea the story teaches.",
+                    "Correct. Kareem shares his notes, and when he needs help the class stays to support him — people who support others often receive support in return.",
+                    "Not quite — the project is just the setting. The story's real message is about how helping others comes back around."
                 ]
             },
             // --- DEMO 2: exactText -----------------------------------------
@@ -2816,10 +3013,12 @@
             homeTitle: document.getElementById("homeTitle"),
             homeDescription: document.getElementById("homeDescription"),
             homeScreen: document.getElementById("homeScreen"),
+            briefScreen: document.getElementById("briefScreen"),
             simScreen: document.getElementById("simScreen"),
             summaryScreen: document.getElementById("summaryScreen"),
             simContainer: document.getElementById("simContainer"),
             startBtn: document.getElementById("startBtn"),
+            briefContinueBtn: document.getElementById("briefContinueBtn"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             audioBtn: document.getElementById("audioBtn"),
             helpBtn: document.getElementById("helpBtn"),
@@ -2831,13 +3030,6 @@
             closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
             gotItBtn: document.getElementById("gotItBtn"),
             resetConfirmModal: document.getElementById("resetConfirmModal"),
-            resetConfirmHeading: document.getElementById("resetConfirmHeading"),
-            resetConfirmMessage: document.getElementById("resetConfirmMessage"),
-            reviewBtn: document.getElementById("reviewBtn"),
-            reviewModal: document.getElementById("reviewModal"),
-            reviewBody: document.getElementById("reviewBody"),
-            closeReviewBtn: document.getElementById("closeReviewBtn"),
-            closeReviewFooterBtn: document.getElementById("closeReviewFooterBtn"),
             closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
             cancelResetBtn: document.getElementById("cancelResetBtn"),
             confirmResetBtn: document.getElementById("confirmResetBtn"),
@@ -2872,14 +3064,6 @@
         };
 
         function initializeApp() {
-            // One-time cleanup: earlier template versions saved to
-            // localStorage, which outlives the tab. Remove any of this sim's
-            // stale keys so shared machines carry no leftover learner data.
-            try {
-                Object.keys(localStorage)
-                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
-                    .forEach((k) => localStorage.removeItem(k));
-            } catch (err) { /* storage unavailable */ }
             // Validate the builder's config FIRST. If anything is wrong we
             // show the full problem list instead of starting the sim (theme
             // still loads so the error page is readable in the right mode).
@@ -2921,6 +3105,10 @@
         function bindEvents() {
             dom.startBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
+                showScreen("brief");
+            });
+            dom.briefContinueBtn.addEventListener("click", () => {
+                playSound("click"); // sound: button press
                 showScreen("sim");
                 devInit();
             });
@@ -2945,34 +3133,19 @@
             dom.audioBtn.addEventListener("click", toggleAudio);
             dom.themeToggleBtn.addEventListener("click", toggleTheme);
             dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
-            dom.resetBtn.addEventListener("click", () => openResetConfirmModal("reset"));
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
             dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
             dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
             dom.confirmResetBtn.addEventListener("click", () => {
-                const action = resetConfirmAction;
                 devReset();
                 closeResetConfirmModal();
-                if (action === "playAgain") {
-                    // Play Again restarts straight into a fresh run.
-                    showScreen("sim");
-                    devInit();
-                } else {
-                    // A reset returns to a clean home screen and, like any fresh
-                    // boot, re-opens the instructions/help modal.
-                    bootFresh();
-                }
+                // A reset returns to a clean home screen and, like any fresh
+                // boot, re-opens the instructions/help modal.
+                bootFresh();
             });
             dom.resetConfirmModal.addEventListener("click", (event) => {
                 if (event.target === dom.resetConfirmModal) {
                     closeResetConfirmModal();
-                }
-            });
-            dom.reviewBtn.addEventListener("click", openReviewModal);
-            dom.closeReviewBtn.addEventListener("click", closeReviewModal);
-            dom.closeReviewFooterBtn.addEventListener("click", closeReviewModal);
-            dom.reviewModal.addEventListener("click", (event) => {
-                if (event.target === dom.reviewModal) {
-                    closeReviewModal();
                 }
             });
             document.addEventListener("fullscreenchange", updateFullscreenButton);
@@ -2984,9 +3157,9 @@
             dom.tryAgainBtn.addEventListener("click", tryAgain);
             dom.playAgainBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
-                // Play Again wipes recorded answers, so it confirms first,
-                // exactly like Reset.
-                openResetConfirmModal("playAgain");
+                devReset();
+                showScreen("sim");
+                devInit();
             });
         }
 
@@ -3060,21 +3233,7 @@
             closeModalA11y();
         }
 
-        // What the shared confirm dialog will do when confirmed:
-        // "reset" (header Reset button) or "playAgain" (summary screen).
-        let resetConfirmAction = "reset";
-
-        function openResetConfirmModal(action) {
-            resetConfirmAction = action === "playAgain" ? "playAgain" : "reset";
-            if (resetConfirmAction === "playAgain") {
-                dom.resetConfirmHeading.textContent = "Play again?";
-                dom.resetConfirmMessage.textContent = "This will clear your current answers and score and start a fresh run.";
-                dom.confirmResetBtn.textContent = "Play Again";
-            } else {
-                dom.resetConfirmHeading.textContent = "Reset simulation?";
-                dom.resetConfirmMessage.textContent = "This will clear your current progress and return you to the home screen.";
-                dom.confirmResetBtn.textContent = "Reset";
-            }
+        function openResetConfirmModal() {
             dom.resetConfirmModal.classList.add("show");
             openModalA11y(dom.resetConfirmModal);
         }
@@ -3085,41 +3244,10 @@
             closeModalA11y();
         }
 
-        function openReviewModal() {
-            playSound("click"); // sound: button press
-            renderReview();
-            dom.reviewModal.classList.add("show");
-            openModalA11y(dom.reviewModal);
-        }
-
-        function closeReviewModal() {
-            if (!dom.reviewModal.classList.contains("show")) return;
-            dom.reviewModal.classList.remove("show");
-            closeModalA11y();
-        }
-
-        // Review/History: list every question answered so far using the same
-        // result cards as the final summary. Answered questions are locked,
-        // so revealing the correct answer here leaks nothing attemptable.
-        function renderReview() {
-            dom.reviewBody.replaceChildren();
-            let shown = 0;
-            (activeQuestions || []).forEach((question, index) => {
-                if (!isAnswered(question.id)) return;
-                dom.reviewBody.appendChild(buildResultCard(question, index));
-                shown++;
-            });
-            if (shown === 0) {
-                const empty = document.createElement("p");
-                empty.className = "muted";
-                empty.textContent = "No answers recorded yet. Answer a question and it will appear here.";
-                dom.reviewBody.appendChild(empty);
-            }
-        }
-
         function showScreen(screenName) {
             state.currentScreen = screenName;
             dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.briefScreen.classList.toggle("active", screenName === "brief");
             dom.simScreen.classList.toggle("active", screenName === "sim");
             dom.summaryScreen.classList.toggle("active", screenName === "summary");
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -3173,7 +3301,6 @@
             if (event.key === "Escape") {
                 closeInstructionsModal();
                 closeResetConfirmModal();
-                closeReviewModal();
             }
         }
 
@@ -3186,17 +3313,14 @@
                 .replace(/'/g, "&#039;");
         }
 
-        /* sessionStorage (not localStorage): survives a refresh so progress
-           resumes mid-session, but clears when the tab closes — so on shared
-           laptops the next learner starts clean and sees the instructions. */
         function storageGet(key) {
-            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+            try { return localStorage.getItem(key); } catch (err) { return null; }
         }
         function storageSet(key, value) {
-            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+            try { localStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
         }
         function storageRemove(key) {
-            try { sessionStorage.removeItem(key); } catch (err) { /* storage unavailable */ }
+            try { localStorage.removeItem(key); } catch (err) { /* storage unavailable */ }
         }
 
         function announce(message) {
@@ -3282,20 +3406,15 @@
             // and token extraction is stable.
             const rawPass = String(text).toLowerCase().replace(/\s+/g, " ");
             const leetPass = deLeet(text).replace(/\s+/g, " ");
-            // Separator-stripped passes catch punctuation spellings like
-            // "s.w.e.a.r": dots/dashes/underscores/stars BETWEEN letters are
-            // removed. Spaces are untouched, so adjacent clean words never
-            // merge into a false match ("grass hit" stays two words).
-            const stripSeparators = (s) => s.replace(/([a-z0-9])[.\-_*+']+(?=[a-z0-9])/g, "$1");
-            const passes = [rawPass, leetPass, stripSeparators(rawPass), stripSeparators(leetPass)];
+            const passes = [rawPass, leetPass];
 
             for (let p = 0; p < passes.length; p++) {
                 const hay = passes[p];
                 for (let i = 0; i < PROFANITY_LIST.length; i++) {
                     const entry = PROFANITY_LIST[i];
-                    // Leet-normalized passes skip entries under 3 chars to
-                    // avoid false positives from normalized text (e.g. "xx").
-                    if ((p === 1 || p === 3) && entry.length < 3) continue;
+                    // Leet pass skips entries under 3 chars to avoid false
+                    // positives from normalized text (e.g. "xx").
+                    if (p === 1 && entry.length < 3) continue;
 
                     if (entry.length >= 4) {
                         // Substring tier with allowlisted-token guard.
@@ -3426,10 +3545,81 @@
                 // boot so the help screen comes up.
                 bootFresh();
             }
+            // Make the chambers reflect whatever rings were earned so far.
+            syncRings();
         }
 
         function clearQuizProgress() {
             storageRemove(PROGRESS_KEY);
+        }
+
+        /* ------------------------------------------------------------
+           Echo-chamber rings. A ring starts as a faint, empty outline and
+           pops in solid and glowing once the matching idea is correctly
+           identified. A question opts in with  revealRing:
+           "message" | "evidence" | "realLife". Both the briefing screen's
+           chamber and the question screen's compact tracker stay in sync.
+           ------------------------------------------------------------ */
+        const RING_TARGETS = {
+            message: {
+                label: "Message",
+                rings: ["ringMessage", "trackRingMessage"],
+                dot: "legendDotMessage"
+            },
+            evidence: {
+                label: "Evidence",
+                rings: ["ringEvidence", "trackRingEvidence"],
+                dot: "legendDotEvidence"
+            },
+            realLife: {
+                label: "Real Life",
+                rings: ["ringRealLife", "trackRingRealLife"],
+                dot: "legendDotRealLife"
+            }
+        };
+
+        function normalizeRingKey(key) {
+            return String(key).toLowerCase().replace(/\s+/g, ""); // "real life" -> "reallife"
+        }
+
+        function revealRing(key, opts) {
+            const options = opts || {};
+            const target = RING_TARGETS[normalizeRingKey(key)];
+            if (!target) return;
+            target.rings.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add("revealed");
+            });
+            const dot = document.getElementById(target.dot);
+            if (dot) dot.classList.add("lit");
+            if (options.announce !== false) {
+                announce("Ring appeared: " + target.label + ".");
+            }
+        }
+
+        function hideAllRings() {
+            Object.keys(RING_TARGETS).forEach((key) => {
+                const target = RING_TARGETS[key];
+                target.rings.forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove("revealed");
+                });
+                const dot = document.getElementById(target.dot);
+                if (dot) dot.classList.remove("lit");
+            });
+        }
+
+        // Re-apply the revealed state from stored results, so the chambers
+        // always match progress on resume and after a reset.
+        function syncRings() {
+            hideAllRings();
+            activeQuestions.forEach((question) => {
+                if (!question.revealRing) return;
+                const result = state.results[question.id];
+                if (result && result.status === "correct") {
+                    revealRing(question.revealRing, { announce: false });
+                }
+            });
         }
 
         /* ============================================================
@@ -5279,62 +5469,14 @@
                 return;
             }
 
-            // Type mismatch guards — reject with guidance instead of grading
-            // (grading would silently consume an attempt).
-            if (question.type === "exactNumber" && typeof answer === "string" &&
-                !Number.isFinite(Number(answer.replace(",", ".")))) {
-                showAlert("Please enter a number (digits only, e.g. 6).");
-                const numInput = document.getElementById("dynamicAnswerInput");
-                if (numInput) markInputError(numInput);
-                rejectSubmit();
-                return;
-            }
-            // (exactText is exempt when the configured answer is itself
-            // numeric — a builder may legitimately ask for "7".)
-            if ((question.type === "keywords" || question.type === "shortAnswer" ||
-                 (question.type === "exactText" && !/^[\d\s.,+-]+$/.test(String(question.answer || "")))) &&
-                typeof answer === "string" && /^[\d\s.,+-]+$/.test(answer)) {
-                showAlert("Please write your answer in words, not just numbers.");
-                const txtInput = document.getElementById("dynamicAnswerInput");
-                if (txtInput) markInputError(txtInput);
-                rejectSubmit();
-                return;
-            }
-
-            // Profanity filter on typed answers. A hit warns AND clears only
-            // the offending field(s); clean fields keep their content.
+            // profanity filter on typed answers (word-boundary, inline warning)
             if (typeof answer === "string") {
                 const hit = findProfanity(answer);
                 if (hit) {
                     showAlert("Please remove inappropriate language from your answer before submitting.");
-                    announce("Answer blocked: inappropriate language detected. The field was cleared.");
+                    announce("Answer blocked: inappropriate language detected.");
                     const profanityInput = document.getElementById("dynamicAnswerInput");
-                    if (profanityInput) {
-                        profanityInput.value = "";
-                        profanityInput.dispatchEvent(new Event("input", { bubbles: true }));
-                        markInputError(profanityInput);
-                    }
-                    rejectSubmit();
-                    return;
-                }
-            }
-            // fillBlank typed answers are an object of per-blank strings —
-            // check each blank and clear only the ones that contain a hit.
-            if (question.type === "fillBlank" && answer && typeof answer === "object") {
-                let anyHit = false;
-                Object.keys(answer).forEach((tok) => {
-                    if (typeof answer[tok] !== "string" || !findProfanity(answer[tok])) return;
-                    anyHit = true;
-                    const blankInput = dom.answerArea.querySelector('.fillblank-input[data-blank="' + tok + '"]');
-                    if (blankInput) {
-                        blankInput.value = "";
-                        blankInput.dispatchEvent(new Event("input", { bubbles: true }));
-                        markInputError(blankInput);
-                    }
-                });
-                if (anyHit) {
-                    showAlert("Please remove inappropriate language from your answer before submitting.");
-                    announce("Answer blocked: inappropriate language detected. The affected blanks were cleared.");
+                    if (profanityInput) markInputError(profanityInput);
                     rejectSubmit();
                     return;
                 }
@@ -5365,6 +5507,10 @@
             }
 
             recordResult(question, answer, result);
+            // A correctly identified idea makes its echo-chamber ring appear.
+            if (result.status === "correct" && question.revealRing) {
+                revealRing(question.revealRing);
+            }
             justGraded = true; // sound: allow per-pair result tones for this render only
             renderQuestion();
             justGraded = false;
@@ -6123,13 +6269,6 @@
 
             dom.summaryResults.replaceChildren();
             activeQuestions.forEach((question, index) => {
-                dom.summaryResults.appendChild(buildResultCard(question, index));
-            });
-        }
-
-        // One per-question result card, shared by the final summary screen
-        // and the Review modal.
-        function buildResultCard(question, index) {
                 const result = state.results[question.id];
                 const card = document.createElement("article");
                 card.className = "result-card";
@@ -6189,7 +6328,8 @@
                 }
 
                 card.append(heading, statusLine, list);
-                return card;
+                dom.summaryResults.appendChild(card);
+            });
         }
 
         /* ------------------------------------------------------------
@@ -6206,6 +6346,7 @@
             state.started = true;
             state.finished = false;
             renderQuestion();
+            syncRings();
             saveQuizProgress();
         }
 
@@ -6224,6 +6365,7 @@
             state.bestStreak = 0;
             state.interaction = null;
             clearMessageBoxes();
+            hideAllRings();
             clearQuizProgress();
         }
 
