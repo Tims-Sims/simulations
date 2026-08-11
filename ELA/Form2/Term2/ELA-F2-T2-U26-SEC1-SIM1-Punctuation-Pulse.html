@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Punctuation Pulse</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ---- Punctuation Pulse sim styles ---- */
+
+        .pp-live {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
+
+        .pp-progress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .pp-progress-bar {
+            flex: 1;
+            height: 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--surface-2) 75%, transparent);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .pp-progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.45s ease;
+        }
+
+        .pp-progress-text {
+            flex: 0 0 auto;
+            font-weight: 700;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+            white-space: nowrap;
+        }
+
+        .pp-card {
+            display: grid;
+            gap: 14px;
+        }
+
+        .pp-eyebrow {
+            justify-self: start;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .pp-title {
+            margin: 0;
+            font-size: clamp(1.5rem, 3vw, 2.1rem);
+            line-height: 1.15;
+        }
+
+        .pp-intro {
+            margin: 0;
+            color: var(--text-soft);
+            line-height: 1.6;
+            max-width: 760px;
+        }
+
+        .pp-note {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .pp-note-ok {
+            margin: 0;
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        /* ---- Poem + pulse lines ---- */
+
+        .pp-poem {
+            display: grid;
+            gap: 14px;
+            margin-top: 6px;
+        }
+
+        .pp-line {
+            display: grid;
+            gap: 6px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+        }
+
+        .pp-line-verse {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.3rem;
+            line-height: 1.5;
+        }
+
+        .pp-slot {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 2px dashed var(--accent);
+            background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            touch-action: manipulation;
+        }
+
+        .pp-slot:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .pp-slot-filled {
+            border-style: solid;
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 16%, var(--surface));
+            cursor: default;
+        }
+
+        .pp-slot-char {
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+
+        .pp-slot-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--success);
+            white-space: nowrap;
+        }
+
+        .pp-slot:disabled {
+            cursor: default;
+        }
+
+        .pp-poem-ready .pp-slot:not(.pp-slot-filled) {
+            animation: ppSlotPulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes ppSlotPulse {
+            0%, 100% { border-color: var(--accent); transform: scale(1); }
+            50% { border-color: var(--accent-2); transform: scale(1.06); }
+        }
+
+        .pp-pulse {
+            display: block;
+            width: 100%;
+            height: 46px;
+        }
+
+        .pp-pulse path {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .pp-pulse.pp-pulse-wob path {
+            animation: ppWobble 1.1s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes ppWobble {
+            0%, 100% { transform: translateX(0) scaleX(1); }
+            25% { transform: translateX(-3px) scaleX(0.995); }
+            50% { transform: translateX(3px) scaleX(1.005); }
+            75% { transform: translateX(-2px) scaleX(1); }
+        }
+
+        .pp-pulse.pp-pulse-beat path {
+            animation: ppBeat 2.4s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes ppBeat {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.05); }
+        }
+
+        .pp-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.92rem;
+        }
+
+        .pp-status-stable {
+            color: var(--success);
+        }
+
+        .pp-status-unstable {
+            color: var(--warning);
+        }
+
+        .pp-check {
+            color: var(--success);
+            font-weight: 900;
+        }
+
+        .pp-x {
+            color: var(--danger);
+            font-weight: 900;
+        }
+
+        .pp-ic {
+            width: 22px;
+            height: 22px;
+            flex: 0 0 auto;
+        }
+
+        .pp-shake {
+            animation: ppShake 0.45s ease;
+        }
+
+        @keyframes ppShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-7px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(3px); }
+        }
+
+        /* ---- Token tray ---- */
+
+        .pp-tray {
+            margin-top: 6px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+        }
+
+        .pp-tray-title {
+            margin: 0 0 10px;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .pp-tray-help {
+            margin: 0 0 10px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .pp-tray-tokens {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pp-token {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            min-width: 64px;
+            min-height: 44px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text);
+            touch-action: manipulation;
+        }
+
+        .pp-token:hover {
+            border-color: var(--accent);
+        }
+
+        .pp-token-selected {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+            box-shadow: var(--focus);
+            transform: translateY(-2px) scale(1.04);
+        }
+
+        .pp-token-selected .pp-token-char::after {
+            content: " ✓";
+        }
+
+        .pp-token-used {
+            opacity: 0.45;
+            text-decoration: line-through;
+            cursor: not-allowed;
+        }
+
+        .pp-token-char {
+            font-size: 1.5rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .pp-token-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        /* ---- Feedback ---- */
+
+        .pp-feedback-wrap {
+            margin-top: 4px;
+        }
+
+        .pp-feedback {
+            margin-top: 10px;
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            display: grid;
+            gap: 6px;
+        }
+
+        .pp-feedback p {
+            margin: 0;
+            line-height: 1.55;
+            color: var(--text-soft);
+        }
+
+        .pp-feedback-bad {
+            border-left: 5px solid var(--danger);
+        }
+
+        .pp-feedback-ok {
+            border-left: 5px solid var(--success);
+        }
+
+        .pp-feedback-note {
+            border-left: 5px solid var(--accent);
+        }
+
+        .pp-fb-head {
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .pp-model {
+            font-family: Georgia, "Times New Roman", serif;
+            font-style: italic;
+            color: var(--text);
+        }
+
+        /* ---- Hint ---- */
+
+        .pp-hint-box {
+            margin-top: 10px;
+            padding: 12px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--warning);
+            background: color-mix(in srgb, var(--warning) 10%, var(--surface));
+            color: var(--text-soft);
+            line-height: 1.55;
+        }
+
+        /* ---- Effects (final screen) ---- */
+
+        .pp-effect-row {
+            margin-top: 12px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+            display: grid;
+            gap: 10px;
+        }
+
+        .pp-effect-prompt {
+            margin: 0;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .pp-effect-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pp-effect-chip {
+            min-height: 44px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text);
+            font-weight: 700;
+            touch-action: manipulation;
+        }
+
+        .pp-effect-chip:hover {
+            border-color: var(--accent);
+        }
+
+        .pp-chip-picked {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+        }
+
+        .pp-chip-correct {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 16%, var(--surface));
+        }
+
+        .pp-chip-wrong {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+        }
+
+        .pp-effect-chip:disabled {
+            cursor: default;
+        }
+
+        .pp-effect-feedback {
+            display: grid;
+            gap: 6px;
+        }
+
+        /* ---- Completion ---- */
+
+        .pp-complete {
+            text-align: center;
+        }
+
+        .pp-complete .pp-title {
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+        }
+
+        .pp-check-big {
+            color: var(--success);
+            font-size: 1.4em;
+        }
+
+        .pp-skill-row {
+            text-align: left;
+            max-width: 620px;
+            margin: 0 auto;
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+        }
+
+        .pp-skill-row ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pp-pulse.pp-pulse-wob path,
+            .pp-pulse.pp-pulse-beat path,
+            .pp-shake,
+            .pp-poem-ready .pp-slot:not(.pp-slot-filled) {
+                animation: none !important;
+            }
+
+            .pp-progress-fill {
+                transition: none;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- ===== OPTIONAL: AUDIO TOGGLE BUTTON =====
+                     Audio intentionally removed for this sim (silent, no sound clues).
+                     The DEV-EDIT: AUDIO script section below is also removed. -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open rules">❔ Rules</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Exit the sim and return home"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Exit</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Punctuation Pulse — a poem appears as a moving pulse line;
+                         the student places end marks into fixed slots. All stage
+                         content is rendered into #ppStageHost by the SIM LOGIC.
+                         ============================================================ -->
+                    <div id="pp">
+                        <div class="pp-progress-wrap">
+                            <div class="pp-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" aria-label="Lines stable">
+                                <div class="pp-progress-fill" id="ppProgressFill"></div>
+                            </div>
+                            <span class="pp-progress-text" id="ppProgressText">Lines stable: 0 of 4</span>
+                        </div>
+                        <div id="ppStageHost"></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Punctuation Pulse · Unit 26 Grammar and Spelling · Silent, offline, keyboard-friendly.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Exit the sim?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Stay</button>
+                <button class="danger-btn" id="confirmResetBtn">Exit</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "ELA-F2-T2-U26-SEC1-SIM1-Punctuation-Pulse",
+            title: "Punctuation Pulse",
+            subtitle: "Stabilise the poem with accurate end marks",
+            badgeText: "PULSE",
+            homeEyebrow: "Unit 26 · Grammar and Spelling",
+            homeDescription:
+                "A poem appears as a moving pulse line, but its beat is unsteady. Place the correct punctuation into the fixed slots to stabilise all four lines and preserve the poem's pace and meaning. Choose end marks that match each line's pause, question or strong feeling.",
+            instructions: [
+                "A full stop creates a complete stop; a question mark signals a direct question; an exclamation mark shows strong feeling or urgency.",
+                "Commas create shorter pauses within a line.",
+                "Punctuation choices influence visible pacing and meaning in poetry.",
+                "Drag or tap a punctuation token, then tap its slot. Every mark is checked against one exact answer.",
+                "Wrong marks show why the answer is wrong, how to fix it and a correct model.",
+                "This sim is silent and fully usable without audio."
+            ]
+        };
+
+        /* ============================================================
+           AUDIO ENGINE - REMOVED (this sim is silent by design)
+           ============================================================ */
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           Punctuation Pulse — a poem appears as a moving pulse line;
+           the student drags punctuation tokens into fixed slots.
+           Content below mirrors issue #110 exactly.
+           ============================================================ */
+
+        /* ---- Punctuation tokens ---- */
+
+        const PP_TOKENS = [
+            { id: "dot", char: ".", label: "Full stop" },
+            { id: "q", char: "?", label: "Question mark" },
+            { id: "ex", char: "!", label: "Exclamation mark" },
+            { id: "comma", char: ",", label: "Comma" },
+            { id: "semi", char: ";", label: "Semicolon" }
+        ];
+
+        const PP_TOKEN_BY_ID = {};
+        PP_TOKENS.forEach(function (t) { PP_TOKEN_BY_ID[t.id] = t; });
+
+        /* ---- Pulse wave shapes (svg path data) ---- */
+
+        const PP_PATHS = {
+            unstable: "M0 34 C20 30 32 42 46 36 C60 30 72 46 88 38 C104 30 116 44 132 36 C148 28 160 44 176 36 C192 28 204 40 220 34 C236 28 248 42 264 34 C278 28 290 38 300 32",
+            q: "M0 34 C30 34 44 22 58 16 C72 10 86 10 100 12 C120 14 132 12 150 12 L300 12",
+            dot: "M0 34 C40 34 70 30 100 28 C140 26 180 28 220 28 C250 28 280 30 300 30",
+            ex: "M0 34 C26 34 34 18 44 16 C54 14 60 10 66 8 C72 6 78 8 86 14 C96 22 108 26 122 28 C180 30 260 32 300 32",
+            comma: "M0 30 C30 30 42 32 52 34 C56 42 54 46 58 48 C62 50 66 44 70 36 C80 30 100 30 140 30 C220 30 280 32 300 32",
+            combo: "M0 30 C22 30 32 32 40 34 C44 42 42 46 46 48 C50 50 54 44 58 36 C66 30 86 30 124 30 C200 30 260 32 300 32"
+        };
+
+        const PP_ICONS = {
+            q: '<svg class="pp-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16 L12 8 L19 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="8" x2="12" y2="21" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
+            dot: '<svg class="pp-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>',
+            ex: '<svg class="pp-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 L20 20 L4 20 Z" fill="currentColor"/></svg>',
+            comma: '<svg class="pp-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 H20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M14 12 C14 16 13 18 10 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>'
+        };
+
+        /* ---- Poem lines and slots (exact content from the issue) ---- */
+
+        const PP_LINES = {
+            l1: [{ t: "text", s: "Who called my name" }, { t: "slot", k: "l1" }],
+            l2: [{ t: "text", s: "I turned but saw no one" }, { t: "slot", k: "l2" }],
+            l3: [{ t: "text", s: "Wait for me" }, { t: "slot", k: "l3" }],
+            l4: [{ t: "text", s: "The road is dark" }, { t: "slot", k: "l4a" }, { t: "text", s: "but I will go" }, { t: "slot", k: "l4b" }]
+        };
+
+        const PP_LINE_SHAPE = { l1: "q", l2: "dot", l3: "ex", l4: "combo" };
+
+        const PP_LINE_STATUS = {
+            l1: "Rising question pause",
+            l2: "Full stop pause",
+            l3: "Sharp urgency pulse",
+            l4: "Short pause, then full stop"
+        };
+
+        const PP_SLOTS = {
+            l1:  { correct: "q",     skill: "choosing end marks for direct questions",   label: "at the end of line 1" },
+            l2:  { correct: "dot",   skill: "choosing end marks for statements",         label: "at the end of line 2" },
+            l3:  { correct: "ex",    skill: "choosing end marks for urgency",            label: "at the end of line 3" },
+            l4a: { correct: "comma", skill: "choosing commas for short pauses",          label: "after \u201Cdark\u201D" },
+            l4b: { correct: "dot",   skill: "choosing end marks for closure",            label: "at the end of line 4" }
+        };
+
+        /* ---- Corrective feedback: why, fix, model (from the issue) ---- */
+
+        const PP_FEEDBACK = {
+            l1: {
+                why: "The line directly asks who called, so it is a question, not a statement or a shout.",
+                fix: "Place a question mark at the end of the line.",
+                model: "Who called my name?"
+            },
+            l2: {
+                why: "The speaker calmly says what happened — this is a plain statement.",
+                fix: "Place a full stop at the end of the line.",
+                model: "I turned but saw no one."
+            },
+            l3: {
+                why: "The speaker urgently calls for someone to wait — the line carries strong feeling.",
+                fix: "Use an exclamation mark to show the urgency.",
+                model: "Wait for me!"
+            },
+            l4a: {
+                why: "The line contrasts darkness with the decision to keep going, so the pause before \u201Cbut\u201D is short.",
+                fix: "Place a comma after \u201Cdark\u201D.",
+                model: "The road is dark, but I will go."
+            },
+            l4b: {
+                why: "The sentence is complete, so the line needs a full stop to give closure.",
+                fix: "Place a full stop at the end of the line.",
+                model: "The road is dark, but I will go."
+            }
+        };
+
+        /* ---- Gameplay stages ---- */
+
+        const PP_STAGES = [
+            {
+                id: "s2",
+                eyebrow: "Stage 1 of 4 · Question Pulse",
+                title: "A direct question",
+                intro: "Line 1 asks who called. Choose the end mark that turns a spoken question into a rising pulse.",
+                hint: "A line that asks a question — like \u201Cwho called?\u201D — ends with a question mark.",
+                lines: ["l1"]
+            },
+            {
+                id: "s3",
+                eyebrow: "Stage 2 of 4 · Statement and Urgency",
+                title: "A statement, then a call",
+                intro: "Line 2 calmly states what happened. Line 3 is an urgent call. Punctuate each line to lock its pulse.",
+                hint: "Line 2 is a calm statement (full stop). Line 3 is an urgent call (exclamation mark).",
+                lines: ["l2", "l3"]
+            },
+            {
+                id: "s4",
+                eyebrow: "Stage 3 of 4 · Internal Pause",
+                title: "A pause inside the line",
+                intro: "Line 4 needs a short pause before \u201Cbut\u201D and a full stop at the end.",
+                hint: "Place a comma after \u201Cdark\u201D for the short pause, then a full stop at the end of the line.",
+                lines: ["l4"]
+            }
+        ];
+
+        /* ---- Final effect cards (screen 5) ---- */
+
+        const PP_EFFECT_CHOICES = ["Uncertainty", "Urgency", "Brief contrast pause", "Closure"];
+
+        const PP_EFFECTS = [
+            {
+                key: "e1", line: "Who called my name?", ask: "What does the question mark create?", correct: "Uncertainty",
+                ok: "The question mark creates uncertainty.",
+                why: "The question mark shows the speaker does not know who called — it creates uncertainty.",
+                fix: "Select \u201CUncertainty\u201D for the question mark.",
+                model: "Question mark → Uncertainty"
+            },
+            {
+                key: "e2", line: "Wait for me!", ask: "What does the exclamation mark create?", correct: "Urgency",
+                ok: "The exclamation mark creates urgency.",
+                why: "The exclamation mark shows the speaker\u2019s urgent feeling — it creates urgency.",
+                fix: "Select \u201CUrgency\u201D for the exclamation mark.",
+                model: "Exclamation mark → Urgency"
+            },
+            {
+                key: "e3", line: "The road is dark,", ask: "What does the comma create?", correct: "Brief contrast pause",
+                ok: "The comma creates a brief contrast pause.",
+                why: "The comma makes a short pause before \u201Cbut\u201D — it creates a brief contrast pause.",
+                fix: "Select \u201CBrief contrast pause\u201D for the comma.",
+                model: "Comma → Brief contrast pause"
+            },
+            {
+                key: "e4", line: "I will go.", ask: "What does the final full stop create?", correct: "Closure",
+                ok: "The final full stop gives closure.",
+                why: "The final full stop brings the sentence to a complete stop — it gives closure.",
+                fix: "Select \u201CClosure\u201D for the final full stop.",
+                model: "Full stop → Closure"
+            }
+        ];
+
+        /* ---- Sim state ---- */
+
+        const PP = {
+            view: "mission",
+            stageIdx: 0,
+            slotFill: {},
+            slotFirstCorrect: {},
+            attempts: {},
+            effectPick: {},
+            effectFirstCorrect: {},
+            effectAttempts: {},
+            selectedToken: null,
+            hintsUsed: 0,
+            startTime: 0,
+            reported: false
+        };
+
+        /* ---- Progress ---- */
+
+        function ppLineSlots(key) {
+            return PP_LINES[key].filter(function (seg) { return seg.t === "slot"; }).map(function (seg) { return seg.k; });
+        }
+
+        function ppLineStable(key) {
+            return ppLineSlots(key).every(function (k) { return !!PP.slotFill[k]; });
+        }
+
+        function ppLinesStable() {
+            var n = 0;
+            ["l1", "l2", "l3", "l4"].forEach(function (k) { if (ppLineStable(k)) n += 1; });
+            return n;
+        }
+
+        function updateProgress() {
+            var n = ppLinesStable();
+            var fill = document.getElementById("ppProgressFill");
+            var text = document.getElementById("ppProgressText");
+            var bar = document.querySelector(".pp-progress-bar");
+            if (fill) fill.style.width = Math.round((n / 4) * 100) + "%";
+            if (text) text.textContent = "Lines stable: " + n + " of 4";
+            if (bar) bar.setAttribute("aria-valuenow", String(n));
+        }
+
+        /* ---- Rendering ---- */
+
+        function ppSvg(shape, stable) {
+            var d = stable ? PP_PATHS[shape] : PP_PATHS.unstable;
+            var cls = stable ? "pp-pulse pp-pulse-beat" : "pp-pulse pp-pulse-wob";
+            return '<svg class="' + cls + '" viewBox="0 0 300 56" preserveAspectRatio="none" aria-hidden="true"><path d="' + d + '"/></svg>';
+        }
+
+        function ppSlotHTML(key, opts) {
+            var o = opts || {};
+            var fill = o.fill !== undefined ? o.fill : PP.slotFill[key];
+            var token = fill ? PP_TOKEN_BY_ID[fill] : null;
+            var meta = PP_SLOTS[key];
+            var disabled = o.disabled || token ? " disabled" : "";
+            var label = token ? token.label : "Empty punctuation slot " + meta.label;
+            var inner = token
+                ? '<span class="pp-slot-char">' + escapeHtml(token.char) + '</span><span class="pp-slot-tag">✓ ' + escapeHtml(token.label) + '</span>'
+                : '<span class="pp-slot-char">＿</span>';
+            return '<button type="button" class="pp-slot' + (token ? " pp-slot-filled" : "") + '" data-slot="' + key + '" aria-label="' + escapeHtml(label) + '"' + disabled + '>' + inner + '</button>';
+        }
+
+        function ppLineHTML(key, mode) {
+            var segs = PP_LINES[key];
+            var html = "";
+            segs.forEach(function (seg) {
+                if (seg.t === "text") {
+                    html += '<span class="pp-line-text">' + escapeHtml(seg.s) + '</span>';
+                } else if (mode === "filled") {
+                    html += ppSlotHTML(seg.k, { fill: PP_SLOTS[seg.k].correct, disabled: true });
+                } else if (mode === "empty") {
+                    html += ppSlotHTML(seg.k, { fill: null, disabled: true });
+                } else {
+                    html += ppSlotHTML(seg.k);
+                }
+            });
+            var stable = mode === "filled" ? true : ppLineStable(key);
+            var shape = PP_LINE_SHAPE[key];
+            var statusHTML = stable
+                ? '<div class="pp-status pp-status-stable">' + PP_ICONS[shape] + '<span><b>✓ Stable.</b> ' + PP_LINE_STATUS[key] + '</span></div>'
+                : '<div class="pp-status pp-status-unstable"><span aria-hidden="true">⚠</span><span>Unstable — waiting for the correct mark</span></div>';
+            return '<div class="pp-line" data-line="' + key + '">' +
+                '<div class="pp-line-verse">' + html + '</div>' +
+                ppSvg(shape, stable) +
+                statusHTML +
+                '</div>';
+        }
+
+        function ppRenderMission() {
+            var poem = ["l1", "l2", "l3", "l4"].map(function (k) { return ppLineHTML(k, "empty"); }).join("");
+            return '<div class="pp-card">' +
+                '<div class="pp-eyebrow">Mission Brief</div>' +
+                '<h2 class="pp-title">Keep the poem\u2019s pulse alive</h2>' +
+                '<p class="pp-intro">A poem is a moving pulse line, but right now the beat is unsteady — every end mark is missing. Place the correct punctuation into the fixed slots to stabilise all four lines and preserve the poem\u2019s pace and meaning.</p>' +
+                '<div class="pp-poem">' + poem + '</div>' +
+                '<p class="pp-note">Four pulse segments are unstable. Choose accurate end marks and steady the rhythm.</p>' +
+                '<div class="button-row"><button type="button" class="primary-btn" id="ppBegin">Begin</button></div>' +
+                '</div>';
+        }
+
+        function ppRenderStage() {
+            var st = PP_STAGES[PP.stageIdx];
+            var lines = st.lines.map(function (k) { return ppLineHTML(k, "stage"); }).join("");
+            var done = st.lines.every(function (k) { return ppLineStable(k); });
+            var used = {};
+            st.lines.forEach(function (k) {
+                ppLineSlots(k).forEach(function (sk) { if (PP.slotFill[sk]) used[PP.slotFill[sk]] = true; });
+            });
+            var tokens = PP_TOKENS.map(function (t) {
+                var sel = PP.selectedToken === t.id;
+                return '<button type="button" class="pp-token' + (sel ? " pp-token-selected" : "") + (used[t.id] ? " pp-token-used" : "") + '" data-token="' + t.id + '" draggable="true" aria-pressed="' + sel + '"' + (used[t.id] ? " disabled" : "") + '>' +
+                    '<span class="pp-token-char">' + escapeHtml(t.char) + '</span>' +
+                    '<span class="pp-token-label">' + t.label + '</span>' +
+                    '</button>';
+            }).join("");
+            var tray = done
+                ? '<p class="pp-note-ok">✓ This stage\u2019s lines are stable.</p>'
+                : '<div class="pp-tray"><p class="pp-tray-title">Punctuation tokens</p><p class="pp-tray-help">Tap a token to pick it up, then tap its empty slot to drop it. You can also drag a token straight onto a slot.</p><div class="pp-tray-tokens">' + tokens + '</div></div>';
+            return '<div class="pp-card">' +
+                '<div class="pp-eyebrow">' + escapeHtml(st.eyebrow) + '</div>' +
+                '<h2 class="pp-title">' + escapeHtml(st.title) + '</h2>' +
+                '<p class="pp-intro">' + escapeHtml(st.intro) + '</p>' +
+                '<div class="pp-poem">' + lines + '</div>' +
+                tray +
+                '<div id="ppFeedback" class="pp-feedback-wrap"></div>' +
+                '<div id="ppHintBox"></div>' +
+                '<div class="button-row">' +
+                '<button type="button" class="secondary-btn" id="ppBack">← Back</button>' +
+                '<button type="button" class="secondary-btn" id="ppHint">Hint</button>' +
+                (done ? '<button type="button" class="primary-btn" id="ppContinue">Continue →</button>' : '') +
+                '</div>' +
+                '</div>';
+        }
+
+        function ppRenderFinal() {
+            var poem = ["l1", "l2", "l3", "l4"].map(function (k) { return ppLineHTML(k, "filled"); }).join("");
+            var allDone = PP_EFFECTS.every(function (e) { return PP.effectPick[e.key] === e.correct; });
+            var rows = PP_EFFECTS.map(function (e) {
+                var pick = PP.effectPick[e.key];
+                var done = pick === e.correct;
+                var chips = PP_EFFECT_CHOICES.map(function (c) {
+                    var cls = "pp-effect-chip";
+                    var mark = "";
+                    if (done && c === e.correct) { cls += " pp-chip-correct"; mark = " ✓"; }
+                    else if (pick === c && c !== e.correct) { cls += " pp-chip-wrong"; mark = " ✗"; }
+                    else if (pick === c) { cls += " pp-chip-picked"; }
+                    return '<button type="button" class="' + cls + '" data-effect="' + e.key + '" data-choice="' + escapeHtml(c) + '"' + (done ? " disabled" : "") + '>' + escapeHtml(c) + mark + '</button>';
+                }).join("");
+                return '<div class="pp-effect-row" data-ek="' + e.key + '">' +
+                    '<p class="pp-effect-prompt"><b>' + escapeHtml(e.line) + '</b> — ' + escapeHtml(e.ask) + '</p>' +
+                    '<div class="pp-effect-chips">' + chips + '</div>' +
+                    '<div class="pp-effect-feedback" data-efbk="' + e.key + '"></div>' +
+                    '</div>';
+            }).join("");
+            return '<div class="pp-card">' +
+                '<div class="pp-eyebrow">Final Check · The Complete Poem Pulse</div>' +
+                '<h2 class="pp-title">Match each mark to its effect</h2>' +
+                '<p class="pp-intro">The poem is now correctly punctuated and its pulse is steady. Choose the effect each mark creates.</p>' +
+                '<div class="pp-poem">' + poem + '</div>' +
+                rows +
+                '<div id="ppHintBox"></div>' +
+                '<div class="button-row">' +
+                '<button type="button" class="secondary-btn" id="ppBack">← Back</button>' +
+                '<button type="button" class="secondary-btn" id="ppHint">Hint</button>' +
+                (allDone ? '<button type="button" class="primary-btn" id="ppFinish">Finish →</button>' : '') +
+                '</div>' +
+                '</div>';
+        }
+
+        function ppRenderComplete() {
+            return '<div class="pp-card pp-complete">' +
+                '<div class="pp-eyebrow">Mission Complete</div>' +
+                '<h2 class="pp-title"><span class="pp-check-big">✓</span> Poem pulse stable</h2>' +
+                '<p class="pp-intro">You stabilised all four lines and preserved the poem\u2019s pace and meaning.</p>' +
+                '<div class="pp-skill-row">' +
+                '<p class="pp-note-ok">Skills you used:</p>' +
+                '<ul>' +
+                '<li>choosing accurate end marks for questions, statements, urgency and pauses;</li>' +
+                '<li>explaining how punctuation shapes pacing and meaning in poetry.</li>' +
+                '</ul>' +
+                '</div>' +
+                '<p class="pp-note muted">Use Exit at the top right to leave, or play again to retry from the start.</p>' +
+                '<div class="button-row"><button type="button" class="secondary-btn" id="ppAgain">Play Again</button></div>' +
+                '</div>';
+        }
+
+        /* ---- Accessibility announcements ---- */
+
+        function ppAnnounce(msg) {
+            var lr = document.getElementById("ppLive");
+            if (!lr) {
+                lr = document.createElement("div");
+                lr.id = "ppLive";
+                lr.className = "pp-live";
+                lr.setAttribute("aria-live", "polite");
+                document.body.appendChild(lr);
+            }
+            lr.textContent = "";
+            setTimeout(function () { lr.textContent = msg; }, 30);
+        }
+
+        function ppShake() {
+            var poem = document.querySelector(".pp-poem");
+            if (!poem) return;
+            poem.classList.remove("pp-shake");
+            void poem.offsetWidth;
+            poem.classList.add("pp-shake");
+        }
+
+        /* ---- Token and slot actions ---- */
+
+        function ppSyncTraySelection() {
+            document.querySelectorAll(".pp-token").forEach(function (b) {
+                var sel = b.dataset.token === PP.selectedToken;
+                b.classList.toggle("pp-token-selected", sel);
+                b.setAttribute("aria-pressed", sel ? "true" : "false");
+            });
+            var poem = document.querySelector(".pp-poem");
+            if (poem) poem.classList.toggle("pp-poem-ready", !!PP.selectedToken);
+        }
+
+        function ppSelectToken(id) {
+            PP.selectedToken = PP.selectedToken === id ? null : id;
+            ppSyncTraySelection();
+            ppAnnounce(PP.selectedToken ? PP_TOKEN_BY_ID[PP.selectedToken].label + " selected." : "Token deselected.");
+        }
+
+        function ppShowMessage(msg) {
+            var wrap = document.getElementById("ppFeedback");
+            if (!wrap) return;
+            wrap.innerHTML = '<div class="pp-feedback pp-feedback-note" role="status"><p class="pp-fb-head">Tip</p><p>' + escapeHtml(msg) + '</p></div>';
+        }
+
+        function ppShowFeedback(key, correct) {
+            var wrap = document.getElementById("ppFeedback");
+            if (!wrap) return;
+            var fb = PP_FEEDBACK[key];
+            var html = '<div class="pp-feedback ' + (correct ? "pp-feedback-ok" : "pp-feedback-bad") + '" role="alert">';
+            if (correct) {
+                html += '<p class="pp-fb-head"><span class="pp-check">✓</span> Correct — ' + PP_SLOTS[key].label + ' is locked in.</p>';
+            } else {
+                html += '<p class="pp-fb-head"><span class="pp-x">✗</span> Not quite.</p>' +
+                    '<p><b>Why:</b> ' + escapeHtml(fb.why) + '</p>' +
+                    '<p><b>How to fix it:</b> ' + escapeHtml(fb.fix) + '</p>' +
+                    '<p class="pp-model">Correct model: \u201C' + escapeHtml(fb.model) + '\u201D</p>' +
+                    '<div class="button-row" style="justify-content:flex-start;"><button type="button" class="primary-btn" id="ppTryAgain">Try Again</button></div>';
+            }
+            html += '</div>';
+            wrap.innerHTML = html;
+            var ta = document.getElementById("ppTryAgain");
+            if (ta) ta.focus();
+        }
+
+        function ppPlace(key) {
+            var meta = PP_SLOTS[key];
+            if (PP.slotFill[key]) return;
+            var id = PP.selectedToken;
+            if (!id) {
+                ppAnnounce("Choose a punctuation token first, then tap its slot.");
+                ppShowMessage("Choose a punctuation token first, then tap its slot.");
+                return;
+            }
+            PP.attempts[key] = (PP.attempts[key] || 0) + 1;
+            var correct = id === meta.correct;
+            if (PP.slotFirstCorrect[key] === undefined) PP.slotFirstCorrect[key] = correct;
+            if (correct) {
+                PP.slotFill[key] = id;
+                PP.selectedToken = null;
+                updateProgress();
+                ppRender();
+                ppShowFeedback(key, true);
+                var cont = document.getElementById("ppContinue");
+                if (cont) cont.focus();
+                else {
+                    var nextToken = document.querySelector(".pp-token:not(:disabled)");
+                    if (nextToken) nextToken.focus();
+                }
+            } else {
+                PP.selectedToken = null;
+                ppShowFeedback(key, false);
+                ppShake();
+                ppAnnounce("Not quite. Read the feedback, then try again.");
+            }
+        }
+
+        function ppDismissFeedback() {
+            var wrap = document.getElementById("ppFeedback");
+            if (wrap) wrap.innerHTML = "";
+            var first = document.querySelector(".pp-token:not(:disabled)");
+            if (first) first.focus();
+        }
+
+        /* ---- Effect cards (screen 5) ---- */
+
+        function ppPickEffect(key, choice) {
+            var e = PP_EFFECTS.filter(function (x) { return x.key === key; })[0];
+            if (PP.effectPick[key] === e.correct) return;
+            PP.effectAttempts[key] = (PP.effectAttempts[key] || 0) + 1;
+            if (PP.effectFirstCorrect[key] === undefined) PP.effectFirstCorrect[key] = (choice === e.correct);
+            PP.effectPick[key] = choice;
+            var row = document.querySelector('.pp-effect-row[data-ek="' + key + '"]');
+            var fbk = document.querySelector('.pp-effect-feedback[data-efbk="' + key + '"]');
+            if (!row || !fbk) return;
+            row.querySelectorAll(".pp-effect-chip").forEach(function (ch) {
+                var val = ch.dataset.choice;
+                ch.classList.remove("pp-chip-picked", "pp-chip-correct", "pp-chip-wrong");
+                if (choice === val) {
+                    if (choice === e.correct) {
+                        ch.classList.add("pp-chip-correct");
+                        ch.textContent = val + " ✓";
+                    } else {
+                        ch.classList.add("pp-chip-wrong");
+                        ch.textContent = val + " ✗";
+                    }
+                }
+                if (choice === e.correct && val === e.correct) ch.disabled = true;
+            });
+            if (choice === e.correct) {
+                fbk.innerHTML = '<div class="pp-feedback pp-feedback-ok" role="alert"><p class="pp-fb-head"><span class="pp-check">✓</span> Correct — ' + escapeHtml(e.ok) + '</p></div>';
+                ppAnnounce("Correct. " + e.ok);
+                ppMaybeShowFinish();
+            } else {
+                fbk.innerHTML = '<div class="pp-feedback pp-feedback-bad" role="alert">' +
+                    '<p class="pp-fb-head"><span class="pp-x">✗</span> Not quite.</p>' +
+                    '<p><b>Why:</b> ' + escapeHtml(e.why) + '</p>' +
+                    '<p><b>How to fix it:</b> ' + escapeHtml(e.fix) + '</p>' +
+                    '<p class="pp-model">Correct model: ' + escapeHtml(e.model) + '</p>' +
+                    '<div class="button-row" style="justify-content:flex-start;"><button type="button" class="primary-btn" id="ppTryAgainEffect">Try Again</button></div>' +
+                    '</div>';
+                ppShake();
+                ppAnnounce("Not quite. Read the feedback, then try again.");
+            }
+            updateProgress();
+        }
+
+        function ppMaybeShowFinish() {
+            var allDone = PP_EFFECTS.every(function (e) { return PP.effectPick[e.key] === e.correct; });
+            if (!allDone) return;
+            var row = document.querySelector(".pp-card .button-row");
+            if (!row || document.getElementById("ppFinish")) return;
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "primary-btn";
+            btn.id = "ppFinish";
+            btn.textContent = "Finish →";
+            row.appendChild(btn);
+            btn.focus();
+        }
+
+        /* ---- Navigation ---- */
+
+        function ppBack() {
+            if (PP.view === "final") { PP.view = "stage"; PP.stageIdx = 2; }
+            else if (PP.view === "stage") {
+                if (PP.stageIdx === 0) { PP.view = "mission"; }
+                else { PP.stageIdx -= 1; }
+            } else if (PP.view === "complete") { PP.view = "final"; }
+            ppRender();
+            ppAfterNav();
+        }
+
+        function ppNext() {
+            PP.stageIdx += 1;
+            PP.view = PP.stageIdx >= PP_STAGES.length ? "final" : "stage";
+            ppRender();
+            ppAfterNav();
+        }
+
+        function ppShowHint() {
+            PP.hintsUsed += 1;
+            var box = document.getElementById("ppHintBox");
+            if (!box) return;
+            var text = PP.view === "stage" ? PP_STAGES[PP.stageIdx].hint :
+                "Question mark → uncertainty. Exclamation mark → urgency. Comma → a brief contrast pause. Final full stop → closure.";
+            box.innerHTML = '<div class="pp-hint-box" role="note"><b>Hint:</b> ' + escapeHtml(text) + '</div>';
+            box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+
+        function ppFinish() {
+            PP.view = "complete";
+            ppRender();
+            ppAppendReport();
+            ppAfterNav();
+        }
+
+        function ppRestart() {
+            devReset();
+            PP.view = "mission";
+            ppRender();
+            ppAfterNav();
+        }
+
+        /* ---- Reporting ---- */
+
+        function ppAppendReport() {
+            if (PP.reported) return;
+            PP.reported = true;
+            var slotKeys = Object.keys(PP_SLOTS);
+            var firstCorrectCount = 0;
+            var attempts = {};
+            var missed = [];
+            slotKeys.forEach(function (k) {
+                if (PP.slotFirstCorrect[k]) firstCorrectCount += 1;
+                if (PP.slotFirstCorrect[k] === false) missed.push(PP_SLOTS[k].skill);
+                attempts[k] = PP.attempts[k] || 0;
+            });
+            var eCorrect = 0;
+            PP_EFFECTS.forEach(function (e) {
+                if (PP.effectFirstCorrect[e.key]) eCorrect += 1;
+                if (PP.effectFirstCorrect[e.key] === false) missed.push("explaining punctuation\u2019s effect on pacing and meaning");
+            });
+            var report = {
+                sim: SIM_CONFIG.simId,
+                completed: true,
+                completedAt: new Date().toISOString(),
+                timeOnTaskSeconds: Math.max(0, Math.round((Date.now() - PP.startTime) / 1000)),
+                firstAttemptAccuracy: {
+                    total: slotKeys.length + PP_EFFECTS.length,
+                    correct: firstCorrectCount + eCorrect
+                },
+                finalMastery: "full",
+                attempts: attempts,
+                hintsUsed: PP.hintsUsed,
+                missedFocusSkills: missed
+            };
+            var div = document.createElement("div");
+            div.id = "ppReport";
+            div.hidden = true;
+            div.textContent = JSON.stringify(report);
+            document.body.appendChild(div);
+        }
+
+        /* ---- Host events and init ---- */
+
+        function ppRender() {
+            var host = document.getElementById("ppStageHost");
+            var html = "";
+            if (PP.view === "mission") html = ppRenderMission();
+            else if (PP.view === "stage") html = ppRenderStage();
+            else if (PP.view === "final") html = ppRenderFinal();
+            else if (PP.view === "complete") html = ppRenderComplete();
+            host.innerHTML = html;
+            updateProgress();
+            var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            window.scrollTo({ top: 0, left: 0, behavior: reduceMotion ? "auto" : "smooth" });
+        }
+
+        function ppAfterNav() {
+            var el = null;
+            if (PP.view === "stage") {
+                el = document.querySelector(".pp-token:not(:disabled)") || document.getElementById("ppContinue");
+            } else if (PP.view === "final") {
+                el = document.querySelector(".pp-effect-chip:not(:disabled)") || document.getElementById("ppFinish");
+            } else if (PP.view === "mission") {
+                el = document.getElementById("ppBegin");
+            } else if (PP.view === "complete") {
+                el = document.getElementById("ppAgain");
+            }
+            if (el && el.focus) el.focus();
+            var eb = document.querySelector("#ppStageHost .pp-eyebrow");
+            var tt = document.querySelector("#ppStageHost .pp-title");
+            var msg = (eb && eb.textContent ? eb.textContent + " — " : "") + (tt && tt.textContent ? tt.textContent : "");
+            if (msg) ppAnnounce(msg);
+        }
+
+        function ppBindHost() {
+            var host = document.getElementById("ppStageHost");
+            host.addEventListener("click", function (ev) {
+                var target = ev.target.closest("button");
+                if (!target) return;
+                var tokenBtn = target.closest(".pp-token");
+                if (tokenBtn && !tokenBtn.disabled) { ev.preventDefault(); ppSelectToken(tokenBtn.dataset.token); return; }
+                var slotBtn = target.closest(".pp-slot");
+                if (slotBtn && !slotBtn.disabled) { ev.preventDefault(); ppPlace(slotBtn.dataset.slot); return; }
+                var chipBtn = target.closest(".pp-effect-chip");
+                if (chipBtn && !chipBtn.disabled) { ev.preventDefault(); ppPickEffect(chipBtn.dataset.effect, chipBtn.dataset.choice); return; }
+                switch (target.id) {
+                    case "ppBegin": PP.view = "stage"; PP.stageIdx = 0; ppRender(); ppAfterNav(); break;
+                    case "ppBack": ppBack(); break;
+                    case "ppHint": ppShowHint(); break;
+                    case "ppTryAgain": ppDismissFeedback(); break;
+                    case "ppTryAgainEffect":
+                        var fbk = target.closest(".pp-effect-feedback");
+                        if (fbk) fbk.innerHTML = "";
+                        break;
+                    case "ppContinue": ppNext(); break;
+                    case "ppFinish": ppFinish(); break;
+                    case "ppAgain": ppRestart(); break;
+                }
+            });
+            host.addEventListener("dragstart", function (ev) {
+                var tokenBtn = ev.target.closest(".pp-token");
+                if (tokenBtn && !tokenBtn.disabled) {
+                    ev.dataTransfer.setData("text/plain", tokenBtn.dataset.token);
+                    ev.dataTransfer.effectAllowed = "copy";
+                    PP.selectedToken = tokenBtn.dataset.token;
+                    ppSyncTraySelection();
+                }
+            });
+            host.addEventListener("dragover", function (ev) {
+                if (ev.target.closest(".pp-slot")) ev.preventDefault();
+            });
+            host.addEventListener("drop", function (ev) {
+                var slotBtn = ev.target.closest(".pp-slot");
+                if (!slotBtn || slotBtn.disabled) return;
+                ev.preventDefault();
+                var id = ev.dataTransfer.getData("text/plain") || PP.selectedToken;
+                if (id) { PP.selectedToken = id; ppPlace(slotBtn.dataset.slot); }
+            });
+        }
+
+        function devInit() {
+            ppBindHost();
+            PP.startTime = Date.now();
+            PP.view = "mission";
+            ppRender();
+        }
+
+        function devReset() {
+            PP.view = "mission";
+            PP.stageIdx = 0;
+            PP.slotFill = {};
+            PP.slotFirstCorrect = {};
+            PP.attempts = {};
+            PP.effectPick = {};
+            PP.effectFirstCorrect = {};
+            PP.effectAttempts = {};
+            PP.selectedToken = null;
+            PP.hintsUsed = 0;
+            PP.reported = false;
+            var rep = document.getElementById("ppReport");
+            if (rep) rep.remove();
+            updateProgress();
+        }
+    </script>
+</body>
+
+</html>
