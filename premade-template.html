@@ -1502,6 +1502,31 @@
             margin-right: auto;
         }
 
+        .skills-list {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 0;
+            list-style: none;
+            text-align: left;
+        }
+
+        .skills-list li {
+            margin: 10px 0;
+            padding: 12px 18px;
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+            color: var(--text);
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .skills-list li::before {
+            content: "✦";
+            margin-right: 10px;
+            color: var(--accent);
+        }
+
         .echo-chamber {
             position: relative;
             width: min(460px, 78vw);
@@ -1759,6 +1784,10 @@
                         <div class="ring ring-inner" id="ringMessage"><span class="ring-label">Message</span></div>
                         <div class="echo-clear-badge" id="briefClearEcho" hidden>Clear theme echo</div>
                     </div>
+                    <ul class="skills-list" id="briefSkills" hidden>
+                        <li>Identifying a complete theme statement</li>
+                        <li>Linking character choices and evidence to theme</li>
+                    </ul>
                     <div class="button-row">
                         <button class="primary-btn" id="briefContinueBtn">Step In</button>
                     </div>
@@ -2988,6 +3017,9 @@
             simContainer: document.getElementById("simContainer"),
             startBtn: document.getElementById("startBtn"),
             briefContinueBtn: document.getElementById("briefContinueBtn"),
+            briefTitle: document.getElementById("briefTitle"),
+            briefDescription: document.getElementById("briefDescription"),
+            briefSkills: document.getElementById("briefSkills"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             audioBtn: document.getElementById("audioBtn"),
             helpBtn: document.getElementById("helpBtn"),
@@ -3074,10 +3106,18 @@
         function bindEvents() {
             dom.startBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
+                renderBriefScreen();
                 showScreen("brief");
             });
             dom.briefContinueBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
+                // After all four questions, the brief screen becomes the
+                // completed chamber; its button is now an exit to home.
+                if (state.finished) {
+                    devReset();
+                    showScreen("home");
+                    return;
+                }
                 showScreen("sim");
                 devInit();
             });
@@ -3613,6 +3653,33 @@
                 const el = document.getElementById(id);
                 if (el) el.hidden = true;
             });
+        }
+
+        // Renders the briefing screen's text, skills, and button for its two
+        // states: the pre-run briefing (empty rings, "Step In") and the
+        // completed chamber shown after the final question (all three rings
+        // lit, the skills list, and an "Exit to Home" button).
+        function renderBriefScreen() {
+            const complete = state.finished === true;
+            dom.briefTitle.textContent = complete
+                ? "The Silent Echo Chamber — Complete"
+                : "The Silent Echo Chamber";
+            dom.briefDescription.textContent = complete
+                ? "The still room holds its answer now. All three rings glow — the message, the evidence that carries it, and how the theme echoes into real life."
+                : "Step into the still room. The air holds its breath. Three empty rings wait, ready for a message to drop into the quiet — and for what it echoes, through evidence, into real life.";
+            dom.briefSkills.hidden = !complete;
+            dom.briefContinueBtn.textContent = complete ? "Exit to Home" : "Step In";
+        }
+
+        // Completes the run back at the briefing screen: every ring lights,
+        // the skills list appears, and the "Clear theme echo" badge shows if
+        // the final synthesis was answered correctly.
+        function showCompletedBrief() {
+            state.finished = true;
+            ["message", "evidence", "realLife"].forEach((key) => revealRing(key, { announce: false }));
+            syncEchoClear();
+            renderBriefScreen();
+            showScreen("brief");
         }
 
         /* ============================================================
@@ -5921,6 +5988,7 @@
         // sound here beyond the wrong/partial tone already played on submit.
         function tryAgain() {
             dom.tryAgainBtn.classList.add("hidden");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
             renderQuestion();
             focusFirstAnswerControl(); // return keyboard focus to the first input/choice
         }
@@ -6163,13 +6231,15 @@
             // button state; on the last question Next stays hidden.
             dom.nextBtn.disabled = true;
             playSound("click"); // sound: button press
+            // Every forward step starts at the top of the page.
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
             if (state.currentIndex >= activeQuestions.length - 1) {
-                // Finish: mark the run finished so the next page load wipes
-                // this progress and boots fresh instead of re-showing summary.
-                state.finished = true;
-                showScreen("summary");
-                renderSummary();
-                playSound("complete"); // sound: summary screen reached
+                // Finish: complete the run back at the briefing screen with
+                // the full echo chamber lit. Mark the run finished so the
+                // next page load wipes this progress and boots fresh instead
+                // of re-showing a finished state.
+                showCompletedBrief();
+                playSound("complete"); // sound: completion reached
                 saveQuizProgress();
                 return;
             }
