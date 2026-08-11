@@ -1804,10 +1804,11 @@
                   <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
                   <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
                 </button>
-                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open rules">❔ Rules</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
                 <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+                <button class="control-btn hidden" id="exitBtn" aria-label="Exit to home screen">Exit</button>
             </div>
         </header>
 
@@ -1983,7 +1984,7 @@
     <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
         <section class="modal-card">
             <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
-            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <h3 id="instructionsHeading">Rules</h3>
             <div id="instructionsBody"></div>
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
                 <button class="primary-btn" id="gotItBtn">Got it</button>
@@ -2317,13 +2318,14 @@
                 id: "evidence-cards",
                 type: "dragSort",
                 title: "Sort the Evidence",
-                prompt: "Kareem shares his notes with classmates who had missed school. Later, when he struggles with a project, the class stays to help him finish.\n\nDrag each detail into Evidence if it supports the theme (people who support others often receive support in return), or into Not Evidence if it does not.",
-                hint: "Evidence must show someone giving or receiving support. Details about when or what are not evidence of the theme.",
-                explanation: "\"shared his notes\" and \"the class stayed to help him\" both show people supporting each other — that is the evidence for the theme. \"every afternoon\" is just a time detail and \"a project\" is just an object, so neither supports the theme.",
+                prompt: "Kareem shares his notes with classmates who had missed school. Later, when he struggles with a project, the class stays to help him finish.\n\nDrag each card into Evidence if it supports the theme (people who support others often receive support in return), or into Not Evidence if it does not. One card is a language detail — the word that most strongly reinforces the theme.",
+                hint: "Evidence must show someone giving or receiving support. Details about when or what are not evidence of the theme. Listen for the one word from the story that carries the message.",
+                explanation: "\"shared his notes\" and \"the class stayed to help him\" both show people supporting each other — that is the evidence for the theme. The word \"shared\" is the language that most strongly reinforces the theme. \"every afternoon\" is just a time detail and \"a project\" is just an object, so neither supports the theme.",
                 revealRing: "evidence",
                 items: [
                     { id: "ev-notes", label: "shared his notes", correctBin: "bin-evidence" },
                     { id: "ev-stayed", label: "the class stayed to help him", correctBin: "bin-evidence" },
+                    { id: "ev-shared", label: "shared", correctBin: "bin-evidence" },
                     { id: "ev-afternoon", label: "every afternoon", correctBin: "bin-not-evidence" },
                     { id: "ev-project", label: "a project", correctBin: "bin-not-evidence" }
                 ],
@@ -3079,7 +3081,10 @@
             order: [],     // question ids in the order this run uses (shuffle/bank aware) — persisted for consistent resume
             attempts: {},  // questionId -> number of grading attempts used so far — persisted
             choiceOrder: {}, // questionId -> array of original choice indices in display order (shuffleChoices) — persisted
-            finished: false, // set true when the summary screen is reached
+            firstTry: {},  // questionId -> true when the question was correct on the FIRST grading attempt — persisted
+            missedSkills: [], // names of the focus skills not achieved by the end of the run — persisted
+            startedAt: null, // timestamp when the run began (for time on task) — persisted
+            finished: false, // set true when the run is completed on the briefing screen
             score: 0,
             streak: 0,
             bestStreak: 0,
@@ -3113,6 +3118,7 @@
             themeToggleBtn: document.getElementById("themeToggleBtn"),
             fullscreenBtn: document.getElementById("fullscreenBtn"),
             resetBtn: document.getElementById("resetBtn"),
+            exitBtn: document.getElementById("exitBtn"),
             instructionsModal: document.getElementById("instructionsModal"),
             instructionsBody: document.getElementById("instructionsBody"),
             closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
@@ -3230,6 +3236,10 @@
             dom.themeToggleBtn.addEventListener("click", toggleTheme);
             dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
             dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.exitBtn.addEventListener("click", () => {
+                playSound("click"); // sound: button press
+                showScreen("home");
+            });
             dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
             dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
             dom.confirmResetBtn.addEventListener("click", () => {
@@ -3346,6 +3356,8 @@
             dom.briefScreen.classList.toggle("active", screenName === "brief");
             dom.simScreen.classList.toggle("active", screenName === "sim");
             dom.summaryScreen.classList.toggle("active", screenName === "summary");
+            // Exit is only meaningful while playing, not on the home screen.
+            dom.exitBtn.classList.toggle("hidden", screenName === "home");
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
 
@@ -3552,6 +3564,10 @@
                 order: state.order,
                 attempts: state.attempts,
                 choiceOrder: state.choiceOrder,
+                firstTry: state.firstTry,
+                missedSkills: state.missedSkills,
+                startedAt: state.startedAt,
+                timeOnTask: state.startedAt ? Math.round((Date.now() - state.startedAt) / 1000) : 0,
                 finished: state.finished === true,
                 score: state.score,
                 streak: state.streak,
@@ -3606,6 +3622,9 @@
             state.hintsUsed = (payload.hintsUsed && typeof payload.hintsUsed === "object") ? payload.hintsUsed : {};
             state.attempts = (payload.attempts && typeof payload.attempts === "object") ? payload.attempts : {};
             state.choiceOrder = (payload.choiceOrder && typeof payload.choiceOrder === "object") ? payload.choiceOrder : {};
+            state.firstTry = (payload.firstTry && typeof payload.firstTry === "object") ? payload.firstTry : {};
+            state.missedSkills = Array.isArray(payload.missedSkills) ? payload.missedSkills : [];
+            state.startedAt = payload.startedAt || null;
             state.finished = false;
             state.score = Number(payload.score) || 0;
             state.streak = Number(payload.streak) || 0;
@@ -3860,6 +3879,10 @@
                 if (status === "correct") revealRing(key, { announce: false });
                 else if (status === "partial") setRingPartial(key, { announce: false });
             });
+            // Record the focus skill(s) not fully achieved for reporting.
+            state.missedSkills = [];
+            if (!skillAchieved("theme")) state.missedSkills.push("identifying a complete theme statement");
+            if (!skillAchieved("link")) state.missedSkills.push("linking character choices and evidence to theme");
             syncEchoClear();
             renderBriefScreen();
             showScreen("brief");
@@ -5770,6 +5793,12 @@
             // is NOT locked in — the student sees feedback with the attempts
             // left and a Try Again button instead of Next.
             state.attempts[question.id] = (state.attempts[question.id] || 0) + 1;
+            // First-attempt accuracy: record whether this question was solved
+            // on its very first grading, so it can be reported separately
+            // from final mastery (see Description section 9).
+            if (state.attempts[question.id] === 1) {
+                state.firstTry[question.id] = result.status === "correct";
+            }
             if ((result.status === "wrong" || result.status === "partial") && attemptsRemaining(question.id) > 0) {
                 state.answers[question.id] = answer; // keep their work visible on retry/resume
                 lockAnswerInputs(question);
@@ -6706,6 +6735,8 @@
             }
             state.started = true;
             state.finished = false;
+            // Start the time-on-task clock the first time the sim is entered.
+            if (!state.startedAt) state.startedAt = Date.now();
             renderQuestion();
             syncRings();
             saveQuizProgress();
@@ -6720,6 +6751,9 @@
             state.order = [];
             state.attempts = {};
             state.choiceOrder = {};
+            state.firstTry = {};
+            state.missedSkills = [];
+            state.startedAt = null;
             state.finished = false;
             state.score = 0;
             state.streak = 0;
