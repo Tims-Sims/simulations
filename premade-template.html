@@ -22,7 +22,7 @@
          Change the browser tab title here.
          Search "DEV-EDIT" to find every place you need to change.
          ============================================================ -->
-    <title>Premade Question Simulation Template</title>
+    <title>The Last Bicycle — Story Race</title>
     <style>
         /* ============================================================
            CHROME — DO NOT EDIT
@@ -1463,6 +1463,288 @@
            Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
 
+        /* ============ STORY RACE — progress track ============ */
+        .race-track {
+            margin-bottom: 14px;
+        }
+
+        .race-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .race-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            color: var(--text);
+        }
+
+        .race-live {
+            color: var(--accent);
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .race-road {
+            position: relative;
+            height: 46px;
+            border-radius: 999px;
+            background: #141a2e;
+            border: 2px solid color-mix(in srgb, var(--border) 55%, transparent);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        .race-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(125, 211, 252, 0.28), rgba(167, 139, 250, 0.12));
+            transition: width 0.5s ease;
+        }
+
+        .race-dashes {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            transform: translateY(-50%);
+            background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0 14px, transparent 14px 26px);
+        }
+
+        .race-start {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: #ffffff;
+            opacity: 0.85;
+        }
+
+        .race-finish {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 12px;
+            background: repeating-conic-gradient(#ffffff 0 25%, #0b0e1c 0 50%) 0 0 / 6px 6px;
+            box-shadow: -2px 0 6px rgba(0, 0, 0, 0.35);
+        }
+
+        .pit-dots {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+        }
+
+        .pit-dot {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #1b2140;
+            border: 2px solid var(--muted);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .pit-dot.done {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .pit-dot.current {
+            background: var(--accent);
+            border-color: #ffffff;
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
+        }
+
+        .race-car {
+            position: absolute;
+            top: 50%;
+            z-index: 5;
+            transform: translate(-50%, -50%);
+            transition: left 0.55s cubic-bezier(0.3, 0.7, 0.4, 1);
+            filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.4));
+            pointer-events: none;
+        }
+
+        .race-car svg {
+            display: block;
+            width: 54px;
+            height: auto;
+        }
+
+        .pit-labels {
+            position: relative;
+            height: 24px;
+            margin-top: 5px;
+        }
+
+        .pit-label {
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            color: var(--muted);
+            transition: color 0.3s ease;
+        }
+
+        .pit-label.current {
+            color: var(--accent);
+        }
+
+        .pit-label.done {
+            color: var(--success);
+        }
+
+        /* The engine's plain fill bar is replaced by the race track
+           (kept in the DOM for screen readers / aria progress). */
+        .progress-shell .progress-bar {
+            display: none;
+        }
+
+        /* ============ STORY RACE — intro screen ============ */
+        .story-intro {
+            text-align: center;
+            padding: 8px 4px 20px;
+        }
+
+        .story-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            font-size: 0.82rem;
+        }
+
+        .story-title {
+            margin: 0 0 10px;
+            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            line-height: 1.08;
+        }
+
+        .story-copy {
+            max-width: 680px;
+            margin: 0 auto 20px;
+            color: var(--text-soft);
+            font-size: 1.02rem;
+            line-height: 1.7;
+        }
+
+        .story-stage {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 24px 20px 18px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background:
+                radial-gradient(circle at 20% 0%, rgba(125, 211, 252, 0.12), transparent 45%),
+                radial-gradient(circle at 85% 100%, rgba(167, 139, 250, 0.12), transparent 45%),
+                color-mix(in srgb, var(--surface-2) 45%, transparent);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-big-car {
+            display: flex;
+            justify-content: center;
+            margin: 6px 0 18px;
+            filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.35));
+        }
+
+        .story-big-car svg {
+            width: 170px;
+            height: auto;
+        }
+
+        .story-mini-track {
+            position: relative;
+            height: 34px;
+            border-radius: 999px;
+            background: #141a2e;
+            border: 2px solid color-mix(in srgb, var(--border) 55%, transparent);
+            overflow: hidden;
+        }
+
+        .story-mini-track .race-dashes {
+            height: 1.5px;
+        }
+
+        .story-mini-track .pit-dot {
+            width: 12px;
+            height: 12px;
+        }
+
+        .story-stops {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 16px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .story-stop-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .story-stop-chip .stop-num {
+            display: grid;
+            place-items: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #0b0e1c;
+            font-weight: 900;
+            font-size: 0.78rem;
+        }
+
+        .story-start-btn {
+            margin-top: 24px;
+            padding: 13px 34px;
+            font-size: 1.08rem;
+        }
+
     </style>
 </head>
 
@@ -1515,7 +1797,25 @@
                         ⚠️ TEST MODE — answers visible, progress not saved
                     </div>
 
-                    <div class="status-row">
+                    <!-- Story intro — shown before the first question (see devInit). -->
+                    <section class="story-intro hidden" id="storyIntro">
+                        <div class="story-eyebrow">🏁 A Short Story Race</div>
+                        <h2 class="story-title">The Last Bicycle</h2>
+                        <p class="story-copy">
+                            The town's very last bicycle is stuck at the starting line — and your words are its engine.
+                            The story race has stalled, so it is waiting for you. At each of the four pit stops below,
+                            swap one weak sentence for the exact, stronger sentence. Fix the story at every stop and
+                            the bicycle will roar across the finish line.
+                        </p>
+                        <div class="story-stage">
+                            <div class="story-big-car" id="storyBigCar"></div>
+                            <div class="story-mini-track" id="storyMiniTrack"></div>
+                            <ul class="story-stops" id="storyStops"></ul>
+                        </div>
+                        <button type="button" class="primary-btn story-start-btn" id="storyStartBtn">Start the Race →</button>
+                    </section>
+
+                    <div class="status-row" id="statusRow">
                         <div class="chip-group">
                             <div class="chip" id="questionCounter">Question 1 of 1</div>
                             <div class="chip" id="scoreChip">Score: 0</div>
@@ -1523,7 +1823,22 @@
                         <div class="chip" id="streakChip">Streak: 0</div>
                     </div>
 
-                    <div class="progress-shell">
+                    <div class="progress-shell" id="progressShell">
+                        <div class="race-track">
+                            <div class="race-meta">
+                                <span class="race-title">🏁 The Last Bicycle</span>
+                                <span class="race-live" id="raceLive">Pit Stop 1 of 4 — Opening</span>
+                            </div>
+                            <div class="race-road" id="raceRoad" role="progressbar" aria-label="Story race progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <div class="race-start"></div>
+                                <div class="race-fill" id="raceFill"></div>
+                                <div class="race-dashes"></div>
+                                <div class="pit-dots" id="pitDots"></div>
+                                <div class="race-car" id="raceCar"></div>
+                                <div class="race-finish"></div>
+                            </div>
+                            <div class="pit-labels" id="pitLabels"></div>
+                        </div>
                         <div class="progress-meta">
                             <span id="progressLabel">0% complete</span>
                             <span id="progressSummary">0 answered</span>
@@ -1534,7 +1849,7 @@
                         <div class="step-dots" id="stepDots"></div>
                     </div>
 
-                    <section class="question-panel">
+                    <section class="question-panel" id="questionPanel">
                         <!-- Keyboard flows (all question types are keyboard-completable):
                              MC/True-False = arrow keys within the radio group; dragSort/matching =
                              focus a chip/card, Enter/Space to pick up/select, arrow keys to target a
@@ -1690,20 +2005,20 @@
              pointsPerQuestion - score awarded for a fully correct answer.
            ============================================================ */
         const SIM_CONFIG = {
-            simId: "premade-question-template",
-            title: "Premade Question Simulation Template",
-            subtitle: "Single-file quiz engine for local student activities",
-            badgeText: "SIM",
-            homeEyebrow: "Question Engine Ready",
+            simId: "last-bicycle-story-race",
+            title: "The Last Bicycle — Story Race",
+            subtitle: "Swap weak sentences to keep the story bicycle racing",
+            badgeText: "🏁",
+            homeEyebrow: "A Short Story Race",
             homeDescription:
-                "This premade template ships with a full question engine: multiple choice, exact text, exact number, keywords, short answer, drag-and-drop sorting, and matching pairs. Replace the demo questions in the QUESTIONS array with your own.",
+                "The town's last bicycle has stalled at the starting line, and your words are its engine. At each of the four pit stops — Opening, Action, Imagery, Final Check — swap one weak sentence for the exact, stronger sentence. Fix the story at every stop and the bicycle will cross the finish line.",
             instructions: [
-                "Read each question carefully before answering.",
+                "Read the short story race setup on the intro screen, then press Start the Race.",
+                "You will visit four pit stops in order: Opening, Action, Imagery, Final Check.",
+                "At each pit stop, read the weak sentence, then type the exact, stronger sentence that repairs the story.",
+                "Spelling, punctuation, and word order matter — but capital letters and extra spaces are forgiven.",
                 "Use the Hint button if you get stuck.",
-                "For sorting questions, drag each item into a bin, or click an item then click a bin. Drag a placed item (or click it) to send it back to the tray, or use Reset items to start over. Keyboard: focus an item, press Enter, use arrow keys to target the tray or a bin, press Enter to drop.",
-                "For matching questions, click a card on the left, then click its match on the right.",
-                "Watch your score, streak, and progress bar as you go.",
-                "Use the Reset button any time you want to restart from scratch.",
+                "Watch the car on the race track as it moves to each pit stop.",
                 "This file runs completely offline in a browser. No internet is needed."
             ],
             pointsPerQuestion: 10,
@@ -1720,6 +2035,11 @@
             useQuestionBank: false,        // true = ignore QUESTIONS and draw a random set from the QUESTION_BANK pool instead
             bankDrawCount: 5               // how many questions to randomly draw from the bank each run (used only when useQuestionBank is true)
         };
+
+        // The four pit stops of the story race, in order. Each maps 1:1 to a
+        // question in the QUESTIONS array below (same order). The car on the
+        // progress track moves to the pit stop the student is currently working on.
+        const RACE_STOPS = ["Opening", "Action", "Imagery", "Final Check"];
 
         /* ============================================================
            DEV-EDIT: INPUT LIMITS & FILTER
@@ -1932,199 +2252,57 @@
            imageAlt is required — it is what screen readers read out.
            ============================================================ */
         const QUESTIONS = [
-            // --- DEMO 1: multipleChoice ------------------------------------
-            // choices[] + correctIndex + optional perChoiceFeedback[].
+            // --- PIT STOP 1: Opening ---------------------------------------
+            // The story race can't start without a strong first line.
             {
-                id: "demo-mc",
-                type: "multipleChoice",
-                title: "Multiple Choice Demo",
-                prompt: "How many sides does a triangle have?",
-                hint: "Count the straight edges of the shape.",
-                explanation: "A triangle always has exactly three sides and three corners.",
-                choices: ["Two", "Three", "Four", "Five"],
-                correctIndex: 1,
-                perChoiceFeedback: [
-                    "Two sides cannot close a shape.",
-                    "Right — three sides make a triangle.",
-                    "Four sides make a quadrilateral, not a triangle.",
-                    "Five sides make a pentagon, not a triangle."
-                ]
-            },
-            // --- DEMO 2: exactText -----------------------------------------
-            // answer string + caseSensitive flag (false = ignore case).
-            {
-                id: "demo-text",
+                id: "pitstop-opening",
                 type: "exactText",
-                title: "Exact Text Demo",
-                prompt: "Type the name of the shape that has exactly four equal sides and four right angles.",
-                hint: "It is a special kind of rectangle.",
-                explanation: "A square has four equal sides and four right angles.",
-                answer: "square",
-                caseSensitive: false
+                title: "Pit Stop 1 · Opening",
+                prompt: "The race cannot start without a strong opening. Swap this weak sentence for the exact, stronger sentence: “A bicycle sat in a shed.”",
+                hint: "Why does this bicycle matter? Make it feel last in the town, and let its wheels long for the road.",
+                explanation: "A strong opening sets up the stakes. \"The last bicycle in town\" tells us instantly that this machine is special — and that something is missing.",
+                answer: "The last bicycle in town waited in the dusty shed, its wheels hungry for the road.",
+                caseSensitive: false,
+                maxLength: 120
             },
-            // --- DEMO 3: exactNumber ---------------------------------------
-            // answer number + optional tolerance (accepted +/- range).
+            // --- PIT STOP 2: Action -----------------------------------------
+            // Swap a flat action for one with energy.
             {
-                id: "demo-number",
-                type: "exactNumber",
-                title: "Exact Number Demo",
-                prompt: "A hexagon has how many sides? Enter the number.",
-                hint: "It is more than five and fewer than seven.",
-                explanation: "A hexagon has 6 sides.",
-                answer: 6,
-                tolerance: 0
+                id: "pitstop-action",
+                type: "exactText",
+                title: "Pit Stop 2 · Action",
+                prompt: "The story stalled — now make it move. Swap this weak sentence for the exact, stronger sentence: “It went down the road fast.”",
+                hint: "Strong verbs beat weak ones. What does a bicycle do as it races down a road at night?",
+                explanation: "\"Tore\" is far livelier than \"went\", and the hissing chain and kissing tires let the reader hear and feel the action.",
+                answer: "It tore down the moonlit road, chain hissing and tires kissing the gravel.",
+                caseSensitive: false,
+                maxLength: 120
             },
-            // --- DEMO 4: keywords ------------------------------------------
-            // keywords[] + minMatches for a correct answer.
+            // --- PIT STOP 3: Imagery ----------------------------------------
+            // Swap a flat description for one the reader can feel.
             {
-                id: "demo-keywords",
-                type: "keywords",
-                title: "Keywords Demo",
-                prompt: "In one sentence, describe a circle. Try to mention its edge and its centre.",
-                hint: "Think about how far every point on the edge is from the middle.",
-                explanation: "A circle is a round shape where every point on the edge is the same distance from the centre.",
-                keywords: ["round", "edge", "centre", "center", "distance"],
-                minMatches: 2
+                id: "pitstop-imagery",
+                type: "exactText",
+                title: "Pit Stop 3 · Imagery",
+                prompt: "The reader needs to feel this ride. Swap this weak sentence for the exact, stronger sentence: “The wind was strong and cold.”",
+                hint: "Show the wind doing something. What could it claw at, and what might it sing through?",
+                explanation: "\"Clawed\" and \"sang through the spinning spokes\" turn a boring weather note into a moment the reader can almost feel and hear.",
+                answer: "Cold wind clawed at the rider and sang through the spinning spokes.",
+                caseSensitive: false,
+                maxLength: 120
             },
-            // --- DEMO 5: shortAnswer (textarea) ----------------------------
-            // Optional keywords grading, or ungraded: true for manual review.
+            // --- PIT STOP 4: Final Check ------------------------------------
+            // Swap a flat ending for one that lands.
             {
-                id: "demo-shortanswer",
-                type: "shortAnswer",
-                title: "Short Answer Demo",
-                prompt: "Write a few sentences: which shape is your favourite, and why?",
-                hint: "There is no wrong answer here — explain your thinking.",
-                explanation: "This reflection answer is recorded for your teacher to read. It is not scored.",
-                ungraded: true
-            },
-            // --- DEMO 6: dragSort ------------------------------------------
-            // items[{id,label,icon,correctBin}] + bins[{id,label,icon,description}].
-            {
-                id: "demo-dragsort",
-                type: "dragSort",
-                title: "Drag and Drop Sorting Demo",
-                prompt: "Sort each shape into the bin that matches its number of sides.",
-                hint: "Count the sides in each shape's name: tri = 3, quad = 4.",
-                explanation: "Triangles have 3 sides, squares and rectangles have 4, pentagons have 5.",
-                items: [
-                    { id: "shape-triangle", label: "Triangle", icon: "🔺", correctBin: "bin-3" },
-                    { id: "shape-square", label: "Square", icon: "🟦", correctBin: "bin-4" },
-                    { id: "shape-rectangle", label: "Rectangle", icon: "▭", correctBin: "bin-4" },
-                    { id: "shape-pentagon", label: "Pentagon", icon: "⬠", correctBin: "bin-5" }
-                ],
-                bins: [
-                    { id: "bin-3", label: "3 sides", icon: "3️⃣", description: "Shapes with three sides." },
-                    { id: "bin-4", label: "4 sides", icon: "4️⃣", description: "Shapes with four sides." },
-                    { id: "bin-5", label: "5 sides", icon: "5️⃣", description: "Shapes with five sides." }
-                ]
-            },
-            // --- DEMO 7: matching ------------------------------------------
-            // pairs[{left,right}] — left[i] matches right[i]; right side is shuffled.
-            {
-                id: "demo-matching",
-                type: "matching",
-                title: "Matching Pairs Demo",
-                prompt: "Match each country to its capital city. Click a country, then click its capital.",
-                hint: "Paris is in Europe; Tokyo is in Asia; Ottawa is north of the USA; Canberra is in the southern hemisphere.",
-                explanation: "France–Paris, Japan–Tokyo, Canada–Ottawa, Australia–Canberra.",
-                pairs: [
-                    { left: "France", right: "Paris" },
-                    { left: "Japan", right: "Tokyo" },
-                    { left: "Canada", right: "Ottawa" },
-                    { left: "Australia", right: "Canberra" }
-                ]
-            },
-            // --- DEMO 8: trueFalse -----------------------------------------
-            // correctAnswer (true/false) + optional feedbackCorrect/feedbackWrong.
-            {
-                id: "demo-truefalse",
-                type: "trueFalse",
-                title: "True or False Demo",
-                prompt: "A triangle has three sides.",
-                hint: "Think about the shape's name: 'tri' means three.",
-                explanation: "A triangle always has exactly three sides.",
-                correctAnswer: true,
-                feedbackCorrect: "Correct — 'tri' means three, so a triangle has three sides.",
-                feedbackWrong: "Not quite — a triangle does have three sides."
-            },
-            // --- DEMO 9: fillBlank -----------------------------------------
-            // text with {tokens} + a blanks entry (accept list) for each token.
-            {
-                id: "demo-fillblank",
-                type: "fillBlank",
-                title: "Fill in the Blanks Demo",
-                prompt: "Complete the sentence about our solar system.",
-                hint: "The Moon goes around the Earth.",
-                explanation: "The Moon orbits the Earth, and the Earth orbits the Sun.",
-                text: "The {answer1} orbits the {answer2}.",
-                wordBank: "list",
-                blanks: {
-                    answer1: { accept: ["moon", "the moon"], caseSensitive: false },
-                    answer2: { accept: ["earth", "the earth"] }
-                }
-            },
-            // --- DEMO 9b: fillBlank (drag word bank) -----------------------
-            // wordBank "drag" turns the blanks into drop slots and the words
-            // into draggable chips; extraWords adds decoys.
-            {
-                id: "demo-fillblank-drag",
-                type: "fillBlank",
-                title: "Fill in the Blanks (Drag) Demo",
-                prompt: "Drag the right words into the sentence about our planet.",
-                hint: "Water covers most of the Earth; plants are green.",
-                explanation: "Most of the Earth is covered by water, and healthy leaves are green.",
-                text: "Most of the Earth is covered by {answer1}, and leaves are usually {answer2}.",
-                wordBank: "drag",
-                extraWords: ["sand", "blue"],
-                blanks: {
-                    answer1: { accept: ["water"], caseSensitive: false },
-                    answer2: { accept: ["green"], caseSensitive: false }
-                }
-            },
-            // --- DEMO 10: ordering -----------------------------------------
-            // items[{id,label}] + correctOrder[ids]. Reordered with arrow buttons.
-            {
-                id: "demo-ordering",
-                type: "ordering",
-                title: "Put in Order Demo",
-                prompt: "Put these steps for making tea in the correct order, first at the top.",
-                hint: "You cannot pour water before it has boiled.",
-                explanation: "Boil the water, pour it over the tea bag, let it steep, then add milk.",
-                items: [
-                    { id: "step-boil", label: "Boil the water" },
-                    { id: "step-pour", label: "Pour water over the tea bag" },
-                    { id: "step-steep", label: "Let the tea steep" },
-                    { id: "step-milk", label: "Add milk and stir" }
-                ],
-                correctOrder: ["step-boil", "step-pour", "step-steep", "step-milk"]
-            },
-            // --- DEMO 11: imageHotspot -------------------------------------
-            // image (here a small inline SVG) + hotspots[{id,label,x,y,w,h,correct}].
-            // x/y/w/h are PERCENTAGES (0-100) of the picture box.
-            {
-                id: "demo-hotspot",
-                type: "imageHotspot",
-                title: "Click the Picture Demo",
-                prompt: "Three shapes are drawn below. Click the triangle.",
-                hint: "A triangle is the shape with three straight sides and a pointed top.",
-                explanation: "The triangle is the pointed shape on the right.",
-                image: "<svg viewBox='0 0 300 120' xmlns='http://www.w3.org/2000/svg'>" +
-                    "<rect x='0' y='0' width='300' height='120' fill='#eef3ff'/>" +
-                    "<rect x='20' y='30' width='60' height='60' fill='#7dd3fc'/>" +
-                    "<circle cx='150' cy='60' r='34' fill='#fbbf24'/>" +
-                    "<polygon points='250,30 285,90 215,90' fill='#34d399'/>" +
-                    "</svg>",
-                imageAlt: "A blue square on the left, a yellow circle in the middle, and a green triangle on the right.",
-                multiSelect: false,
-                hotspots: [
-                    // Boxes centred on each shape with even margin, computed from
-                    // the SVG viewBox (0 0 300 120). Square spans x 20-80, y 30-90
-                    // → 6.667-26.667% / 25-75%; triangle spans x 215-285, y 30-90
-                    // → 71.667-95% / 25-75%. Each box adds ~2% x / 3% y padding.
-                    { id: "hs-square", label: "Square", x: 4.667, y: 22, w: 24, h: 56, correct: false },
-                    { id: "hs-circle", label: "Circle", x: 38, y: 18, w: 24, h: 64, correct: false },
-                    { id: "hs-triangle", label: "Triangle", x: 69.667, y: 22, w: 27.333, h: 56, correct: true }
-                ]
+                id: "pitstop-finalcheck",
+                type: "exactText",
+                title: "Pit Stop 4 · Final Check",
+                prompt: "Last stop — the ending must land. Swap this weak sentence for the exact, stronger sentence: “It reached the end at last.”",
+                hint: "Endings reward the effort. The letter is delivered — and what happens to the town?",
+                explanation: "A strong ending pays off the story's promise: the letter arrives and the town is saved, so the long ride finally means something.",
+                answer: "At last the bicycle rolled to a stop — the letter delivered, the town saved.",
+                caseSensitive: false,
+                maxLength: 120
             }
         ];
 
@@ -6030,6 +6208,7 @@
                 dom.progressBar.setAttribute("aria-valuenow", String(progressPercent));
                 dom.progressBar.setAttribute("aria-valuetext", progressPercent + "% complete");
             }
+            updateRaceProgress();
         }
 
         function renderStepDots() {
@@ -6195,6 +6374,170 @@
         /* ------------------------------------------------------------
            Engine entry points wired into the chrome Start/Reset flow.
            ------------------------------------------------------------ */
+
+        /* The race car used on the intro screen and the progress track.
+           Simple flat-colour race car facing the direction of travel. */
+        const RACE_CAR_SVG =
+            "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 34' role='presentation' aria-hidden='true'>" +
+            "<path d='M56 6 L66 4 L66 8 L57 10 Z' fill='#a78bfa' stroke='#0f1222' stroke-width='1.2'/>" +
+            "<path d='M6 22 Q4 14 12 11 L34 8 Q40 8 44 11 L52 12 Q60 14 64 20 L66 24 L62 26 Q40 27 14 26 Z' fill='#38bdf8' stroke='#0f1222' stroke-width='1.5' stroke-linejoin='round'/>" +
+            "<path d='M18 13 L34 11 L38 16 L20 16 Z' fill='#0f1222' opacity='0.9'/>" +
+            "<circle cx='64' cy='22' r='2' fill='#fde047'/>" +
+            "<path d='M8 22 L64 22' stroke='#ffffff' stroke-width='2' opacity='0.55'/>" +
+            "<circle cx='16' cy='26' r='6.5' fill='#1e293b' stroke='#0f1222' stroke-width='1.5'/>" +
+            "<circle cx='52' cy='26' r='6.5' fill='#1e293b' stroke='#0f1222' stroke-width='1.5'/>" +
+            "<circle cx='16' cy='26' r='2.6' fill='#cbd5e1'/>" +
+            "<circle cx='52' cy='26' r='2.6' fill='#cbd5e1'/>" +
+            "</svg>";
+
+        // Pit stop position helper: even spread across the road.
+        function stopPosition(index, count) {
+            return count <= 1 ? 0 : Math.round((index / (count - 1)) * 1000) / 10;
+        }
+
+        // Builds the static race-track structure (pit dots, labels, car).
+        // Idempotent — safe to call on every run. Runs once at boot.
+        function initRaceTrack() {
+            const dotsWrap = document.getElementById("pitDots");
+            const labelsWrap = document.getElementById("pitLabels");
+            if (!dotsWrap || !labelsWrap) return;
+            dotsWrap.replaceChildren();
+            labelsWrap.replaceChildren();
+
+            RACE_STOPS.forEach((name, idx) => {
+                const pct = stopPosition(idx, RACE_STOPS.length);
+
+                const dot = document.createElement("div");
+                dot.className = "pit-dot";
+                dot.style.left = pct + "%";
+                dot.title = name;
+                dotsWrap.appendChild(dot);
+
+                const label = document.createElement("div");
+                label.className = "pit-label";
+                label.style.left = pct + "%";
+                label.textContent = name;
+                labelsWrap.appendChild(label);
+            });
+
+            const car = document.getElementById("raceCar");
+            if (car) {
+                car.innerHTML = RACE_CAR_SVG;
+                car.style.left = "0%";
+            }
+        }
+
+        // Moves the car to the current pit stop and marks completed stops.
+        // Called from the engine's updateStatusUI() on every question render.
+        function updateRaceProgress() {
+            const n = activeQuestions.length;
+            if (!n) return;
+            const i = Math.min(Math.max(state.currentIndex, 0), n - 1);
+            const stopName = RACE_STOPS[Math.min(i, RACE_STOPS.length - 1)] || "Finish";
+            const pct = stopPosition(i, n);
+            const liveText = "Pit Stop " + (i + 1) + " of " + n + " — " + stopName;
+
+            const car = document.getElementById("raceCar");
+            const fill = document.getElementById("raceFill");
+            const live = document.getElementById("raceLive");
+            const road = document.getElementById("raceRoad");
+            const counter = document.getElementById("questionCounter");
+
+            if (car) car.style.left = pct + "%";
+            if (fill) fill.style.width = pct + "%";
+            if (live) live.textContent = liveText;
+            if (counter) counter.textContent = "Pit Stop " + (i + 1) + " of " + n;
+            if (road) {
+                road.setAttribute("aria-valuenow", String(Math.round(pct)));
+                road.setAttribute("aria-valuetext", liveText);
+            }
+
+            const dots = document.getElementById("pitDots");
+            const labels = document.getElementById("pitLabels");
+            if (dots) dots.querySelectorAll(".pit-dot").forEach((dot, idx) => {
+                const q = activeQuestions[idx];
+                const done = Boolean(q && state.results[q.id]);
+                dot.classList.toggle("done", done);
+                dot.classList.toggle("current", idx === i);
+            });
+            if (labels) labels.querySelectorAll(".pit-label").forEach((label, idx) => {
+                const q = activeQuestions[idx];
+                const done = Boolean(q && state.results[q.id]);
+                label.classList.toggle("done", done);
+                label.classList.toggle("current", idx === i);
+            });
+        }
+
+        // Builds the pre-race story screen: car, mini track, stop chips,
+        // and binds the "Start the Race" button exactly once.
+        let storyStartBound = false;
+        function initStoryIntro() {
+            const bigCar = document.getElementById("storyBigCar");
+            if (bigCar) bigCar.innerHTML = RACE_CAR_SVG;
+
+            const miniTrack = document.getElementById("storyMiniTrack");
+            const stopsList = document.getElementById("storyStops");
+            if (miniTrack && stopsList) {
+                miniTrack.replaceChildren();
+                stopsList.replaceChildren();
+
+                const dots = document.createElement("div");
+                dots.className = "pit-dots";
+                RACE_STOPS.forEach((name, idx) => {
+                    const pct = stopPosition(idx, RACE_STOPS.length);
+                    const dot = document.createElement("div");
+                    dot.className = "pit-dot";
+                    dot.style.left = pct + "%";
+                    dot.title = name;
+                    dots.appendChild(dot);
+
+                    const li = document.createElement("li");
+                    const chip = document.createElement("span");
+                    chip.className = "story-stop-chip";
+                    const num = document.createElement("span");
+                    num.className = "stop-num";
+                    num.textContent = String(idx + 1);
+                    chip.appendChild(num);
+                    chip.appendChild(document.createTextNode(name));
+                    li.appendChild(chip);
+                    stopsList.appendChild(li);
+                });
+                const dashes = document.createElement("div");
+                dashes.className = "race-dashes";
+                miniTrack.appendChild(dashes);
+                miniTrack.appendChild(dots);
+            }
+
+            if (!storyStartBound) {
+                storyStartBound = true;
+                document.getElementById("storyStartBtn").addEventListener("click", () => {
+                    playSound("click"); // sound: button press
+                    showSimUI();
+                    renderQuestion();
+                    saveQuizProgress();
+                });
+            }
+        }
+
+        function showStoryIntro() {
+            ["statusRow", "progressShell", "questionPanel"].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add("hidden");
+            });
+            const intro = document.getElementById("storyIntro");
+            if (intro) intro.classList.remove("hidden");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function showSimUI() {
+            const intro = document.getElementById("storyIntro");
+            if (intro) intro.classList.add("hidden");
+            ["statusRow", "progressShell", "questionPanel"].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove("hidden");
+            });
+        }
+
         function devInit() {
             // A brand-new run (not a resume): build the question list fresh
             // so the question bank draw and shuffleQuestions take effect,
@@ -6205,7 +6548,10 @@
             }
             state.started = true;
             state.finished = false;
-            renderQuestion();
+            // The story intro shows before the first question; the race
+            // track and its car are updated once the first question renders.
+            initStoryIntro();
+            showStoryIntro();
             saveQuizProgress();
         }
 
@@ -6227,7 +6573,10 @@
             clearQuizProgress();
         }
 
-        /* Boot the app after all engine constants above are initialized. */
+        /* Boot the app after all engine constants above are initialized.
+           The race-track structure (pit stops + car) is static, so it is
+           built once here — the car only needs to move after that. */
+        initRaceTrack();
         initializeApp();
     </script>
 </body>
