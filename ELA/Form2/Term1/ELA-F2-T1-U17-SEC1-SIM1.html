@@ -125,6 +125,9 @@
         }
 
         .topbar {
+            position: sticky;
+            top: 12px;
+            z-index: 50;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -484,6 +487,8 @@
         .ll-wrap{display:flex;flex-direction:column;gap:16px}
         .ll-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
         .ll-progress{flex:1;min-width:260px}
+        .ll-brand-stack{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+        .ll-brand-stack .ll-mini{max-width:420px}
         .ll-progress-label{display:flex;justify-content:space-between;font-weight:700;color:var(--text-soft);font-size:.9rem;margin-bottom:7px}
         .ll-bar{height:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;overflow:hidden}
         .ll-bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .3s ease}
@@ -510,6 +515,16 @@
         .ll-choice.used{opacity:.35;cursor:not-allowed}
         .ll-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content: space-between;margin-top:14px}
         .ll-actions-left,.ll-actions-right{display:flex;gap:10px;flex-wrap:wrap}
+        .ll-side-actions{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:45;display:flex;flex-direction:column;gap:10px;padding:10px;background:color-mix(in srgb,var(--surface) 94%,transparent);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+        .ll-side-actions button{white-space:nowrap}
+        .ll-choice.dragging{opacity:.25}
+        .ll-drag-clone{position:fixed!important;z-index:10000!important;margin:0!important;pointer-events:none!important;opacity:.95!important;transform:scale(1.02);box-shadow:var(--shadow);cursor:grabbing!important}
+        .ll-choice.used{display:none}
+        @media(max-width:760px){
+          .topbar{top:8px}
+          .ll-side-actions{right:8px;top:auto;bottom:12px;transform:none;flex-direction:row;padding:8px}
+          .ll-side-actions .ll-chip{display:none}
+        }
         .ll-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);font-size:.82rem;color:var(--text-soft)}
         .ll-checklist{display:grid;gap:10px;margin-top:14px}
         .ll-check{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface)}
@@ -522,16 +537,13 @@
         .ll-stat{padding:12px;border-radius:13px;background:var(--surface);border:1px solid var(--border);text-align:center}
         .ll-stat b{display:block;font-size:1.2rem}
         .ll-mini{font-size:.82rem;color:var(--muted)}
-        .ll-format{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-        .ll-format button{text-align:left;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text)}
-        .ll-format button.selected{border-color:var(--success);box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 20%,transparent)}
         @media(max-width:760px){
           .ll-stage-visual{min-height:430px}
           .ll-stage-slots{width:46%;grid-template-columns:1fr;gap:8px}
           .ll-stage-slots .ll-slot{min-height:93px;padding:8px;border-radius:11px}
           .ll-slot-title{font-size:.66rem;margin-bottom:4px}
           .ll-slot-content{font-size:.72rem;line-height:1.2}
-          .ll-choice-grid,.ll-format,.ll-stat-grid{grid-template-columns:1fr}
+          .ll-choice-grid,.ll-stat-grid{grid-template-columns:1fr}
           .ll-stage-visual.stage-1 .ll-stage-slots { top: 50%; bottom: auto; transform: translate(-50%, -50%); }
         }
 
@@ -625,7 +637,7 @@
                 <section class="sim-card" id="simContainer">
                     <div class="ll-wrap">
                         <div class="ll-top">
-                            <div>
+                            <div class="ll-brand-stack">
                                 <div class="ll-chip">🚀 Letter Launchpad</div>
                                 <div class="ll-mini" id="llStageHint">Build the formal message one module at a time.</div>
                             </div>
@@ -638,9 +650,6 @@
                         <div class="ll-actions">
                             <div class="ll-actions-left">
                                 <button class="secondary-btn" id="llBackBtn">← Back</button>
-                                <button class="ghost-btn" id="llRulesBtn">Rules</button>
-                                <button class="ghost-btn" id="llHintBtn">💡 Hint</button>
-                                <button class="ghost-btn" id="llTryBtn">Try Again</button>
                             </div>
                             <div class="ll-actions-right">
                                 <span class="ll-chip" id="llAttemptChip">Attempts: 0</span>
@@ -651,6 +660,11 @@
                 </section>
             </div>
         </main>
+
+        <aside class="ll-side-actions" id="llSideActions" aria-label="Simulation controls">
+            <button class="ghost-btn" id="llHintBtn" type="button">💡 Hint</button>
+            <button class="ghost-btn" id="llTryBtn" type="button">Try Again</button>
+        </aside>
 
         <div class="footer-note">
             Letter Launchpad • Formal request mission • Offline student simulation
@@ -709,7 +723,6 @@
                 "Assemble a formal request to the principal. Each accurate section locks into the launch vehicle; the message launches only when the format, purpose, organisation and tone are exact.",
             instructions: [
                 "Mission: request permission from the principal to use the school hall for a student reading evening.",
-                "Default format: formal email. Choose supplied sections and drag each approved section into its matching rocket module.",
                 "Use respectful Standard English and keep the message in logical order.",
                 "Wrong choices explain what is wrong, why it matters, how to fix it and show a corrected model.",
                 "Use Hint when needed. You can retry without permanent failure.",
@@ -936,6 +949,8 @@
             loadHelpSeen();
             try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
             showScreen("home");
+            // Show the instructions automatically when the simulation is launched.
+            setTimeout(openInstructionsModal, 0);
         }
 
         function loadHelpSeen() {
@@ -1045,6 +1060,8 @@
             if (dom.helpBtn) {
                 dom.helpBtn.style.display = screenName === "home" ? "none" : "";
             }
+            const llSideActions = document.getElementById("llSideActions");
+            if (llSideActions) llSideActions.style.display = screenName === "sim" ? "flex" : "none";
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
 
@@ -1165,7 +1182,6 @@
             startTime: 0,
             wrongSkills: {},
             locked: {},
-            format: "email",
             finalChecks: [false,false,false,false,false,false],
             cards: {
                 header: [
@@ -1208,10 +1224,19 @@
             details:"Details", request:"Request / Responsibility", closing:"Closing / Signature"
         };
 
+        function llShuffleCards(){
+            Object.keys(LL.cards).forEach(key=>{
+                for(let i=LL.cards[key].length-1;i>0;i--){
+                    const j=Math.floor(Math.random()*(i+1));
+                    [LL.cards[key][i],LL.cards[key][j]]=[LL.cards[key][j],LL.cards[key][i]];
+                }
+            });
+        }
+
         function llResetState(){
             LL.stage=1; LL.attempts=0; LL.hints=0; LL.firstAttempted={}; LL.firstAttemptCorrect=0; LL.firstAttemptTotal=0;
             LL.mastered=0; LL.startTime=Date.now(); LL.wrongSkills={}; LL.locked={};
-            LL.format="email"; LL.finalChecks=[false,false,false,false,false,false];
+            LL.finalChecks=[false,false,false,false,false,false];
         }
 
         function llEsc(s){ return escapeHtml(s).replace(/\n/g,"<br>"); }
@@ -1241,6 +1266,10 @@
             document.getElementById("llProgressBar").style.width=pct+"%";
             document.getElementById("llAttemptChip").textContent="Attempts: "+LL.attempts;
             document.getElementById("llHintChip").textContent="Hints: "+LL.hints;
+        }
+
+        function llScrollToTop(){
+            window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
         }
 
         function llRenderStageVisual(stage){
@@ -1279,10 +1308,6 @@
             let html=`<section class="ll-stage">
                 <h2>Stage ${stage} — ${data.title}</h2>
                 <p>${escapeHtml(data.desc)}</p>
-                ${stage===1?`<div class="ll-format">
-                    <button class="selected" type="button" disabled><b>Default format: Formal email</b><br><span class="ll-mini">Fits the principal as the audience and the request as the purpose.</span></button>
-                    <button type="button" disabled><b>Print letter</b><br><span class="ll-mini">Not selected for this mission.</span></button>
-                </div>`:""}
                 ${llRenderStageVisual(stage)}
                 ${data.keys.map(k=>`<div style="margin-top:15px"><div class="ll-slot-title">${LL_LABELS[k]} — drag the correct section into its target slot</div>
                     <div class="ll-choice-grid">${LL.cards[k].map(x=>llCard(k,x)).join("")}</div></div>`).join("")}
@@ -1293,23 +1318,93 @@
         }
 
         function llBindCards(){
+            const dragState={active:false, key:null, id:null, card:null, clone:null, offsetX:0, offsetY:0};
+
+            const moveClone=(x,y)=>{
+                if(!dragState.clone) return;
+                dragState.clone.style.left=(x-dragState.offsetX)+"px";
+                dragState.clone.style.top=(y-dragState.offsetY)+"px";
+            };
+
+            const clearDrag=()=>{
+                document.querySelectorAll(".ll-slot.active").forEach(s=>s.classList.remove("active"));
+                if(dragState.card) dragState.card.classList.remove("dragging");
+                if(dragState.clone) dragState.clone.remove();
+                dragState.active=false;
+                dragState.key=null;
+                dragState.id=null;
+                dragState.card=null;
+                dragState.clone=null;
+            };
+
+            const finishPointerDrag=(e)=>{
+                if(!dragState.active) return;
+                const target=document.elementFromPoint(e.clientX,e.clientY)?.closest(".ll-slot:not(.locked)");
+                const key=dragState.key, id=dragState.id;
+                clearDrag();
+                if(target){
+                    if(key===target.dataset.slot) llAttempt(key,id);
+                    else llWrong("Module in wrong position");
+                }
+            };
+
             document.querySelectorAll(".ll-choice").forEach(btn=>{
-                btn.addEventListener("dragstart",e=>{
+                btn.draggable=false;
+                btn.addEventListener("pointerdown",e=>{
                     if(btn.classList.contains("used")) return;
-                    e.dataTransfer.setData("text/plain",JSON.stringify({key:btn.dataset.key,id:btn.dataset.id}));
+                    if(e.button!==undefined && e.button!==0) return;
+                    e.preventDefault();
+                    const rect=btn.getBoundingClientRect();
+                    dragState.active=true;
+                    dragState.key=btn.dataset.key;
+                    dragState.id=btn.dataset.id;
+                    dragState.card=btn;
+                    dragState.offsetX=e.clientX-rect.left;
+                    dragState.offsetY=e.clientY-rect.top;
+
+                    const clone=btn.cloneNode(true);
+                    clone.classList.remove("used");
+                    clone.classList.add("ll-drag-clone");
+                    clone.style.width=rect.width+"px";
+                    clone.style.height=rect.height+"px";
+                    clone.style.left=rect.left+"px";
+                    clone.style.top=rect.top+"px";
+                    document.body.appendChild(clone);
+                    dragState.clone=clone;
+                    btn.classList.add("dragging");
+                    btn.setPointerCapture?.(e.pointerId);
+                    moveClone(e.clientX,e.clientY);
                 });
-                btn.addEventListener("click", () => {
+
+                btn.addEventListener("pointermove",e=>{
+                    if(!dragState.active || dragState.card!==btn) return;
+                    e.preventDefault();
+                    moveClone(e.clientX,e.clientY);
+                    document.querySelectorAll(".ll-slot:not(.locked)").forEach(slot=>{
+                        const r=slot.getBoundingClientRect();
+                        const over=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
+                        slot.classList.toggle("active",over);
+                    });
+                });
+
+                btn.addEventListener("pointerup",finishPointerDrag);
+                btn.addEventListener("pointercancel",clearDrag);
+                btn.addEventListener("click",e=>{
+                    if(dragState.active) return;
                     if (btn.classList.contains("used")) return;
                     llSetFeedback("wrong", "Drag and Drop Required", "Clicking is disabled for selection.", "Drag and drop the choice directly into the target slot box above.", "Click and drag the card into the slot.");
                 });
             });
+
             document.querySelectorAll(".ll-slot:not(.locked)").forEach(slot=>{
                 slot.addEventListener("dragover",e=>{e.preventDefault();slot.classList.add("active")});
                 slot.addEventListener("dragleave",()=>slot.classList.remove("active"));
                 slot.addEventListener("drop",e=>{
-                    e.preventDefault();slot.classList.remove("active");
+                    e.preventDefault();
+                    const raw=e.dataTransfer?.getData("text/plain");
+                    if(!raw) return;
                     try{
-                        const d=JSON.parse(e.dataTransfer.getData("text/plain"));
+                        const d=JSON.parse(raw);
                         if(d.key===slot.dataset.slot) llAttempt(d.key,d.id);
                         else llWrong("Module in wrong position");
                     }catch(_){}
@@ -1322,13 +1417,13 @@
             LL.wrongSkills[skill]=(LL.wrongSkills[skill]||0)+1;
             playSound("wrong");
             const messages={
-                "Module in wrong position":["Module in wrong position","Formal-letter sections follow a logical external structure.","Place subject and salutation before the body, and closing before the signature.","To/Subject → Dear Principal Joseph → body → Yours sincerely → signature."],
+                "Module in wrong position":["Module in wrong position","The message sections follow a logical external structure.","Place subject and salutation before the body, and closing before the signature.","To/Subject → Dear Principal Joseph → body → Yours sincerely → signature."],
                 header:["Header choice is not exact","The recipient and subject must clearly identify the audience and purpose.","Use the school contact and the specific request subject.","To: principal@school.edu.tt; Subject: Request to Use the School Hall for Reading Evening"],
-                salutation:["Tone is too informal","The wording does not suit a principal or official request.","Use respectful Standard English.","Dear Principal Joseph,"],
+                salutation:["Tone is too informal","The wording does not suit a principal or official school request.","Use respectful Standard English.","Dear Principal Joseph,"],
                 intro:["Purpose is not clear enough","A formal request should state who is writing and exactly what permission is requested.","State the Reading Club, the hall and the request directly.","I am writing on behalf of the Form 2 Reading Club to request permission to use the school hall."],
                 details:["Request lacks key detail","The reader cannot decide without date, time, purpose or responsibility information.","Include the planned schedule and supervised activity.","Friday 22 November, 5:00–7:00 p.m., supervised readings and a book exchange."],
                 request:["Request or responsibility is too informal","A formal request should ask directly and show responsibility.","Use respectful wording and include the club's responsibility.","Could you please approve the booking and advise us of any safety or supervision requirements?"],
-                closing:["Closing is not formal","The closing and signature should match a formal request.","Use the recognised closing and full supplied role.","Yours sincerely, Amara Singh, Form 2 Reading Club Secretary"]
+                closing:["Closing is not formal","The closing and signature should match a formal school request.","Use the recognised closing and full supplied role.","Yours sincerely, Amara Singh, Form 2 Reading Club Secretary"]
             };
             const m=messages[skill]||messages.header;
             llSetFeedback("wrong",m[0],m[1],m[2],m[3]);
@@ -1353,9 +1448,21 @@
                 playSound("correct");
                 llClearFeedback();
                 llRenderStage();
-                if(Object.keys(LL.locked).length===2 && LL.stage===1){LL.stage=2; llRenderStage();}
-                else if(Object.keys(LL.locked).length===4 && LL.stage===2){LL.stage=3; llRenderStage();}
-                else if(Object.keys(LL.locked).length===6){LL.stage=4; llRenderFinal();}
+                if(Object.keys(LL.locked).length===2 && LL.stage===1){
+                    LL.stage=2;
+                    llRenderStage();
+                    llScrollToTop();
+                }
+                else if(Object.keys(LL.locked).length===4 && LL.stage===2){
+                    LL.stage=3;
+                    llRenderStage();
+                    llScrollToTop();
+                }
+                else if(Object.keys(LL.locked).length===6){
+                    LL.stage=4;
+                    llRenderFinal();
+                    llScrollToTop();
+                }
             }else{
                 llWrong(key);
             }
@@ -1368,7 +1475,7 @@
             document.getElementById("llContent").innerHTML=llRenderRocketPreview()+`
             <section class="ll-stage">
               <h2>Stage 4 — Final Launch Check</h2>
-              <p>Check the completed formal email before launch. All six checks must be selected.</p>
+              <p>Check the completed message before launch. All six checks must be selected.</p>
               <div class="ll-stage" style="margin-top:14px; margin-bottom:18px;">
                 <div class="ll-slot-title">Final exact email</div>
                 <p><b>To:</b> principal@school.edu.tt<br><b>Subject:</b> Request to Use the School Hall for Reading Evening</p>
@@ -1438,7 +1545,7 @@
                         <span role="img" aria-label="Sent envelope">${EMBEDDED_SVG.sentEnvelope}</span>
                         <div>
                             <h2>Formal message sent</h2>
-                            <p>The letter rocket reached its destination.</p>
+                            <p>The message rocket reached its destination.</p>
                             <div class="ll-stat-grid">
                                 <div class="ll-stat"><b>${first}%</b><span class="ll-mini">First-attempt accuracy</span></div>
                                 <div class="ll-stat"><b>${LL.mastered}/6</b><span class="ll-mini">Final mastery</span></div>
@@ -1448,16 +1555,22 @@
                     </section>
                     <div class="ll-stage" style="margin-top:14px">
                         <h2>Mission complete</h2>
-                        <p>You applied formal-letter format and chose clear, respectful wording for a digital request.</p>
+                        <p>You chose clear, respectful wording and organised the request for the intended audience.</p>
+                        <div class="button-row" style="margin-top:18px;">
+                            <button class="primary-btn" id="llFinalTryAgainBtn" type="button">Try Again</button>
+                        </div>
                     </div>
                 `;
-                
+
+                document.getElementById("llFinalTryAgainBtn").addEventListener("click", llTryAgain);
                 document.getElementById("llStageHint").textContent = "Mission complete";
+                llScrollToTop();
             }, 2800);
         }
 
         function llHint(){
             LL.hints++;
+            llProgress();
             const hints={
                 1:"For the address module, look for the exact school email and a subject that states the requested action. The salutation names the principal respectfully.",
                 2:"The introduction says who is writing and what permission is requested. The details give Friday 22 November, 5:00–7:00 p.m., supervised readings and a book exchange.",
@@ -1467,10 +1580,20 @@
         }
 
         function llTryAgain(){
-            llResetState();
             llClearFeedback();
-            LL.stage=1;
+            if(LL.stage>=4){
+                llResetState();
+                llShuffleCards();
+                document.querySelector(".ll-actions").style.display="";
+                LL.stage=1;
+                llRenderStage();
+                llScrollToTop();
+                return;
+            }
+            const keys=LL_STAGE_DATA[LL.stage-1]?.keys||[];
+            keys.forEach(k=>{delete LL.locked[k]});
             llRenderStage();
+            llScrollToTop();
         }
 
         function llBack(){
@@ -1481,15 +1604,11 @@
             llClearFeedback(); llRenderStage();
         }
 
-        function llRules(){
-            openInstructionsModal();
-        }
-
         function devInit(){
             llResetState();
+            llShuffleCards();
             document.querySelector(".ll-actions").style.display="";
             document.getElementById("llBackBtn").onclick=llBack;
-            document.getElementById("llRulesBtn").onclick=llRules;
             document.getElementById("llHintBtn").onclick=llHint;
             document.getElementById("llTryBtn").onclick=llTryAgain;
             document.getElementById("llStageHint").textContent="Mission brief";
@@ -1497,12 +1616,16 @@
               <section class="ll-stage">
                 <h2>Screen 1 — Mission Brief</h2>
                 <p><b>Mission:</b> Request permission from the principal to use the school hall for a student reading evening.</p>
-                <p><b>Default format:</b> formal email. Build the launch vehicle by dragging each exact section into its target slot.</p>
+                <p>Build the launch vehicle by dragging each exact section into its target slot.</p>
                 <p>Every correct move locks a module. You can retry mistakes, and no speed or lives are required.</p>
                 ${llRenderRocketPreview()}
                 <div class="button-row"><button class="primary-btn" id="llBeginBtn">Begin Assembly →</button></div>
               </section>`;
-            document.getElementById("llBeginBtn").onclick=()=>{LL.stage=1;llRenderStage();};
+            document.getElementById("llBeginBtn").onclick=()=>{
+                LL.stage=1;
+                llRenderStage();
+                llScrollToTop();
+            };
             llProgress();
         }
         function devReset(){
