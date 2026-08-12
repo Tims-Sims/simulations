@@ -1,0 +1,2274 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 Graphing Exercise Data</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 2 BIOLOGY SIMULATION: GRAPHING EXERCISE DATA
+           Trinidad and Tobago Secondary Schools — Biology Lab
+           Single-file HTML/CSS/JS - Offline Friendly
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Connection / Point Colors */
+            --dot-color: #0ea5e9;
+            --dot-glow: rgba(14, 165, 233, 0.5);
+
+            /* Status Colors */
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* Lock outer window when in game mode so ONLY internal containers scroll */
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1280px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen (Compact Layout to reduce scrolling) */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 12px;
+        }
+
+        .hero-card {
+            width: min(100%, 820px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(20px, 3vw, 32px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 720px);
+            margin: 0 auto 20px;
+            color: var(--text-soft);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 4px;
+            font-size: 0.95rem;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.86rem;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Graph Canvas / 25% Right Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .canvas-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        .canvas-header {
+            padding: 14px 20px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .room-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-stage-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        /* Data Table Styling */
+        .data-table-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .data-table-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .data-table th, .data-table td {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background: var(--surface-3);
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .data-table td {
+            background: var(--surface);
+            color: var(--text-soft);
+        }
+
+        .data-table tr.highlight-row td {
+            background: color-mix(in srgb, var(--accent) 15%, var(--surface));
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Interactive Graph Canvas Area */
+        .graph-wrapper {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .graph-svg-container {
+            width: 100%;
+            max-width: 660px;
+            height: 380px;
+            position: relative;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .graph-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        /* Grid lines & axes */
+        .grid-line {
+            stroke: var(--border);
+            stroke-width: 1;
+        }
+        .axis-line {
+            stroke: var(--text);
+            stroke-width: 2.5;
+        }
+        .axis-text {
+            fill: var(--text-soft);
+            font-size: 11px;
+            font-weight: 600;
+            font-family: inherit;
+        }
+        .axis-title {
+            fill: var(--text);
+            font-size: 13px;
+            font-weight: 800;
+            font-family: inherit;
+        }
+
+        /* Plot Points & Lines */
+        .plot-handle {
+            cursor: grab;
+            transition: r 0.15s ease, fill 0.2s ease, stroke 0.2s ease;
+        }
+        .plot-handle:hover {
+            r: 10;
+            filter: drop-shadow(0 0 8px var(--accent));
+        }
+        .plot-handle.dragging {
+            cursor: grabbing;
+            r: 12;
+            fill: #f59e0b !important;
+        }
+        .plot-handle.correct {
+            fill: var(--safe-color) !important;
+            stroke: #ffffff !important;
+            cursor: default;
+        }
+        .plot-handle.incorrect {
+            fill: var(--danger-color) !important;
+            stroke: #ffffff !important;
+            animation: pointPulse 0.8s infinite alternate;
+        }
+
+        @keyframes pointPulse {
+            from { r: 8; }
+            to { r: 12; }
+        }
+
+        .best-fit-line {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.3s ease;
+        }
+        .best-fit-line.correct {
+            stroke: var(--safe-color);
+            stroke-width: 4.5;
+            filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.7));
+        }
+        .best-fit-line.incorrect {
+            stroke: var(--danger-color);
+            stroke-dasharray: 6, 6;
+        }
+
+        /* Keyboard Point Stepper Controls */
+        .stepper-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 14px;
+            width: 100%;
+        }
+
+        .stepper-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .stepper-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--surface-3);
+            color: var(--text);
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        /* Assessment Questions Section */
+        .questions-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .question-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .question-block h4 {
+            margin: 0;
+            font-size: 1.02rem;
+            color: var(--text);
+            line-height: 1.45;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            color: var(--text-soft);
+            text-align: left;
+            font-size: 0.92rem;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--text);
+            background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
+        }
+
+        .option-btn.selected {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 24%, var(--surface-2));
+            color: var(--text);
+            font-weight: 700;
+            animation: clickBlink 0.4s ease-out;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.45);
+        }
+
+        .question-block.just-selected {
+            animation: blockBlink 0.4s ease-out;
+        }
+
+        @keyframes clickBlink {
+            0% { transform: scale(1); opacity: 0.7; }
+            40% { transform: scale(1.025); opacity: 1; box-shadow: 0 0 20px var(--accent); }
+            70% { transform: scale(0.995); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }
+        }
+
+        @keyframes blockBlink {
+            0% { border-color: var(--border); }
+            50% { border-color: var(--accent); box-shadow: 0 0 20px rgba(56, 189, 248, 0.35); }
+            100% { border-color: var(--border); }
+        }
+
+        .option-btn.correct {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .option-btn.incorrect {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+            color: var(--text);
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width) */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-title {
+            font-size: 0.98rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 10px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            padding: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Feedback Explanation Card */
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 460px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 640px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+            .canvas-pane {
+                min-height: auto;
+            }
+            .mission-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">📊</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 Graphing Exercise Data</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Biology Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="soundToggleBtn" aria-label="Toggle sound">🔊 Sound On</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen (Compact Layout) -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Biology</div>
+                    <h2>Graphing Exercise Data</h2>
+                    <p>
+                        Welcome to the Biology Lab! Plot sample pulse rate data collected during resting, moderate exercise, and recovery periods onto an interactive graph, draw the line of best fit, and analyze heart rate trends.
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">📈</div>
+                            <h3>Interactive Coordinates</h3>
+                            <p>Drag data points to plot pulse rate (bpm) against time (minutes).</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">✍️</div>
+                            <h3>Line of Best Fit</h3>
+                            <p>Click "Draw Line" to connect your coordinates and visualize heart rate curves.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🫀</div>
+                            <h3>Trend Analysis</h3>
+                            <p>Answer guided biology questions analyzing resting, exercise, and recovery phases.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.05rem; padding: 12px 24px;">🚀 Launch Graphing Activity</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Graph Canvas / 25% Right Mission Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Graph & Questions Stage -->
+                <section class="canvas-pane" id="canvasPane">
+                    <div class="canvas-header">
+                        <div class="room-title">
+                            <span id="pageTitleHeading">📊 Section 1: Plotting Pulse Rate Data (6 Points)</span>
+                        </div>
+                        <span style="font-size:0.86rem; color:var(--muted); font-weight:700;">Drag points vertically on the grid or use steppers</span>
+                    </div>
+
+                    <div class="main-stage-scroll" id="mainStageScroll">
+                        <!-- Sample Data Table Card -->
+                        <div class="data-table-card" id="dataTableCard">
+                            <div class="data-table-title">📋 Sample Pulse Rate Data Table</div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time (Minutes)</th>
+                                        <th>0 min</th>
+                                        <th>1 min</th>
+                                        <th>2 min</th>
+                                        <th>3 min</th>
+                                        <th>4 min</th>
+                                        <th>5 min</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="highlight-row">
+                                        <td><strong>Activity Stage</strong></td>
+                                        <td>Resting</td>
+                                        <td>Resting</td>
+                                        <td>Moderate Activity</td>
+                                        <td>Moderate Activity</td>
+                                        <td>Recovery</td>
+                                        <td>Recovery</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Pulse Rate (bpm)</strong></td>
+                                        <td><strong>72 bpm</strong></td>
+                                        <td><strong>72 bpm</strong></td>
+                                        <td><strong>110 bpm</strong></td>
+                                        <td><strong>115 bpm</strong></td>
+                                        <td><strong>90 bpm</strong></td>
+                                        <td><strong>75 bpm</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Interactive SVG Graph Grid Wrapper -->
+                        <div class="graph-wrapper" id="graphWrapper">
+                            <div class="graph-svg-container" id="graphSvgContainer">
+                                <svg class="graph-svg" id="graphSvg" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid meet">
+                                    <!-- Dynamic Grid Lines, Axes, Ticks, Best Fit Line, and Points rendered via JS -->
+                                </svg>
+                            </div>
+
+                            <!-- Stepper Row for Accessibility & Precise Controls -->
+                            <div class="stepper-row" id="stepperRow">
+                                <!-- Steppers generated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Embedded Assessment Questions Section (Appears / Unlocks One by One) -->
+                        <div class="questions-card" id="questionsCard" style="display: none;">
+                            <div class="data-table-title" id="questionsCardTitle">🧠 Section 2: Biology Question 1 of 3</div>
+                            <div id="questionsContainer" style="display:flex; flex-direction:column; gap:16px;">
+                                <!-- Single Active Question dynamically injected -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Dedicated Action & Status Tray -->
+                <aside class="mission-panel">
+                    <!-- 1. Progress Card (FIRST) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Activity Progress</span>
+                            <span id="matchesCount" style="color:var(--accent);">0 / 9 Completed</span>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Inspector Live Explanation Box (SECOND - MOVED ABOVE ACTION BUTTONS) -->
+                    <div class="panel-card">
+                        <div class="panel-title">Lab Inspector Feedback</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Drag the 6 data points vertically on the graph grid to match the sample pulse rate table. Once positioned, click <strong>[Draw Line & Verify Graph]</strong>!
+                        </div>
+                    </div>
+
+                    <!-- 3. Action Buttons Card (THIRD - MOVED BELOW FEEDBACK) -->
+                    <div class="panel-card" style="gap:10px;">
+                        <button class="primary-btn" id="drawLineBtn" style="width:100%; justify-content:center;">
+                            ✍️ Draw Line & Verify Graph
+                        </button>
+                        <button class="secondary-btn" id="resetPointsBtn" style="width:100%; justify-content:center;">
+                            ↺ Reset Points to Default
+                        </button>
+                        <button class="primary-btn" id="submitQuestionBtn" style="width:100%; justify-content:center; display:none;" disabled>
+                            Check Question 1 Answer
+                        </button>
+                        <button class="primary-btn" id="nextQuestionBtn" style="width:100%; justify-content:center; display:none;">
+                            Next Question →
+                        </button>
+                        <button class="primary-btn" id="finishCertificationBtn" style="width:100%; justify-content:center; display:none;">
+                            🎉 Finish Certification
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Lab Report Completed</div>
+                <h2>Form 2 Biology Graphing Certification</h2>
+                <p>Great work in the Biology Lab! Here is your official performance review for graphing exercise data.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Graphing Biologist</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You successfully plotted all pulse rate data points and accurately answered the biology trend questions!</p>
+                </div>
+
+                <!-- SUMMARY SCORECARD GRID -->
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Correct Items</div>
+                        <div class="val" id="summaryCorrectVal">0 / 9</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Item Breakdown (9 Tasks)</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Graphing Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Evaluated data points & question feedback.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Complete Graphing Exercise Data</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome, Biology Student! Follow these steps to graph resting, exercise, and recovery pulse rates:</p>
+                <ul>
+                    <li><strong>Plot Data Points:</strong> Refer to the Sample Data Table. Click & drag each blue point 🔵 vertically on its Minute line, or use the <strong>+ / - buttons</strong> below the graph to set the exact pulse rate (bpm).</li>
+                    <li><strong>Draw Line & Verify:</strong> Click <strong>✍️ Draw Line & Verify Graph</strong> to check your points. When correct, the trend line connects the points, steppers are removed, and the biology questions unlock one by one!</li>
+                    <li><strong>One-by-One Questions:</strong> Answer each question, check your response, and click <strong>Next Question →</strong> to proceed.</li>
+                    <li><strong>Review & Submit:</strong> Check your final score and review feedback in the Review Memory drawer anytime!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the simulation and erase saved answers and plotted points?</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Graphing Activity</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           GRAPHING EXERCISE DATA DATASET & ANSWER KEYS
+           ============================================================ */
+        const GRAPH_POINTS = [
+            { min: 0, label: "Minute 0 (Resting)", targetBpm: 72, currentBpm: 60, id: "point_m0" },
+            { min: 1, label: "Minute 1 (Resting)", targetBpm: 72, currentBpm: 60, id: "point_m1" },
+            { min: 2, label: "Minute 2 (Moderate Activity)", targetBpm: 110, currentBpm: 60, id: "point_m2" },
+            { min: 3, label: "Minute 3 (Moderate Activity)", targetBpm: 115, currentBpm: 60, id: "point_m3" },
+            { min: 4, label: "Minute 4 (Recovery)", targetBpm: 90, currentBpm: 60, id: "point_m4" },
+            { min: 5, label: "Minute 5 (Recovery)", targetBpm: 75, currentBpm: 60, id: "point_m5" }
+        ];
+
+        const ASSESSMENT_QUESTIONS = [
+            {
+                id: "q1",
+                title: "Question 1: Graph Axes Definition",
+                question: "Which variable is placed on the horizontal axis, and which is placed on the vertical axis?",
+                options: [
+                    { id: "a", text: "Time is on the horizontal axis, and pulse rate is on the vertical axis.", isCorrect: true },
+                    { id: "b", text: "Pulse rate is on the horizontal axis, and time is on the vertical axis.", isCorrect: false },
+                    { id: "c", text: "Exercise intensity is on the horizontal axis, and muscle power is on the vertical axis.", isCorrect: false },
+                    { id: "d", text: "Time is on the vertical axis, and body temperature is on the horizontal axis.", isCorrect: false }
+                ],
+                feedback: "The observation is correct. Time is the independent variable, so it goes on the horizontal axis. Pulse rate is the dependent variable, so it goes on the vertical axis."
+            },
+            {
+                id: "q2",
+                title: "Question 2: Exercise Trend Analysis",
+                question: "Describe the trend shown on the graph between Minute 1 and Minute 3.",
+                options: [
+                    { id: "a", text: "The pulse rate remains steady at 72 bpm without any change.", isCorrect: false },
+                    { id: "b", text: "The pulse rate increases rapidly from the resting rate.", isCorrect: true },
+                    { id: "c", text: "The pulse rate decreases rapidly towards zero.", isCorrect: false },
+                    { id: "d", text: "The pulse rate fluctuates unpredictably up and down.", isCorrect: false }
+                ],
+                feedback: "That is accurate. Active muscles require more energy during moderate activity, so the heart pumps faster to transport oxygen to them."
+            },
+            {
+                id: "q3",
+                title: "Question 3: Recovery Phase Analysis",
+                question: "What happens to the pulse rate during the recovery period between Minute 3 and Minute 5?",
+                options: [
+                    { id: "a", text: "The pulse rate continues to rise higher than 120 bpm.", isCorrect: false },
+                    { id: "b", text: "The pulse rate decreases and gradually returns towards the resting rate.", isCorrect: true },
+                    { id: "c", text: "The pulse rate stays at 115 bpm permanently.", isCorrect: false },
+                    { id: "d", text: "The pulse rate drops instantly to zero bpm.", isCorrect: false }
+                ],
+                feedback: "Correct. As the physical activity stops, the body's demand for extra energy drops, allowing the pulse rate to safely slow down."
+            }
+        ];
+
+        /* INAPPROPRIATE LANGUAGE FILTER FOR INPUT COMPLIANCE */
+        const PROHIBITED_WORDS = [
+            "damn", "hell", "crap", "stupid", "idiot", "fool", "bastard", "bitch", "shit", "fuck", "ass"
+        ];
+
+        function containsProhibitedWord(text) {
+            if (!text) return false;
+            const normalized = text.toLowerCase()
+                .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's').replace(/\$/g, 's').replace(/@/g, 'a');
+            return PROHIBITED_WORDS.some(w => {
+                const regex = new RegExp(`\\b${w}\\b`, 'i');
+                return regex.test(normalized);
+            });
+        }
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Drag the 6 data points vertically on the graph grid to match the sample pulse rate table. Once positioned, click <strong>[Draw Line & Verify Graph]</strong>!`;
+
+        const state = {
+            points: JSON.parse(JSON.stringify(GRAPH_POINTS)),
+            questionAnswers: {}, // qId -> optionId
+            evaluations: {},     // itemId -> { isCorrect, userChoice, targetValue, feedback }
+            isGraphVerified: false,
+            currentQuestionIndex: 0,
+            score: 0,
+            attempts: 0,
+            streak: 0,
+            bestStreak: 0,
+            theme: "light",
+            soundEnabled: true
+        };
+
+        let activeDragPointIndex = null;
+
+        /* SVG Coordinates Config */
+        const SVG_CONFIG = {
+            width: 640,
+            height: 400,
+            paddingLeft: 70,
+            paddingRight: 30,
+            paddingTop: 40,
+            paddingBottom: 60,
+            minBpm: 50,
+            maxBpm: 130,
+            minMinute: 0,
+            maxMinute: 5
+        };
+
+        /* DOM Elements */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            soundToggleBtn: document.getElementById("soundToggleBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            pageTitleHeading: document.getElementById("pageTitleHeading"),
+            matchesCount: document.getElementById("matchesCount"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            drawLineBtn: document.getElementById("drawLineBtn"),
+            resetPointsBtn: document.getElementById("resetPointsBtn"),
+            submitQuestionBtn: document.getElementById("submitQuestionBtn"),
+            nextQuestionBtn: document.getElementById("nextQuestionBtn"),
+            finishCertificationBtn: document.getElementById("finishCertificationBtn"),
+            graphSvg: document.getElementById("graphSvg"),
+            stepperRow: document.getElementById("stepperRow"),
+            dataTableCard: document.getElementById("dataTableCard"),
+            questionsCard: document.getElementById("questionsCard"),
+            questionsCardTitle: document.getElementById("questionsCardTitle"),
+            questionsContainer: document.getElementById("questionsContainer"),
+            mainStageScroll: document.getElementById("mainStageScroll"),
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Initialization */
+        init();
+
+        function init() {
+            bindEvents();
+            loadState();
+            renderDashboard();
+
+            // MANDATORY AUTO-OPEN INSTRUCTIONS MODAL ON LAUNCH
+            openModal();
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.soundToggleBtn.addEventListener("click", toggleSound);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // MANDATORY RULE 4.3: NO BACKDROP CLICK DISMISSAL
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+            dom.resetPointsBtn.addEventListener("click", resetPointsToDefault);
+            dom.drawLineBtn.addEventListener("click", handleVerifyGraph);
+            dom.submitQuestionBtn.addEventListener("click", handleSubmitCurrentQuestion);
+            dom.nextQuestionBtn.addEventListener("click", handleNextQuestion);
+            dom.finishCertificationBtn.addEventListener("click", () => showScreen("summary"));
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            // Pointer events for dragging points on SVG Graph
+            const svgEl = dom.graphSvg;
+            svgEl.addEventListener("pointerdown", handleSvgPointerDown);
+            window.addEventListener("pointermove", handleSvgPointerMove);
+            window.addEventListener("pointerup", handleSvgPointerUp);
+            window.addEventListener("pointercancel", handleSvgPointerUp);
+
+            // Real-time browser color scheme listener for Chrome & Edge
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (err) {
+                // Media listener fallback
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            dom.soundToggleBtn.textContent = state.soundEnabled ? "🔊 Sound On" : "🔇 Mute";
+        }
+
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+        }
+
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {
+                // Fallback to light
+            }
+            return "light";
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "game") {
+                setTimeout(renderGraphSvg, 50);
+            }
+            if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        /* SVG Graph Coordinate Math */
+        function minuteToX(min) {
+            const plotWidth = SVG_CONFIG.width - SVG_CONFIG.paddingLeft - SVG_CONFIG.paddingRight;
+            return SVG_CONFIG.paddingLeft + (min / SVG_CONFIG.maxMinute) * plotWidth;
+        }
+
+        function bpmToY(bpm) {
+            const plotHeight = SVG_CONFIG.height - SVG_CONFIG.paddingTop - SVG_CONFIG.paddingBottom;
+            const range = SVG_CONFIG.maxBpm - SVG_CONFIG.minBpm;
+            const ratio = (bpm - SVG_CONFIG.minBpm) / range;
+            return (SVG_CONFIG.height - SVG_CONFIG.paddingBottom) - ratio * plotHeight;
+        }
+
+        function yToBpm(y) {
+            const plotHeight = SVG_CONFIG.height - SVG_CONFIG.paddingTop - SVG_CONFIG.paddingBottom;
+            const bottomY = SVG_CONFIG.height - SVG_CONFIG.paddingBottom;
+            const ratio = (bottomY - y) / plotHeight;
+            const range = SVG_CONFIG.maxBpm - SVG_CONFIG.minBpm;
+            let rawBpm = SVG_CONFIG.minBpm + ratio * range;
+            rawBpm = Math.max(SVG_CONFIG.minBpm, Math.min(SVG_CONFIG.maxBpm, Math.round(rawBpm)));
+            return rawBpm;
+        }
+
+        /* SVG Pointer Dragging Handlers */
+        function handleSvgPointerDown(e) {
+            if (state.isGraphVerified) return;
+
+            const rect = dom.graphSvg.getBoundingClientRect();
+            const mouseX = ((e.clientX - rect.left) / rect.width) * SVG_CONFIG.width;
+            const mouseY = ((e.clientY - rect.top) / rect.height) * SVG_CONFIG.height;
+
+            // Find closest point horizontally
+            let closestIndex = null;
+            let minDistance = 45; // Pixel threshold
+
+            state.points.forEach((pt, idx) => {
+                const ptX = minuteToX(pt.min);
+                const ptY = bpmToY(pt.currentBpm);
+                const dist = Math.hypot(mouseX - ptX, mouseY - ptY);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestIndex = idx;
+                }
+            });
+
+            if (closestIndex !== null) {
+                activeDragPointIndex = closestIndex;
+                const newBpm = yToBpm(mouseY);
+                state.points[closestIndex].currentBpm = newBpm;
+                renderGraphSvg();
+                renderSteppers();
+            }
+        }
+
+        function handleSvgPointerMove(e) {
+            if (activeDragPointIndex === null) return;
+            e.preventDefault();
+
+            const rect = dom.graphSvg.getBoundingClientRect();
+            const mouseY = ((e.clientY - rect.top) / rect.height) * SVG_CONFIG.height;
+            const newBpm = yToBpm(mouseY);
+
+            state.points[activeDragPointIndex].currentBpm = newBpm;
+            renderGraphSvg();
+            renderSteppers();
+        }
+
+        function handleSvgPointerUp() {
+            if (activeDragPointIndex !== null) {
+                activeDragPointIndex = null;
+                renderGraphSvg();
+            }
+        }
+
+        /* Render SVG Graph Grid, Line of Best Fit, Points & Labels */
+        function renderGraphSvg() {
+            const svg = dom.graphSvg;
+            svg.innerHTML = "";
+
+            const plotWidth = SVG_CONFIG.width - SVG_CONFIG.paddingLeft - SVG_CONFIG.paddingRight;
+            const plotHeight = SVG_CONFIG.height - SVG_CONFIG.paddingTop - SVG_CONFIG.paddingBottom;
+            const bottomY = SVG_CONFIG.height - SVG_CONFIG.paddingBottom;
+
+            // 1. Render Horizontal Gridlines (every 10 bpm)
+            for (let bpm = SVG_CONFIG.minBpm; bpm <= SVG_CONFIG.maxBpm; bpm += 10) {
+                const y = bpmToY(bpm);
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", SVG_CONFIG.paddingLeft);
+                line.setAttribute("y1", y);
+                line.setAttribute("x2", SVG_CONFIG.width - SVG_CONFIG.paddingRight);
+                line.setAttribute("y2", y);
+                line.setAttribute("class", "grid-line");
+                if (bpm === 70 || bpm === 100 || bpm === 120) {
+                    line.setAttribute("stroke-opacity", "0.4");
+                }
+                svg.appendChild(line);
+
+                // Y-Axis Labels
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", SVG_CONFIG.paddingLeft - 10);
+                text.setAttribute("y", y + 4);
+                text.setAttribute("text-anchor", "end");
+                text.setAttribute("class", "axis-text");
+                text.textContent = `${bpm}`;
+                svg.appendChild(text);
+            }
+
+            // 2. Render Vertical Gridlines & X-Axis Labels (Minutes 0 to 5)
+            for (let min = 0; min <= 5; min++) {
+                const x = minuteToX(min);
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", x);
+                line.setAttribute("y1", SVG_CONFIG.paddingTop);
+                line.setAttribute("x2", x);
+                line.setAttribute("y2", bottomY);
+                line.setAttribute("class", "grid-line");
+                svg.appendChild(line);
+
+                // X-Axis Labels
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", x);
+                text.setAttribute("y", bottomY + 22);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("class", "axis-text");
+                text.textContent = `Min ${min}`;
+                svg.appendChild(text);
+            }
+
+            // 3. Axes Lines
+            const yAxis = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            yAxis.setAttribute("x1", SVG_CONFIG.paddingLeft);
+            yAxis.setAttribute("y1", SVG_CONFIG.paddingTop - 10);
+            yAxis.setAttribute("x2", SVG_CONFIG.paddingLeft);
+            yAxis.setAttribute("y2", bottomY);
+            yAxis.setAttribute("class", "axis-line");
+            svg.appendChild(yAxis);
+
+            const xAxis = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            xAxis.setAttribute("x1", SVG_CONFIG.paddingLeft);
+            xAxis.setAttribute("y1", bottomY);
+            xAxis.setAttribute("x2", SVG_CONFIG.width - SVG_CONFIG.paddingRight + 10);
+            xAxis.setAttribute("y2", bottomY);
+            xAxis.setAttribute("class", "axis-line");
+            svg.appendChild(xAxis);
+
+            // Axes Titles
+            const yTitle = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            yTitle.setAttribute("x", -(SVG_CONFIG.paddingTop + plotHeight / 2));
+            yTitle.setAttribute("y", 20);
+            yTitle.setAttribute("transform", "rotate(-90)");
+            yTitle.setAttribute("text-anchor", "middle");
+            yTitle.setAttribute("class", "axis-title");
+            yTitle.textContent = "Pulse Rate (bpm)";
+            svg.appendChild(yTitle);
+
+            const xTitle = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            xTitle.setAttribute("x", SVG_CONFIG.paddingLeft + plotWidth / 2);
+            xTitle.setAttribute("y", SVG_CONFIG.height - 12);
+            xTitle.setAttribute("text-anchor", "middle");
+            xTitle.setAttribute("class", "axis-title");
+            xTitle.textContent = "Time (Minutes)";
+            svg.appendChild(xTitle);
+
+            // 4. Trend Line of Best Fit (Polyline / Path connecting points)
+            // ONLY display the connecting line if the student clicked "Draw Line" AND all points are in the correct position
+            if (state.isGraphVerified) {
+                const allCorrect = state.points.every(p => state.evaluations[p.id]?.isCorrect);
+                if (allCorrect) {
+                    const pathPoints = state.points.map(p => `${minuteToX(p.min)},${bpmToY(p.currentBpm)}`).join(" ");
+                    const polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+                    polyline.setAttribute("points", pathPoints);
+                    polyline.setAttribute("class", "best-fit-line correct");
+                    svg.appendChild(polyline);
+                }
+            }
+
+            // 5. Render Data Points (Circles with Readout Tooltips)
+            state.points.forEach((pt, idx) => {
+                const x = minuteToX(pt.min);
+                const y = bpmToY(pt.currentBpm);
+                const evalItem = state.evaluations[pt.id];
+
+                let handleClass = "plot-handle";
+                if (activeDragPointIndex === idx) handleClass += " dragging";
+                if (evalItem) {
+                    handleClass += evalItem.isCorrect ? " correct" : " incorrect";
+                }
+
+                // Point Circle
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", x);
+                circle.setAttribute("cy", y);
+                circle.setAttribute("r", activeDragPointIndex === idx ? "11" : "8");
+                circle.setAttribute("fill", "var(--accent)");
+                circle.setAttribute("stroke", "var(--surface)");
+                circle.setAttribute("stroke-width", "3");
+                circle.setAttribute("class", handleClass);
+                svg.appendChild(circle);
+
+                // Floating BPM Badge Readout above point
+                const badgeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                const bgWidth = 52;
+                const bgHeight = 20;
+                rect.setAttribute("x", x - bgWidth / 2);
+                rect.setAttribute("y", y - 28);
+                rect.setAttribute("width", bgWidth);
+                rect.setAttribute("height", bgHeight);
+                rect.setAttribute("rx", "6");
+                rect.setAttribute("fill", "var(--surface-3)");
+                rect.setAttribute("stroke", "var(--border)");
+                rect.setAttribute("stroke-width", "1");
+                badgeGroup.appendChild(rect);
+
+                const badgeText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                badgeText.setAttribute("x", x);
+                badgeText.setAttribute("y", y - 14);
+                badgeText.setAttribute("text-anchor", "middle");
+                badgeText.setAttribute("fill", "var(--text)");
+                badgeText.setAttribute("font-size", "10px");
+                badgeText.setAttribute("font-weight", "700");
+                badgeText.textContent = `${pt.currentBpm} bpm`;
+                badgeGroup.appendChild(badgeText);
+
+                svg.appendChild(badgeGroup);
+            });
+        }
+
+        /* Render Steppers below SVG Graph */
+        function renderSteppers() {
+            dom.stepperRow.innerHTML = "";
+            // REMOVE / HIDE STEPPERS IF GRAPH POINTS ARE CORRECT & VERIFIED
+            if (state.isGraphVerified) {
+                dom.stepperRow.style.display = "none";
+                return;
+            }
+
+            dom.stepperRow.style.display = "flex";
+            state.points.forEach((pt, idx) => {
+                const box = document.createElement("div");
+                box.className = "stepper-box";
+                box.innerHTML = `
+                    <span style="font-weight:700;">Min ${pt.min}:</span>
+                    <button class="stepper-btn" onclick="adjustPointBpm(${idx}, -1)" aria-label="Decrease pulse rate">-</button>
+                    <span style="font-weight:800; color:var(--accent); min-width:50px; text-align:center;">${pt.currentBpm} bpm</span>
+                    <button class="stepper-btn" onclick="adjustPointBpm(${idx}, 1)" aria-label="Increase pulse rate">+</button>
+                `;
+                dom.stepperRow.appendChild(box);
+            });
+        }
+
+        window.adjustPointBpm = function(index, delta) {
+            if (state.isGraphVerified) return;
+            const newBpm = Math.max(SVG_CONFIG.minBpm, Math.min(SVG_CONFIG.maxBpm, state.points[index].currentBpm + delta));
+            state.points[index].currentBpm = newBpm;
+            renderGraphSvg();
+            renderSteppers();
+        };
+
+        function resetPointsToDefault() {
+            if (state.isGraphVerified) return;
+            state.points.forEach(p => p.currentBpm = 60);
+            renderGraphSvg();
+            renderSteppers();
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = `↺ Points reset to 60 bpm. Refer to the data table and drag them to the target values!`;
+        }
+
+        /* VERIFY GRAPH POINTS (Interactive Task Feedback Logic) */
+        function handleVerifyGraph() {
+            state.attempts += 1;
+            let incorrectPoint = null;
+            let correctCount = 0;
+
+            state.points.forEach(pt => {
+                const isCorrect = pt.currentBpm === pt.targetBpm;
+                state.evaluations[pt.id] = {
+                    isCorrect,
+                    userChoice: `${pt.currentBpm} bpm`,
+                    targetValue: `${pt.targetBpm} bpm`,
+                    feedback: isCorrect
+                        ? `✅ ${pt.label}: Correctly plotted at ${pt.targetBpm} bpm.`
+                        : `❌ ${pt.label}: Plotted at ${pt.currentBpm} bpm (Target is ${pt.targetBpm} bpm).`
+                };
+
+                if (isCorrect) {
+                    correctCount += 1;
+                } else if (!incorrectPoint) {
+                    incorrectPoint = pt;
+                }
+            });
+
+            if (correctCount === state.points.length) {
+                state.isGraphVerified = true;
+                state.currentQuestionIndex = 0;
+                state.score += 60;
+                state.streak += 6;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+
+                // DRAW LINE & RE-RENDER GRAPH SVG NOW THAT isGraphVerified IS TRUE
+                renderGraphSvg();
+
+                playAudioFeedback(true);
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    🎉 <strong>Excellent Graph Plotting!</strong> All 6 data points are precisely placed and the trend line has been drawn!
+                    <br><br>👉 <strong>Now answer Question 1 of 3 below!</strong>
+                `;
+
+                // REMOVE DATA TABLE AND STEPPERS AFTER DRAW LINE CLICKED
+                if (dom.dataTableCard) dom.dataTableCard.style.display = "none";
+                dom.stepperRow.style.display = "none";
+                dom.stepperRow.innerHTML = "";
+
+                dom.drawLineBtn.style.display = "none";
+                dom.resetPointsBtn.style.display = "none";
+
+                renderQuestionsSection();
+                renderDashboard();
+                renderHistoryList();
+
+                // Scroll pane to top so user sees graph and Question 1 clearly
+                if (dom.mainStageScroll) dom.mainStageScroll.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } else {
+                state.isGraphVerified = false;
+                renderGraphSvg();
+
+                state.streak = 0;
+                playAudioFeedback(false);
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+
+                // EXACT SPEC FEEDBACK PATTERN: "Not yet. Check the pulse rate value for Minute [X] on the vertical axis and try moving the point again."
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ⚠️ <strong>Not yet.</strong> Check the pulse rate value for <strong>Minute ${incorrectPoint.min}</strong> on the vertical (y) axis and try moving the point again.
+                    <br><small style="color:var(--muted);">Currently set to ${incorrectPoint.currentBpm} bpm. Target is ${incorrectPoint.targetBpm} bpm.</small>
+                `;
+                renderSteppers();
+                renderDashboard();
+                renderHistoryList();
+            }
+        }
+
+        /* Render Embedded Assessment Questions (ONE BY ONE) */
+        function renderQuestionsSection() {
+            if (!state.isGraphVerified) {
+                dom.questionsCard.style.display = "none";
+                return;
+            }
+
+            dom.questionsCard.style.display = "flex";
+            const qIndex = state.currentQuestionIndex;
+            const q = ASSESSMENT_QUESTIONS[qIndex];
+            if (!q) return;
+
+            dom.pageTitleHeading.textContent = `🧠 Section 2: Biology Question ${qIndex + 1} of ${ASSESSMENT_QUESTIONS.length}`;
+            dom.questionsCardTitle.textContent = `🧠 Question ${qIndex + 1} of ${ASSESSMENT_QUESTIONS.length}`;
+
+            dom.questionsContainer.innerHTML = "";
+
+            const selectedOptId = state.questionAnswers[q.id];
+            const evalData = state.evaluations[q.id];
+
+            const qBlock = document.createElement("div");
+            qBlock.className = "question-block";
+            qBlock.id = `block_${q.id}`;
+
+            let optionsHtml = "";
+            q.options.forEach(opt => {
+                let optClass = "option-btn";
+                if (evalData) {
+                    if (opt.isCorrect) optClass += " correct";
+                    else if (selectedOptId === opt.id) optClass += " incorrect";
+                } else if (selectedOptId === opt.id) {
+                    optClass += " selected";
+                }
+
+                optionsHtml += `
+                    <button class="${optClass}" 
+                            onclick="selectQuestionOption('${q.id}', '${opt.id}')"
+                            ${evalData ? 'disabled' : ''}>
+                        <span>${opt.isCorrect && evalData ? '✅' : (selectedOptId === opt.id ? '🔘' : '⚪')}</span>
+                        <span>${escapeHtml(opt.text)}</span>
+                    </button>
+                `;
+            });
+
+            qBlock.innerHTML = `
+                <div style="font-size:0.85rem; font-weight:800; color:var(--accent); text-transform:uppercase; margin-bottom:4px;">
+                    ${escapeHtml(q.title)}
+                </div>
+                <h4>${escapeHtml(q.question)}</h4>
+                <div class="options-grid">${optionsHtml}</div>
+            `;
+
+            dom.questionsContainer.appendChild(qBlock);
+
+            // Update Right Mission Panel Buttons
+            if (!evalData) {
+                dom.submitQuestionBtn.style.display = "inline-flex";
+                dom.submitQuestionBtn.textContent = `Check Question ${qIndex + 1} Answer`;
+                dom.submitQuestionBtn.disabled = !selectedOptId;
+
+                dom.nextQuestionBtn.style.display = "none";
+                dom.finishCertificationBtn.style.display = "none";
+            } else {
+                dom.submitQuestionBtn.style.display = "none";
+
+                if (qIndex < ASSESSMENT_QUESTIONS.length - 1) {
+                    dom.nextQuestionBtn.style.display = "inline-flex";
+                    dom.nextQuestionBtn.textContent = `Next Question (Q${qIndex + 2} of 3) →`;
+                    dom.finishCertificationBtn.style.display = "none";
+                } else {
+                    dom.nextQuestionBtn.style.display = "none";
+                    dom.finishCertificationBtn.style.display = "inline-flex";
+                }
+            }
+        }
+
+        window.selectQuestionOption = function(qId, optId) {
+            if (state.evaluations[qId]) return;
+            state.questionAnswers[qId] = optId;
+            renderQuestionsSection();
+
+            const block = document.getElementById(`block_${qId}`);
+            if (block) {
+                block.classList.remove("just-selected");
+                void block.offsetWidth; // Trigger reflow for animation restart
+                block.classList.add("just-selected");
+            }
+        };
+
+        /* SUBMIT CURRENT QUESTION ANSWER */
+        function handleSubmitCurrentQuestion() {
+            const qIndex = state.currentQuestionIndex;
+            const q = ASSESSMENT_QUESTIONS[qIndex];
+            if (!q) return;
+
+            const selectedOptId = state.questionAnswers[q.id];
+            if (!selectedOptId) return;
+
+            const selectedOpt = q.options.find(o => o.id === selectedOptId);
+            const isCorrect = selectedOpt ? selectedOpt.isCorrect : false;
+
+            state.attempts += 1;
+            state.evaluations[q.id] = {
+                isCorrect,
+                userChoice: selectedOpt ? selectedOpt.text : "Unanswered",
+                targetValue: q.options.find(o => o.isCorrect).text,
+                feedback: q.feedback
+            };
+
+            if (isCorrect) {
+                state.score += 10;
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+                playAudioFeedback(true);
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ✅ <strong>Correct!</strong> ${escapeHtml(q.feedback)}
+                `;
+            } else {
+                state.streak = 0;
+                playAudioFeedback(false);
+
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ❌ <strong>Not quite.</strong> ${escapeHtml(q.feedback)}
+                `;
+            }
+
+            renderQuestionsSection();
+            renderDashboard();
+            renderHistoryList();
+        }
+
+        /* ADVANCE TO NEXT QUESTION (SCROLL PANE TO TOP) */
+        function handleNextQuestion() {
+            if (state.currentQuestionIndex < ASSESSMENT_QUESTIONS.length - 1) {
+                state.currentQuestionIndex += 1;
+                const qIndex = state.currentQuestionIndex;
+                dom.inspectorFeedbackBox.className = "feedback-card";
+                dom.inspectorFeedbackBox.innerHTML = `🔍 Select an answer for Question ${qIndex + 1} of ${ASSESSMENT_QUESTIONS.length}.`;
+                renderQuestionsSection();
+                
+                // Scroll main stage scroll pane all the way to the top
+                if (dom.mainStageScroll) dom.mainStageScroll.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function renderDashboard() {
+            const evaluatedCount = Object.keys(state.evaluations).length;
+            const totalItems = GRAPH_POINTS.length + ASSESSMENT_QUESTIONS.length;
+            const pct = Math.round((evaluatedCount / totalItems) * 100);
+
+            dom.matchesCount.textContent = `${evaluatedCount} / ${totalItems} Completed`;
+            dom.progressPercent.textContent = `${pct}% Complete`;
+            dom.progressFillBar.style.width = `${pct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            const correctTotal = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const acc = evaluatedCount === 0 ? 0 : Math.round((correctTotal / evaluatedCount) * 100);
+            dom.accuracyVal.textContent = `${acc}%`;
+
+            renderSteppers();
+        }
+
+        function renderSummaryScreen() {
+            const totalItems = GRAPH_POINTS.length + ASSESSMENT_QUESTIONS.length;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = Math.round((correctCount / totalItems) * 100);
+
+            dom.summaryScoreVal.textContent = state.score;
+            dom.summaryAccuracyVal.textContent = `${accuracy}%`;
+            dom.summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            dom.summaryCorrectVal.textContent = `${correctCount} / ${totalItems}`;
+
+            if (accuracy >= 90) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "Master Graphing Biologist";
+                dom.badgeDesc.textContent = `Flawless execution! You achieved ${accuracy}% accuracy (${correctCount}/${totalItems} correct)! You have mastered graphing pulse rate data and analyzing exercise trends.`;
+            } else if (accuracy >= 70) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Science Technician";
+                dom.badgeDesc.textContent = `Great work! You achieved ${accuracy}% accuracy (${correctCount}/${totalItems} correct). Review the missed items below to refine your graphing skills!`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Biology Lab Trainee";
+                dom.badgeDesc.textContent = `You achieved ${accuracy}% accuracy (${correctCount}/${totalItems} correct). Review the technical explanations in the memory drawer to strengthen your skills.`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+
+            // 1. Detailed breakdown for Graph Points
+            state.points.forEach(pt => {
+                const evalData = state.evaluations[pt.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">📈 ${escapeHtml(pt.label)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'} ${isCorrect ? `(${pt.targetBpm} bpm)` : `(Plotted: ${evalData.userChoice || 'Unplotted'} → Target: ${pt.targetBpm} bpm)`}
+                        </span>
+                    </div>
+                    <p style="margin:4px 0 0; color:var(--text-soft); font-size:0.9rem;">${escapeHtml(evalData.feedback || '')}</p>
+                `;
+                dom.summaryDetailsList.appendChild(card);
+            });
+
+            // 2. Detailed breakdown for Questions
+            ASSESSMENT_QUESTIONS.forEach(q => {
+                const evalData = state.evaluations[q.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">🧠 ${escapeHtml(q.title)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'}
+                        </span>
+                    </div>
+                    <p style="margin:4px 0 0; color:var(--text-soft); font-size:0.9rem;"><strong>Answer:</strong> ${escapeHtml(evalData.userChoice || 'Unanswered')}</p>
+                    <p style="margin:4px 0 0; color:var(--muted); font-size:0.86rem;">${escapeHtml(q.feedback)}</p>
+                `;
+                dom.summaryDetailsList.appendChild(card);
+            });
+        }
+
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedKeys = Object.keys(state.evaluations);
+
+            if (evaluatedKeys.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:16px; color:var(--muted); text-align:center;">No evaluated items yet.</div>`;
+                return;
+            }
+
+            evaluatedKeys.forEach(id => {
+                const evalData = state.evaluations[id];
+                if (!evalData) return;
+
+                let title = id;
+                const pt = state.points.find(p => p.id === id);
+                const q = ASSESSMENT_QUESTIONS.find(q => q.id === id);
+
+                if (pt) title = `📈 ${pt.label}`;
+                if (q) title = `🧠 ${q.title}`;
+
+                const isCorrect = evalData.isCorrect === true;
+                const item = document.createElement("div");
+                item.className = "summary-item-card";
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">${escapeHtml(title)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'}
+                        </span>
+                    </div>
+                    <div style="font-size:0.88rem; color:var(--text-soft); margin-top:4px;">${escapeHtml(evalData.feedback)}</div>
+                `;
+                dom.historyList.appendChild(item);
+            });
+        }
+
+        /* Modal & Drawer Controls */
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try {
+                sessionStorage.setItem("user_toggled_theme", state.theme);
+            } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen toggle failed", err);
+            }
+        }
+
+        function playAudioFeedback(isSuccess) {
+            if (!state.soundEnabled) return;
+
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.value = isSuccess ? 587.33 : 220;
+                gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (isSuccess ? 0.25 : 0.3));
+
+                osc.start();
+                osc.stop(ctx.currentTime + (isSuccess ? 0.26 : 0.31));
+            } catch (e) {
+                // Ignore audio errors
+            }
+        }
+
+        /* Utility: Fisher-Yates Array Shuffle */
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function randomizeQuestionOptions() {
+            ASSESSMENT_QUESTIONS.forEach(q => {
+                q.options = shuffleArray(q.options);
+            });
+        }
+
+        /* CONFIRM RESET (ALWAYS CLEAR EXPLANATION BOX & START FRESH) */
+        function confirmReset() {
+            closeResetModal();
+
+            state.points = JSON.parse(JSON.stringify(GRAPH_POINTS));
+            state.questionAnswers = {};
+            state.evaluations = {};
+            state.isGraphVerified = false;
+            state.currentQuestionIndex = 0;
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+
+            randomizeQuestionOptions();
+            resetExplanationBox();
+
+            if (dom.dataTableCard) dom.dataTableCard.style.display = "block";
+            dom.stepperRow.style.display = "flex";
+
+            dom.pageTitleHeading.textContent = "📊 Section 1: Plotting Pulse Rate Data (6 Points)";
+            dom.drawLineBtn.style.display = "inline-flex";
+            dom.resetPointsBtn.style.display = "inline-flex";
+            dom.questionsCard.style.display = "none";
+            dom.submitQuestionBtn.style.display = "none";
+            dom.nextQuestionBtn.style.display = "none";
+            dom.finishCertificationBtn.style.display = "none";
+
+            renderGraphSvg();
+            renderSteppers();
+            renderDashboard();
+            showScreen("home");
+        }
+
+        /* FRESH LAUNCH LOADER */
+        function loadState() {
+            state.points = JSON.parse(JSON.stringify(GRAPH_POINTS));
+            state.questionAnswers = {};
+            state.evaluations = {};
+            state.isGraphVerified = false;
+            state.currentQuestionIndex = 0;
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+
+            randomizeQuestionOptions();
+            resetExplanationBox();
+
+            try {
+                localStorage.removeItem("graphing_exercise_theme");
+            } catch (e) {}
+
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
