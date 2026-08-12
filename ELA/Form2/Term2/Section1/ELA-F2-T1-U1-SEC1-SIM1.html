@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Expo Cue Master</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: 100%;
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        .expo-shell { display: grid; gap: 10px; color: var(--text); }
+        .expo-topline, .mission-meta, .scene-actions, .stage-lights, .choice-grid, .profile-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .expo-topline { align-items: center; justify-content: space-between; }
+        .expo-kicker { margin: 0; color: var(--accent); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; font-size: .8rem; }
+        .progress-label { color: var(--text-soft); font-weight: 700; }
+        .expo-stage { position: relative; min-height: 0; overflow: hidden; border: 1px solid rgba(251,191,36,.48); border-radius: 18px; padding: 14px; background: linear-gradient(130deg, #071831 0 40%, #102a48 40% 63%, #08213d 63%); }
+        .expo-stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(90deg, rgba(251,191,36,.11) 0 2px, transparent 2px 48px); }
+        .expo-stage::after { content: ""; position: absolute; top: 14px; right: 18px; width: 116px; height: 38px; border: 1px solid rgba(103,232,249,.32); border-radius: 8px; background: repeating-linear-gradient(0deg, rgba(103,232,249,.18) 0 2px, transparent 2px 8px); opacity: .72; pointer-events: none; }
+        .stage-copy, .stage-lights { position: relative; z-index: 1; }
+        .stage-copy { max-width: 580px; }
+        .stage-copy h2 { margin: 8px 0; color: #f4f8ff; font-size: clamp(1.5rem, 4vw, 2.2rem); text-shadow: 0 1px 0 rgba(0,0,0,.4); }
+        .stage-copy strong { color: #f4f8ff; }
+        .stage-copy p { margin: 0; color: #d8f2ff; line-height: 1.55; }
+        .stage-lights { margin-top: 10px; }
+        .stage-light { min-width: 116px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.32); border-radius: 12px; background: rgba(5,15,32,.68); color: #d9eaff; font-size: .82rem; }
+        .stage-light strong { display: block; margin-bottom: 4px; }
+        .stage-light.on { border-color: #fbbf24; box-shadow: 0 0 16px rgba(251,191,36,.58); }
+        .stage-light.ready { border-color: #67e8f9; box-shadow: 0 0 16px rgba(103,232,249,.48); }
+        .courtyard-label { display: inline-flex; align-items: center; gap: 7px; margin-top: 4px; padding: 5px 9px; border: 1px solid rgba(103,232,249,.42); border-radius: 8px; background: rgba(7,24,49,.64); color: #d8f7ff; font-size: .75rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+        .courtyard-label::before { content: "✦"; color: #fbbf24; }
+        .booth-map { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(86px, 1fr)); gap: 6px; margin-top: 10px; padding: 8px 8px 7px; border: 1px solid rgba(103,232,249,.28); border-radius: 14px; background: rgba(2,12,28,.5); }
+        .booth-map::before { content: ""; position: absolute; left: 7%; right: 7%; top: 43px; height: 2px; background: repeating-linear-gradient(90deg, rgba(251,191,36,.9) 0 12px, transparent 12px 20px); opacity: .62; }
+        .booth-node { position: relative; z-index: 1; min-height: 60px; padding: 6px 5px; border: 1px solid rgba(255,255,255,.22); border-radius: 10px; background: rgba(8,25,48,.86); color: #d9eaff; text-align: center; }
+        .booth-node.active { border-color: #67e8f9; box-shadow: 0 0 0 2px rgba(103,232,249,.2), 0 0 16px rgba(103,232,249,.24); }
+        .booth-node.complete { border-color: #fbbf24; background: rgba(57,41,9,.7); }
+        .booth-sign { display: block; min-height: 24px; font-size: .7rem; font-weight: 900; line-height: 1.1; }
+        .booth-icon { display: flex; align-items: center; justify-content: center; height: 20px; margin: 2px 0; color: #67e8f9; line-height: 1; }
+        .booth-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .booth-node.complete .booth-icon { color: #fbbf24; }
+        .booth-state { display: block; color: #b7c6df; font-size: .7rem; font-weight: 800; }
+        .booth-node.active .booth-state { color: #b7f5ff; }
+        .host-marker { position: absolute; top: 4px; right: 4px; display: inline-flex; align-items: center; justify-content: center; width: 21px; height: 21px; border: 2px solid #fbbf24; border-radius: 50%; background: #243d62; color: #fff7d1; font-size: .65rem; font-weight: 900; box-shadow: 0 2px 0 #02060b; }
+        .cue-panel { border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--border)); border-radius: 18px; padding: 14px; background: color-mix(in srgb, #c9fbff 14%, var(--surface)); }
+        .cue-panel h3 { margin: 0 0 8px; }
+        .cue-panel > p { margin: 0; color: var(--text-soft); line-height: 1.55; }
+        .cue-card { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text); text-align: left; line-height: 1.35; box-shadow: 0 4px 0 color-mix(in srgb, var(--border) 72%, transparent); }
+        .cue-card[aria-pressed="true"] { border-color: var(--accent); outline: 3px solid color-mix(in srgb, var(--accent) 28%, transparent); transform: translateY(-1px); }
+        .cue-card.correct { border-color: var(--success); background: color-mix(in srgb, var(--success) 22%, var(--surface)); color: var(--text); box-shadow: 0 4px 0 color-mix(in srgb, var(--success) 55%, transparent); }
+        .cue-card.incorrect { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, var(--surface)); }
+        .cue-card:disabled { cursor: default; opacity: .9; }
+        .choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin-top: 10px; }
+        .question-label { display: block; margin: 16px 0 8px; font-weight: 800; }
+        .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+        .profile-group { display: grid; gap: 5px; padding: 9px; border: 1px solid var(--border); border-radius: 12px; background: color-mix(in srgb, var(--surface) 88%, transparent); }
+        .profile-group legend { padding: 0 4px; font-weight: 800; }
+        .profile-group label { display: flex; min-height: 44px; padding: 6px; gap: 7px; align-items: center; color: var(--text-soft); border-radius: 8px; }
+        .profile-group label.correct { background: color-mix(in srgb, var(--success) 22%, var(--surface)); color: var(--text); }
+        .profile-group input { accent-color: var(--accent); }
+        .scene-actions { justify-content: space-between; align-items: center; }
+        .scene-actions .action-set { display: flex; flex-wrap: wrap; gap: 10px; }
+        .feedback { margin-top: 14px; border-left: 5px solid var(--warning); padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--warning) 12%, var(--surface)); }
+        .feedback.good { border-left-color: var(--success); background: color-mix(in srgb, var(--success) 12%, var(--surface)); }
+        .feedback p { margin: 6px 0; color: var(--text-soft); line-height: 1.45; }
+        .feedback strong { color: var(--text); }
+        .read-only { opacity: .88; }
+        .mission-list { text-align: left; max-width: 680px; margin: 20px auto; color: var(--text-soft); line-height: 1.6; }
+        .status-note { margin: 0; color: var(--muted); font-size: .92rem; }
+        .host-line { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+        .host-avatar { position: relative; width: 48px; height: 48px; flex: 0 0 48px; border: 3px solid #fbbf24; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #f4c7a1 0 20%, transparent 21%), linear-gradient(#243d62 0 40%, #f4c7a1 41% 66%, #fbbf24 67%); box-shadow: 0 0 0 3px rgba(7,24,49,.6); }
+        .host-avatar::before { content: ""; position: absolute; left: 9px; top: 5px; width: 24px; height: 9px; border-radius: 50% 50% 35% 35%; background: #172b46; transform: rotate(-4deg); }
+        .host-avatar::after { content: ""; position: absolute; left: 14px; bottom: 5px; width: 16px; height: 6px; border-radius: 50%; background: #fff1b8; opacity: .9; }
+        .mission-meta { row-gap: 8px; column-gap: 8px; margin-top: 7px; }
+        .audience-badge { display: inline-flex; align-items: center; min-height: 30px; padding: 6px 10px; border: 1px solid rgba(103,232,249,.7); border-radius: 999px; background: rgba(7,24,49,.72); color: #d8f7ff; font-size: .8rem; font-weight: 700; }
+        .memory-list { display: grid; gap: 10px; max-height: min(60vh, 520px); overflow: auto; padding-right: 4px; }
+        .memory-item { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); }
+        .memory-item h4 { margin: 0 0 5px; color: var(--text); }
+        .memory-item p { margin: 5px 0; color: var(--text-soft); line-height: 1.45; }
+        .memory-item .memory-status { color: var(--success); font-weight: 800; }
+        .memory-item .memory-status.missed { color: var(--danger); }
+        .memory-item .memory-actions { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .arrow-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; }
+        .arrow-row .nav-btn { min-width: 44px; min-height: 44px; justify-content: center; padding: 10px 14px; font-size: 1.1rem; }
+        .arrow-row .nav-btn:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+        .eyebrow:empty { display: none; }
+        @media (min-width: 900px) { .topbar { padding: 8px 12px; } .controls { gap: 6px; flex-wrap: nowrap; } .controls .control-btn, .controls .danger-btn { min-height: 44px; padding: 9px 12px; } #simScreen { overflow: hidden; } #simScreen .sim-layout { padding: 0; } #simScreen .sim-card { padding: 16px 22px; } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+        html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        @media (max-width: 620px) { .booth-map { grid-template-columns: repeat(3, minmax(82px, 1fr)); } .booth-map::before { display: none; } }
+        @media (max-width: 420px) { .sim-card { padding: 14px; } .scene-actions { align-items: stretch; } .scene-actions .action-set, .scene-actions .action-set button { width: 100%; } .stage-light { flex: 1 1 125px; } .host-line { align-items: flex-start; } .audience-badge { width: 100%; } .booth-map { grid-template-columns: repeat(2, minmax(98px, 1fr)); } .booth-node { min-height: 72px; } .courtyard-label { font-size: .68rem; } }
+
+        .question-explain { margin-bottom: 8px; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--accent) 52%, var(--border)); border-radius: var(--radius-md); background: color-mix(in srgb, var(--accent) 10%, var(--surface-2)); }
+        .question-explain h3 { margin: 0 0 7px; color: var(--text); font-size: 1.05rem; }
+        .question-explain > p { margin: 0 0 8px; color: var(--text-soft); line-height: 1.35; }
+        .question-context { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+        .question-context div { min-width: 0; padding: 6px 8px; border-radius: 8px; background: color-mix(in srgb, var(--surface) 76%, transparent); }
+        .question-context dt { color: var(--muted); font-size: .68rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+        .question-context dd { margin: 2px 0 0; color: var(--text); font-size: .84rem; line-height: 1.25; }
+        .feedback.bad { border-left-color: var(--danger); background: color-mix(in srgb, var(--danger) 13%, var(--surface)); }
+        .feedback.bad strong { color: var(--danger); }
+        .profile-group label.incorrect { background: color-mix(in srgb, var(--danger) 18%, var(--surface)); color: var(--text); }
+        .check-again { border-color: color-mix(in srgb, var(--danger) 44%, var(--border)); }
+
+        @media (min-width: 900px) {
+            html, body { height: 100%; overflow: hidden; }
+            body { height: 100vh; min-height: 0; overflow: hidden; }
+            .app-shell { height: calc(100vh - 32px); min-height: 0; }
+            #simScreen.active { min-height: 0; overflow: hidden; }
+            #simScreen .sim-layout { height: 100%; min-height: 0; align-items: stretch; }
+            #simScreen .sim-card { height: 100%; min-height: 0; overflow: hidden; }
+            #simScreen .expo-shell { height: 100%; min-height: 0; grid-template-columns: minmax(310px, .7fr) minmax(0, 1.3fr); grid-template-rows: auto 1fr; align-items: stretch; gap: 8px 12px; }
+            #simScreen .expo-topline { grid-column: 1 / -1; }
+            #simScreen .expo-stage-column { grid-column: 1; grid-row: 2; height: 100%; min-height: 0; }
+            #simScreen .expo-stage-column > .expo-stage { height: 100%; min-height: 0; padding: 10px; }
+            #simScreen .expo-content-column { grid-column: 2; grid-row: 2; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+            #simScreen .expo-content-column { overflow-y: auto; overflow-x: hidden; padding-right: 2px; }
+            #simScreen .expo-content-column > .scene-actions { flex: 0 0 auto; }
+            #simScreen .expo-content-column > .cue-panel { min-height: 0; }
+            #simScreen .expo-content-column > .cue-panel { flex: 0 0 auto; }
+            #simScreen .stage-copy h2 { margin: 5px 0; font-size: clamp(1.35rem, 2.2vw, 1.85rem); }
+            #simScreen .stage-copy p { line-height: 1.35; }
+            #simScreen .host-line { margin: 5px 0; }
+            #simScreen .host-avatar { width: 40px; height: 40px; flex-basis: 40px; }
+            #simScreen .stage-lights { gap: 6px; margin-top: 7px; }
+            #simScreen .stage-light { min-width: 0; flex: 1 1 0; padding: 6px 7px; }
+            #simScreen .booth-map { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin-top: 7px; padding: 6px; }
+            #simScreen .booth-map::before { top: 39px; }
+            #simScreen .booth-node { min-height: 54px; padding: 5px 3px; }
+            #simScreen .booth-sign { min-height: 20px; font-size: .64rem; }
+            #simScreen .booth-icon { margin: 1px 0; font-size: .95rem; }
+            #simScreen .cue-panel { padding: 10px 12px; }
+            #simScreen .cue-panel h3 { margin-bottom: 5px; }
+            #simScreen .cue-panel > p { line-height: 1.35; }
+            #simScreen .choice-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 7px; }
+            #simScreen .cue-card { min-height: 44px; }
+            #simScreen .checkpoint-backstage .cue-choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #simScreen .cue-card { padding: 8px 9px; line-height: 1.25; }
+            #simScreen .question-label { margin: 9px 0 5px; }
+            #simScreen .feedback { margin-top: 8px; padding: 8px 10px; }
+            #simScreen .feedback p { margin: 3px 0; line-height: 1.3; }
+            #simScreen .button-row { margin-top: 9px; gap: 7px; }
+            #simScreen .mission-list { margin: 10px auto; line-height: 1.35; }
+            #simScreen .profile-grid { gap: 6px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            #simScreen .profile-group { gap: 2px; padding: 6px; }
+            #simScreen .profile-group label { min-height: 40px; padding: 4px; }
+            #simScreen .question-explain { margin-bottom: 5px; padding: 6px 8px; }
+            #simScreen .question-explain h3 { margin-bottom: 3px; font-size: .96rem; }
+            #simScreen .question-explain > p { margin-bottom: 4px; font-size: .9rem; line-height: 1.2; }
+            #simScreen .question-context { gap: 4px; }
+            #simScreen .question-context div { padding: 3px 5px; }
+            #simScreen .question-context dd { font-size: .72rem; line-height: 1.15; }
+        }
+
+        @media (max-width: 899px) {
+            .expo-content-column { display: contents; }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="control-btn" id="memoryBtn" aria-label="Open review memory">Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <div class="expo-shell" id="expoApp" aria-live="polite"></div>
+                    <p id="expoLive" class="hidden" aria-live="polite"></p>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="hidden">
+            Expo Cue Master · local, offline learning activity
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <label class="question-label"><input type="checkbox" id="helpMotionToggle"> Reduce motion</label>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="memoryModal" role="dialog" aria-modal="true" aria-labelledby="memoryHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeMemoryBtn" aria-label="Close review memory">x</button>
+            <h3 id="memoryHeading">Review Memory</h3>
+            <p class="muted">Completed cues stay read-only. Open one to revisit the saved answer.</p>
+            <div class="memory-list" id="memoryBody"></div>
+        </section>
+    </div>
+
+    <div class="modal" id="retryConfirmModal" role="dialog" aria-modal="true" aria-labelledby="retryConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeRetryConfirmBtn" aria-label="Close try again confirmation">x</button>
+            <h3 id="retryConfirmHeading">Start again?</h3>
+            <p>This starts a fresh Expo Cue Master mission and clears the current run.</p>
+            <div class="button-row" style="margin-top:18px;justify-content:flex-start;">
+                <button class="secondary-btn" id="cancelRetryBtn">Cancel</button>
+                <button class="primary-btn" id="confirmRetryBtn">Start fresh</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               localStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "ela-f2-t1-u1-sec1-sim1",
+            title: "Expo Cue Master",
+            subtitle: "Choose the cue that fits the audience and purpose",
+            badgeText: "ELA",
+            homeEyebrow: "",
+            homeDescription:
+                "Choose clear, respectful cues for each moment on the expo stage. Every accurate cue switches on one part of the expo.",
+            instructions: [
+                "Choose a cue card or a profile, then select Send cue.",
+                "Match your words to the audience, purpose, and setting.",
+                "Use Hint once in each scene if you need a quick rule.",
+                "Try Again appears after feedback. Reset starts a new mission.",
+                "Use the Reduce motion option in Help if you prefer fewer transitions."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return localStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { localStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* --- HANDY UTILITIES (examples — uncomment what you need) --- */
+        // function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        // function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        // function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        // Example: const order = shuffle([1, 2, 3, 4]);  const dice = randInt(1, 6);
+        // Storage: storageGet/storageSet are available for saving progress, keyed like `sim:${SIM_CONFIG.simId}:mydata`.
+
+        const PROGRESS_KEY = "sim:ela-f2-t1-u1-sec1-sim1:progress:v1";
+        const ORDER = ["welcome", "question", "turn", "backstage", "finalCue", "profile"];
+        function stageVisual() {
+            const lights = [["Section 1", mastered("welcome")], ["Section 2", mastered("question")], ["Section 3", mastered("turn")], ["Section 4", mastered("profile")]];
+            const cue = current();
+            const badges = { welcome: ["Principal Joseph", "Invited guests"], question: ["Exhibitor", "Raised-hand student"], turn: ["Exhibitor", "Raised-hand student"], backstage: ["Peer backstage"], finalCue: ["Community guests"], profile: ["Community guests"] }[cue] || [];
+            const booths = [
+                { id: "welcome", label: "Welcome", icon: "&#9733;", checkpoint: "welcome" },
+                { id: "question", label: "Rainwater model", icon: "&#9673;", checkpoint: "question" },
+                { id: "turn", label: "Q&amp;A", icon: "?", checkpoint: "turn" },
+                { id: "backstage", label: "Backstage", icon: "&#9641;", checkpoint: "backstage" },
+                { id: "finalCue", label: "Recycling booth", icon: "&#9851;", checkpoint: "finalCue" }
+            ];
+            const activeBooth = cue === "profile" ? "finalCue" : cue;
+            const boothMarkup = booths.map((booth) => {
+                const complete = mastered(booth.checkpoint);
+                const active = activeBooth === booth.id;
+                const classes = ["booth-node", complete ? "complete" : "", active ? "active" : ""].filter(Boolean).join(" ");
+                const stateLabel = complete ? "On" : active ? "Ready" : "Off";
+                return `<div class="${classes}" role="listitem" aria-label="${escapeHtml(booth.label)}: ${stateLabel}" ${active ? "aria-current=\"step\"" : ""}><span class="booth-sign">${booth.label}</span><span class="booth-icon" aria-hidden="true">${booth.icon}</span><span class="booth-state">${stateLabel}</span>${active ? `<span class="host-marker" aria-label="Expo host location">H</span>` : ""}</div>`;
+            }).join("");
+            const tablet = mastered("backstage") ? "Ready" : "Standby";
+            const heading = progress.stage === "mission" ? "Cue-card mission" : progress.stage === "complete" ? "Expo cue sequence complete" : cue === "profile" ? "Set the delivery profile" : DATA[cue].title;
+            return `<section class="expo-stage" aria-label="Expo stage status"><div class="stage-copy"><p class="expo-kicker">St. Lucia School Innovation Expo</p><span class="courtyard-label">Courtyard route · host position shown</span><div class="host-line"><span class="host-avatar" aria-hidden="true"></span><div><strong>Expo host</strong><div class="mission-meta">${badges.map((badge) => `<span class="audience-badge">${escapeHtml(badge)}</span>`).join("")}</div></div></div><h2 id="sceneHeading" tabindex="-1">${escapeHtml(heading)}</h2><p>${progress.stage === "mission" ? "Choose the cue that fits each audience. Every accurate cue switches on one part of the expo." : "Stage labels show each section's state."}</p></div><div class="stage-lights">${lights.map(([label, on]) => `<div class="stage-light ${on ? "on" : ""}"><strong>● ${label}</strong>${on ? "On" : "Off"}</div>`).join("")}<div class="tablet ${tablet === "Ready" ? "ready" : ""}"><strong>▣ Cue tablet</strong><span class="tablet-state">${tablet}</span></div></div><div class="booth-map" role="list" aria-label="Expo route from Welcome to Recycling Booth">${boothMarkup}</div></section>`;
+        }
+        stage = stageVisual;
+
+        const DATA = {
+            welcome: { scene: "welcome", section: "Section 1", title: "Open the school innovation expo", prompt: "Choose the cue for Principal Joseph and invited guests.", hint: "A principal and invited guests need a formal welcome.", correct: "Good afternoon, Principal Joseph and invited guests. Welcome to our school innovation expo.", choices: ["Good afternoon, everyone. Please move through the expo quietly and wait beside each display until a student is ready to speak.", "Good afternoon, Principal Joseph and invited guests. Welcome to our school innovation expo.", "Principal Joseph and invited guests, the student teams are still preparing their displays, so please wait outside until the expo is ready."], why: "The cue must welcome guests with a respectful formal register.", fix: "Name the audience and use courteous Standard English." },
+            question: { scene: "interview", section: "Section 2", title: "Ask the model maker", prompt: "Choose your question for the student model maker.", hint: "A respectful question uses a courteous opener and asks for an explanation.", correct: "Could you please explain how your model helps the community?", choices: ["What materials did you use to build the model, and how long did the construction take?", "Why did your group choose a rainwater model instead of another project for the expo?", "Could you please explain how your model helps the community?"], why: "The question must invite an explanation of the model's community value.", fix: "Ask how the model helps the community." },
+            turn: { scene: "interview", section: "Section 3", title: "Keep the interview respectful", prompt: "A student interrupts. Choose the cue that keeps the turn-taking respectful.", hint: "A good host protects the speaker’s turn before taking another question.", correct: "Please allow her to finish, then we can take your question.", choices: ["Let us pause the explanation so the waiting student can ask a question before we continue.", "Please allow her to finish, then we can take your question.", "Please save your question until the entire presentation has ended, and we will return to you if time permits."], why: "The speaker needs time to finish, and the waiting student's question should follow without being dismissed.", fix: "Acknowledge the waiting student and protect the current speaker’s turn." },
+            backstage: { scene: "backstage", section: "Backstage", title: "Match the line to the context", prompt: "Choose a friend-appropriate line, then choose its context.", hint: "A casual line to a friend fits an informal peer context. A teacher-directed line does not.", correct: "I will be there shortly; please save a seat for me.", choices: ["I will be there shortly; please save a seat for me.", "Mister, when allyuh want this thing?", "Mr James, could you tell me when you would like the display materials brought backstage?", "Ah coming just now; save a space for me."], accepted: ["I will be there shortly; please save a seat for me.", "Ah coming just now; save a space for me."], why: "The selected line and context must fit a peer conversation.", fix: "Use either friend-appropriate line with Informal peer context.", model: "I will be there shortly; please save a seat for me. — Informal peer context" },
+            finalCue: { scene: "finale", section: "Section 4", title: "Invite community guests", prompt: "Audience: community guests · Purpose: explain the recycling booth · Setting: formal school event.", hint: "Community guests at a formal school event need a clear Standard English invitation.", correct: "Good afternoon. Our recycling booth shows how paper and plastic can be separated for collection. Could you please visit the demonstration table after the presentation?", choices: ["Good afternoon. Our recycling booth displays useful items made from reused paper and plastic. Please visit the table after the presentation to view the finished projects.", "Good afternoon. Our recycling booth shows how paper and plastic can be separated for collection. Could you please visit the demonstration table after the presentation?", "Good afternoon, community guests. The recycling team is ready to answer your questions. Please gather at the demonstration table before the presentation begins."], why: "The invitation must explain that the booth separates paper and plastic, and it must invite guests after the presentation.", fix: "Explain the booth's correct purpose and invite the guests at the correct time." }
+        };
+        const LEGACY_CHOICES = {
+            welcome: ["Wha allyuh saying? Come inside.", "Everybody quiet down right now."],
+            question: ["Tell me what this thing doing.", "Why should anybody care?"],
+            turn: ["Interrupt now", "Ignore both students"],
+            backstage: ["Mister, when allyuh want this thing?"],
+            finalCue: ["Come and check out we recycling booth after this; it sorts paper and plastic.", "Everybody needs to visit the recycling table now because this booth is important."]
+        };
+        let progress, started = false;
+        const fresh = () => ({ version: 1, stage: "mission", review: false, reviewCheckpoint: null, complete: false, checkpoints: Object.fromEntries(ORDER.map((id) => [id, { first: null, mastered: false, attempts: 0 }])), hints: [], selections: {}, feedback: null, activeSeconds: 0, activeAt: Date.now(), reduceMotion: false, rulesOpen: false });
+        const check = (id) => progress.checkpoints[id];
+        const mastered = (id) => check(id).mastered;
+        const current = () => progress.review && progress.reviewCheckpoint ? progress.reviewCheckpoint : progress.stage === "welcome" ? "welcome" : progress.stage === "interview" ? (mastered("question") ? "turn" : "question") : progress.stage === "backstage" ? "backstage" : mastered("finalCue") ? "profile" : "finalCue";
+        const stageFor = (id) => id === "welcome" ? "welcome" : ["question", "turn"].includes(id) ? "interview" : id === "backstage" ? "backstage" : "finale";
+        function load() { try { const saved = JSON.parse(storageGet(PROGRESS_KEY) || "null"), stages = ["mission", "welcome", "interview", "backstage", "finale", "complete"], contexts = ["Informal peer context", "Formal guest context", "Formal teacher context"], profiles = { Volume: ["Low", "Medium", "Loud"], Pace: ["Rushed", "Steady", "Very slow"], Spacing: ["Words run together", "Clear spacing", "Exaggerated gaps"], Expression: ["Bored", "Calm", "Overexcited"], Posture: ["Turned towards display", "Audience-facing", "Looking at tablet"] }; if (!saved || typeof saved !== "object" || Array.isArray(saved) || saved.version !== 1 || !stages.includes(saved.stage) || typeof saved.complete !== "boolean" || !saved.checkpoints || typeof saved.checkpoints !== "object" || Array.isArray(saved.checkpoints) || !Array.isArray(saved.hints) || !saved.selections || typeof saved.selections !== "object" || Array.isArray(saved.selections) || !Number.isSafeInteger(saved.activeSeconds) || saved.activeSeconds < 0 || typeof saved.reduceMotion !== "boolean" || !(saved.reviewCheckpoint === null || ORDER.includes(saved.reviewCheckpoint))) return fresh(); const base = fresh(); for (const id of ORDER) { const item = saved.checkpoints[id]; if (!item || typeof item !== "object" || Array.isArray(item) || !(item.first === null || typeof item.first === "boolean") || typeof item.mastered !== "boolean" || !Number.isSafeInteger(item.attempts) || item.attempts < 0) return fresh(); base.checkpoints[id] = { first: item.first, mastered: item.mastered, attempts: item.attempts }; } if (saved.hints.some((id) => !ORDER.includes(id)) || new Set(saved.hints).size !== saved.hints.length) return fresh(); for (const [id, value] of Object.entries(saved.selections)) { const allowed = id === "context" ? contexts : profiles[id] || DATA[id]?.choices; if (!allowed || typeof value !== "string" || !allowed.includes(value)) return fresh(); base.selections[id] = value; } return { ...base, stage: saved.stage, complete: saved.complete, hints: saved.hints.slice(), activeSeconds: saved.activeSeconds, reduceMotion: saved.reduceMotion, reviewCheckpoint: saved.reviewCheckpoint, activeAt: Date.now() }; } catch (error) { return fresh(); } }
+        function time() { if (progress && !document.hidden) { const now = Date.now(); progress.activeSeconds += Math.max(0, Math.round((now - progress.activeAt) / 1000)); progress.activeAt = now; } }
+        function save() { if (progress) { time(); storageSet(PROGRESS_KEY, JSON.stringify({ ...progress, activeAt: 0 })); } }
+        function missed() { return ORDER.find((id) => check(id).first === false) || null; }
+        function announce(text) { document.getElementById("expoLive").textContent = text; }
+        function setMotion(on) { progress.reduceMotion = on; document.documentElement.classList.toggle("reduce-motion", on); save(); render(); }
+        function report() { const attemptsByCheckpoint = Object.fromEntries(ORDER.map((id) => [id, check(id).attempts])), focus = { welcome: "Choosing register for audience and purpose", question: "Building a respectful Standard English question", turn: "Respectful turn-taking", backstage: "Matching language to context", finalCue: "Choosing register for audience and purpose", profile: "Clear delivery profile" }; return { complete: progress.complete, firstAttemptCorrect: Object.fromEntries(ORDER.map((id) => [id, check(id).first])), finalMastery: Object.fromEntries(ORDER.map((id) => [id, check(id).mastered])), totalAttempts: Object.values(attemptsByCheckpoint).reduce((sum, count) => sum + count, 0), attemptsByCheckpoint, uniqueHintsUsed: progress.hints.slice(), activeTimeSeconds: progress.activeSeconds, missedFocusSkill: missed() ? focus[missed()] : null }; }
+        function stage() { return ""; }
+        function actions() { return ""; }
+        function feedback() { const f = progress.feedback; if (!f) return ""; return `<section class="feedback ${f.good ? "good" : ""}" role="${f.good ? "status" : "alert"}"><p><strong>${f.good ? "Cue accepted." : "Why:"}</strong> ${escapeHtml(f.why)}</p>${f.good ? "" : `<p><strong>Fix:</strong> ${escapeHtml(f.fix)}</p><p><strong>Correct model:</strong> ${escapeHtml(f.model)}</p>`}</section>`; }
+        function next() { const canContinue = mastered(current()) && !progress.review; if (!progress.feedback && !canContinue) return ""; if (progress.feedback && !progress.feedback.good) return `<div class="button-row"><button class="secondary-btn" data-action="retry" type="button">Try Again</button></div>`; return `<div class="button-row"><button class="primary-btn" data-action="${progress.review ? "endReview" : "next"}" type="button">${progress.review ? "Return to results" : "Continue"}</button></div>`; }
+        function contexts(locked) { const choices = ["Informal peer context", "Formal guest context", "Formal teacher context"]; return `<span class="question-label">Context</span><div class="choice-grid" role="group" aria-label="Context choices">${choices.map((text, i) => `<button class="cue-card" data-context="${i}" aria-pressed="${progress.selections.context === text}" ${locked ? "disabled" : ""} type="button">${text}</button>`).join("")}</div>`; }
+        function choices(id) { const d = DATA[id], locked = Boolean(progress.feedback) || progress.review || mastered(id), selected = progress.selections[id]; return `<section class="cue-panel ${locked ? "read-only" : ""}"><p class="expo-kicker">${d.section}</p><h3>${d.title}</h3><p>${d.prompt}</p><div class="choice-grid" role="group" aria-label="Cue choices">${d.choices.map((text, i) => `<button class="cue-card" data-choice="${i}" aria-pressed="${selected === text}" ${locked ? "disabled" : ""} type="button">${escapeHtml(text)}</button>`).join("")}</div>${id === "backstage" ? contexts(locked) : ""}${feedback()}${locked ? next() : `<div class="button-row"><button class="primary-btn" data-action="send" type="button">Send cue</button></div>`}</section>`; }
+        function profile() { const sets = { Volume: ["Low", "Medium", "Loud"], Pace: ["Rushed", "Steady", "Very slow"], Spacing: ["Words run together", "Clear spacing", "Exaggerated gaps"], Expression: ["Bored", "Calm", "Overexcited"], Posture: ["Turned towards display", "Audience-facing", "Looking at tablet"] }, locked = Boolean(progress.feedback) || progress.review || mastered("profile"); return `<section class="cue-panel ${locked ? "read-only" : ""}"><p class="expo-kicker">Final profile · Section 4</p><h3>Set the delivery profile</h3><p>Choose the profile that supports a clear, respectful formal cue.</p><div class="profile-grid">${Object.entries(sets).map(([name, values]) => `<fieldset class="profile-group"><legend>${name}</legend>${values.map((value) => `<label><input type="radio" name="${name}" value="${value}" ${progress.selections[name] === value ? "checked" : ""} ${locked ? "disabled" : ""}>${value}</label>`).join("")}</fieldset>`).join("")}</div>${feedback()}${locked ? next() : `<div class="button-row"><button class="primary-btn" data-action="send" type="button">Send cue</button></div>`}</section>`; }
+        function rules() { return `${progress.hintText ? `<section class="feedback good" role="status"><p><strong>Hint:</strong> ${escapeHtml(progress.hintText)}</p></section>` : ""}${progress.rulesOpen ? `<section class="cue-panel"><h3>Quick rules</h3><p>Match the words to the audience and purpose. Use a respectful question. Let the speaker finish. Speak clearly at a steady pace.</p><label class="question-label"><input type="checkbox" data-action="motion" ${progress.reduceMotion ? "checked" : ""}> Reduce motion</label></section>` : ""}`; }
+        function mission() { return ""; }
+        function complete() { return ""; }
+        function render(focus = false) { if (!started) return; const content = progress.stage === "mission" ? mission() : progress.stage === "complete" ? complete() : current() === "profile" ? profile() : choices(current()); const playActions = !["mission", "complete"].includes(progress.stage) ? actions() : ""; document.getElementById("expoApp").innerHTML = `<div class="expo-topline"><p class="expo-kicker">Cue Master</p><span class="progress-label">${ORDER.filter(mastered).length} of 6 cues mastered</span></div>${stage()}${rules()}${playActions}${content}`; bind(); if (focus) document.getElementById("sceneHeading")?.focus(); }
+        function bind() { const app = document.getElementById("expoApp"); app.querySelectorAll("[data-choice]").forEach((b) => b.addEventListener("click", () => { const id = current(); progress.selections[id] = DATA[id].choices[Number(b.dataset.choice)]; save(); render(); })); app.querySelectorAll("[data-context]").forEach((b) => b.addEventListener("click", () => { progress.selections.context = ["Informal peer context", "Formal guest context", "Formal teacher context"][Number(b.dataset.context)]; save(); render(); })); app.querySelectorAll("input[type=radio]").forEach((i) => i.addEventListener("change", () => { progress.selections[i.name] = i.value; save(); })); app.querySelectorAll("[data-action]").forEach((b) => b.addEventListener("click", () => act(b.dataset.action, b))); }
+        function act() { }
+        function submit() { const id = current(), record = check(id); let ok; if (id === "profile") ok = progress.selections.Volume === "Medium" && progress.selections.Pace === "Steady" && progress.selections.Spacing === "Clear spacing" && progress.selections.Expression === "Calm" && progress.selections.Posture === "Audience-facing"; else if (id === "backstage") ok = DATA.backstage.accepted.includes(progress.selections.backstage) && progress.selections.context === "Informal peer context"; else ok = progress.selections[id] === DATA[id].correct; record.attempts += 1; if (record.first === null) record.first = ok; record.mastered ||= ok; const d = id === "profile" ? { why: "Your delivery profile supports a clear formal invitation.", fix: "Use medium volume, steady pace, clear spacing, calm expression, and an audience-facing posture.", model: "Medium · Steady · Clear spacing · Calm · Audience-facing" } : DATA[id]; progress.feedback = ok ? { good: true, why: "This cue fits the audience and purpose." } : { good: false, why: d.why, fix: d.fix, model: d.model || d.correct }; announce(ok ? "Cue accepted." : "Try again after reading the feedback."); save(); render(); }
+        function advance() { progress.feedback = null; progress.hintText = ""; if (progress.stage === "welcome") progress.stage = "interview"; else if (progress.stage === "interview" && mastered("turn")) progress.stage = "backstage"; else if (progress.stage === "backstage") progress.stage = "finale"; else if (progress.stage === "finale" && mastered("profile")) { progress.stage = "complete"; progress.complete = true; } render(true); }
+        function devInit() { started = true; progress = load(); document.documentElement.classList.toggle("reduce-motion", Boolean(progress.reduceMotion)); Object.defineProperty(window, "ExpoCueMasterReport", { configurable: true, get: report }); render(true); }
+        function devReset() { progress = fresh(); started = false; storageSet(PROGRESS_KEY, ""); document.documentElement.classList.remove("reduce-motion"); }
+        document.addEventListener("visibilitychange", () => { if (progress) { if (document.hidden) time(); else progress.activeAt = Date.now(); save(); } });
+    </script>
+<script>
+
+        const expoSource = String.raw`
+        /* ============================================================
+           EXPO CUE MASTER LAYOUT OVERRIDES
+           The original template chrome remains untouched; these handlers
+           keep review navigation transient and save only live mission data.
+           ============================================================ */
+        let expoTransitionTimer = null;
+
+        function expoFresh() {
+            const value = fresh();
+            value.navCheckpoint = null;
+            value.hintText = "";
+            value.feedback = null;
+            value.activeAt = Date.now();
+            return value;
+        }
+
+        function expoValidSaved(saved) {
+            const stages = ["mission", "welcome", "interview", "backstage", "finale", "complete"];
+            const contexts = ["Informal peer context", "Formal guest context", "Formal teacher context"];
+            const profiles = {
+                Volume: ["Low", "Medium", "Loud"],
+                Pace: ["Rushed", "Steady", "Very slow"],
+                Spacing: ["Words run together", "Clear spacing", "Exaggerated gaps"],
+                Expression: ["Bored", "Calm", "Overexcited"],
+                Posture: ["Turned towards display", "Audience-facing", "Looking at tablet"]
+            };
+            if (!saved || typeof saved !== "object" || Array.isArray(saved)) return false;
+            if (saved.version !== 1 || !stages.includes(saved.stage) || typeof saved.complete !== "boolean") return false;
+            if (!saved.checkpoints || typeof saved.checkpoints !== "object" || Array.isArray(saved.checkpoints)) return false;
+            if (!Array.isArray(saved.hints) || !saved.selections || typeof saved.selections !== "object" || Array.isArray(saved.selections)) return false;
+            if (!Number.isSafeInteger(saved.activeSeconds) || saved.activeSeconds < 0) return false;
+            if (typeof saved.reduceMotion !== "boolean") return false;
+            for (const id of ORDER) {
+                const item = saved.checkpoints[id];
+                if (!item || typeof item !== "object" || Array.isArray(item)) return false;
+                if (!(item.first === null || typeof item.first === "boolean") || typeof item.mastered !== "boolean") return false;
+                if (!Number.isSafeInteger(item.attempts) || item.attempts < 0) return false;
+            }
+            if (saved.hints.some((id) => !ORDER.includes(id)) || new Set(saved.hints).size !== saved.hints.length) return false;
+            for (const [id, value] of Object.entries(saved.selections)) {
+                const allowed = id === "context" ? contexts : profiles[id] || DATA[id]?.choices;
+                const legacy = LEGACY_CHOICES[id] || [];
+                if (!allowed || typeof value !== "string" || (!allowed.includes(value) && !legacy.includes(value))) return false;
+            }
+            return true;
+        }
+
+        function expoReconcileStage(value) {
+            if (value.stage === "welcome" && value.checkpoints.welcome.mastered) value.stage = "interview";
+            if (value.stage === "interview" && value.checkpoints.question.mastered && value.checkpoints.turn.mastered) value.stage = "backstage";
+            if (value.stage === "backstage" && value.checkpoints.backstage.mastered) value.stage = "finale";
+            if (value.stage === "finale" && value.checkpoints.finalCue.mastered && value.checkpoints.profile.mastered) {
+                value.stage = "complete";
+                value.complete = true;
+            }
+            return value;
+        }
+
+        function expoLoad() {
+            let saved = null;
+            try {
+                saved = JSON.parse(storageGet(PROGRESS_KEY) || "null");
+            } catch (error) {
+                saved = null;
+            }
+            if (!expoValidSaved(saved)) return expoFresh();
+            const value = expoFresh();
+            value.stage = saved.stage;
+            value.complete = saved.complete;
+            value.hints = saved.hints.slice();
+            value.activeSeconds = saved.activeSeconds;
+            value.reduceMotion = saved.reduceMotion;
+            for (const id of ORDER) {
+                const item = saved.checkpoints[id];
+                value.checkpoints[id] = { first: item.first, mastered: item.mastered, attempts: item.attempts };
+            }
+            value.selections = Object.fromEntries(Object.entries(saved.selections).filter(([id, selection]) => {
+                const allowed = id === "context"
+                    ? ["Informal peer context", "Formal guest context", "Formal teacher context"]
+                    : ["Volume", "Pace", "Spacing", "Expression", "Posture"].includes(id)
+                        ? { Volume: ["Low", "Medium", "Loud"], Pace: ["Rushed", "Steady", "Very slow"], Spacing: ["Words run together", "Clear spacing", "Exaggerated gaps"], Expression: ["Bored", "Calm", "Overexcited"], Posture: ["Turned towards display", "Audience-facing", "Looking at tablet"] }[id]
+                        : DATA[id]?.choices;
+                return allowed && allowed.includes(selection);
+            }));
+            const reconciled = expoReconcileStage(value);
+            expoSaveSnapshot(reconciled);
+            return reconciled;
+        }
+
+        function expoSaveSnapshot(value) {
+            storageSet(PROGRESS_KEY, JSON.stringify({
+                version: 1,
+                stage: value.stage,
+                complete: value.complete,
+                checkpoints: value.checkpoints,
+                hints: value.hints,
+                selections: value.selections,
+                activeSeconds: value.activeSeconds,
+                reduceMotion: Boolean(value.reduceMotion)
+            }));
+        }
+
+        function expoTime() {
+            if (!progress || document.hidden) return;
+            const now = Date.now();
+            progress.activeSeconds += Math.max(0, Math.round((now - progress.activeAt) / 1000));
+            progress.activeAt = now;
+        }
+
+        function expoSave() {
+            if (!progress) return;
+            expoTime();
+            storageSet(PROGRESS_KEY, JSON.stringify({
+                version: 1,
+                stage: progress.stage,
+                complete: progress.complete,
+                checkpoints: progress.checkpoints,
+                hints: progress.hints,
+                selections: progress.selections,
+                activeSeconds: progress.activeSeconds,
+                reduceMotion: Boolean(progress.reduceMotion)
+            }));
+        }
+
+        function expoEnsureProgress() {
+            if (!progress) progress = expoLoad();
+            return progress;
+        }
+
+        function expoLiveId() {
+            if (!progress || progress.stage === "mission" || progress.stage === "complete") return null;
+            if (progress.stage === "welcome") return "welcome";
+            if (progress.stage === "interview") return progress.checkpoints.question.mastered ? "turn" : "question";
+            if (progress.stage === "backstage") return "backstage";
+            if (progress.stage === "finale") return progress.checkpoints.finalCue.mastered ? "profile" : "finalCue";
+            return null;
+        }
+
+        function expoDisplayId() {
+            return progress?.navCheckpoint || expoLiveId();
+        }
+
+        function expoDisplayIndex() {
+            const id = expoDisplayId();
+            return id ? ORDER.indexOf(id) : -1;
+        }
+
+        function expoLiveIndex() {
+            if (progress?.stage === "complete") return ORDER.length - 1;
+            const id = expoLiveId();
+            return id ? ORDER.indexOf(id) : -1;
+        }
+
+        function expoReadOnly() {
+            return Boolean(progress?.navCheckpoint);
+        }
+
+        function expoMissed() {
+            return ORDER.find((id) => progress.checkpoints[id].first === false) || null;
+        }
+
+        function expoReport() {
+            const value = progress || expoLoad();
+            const attemptsByCheckpoint = Object.fromEntries(ORDER.map((id) => [id, value.checkpoints[id].attempts]));
+            const focus = {
+                welcome: "Choosing register for audience and purpose",
+                question: "Building a respectful Standard English question",
+                turn: "Respectful turn-taking",
+                backstage: "Matching language to context",
+                finalCue: "Choosing register for audience and purpose",
+                profile: "Clear delivery profile"
+            };
+            const missedId = ORDER.find((id) => value.checkpoints[id].first === false) || null;
+            return {
+                complete: value.complete,
+                firstAttemptCorrect: Object.fromEntries(ORDER.map((id) => [id, value.checkpoints[id].first])),
+                finalMastery: Object.fromEntries(ORDER.map((id) => [id, value.checkpoints[id].mastered])),
+                totalAttempts: Object.values(attemptsByCheckpoint).reduce((sum, count) => sum + count, 0),
+                attemptsByCheckpoint,
+                uniqueHintsUsed: value.hints.slice(),
+                activeTimeSeconds: value.activeSeconds,
+                missedFocusSkill: missedId ? focus[missedId] : null
+            };
+        }
+
+        function expoStage() {
+            const id = expoDisplayId();
+            const lights = [
+                ["Section 1", "welcome", "✦"],
+                ["Section 2", "question", "◈"],
+                ["Section 3", "turn", "◇"],
+                ["Section 4", "profile", "✹"]
+            ];
+            const badges = {
+                welcome: ["Principal Joseph", "Invited guests"],
+                question: ["Exhibitor", "Raised-hand student"],
+                turn: ["Exhibitor", "Raised-hand student"],
+                backstage: ["Peer backstage"],
+                finalCue: ["Community guests"],
+                profile: ["Community guests"]
+            }[id] || [];
+            const booths = [
+                { id: "welcome", label: "Welcome", icon: "★", checkpoint: "welcome" },
+                { id: "question", label: "Rainwater model", icon: "◉", checkpoint: "question" },
+                { id: "turn", label: "Q&amp;A", icon: "?", checkpoint: "turn" },
+                { id: "backstage", label: "Backstage", icon: "▣", checkpoint: "backstage" },
+                { id: "finalCue", label: "Recycling booth", icon: "♻", checkpoint: "finalCue" }
+            ];
+            const activeBooth = id === "profile" ? "finalCue" : id;
+            const heading = progress.navCheckpoint
+                ? (id === "profile" ? "Set the delivery profile" : DATA[id].title)
+                : progress.stage === "mission"
+                ? "Cue-card mission"
+                : progress.stage === "complete"
+                    ? "Expo cue sequence complete"
+                    : id === "profile"
+                        ? "Set the delivery profile"
+                        : DATA[id].title;
+            const boothMarkup = booths.map((booth) => {
+                const complete = progress.checkpoints[booth.checkpoint].mastered;
+                const active = activeBooth === booth.id;
+                const stateLabel = complete ? "On" : active ? "Ready" : "Off";
+                const classes = ["booth-node", complete ? "complete" : "", active ? "active" : ""].filter(Boolean).join(" ");
+                return \`<div class="\${classes}" role="listitem" aria-label="\${escapeHtml(booth.label)}: \${stateLabel}" \${active ? "aria-current=\\"step\\"" : ""}><span class="booth-sign">\${booth.label}</span><span class="booth-icon" aria-hidden="true">\${booth.icon}</span><span class="booth-state">\${stateLabel}</span>\${active ? \`<span class="host-marker" aria-label="Expo host location">H</span>\` : ""}</div>\`;
+            }).join("");
+            const lightMarkup = lights.map(([label, checkpoint, icon]) => {
+                const complete = progress.checkpoints[checkpoint].mastered;
+                const active = activeBooth === checkpoint || (checkpoint === "question" && id === "turn");
+                const stateLabel = complete ? "On" : active ? "Ready" : "Off";
+                return \`<div class="stage-light \${complete ? "on" : active ? "ready" : ""}" aria-label="\${label}, \${stateLabel}"><strong>\${icon} \${label}</strong><span>\${stateLabel}</span></div>\`;
+            }).join("");
+            const audience = badges.map((badge) => \`<span class="audience-badge">\${escapeHtml(badge)}</span>\`).join("");
+            return \`<section class="expo-stage" aria-label="School Innovation Expo stage status"><div class="stage-copy"><p class="expo-kicker">School Innovation Expo</p><span class="courtyard-label">Courtyard route · host position shown</span><div class="host-line"><span class="host-avatar" aria-hidden="true"></span><div><strong>Expo host</strong><div class="mission-meta">\${audience}</div></div></div><h2 id="sceneHeading" tabindex="-1">\${escapeHtml(heading)}</h2><p>\${progress.stage === "mission" ? "Choose the cue that fits each audience. Every accurate cue switches on one part of the expo." : "Stage labels show each section's state."}</p></div><div class="stage-lights">\${lightMarkup}</div><div class="booth-map" role="list" aria-label="Expo route from Welcome to Recycling Booth">\${boothMarkup}</div></section>\`;
+        }
+
+        function expoNav() {
+            if (!progress || ((progress.stage === "mission" || progress.stage === "complete") && !progress.navCheckpoint)) return "";
+            const index = expoDisplayIndex();
+            const maxIndex = expoLiveIndex();
+            let previous = -1;
+            for (let i = index - 1; i >= 0; i -= 1) {
+                if (progress.checkpoints[ORDER[i]].mastered) {
+                    previous = i;
+                    break;
+                }
+            }
+            let next = -1;
+            for (let i = index + 1; i <= maxIndex; i += 1) {
+                if (i === maxIndex || progress.checkpoints[ORDER[i]].mastered) {
+                    next = i;
+                    break;
+                }
+            }
+            const previousId = previous >= 0 ? ORDER[previous] : "";
+            const nextIsLive = next === maxIndex;
+            const nextId = next >= 0 ? ORDER[next] : "";
+            return \`<div class="arrow-row" aria-label="Completed checkpoint navigation"><button class="nav-btn" type="button" data-action="navPrev" aria-label="Previous completed cue" \${previous < 0 ? "disabled" : ""}>←</button><span class="status-note">\${expoReadOnly() ? "Review memory · read-only" : "Current cue"}</span><button class="nav-btn" type="button" data-action="navNext" aria-label="Next completed cue or current cue" \${next < 0 ? "disabled" : ""}>\${nextIsLive && !nextId ? "→" : "→"}</button></div>\`;
+        }
+
+        function expoFeedback() {
+            const id = expoDisplayId();
+            if (expoReadOnly()) {
+                const answer = expoAnswerSummary(id);
+                return \`<section class="feedback good" role="status"><p><strong>Review memory.</strong> Saved answer: \${escapeHtml(answer)}.</p><p>First attempt: \${progress.checkpoints[id].first === true ? "correct" : progress.checkpoints[id].first === false ? "missed" : "not submitted"} · Attempts: \${progress.checkpoints[id].attempts}</p></section>\`;
+            }
+            const feedbackValue = progress.feedback;
+            if (!feedbackValue) return "";
+            return \`<section class="feedback \${feedbackValue.good ? "good" : ""}" role="\${feedbackValue.good ? "status" : "alert"}"><p><strong>\${feedbackValue.good ? "Cue accepted." : "Why:"}</strong> \${escapeHtml(feedbackValue.why)}</p>\${feedbackValue.good ? "" : \`<p><strong>Fix:</strong> \${escapeHtml(feedbackValue.fix)}</p><p><strong>Correct model:</strong> \${escapeHtml(feedbackValue.model)}</p>\`}</section>\`;
+        }
+
+        function expoAnswerSummary(id) {
+            if (!id) return "No saved answer";
+            if (id === "backstage") return [progress.selections.backstage, progress.selections.context].filter(Boolean).join(" · ") || "No saved answer";
+            if (id === "profile") return ["Volume", "Pace", "Spacing", "Expression", "Posture"].map((key) => progress.selections[key]).filter(Boolean).join(" · ") || "No saved profile";
+            return progress.selections[id] || "No saved answer";
+        }
+
+        function expoCorrectSelection(id) {
+            if (id === "backstage") return DATA.backstage.accepted.includes(progress.selections.backstage) && progress.selections.context === "Informal peer context";
+            if (id === "profile") return progress.selections.Volume === "Medium" && progress.selections.Pace === "Steady" && progress.selections.Spacing === "Clear spacing" && progress.selections.Expression === "Calm" && progress.selections.Posture === "Audience-facing";
+            return progress.selections[id] === DATA[id]?.correct;
+        }
+
+        function expoChoices(id) {
+            const data = DATA[id];
+            const readOnly = expoReadOnly();
+            const locked = readOnly || Boolean(progress.feedback) || progress.checkpoints[id].mastered;
+            const selected = progress.selections[id];
+            const correctNow = expoCorrectSelection(id);
+            const choices = data.choices.map((choice, index) => {
+                const isSelected = selected === choice;
+                const stateClass = isSelected && progress.feedback?.good ? "correct" : isSelected && progress.feedback && !progress.feedback.good ? "incorrect" : "";
+                return \`<button class="cue-card \${stateClass}" data-choice="\${index}" aria-pressed="\${isSelected}" \${locked ? "disabled" : ""} type="button">\${escapeHtml(choice)}</button>\`;
+            }).join("");
+            const context = id === "backstage" ? \`<span class="question-label">Context</span><div class="choice-grid" role="group" aria-label="Context choices">\${["Informal peer context", "Formal guest context", "Formal teacher context"].map((value, index) => {
+                const isSelected = progress.selections.context === value;
+                const stateClass = isSelected && progress.feedback?.good ? "correct" : isSelected && progress.feedback && !progress.feedback.good ? "incorrect" : "";
+                return \`<button class="cue-card \${stateClass}" data-context="\${index}" aria-pressed="\${isSelected}" \${locked ? "disabled" : ""} type="button">\${value}</button>\`;
+            }).join("")}</div>\` : "";
+            const retry = progress.feedback && !progress.feedback.good ? \`<div class="button-row"><button class="secondary-btn" data-action="retry" type="button">Try Again</button></div>\` : "";
+            const send = !locked ? \`<div class="button-row"><button class="primary-btn" data-action="send" type="button">Send cue</button></div>\` : "";
+            return \`<section class="cue-panel \${locked ? "read-only" : ""}"><p class="expo-kicker">\${data.section}</p><h3>\${data.title}</h3><p>\${data.prompt}</p><div class="choice-grid" role="group" aria-label="Cue choices">\${choices}</div>\${context}\${expoFeedback()}\${retry}\${send}</section>\`;
+        }
+
+        function expoProfile() {
+            const sets = {
+                Volume: ["Low", "Medium", "Loud"],
+                Pace: ["Rushed", "Steady", "Very slow"],
+                Spacing: ["Words run together", "Clear spacing", "Exaggerated gaps"],
+                Expression: ["Bored", "Calm", "Overexcited"],
+                Posture: ["Turned towards display", "Audience-facing", "Looking at tablet"]
+            };
+            const locked = expoReadOnly() || Boolean(progress.feedback) || progress.checkpoints.profile.mastered;
+            const labels = Object.entries(sets).map(([name, values]) => \`<fieldset class="profile-group"><legend>\${name}</legend>\${values.map((value) => {
+                const checked = progress.selections[name] === value;
+                const good = checked && (progress.feedback?.good || (expoReadOnly() && expoCorrectSelection("profile")));
+                return \`<label class="\${good ? "correct" : ""}"><input type="radio" name="\${name}" value="\${value}" \${checked ? "checked" : ""} \${locked ? "disabled" : ""}>\${value}</label>\`;
+            }).join("")}</fieldset>\`).join("");
+            const retry = progress.feedback && !progress.feedback.good ? \`<div class="button-row"><button class="secondary-btn" data-action="retry" type="button">Try Again</button></div>\` : "";
+            const send = !locked ? \`<div class="button-row"><button class="primary-btn" data-action="send" type="button">Send cue</button></div>\` : "";
+            return \`<section class="cue-panel \${locked ? "read-only" : ""}"><p class="expo-kicker">Final profile · Section 4</p><h3>Set the delivery profile</h3><p>Choose the profile that supports a clear, respectful formal cue.</p><div class="profile-grid">\${labels}</div>\${expoFeedback()}\${retry}\${send}</section>\`;
+        }
+
+        function expoHint() {
+            return progress.hintText && !expoReadOnly() ? \`<section class="feedback good" role="status"><p><strong>Hint:</strong> \${escapeHtml(progress.hintText)}</p></section>\` : "";
+        }
+
+        function expoActions() {
+            if ((progress.stage === "mission" || progress.stage === "complete") && !progress.navCheckpoint) return "";
+            const hint = expoReadOnly() ? "" : \`<button class="nav-btn" data-action="hint" type="button">Hint</button>\`;
+            return \`<div class="scene-actions">\${expoNav()}<div class="action-set">\${hint}</div></div>\`;
+        }
+
+        function expoMission() {
+            return \`<section class="cue-panel"><h3>Your mission</h3><p>Choose the cue that fits each audience. Every accurate cue switches on one part of the expo.</p><ul class="mission-list"><li>Welcome Principal Joseph and invited guests.</li><li>Ask a respectful question and protect the speaker's turn.</li><li>Match a backstage line to its context.</li><li>Invite community guests to the recycling demonstration.</li></ul><div class="button-row"><button class="primary-btn" data-action="begin" type="button">Begin mission</button></div></section>\`;
+        }
+
+        function expoComplete() {
+            return \`<section class="cue-panel"><h3>Expo cue sequence complete</h3><p>You practised choosing register for audience and purpose, and building a respectful Standard English question.</p><p class="status-note">\${expoMissed() ? "Review Memory lists the earliest missed skill and every saved answer." : "Perfect first-attempt run. Review Memory contains your completed cues."}</p><div class="button-row"><button class="primary-btn" data-action="fresh" type="button">Try Again</button><button class="secondary-btn" data-action="memory" type="button">Review Memory</button></div></section>\`;
+        }
+
+        function expoRender(focus = false) {
+            if (!started || !progress) return;
+            const id = expoDisplayId();
+            const content = !progress.navCheckpoint && progress.stage === "mission"
+                ? expoMission()
+                : !progress.navCheckpoint && progress.stage === "complete"
+                    ? expoComplete()
+                    : id === "profile"
+                        ? expoProfile()
+                        : expoChoices(id);
+            const masteredCount = ORDER.filter((checkpoint) => progress.checkpoints[checkpoint].mastered).length;
+            document.getElementById("expoApp").innerHTML = \`<div class="expo-topline"><p class="expo-kicker">Cue Master</p><span class="progress-label">\${masteredCount} of 6 cues mastered</span></div>\${expoStage()}\${expoHint()}\${expoActions()}\${content}\`;
+            expoBind();
+            if (focus) document.getElementById("sceneHeading")?.focus();
+        }
+
+        function expoBind() {
+            const app = document.getElementById("expoApp");
+            app.querySelectorAll("[data-choice]").forEach((button) => button.addEventListener("click", () => {
+                if (expoReadOnly() || progress.feedback || expoTransitionTimer) return;
+                const id = expoDisplayId();
+                progress.selections[id] = DATA[id].choices[Number(button.dataset.choice)];
+                expoSave();
+                expoRender();
+            }));
+            app.querySelectorAll("[data-context]").forEach((button) => button.addEventListener("click", () => {
+                if (expoReadOnly() || progress.feedback || expoTransitionTimer) return;
+                progress.selections.context = ["Informal peer context", "Formal guest context", "Formal teacher context"][Number(button.dataset.context)];
+                expoSave();
+                expoRender();
+            }));
+            app.querySelectorAll("input[type=radio]").forEach((input) => input.addEventListener("change", () => {
+                if (expoReadOnly() || progress.feedback || expoTransitionTimer) return;
+                progress.selections[input.name] = input.value;
+                expoSave();
+            }));
+            app.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => expoAct(button.dataset.action)));
+        }
+
+        function expoAct(action) {
+            expoEnsureProgress();
+            expoTime();
+            if (action === "begin") {
+                progress.stage = "welcome";
+                progress.navCheckpoint = null;
+                progress.feedback = null;
+                progress.hintText = "";
+                announce("Welcome cue ready.");
+                expoSave();
+                expoRender(true);
+                return;
+            }
+            if (action === "hint") {
+                if (expoReadOnly()) return;
+                const id = expoLiveId();
+                if (!id) return;
+                if (!progress.hints.includes(id)) progress.hints.push(id);
+                progress.hintText = DATA[id]?.hint || "Use medium volume, steady pace, clear spacing, calm expression, and an audience-facing posture.";
+                announce("Hint shown.");
+                expoSave();
+                expoRender();
+                return;
+            }
+            if (action === "send") {
+                expoSubmit();
+                return;
+            }
+            if (action === "retry") {
+                if (expoReadOnly() || !progress.feedback || progress.feedback.good) return;
+                const id = expoLiveId();
+                progress.feedback = null;
+                progress.hintText = "";
+                delete progress.selections[id];
+                if (id === "backstage") delete progress.selections.context;
+                if (id === "profile") ["Volume", "Pace", "Spacing", "Expression", "Posture"].forEach((key) => delete progress.selections[key]);
+                expoSave();
+                expoRender();
+                return;
+            }
+            if (action === "navPrev" || action === "navNext") {
+                expoNavigate(action === "navPrev" ? -1 : 1);
+                return;
+            }
+            if (action === "fresh") {
+                expoOpenRetryConfirm();
+                return;
+            }
+            if (action === "memory") {
+                expoOpenMemory();
+            }
+        }
+
+        function expoNavigate(direction) {
+            if ((progress.stage === "mission" || progress.stage === "complete") && !progress.navCheckpoint) return;
+            const currentIndex = expoDisplayIndex();
+            const maxIndex = expoLiveIndex();
+            let target = -1;
+            if (direction < 0) {
+                for (let i = currentIndex - 1; i >= 0; i -= 1) {
+                    if (progress.checkpoints[ORDER[i]].mastered) {
+                        target = i;
+                        break;
+                    }
+                }
+            } else {
+                for (let i = currentIndex + 1; i <= maxIndex; i += 1) {
+                    if (i === maxIndex || progress.checkpoints[ORDER[i]].mastered) {
+                        target = i;
+                        break;
+                    }
+                }
+            }
+            if (target < 0) return;
+            progress.feedback = null;
+            progress.hintText = "";
+            progress.navCheckpoint = target === expoLiveIndex() ? null : ORDER[target];
+            expoRender(true);
+        }
+
+        function expoSubmit() {
+            if (expoTransitionTimer || expoReadOnly()) return;
+            const id = expoLiveId();
+            if (!id || progress.checkpoints[id].mastered) return;
+            const record = progress.checkpoints[id];
+            let ok = false;
+            if (id === "profile") {
+                ok = expoCorrectSelection("profile");
+            } else if (id === "backstage") {
+                ok = DATA.backstage.accepted.includes(progress.selections.backstage) && progress.selections.context === "Informal peer context";
+            } else {
+                ok = progress.selections[id] === DATA[id].correct;
+            }
+            record.attempts += 1;
+            if (record.first === null) record.first = ok;
+            if (ok) record.mastered = true;
+            const data = id === "profile"
+                ? { why: "Your delivery profile supports a clear formal invitation.", fix: "Use medium volume, steady pace, clear spacing, calm expression, and an audience-facing posture.", model: "Medium · Steady · Clear spacing · Calm · Audience-facing" }
+                : DATA[id];
+            progress.feedback = ok
+                ? { good: true, why: "This cue fits the audience and purpose." }
+                : { good: false, why: data.why, fix: data.fix, model: data.model || data.correct };
+            progress.hintText = "";
+            announce(ok ? "Cue accepted." : "Try again after reading the feedback.");
+            expoSave();
+            expoRender();
+            if (ok) {
+                expoTransitionTimer = window.setTimeout(() => {
+                    expoTransitionTimer = null;
+                    expoAdvance(id);
+                }, 700);
+            }
+        }
+
+        function expoAdvance(id) {
+            if (!progress || !progress.feedback?.good) return;
+            progress.feedback = null;
+            progress.hintText = "";
+            progress.navCheckpoint = null;
+            if (id === "welcome") progress.stage = "interview";
+            else if (id === "turn") progress.stage = "backstage";
+            else if (id === "backstage") progress.stage = "finale";
+            else if (id === "profile") {
+                progress.stage = "complete";
+                progress.complete = true;
+            }
+            expoReconcileStage(progress);
+            expoSave();
+            announce(progress.stage === "complete" ? "Expo cue sequence complete." : "Next cue ready.");
+            expoRender(true);
+        }
+
+        const expoMemoryModal = document.getElementById("memoryModal");
+        const expoMemoryBody = document.getElementById("memoryBody");
+        const expoRetryModal = document.getElementById("retryConfirmModal");
+        function expoOpenMemory() {
+            expoEnsureProgress();
+            const items = ORDER.filter((id) => progress.checkpoints[id].attempts > 0 || progress.checkpoints[id].mastered).map((id) => {
+                const record = progress.checkpoints[id];
+                return \`<article class="memory-item"><div><strong>\${escapeHtml(DATA[id].title)}</strong><p class="muted">\${escapeHtml(DATA[id].section)} · \${escapeHtml(expoAnswerSummary(id))}</p><span class="memory-status">\${record.first === true ? "First attempt correct" : record.first === false ? "First attempt missed" : "Not submitted"} · \${record.attempts} attempt\${record.attempts === 1 ? "" : "s"}</span></div><button class="secondary-btn" type="button" data-memory-id="\${id}">Open review</button></article>\`).join("");
+            expoMemoryBody.innerHTML = items || '<p class="muted">No completed cues yet.</p>';
+            expoMemoryModal.classList.add("show");
+            expoMemoryBody.querySelectorAll("[data-memory-id]").forEach((button) => button.addEventListener("click", () => {
+                const id = button.dataset.memoryId;
+                progress.navCheckpoint = id;
+                progress.feedback = null;
+                started = true;
+                showScreen("sim");
+                expoCloseMemory();
+                expoRender(true);
+            }));
+            document.getElementById("closeMemoryBtn").focus();
+        }
+
+        function expoCloseMemory() {
+            expoMemoryModal.classList.remove("show");
+        }
+
+        function expoOpenRetryConfirm() {
+            expoRetryModal.classList.add("show");
+            document.getElementById("cancelRetryBtn").focus();
+        }
+
+        function expoCloseRetryConfirm() {
+            expoRetryModal.classList.remove("show");
+        }
+
+        function expoConfirmRetry() {
+            if (expoTransitionTimer) {
+                window.clearTimeout(expoTransitionTimer);
+                expoTransitionTimer = null;
+            }
+            progress = expoFresh();
+            started = true;
+            showScreen("sim");
+            expoCloseRetryConfirm();
+            expoSave();
+            announce("Fresh mission ready.");
+            expoRender(true);
+        }
+
+        function expoSyncMotion() {
+            const toggle = document.getElementById("helpMotionToggle");
+            if (!toggle) return;
+            const value = progress || expoLoad();
+            toggle.checked = Boolean(value.reduceMotion);
+        }
+
+        devInit = function () {
+            if (expoTransitionTimer) {
+                window.clearTimeout(expoTransitionTimer);
+                expoTransitionTimer = null;
+            }
+            started = true;
+            progress = expoLoad();
+            document.documentElement.classList.toggle("reduce-motion", Boolean(progress.reduceMotion));
+            Object.defineProperty(window, "ExpoCueMasterReport", { configurable: true, get: expoReport });
+            expoRender(true);
+        };
+
+        devReset = function () {
+            if (expoTransitionTimer) {
+                window.clearTimeout(expoTransitionTimer);
+                expoTransitionTimer = null;
+            }
+            progress = expoFresh();
+            started = false;
+            storageSet(PROGRESS_KEY, "");
+            document.documentElement.classList.remove("reduce-motion");
+            expoCloseMemory();
+            expoCloseRetryConfirm();
+        };
+
+        document.getElementById("memoryBtn").addEventListener("click", expoOpenMemory);
+        document.getElementById("closeMemoryBtn").addEventListener("click", expoCloseMemory);
+        document.getElementById("closeRetryConfirmBtn").addEventListener("click", expoCloseRetryConfirm);
+        document.getElementById("cancelRetryBtn").addEventListener("click", expoCloseRetryConfirm);
+        document.getElementById("confirmRetryBtn").addEventListener("click", expoConfirmRetry);
+        expoMemoryModal.addEventListener("click", (event) => {
+            if (event.target === expoMemoryModal) expoCloseMemory();
+        });
+        expoRetryModal.addEventListener("click", (event) => {
+            if (event.target === expoRetryModal) expoCloseRetryConfirm();
+        });
+        document.getElementById("helpMotionToggle").addEventListener("change", (event) => {
+            expoEnsureProgress();
+            progress.reduceMotion = event.target.checked;
+            document.documentElement.classList.toggle("reduce-motion", progress.reduceMotion);
+            expoSave();
+        });
+        dom.helpBtn.addEventListener("click", expoSyncMotion);
+        dom.openInstructionsBtn.addEventListener("click", expoSyncMotion);
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                expoCloseMemory();
+                expoCloseRetryConfirm();
+            }
+        });
+        document.addEventListener("visibilitychange", () => {
+            if (progress) {
+                if (document.hidden) expoTime();
+                else progress.activeAt = Date.now();
+                expoSave();
+            }
+        });
+`;
+eval(expoSource.replace("escapeHtml(DATA[id].title)", "escapeHtml(id === " + String.fromCharCode(34) + "profile" + String.fromCharCode(34) + " ? " + String.fromCharCode(34) + "Final delivery profile" + String.fromCharCode(34) + " : DATA[id].title)").replace("escapeHtml(DATA[id].section)", "escapeHtml(id === " + String.fromCharCode(34) + "profile" + String.fromCharCode(34) + " ? " + String.fromCharCode(34) + "Section 4" + String.fromCharCode(34) + " : DATA[id].section)").replace("</article>" + String.fromCharCode(92, 96) + ").join(" + String.fromCharCode(34) + String.fromCharCode(34) + ");", "</article>" + String.fromCharCode(96) + ";\n            }).join(" + String.fromCharCode(34) + String.fromCharCode(34) + ");").split(String.fromCharCode(92, 96)).join(String.fromCharCode(96)).split("\\${").join("${").split("aria-current=" + String.fromCharCode(92, 92, 34) + "step" + String.fromCharCode(92, 92, 34)).join("aria-current=step").split(String.fromCharCode(92, 34)).join(String.fromCharCode(34)));
+    </script>
+    <script>
+        var expoTransitionTimer = null;
+        (function () {
+            const CLARITY_META = {
+                welcome: {
+                    speaker: "You are the expo host.",
+                    audience: "Principal Joseph and invited guests.",
+                    setting: "The school innovation expo welcome.",
+                    purpose: "Open the event with a respectful formal greeting.",
+                    question: "Which cue should you say first to greet this audience formally?"
+                },
+                question: {
+                    speaker: "You are the expo host.",
+                    audience: "The student who built the rainwater model.",
+                    setting: "The rainwater model booth during the interview.",
+                    purpose: "Invite the model maker to explain the model's community value.",
+                    question: "What respectful question asks the model maker for an explanation?"
+                },
+                turn: {
+                    speaker: "You are the expo host.",
+                    audience: "The current model maker and a student waiting to ask a question.",
+                    setting: "The Q&A section of the expo interview.",
+                    purpose: "Protect the current speaker's turn while acknowledging the waiting student.",
+                    question: "Which cue keeps the current speaker's turn respectful?"
+                },
+                backstage: {
+                    speaker: "You are the expo host speaking to a friend.",
+                    audience: "A peer backstage.",
+                    setting: "Behind the expo stage before the next cue.",
+                    purpose: "Choose language that fits an informal peer conversation.",
+                    question: "Which line and context belong together when you speak to your friend?"
+                },
+                finalCue: {
+                    speaker: "You are the expo host.",
+                    audience: "Community guests visiting the school.",
+                    setting: "A formal school event at the recycling booth.",
+                    purpose: "Explain the booth briefly and invite guests to visit.",
+                    question: "Which formal cue should invite the community guests to the recycling booth?"
+                },
+                profile: {
+                    speaker: "You are the expo host.",
+                    audience: "Community guests at the school expo.",
+                    setting: "The final recycling-booth invitation.",
+                    purpose: "Deliver the approved cue clearly and respectfully.",
+                    question: "Which delivery profile best supports this formal invitation?"
+                }
+            };
+
+            function clarityQuestion(id) {
+                const meta = CLARITY_META[id];
+                if (!meta) return "";
+                const headingId = "questionToAnswerHeading";
+                return '<section class="question-explain" aria-labelledby="' + headingId + '">' +
+                    '<h3 id="' + headingId + '" tabindex="-1">Question to answer</h3>' +
+                    '<p><strong>' + escapeHtml(meta.question) + '</strong></p>' +
+                    '<dl class="question-context">' +
+                    '<div><dt>Speaker</dt><dd>' + escapeHtml(meta.speaker) + '</dd></div>' +
+                    '<div><dt>Speaking to</dt><dd>' + escapeHtml(meta.audience) + '</dd></div>' +
+                    '<div><dt>Setting</dt><dd>' + escapeHtml(meta.setting) + '</dd></div>' +
+                    '<div><dt>Purpose</dt><dd>' + escapeHtml(meta.purpose) + '</dd></div>' +
+                    '</dl></section>';
+            }
+
+            function clarityFeedback(id) {
+                if (expoReadOnly()) {
+                    const answer = expoAnswerSummary(id);
+                    const record = progress.checkpoints[id];
+                    return '<section class="feedback good" role="status"><p><strong>Review memory.</strong> Saved answer: ' + escapeHtml(answer) + '.</p><p>First attempt: ' + (record.first === true ? "correct" : record.first === false ? "missed" : "not submitted") + ' · Attempts: ' + record.attempts + '</p></section>';
+                }
+                const feedbackValue = progress.feedback;
+                if (!feedbackValue) return "";
+                if (feedbackValue.good) {
+                    return '<section class="feedback good" role="status"><p><strong>Cue accepted.</strong> ' + escapeHtml(feedbackValue.why) + '</p></section>';
+                }
+                return '<section class="feedback bad" role="alert"><p><strong>Not quite.</strong> ' + escapeHtml(feedbackValue.why) + '</p><p><strong>Fix:</strong> ' + escapeHtml(feedbackValue.fix) + '</p><p><strong>Correct model:</strong> ' + escapeHtml(feedbackValue.model) + '</p></section>';
+            }
+
+            function clarityChoiceClass(id, choice, selected) {
+                const feedbackValue = progress.feedback;
+                if (feedbackValue && !feedbackValue.good && feedbackValue.badChoice === choice) return "incorrect";
+                if (selected && feedbackValue && feedbackValue.good) return "correct";
+                if (selected && expoReadOnly() && expoCorrectSelection(id)) return "correct";
+                return "";
+            }
+
+            function clarityContextClass(value, selected) {
+                const feedbackValue = progress.feedback;
+                if (feedbackValue && !feedbackValue.good && feedbackValue.badContext === value) return "incorrect";
+                if (selected && feedbackValue && feedbackValue.good) return "correct";
+                if (selected && expoReadOnly() && expoCorrectSelection("backstage")) return "correct";
+                return "";
+            }
+
+            function clarityChoices(id) {
+                const data = DATA[id];
+                const feedbackValue = progress.feedback;
+                const locked = expoReadOnly() || Boolean(feedbackValue && feedbackValue.good) || progress.checkpoints[id].mastered || Boolean(expoTransitionTimer);
+                const selected = progress.selections[id];
+                const choices = data.choices.map((choice, index) => {
+                    const selectedNow = selected === choice;
+                    return '<button class="cue-card ' + clarityChoiceClass(id, choice, selectedNow) + '" data-choice="' + index + '" aria-pressed="' + selectedNow + '" ' + (locked ? "disabled" : "") + ' type="button">' + escapeHtml(choice) + '</button>';
+                }).join("");
+                let context = "";
+                if (id === "backstage") {
+                    const contextChoices = ["Informal peer context", "Formal guest context", "Formal teacher context"];
+                    context = '<span class="question-label">Choose the context</span><div class="choice-grid" role="group" aria-label="Context choices">' + contextChoices.map((value, index) => {
+                        const selectedNow = progress.selections.context === value;
+                        return '<button class="cue-card ' + clarityContextClass(value, selectedNow) + '" data-context="' + index + '" aria-pressed="' + selectedNow + '" ' + (locked ? "disabled" : "") + ' type="button">' + value + '</button>';
+                    }).join("") + '</div>';
+                }
+                const action = locked ? "" : '<div class="button-row"><button class="primary-btn ' + (feedbackValue && !feedbackValue.good ? "check-again" : "") + '" data-action="send" type="button">' + (feedbackValue && !feedbackValue.good ? "Check again" : "Send cue") + '</button></div>';
+                return '<section class="cue-panel checkpoint-' + id + ' ' + (locked ? "read-only" : "") + '">' +
+                    '<p class="expo-kicker">' + escapeHtml(data.section) + '</p>' +
+                    clarityQuestion(id) +
+                    '<h3>' + escapeHtml(data.title) + '</h3>' +
+                    '<p>' + escapeHtml(data.prompt) + '</p>' +
+                    '<span class="question-label">Choose your cue</span><div class="choice-grid cue-choice-grid" role="group" aria-label="Cue choices">' + choices + '</div>' +
+                    context + clarityFeedback(id) + action + '</section>';
+            }
+
+            function clarityProfile() {
+                const sets = {
+                    Volume: ["Low", "Medium", "Loud"],
+                    Pace: ["Rushed", "Steady", "Very slow"],
+                    Spacing: ["Words run together", "Clear spacing", "Exaggerated gaps"],
+                    Expression: ["Bored", "Calm", "Overexcited"],
+                    Posture: ["Turned towards display", "Audience-facing", "Looking at tablet"]
+                };
+                const feedbackValue = progress.feedback;
+                const locked = expoReadOnly() || Boolean(feedbackValue && feedbackValue.good) || progress.checkpoints.profile.mastered || Boolean(expoTransitionTimer);
+                const labels = Object.entries(sets).map(([name, values]) => '<fieldset class="profile-group"><legend>' + name + '</legend>' + values.map((value) => {
+                    const checked = progress.selections[name] === value;
+                    const wrongSnapshot = feedbackValue && !feedbackValue.good && feedbackValue.badProfile && feedbackValue.badProfile[name] === value;
+                    const good = checked && ((feedbackValue && feedbackValue.good) || (expoReadOnly() && expoCorrectSelection("profile")));
+                    return '<label class="' + (wrongSnapshot ? "incorrect" : good ? "correct" : "") + '"><input type="radio" name="' + name + '" value="' + value + '" ' + (checked ? "checked" : "") + ' ' + (locked ? "disabled" : "") + '>' + value + '</label>';
+                }).join("") + '</fieldset>').join("");
+                const action = locked ? "" : '<div class="button-row"><button class="primary-btn ' + (feedbackValue && !feedbackValue.good ? "check-again" : "") + '" data-action="send" type="button">' + (feedbackValue && !feedbackValue.good ? "Check again" : "Send cue") + '</button></div>';
+                return '<section class="cue-panel ' + (locked ? "read-only" : "") + '">' +
+                    '<p class="expo-kicker">Final profile · Section 4</p>' +
+                    clarityQuestion("profile") +
+                    '<h3>Set the delivery profile</h3><p>Choose the profile that supports a clear, respectful formal cue.</p>' +
+                    '<div class="profile-grid">' + labels + '</div>' + clarityFeedback("profile") + action + '</section>';
+            }
+
+            function clarityMission() {
+                return '<section class="cue-panel"><p class="expo-kicker">Mission briefing</p><h3>Your mission</h3>' +
+                    clarityQuestion("welcome") +
+                    '<p>Complete each cue in order. The next question opens after the current answer is mastered.</p>' +
+                    '<ul class="mission-list"><li>Greet Principal Joseph and invited guests formally.</li><li>Ask for an explanation and protect the speaker’s turn.</li><li>Match a friend-appropriate line to its context.</li><li>Invite community guests to the recycling booth.</li></ul>' +
+                    '<div class="button-row"><button class="primary-btn" data-action="begin" type="button">Begin mission</button></div></section>';
+            }
+
+            function clarityComplete() {
+                return expoComplete();
+            }
+
+            function clarityStage() {
+                const id = expoDisplayId();
+                const uniformSectionIcon = "&#9679;";
+                const lights = [
+                    ["Section 1", "welcome", uniformSectionIcon],
+                    ["Section 2", "question", uniformSectionIcon],
+                    ["Section 3", "turn", uniformSectionIcon],
+                    ["Section 4", "profile", uniformSectionIcon]
+                ];
+                const badges = {
+                    welcome: ["Principal Joseph", "Invited guests"],
+                    question: ["Exhibitor", "Raised-hand student"],
+                    turn: ["Exhibitor", "Raised-hand student"],
+                    backstage: ["Peer backstage"],
+                    finalCue: ["Community guests"],
+                    profile: ["Community guests"]
+                }[id] || [];
+                const routeIcons = {
+                    welcome: '<svg viewBox="0 0 24 24" focusable="false"><circle cx="9" cy="7" r="2.5"/><path d="M4.5 20c.5-4.5 2-7 4.5-7s4 2.5 4.5 7M14 13c2.2-1 3.3-3 3.3-5.6M17.3 7.4l2.8-1.5M17.5 9.5l3.2.2M16.4 5.8l1.4-2.5"/></svg>',
+                    question: '<svg viewBox="0 0 24 24" focusable="false"><path d="M12 3c-4.9 0-8.5 3-8.5 7s3.6 7 8.5 7c1 0 2-.1 2.9-.4L19 20v-5.7c1-1.2 1.5-2.7 1.5-4.3 0-4-3.6-7-8.5-7Z"/><path d="M9.8 8.2A2.3 2.3 0 0 1 12 6.8c1.4 0 2.4.8 2.4 2 0 1.8-2.4 1.8-2.4 3.5M12 14.7h.01"/></svg>',
+                    rainwater: '<svg viewBox="0 0 24 24" focusable="false"><path d="M12 2.8S5.8 10 5.8 14.5a6.2 6.2 0 1 0 12.4 0C18.2 10 12 2.8 12 2.8Z"/><path d="M9 15.2c.4 1.4 1.4 2.2 3 2.5"/></svg>',
+                    backstage: '<svg viewBox="0 0 24 24" focusable="false"><path d="M4 3h16v18H4zM4 3c4 4 4 10 0 18M20 3c-4 4-4 10 0 18M9 3v18M15 3v18"/></svg>',
+                    recycling: '<svg viewBox="0 0 24 24" focusable="false"><path d="m9.4 4 2-2 3.2 5.5H9.8M18.5 9.5l2.7.8-3.2 5.5-2.3-4M14.7 19.5l-.7 2.7H7.6l2.3-4M8.4 7.2 5 13l1.8 3.1M16.8 16.1H10"/></svg>'
+                };
+                const booths = [
+                    { id: "welcome", label: "Welcome", icon: routeIcons.welcome, checkpoint: "welcome" },
+                    { id: "question", label: "Rainwater model", icon: routeIcons.rainwater, checkpoint: "question" },
+                    { id: "turn", label: "Q&A", icon: routeIcons.question, checkpoint: "turn" },
+                    { id: "backstage", label: "Backstage", icon: routeIcons.backstage, checkpoint: "backstage" },
+                    { id: "finalCue", label: "Recycling booth", icon: routeIcons.recycling, checkpoint: "finalCue" }
+                ];
+                const activeBooth = id === "profile" ? "finalCue" : id;
+                const heading = progress.navCheckpoint
+                    ? (id === "profile" ? "Set the delivery profile" : DATA[id].title)
+                    : progress.stage === "mission"
+                        ? "Cue-card mission"
+                        : progress.stage === "complete"
+                            ? "Expo cue sequence complete"
+                            : id === "profile" ? "Set the delivery profile" : DATA[id].title;
+                const lightsMarkup = lights.map(([label, checkpoint, icon]) => {
+                    const complete = progress.checkpoints[checkpoint].mastered;
+                    const active = activeBooth === checkpoint || (checkpoint === "question" && id === "turn");
+                    const stateLabel = complete ? "On" : active ? "Ready" : "Off";
+                    return '<div class="stage-light ' + (complete ? "on" : active ? "ready" : "") + '" aria-label="' + label + ', ' + stateLabel + '"><strong>' + icon + ' ' + label + '</strong><span>' + stateLabel + '</span></div>';
+                }).join("");
+                const boothMarkup = booths.map((booth) => {
+                    const complete = progress.checkpoints[booth.checkpoint].mastered;
+                    const active = activeBooth === booth.id;
+                    const stateLabel = complete ? "On" : active ? "Ready" : "Off";
+                    const classes = ["booth-node", complete ? "complete" : "", active ? "active" : ""].filter(Boolean).join(" ");
+                    return '<div class="' + classes + '" role="listitem" aria-label="' + escapeHtml(booth.label) + ': ' + stateLabel + '" ' + (active ? 'aria-current="step"' : '') + '><span class="booth-sign">' + booth.label + '</span><span class="booth-icon" aria-hidden="true">' + booth.icon + '</span><span class="booth-state">' + stateLabel + '</span>' + (active ? '<span class="host-marker" aria-label="Expo host location">H</span>' : '') + '</div>';
+                }).join("");
+                const audience = badges.map((badge) => '<span class="audience-badge">' + escapeHtml(badge) + '</span>').join("");
+                return '<section class="expo-stage" aria-label="School Innovation Expo stage status"><div class="stage-copy"><p class="expo-kicker">School Innovation Expo</p><span class="courtyard-label">Courtyard route · host position shown</span><div class="host-line"><span class="host-avatar" aria-hidden="true"></span><div><strong>Expo host</strong><div class="mission-meta">' + audience + '</div></div></div><h2 id="sceneHeading" tabindex="-1">' + escapeHtml(heading) + '</h2><p>' + (progress.stage === "mission" ? "Choose the cue that fits each audience. Every accurate cue switches on one part of the expo." : "Stage labels show each section's state.") + '</p></div><div class="stage-lights">' + lightsMarkup + '</div><div class="booth-map" role="list" aria-label="Expo route from Welcome to Recycling Booth">' + boothMarkup + '</div></section>';
+            }
+
+            function clarityRender(focus) {
+                if (!started || !progress) return;
+                const id = expoDisplayId();
+                const content = !progress.navCheckpoint && progress.stage === "mission"
+                    ? clarityMission()
+                    : !progress.navCheckpoint && progress.stage === "complete"
+                        ? clarityComplete()
+                        : id === "profile" ? clarityProfile() : clarityChoices(id);
+                const masteredCount = ORDER.filter((checkpoint) => progress.checkpoints[checkpoint].mastered).length;
+                document.getElementById("expoApp").innerHTML =
+                    '<div class="expo-topline"><p class="expo-kicker">Cue Master</p><span class="progress-label">' + masteredCount + ' of 6 cues mastered</span></div>' +
+                    '<div class="expo-stage-column">' + clarityStage() + '</div>' +
+                    '<div class="expo-content-column">' + expoActions() + expoHint() + content + '</div>';
+                clarityBind();
+                if (focus) {
+                    const target = document.getElementById("questionToAnswerHeading") || document.getElementById("sceneHeading");
+                    if (target) target.focus({ preventScroll: true });
+                }
+            }
+
+            function clarityBind() {
+                const app = document.getElementById("expoApp");
+                app.querySelectorAll("[data-choice]").forEach((button) => button.addEventListener("click", () => {
+                    const id = expoLiveId();
+                    if (expoReadOnly() || (progress.feedback && progress.feedback.good) || !id || progress.checkpoints[id].mastered || expoTransitionTimer) return;
+                    progress.selections[id] = DATA[id].choices[Number(button.dataset.choice)];
+                    expoSave();
+                    clarityRender(false);
+                }));
+                app.querySelectorAll("[data-context]").forEach((button) => button.addEventListener("click", () => {
+                    const id = expoLiveId();
+                    if (expoReadOnly() || (progress.feedback && progress.feedback.good) || !id || progress.checkpoints[id].mastered || expoTransitionTimer) return;
+                    progress.selections.context = ["Informal peer context", "Formal guest context", "Formal teacher context"][Number(button.dataset.context)];
+                    expoSave();
+                    clarityRender(false);
+                }));
+                app.querySelectorAll("input[type=radio]").forEach((input) => input.addEventListener("change", () => {
+                    if (expoReadOnly() || (progress.feedback && progress.feedback.good) || progress.checkpoints.profile.mastered || expoTransitionTimer) return;
+                    progress.selections[input.name] = input.value;
+                    expoSave();
+                    clarityRender(false);
+                }));
+                app.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => clarityAct(button.dataset.action)));
+            }
+
+            function clarityAct(action) {
+                expoEnsureProgress();
+                expoTime();
+                if (action === "begin") {
+                    progress.stage = "welcome";
+                    progress.navCheckpoint = null;
+                    progress.feedback = null;
+                    progress.hintText = "";
+                    announce("Welcome cue ready.");
+                    expoSave();
+                    clarityRender(true);
+                    return;
+                }
+                if (action === "hint") {
+                    if (expoReadOnly()) return;
+                    const id = expoLiveId();
+                    if (!id) return;
+                    if (!progress.hints.includes(id)) progress.hints.push(id);
+                    progress.hintText = DATA[id] && DATA[id].hint ? DATA[id].hint : "Use medium volume, steady pace, clear spacing, calm expression, and an audience-facing posture.";
+                    announce("Hint shown.");
+                    expoSave();
+                    clarityRender(false);
+                    return;
+                }
+                if (action === "send") {
+                    claritySubmit();
+                    return;
+                }
+                if (action === "navPrev" || action === "navNext") {
+                    expoNavigate(action === "navPrev" ? -1 : 1);
+                    return;
+                }
+                if (action === "fresh") {
+                    expoOpenRetryConfirm();
+                    return;
+                }
+                if (action === "memory") {
+                    clarityOpenMemory();
+                }
+            }
+
+            function claritySubmit() {
+                if (expoTransitionTimer || expoReadOnly()) return;
+                const id = expoLiveId();
+                if (!id || progress.checkpoints[id].mastered) return;
+                const record = progress.checkpoints[id];
+                let ok = false;
+                if (id === "profile") {
+                    ok = expoCorrectSelection("profile");
+                } else if (id === "backstage") {
+                    ok = DATA.backstage.accepted.includes(progress.selections.backstage) && progress.selections.context === "Informal peer context";
+                } else {
+                    ok = progress.selections[id] === DATA[id].correct;
+                }
+                record.attempts += 1;
+                if (record.first === null) record.first = ok;
+                if (ok) record.mastered = true;
+                const data = id === "profile"
+                    ? { why: "Your delivery profile supports a clear formal invitation.", fix: "Use medium volume, steady pace, clear spacing, calm expression, and an audience-facing posture.", model: "Medium · Steady · Clear spacing · Calm · Audience-facing" }
+                    : DATA[id];
+                progress.feedback = ok
+                    ? { good: true, why: "This cue fits the audience and purpose." }
+                    : {
+                        good: false,
+                        why: data.why,
+                        fix: data.fix,
+                        model: data.model || data.correct,
+                        badChoice: progress.selections[id],
+                        badContext: id === "backstage" ? progress.selections.context : null,
+                        badProfile: id === "profile" ? { Volume: progress.selections.Volume, Pace: progress.selections.Pace, Spacing: progress.selections.Spacing, Expression: progress.selections.Expression, Posture: progress.selections.Posture } : null
+                    };
+                progress.hintText = "";
+                announce(ok ? "Cue accepted." : "Not quite. Choose another answer and check again.");
+                expoSave();
+                clarityRender(false);
+                if (ok) {
+                    expoTransitionTimer = window.setTimeout(() => {
+                        expoTransitionTimer = null;
+                        expoAdvance(id);
+                    }, 700);
+                }
+            }
+
+            function clarityOpenMemory() {
+                expoEnsureProgress();
+                const memoryBody = document.getElementById("memoryBody");
+                const memoryModal = document.getElementById("memoryModal");
+                const items = ORDER.filter((id) => progress.checkpoints[id].attempts > 0 || progress.checkpoints[id].mastered).map((id) => {
+                    const record = progress.checkpoints[id];
+                    const title = id === "profile" ? "Final delivery profile" : DATA[id].title;
+                    const section = id === "profile" ? "Section 4" : DATA[id].section;
+                    return '<article class="memory-item"><div><strong>' + escapeHtml(title) + '</strong><p class="muted">' + escapeHtml(section) + ' · ' + escapeHtml(expoAnswerSummary(id)) + '</p><span class="memory-status ' + (record.first === false ? "missed" : "") + '">' + (record.first === true ? "First attempt correct" : record.first === false ? "First attempt missed" : "Not submitted") + ' · ' + record.attempts + ' attempt' + (record.attempts === 1 ? "" : "s") + '</span></div><button class="secondary-btn" type="button" data-memory-id="' + id + '">Open review</button></article>';
+                }).join("");
+                memoryBody.innerHTML = items || '<p class="muted">No completed cues yet.</p>';
+                memoryModal.classList.add("show");
+                memoryBody.querySelectorAll("[data-memory-id]").forEach((button) => button.addEventListener("click", () => {
+                    progress.navCheckpoint = button.dataset.memoryId;
+                    progress.feedback = null;
+                    started = true;
+                    showScreen("sim");
+                    expoCloseMemory();
+                    clarityRender(true);
+                }));
+                document.getElementById("closeMemoryBtn").focus();
+            }
+
+            expoRender = clarityRender;
+            expoBind = clarityBind;
+            expoAct = clarityAct;
+            expoSubmit = claritySubmit;
+            const memoryButton = document.getElementById("memoryBtn");
+            if (memoryButton) memoryButton.addEventListener("click", clarityOpenMemory);
+            const resetButton = document.getElementById("resetBtn");
+            if (resetButton) resetButton.addEventListener("click", () => {
+                if (expoTransitionTimer) {
+                    window.clearTimeout(expoTransitionTimer);
+                    expoTransitionTimer = null;
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
