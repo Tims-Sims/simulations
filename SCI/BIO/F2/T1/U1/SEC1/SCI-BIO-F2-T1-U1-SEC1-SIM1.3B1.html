@@ -1,0 +1,2558 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 Enzyme Matching Simulation</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 2 BIOLOGY ENZYME MATCHING SIMULATION
+           Single-file HTML/CSS/JS - Offline Friendly
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Connection / Anchor Dots */
+            --dot-color: #0ea5e9;
+            --dot-glow: rgba(14, 165, 233, 0.5);
+
+            /* Status Colors */
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            overflow-x: hidden;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        html.in-game,
+        body.in-game {
+            height: 100vh !important;
+            overflow: hidden !important;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1280px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-x: hidden;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            flex-shrink: 1;
+        }
+
+        .brand-badge {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 0.98rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 1px;
+            font-size: 0.78rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .topbar .control-btn,
+        .topbar .danger-btn {
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* Mandatory Orange Pulse Ring on Help Button */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Landing Page */
+        #homeScreen {
+            overflow-y: auto;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 20px;
+            min-height: min-content;
+        }
+
+        .hero-card {
+            width: min(100%, 980px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 3.8vh, 42px) clamp(28px, 4vw, 56px);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding: 7px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            align-self: center;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 3.8vw, 3rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 800px);
+            margin: 0 auto 22px;
+            color: var(--text-soft);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            margin: 22px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 16px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 1.85rem;
+            margin-bottom: 8px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 4px;
+            font-size: 1.05rem;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .hero-actions .primary-btn,
+        .hero-actions .secondary-btn {
+            padding: 12px 24px;
+            font-size: 1.02rem;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Interactive Stage / 25% Right Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Canvas Pane */
+        .canvas-pane {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .canvas-pane.glow-correct {
+            border-color: var(--safe-color) !important;
+            box-shadow: 0 0 32px rgba(16, 185, 129, 0.75), inset 0 0 20px rgba(16, 185, 129, 0.15) !important;
+        }
+
+        .canvas-pane.glow-incorrect {
+            border-color: var(--danger-color) !important;
+            box-shadow: 0 0 32px rgba(239, 68, 68, 0.75), inset 0 0 20px rgba(239, 68, 68, 0.15) !important;
+        }
+
+        .canvas-header {
+            padding: 10px 16px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .room-title {
+            font-size: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-tab {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: var(--surface);
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .mode-tab.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        .matching-stage {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 16px 20px;
+            background: color-mix(in srgb, var(--bg-soft) 40%, var(--surface));
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        .column-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .column-title {
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Food Pool Grid */
+        .food-pool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .food-card {
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+
+        /* Food Container Shapes */
+        .food-card.food-shape-rectangle {
+            border-radius: 6px;
+            padding: 8px 16px;
+            border-color: color-mix(in srgb, #38bdf8 60%, var(--border));
+        }
+
+        .food-card.food-shape-trapezoid {
+            clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%);
+            border-radius: 0;
+            padding: 8px 16px;
+            border-color: color-mix(in srgb, #818cf8 60%, var(--border));
+        }
+
+        .food-card.food-shape-oval {
+            border-radius: 999px;
+            padding: 8px 16px;
+            border-color: color-mix(in srgb, #10b981 60%, var(--border));
+        }
+
+        .food-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.2);
+        }
+
+        .food-card.selected {
+            border-color: #f59e0b;
+            background: color-mix(in srgb, #f59e0b 15%, var(--surface-2));
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+        }
+
+        .food-card.dragging {
+            opacity: 0.6;
+            transform: scale(0.98);
+        }
+
+        .food-card.matched {
+            opacity: 0.5;
+            pointer-events: none;
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .food-card.bounce-off {
+            animation: bounceOffEnzyme 0.6s ease-in-out;
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        @keyframes bounceOffEnzyme {
+            0% { transform: scale(1) translate(0, 0); }
+            25% { transform: scale(1.1) translate(-16px, -10px) rotate(-8deg); filter: drop-shadow(0 0 14px rgba(239, 68, 68, 0.7)); }
+            50% { transform: scale(0.95) translate(16px, 10px) rotate(8deg); }
+            75% { transform: scale(1.05) translate(-8px, -4px) rotate(-3deg); }
+            100% { transform: scale(1) translate(0, 0); }
+        }
+
+        @keyframes snapAndDrift {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1.4) rotate(0deg);
+                filter: drop-shadow(0 0 12px #10b981);
+            }
+            40% {
+                opacity: 1;
+                transform: translateY(25px) scale(1.2) rotate(-12deg);
+            }
+            100% {
+                opacity: 0.9;
+                transform: translateY(80px) scale(0.95) rotate(6deg);
+            }
+        }
+
+        .drifting-particle {
+            position: absolute;
+            z-index: 50;
+            font-size: 1.8rem;
+            pointer-events: none;
+            animation: snapAndDrift 0.85s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        /* Food Molecule Dissolving Animation (1.5s high-fidelity reaction) */
+        @keyframes dissolveAndBreakdown {
+            0% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: drop-shadow(0 0 16px var(--accent)) brightness(1.2);
+            }
+            35% {
+                opacity: 1;
+                transform: scale(1.3) rotate(-8deg);
+                filter: drop-shadow(0 0 30px #10b981) brightness(1.5);
+            }
+            70% {
+                opacity: 0.7;
+                transform: scale(0.6) rotate(16deg);
+                filter: drop-shadow(0 0 35px #10b981) blur(4px) brightness(1.7);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.05) rotate(360deg);
+                filter: drop-shadow(0 0 45px #10b981) blur(14px) brightness(2.2);
+            }
+        }
+
+        .dissolving-food-clone {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: var(--surface-2);
+            border: 2px solid #10b981;
+            border-radius: var(--radius-md);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.75);
+            font-size: 0.92rem;
+            font-weight: 800;
+            pointer-events: none;
+            white-space: nowrap;
+            max-height: 100%;
+            box-sizing: border-box;
+            animation: dissolveAndBreakdown 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes bubbleSparkle {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.2);
+            }
+        }
+
+        .dissolve-bubble {
+            position: absolute;
+            z-index: 105;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: bubbleSparkle 1.4s ease-out forwards;
+        }
+
+        .food-icon {
+            font-size: 1.6rem;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--surface-3);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+        }
+
+        .food-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .food-details h4 {
+            margin: 0 0 1px;
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .food-details p {
+            margin: 0;
+            font-size: 0.74rem;
+            color: var(--muted);
+        }
+
+        .blue-connect-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--dot-color);
+            border: 3px solid var(--surface);
+            box-shadow: 0 0 8px var(--dot-glow);
+            cursor: grab;
+            flex-shrink: 0;
+            touch-action: none;
+        }
+
+        .blue-connect-dot:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.8);
+        }
+
+        /* Enzyme Lock Stations Grid */
+        .enzyme-stations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 13px;
+            flex: 1;
+            min-height: 0;
+            overflow-x: hidden;
+        }
+
+        .enzyme-station-card {
+            background: var(--surface-2);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: 15px 17px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 11px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+            height: 100%;
+            min-height: 325px;
+            max-height: 338px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+
+        .enzyme-station-card.drag-hover {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+            transform: scale(1.02);
+        }
+
+        .enzyme-station-card.fit-success {
+            animation: fitLock 0.6s ease;
+            border-style: solid;
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        @keyframes fitLock {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .station-header {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .active-site-lock {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--surface-3), var(--surface-2));
+            border: 2px solid var(--accent);
+            display: grid;
+            place-items: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+        }
+
+        .station-info h4 {
+            margin: 0 0 2px;
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        .station-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .drop-target-zone {
+            height: 102px;
+            min-height: 102px;
+            max-height: 102px;
+            flex-shrink: 0;
+            border: 2px dashed color-mix(in srgb, var(--accent) 35%, transparent);
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--surface) 60%, transparent);
+            display: grid;
+            place-items: center;
+            padding: 7px 11px;
+            text-align: center;
+            font-size: 0.89rem;
+            color: var(--muted);
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* 1. Carbohydrase: Rectangular Lock Active Site */
+        .active-site-lock.shape-rectangular {
+            border-radius: 8px;
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+        }
+        .drop-target-zone.shape-rectangular {
+            border-radius: 8px;
+            border: 2px dashed #38bdf8;
+            background: color-mix(in srgb, #38bdf8 10%, var(--surface));
+            padding: 7px 12px;
+        }
+
+        /* 2. Protease: Triangular Lock Active Site */
+        .active-site-lock.shape-triangle {
+            border-radius: 0;
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+            background: linear-gradient(135deg, #818cf8, #4f46e5);
+            border: none;
+            width: 46px;
+            height: 46px;
+            padding-top: 6px;
+            box-shadow: 0 0 14px rgba(129, 140, 248, 0.4);
+            display: grid;
+            place-items: center;
+        }
+        .drop-target-zone.shape-triangle {
+            clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+            border-radius: 0;
+            border: 2px dashed #818cf8;
+            background: color-mix(in srgb, #818cf8 12%, var(--surface));
+            padding: 7px 12px;
+        }
+
+        /* 3. Lipase: Circular Lock Active Site */
+        .active-site-lock.shape-circle {
+            border-radius: 50%;
+            border: 2px solid #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+        }
+        .drop-target-zone.shape-circle {
+            border-radius: 999px;
+            border: 2px dashed #10b981;
+            background: color-mix(in srgb, #10b981 10%, var(--surface));
+            padding: 7px 12px;
+        }
+
+        .collection-bin {
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+            height: 112px;
+            min-height: 112px;
+            max-height: 112px;
+            flex-shrink: 0;
+        }
+
+        .collection-bin-title {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            min-height: 2.3em;
+            gap: 6px;
+        }
+
+        .collection-particles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            flex: 1;
+            min-height: 52px;
+            align-content: flex-start;
+            align-items: flex-start;
+            overflow-y: auto;
+        }
+
+        .particle-chip {
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--safe-color) 20%, var(--surface));
+            border: 1px solid var(--safe-border);
+            color: var(--safe-color);
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            animation: particleFloat 0.5s ease-out;
+        }
+
+        @keyframes particleFloat {
+            from { opacity: 0; transform: translateY(-10px) scale(0.7); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Dropdown Mode Styling */
+        .dropdown-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .dropdown-select {
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-weight: 600;
+            min-width: 220px;
+        }
+
+        /* Right Panel: Mission Panel */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: hidden;
+            max-height: 100%;
+            height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 8px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stat-box {
+            padding: 6px 8px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 1px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.85rem;
+            line-height: 1.45;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+            height: 230px;
+            min-height: 230px;
+            max-height: 230px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Screen 3: Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .drawer.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .drawer-card {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: min(100%, 480px);
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .drawer.show .drawer-card {
+            transform: translateX(0);
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            width: min(92%, 560px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(20px, 4vw, 32px);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Persistent Fixed Topbar Header -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">🧪</div>
+                <div class="brand-copy">
+                    <h1 id="appTitle">Form 2 Enzyme Matching Simulation</h1>
+                    <p id="appSubtitle">Trinidad and Tobago Secondary Schools — Form 2 Biology Lab</p>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Help Instructions">❔ Help</button>
+                <button class="control-btn" id="soundBtn" aria-label="Toggle Sound">🔊 Sound</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Toggle theme">☀️ Light</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Landing Page -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Biology</div>
+                    <h2>Enzyme Matching Simulation</h2>
+                    <p>Welcome to the Form 2 Biology Lab! Digestive enzymes act like biological keys fitting specific lock-shaped food molecules. Test your knowledge by matching complex foods to their specialized enzyme and observing their breakdown into essential end products.</p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">🔒</div>
+                            <h3>Lock & Key Mechanics</h3>
+                            <p>Match substrate food shapes (starches, proteins, lipids) directly to active enzyme lock sites.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🧪</div>
+                            <h3>End Product Breakdown</h3>
+                            <p>Watch correct matches snap into simple sugars, amino acids, or fatty acids & glycerol in collection bins.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">♿</div>
+                            <h3>Dual Interaction Modes</h3>
+                            <p>Choose between interactive visual drag-and-lock station or accessible text dropdown controls.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Lab Instructions</button>
+                        <button class="primary-btn" id="startSimBtn">🚀 Begin Experiment</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Interactive Game Screen -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- 75% Left Interactive Stage -->
+                <section class="canvas-pane">
+                    <div class="canvas-header">
+                        <div class="room-title">
+                            <span id="pageTitleHeading">🧪 Round 1: Food Substrate & Enzyme Matching (3 Items)</span>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="mode-tab active" id="dragModeTab">🎮 Interactive Station</button>
+                            <button class="mode-tab" id="dropdownModeTab">♿ Text Dropdowns</button>
+                        </div>
+                    </div>
+
+                    <div class="matching-stage" id="matchingStage">
+                        <!-- Interactive Drag/Click Mode -->
+                        <div id="interactiveContainer" style="display:flex; flex-direction:column; gap:24px; width:100%; flex:1; min-height:0; justify-content:space-between;">
+                            <!-- Food Pool -->
+                            <div class="column-box" style="flex-shrink:0;">
+                                <div class="column-title">
+                                    <span>🥩 Floating Food Substrates (Drag 🔵 or Click to Select)</span>
+                                </div>
+                                <div class="food-pool-grid" id="foodPoolGrid"></div>
+                            </div>
+
+                            <!-- Enzyme Lock Stations -->
+                            <div class="column-box" style="flex:1; min-height:0; display:flex; flex-direction:column; margin-top:10px;">
+                                <div class="column-title">
+                                    <span>🔑 Digestive Enzyme Lock Stations & Collection Bins</span>
+                                </div>
+                                <div class="enzyme-stations-grid" id="enzymeStationsGrid"></div>
+                            </div>
+                        </div>
+
+                        <!-- Accessible Text Dropdown Mode -->
+                        <div id="dropdownContainer" style="display:none; flex-direction:column; gap:16px; width:100%;">
+                            <div class="column-title">
+                                <span>♿ Accessible Dropdown Selector Mode</span>
+                            </div>
+                            <div id="dropdownItemsList" style="display:flex; flex-direction:column; gap:16px;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 25% Right Action & Status Panel -->
+                <aside class="mission-panel">
+                    <!-- 1. Progress Card -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Experiment Progress</span>
+                            <span id="matchesCount" style="color:var(--accent);">0 / 9 Matched</span>
+                        </div>
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Technical Scientific Feedback Box (ABOVE CLEAR AND NEXT BUTTONS) -->
+                    <div class="panel-card">
+                        <div class="panel-title">Scientific Feedback</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Select or drag a food item 🥔 🐟 🛢️ onto its matching enzyme station key. Observe how the substrate fits the active site and breaks down into end products!
+                        </div>
+                    </div>
+
+                    <!-- 3. Action Controls Card -->
+                    <div class="panel-card" style="gap:10px;">
+                        <button class="primary-btn" id="nextRoundBtn" style="width:100%; justify-content:center;" disabled>
+                            Next Round →
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Form 2 Biology Lab</div>
+                <h2>Digestive Enzyme Mastery Certification</h2>
+                <p>Excellent work in the Form 2 Biology Lab! Here is your official digestion & enzyme experiment report.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Biochemist</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You successfully matched all food substrates to their correct digestive enzymes and end products!</p>
+                </div>
+
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Correct Items</div>
+                        <div class="val" id="summaryCorrectVal">0 / 9</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Digestion & End Product Breakdown (9 Items)</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Matching Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer (Slide-Over) -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Evaluated food substrates, enzyme stations & scientific end products.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Play Enzyme Matcher</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome, Form 2 Biologist! Your goal is to match food items to their correct digestive enzyme across 3 lab rounds.</p>
+                <ul>
+                    <li><strong>Carbohydrases (Rectangular Substrates):</strong> Break down complex carbohydrates (starches like potatoes, bread, rice) into <em>Simple Sugars (glucose)</em>.</li>
+                    <li><strong>Proteases (Trapezoidal Substrates):</strong> Break down long protein chains (fish, chicken, egg white) into <em>Amino Acids</em>.</li>
+                    <li><strong>Lipases (Oval Substrates):</strong> Break down lipids/fats (cooking oil, butter, coconut oil) into <em>Fatty Acids & Glycerol</em>.</li>
+                    <li><strong>Interaction:</strong> Drag food cards using the blue handle 🔵 or click a food card and then click the target enzyme lock station. Alternatively, use the <strong>♿ Text Dropdowns</strong> tab.</li>
+                    <li><strong>Watch the Lock:</strong> Correct matches fit into the specialized active site shapes (Rectangle, Trapezoid, Oval) and produce animated end products in the collection bin!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the lab experiment and clear your progress?</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Experiment Progress</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           ENZYME MATCHING DATASET (9 FOOD ITEMS ACROSS 3 ROUNDS)
+           ============================================================ */
+        const MASTER_DATASET = [
+            {
+                "food_id": "food_001",
+                "round": 0,
+                "food_name": "Potato",
+                "food_icon": "🥔",
+                "substrate_type": "Carbohydrate (Starch)",
+                "target_enzyme": "Carbohydrase",
+                "end_product": "Simple sugars (such as glucose)",
+                "particle_icon": "🍬",
+                "explanation": "A potato is rich in carbohydrates (starch). Carbohydrases break down these large, insoluble carbohydrates into small, soluble sugars that the body can use for energy.",
+                "hints": {
+                    "Protease": "Not quite! Proteases act on proteins. A potato is mostly carbohydrate, so it needs a carbohydrase.",
+                    "Lipase": "Not quite! Lipases act on lipids (fats). A potato is rich in starch (carbohydrate), so it requires a carbohydrase."
+                }
+            },
+            {
+                "food_id": "food_002",
+                "round": 0,
+                "food_name": "Piece of Fish",
+                "food_icon": "🐟",
+                "substrate_type": "Protein",
+                "target_enzyme": "Protease",
+                "end_product": "Amino acids",
+                "particle_icon": "🔵",
+                "explanation": "Fish is a great source of protein. Proteases break down long protein chains into individual amino acids, which the body uses for growth and tissue repair.",
+                "hints": {
+                    "Carbohydrase": "Not quite! Carbohydrases break down starches into simple sugars. Fish is high in protein, so it needs a protease.",
+                    "Lipase": "Not quite! Lipases act on lipids (fats). Fish is a protein source, so it requires a protease."
+                }
+            },
+            {
+                "food_id": "food_003",
+                "round": 0,
+                "food_name": "Drop of Cooking Oil",
+                "food_icon": "🛢️",
+                "substrate_type": "Lipid (Fat)",
+                "target_enzyme": "Lipase",
+                "end_product": "Fatty acids and glycerol",
+                "particle_icon": "💧",
+                "explanation": "Cooking oil is a lipid (fat). Lipases break down large fat molecules into smaller fatty acids and glycerol.",
+                "hints": {
+                    "Carbohydrase": "Almost! Carbohydrases break down starches and sugars. Oil is a fat (lipid), so it needs a lipase.",
+                    "Protease": "Not quite! Proteases break down proteins into amino acids. Oil is a lipid (fat), so it needs a lipase."
+                }
+            },
+            {
+                "food_id": "food_004",
+                "round": 1,
+                "food_name": "Slice of Bread",
+                "food_icon": "🍞",
+                "substrate_type": "Carbohydrate (Starch)",
+                "target_enzyme": "Carbohydrase",
+                "end_product": "Simple sugars (glucose)",
+                "particle_icon": "🍬",
+                "explanation": "Bread contains high levels of starch (a complex carbohydrate). Carbohydrase enzymes split these starch molecules into simple glucose sugars.",
+                "hints": {
+                    "Protease": "Not quite! Proteases target proteins. Bread is a starchy food, so it requires a carbohydrase.",
+                    "Lipase": "Not quite! Lipases break down lipids (fats). Bread is primarily carbohydrate, so it needs a carbohydrase."
+                }
+            },
+            {
+                "food_id": "food_005",
+                "round": 1,
+                "food_name": "Boiled Chicken",
+                "food_icon": "🍗",
+                "substrate_type": "Protein",
+                "target_enzyme": "Protease",
+                "end_product": "Amino acids",
+                "particle_icon": "🔵",
+                "explanation": "Chicken breast is packed with muscle protein. Proteases hydrolyze the peptide bonds in proteins to yield free amino acids.",
+                "hints": {
+                    "Carbohydrase": "Not quite! Carbohydrases break down carbohydrates like starch. Chicken is rich in protein, so it needs a protease.",
+                    "Lipase": "Not quite! Lipases break down fats. Lean chicken breast is mostly protein, so it requires a protease."
+                }
+            },
+            {
+                "food_id": "food_006",
+                "round": 1,
+                "food_name": "Scoop of Butter",
+                "food_icon": "🧈",
+                "substrate_type": "Lipid (Fat)",
+                "target_enzyme": "Lipase",
+                "end_product": "Fatty acids and glycerol",
+                "particle_icon": "💧",
+                "explanation": "Butter consists mainly of dairy lipids. Lipase enzymes hydrolyze triglyceride fats into fatty acid chains and glycerol molecules.",
+                "hints": {
+                    "Carbohydrase": "Not quite! Carbohydrases break down starches into sugars. Butter is a lipid (fat), so it requires a lipase.",
+                    "Protease": "Not quite! Proteases digest proteins. Butter is composed of lipids, so it needs a lipase."
+                }
+            },
+            {
+                "food_id": "food_007",
+                "round": 2,
+                "food_name": "Bowl of Boiled Rice",
+                "food_icon": "🍚",
+                "substrate_type": "Carbohydrate (Starch)",
+                "target_enzyme": "Carbohydrase",
+                "end_product": "Simple sugars (glucose)",
+                "particle_icon": "🍬",
+                "explanation": "Rice is a major carbohydrate crop high in starch. Carbohydrase enzymes digest complex starch into soluble glucose for energy.",
+                "hints": {
+                    "Protease": "Not quite! Proteases digest proteins. Rice is mainly starch (carbohydrate), so it needs a carbohydrase.",
+                    "Lipase": "Not quite! Lipases digest fats. Rice is a carbohydrate-rich food, so it requires a carbohydrase."
+                }
+            },
+            {
+                "food_id": "food_008",
+                "round": 2,
+                "food_name": "Egg White (Albumen)",
+                "food_icon": "🥚",
+                "substrate_type": "Protein",
+                "target_enzyme": "Protease",
+                "end_product": "Amino acids",
+                "particle_icon": "🔵",
+                "explanation": "Egg white consists almost entirely of water and pure albumen protein. Proteases break down albumen into amino acid building blocks.",
+                "hints": {
+                    "Carbohydrase": "Not quite! Carbohydrases target starches and sugars. Egg white is pure protein, so it needs a protease.",
+                    "Lipase": "Not quite! Lipases digest lipids. Egg white is free of fat and rich in protein, so it requires a protease."
+                }
+            },
+            {
+                "food_id": "food_009",
+                "round": 2,
+                "food_name": "Spoonful of Coconut Oil",
+                "food_icon": "🥥",
+                "substrate_type": "Lipid (Fat)",
+                "target_enzyme": "Lipase",
+                "end_product": "Fatty acids and glycerol",
+                "particle_icon": "💧",
+                "explanation": "Coconut oil is a plant lipid rich in triglycerides. Lipases break down these lipid molecules into fatty acids and glycerol.",
+                "hints": {
+                    "Carbohydrase": "Not quite! Carbohydrases break down starches. Coconut oil is a lipid (fat), so it needs a lipase.",
+                    "Protease": "Not quite! Proteases digest proteins into amino acids. Coconut oil is a fat, so it requires a lipase."
+                }
+            }
+        ];
+
+        const ENZYME_STATIONS_CONFIG = [
+            {
+                "name": "Carbohydrase",
+                "lock_icon": "🔒",
+                "shape_class": "shape-rectangular",
+                "shape_name": "Rectangular",
+                "subtitle": "Acts on Carbohydrates",
+                "bin_label": "Simple Sugars Bin (Glucose)",
+                "particle_icon": "🍬"
+            },
+            {
+                "name": "Protease",
+                "lock_icon": "🔒",
+                "shape_class": "shape-triangle",
+                "shape_name": "Trapezoidal",
+                "subtitle": "Acts on Protein Chains",
+                "bin_label": "Amino Acids Bin (Peptides)",
+                "particle_icon": "🔵"
+            },
+            {
+                "name": "Lipase",
+                "lock_icon": "🔒",
+                "shape_class": "shape-circle",
+                "shape_name": "Oval",
+                "subtitle": "Acts on Lipids / Fats & Oils",
+                "bin_label": "Fatty Acids & Glycerol Bin",
+                "particle_icon": "💧"
+            }
+        ];
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Select or drag a food item 🥔 🐟 🛢️ onto its matching enzyme station lock (Rectangle for Carbohydrase, Trapezoid for Protease, Oval for Lipase). Observe how the substrate fits the active site!`;
+
+        const state = {
+            currentRound: 0,
+            selectedFoodId: null,
+            evaluations: {}, // food_id -> { isCorrect, chosenEnzyme, attempts }
+            attemptsCount: 0,
+            score: 0,
+            streak: 0,
+            bestStreak: 0,
+            theme: "light",
+            mode: "drag", // "drag" or "dropdown"
+            collectedParticles: {
+                "Carbohydrase": [],
+                "Protease": [],
+                "Lipase": []
+            },
+            isInputBlocked: false,
+            feedbackTimeout: null,
+            countdownInterval: null,
+            feedbackCountdown: 0,
+            soundMuted: false
+        };
+
+        let draggingFoodId = null;
+
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function randomizeDatasetRounds() {
+            const carbs = shuffleArray(MASTER_DATASET.filter(f => f.target_enzyme === "Carbohydrase"));
+            const proteins = shuffleArray(MASTER_DATASET.filter(f => f.target_enzyme === "Protease"));
+            const lipids = shuffleArray(MASTER_DATASET.filter(f => f.target_enzyme === "Lipase"));
+
+            const newDataset = [];
+
+            for (let r = 0; r < 3; r++) {
+                const roundGroup = shuffleArray([carbs[r], proteins[r], lipids[r]]);
+                roundGroup.forEach(item => {
+                    item.round = r;
+                    newDataset.push(item);
+                });
+            }
+
+            MASTER_DATASET.length = 0;
+            MASTER_DATASET.push(...newDataset);
+        }
+
+        function clearFeedbackTimer() {
+            if (state.feedbackTimeout) {
+                clearTimeout(state.feedbackTimeout);
+                state.feedbackTimeout = null;
+            }
+            if (state.countdownInterval) {
+                clearInterval(state.countdownInterval);
+                state.countdownInterval = null;
+            }
+            state.isInputBlocked = false;
+
+            const canvasPane = document.querySelector(".canvas-pane");
+            if (canvasPane) {
+                canvasPane.classList.remove("glow-correct", "glow-incorrect");
+            }
+        }
+
+        /* DOM Elements */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            soundBtn: document.getElementById("soundBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            pageTitleHeading: document.getElementById("pageTitleHeading"),
+            dragModeTab: document.getElementById("dragModeTab"),
+            dropdownModeTab: document.getElementById("dropdownModeTab"),
+            interactiveContainer: document.getElementById("interactiveContainer"),
+            dropdownContainer: document.getElementById("dropdownContainer"),
+            foodPoolGrid: document.getElementById("foodPoolGrid"),
+            enzymeStationsGrid: document.getElementById("enzymeStationsGrid"),
+            dropdownItemsList: document.getElementById("dropdownItemsList"),
+            matchesCount: document.getElementById("matchesCount"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            nextRoundBtn: document.getElementById("nextRoundBtn"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList")
+        };
+
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+        }
+
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        /* Initialization */
+        init();
+
+        function init() {
+            bindEvents();
+            loadState();
+            renderDashboard();
+
+            // MANDATORY AUTO-OPEN INSTRUCTIONS MODAL ON LAUNCH
+            openModal();
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                clearFeedbackTimer();
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // MANDATORY RULE: NO BACKDROP CLICK DISMISSAL
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.soundBtn.addEventListener("click", toggleSound);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+            dom.nextRoundBtn.addEventListener("click", advanceRoundOrSummary);
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            dom.dragModeTab.addEventListener("click", () => setMode("drag"));
+            dom.dropdownModeTab.addEventListener("click", () => setMode("dropdown"));
+
+            window.addEventListener("pointermove", handlePointerMoveGlobal);
+            window.addEventListener("pointerup", handlePointerUpGlobal);
+            window.addEventListener("pointercancel", handlePointerUpGlobal);
+
+            // Real-time browser color scheme listener
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (err) {}
+        }
+
+        /* CUSTOM SMOOTH FLUID DRAG-AND-DROP WITHOUT BROWSER GHOSTING */
+        let draggingData = null;
+
+        function handlePointerDownFood(foodId, e) {
+            if (state.isInputBlocked) return;
+
+            const isMatched = state.evaluations[foodId]?.isCorrect === true;
+            if (isMatched) return;
+
+            // Prevent native browser drag ghosting
+            e.preventDefault();
+
+            const card = document.getElementById(`food_card_${foodId}`);
+            if (!card) return;
+
+            const rect = card.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
+
+            // Create floating clone avatar that moves directly under the pointer
+            const clone = card.cloneNode(true);
+            clone.id = `food_clone_${foodId}`;
+            clone.style.position = "fixed";
+            clone.style.width = `${rect.width}px`;
+            clone.style.height = `${rect.height}px`;
+            clone.style.left = `${e.clientX - offsetX}px`;
+            clone.style.top = `${e.clientY - offsetY}px`;
+            clone.style.zIndex = "1000";
+            clone.style.pointerEvents = "none";
+            clone.style.transform = "scale(1.06) rotate(2deg)";
+            clone.style.boxShadow = "0 16px 32px rgba(0,0,0,0.4)";
+            clone.style.borderColor = "var(--accent)";
+            clone.style.cursor = "grabbing";
+
+            document.body.appendChild(clone);
+            card.style.opacity = "0.3";
+
+            draggingData = {
+                foodId,
+                cloneEl: clone,
+                sourceEl: card,
+                offsetX,
+                offsetY
+            };
+        }
+
+        function handlePointerMoveGlobal(e) {
+            if (!draggingData) return;
+
+            const x = e.clientX - draggingData.offsetX;
+            const y = e.clientY - draggingData.offsetY;
+
+            draggingData.cloneEl.style.left = `${x}px`;
+            draggingData.cloneEl.style.top = `${y}px`;
+
+            // Live highlight target container under pointer
+            document.querySelectorAll(".enzyme-station-card").forEach(station => {
+                station.classList.remove("drag-hover");
+            });
+
+            const hovered = document.elementFromPoint(e.clientX, e.clientY);
+            if (hovered) {
+                const stationCard = hovered.closest(".enzyme-station-card");
+                if (stationCard) {
+                    stationCard.classList.add("drag-hover");
+                }
+            }
+        }
+
+        function handlePointerUpGlobal(e) {
+            if (!draggingData) return;
+
+            const foodId = draggingData.foodId;
+            const cloneEl = draggingData.cloneEl;
+            const sourceEl = draggingData.sourceEl;
+
+            // Detect drop target container
+            const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+            let targetEnzyme = null;
+            if (dropTarget) {
+                const stationCard = dropTarget.closest(".enzyme-station-card");
+                if (stationCard && stationCard.dataset.enzyme) {
+                    targetEnzyme = stationCard.dataset.enzyme;
+                }
+            }
+
+            // Cleanup floating clone
+            if (cloneEl && cloneEl.parentNode) {
+                cloneEl.parentNode.removeChild(cloneEl);
+            }
+            if (sourceEl) {
+                sourceEl.style.opacity = "1";
+            }
+
+            document.querySelectorAll(".enzyme-station-card").forEach(station => {
+                station.classList.remove("drag-hover");
+            });
+
+            draggingData = null;
+
+            if (targetEnzyme) {
+                attemptMatch(foodId, targetEnzyme);
+            }
+        }
+
+        function setMode(modeName) {
+            state.mode = modeName;
+            dom.dragModeTab.classList.toggle("active", modeName === "drag");
+            dom.dropdownModeTab.classList.toggle("active", modeName === "dropdown");
+            dom.interactiveContainer.style.display = modeName === "drag" ? "flex" : "none";
+            dom.dropdownContainer.style.display = modeName === "dropdown" ? "flex" : "none";
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        function clearSelection() {
+            if (state.isInputBlocked) return;
+            state.selectedFoodId = null;
+            clearFeedbackTimer();
+            resetExplanationBox();
+            renderDashboard();
+        }
+
+        /* CORE MATCHING ENGINE logic */
+        function attemptMatch(foodId, chosenEnzyme) {
+            if (state.isInputBlocked) return;
+
+            const food = MASTER_DATASET.find(f => f.food_id === foodId);
+            if (!food) return;
+
+            // If already correctly evaluated, ignore
+            if (state.evaluations[foodId] && state.evaluations[foodId].isCorrect) {
+                return;
+            }
+
+            clearFeedbackTimer();
+            state.isInputBlocked = true;
+
+            const canvasPane = document.querySelector(".canvas-pane");
+
+            state.attemptsCount += 1;
+            const isCorrect = food.target_enzyme === chosenEnzyme;
+
+            if (isCorrect) {
+                if (canvasPane) {
+                    canvasPane.classList.add("glow-correct");
+                }
+
+                state.evaluations[foodId] = {
+                    isCorrect: true,
+                    chosenEnzyme,
+                    attempts: (state.evaluations[foodId]?.attempts || 0) + 1
+                };
+                state.score += 10;
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+
+                // Add to collection bin
+                state.collectedParticles[chosenEnzyme].push(food.particle_icon);
+
+                playAudioFeedback(true);
+
+                // Immediately gray out food card in food pool
+                const sourceCard = document.getElementById(`food_card_${foodId}`);
+                if (sourceCard) {
+                    sourceCard.classList.add("matched");
+                }
+
+                // Place food avatar inside enzyme station drop target zone and animate 1.5s dissolution
+                const stationCard = document.getElementById(`station_${chosenEnzyme}`);
+                if (stationCard) {
+                    stationCard.classList.add("fit-success");
+
+                    const dropZone = stationCard.querySelector(".drop-target-zone");
+                    if (dropZone) {
+                        dropZone.style.position = "relative";
+                        dropZone.style.overflow = "hidden";
+                        dropZone.innerHTML = `
+                            <div class="dissolving-food-clone">
+                                <span>${food.food_icon}</span>
+                                <span>${escapeHtml(food.food_name)}</span>
+                            </div>
+                        `;
+
+                        // Spawn 8 effervescent reaction sparkles
+                        for (let b = 0; b < 8; b++) {
+                            const bubble = document.createElement("div");
+                            bubble.className = "dissolve-bubble";
+                            bubble.textContent = b % 2 === 0 ? "✨" : "🫧";
+                            const angle = (b / 8) * Math.PI * 2;
+                            const tx = `${Math.cos(angle) * 38}px`;
+                            const ty = `${Math.sin(angle) * 38}px`;
+                            bubble.style.setProperty("--tx", tx);
+                            bubble.style.setProperty("--ty", ty);
+                            bubble.style.left = "50%";
+                            bubble.style.top = "50%";
+                            dropZone.appendChild(bubble);
+
+                            setTimeout(() => {
+                                if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
+                            }, 1400);
+                        }
+                    }
+
+                    // Spawn end-product drift into collection bin as dissolve completes
+                    setTimeout(() => {
+                        for (let i = 0; i < 3; i++) {
+                            setTimeout(() => {
+                                const particle = document.createElement("div");
+                                particle.className = "drifting-particle";
+                                particle.textContent = food.particle_icon;
+                                particle.style.left = `${25 + i * 25}%`;
+                                particle.style.top = "45px";
+                                stationCard.appendChild(particle);
+
+                                setTimeout(() => {
+                                    if (particle.parentNode) {
+                                        particle.parentNode.removeChild(particle);
+                                    }
+                                }, 850);
+                            }, i * 180);
+                        }
+                    }, 1100);
+
+                    // Re-render dashboard after 1.5s dissolve animation finishes
+                    setTimeout(() => {
+                        stationCard.classList.remove("fit-success");
+                        renderDashboard();
+                    }, 1500);
+                }
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <div style="font-weight:800; margin-bottom:4px; color:var(--safe-color);">✅ Perfect Lock & Key Fit!</div>
+                    <div><strong>${escapeHtml(food.food_name)}</strong> (${escapeHtml(food.substrate_type)}) ➔ <strong>${escapeHtml(chosenEnzyme)}</strong> ➔ <em>${escapeHtml(food.end_product)}</em></div>
+                    <div style="margin-top:6px; font-size:0.84rem;">${escapeHtml(food.explanation)}</div>
+                    <div style="margin-top:6px; font-size:0.78rem; color:var(--accent); font-weight:700;" id="feedbackTimerText">⏱️ Resuming in 10s...</div>
+                `;
+            } else {
+                if (canvasPane) {
+                    canvasPane.classList.add("glow-incorrect");
+                }
+
+                state.evaluations[foodId] = {
+                    isCorrect: false,
+                    chosenEnzyme,
+                    attempts: (state.evaluations[foodId]?.attempts || 0) + 1
+                };
+                state.streak = 0;
+
+                playAudioFeedback(false);
+
+                // Trigger Bounce Off animation on card
+                const foodCard = document.getElementById(`food_card_${foodId}`);
+                if (foodCard) {
+                    foodCard.classList.add("bounce-off");
+                    setTimeout(() => foodCard.classList.remove("bounce-off"), 500);
+                }
+
+                const hint = food.hints[chosenEnzyme] || `Not quite! ${food.food_name} does not match ${chosenEnzyme}.`;
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <div style="font-weight:800; margin-bottom:4px; color:var(--danger-color);">❌ Mismatched Substrate</div>
+                    <div>${escapeHtml(hint)}</div>
+                    <div style="margin-top:6px; font-size:0.78rem; color:var(--hazard-color); font-weight:700;" id="feedbackTimerText">⏱️ Resuming in 10s...</div>
+                `;
+
+                renderDashboard();
+            }
+
+            state.selectedFoodId = null;
+            renderHistoryList();
+
+            // 10 second countdown and auto-unblock
+            state.feedbackCountdown = 10;
+            state.countdownInterval = setInterval(() => {
+                state.feedbackCountdown -= 1;
+                const timerEl = document.getElementById("feedbackTimerText");
+                if (timerEl && state.feedbackCountdown > 0) {
+                    timerEl.textContent = `⏱️ Resuming in ${state.feedbackCountdown}s...`;
+                }
+            }, 1000);
+
+            state.feedbackTimeout = setTimeout(() => {
+                clearFeedbackTimer();
+                resetExplanationBox();
+                renderDashboard();
+            }, 10000);
+        }
+
+        function advanceRoundOrSummary() {
+            if (state.isInputBlocked) return;
+            clearFeedbackTimer();
+            if (state.currentRound < 2) {
+                state.currentRound += 1;
+                state.selectedFoodId = null;
+                resetExplanationBox();
+                renderDashboard();
+            } else {
+                showScreen("summary");
+            }
+        }
+
+        function renderDashboard() {
+            const currentRoundItems = MASTER_DATASET.filter(f => f.round === state.currentRound);
+            const totalItems = MASTER_DATASET.length;
+            const evaluatedCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const pct = Math.round((evaluatedCount / totalItems) * 100);
+
+            dom.pageTitleHeading.textContent = `🧪 Round ${state.currentRound + 1} of 3: Food Substrates & Enzyme Lock Stations`;
+            dom.matchesCount.textContent = `${evaluatedCount} / ${totalItems} Matched`;
+            dom.progressPercent.textContent = `${pct}% Complete`;
+            dom.progressFillBar.style.width = `${pct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            // Accuracy calculation strictly based on correct / total attempts
+            const totalAttempts = state.attemptsCount;
+            const accuracy = totalAttempts > 0 ? Math.round((evaluatedCount / totalAttempts) * 100) : 0;
+            dom.accuracyVal.textContent = `${accuracy}%`;
+
+            // Check if current round complete
+            const currentRoundComplete = currentRoundItems.every(f => state.evaluations[f.food_id]?.isCorrect);
+
+            // Keep Next Round / View Certification button visible at ALL times!
+            dom.nextRoundBtn.style.display = "inline-flex";
+            dom.nextRoundBtn.textContent = state.currentRound < 2 ? "Next Round →" : "View Final Certification →";
+
+            // Greyed out / disabled until all items in round are matched AND 3s cooldown is clear
+            dom.nextRoundBtn.disabled = !currentRoundComplete || state.isInputBlocked;
+
+            // Render Food Pool Grid
+            dom.foodPoolGrid.innerHTML = "";
+            currentRoundItems.forEach(food => {
+                const isMatched = state.evaluations[food.food_id]?.isCorrect === true;
+                const isSelected = state.selectedFoodId === food.food_id;
+
+                const shapeClass = food.target_enzyme === 'Carbohydrase' 
+                    ? 'food-shape-rectangle' 
+                    : food.target_enzyme === 'Protease' 
+                    ? 'food-shape-trapezoid' 
+                    : 'food-shape-oval';
+
+                const card = document.createElement("div");
+                card.id = `food_card_${food.food_id}`;
+                card.className = `food-card ${shapeClass} ${isSelected ? 'selected' : ''} ${isMatched ? 'matched' : ''} ${state.isInputBlocked ? 'disabled' : ''}`;
+                card.ondragstart = () => false;
+
+                if (state.isInputBlocked && !isMatched) {
+                    card.style.opacity = "0.5";
+                    card.style.cursor = "not-allowed";
+                }
+
+                card.innerHTML = `
+                    <div class="food-icon">${food.food_icon}</div>
+                    <div class="food-details">
+                        <h4>${escapeHtml(food.food_name)}</h4>
+                        <p>${escapeHtml(food.substrate_type)}</p>
+                    </div>
+                    <div class="blue-connect-dot" title="Drag to Enzyme Lock Station"></div>
+                `;
+
+                // Click to select behavior
+                card.addEventListener("click", (e) => {
+                    if (state.isInputBlocked || isMatched) return;
+                    if (state.selectedFoodId === food.food_id) {
+                        state.selectedFoodId = null;
+                    } else {
+                        state.selectedFoodId = food.food_id;
+                    }
+                    renderDashboard();
+                });
+
+                // Custom pointer drag initiation
+                card.addEventListener("pointerdown", (e) => {
+                    if (state.isInputBlocked) return;
+                    handlePointerDownFood(food.food_id, e);
+                });
+
+                dom.foodPoolGrid.appendChild(card);
+            });
+
+            // Render Enzyme Stations Grid
+            dom.enzymeStationsGrid.innerHTML = "";
+            ENZYME_STATIONS_CONFIG.forEach(cfg => {
+                const stationCard = document.createElement("div");
+                stationCard.id = `station_${cfg.name}`;
+                stationCard.className = "enzyme-station-card";
+                stationCard.dataset.enzyme = cfg.name;
+
+                const particlesHtml = state.collectedParticles[cfg.name].map(p => `
+                    <span class="particle-chip">${p} ${escapeHtml(cfg.name === 'Carbohydrase' ? 'Glucose' : cfg.name === 'Protease' ? 'Amino Acid' : 'Fatty Acid')}</span>
+                `).join("");
+
+                stationCard.innerHTML = `
+                    <div class="station-header">
+                        <div class="active-site-lock ${cfg.shape_class}" title="${cfg.shape_name}">${cfg.lock_icon}</div>
+                        <div class="station-info">
+                            <h4>${escapeHtml(cfg.name)} Station</h4>
+                            <p>${escapeHtml(cfg.subtitle)}</p>
+                        </div>
+                    </div>
+
+                    <div class="drop-target-zone ${cfg.shape_class}">
+                        ${state.selectedFoodId ? `👉 Click to lock [${escapeHtml(MASTER_DATASET.find(f => f.food_id === state.selectedFoodId)?.food_name)}] here!` : `🎯 Fit ${cfg.shape_name} Substrate Here`}
+                    </div>
+
+                    <div class="collection-bin">
+                        <div class="collection-bin-title">
+                            <span>🧪 ${escapeHtml(cfg.bin_label)}</span>
+                            <span>${state.collectedParticles[cfg.name].length} Collected</span>
+                        </div>
+                        <div class="collection-particles">
+                            ${particlesHtml || '<span style="font-size:0.78rem; color:var(--muted);">No end products collected yet.</span>'}
+                        </div>
+                    </div>
+                `;
+
+                // Click to place if food selected
+                stationCard.addEventListener("click", () => {
+                    if (state.isInputBlocked) return;
+                    if (state.selectedFoodId) {
+                        attemptMatch(state.selectedFoodId, cfg.name);
+                    }
+                });
+
+                dom.enzymeStationsGrid.appendChild(stationCard);
+            });
+
+            // Render Accessible Text Dropdowns List
+            dom.dropdownItemsList.innerHTML = "";
+            currentRoundItems.forEach(food => {
+                const evalData = state.evaluations[food.food_id] || {};
+                const isMatched = evalData.isCorrect === true;
+
+                const row = document.createElement("div");
+                row.className = "dropdown-card";
+
+                row.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:1.8rem;">${food.food_icon}</span>
+                        <div>
+                            <strong style="font-size:0.98rem; display:block;">${escapeHtml(food.food_name)}</strong>
+                            <span style="font-size:0.8rem; color:var(--muted);">${escapeHtml(food.substrate_type)}</span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <select class="dropdown-select" id="select_${food.food_id}" ${isMatched || state.isInputBlocked ? 'disabled' : ''}>
+                            <option value="">-- Select Enzyme Station --</option>
+                            <option value="Carbohydrase" ${evalData.chosenEnzyme === 'Carbohydrase' ? 'selected' : ''}>Carbohydrase</option>
+                            <option value="Protease" ${evalData.chosenEnzyme === 'Protease' ? 'selected' : ''}>Protease</option>
+                            <option value="Lipase" ${evalData.chosenEnzyme === 'Lipase' ? 'selected' : ''}>Lipase</option>
+                        </select>
+                        <button class="primary-btn" id="btn_select_${food.food_id}" ${isMatched || state.isInputBlocked ? 'disabled' : ''}>
+                            ${isMatched ? '✅ Matched' : 'Check Match'}
+                        </button>
+                    </div>
+                `;
+
+                dom.dropdownItemsList.appendChild(row);
+
+                const btn = document.getElementById(`btn_select_${food.food_id}`);
+                const selectEl = document.getElementById(`select_${food.food_id}`);
+
+                if (btn && selectEl) {
+                    if (!isMatched) {
+                        btn.disabled = state.isInputBlocked || !selectEl.value;
+                        selectEl.addEventListener("change", () => {
+                            btn.disabled = state.isInputBlocked || !selectEl.value;
+                        });
+                    }
+
+                    btn.addEventListener("click", () => {
+                        if (state.isInputBlocked) return;
+                        const chosen = selectEl.value;
+                        if (!chosen) return;
+                        attemptMatch(food.food_id, chosen);
+                    });
+                }
+            });
+        }
+
+        function renderSummaryScreen() {
+            const total = MASTER_DATASET.length;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = state.attemptsCount > 0 ? Math.round((correctCount / state.attemptsCount) * 100) : 0;
+
+            dom.summaryScoreVal.textContent = state.score;
+            dom.summaryAccuracyVal.textContent = `${accuracy}%`;
+            dom.summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            dom.summaryCorrectVal.textContent = `${correctCount} / ${total}`;
+
+            if (accuracy >= 90 && correctCount === total) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "Master Biochemist";
+                dom.badgeDesc.textContent = `Flawless lab performance! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct)! You thoroughly understand enzyme digestion.`;
+            } else if (accuracy >= 70) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Lab Biochemist";
+                dom.badgeDesc.textContent = `Great work! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Review the breakdown below to perfect your enzyme knowledge.`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Junior Lab Trainee";
+                dom.badgeDesc.textContent = `You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Review the scientific memory drawer to strengthen your skills.`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+            MASTER_DATASET.forEach(food => {
+                const evalData = state.evaluations[food.food_id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const userChoice = evalData.chosenEnzyme || "Unanswered";
+
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text); font-size:0.98rem;">${food.food_icon} ${escapeHtml(food.food_name)} (${escapeHtml(food.substrate_type)})</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'} ${isCorrect ? `(🎯 ${escapeHtml(food.target_enzyme)})` : `(Selected: ${escapeHtml(userChoice)} ➔ Target: ${escapeHtml(food.target_enzyme)})`}
+                        </span>
+                    </div>
+                    <div style="font-size:0.86rem; color:var(--accent); font-weight:700; margin-bottom:4px;">🧪 End Product: ${escapeHtml(food.end_product)}</div>
+                    <p style="margin:4px 0 0; color:var(--text-soft); font-size:0.88rem; line-height:1.5;">${escapeHtml(food.explanation)}</p>
+                `;
+                dom.summaryDetailsList.appendChild(card);
+            });
+        }
+
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedList = MASTER_DATASET.filter(f => state.evaluations[f.food_id]);
+
+            if (evaluatedList.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:16px; color:var(--muted); text-align:center;">No evaluated food items yet.</div>`;
+                return;
+            }
+
+            evaluatedList.forEach(food => {
+                const evalData = state.evaluations[food.food_id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const userChoice = evalData.chosenEnzyme || "Unanswered";
+
+                const item = document.createElement("div");
+                item.className = "summary-item-card";
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">${food.food_icon} ${escapeHtml(food.food_name)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'} ${isCorrect ? `(🎯 ${escapeHtml(food.target_enzyme)})` : `(Selected: ${escapeHtml(userChoice)} ➔ Target: ${escapeHtml(food.target_enzyme)})`}
+                        </span>
+                    </div>
+                    <div style="font-size:0.84rem; color:var(--accent); font-weight:700; margin-bottom:4px;">🧪 End Product: ${escapeHtml(food.end_product)}</div>
+                    <div style="font-size:0.86rem; color:var(--text-soft);">${escapeHtml(food.explanation)}</div>
+                `;
+                dom.historyList.appendChild(item);
+            });
+        }
+
+        /* Modal & Drawer Controls */
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleSound() {
+            state.soundMuted = !state.soundMuted;
+            updateSoundUI();
+        }
+
+        function updateSoundUI() {
+            if (dom.soundBtn) {
+                dom.soundBtn.textContent = state.soundMuted ? "🔇 Muted" : "🔊 Sound";
+                dom.soundBtn.setAttribute("aria-label", state.soundMuted ? "Unmute Sound" : "Mute Sound");
+            }
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try {
+                sessionStorage.setItem("user_toggled_theme", state.theme);
+            } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen toggle failed", err);
+            }
+        }
+
+        function confirmReset() {
+            closeResetModal();
+
+            state.currentRound = 0;
+            state.selectedFoodId = null;
+            state.evaluations = {};
+            state.attemptsCount = 0;
+            state.score = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.collectedParticles = {
+                "Carbohydrase": [],
+                "Protease": [],
+                "Lipase": []
+            };
+
+            randomizeDatasetRounds();
+            resetExplanationBox();
+            renderDashboard();
+            showScreen("home");
+        }
+
+        function playAudioFeedback(isSuccess) {
+            if (state.soundMuted) return;
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.value = isSuccess ? 587.33 : 220;
+                gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (isSuccess ? 0.25 : 0.3));
+
+                osc.start();
+                osc.stop(ctx.currentTime + (isSuccess ? 0.26 : 0.31));
+            } catch (e) {}
+        }
+
+        function loadState() {
+            state.currentRound = 0;
+            state.selectedFoodId = null;
+            state.evaluations = {};
+            state.attemptsCount = 0;
+            state.score = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.collectedParticles = {
+                "Carbohydrase": [],
+                "Protease": [],
+                "Lipase": []
+            };
+
+            randomizeDatasetRounds();
+            resetExplanationBox();
+
+            try {
+                localStorage.removeItem("enzyme_matching_theme");
+            } catch (e) {}
+
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+            updateSoundUI();
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
