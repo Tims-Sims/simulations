@@ -1999,7 +1999,7 @@
         <section class="modal-card">
             <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
             <h3 id="resetConfirmHeading">Reset simulation?</h3>
-            <p>This will clear your current progress and return you to the home screen.</p>
+            <p id="resetConfirmText">This will clear your current progress and return you to the home screen.</p>
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
                 <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
                 <button class="danger-btn" id="confirmResetBtn">Reset</button>
@@ -3129,6 +3129,8 @@
             closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
             gotItBtn: document.getElementById("gotItBtn"),
             resetConfirmModal: document.getElementById("resetConfirmModal"),
+            resetConfirmHeading: document.getElementById("resetConfirmHeading"),
+            resetConfirmText: document.getElementById("resetConfirmText"),
             closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
             cancelResetBtn: document.getElementById("cancelResetBtn"),
             confirmResetBtn: document.getElementById("confirmResetBtn"),
@@ -3219,10 +3221,10 @@
             dom.briefContinueBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
                 // After all four questions, the brief screen becomes the
-                // completed chamber; its button is now an exit to home.
+                // completed chamber; its button is an exit to home. Confirm
+                // first so the student chooses to clear progress and restart.
                 if (state.finished) {
-                    devReset();
-                    showScreen("home");
+                    openResetConfirmModal();
                     return;
                 }
                 devInit();
@@ -3259,9 +3261,15 @@
             dom.confirmResetBtn.addEventListener("click", () => {
                 devReset();
                 closeResetConfirmModal();
-                // A reset returns to a clean home screen and, like any fresh
-                // boot, re-opens the instructions/help modal.
-                bootFresh();
+                if (resetReturnTarget === "sim") {
+                    // Play Again: restart the run directly at the first question.
+                    devInit();
+                    showScreen("sim");
+                } else {
+                    // A reset returns to a clean home screen and, like any fresh
+                    // boot, re-opens the instructions/help modal.
+                    bootFresh();
+                }
             });
             dom.resetConfirmModal.addEventListener("click", (event) => {
                 if (event.target === dom.resetConfirmModal) {
@@ -3277,9 +3285,8 @@
             dom.tryAgainBtn.addEventListener("click", tryAgain);
             dom.playAgainBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
-                devReset();
-                devInit();
-                showScreen("sim");
+                // Confirm first so an accidental tap doesn't wipe the results.
+                openResetConfirmModal("sim");
             });
             dom.summaryBackBtn.addEventListener("click", () => {
                 playSound("click"); // sound: button press
@@ -3375,7 +3382,18 @@
             closeModalA11y();
         }
 
-        function openResetConfirmModal() {
+        // Where a confirmed reset should land the student: "home" (header
+        // Reset and the completed chamber's Exit to Home) or "sim" (Play
+        // Again, which restarts the run directly).
+        let resetReturnTarget = "home";
+
+        function openResetConfirmModal(returnTarget) {
+            resetReturnTarget = returnTarget === "sim" ? "sim" : "home";
+            const restart = resetReturnTarget === "sim";
+            dom.resetConfirmHeading.textContent = restart ? "Restart simulation?" : "Reset simulation?";
+            dom.resetConfirmText.textContent = restart
+                ? "This will clear your current progress and start the simulation again."
+                : "This will clear your current progress and return you to the home screen.";
             dom.resetConfirmModal.classList.add("show");
             openModalA11y(dom.resetConfirmModal);
         }
@@ -3727,7 +3745,7 @@
                 rings: ["ringEvidence", "trackRingEvidence"],
                 dot: "legendDotEvidence"
             },
-            realLife: {
+            reallife: {
                 label: "Real Life",
                 rings: ["ringRealLife", "trackRingRealLife"],
                 dot: "legendDotRealLife"
@@ -3776,14 +3794,45 @@
             }
         }
 
-        // The result status of the question that feeds a given ring, or null
-        // when no question is linked to it (or it has not been answered).
+        // The result status of the question(s) that feed a given ring, or
+        // null when nothing is linked to it (or it has not been answered).
+        // The Real Life ring is fed by both the real-life chain build AND the
+        // final synthesis question, which carries more weight: once the last
+        // question is answered, its result drives the ring — a correct
+        // synthesis fully lights it, a wrong one dims it to partial when the
+        // chain build was still correct.
         function ringStatusFor(key) {
             const norm = normalizeRingKey(key);
+            if (norm === "reallife") {
+                const revealQ = activeQuestions.find((q) => q.revealRing && normalizeRingKey(q.revealRing) === norm);
+                const lastQ = activeQuestions[activeQuestions.length - 1];
+                const lastResult = lastQ ? state.results[lastQ.id] : null;
+                if (lastQ && lastResult) {
+                    if (lastResult.status === "correct") return "correct";
+                    if (lastResult.status === "partial") return "partial";
+                    const revealResult = revealQ ? state.results[revealQ.id] : null;
+                    return revealResult && revealResult.status === "correct" ? "partial" : null;
+                }
+                const revealResult = revealQ ? state.results[revealQ.id] : null;
+                return revealResult ? revealResult.status : null;
+            }
             const question = activeQuestions.find((q) => q.revealRing && normalizeRingKey(q.revealRing) === norm);
             if (!question) return null;
             const result = state.results[question.id];
             return result ? result.status : null;
+        }
+
+        // Clears a single ring back to its un-lit state (used when a later
+        // answer undoes what an earlier question had earned).
+        function clearRing(key) {
+            const target = RING_TARGETS[normalizeRingKey(key)];
+            if (!target) return;
+            target.rings.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove("revealed", "partial");
+            });
+            const dot = document.getElementById(target.dot);
+            if (dot) dot.classList.remove("lit");
         }
 
         function hideAllRings() {
@@ -3804,15 +3853,10 @@
         // chambers always match progress on resume and after a reset.
         function syncRings() {
             hideAllRings();
-            activeQuestions.forEach((question) => {
-                if (!question.revealRing) return;
-                const result = state.results[question.id];
-                if (!result) return;
-                if (result.status === "correct") {
-                    revealRing(question.revealRing, { announce: false });
-                } else if (result.status === "partial") {
-                    setRingPartial(question.revealRing, { announce: false });
-                }
+            Object.keys(RING_TARGETS).forEach((key) => {
+                const status = ringStatusFor(key);
+                if (status === "correct") revealRing(key, { announce: false });
+                else if (status === "partial") setRingPartial(key, { announce: false });
             });
             syncEchoClear();
         }
@@ -5885,6 +5929,14 @@
                 } else if (result.status === "partial") {
                     setRingPartial(question.revealRing);
                 }
+            }
+            // The final synthesis also feeds the Real Life ring: a correct
+            // answer keeps or strengthens it, an incorrect one dims it.
+            if (state.currentIndex === activeQuestions.length - 1) {
+                const rl = ringStatusFor("realLife");
+                if (rl === "correct") revealRing("realLife", { announce: false });
+                else if (rl === "partial") setRingPartial("realLife", { announce: false });
+                else clearRing("realLife");
             }
             // The final synthesis question completing makes the chamber show
             // "Clear theme echo" once all parts are connected.
