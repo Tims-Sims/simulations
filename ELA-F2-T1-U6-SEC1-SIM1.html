@@ -1296,14 +1296,21 @@
             font-weight: 800;
         }
 
-        /* Reject cards that must NOT go into the ordered chain: shown as a
-           fixed, non-draggable tray beneath the list. */
+        /* Reject cards that must NOT go into the ordered chain: shown in a
+           draggable tray beneath the list. A reject card can be dragged into
+           the chain (or removed again by dropping it back on the tray). */
         .ordering-tray {
             margin-top: 20px;
             padding-top: 14px;
             border-top: 1px dashed var(--border);
             display: grid;
             gap: 10px;
+        }
+        .ordering-tray.ordering-tray-target {
+            border-top-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 8%, transparent);
+            box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--danger) 35%, transparent);
+            border-radius: 14px;
         }
         .ordering-tray-label {
             margin: 0;
@@ -1312,9 +1319,18 @@
             letter-spacing: 0.04em;
             color: var(--text-soft);
         }
+        .ordering-tray-empty {
+            margin: 0;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px dashed var(--border);
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
         .ordering-row.ordering-distractor {
-            cursor: default;
-            touch-action: auto;
+            cursor: grab;
+            touch-action: none;
             border-style: dashed;
             border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
             background: color-mix(in srgb, var(--danger) 6%, var(--surface));
@@ -1324,8 +1340,13 @@
             background: color-mix(in srgb, var(--danger) 14%, var(--surface-2));
         }
         .ordering-row.ordering-distractor .ordering-grip {
+            cursor: grab;
+            opacity: 1;
+        }
+        .ordering-row.is-locked {
             cursor: default;
-            opacity: 0.45;
+            touch-action: auto;
+            opacity: 0.85;
         }
 
         /* --- imageHotspot (click the right region of a picture) --- */
@@ -1900,7 +1921,9 @@
                         <!-- Keyboard flows (all question types are keyboard-completable):
                              MC/True-False = arrow keys within the radio group; dragSort/matching =
                              focus a chip/card, Enter/Space to pick up/select, arrow keys to target a
-                             bin/pair, Enter to drop (Escape cancels); ordering = ▲/▼ buttons;
+                             bin/pair, Enter to drop (Escape cancels); ordering = ArrowUp/ArrowDown
+                             to reorder (a reject card in the chain: Delete/Backspace sends it back to
+                             the reject tray; a reject tray card: Enter/ArrowUp adds it to the chain);
                              imageHotspot = Tab to a region + Enter. Submit moves focus to the feedback
                              box (role=status) so results are announced. -->
                         <h2 class="question-title" id="questionTitle" tabindex="-1">Question title</h2>
@@ -2237,17 +2260,22 @@
                        the first accepted answer of each blank (one chip per
                        blank, duplicates counted) plus these, all shuffled.
 
-           ordering:
-             items        - array of { id, label } objects.
-             correctOrder - array of item ids in the right order.
-             distractors  - (optional) array of { id, label } reject cards.
-                        These are shown beneath the chain in a fixed,
-                        non-draggable tray ("not part of the chain"); they
-                        are ignored by grading.
-             The items appear shuffled; the student reorders them by dragging
-             a block (grab it anywhere) or by focusing a block and pressing
-             ArrowUp / ArrowDown. Exact order = correct, at least half the
-             items in the right spot = partial, else wrong.
+            ordering:
+              items        - array of { id, label } objects.
+              correctOrder - array of item ids in the right order.
+              distractors  - (optional) array of { id, label } reject cards.
+                         These appear in a draggable reject tray beneath the
+                         chain. A student can drag a reject card into the
+                         chain (pointer, or focus + Enter/ArrowUp from the
+                         tray) and drag it back out, dropping it on the tray
+                         to remove it (pointer, or focus + Delete/Backspace).
+                         Leaving a reject card in the chain stops a fully
+                         correct grade.
+              The items appear shuffled; the student reorders them by dragging
+              a block (grab it anywhere) or by focusing a block and pressing
+              ArrowUp / ArrowDown. Exact order with no reject cards in the
+              chain = correct, at least half the items in the right spot =
+              partial, else wrong.
 
            imageHotspot:
              image      - the picture to click on (same three formats as the
@@ -2345,9 +2373,12 @@
             },
             // --- Q3: build the chain (fills the Real Life ring) -------------
             // Arrange cause -> effect -> message. The reject card says the
-            // opposite of the story and must be left out of the chain.
-            // Correctly ordering all three cards makes the Real Life ring
-            // appear, so all three echo rings glow.
+            // opposite of the story and must be left out of the chain. Every
+            // card (including the reject) loads inside the chain shuffled, so
+            // the student drags the reject card out to the reject tray (or
+            // pulls any card out/back in). Correctly ordering all three cards
+            // with no card in the tray makes the Real Life ring appear, so all
+            // three echo rings glow.
             {
                 id: "chain-real-life",
                 type: "ordering",
@@ -4591,26 +4622,45 @@
         /* ------------------------------------------------------------
            ordering rendering. A vertical list the student reorders by
            dragging a block anywhere (pointer) or by focusing a block and
-           pressing ArrowUp / ArrowDown (keyboard). No arrow buttons. The
-           items start shuffled (never exactly the correct order when there
-           are more than two). The current arrangement is saved in
-           state.answers as an array of item ids.
+           pressing ArrowUp / ArrowDown (keyboard). Every card (chain
+           items AND the reject card) loads inside the chain with the
+           reject tray empty. ANY card can be dragged out to the reject
+           tray and back (pointer drop on the tray, Delete/Backspace out,
+           Enter/ArrowUp from the tray back in). The reject card is only
+           revealed in red after the answer is submitted. The arrangement
+           is saved in state.answers as an array of the chain's card ids.
            ------------------------------------------------------------ */
         function renderOrdering(question, answered) {
             const allIds = question.items.map((it) => it.id);
+            const distractorIds = Array.isArray(question.distractors)
+                ? question.distractors.map((d) => d.id)
+                : [];
+            const allKnownIds = allIds.concat(distractorIds);
+            const allowedIds = new Set(allKnownIds);
+
             let order = state.answers[question.id];
-            const validSaved = Array.isArray(order) && order.length === allIds.length &&
-                order.slice().sort().join("|") === allIds.slice().sort().join("|");
+            // Valid saved state = a duplicate-free list of known ids. Any card
+            // (chain item or reject card) may sit in the chain or the tray.
+            const validSaved = Array.isArray(order) &&
+                new Set(order).size === order.length &&
+                order.every((id) => allowedIds.has(id));
             if (!validSaved) {
-                order = shuffle(allIds);
-                if (allIds.length > 2) {
-                    let guard = 0;
-                    while (order.join("|") === question.correctOrder.join("|") && guard++ < 20) {
-                        order = shuffle(order);
-                    }
+                // Fresh start: every card is in the chain and the tray is empty.
+                order = shuffle(allKnownIds);
+                let guard = 0;
+                // Avoid a fresh chain whose chain items already sit in order.
+                while (question.correctOrder.every((id, i) => order[i] === id) && guard++ < 20) {
+                    order = shuffle(order);
                 }
             }
-            state.interaction = { type: "ordering", order: order.slice(), locked: answered, dragging: null };
+            const rejects = allKnownIds.filter((id) => order.indexOf(id) === -1);
+            state.interaction = {
+                type: "ordering",
+                order: order.slice(),
+                rejects: rejects.slice(),
+                locked: answered,
+                dragging: null
+            };
             state.answers[question.id] = order.slice(); // keep the same start on refresh
 
             const list = document.createElement("div");
@@ -4624,20 +4674,30 @@
             // never interrupted. All drag state lives in one `dragState` object.
             const nodes = {};
             let dragState = null;
+            let trayEl = null;
+            let trayLabelEl = null;
 
             const gripSvg = "<svg viewBox='0 0 16 16' width='16' height='16' aria-hidden='true' focusable='false'>" +
                 "<circle cx='5' cy='3' r='1.4'/><circle cx='11' cy='3' r='1.4'/>" +
                 "<circle cx='5' cy='8' r='1.4'/><circle cx='11' cy='8' r='1.4'/>" +
                 "<circle cx='5' cy='13' r='1.4'/><circle cx='11' cy='13' r='1.4'/></svg>";
 
+            function isDistractor(id) { return distractorIds.indexOf(id) !== -1; }
+
             function labelFor(id) {
                 const item = question.items.find((it) => it.id === id);
-                return item ? item.label : id;
+                if (item) return item.label;
+                const d = (question.distractors || []).find((x) => x.id === id);
+                return d ? d.label : id;
             }
 
             function buildNode(id) {
                 const row = document.createElement("div");
                 row.className = "ordering-row";
+                // The reject card is only revealed in red AFTER the answer is
+                // submitted; before that every card looks the same.
+                if (answered && isDistractor(id)) row.classList.add("ordering-distractor");
+                if (answered) row.classList.add("is-locked");
                 row.dataset.itemId = id;
                 row.setAttribute("role", "listitem");
                 row.tabIndex = answered ? -1 : 0;
@@ -4656,7 +4716,7 @@
                 row.append(grip, posBadge, lab);
 
                 if (!answered) {
-                    row.addEventListener("keydown", (event) => onOrderKeydown(event, id));
+                    row.addEventListener("keydown", (event) => onChainKeydown(event, id));
                     row.addEventListener("pointerdown", (event) => onOrderPointerDown(event, id));
                     row.addEventListener("pointermove", (event) => onOrderPointerMove(event, id));
                     row.addEventListener("pointerup", (event) => onOrderPointerEnd(event, id));
@@ -4666,16 +4726,64 @@
                 return row;
             }
 
+            function buildTrayChip(id) {
+                const chip = document.createElement("div");
+                chip.className = "ordering-row";
+                // Reveal the red reject styling only after the answer is submitted.
+                if (answered && isDistractor(id)) chip.classList.add("ordering-distractor");
+                if (answered) chip.classList.add("is-locked");
+                chip.dataset.itemId = id;
+                chip.setAttribute("role", "listitem");
+                chip.setAttribute("aria-label", labelFor(id) + " — " +
+                    (answered && isDistractor(id)
+                        ? "reject card, not part of the chain"
+                        : "removed from the chain, press Enter to add it back"));
+                chip.tabIndex = answered ? -1 : 0;
+
+                const grip = document.createElement("span");
+                grip.className = "ordering-grip";
+                grip.innerHTML = gripSvg; // trusted inline icon
+
+                const posBadge = document.createElement("span");
+                posBadge.className = "ordering-position";
+                posBadge.textContent = "✗";
+
+                const lab = document.createElement("span");
+                lab.className = "ordering-label";
+                lab.textContent = labelFor(id);
+
+                chip.append(grip, posBadge, lab);
+
+                if (!answered) {
+                    chip.addEventListener("keydown", (event) => onTrayKeydown(event, id));
+                    chip.addEventListener("pointerdown", (event) => onTrayPointerDown(event, id));
+                    chip.addEventListener("pointermove", (event) => onTrayPointerMove(event, id));
+                    chip.addEventListener("pointerup", (event) => onTrayPointerEnd(event, id));
+                    chip.addEventListener("pointercancel", (event) => onTrayPointerEnd(event, id));
+                    chip.addEventListener("lostpointercapture", (event) => onTrayPointerEnd(event, id));
+                }
+                return chip;
+            }
+
             // Re-append nodes in the working order and refresh each block's
             // position number and aria-label.
             function rebuild() {
+                // Drop any stale rows no longer in the chain (e.g. a reject
+                // card just moved out to the tray).
+                const inOrder = new Set(state.interaction.order);
+                Array.from(list.children).forEach((child) => {
+                    if (child.classList.contains("ordering-row") && !inOrder.has(child.dataset.itemId)) {
+                        list.removeChild(child);
+                    }
+                });
                 const total = state.interaction.order.length;
                 state.interaction.order.forEach((id, pos) => {
                     let node = nodes[id];
                     if (!node) { node = nodes[id] = buildNode(id); }
                     node.querySelector(".ordering-position").textContent = String(pos + 1);
                     node.setAttribute("aria-label",
-                        labelFor(id) + " — position " + (pos + 1) + " of " + total + ", use arrow keys to move");
+                        labelFor(id) + " — position " + (pos + 1) + " of " + total +
+                        ", use arrow keys to move, press Delete to move it out of the chain");
                     list.appendChild(node); // appendChild moves an existing node
                 });
             }
@@ -4690,18 +4798,78 @@
                 return true;
             }
 
-            function onOrderKeydown(event, id) {
-                if (state.interaction.locked) return;
+            function moveToTray(id) {
+                const arr = state.interaction.order;
+                const from = arr.indexOf(id);
+                if (from === -1) return;
+                arr.splice(from, 1);
+                state.interaction.rejects.push(id);
+                state.answers[question.id] = arr.slice();
+                rebuild();
+                renderTray();
+                playSound("drop"); // sound: item moved
+                announce(labelFor(id) + " removed from the chain and placed in the reject tray.");
+                saveQuizProgress();
+            }
+
+            function moveToChain(id, index) {
+                const r = state.interaction.rejects;
+                const ri = r.indexOf(id);
+                if (ri === -1) return;
+                r.splice(ri, 1);
+                const arr = state.interaction.order;
+                const at = Math.max(0, Math.min(index, arr.length));
+                arr.splice(at, 0, id);
+                state.answers[question.id] = arr.slice();
+                rebuild();
+                renderTray();
+                playSound("drop"); // sound: item moved
+                announce(labelFor(id) + " added to the chain at position " + (at + 1) + " of " + arr.length + ".");
+                saveQuizProgress();
+            }
+
+            function onChainKeydown(event, id) {
+                const inter = state.interaction;
+                if (inter.locked) return;
+                if (event.key === "Delete" || event.key === "Backspace") {
+                    event.preventDefault();
+                    moveToTray(id);
+                    const chip = trayEl.querySelector('[data-item-id="' + id + '"]');
+                    if (chip) chip.focus({ preventScroll: true }); // keep focus on the moved card
+                    return;
+                }
                 if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
                 event.preventDefault();
-                const from = state.interaction.order.indexOf(id);
+                const from = inter.order.indexOf(id);
                 const to = event.key === "ArrowUp" ? from - 1 : from + 1;
                 if (!moveTo(id, to)) return;
                 playSound("drop"); // sound: item moved
                 rebuild();
                 nodes[id].focus({ preventScroll: true }); // keep focus on the moved block
-                announce(labelFor(id) + " moved to position " + (to + 1) + " of " + state.interaction.order.length + ".");
+                announce(labelFor(id) + " moved to position " + (to + 1) + " of " + inter.order.length + ".");
                 saveQuizProgress();
+            }
+
+            function onTrayKeydown(event, id) {
+                if (state.interaction.locked) return;
+                if (event.key === "Enter" || event.key === " " || event.key === "ArrowUp") {
+                    event.preventDefault();
+                    moveToChain(id, state.interaction.order.length);
+                    nodes[id].focus({ preventScroll: true });
+                }
+            }
+
+            // --- pointer geometry helpers ---
+
+            function isOverTray(clientX, clientY) {
+                if (!trayEl) return false;
+                const r = trayEl.getBoundingClientRect();
+                return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
+            }
+
+            function isOverList(clientX, clientY) {
+                const r = list.getBoundingClientRect();
+                return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
             }
 
             // --- pointer drag: lift block out of flow, placeholder holds slot ---
@@ -4766,6 +4934,16 @@
                 if (moved) syncOrderFromDom();
             }
 
+            function resetDragNode(node, pointerId) {
+                node.classList.remove("dragging");
+                node.style.position = "";
+                node.style.width = "";
+                node.style.left = "";
+                node.style.top = "";
+                node.style.transform = "";
+                try { node.releasePointerCapture(pointerId); } catch (e) { /* already released */ }
+            }
+
             function onOrderPointerDown(event, id) {
                 const inter = state.interaction;
                 if (inter.locked || dragState) return; // ignore if a drag is active
@@ -4799,7 +4977,15 @@
                 if (!dragState || event.pointerId !== dragState.pointerId) return;
                 event.preventDefault();
                 dragState.node.style.top = (event.clientY - dragState.offsetY) + "px";
-                movePlaceholder(event.clientY);
+                if (isOverTray(event.clientX, event.clientY)) {
+                    // hovering the reject tray: drop there to remove from the chain
+                    if (dragState.placeholder.isConnected) list.removeChild(dragState.placeholder);
+                    if (trayEl) trayEl.classList.add("ordering-tray-target");
+                } else {
+                    if (trayEl) trayEl.classList.remove("ordering-tray-target");
+                    if (!dragState.placeholder.isConnected) list.insertBefore(dragState.placeholder, dragState.node);
+                    movePlaceholder(event.clientY);
+                }
             }
 
             function onOrderPointerEnd(event, id) {
@@ -4808,20 +4994,29 @@
                 const placeholder = dragState.placeholder;
                 const draggedId = dragState.id;
                 const pointerId = dragState.pointerId;
+                const dropToTray = isOverTray(event.clientX, event.clientY);
 
                 dragState = null; // clear ALL drag state up front so the release
                                   // below (which fires lostpointercapture) can't re-enter
 
+                if (dropToTray) {
+                    // remove the dragged card from the chain into the tray
+                    if (placeholder.isConnected) list.removeChild(placeholder);
+                    list.removeChild(node);
+                    resetDragNode(node, pointerId);
+                    trayEl.classList.remove("ordering-tray-target");
+                    moveToTray(draggedId);
+                    const chip = trayEl.querySelector('[data-item-id="' + draggedId + '"]');
+                    if (chip) chip.focus({ preventScroll: true });
+                    saveQuizProgress();
+                    return;
+                }
+
+                if (trayEl) trayEl.classList.remove("ordering-tray-target");
                 // drop the node into the placeholder's slot, then tear down
                 list.insertBefore(node, placeholder);
                 list.removeChild(placeholder);
-                node.classList.remove("dragging");
-                node.style.position = "";
-                node.style.width = "";
-                node.style.left = "";
-                node.style.top = "";
-                node.style.transform = "";
-                try { node.releasePointerCapture(pointerId); } catch (e) { /* already released */ }
+                resetDragNode(node, pointerId);
 
                 // final order straight from the DOM
                 const ids = Array.from(list.children)
@@ -4838,43 +5033,152 @@
                 saveQuizProgress();
             }
 
+            // --- reject tray: chips live here and can be dragged into the chain ---
+
+            function onTrayPointerDown(event, id) {
+                const inter = state.interaction;
+                if (inter.locked || dragState) return; // ignore if a drag is active
+                if (event.button !== undefined && event.button !== 0) return;
+                event.preventDefault();
+                const node = trayEl.querySelector('[data-item-id="' + id + '"]');
+                if (!node) return;
+                const rect = node.getBoundingClientRect();
+
+                dragState = {
+                    pointerId: event.pointerId,
+                    id: id,
+                    node: node,
+                    placeholder: null,
+                    offsetY: event.clientY - rect.top
+                };
+
+                node.classList.add("dragging");
+                node.style.position = "fixed";
+                node.style.width = rect.width + "px";
+                node.style.left = rect.left + "px";
+                node.style.top = (event.clientY - dragState.offsetY) + "px";
+                node.setPointerCapture(event.pointerId);
+            }
+
+            function ensureTrayPlaceholder(y) {
+                if (!dragState.placeholder) {
+                    const ph = document.createElement("div");
+                    ph.className = "ordering-placeholder";
+                    ph.style.height = dragState.node.getBoundingClientRect().height + "px";
+                    dragState.placeholder = ph;
+                }
+                const ph = dragState.placeholder;
+                // find the insertion index by scanning each chain row's midpoint
+                let target = 0;
+                for (const cid of state.interaction.order) {
+                    const row = nodes[cid];
+                    if (!row || !row.isConnected) continue;
+                    const r = row.getBoundingClientRect();
+                    if (y > r.top + r.height / 2) target++;
+                    else break;
+                }
+                let before = null, count = 0;
+                for (const c of list.children) {
+                    if (!c.classList.contains("ordering-row")) continue;
+                    if (count === target) { before = c; break; }
+                    count++;
+                }
+                if (before) list.insertBefore(ph, before);
+                else list.appendChild(ph);
+            }
+
+            function removeTrayPlaceholder() {
+                if (dragState.placeholder && dragState.placeholder.isConnected) {
+                    list.removeChild(dragState.placeholder);
+                }
+            }
+
+            function onTrayPointerMove(event, id) {
+                if (!dragState || event.pointerId !== dragState.pointerId) return;
+                event.preventDefault();
+                dragState.node.style.top = (event.clientY - dragState.offsetY) + "px";
+                if (isOverList(event.clientX, event.clientY)) {
+                    trayEl.classList.remove("ordering-tray-target");
+                    ensureTrayPlaceholder(event.clientY);
+                } else if (isOverTray(event.clientX, event.clientY)) {
+                    removeTrayPlaceholder();
+                    trayEl.classList.add("ordering-tray-target");
+                } else {
+                    removeTrayPlaceholder();
+                    trayEl.classList.remove("ordering-tray-target");
+                }
+            }
+
+            function onTrayPointerEnd(event, id) {
+                if (!dragState || event.pointerId !== dragState.pointerId) return;
+                const node = dragState.node;
+                const placeholder = dragState.placeholder;
+                const draggedId = dragState.id;
+                const pointerId = dragState.pointerId;
+
+                dragState = null; // clear ALL drag state up front so the release
+                                  // below (which fires lostpointercapture) can't re-enter
+
+                resetDragNode(node, pointerId);
+
+                if (placeholder && placeholder.isConnected) {
+                    const at = Array.from(list.children).indexOf(placeholder);
+                    list.removeChild(placeholder);
+                    moveToChain(draggedId, at);
+                    const row = nodes[draggedId];
+                    if (row) row.focus({ preventScroll: true });
+                } else {
+                    trayEl.classList.remove("ordering-tray-target");
+                    renderTray(); // rebuild the tray so the dropped chip is fresh
+                    const chip = trayEl.querySelector('[data-item-id="' + draggedId + '"]');
+                    if (chip) chip.focus({ preventScroll: true });
+                    announce(labelFor(draggedId) + " returned to the reject tray.");
+                }
+                saveQuizProgress();
+            }
+
+            // The reject tray beneath the chain. Always rendered (when the
+            // question has distractors) so it doubles as the drop target.
+            // ANY card can be dragged here out of the chain and back. Chips
+            // shown = cards currently NOT in the chain. The reject card is
+            // revealed (red) only after the answer is submitted.
+            function renderTray() {
+                if (!question.distractors || question.distractors.length === 0) return;
+                if (!trayEl) {
+                    trayEl = document.createElement("div");
+                    trayEl.className = "ordering-tray";
+                    trayLabelEl = document.createElement("p");
+                    trayLabelEl.className = "ordering-tray-label";
+                    trayEl.appendChild(trayLabelEl);
+                    dom.answerArea.appendChild(trayEl);
+                }
+                const inTray = state.interaction.rejects;
+                trayLabelEl.textContent = inTray.length === 1
+                    ? "Reject tray — 1 card left out of the chain:"
+                    : inTray.length > 1
+                        ? "Reject tray — " + inTray.length + " cards left out of the chain:"
+                        : "Reject tray — not part of the chain";
+                Array.from(trayEl.querySelectorAll(".ordering-row")).forEach((chip) => chip.remove());
+                let emptyHint = trayEl.querySelector(".ordering-tray-empty");
+                if (inTray.length === 0) {
+                    if (!emptyHint) {
+                        emptyHint = document.createElement("p");
+                        emptyHint.className = "ordering-tray-empty";
+                        trayEl.appendChild(emptyHint);
+                    }
+                    emptyHint.textContent = answered
+                        ? "Empty — no cards were left out of the chain."
+                        : "The tray is empty. Drag a card here that does not belong in the chain.";
+                } else if (emptyHint) {
+                    emptyHint.remove();
+                }
+                inTray.forEach((id) => trayEl.appendChild(buildTrayChip(id)));
+                trayEl.classList.remove("ordering-tray-target");
+            }
+
             rebuild();
             dom.answerArea.appendChild(list);
-
-            // Reject cards: fixed, non-draggable tray beneath the chain.
-            if (Array.isArray(question.distractors) && question.distractors.length > 0) {
-                const tray = document.createElement("div");
-                tray.className = "ordering-tray";
-                const trayLabel = document.createElement("p");
-                trayLabel.className = "ordering-tray-label";
-                trayLabel.textContent = question.distractors.length === 1
-                    ? "Reject card — not part of the chain:"
-                    : "Reject cards — not part of the chain:";
-                tray.appendChild(trayLabel);
-                question.distractors.forEach((d) => {
-                    const chip = document.createElement("div");
-                    chip.className = "ordering-row ordering-distractor";
-                    chip.setAttribute("role", "listitem");
-                    chip.setAttribute("aria-label", d.label + " — reject card, not part of the chain");
-                    chip.tabIndex = -1;
-
-                    const grip = document.createElement("span");
-                    grip.className = "ordering-grip";
-                    grip.innerHTML = gripSvg; // trusted inline icon
-
-                    const posBadge = document.createElement("span");
-                    posBadge.className = "ordering-position";
-                    posBadge.textContent = "✗";
-
-                    const lab = document.createElement("span");
-                    lab.className = "ordering-label";
-                    lab.textContent = d.label;
-
-                    chip.append(grip, posBadge, lab);
-                    tray.appendChild(chip);
-                });
-                dom.answerArea.appendChild(tray);
-            }
+            renderTray();
         }
 
         /* ------------------------------------------------------------
@@ -6129,12 +6433,42 @@
                 case "ordering": {
                     const given = Array.isArray(answer) ? answer : [];
                     const total = question.correctOrder.length;
+                    const itemIds = question.items.map((it) => it.id);
+                    const distractorIds = Array.isArray(question.distractors)
+                        ? question.distractors.map((d) => d.id)
+                        : [];
                     let inPlace = 0;
                     question.correctOrder.forEach((id, i) => { if (given[i] === id) inPlace++; });
-                    const status = inPlace === total ? "correct" : (inPlace >= Math.ceil(total / 2) ? "partial" : "wrong");
+                    // Cards pulled out of the chain into the tray, and reject
+                    // cards the student left in the chain.
+                    const removedItems = itemIds.filter((id) => given.indexOf(id) === -1);
+                    const chainRejects = given.filter((id) => distractorIds.indexOf(id) !== -1);
+                    const zonesClean = removedItems.length === 0 && chainRejects.length === 0;
+                    let status;
+                    if (inPlace === total && zonesClean) status = "correct";
+                    else if (inPlace === total) status = "partial";   // chain in order, but a card is in the wrong place
+                    else if (inPlace >= Math.ceil(total / 2) && zonesClean) status = "partial";
+                    else status = "wrong";
+                    const notes = [];
+                    if (chainRejects.length) {
+                        notes.push("The reject card" + (chainRejects.length === 1 ? "" : "s") +
+                            " should not be in the chain: " +
+                            chainRejects.map((id) => {
+                                const d = (question.distractors || []).find((x) => x.id === id);
+                                return d ? d.label : id;
+                            }).join("; ") + ". Drag it back to the reject tray.");
+                    }
+                    if (removedItems.length) {
+                        notes.push("These cards belong in the chain but were left out: " +
+                            removedItems.map((id) => {
+                                const it = question.items.find((x) => x.id === id);
+                                return it ? it.label : id;
+                            }).join("; ") + ".");
+                    }
                     return {
                         status: status,
-                        explanation: (question.explanation || "") + " " + inPlace + " of " + total + " items are in the right place.",
+                        explanation: (question.explanation || "") + " " + inPlace + " of " + total + " items are in the right place." +
+                            (notes.length ? " " + notes.join(" ") : ""),
                         correctCount: inPlace,
                         total: total
                     };
@@ -6275,15 +6609,37 @@
 
         function orderingResultLines(question, answer) {
             const given = Array.isArray(answer) ? answer : [];
-            return question.correctOrder.map((id, i) => {
+            const lines = question.correctOrder.map((id, i) => {
                 const correctItem = question.items.find((it) => it.id === id);
-                const givenItem = question.items.find((it) => it.id === given[i]);
+                const givenId = given[i];
+                let givenLabel = "(none)";
+                const givenItem = question.items.find((it) => it.id === givenId);
+                if (givenItem) {
+                    givenLabel = givenItem.label;
+                } else {
+                    const d = (question.distractors || []).find((x) => x.id === givenId);
+                    if (d) givenLabel = d.label + " (reject card)";
+                }
                 const correctLabel = correctItem ? correctItem.label : id;
-                const givenLabel = givenItem ? givenItem.label : "(none)";
-                return given[i] === id
+                return givenId === id
                     ? (i + 1) + ". " + correctLabel + " ✓"
                     : (i + 1) + ". your answer: " + givenLabel + ", correct: " + correctLabel + " ✗";
             });
+            // Any reject card left in the chain beyond the correct slots.
+            const rejectIds = (question.distractors || []).map((d) => d.id);
+            given.slice(question.correctOrder.length).forEach((id) => {
+                if (rejectIds.indexOf(id) !== -1) {
+                    const d = (question.distractors || []).find((x) => x.id === id);
+                    lines.push("✗ Reject card left in the chain: " + (d ? d.label : id) + " — it belongs in the reject tray.");
+                }
+            });
+            // Chain items the student pulled out into the tray.
+            question.items.forEach((it) => {
+                if (given.indexOf(it.id) === -1) {
+                    lines.push("✗ Left out of the chain: " + it.label + " — it belongs in the chain.");
+                }
+            });
+            return lines;
         }
 
         function imageHotspotResultLines(question, answer) {
