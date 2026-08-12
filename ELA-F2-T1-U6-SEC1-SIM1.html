@@ -2018,10 +2018,11 @@
            Search "DEV-EDIT" to find every place you need to change.
 
            Field notes:
-             simId          - must be UNIQUE per sim. Used as the
-                               localStorage key prefix (theme, help-seen,
-                               quiz progress). Colliding simIds will
-                               clobber each other's saved data.
+              simId          - must be UNIQUE per sim. Used as the key
+                                prefix for saved data (theme and audio in
+                                localStorage; quiz progress in sessionStorage,
+                                which clears when the tab closes). Colliding
+                                simIds will clobber each other's saved data.
              title           - shown in <title>, topbar, and home screen.
              subtitle        - shown under the title in the topbar.
              badgeText       - short text in the topbar logo badge.
@@ -3488,6 +3489,20 @@
             try { localStorage.removeItem(key); } catch (err) { /* storage unavailable */ }
         }
 
+        // Preferences (theme, audio, help-seen) live in localStorage and
+        // survive tab close. Quiz progress uses sessionStorage so the browser
+        // wipes it automatically the moment the tab is closed — no progress
+        // is ever resumed across sessions, while in-tab refreshes still work.
+        function sessionGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function sessionSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable */ }
+        }
+        function sessionRemove(key) {
+            try { sessionStorage.removeItem(key); } catch (err) { /* storage unavailable */ }
+        }
+
         function announce(message) {
             dom.liveRegion.textContent = "";
             window.setTimeout(() => { dom.liveRegion.textContent = message; }, 20);
@@ -3603,8 +3618,10 @@
 
         /* ============================================================
            CHROME — DO NOT EDIT
-           QUIZ PROGRESS PERSISTENCE (via storageGet/storageSet under the
-           SIM_CONFIG.simId prefix).
+           QUIZ PROGRESS PERSISTENCE (via sessionGet/sessionSet under the
+           SIM_CONFIG.simId prefix). Progress lives in sessionStorage so it
+           is wiped automatically when the tab is closed; preferences stay
+           in localStorage.
            ============================================================ */
         const PROGRESS_KEY = SIM_CONFIG.simId + "-progress";
 
@@ -3632,7 +3649,7 @@
                 bestStreak: state.bestStreak,
                 currentScreen: state.currentScreen
             };
-            storageSet(PROGRESS_KEY, JSON.stringify(payload));
+            sessionSet(PROGRESS_KEY, JSON.stringify(payload));
         }
 
         // Fresh boot: a clean home screen that ALWAYS re-opens the
@@ -3649,7 +3666,7 @@
             // Testing mode never restores saved progress — every load is a
             // fresh run (matching "progress not saved").
             if (isTestMode()) { bootFresh(); return; }
-            const raw = storageGet(PROGRESS_KEY);
+            const raw = sessionGet(PROGRESS_KEY);
             if (!raw) { bootFresh(); return; }
 
             let payload = null;
@@ -3724,7 +3741,7 @@
         }
 
         function clearQuizProgress() {
-            storageRemove(PROGRESS_KEY);
+            sessionRemove(PROGRESS_KEY);
         }
 
         /* ------------------------------------------------------------
