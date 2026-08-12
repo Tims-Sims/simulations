@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 Energy Balance Scale</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 2 BIOLOGY: ENERGY BALANCE SCALE SIMULATION
+           Single-file HTML/CSS/JS - Offline Friendly
+           Trinidad and Tobago Secondary Schools — Biology Lab
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Indicator Colors */
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* Lock outer window when in game mode so ONLY internal containers scroll */
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1280px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+        }
+
+        .hero-card {
+            width: min(100%, 860px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: clamp(2.1rem, 4vw, 3.2rem);
+            line-height: 1.1;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 720px);
+            margin: 0 auto 28px;
+            color: var(--text-soft);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Interactive Stage / 25% Right Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Pane (75%): Interactive Seesaw & Controls Area */
+        .canvas-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        .canvas-header {
+            padding: 14px 20px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .room-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .simulation-stage {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 20px;
+            background: color-mix(in srgb, var(--bg-soft) 40%, var(--surface));
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* SEESAW BALANCE VISUAL COMPONENT */
+        .scale-visual-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scale-status-banner {
+            padding: 10px 24px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 1.08rem;
+            margin-bottom: 56px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .section-divider {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+            opacity: 0.35;
+            margin: 24px 0;
+        }
+
+        .scale-status-banner.balanced {
+            background: var(--safe-bg);
+            color: var(--safe-color);
+            border: 1px solid var(--safe-border);
+        }
+
+        .scale-status-banner.surplus {
+            background: var(--hazard-bg);
+            color: var(--hazard-color);
+            border: 1px solid var(--hazard-border);
+        }
+
+        .scale-status-banner.deficit {
+            background: color-mix(in srgb, var(--accent-2) 20%, var(--surface));
+            color: var(--accent-2);
+            border: 1px solid color-mix(in srgb, var(--accent-2) 40%, transparent);
+        }
+
+        .seesaw-frame {
+            width: 100%;
+            max-width: 780px;
+            height: 240px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin: 10px 0;
+        }
+
+        .seesaw-fulcrum {
+            width: 0;
+            height: 0;
+            border-left: 32px solid transparent;
+            border-right: 32px solid transparent;
+            border-bottom: 48px solid var(--surface-3);
+            position: absolute;
+            bottom: 0;
+            z-index: 5;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+        }
+
+        .seesaw-beam-wrap {
+            width: 90%;
+            height: 14px;
+            position: absolute;
+            bottom: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: center bottom;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+        }
+
+        .seesaw-beam {
+            width: 100%;
+            height: 14px;
+            background: linear-gradient(90deg, var(--hazard-color), var(--accent));
+            border-radius: 7px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .seesaw-pan {
+            position: absolute;
+            top: -125px;
+            width: 195px;
+            min-height: 125px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.4s ease;
+        }
+
+        .seesaw-pan.left-pan {
+            left: -15px;
+            border-top: 4px solid var(--hazard-color);
+        }
+
+        .seesaw-pan.right-pan {
+            right: -15px;
+            border-top: 4px solid var(--accent);
+        }
+
+        .pan-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .pan-value {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .pan-value.intake { color: var(--hazard-color); }
+        .pan-value.output { color: var(--accent); }
+
+        .pan-items-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+            max-height: 60px;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .pan-item-chip {
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            border: 1px solid var(--border);
+        }
+
+        /* CONTROLS SECTION */
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .section-header-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .grid-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 14px;
+        }
+
+        .item-tile {
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 125px;
+            user-select: none;
+            transition: border-color 0.2s ease, transform 0.18s ease;
+        }
+
+        .item-tile:hover {
+            border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .item-icon {
+            font-size: 1.5rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--surface-3);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .item-details {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .item-details h4 {
+            margin: 0;
+            font-size: 0.92rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text);
+        }
+
+        .item-details p {
+            margin: 3px 0 0;
+            font-size: 0.76rem;
+            color: var(--muted);
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .counter-controls-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            width: 100%;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .btn-counter-lg {
+            flex: 1;
+            height: 32px;
+            border-radius: var(--radius-md);
+            background: var(--surface-3);
+            color: var(--text);
+            font-size: 1.1rem;
+            font-weight: 800;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+        }
+
+        .btn-counter-lg:hover:not(:disabled) {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        .counter-count-badge {
+            font-size: 0.92rem;
+            font-weight: 800;
+            min-width: 32px;
+            text-align: center;
+            padding: 3px 8px;
+            background: var(--surface);
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--accent);
+        }
+
+        .counter-count {
+            font-size: 0.9rem;
+            font-weight: 800;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        /* BMR GENETICS SLIDER CARD */
+        .bmr-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bmr-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bmr-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bmr-val-badge {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--accent-2);
+            background: color-mix(in srgb, var(--accent-2) 15%, var(--surface));
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid color-mix(in srgb, var(--accent-2) 30%, transparent);
+        }
+
+        .slider-control-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .slider-control-row input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--surface-3);
+            outline: none;
+            accent-color: var(--accent-2);
+            cursor: pointer;
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width) */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-title {
+            font-size: 0.98rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        /* Feedback Explanation Card */
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.surplus {
+            border-color: var(--hazard-border);
+            background: var(--hazard-bg);
+        }
+
+        .feedback-card.deficit {
+            border-color: color-mix(in srgb, var(--accent-2) 40%, transparent);
+            background: color-mix(in srgb, var(--accent-2) 15%, var(--surface));
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 460px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 640px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+            .canvas-pane {
+                min-height: auto;
+            }
+            .mission-panel {
+                max-height: none;
+            }
+            .seesaw-pan {
+                width: 140px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header (Fixed Sticky Layout) -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">⚖️</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 Energy Balance Scale</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Biology Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="soundToggleBtn" aria-label="Toggle sound audio">🔊 Sound</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Biology Studies</div>
+                    <h2>The Energy Balance Scale</h2>
+                    <p>
+                        Welcome to the Biology Lab! Interactively explore how <strong>Energy Intake</strong> (food & drink) and <strong>Energy Output</strong> (physical activity & basic metabolic rate) dictate body mass changes.
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">⚖️</div>
+                            <h3 style="font-size:0.95rem;">Dynamic Balance Scale</h3>
+                            <p>Watch the scale tilt live towards Weight Gain (Surplus) or Weight Loss (Deficit).</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🧬</div>
+                            <h3 style="font-size:0.95rem;">Metabolism & Genetics</h3>
+                            <p>Adjust the BMR slider to see how basic body functions shift the balance point for everyone.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🧪</div>
+                            <h3 style="font-size:0.95rem;">Interactive Exploration</h3>
+                            <p>Add food items and physical activities to test different daily energy combinations.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.1rem; padding: 14px 28px;">🚀 Launch Interactive Scale</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Interactive Stage / 25% Right Mission Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Seesaws & Controls Area -->
+                <section class="canvas-pane" id="canvasPane">
+                    <div class="canvas-header">
+                        <div class="room-title">
+                            <span>⚖️ Interactive Energy Balance Scale</span>
+                        </div>
+                        <span style="font-size:0.86rem; color:var(--muted); font-weight:700;">Starting State: Scale is perfectly balanced (0 kJ vs 0 kJ)</span>
+                    </div>
+
+                    <div class="simulation-stage" id="simulationStage">
+                        <!-- SEESAW BALANCE VISUAL CARD (MAIN GAME PALETTE) -->
+                        <div class="scale-visual-card">
+                            <div class="scale-status-banner balanced" id="scaleStatusBanner">
+                                ⚖️ Weight Maintenance (Energy Intake = Energy Output)
+                            </div>
+
+                            <div class="seesaw-frame">
+                                <div class="seesaw-fulcrum"></div>
+                                <div class="seesaw-beam-wrap" id="seesawBeamWrap">
+                                    <div class="seesaw-beam">
+                                        <!-- Left Pan (Intake) -->
+                                        <div class="seesaw-pan left-pan">
+                                            <div class="pan-title">🍔 Energy Intake</div>
+                                            <div class="pan-value intake" id="leftPanVal">0 kJ</div>
+                                            <div class="pan-items-grid" id="leftPanItemsGrid"></div>
+                                        </div>
+
+                                        <!-- Right Pan (Output) -->
+                                        <div class="seesaw-pan right-pan">
+                                            <div class="pan-title">🏃 Energy Output</div>
+                                            <div class="pan-value output" id="rightPanVal">0 kJ</div>
+                                            <div class="pan-items-grid" id="rightPanItemsGrid"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTROLS SECTION -->
+                        <div class="controls-section">
+                            <!-- FOOD INTAKE SELECTOR -->
+                            <div>
+                                <div class="section-header-title">
+                                    <span>🍔 Energy Intake (Food & Drinks)</span>
+                                    <button class="secondary-btn" id="clearFoodsBtn" style="padding:4px 12px; font-size:0.78rem;">Clear Foods</button>
+                                </div>
+                                <div class="grid-selector" id="foodSelectorGrid" style="margin-top:10px;"></div>
+                            </div>
+
+                            <!-- VISUAL SECTION DIVIDER -->
+                            <hr class="section-divider" />
+
+                            <!-- PHYSICAL ACTIVITY SELECTOR -->
+                            <div>
+                                <div class="section-header-title">
+                                    <span>🏃 Energy Output (Physical Activities)</span>
+                                    <button class="secondary-btn" id="clearActivitiesBtn" style="padding:4px 12px; font-size:0.78rem;">Clear Activities</button>
+                                </div>
+                                <div class="grid-selector" id="activitySelectorGrid" style="margin-top:10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): BMR Slider, Scientific Readout & Review Actions -->
+                <aside class="mission-panel">
+                    <!-- BMR GENETICS SLIDER CARD (RIGHT SIDEBAR) -->
+                    <div class="bmr-card">
+                        <div class="bmr-header">
+                            <div class="bmr-title-wrap">
+                                <span style="font-size:1.3rem;">🧬</span>
+                                <div>
+                                    <h4 style="margin:0; font-size:0.95rem; font-weight:800;">Genetics & Basal Metabolic Rate (BMR)</h4>
+                                    <p style="margin:2px 0 0; font-size:0.78rem; color:var(--muted);">Basic Body Functions (breathing, circulation, cellular repair)</p>
+                                </div>
+                            </div>
+                            <div class="bmr-val-badge" id="bmrValBadge">0 kJ</div>
+                        </div>
+                        <div class="slider-control-row">
+                            <span style="font-size:0.8rem; color:var(--muted); font-weight:700;">0 kJ</span>
+                            <input type="range" id="bmrSlider" min="0" max="8000" step="100" value="0" aria-label="Basal Metabolic Rate slider" />
+                            <span style="font-size:0.8rem; color:var(--muted); font-weight:700;">8,000 kJ</span>
+                        </div>
+                    </div>
+
+                    <!-- Scientific Real-Time Readout Card -->
+                    <div class="panel-card">
+                        <div class="panel-title">Scientific Real-Time Readout</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 The scale is currently perfectly balanced with 0 food selected and 0 energy output (0 kJ vs 0 kJ). Add foods, physical activities, or adjust the BMR slider to explore energy balance!
+                        </div>
+                        <button class="primary-btn" id="finishLabBtn" style="width:100%; justify-content:center; margin-top:6px;">
+                            🎉 Complete Lab Review
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Certification Complete</div>
+                <h2>Form 2 Biology — Energy Balance Analysis</h2>
+                <p>Great job exploring energy balance and metabolism in the Biology Lab!</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">⚖️</div>
+                    <div class="badge-title" id="badgeTitle">Energy Balance Exploration</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You explored how daily Energy Intake (food & drink) and Energy Output (basal metabolism & physical activity) govern body mass.</p>
+                </div>
+
+                <!-- SUMMARY SCORECARD GRID -->
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Energy Intake</div>
+                        <div class="val">Food & Drinks</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Energy Output</div>
+                        <div class="val">BMR + Activity</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Weight States</div>
+                        <div class="val">Surplus / Deficit</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Metabolism</div>
+                        <div class="val">Genetics (BMR)</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Key Scientific Concepts Reviewed</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Scale Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer (SLIDE-OVER DRAWER RULE) -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Scientific Energy Balance Principles & Definitions.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How the Energy Balance Scale Works</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome to Form 2 Biology Lab! Energy in food and energy output govern body mass.</p>
+                <ul>
+                    <li><strong>Starting State:</strong> The scale starts perfectly balanced with 0 food selected and 0 energy output (0 kJ vs 0 kJ).</li>
+                    <li><strong>Energy Intake (🍔 Left Pan):</strong> Add food and drink items (measured in Kilojoules / kJ and Calories / kcal).</li>
+                    <li><strong>Energy Output (🏃 Right Pan):</strong> Add physical activities and adjust the Genetics BMR slider.</li>
+                    <li><strong>Weight Maintenance (⚖️ Level Scale):</strong> Energy Intake = Energy Output. Body mass remains constant.</li>
+                    <li><strong>Weight Gain / Surplus (🍔 Left Pan Low):</strong> Energy Intake &gt; Energy Output. Excess energy stored as body fat. The food side tilts DOWN.</li>
+                    <li><strong>Weight Loss / Deficit (🏃 Right Pan Low):</strong> Energy Output &gt; Energy Intake. Body uses stored energy reserves. The activity side tilts DOWN.</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the scale to its starting state (0 food and 0 energy output)?</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Scale</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           DATASETS: FOODS & PHYSICAL ACTIVITIES
+           ============================================================ */
+        const FOOD_ITEMS = [
+            { id: "food_pelau", name: "Pelau & Salad", icon: "🍲", kj: 2500, kcal: 600 },
+            { id: "food_bake_shark", name: "Bake & Shark", icon: "🥙", kj: 2100, kcal: 500 },
+            { id: "food_mango", name: "Fresh Mangoes", icon: "🥭", kj: 600, kcal: 140 },
+            { id: "food_soda", name: "Sweetened Soda", icon: "🥤", kj: 900, kcal: 215 },
+            { id: "food_water", name: "Pure Water", icon: "💧", kj: 0, kcal: 0 },
+            { id: "food_plantains", name: "Fried Plantains", icon: "🍌", kj: 800, kcal: 190 }
+        ];
+
+        const ACTIVITY_ITEMS = [
+            { id: "act_football", name: "School Football Match", icon: "⚽", kj: 2200, kcal: 525 },
+            { id: "act_track", name: "Track & Field Sprints", icon: "🏃", kj: 2600, kcal: 620 },
+            { id: "act_walking", name: "Walking to School", icon: "🚶", kj: 800, kcal: 190 },
+            { id: "act_cycling", name: "Cycling with Friends", icon: "🚲", kj: 1800, kcal: 430 },
+            { id: "act_swimming", name: "Maracas Bay Swimming", icon: "🏊", kj: 2000, kcal: 475 },
+            { id: "act_studying", name: "Classroom Studying", icon: "🪑", kj: 500, kcal: 120 }
+        ];
+
+        const CORE_PRINCIPLES = [
+            {
+                title: "Weight Maintenance (Level Scale)",
+                icon: "⚖️",
+                desc: "Energy Intake (food & drink) exactly equals Energy Output (physical activity & basic body functions). Body mass remains constant over time."
+            },
+            {
+                title: "Weight Gain / Energy Surplus (Food Side DOWN)",
+                icon: "🍔",
+                desc: "Energy Intake exceeds Energy Output. The food side tilts DOWN. The body stores excess energy as fat tissue, leading to weight gain over time."
+            },
+            {
+                title: "Weight Loss / Energy Deficit (Activity Side DOWN)",
+                icon: "🏃",
+                desc: "Energy Output exceeds Energy Intake. The activity side tilts DOWN. The body mobilizes stored energy reserves, leading to weight loss over time."
+            },
+            {
+                title: "Genetics & Basal Metabolic Rate (BMR Slider)",
+                icon: "🧬",
+                desc: "Energy spent at rest for basic body functions (breathing, circulation, cellular repair). Everyone's natural BMR varies due to genetics, creating unique balance points."
+            }
+        ];
+
+        const state = {
+            foodCounts: {},     // foodId -> count
+            actCounts: {},      // actId -> count
+            bmrValue: 0,        // BMR in kJ (default 0 on start)
+            soundMuted: false,  // Audio feedback mute toggle
+            theme: "light"
+        };
+
+        /* DOM Elements */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            soundToggleBtn: document.getElementById("soundToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            scaleStatusBanner: document.getElementById("scaleStatusBanner"),
+            seesawBeamWrap: document.getElementById("seesawBeamWrap"),
+            leftPanVal: document.getElementById("leftPanVal"),
+            rightPanVal: document.getElementById("rightPanVal"),
+            leftPanItemsGrid: document.getElementById("leftPanItemsGrid"),
+            rightPanItemsGrid: document.getElementById("rightPanItemsGrid"),
+            bmrSlider: document.getElementById("bmrSlider"),
+            bmrValBadge: document.getElementById("bmrValBadge"),
+            foodSelectorGrid: document.getElementById("foodSelectorGrid"),
+            activitySelectorGrid: document.getElementById("activitySelectorGrid"),
+            clearFoodsBtn: document.getElementById("clearFoodsBtn"),
+            clearActivitiesBtn: document.getElementById("clearActivitiesBtn"),
+            finishLabBtn: document.getElementById("finishLabBtn"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Web Audio API Sound Synthesizer */
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === "suspended") {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playAudioFeedback(type = "toggle") {
+            if (state.soundMuted) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+
+                if (type === "add") {
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(520, now);
+                    osc.frequency.exponentialRampToValueAtTime(840, now + 0.1);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === "sub") {
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(320, now + 0.1);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === "toggle") {
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                    osc.start(now);
+                    osc.stop(now + 0.06);
+                }
+            } catch (e) {}
+        }
+
+        function updateSoundUI() {
+            if (state.soundMuted) {
+                dom.soundToggleBtn.textContent = "🔇 Muted";
+            } else {
+                dom.soundToggleBtn.textContent = "🔊 Sound";
+            }
+        }
+
+        function toggleSound() {
+            state.soundMuted = !state.soundMuted;
+            try {
+                sessionStorage.setItem("user_sound_muted", state.soundMuted ? "true" : "false");
+            } catch (e) {}
+            updateSoundUI();
+            if (!state.soundMuted) {
+                playAudioFeedback("toggle");
+            }
+        }
+
+        /* Detect Browser System Theme */
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        /* Initialization */
+        init();
+
+        function init() {
+            bindEvents();
+            loadState();
+            renderDashboard();
+
+            // MANDATORY AUTO-OPEN INSTRUCTIONS MODAL ON LAUNCH
+            openModal();
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // MANDATORY RULE: NO BACKDROP CLICK DISMISSAL
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.soundToggleBtn.addEventListener("click", toggleSound);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+
+            dom.clearFoodsBtn.addEventListener("click", clearFoods);
+            dom.clearActivitiesBtn.addEventListener("click", clearActivities);
+
+            dom.finishLabBtn.addEventListener("click", () => showScreen("summary"));
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            dom.bmrSlider.addEventListener("input", (e) => {
+                state.bmrValue = parseInt(e.target.value, 10);
+                dom.bmrValBadge.textContent = `${state.bmrValue.toLocaleString()} kJ`;
+                playAudioFeedback("toggle");
+                updateSeesawAndInspector();
+            });
+
+            // Real-time theme listener
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            // Lock outer body overflow in game mode
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo(0, 0);
+
+            if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        function adjustFoodCount(foodId, delta) {
+            const current = state.foodCounts[foodId] || 0;
+            const next = Math.max(0, current + delta);
+            if (next === 0) {
+                delete state.foodCounts[foodId];
+            } else {
+                state.foodCounts[foodId] = next;
+            }
+            playAudioFeedback(delta > 0 ? "add" : "sub");
+            renderDashboard();
+        }
+
+        function adjustActivityCount(actId, delta) {
+            const current = state.actCounts[actId] || 0;
+            const next = Math.max(0, current + delta);
+            if (next === 0) {
+                delete state.actCounts[actId];
+            } else {
+                state.actCounts[actId] = next;
+            }
+            playAudioFeedback(delta > 0 ? "add" : "sub");
+            renderDashboard();
+        }
+
+        function clearFoods() {
+            state.foodCounts = {};
+            playAudioFeedback("sub");
+            renderDashboard();
+        }
+
+        function clearActivities() {
+            state.actCounts = {};
+            playAudioFeedback("sub");
+            renderDashboard();
+        }
+
+        function calculateTotals() {
+            let intakeKj = 0;
+            let intakeKcal = 0;
+            Object.keys(state.foodCounts).forEach(fid => {
+                const count = state.foodCounts[fid];
+                const item = FOOD_ITEMS.find(f => f.id === fid);
+                if (item) {
+                    intakeKj += item.kj * count;
+                    intakeKcal += item.kcal * count;
+                }
+            });
+
+            let actKj = 0;
+            let actKcal = 0;
+            Object.keys(state.actCounts).forEach(aid => {
+                const count = state.actCounts[aid];
+                const item = ACTIVITY_ITEMS.find(a => a.id === aid);
+                if (item) {
+                    actKj += item.kj * count;
+                    actKcal += item.kcal * count;
+                }
+            });
+
+            const outputKj = state.bmrValue + actKj;
+            const outputKcal = Math.round(state.bmrValue / 4.184) + actKcal;
+            const diffKj = intakeKj - outputKj;
+            const diffKcal = intakeKcal - outputKcal;
+
+            return { intakeKj, intakeKcal, outputKj, outputKcal, diffKj, diffKcal, actKj };
+        }
+
+        function updateSeesawAndInspector() {
+            const { intakeKj, intakeKcal, outputKj, outputKcal, diffKj, diffKcal } = calculateTotals();
+
+            dom.leftPanVal.textContent = `${intakeKj.toLocaleString()} kJ`;
+            dom.rightPanVal.textContent = `${outputKj.toLocaleString()} kJ`;
+
+            // Left Pan item chips
+            const leftChips = [];
+            Object.keys(state.foodCounts).forEach(fid => {
+                const count = state.foodCounts[fid];
+                const item = FOOD_ITEMS.find(f => f.id === fid);
+                if (item) {
+                    leftChips.push(`<div class="pan-item-chip">${item.icon} ${item.name} (${count}x)</div>`);
+                }
+            });
+            dom.leftPanItemsGrid.innerHTML = leftChips.join('');
+
+            // Right Pan item chips
+            const rightChips = [`<div class="pan-item-chip">🧬 BMR: ${state.bmrValue.toLocaleString()}kJ</div>`];
+            Object.keys(state.actCounts).forEach(aid => {
+                const count = state.actCounts[aid];
+                const item = ACTIVITY_ITEMS.find(a => a.id === aid);
+                if (item) {
+                    rightChips.push(`<div class="pan-item-chip">${item.icon} ${item.name} (${count}x)</div>`);
+                }
+            });
+            dom.rightPanItemsGrid.innerHTML = rightChips.join('');
+
+            // Seesaw angle clamp [-22, 22]
+            // PHYSICAL BALANCE SCALE RULE: The HEAVIER side goes DOWN.
+            // Left Pan (Intake) is heavier (diffKj > 0) => Left side goes DOWN (negative angle in CSS rotate).
+            // Right Pan (Output) is heavier (diffKj < 0) => Right side goes DOWN (positive angle in CSS rotate).
+            let angle = 0;
+            if (Math.abs(diffKj) <= 200) {
+                angle = 0;
+                dom.scaleStatusBanner.className = "scale-status-banner balanced";
+                dom.scaleStatusBanner.innerHTML = "⚖️ Weight Maintenance (Energy Intake = Energy Output)";
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                if (intakeKj === 0 && outputKj === 0) {
+                    dom.inspectorFeedbackBox.innerHTML = `
+                        <strong>⚖️ Starting State (Perfectly Level):</strong><br/>
+                        The scale is currently level with 0 food selected and 0 energy output (0 kJ vs 0 kJ). Add foods, physical activities, or move the BMR slider to see the scale tilt!
+                    `;
+                } else {
+                    dom.inspectorFeedbackBox.innerHTML = `
+                        <strong>⚖️ Weight Maintenance State:</strong><br/>
+                        Energy Intake (${intakeKj.toLocaleString()} kJ / ${intakeKcal} kcal) exactly equals Energy Output (${outputKj.toLocaleString()} kJ / ${outputKcal} kcal). Body mass remains constant over time.
+                    `;
+                }
+            } else if (diffKj > 200) {
+                // Left Pan (Food Intake) is heavier -> Left side goes DOWN!
+                angle = -Math.min(18, 3 + (diffKj - 200) / 250);
+                dom.scaleStatusBanner.className = "scale-status-banner surplus";
+                dom.scaleStatusBanner.innerHTML = `🍔 Energy Surplus (+${diffKj.toLocaleString()} kJ → Weight Gain)`;
+
+                dom.inspectorFeedbackBox.className = "feedback-card surplus";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <strong>🍔 Weight Gain (Energy Surplus):</strong><br/>
+                    Intake (${intakeKj.toLocaleString()} kJ) is heavier than Output (${outputKj.toLocaleString()} kJ) by <strong>+${diffKj.toLocaleString()} kJ (+${diffKcal} kcal)</strong>. The food side tilts DOWN. The body stores excess energy as fat tissue, leading to weight gain over time. To balance the scale, increase physical activity or decrease food intake.
+                `;
+            } else {
+                // Right Pan (Activity + BMR Output) is heavier -> Right side goes DOWN!
+                const mag = Math.abs(diffKj);
+                angle = Math.min(18, 3 + (mag - 200) / 250);
+                dom.scaleStatusBanner.className = "scale-status-banner deficit";
+                dom.scaleStatusBanner.innerHTML = `🏃 Energy Deficit (${diffKj.toLocaleString()} kJ → Weight Loss)`;
+
+                dom.inspectorFeedbackBox.className = "feedback-card deficit";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <strong>🏃 Weight Loss (Energy Deficit):</strong><br/>
+                    Output (${outputKj.toLocaleString()} kJ) is heavier than Intake (${intakeKj.toLocaleString()} kJ) by <strong>${diffKj.toLocaleString()} kJ (${diffKcal} kcal)</strong>. The activity side tilts DOWN. The body uses stored energy reserves to make up the difference, leading to weight loss over time. To balance the scale, increase food intake.
+                `;
+            }
+
+            // Apply rotation to seesaw beam (Heavier side moves DOWN)
+            dom.seesawBeamWrap.style.transform = `rotate(${angle}deg)`;
+
+            // Counter-rotate hanging pans so they remain hanging vertically straight down
+            const leftPan = dom.seesawBeamWrap.querySelector('.left-pan');
+            const rightPan = dom.seesawBeamWrap.querySelector('.right-pan');
+            if (leftPan) leftPan.style.transform = `rotate(${-angle}deg)`;
+            if (rightPan) rightPan.style.transform = `rotate(${-angle}deg)`;
+        }
+
+        function renderDashboard() {
+            // Food Selector Grid
+            dom.foodSelectorGrid.innerHTML = FOOD_ITEMS.map(food => {
+                const count = state.foodCounts[food.id] || 0;
+                return `
+                    <div class="item-tile">
+                        <div class="item-info">
+                            <div class="item-icon">${food.icon}</div>
+                            <div class="item-details">
+                                <h4>${escapeHtml(food.name)}</h4>
+                                <p>+${food.kj.toLocaleString()} kJ (${food.kcal} kcal)</p>
+                            </div>
+                        </div>
+                        <div class="counter-controls-bottom">
+                            <button class="btn-counter-lg" onclick="adjustFoodCount('${food.id}', -1)" ${count === 0 ? 'disabled' : ''} aria-label="Decrease ${food.name}">-</button>
+                            <span class="counter-count-badge">${count}</span>
+                            <button class="btn-counter-lg" onclick="adjustFoodCount('${food.id}', 1)" aria-label="Increase ${food.name}">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Activity Selector Grid
+            dom.activitySelectorGrid.innerHTML = ACTIVITY_ITEMS.map(act => {
+                const count = state.actCounts[act.id] || 0;
+                return `
+                    <div class="item-tile">
+                        <div class="item-info">
+                            <div class="item-icon">${act.icon}</div>
+                            <div class="item-details">
+                                <h4>${escapeHtml(act.name)}</h4>
+                                <p>+${act.kj.toLocaleString()} kJ (${act.kcal} kcal)</p>
+                            </div>
+                        </div>
+                        <div class="counter-controls-bottom">
+                            <button class="btn-counter-lg" onclick="adjustActivityCount('${act.id}', -1)" ${count === 0 ? 'disabled' : ''} aria-label="Decrease ${act.name}">-</button>
+                            <span class="counter-count-badge">${count}</span>
+                            <button class="btn-counter-lg" onclick="adjustActivityCount('${act.id}', 1)" aria-label="Increase ${act.name}">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateSeesawAndInspector();
+        }
+
+        function renderSummaryScreen() {
+            dom.badgeIcon.textContent = "⚖️";
+            dom.badgeTitle.textContent = "Energy Balance Exploration";
+            dom.badgeDesc.textContent = "You explored how daily Energy Intake (food & drink) and Energy Output (basal metabolism & physical activity) govern body mass.";
+
+            dom.summaryDetailsList.innerHTML = CORE_PRINCIPLES.map(p => `
+                <div class="summary-item-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">${p.icon} ${escapeHtml(p.title)}</strong>
+                    </div>
+                    <p style="margin:4px 0 0; color:var(--text-soft); font-size:0.9rem;">${escapeHtml(p.desc)}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderHistoryList() {
+            dom.historyList.innerHTML = CORE_PRINCIPLES.map(p => `
+                <div class="summary-item-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">${p.icon} ${escapeHtml(p.title)}</strong>
+                    </div>
+                    <div style="font-size:0.88rem; color:var(--text-soft); margin-top:4px;">${escapeHtml(p.desc)}</div>
+                </div>
+            `).join('');
+        }
+
+        /* Modal & Drawer Controls */
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try {
+                sessionStorage.setItem("user_toggled_theme", state.theme);
+            } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen toggle failed", err);
+            }
+        }
+
+        /* Confirm Reset (Preserve fullscreen & theme, return to home) */
+        function confirmReset() {
+            closeResetModal();
+
+            state.foodCounts = {};
+            state.actCounts = {};
+            state.bmrValue = 0;
+
+            dom.bmrSlider.value = 0;
+            dom.bmrValBadge.textContent = "0 kJ";
+
+            renderDashboard();
+            showScreen("home");
+        }
+
+        /* Fresh Launch Loader */
+        function loadState() {
+            state.foodCounts = {};
+            state.actCounts = {};
+            state.bmrValue = 0;
+
+            dom.bmrSlider.value = 0;
+            dom.bmrValBadge.textContent = "0 kJ";
+
+            try {
+                const savedMute = sessionStorage.getItem("user_sound_muted");
+                if (savedMute !== null) {
+                    state.soundMuted = (savedMute === "true");
+                }
+            } catch (e) {}
+
+            updateSoundUI();
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
