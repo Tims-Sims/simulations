@@ -46,4 +46,4 @@ The 5 questions and answers are fixed (from the SIM plan, Section 6) and must no
 
 ## Testing
 
-This branch is in the **testing** phase — see `TESTER_INSTRUCTIONS.md` for the tester brief and the QA checklist to follow. Report bugs as issues with steps to reproduce, expected result, and actual output. Do not modify the simulation while testing.
+This branch is in the **testing** phase — see [issue #169](https://github.com/Tims-Sims/simulations/issues/169) for the tester brief and the QA checklist to follow. Report bugs as comments on that issue with steps to reproduce, expected result, and actual output. Do not modify the simulation while testing.
