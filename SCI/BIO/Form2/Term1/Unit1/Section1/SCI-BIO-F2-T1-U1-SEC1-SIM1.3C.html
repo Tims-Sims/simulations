@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Virtual Food-Testing Laboratory</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        .lab-shell, #labView { display: grid; gap: clamp(24px, 4vw, 36px); }
+        .hero-card h2 { margin-bottom: 16px; line-height: 1.2; }
+        .hero-card > p { line-height: 1.65; margin-bottom: 20px; }
+        .modal-card h3 { margin: 0 38px 14px 0; line-height: 1.25; }
+        .modal-card h3 + p { margin: 0; line-height: 1.65; }
+        .lab-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+        .lab-header > div { display: grid; gap: 0; }
+        .lab-header h2 { margin: 16px 0 12px; font-size: clamp(1.55rem, 3vw, 2.2rem); line-height: 1.18; }
+        .lab-header p { color: var(--text-soft); margin: 0; max-width: 68ch; line-height: 1.65; }
+        .step-pill, .status-chip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 999px; padding: 7px 11px; font-weight: 800; }
+        .step-pill { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+        .status-chip { color: var(--text-soft); background: var(--surface-2); }
+        .progress-track { height: 10px; overflow: hidden; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); }
+        .progress-fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--success)); transition: width .28s ease; }
+        .progress-meta { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .bench-card, .question-card, .complete-card { width: min(100%, 850px); margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow); padding: clamp(20px, 4vw, 34px); }
+        .bench-card { display: grid; gap: clamp(22px, 4vw, 32px); min-width: 0; }
+        .bench-stage { position: relative; min-height: 270px; display: grid; place-items: center; overflow: hidden; border-radius: 20px; border: 1px solid var(--border); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 7%, var(--surface-2)) 0 70%, color-mix(in srgb, #93633e 32%, var(--surface)) 70% 100%); }
+        .sample-art { width: min(100%, 500px); height: 240px; display: block; }
+        .visual-state { position: absolute; left: 14px; bottom: 14px; right: 14px; padding: 9px 12px; border-radius: 12px; color: var(--text); background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--border); font-weight: 800; text-align: center; }
+        .stage-card { display: grid; gap: 18px; padding: clamp(18px, 3vw, 26px); border: 1px solid var(--border); border-radius: 18px; background: color-mix(in srgb, var(--surface-2) 72%, var(--surface)); }
+        .stage-heading { display: grid; gap: 8px; }
+        .stage-heading h3 { margin: 0; font-size: 1.18rem; line-height: 1.3; }
+        .stage-heading p { margin: 0; color: var(--text-soft); line-height: 1.6; }
+        .reagent-section h3, .record-panel h3 { margin: 0; font-size: 1.12rem; }
+        .reagent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .reagent { min-height: 116px; display: grid; place-items: center; gap: 6px; padding: 10px; color: var(--text); background: var(--surface-2); border: 2px solid var(--border); border-radius: 15px; }
+        .reagent:hover { border-color: var(--accent); }
+        .reagent[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, var(--surface)); box-shadow: var(--focus); }
+        .reagent[aria-pressed="true"]::after { content: "✓ Selected"; color: var(--success); font-size: .82rem; font-weight: 900; }
+        .bottle { width: 38px; height: 52px; border: 3px solid currentColor; border-radius: 5px 5px 12px 12px; position: relative; background: linear-gradient(180deg, transparent 28%, var(--bottle-colour) 29%); }
+        .bottle::before { content: ""; position: absolute; width: 22px; height: 10px; left: 5px; top: -11px; border: 3px solid currentColor; border-bottom: 0; border-radius: 4px 4px 0 0; }
+        .bottle.iodine { --bottle-colour: #9a5b16; }
+        .bottle.benedicts { --bottle-colour: #1989d6; }
+        .bottle.biuret { --bottle-colour: #3d76cf; }
+        .action-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .procedure-btn { background: color-mix(in srgb, var(--warning) 16%, var(--surface)); color: var(--text); border: 1px solid color-mix(in srgb, var(--warning) 55%, var(--border)); border-radius: 12px; padding: 12px 16px; min-height: 44px; font-weight: 800; }
+        .record-panel { display: grid; gap: 22px; }
+        .choice-block { border: 0; padding: 0; margin: 0; min-width: 0; }
+        .choice-block legend { font-weight: 800; margin-bottom: 12px; line-height: 1.4; }
+        .choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+        .choice-card { position: relative; display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 10px; border: 2px solid var(--border); border-radius: 12px; background: var(--surface-2); cursor: pointer; font-weight: 700; }
+        .choice-card:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
+        .choice-card:has(input:focus-visible) { box-shadow: var(--focus); }
+        .choice-card input { accent-color: var(--accent); }
+        .feedback { min-height: 52px; padding: 14px 16px; border-radius: 12px; background: var(--surface-2); border-left: 5px solid var(--muted); color: var(--text-soft); line-height: 1.55; }
+        .feedback.correct { border-left-color: var(--success); color: var(--text); }
+        .feedback.error { border-left-color: var(--warning); color: var(--text); }
+        .row-check { color: var(--success); font-weight: 900; }
+        .model-note, .safety-note { margin: 0; padding: 12px 14px; border-radius: 12px; line-height: 1.45; }
+        .model-note { color: var(--text-soft); background: color-mix(in srgb, var(--accent-2) 9%, var(--surface-2)); border: 1px solid var(--border); }
+        .safety-note { color: var(--text); background: color-mix(in srgb, var(--warning) 13%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--border)); }
+        .nav-row { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+        .gated { opacity: .42; }
+        .gated:not(:disabled) { opacity: 1; }
+        .question-card { max-width: 760px; display: grid; gap: 24px; }
+        .question-card h2, .complete-card h2 { margin: 8px 0 0; line-height: 1.2; }
+        .assessment-copy { font-size: 1.15rem; line-height: 1.5; font-weight: 800; }
+        .complete-card { max-width: 780px; margin: 0 auto; text-align: center; display: grid; gap: 16px; }
+        .recap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: left; }
+        .recap-item { padding: 14px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+        .recap-item strong { display: block; margin-bottom: 5px; }
+        .modal.show { display: grid; }
+        .history-list { display: grid; gap: 10px; padding: 0; list-style: none; }
+        .history-list li { padding: 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+        .guide-grid { display: grid; gap: 14px; margin-top: 18px; }
+        .guide-card { display: grid; grid-template-columns: 54px 1fr; gap: 14px; align-items: start; padding: 15px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+        .guide-card h4 { margin: 0 0 7px; font-size: 1rem; }
+        .guide-card p { margin: 0; color: var(--text-soft); line-height: 1.55; }
+        .guide-symbol { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 13px; color: #fff; font-size: 1.3rem; font-weight: 900; border: 2px solid color-mix(in srgb, #fff 68%, transparent); }
+        .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .liquid { transition: fill .45s ease; }
+        .liquid-meniscus { fill: none; stroke: rgba(255, 255, 255, .58); stroke-width: 3; stroke-linecap: round; pointer-events: none; }
+        .glass-highlight { fill: none; stroke: rgba(255, 255, 255, .72); stroke-width: 4; stroke-linecap: round; pointer-events: none; }
+        .swirl .liquid { animation: liquid-swish .7s ease-in-out; transform-origin: center; }
+        .heating .bubble { animation: bubble-rise .8s ease-in infinite; }
+        .precipitate { opacity: 0; }
+        .brick-red .precipitate { opacity: 1; }
+        @keyframes liquid-swish { 50% { transform: skewX(5deg) translateY(3px); } }
+        @keyframes bubble-rise { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(-14px); opacity: 1; } }
+        @media (max-width: 620px) { .reagent-grid, .choice-grid, .recap-grid { grid-template-columns: 1fr; } .reagent { min-height: 76px; grid-template-columns: 48px 1fr; justify-items: start; text-align: left; } .guide-card { grid-template-columns: 1fr; } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" id="reviewBtn" aria-label="Open Review History">▤ Review History</button>
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <p class="safety-note"><strong>Virtual lab safety:</strong> In a real laboratory, wear eye protection, never taste samples or reagents, and use a supervised hot water bath.</p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Enter the lab</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                        <button class="secondary-btn" id="homeGuideBtn">Food Test Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <div class="lab-shell" id="labApp" aria-live="off">
+                        <div id="labView"></div>
+                    </div>
+                    <div class="sr-only" id="liveRegion" role="status" aria-live="polite" aria-atomic="true"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Form 2 Biology • Food tests • Runs fully offline
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeReviewBtn" aria-label="Close Review History">×</button>
+            <h3 id="reviewHeading">Review History</h3>
+            <div id="reviewBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="doneReviewBtn">Done</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeGuideBtn" aria-label="Close Food Test Guide">×</button>
+            <h3 id="guideHeading">Food Test Guide</h3>
+            <p>Use this guide whenever you need to check a reagent, procedure, or positive result.</p>
+            <div class="guide-grid">
+                <article class="guide-card"><span class="guide-symbol" style="background:#17203f">I</span><div><h4>Iodine test</h4><p><strong>Tests for:</strong> Starch.<br><strong>Procedure:</strong> Add iodine directly.<br><strong>Positive result:</strong> Yellow-brown changes to blue-black.<br><strong>What it means:</strong> Starch, a complex carbohydrate, is present.</p></div></article>
+                <article class="guide-card"><span class="guide-symbol" style="background:#7d3bb8">B</span><div><h4>Biuret test</h4><p><strong>Tests for:</strong> Protein.<br><strong>Procedure:</strong> Add Biuret reagent and swirl gently.<br><strong>Positive result:</strong> Blue changes to purple or lilac.<br><strong>What it means:</strong> Protein is present.</p></div></article>
+                <article class="guide-card"><span class="guide-symbol" style="background:#a63120">H</span><div><h4>Benedict's test</h4><p><strong>Tests for:</strong> Reducing sugar.<br><strong>Procedure:</strong> Add Benedict's solution and heat safely in a hot water bath.<br><strong>Positive result:</strong> Green, yellow, orange, or brick-red appears.<br><strong>What it means:</strong> Reducing sugar, a simple carbohydrate, is present.</p></div></article>
+            </div>
+            <div class="button-row" style="margin-top: 22px; justify-content: flex-start;">
+                <button class="primary-btn" id="doneGuideBtn">Close guide</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "SCI-BIO-F2-T1-U1-SEC1-SIM1.3C",
+            title: "Virtual Food-Testing Laboratory",
+            subtitle: "Form 2 Biology • Safe offline laboratory",
+            badgeText: "BIO",
+            homeEyebrow: "Form 2 Biology Lab",
+            homeDescription:
+                "Investigate three food samples. Choose a reagent, follow the test procedure, observe the result, and record the nutrient you identify.",
+            instructions: [
+                "Work through one investigation at a time. Each screen tells you what to do next.",
+                "Use Food Test Guide when you want to review the purpose, procedure, and meaning of a positive food test.",
+                "Forward controls remain unavailable until the current task is complete. Review History stores your correct results.",
+                "Use Tab and Shift+Tab to move, arrow keys within answer groups, and Enter or Space to activate controls.",
+                "In a real laboratory, wear eye protection, never taste samples or reagents, and follow supervision when heating materials.",
+                "The simulation runs offline and stores progress only for the current browser tab."
+            ]
+        };
+
+        /* ============================================================
+           DEV-EDIT: AUDIO (OPTIONAL)
+           Audio is completely optional. If you don't want sound in your
+           sim, delete this whole section AND the #audioBtn button in the
+           header above (search "OPTIONAL: AUDIO TOGGLE BUTTON").
+
+           All sounds here work fully offline - no internet connection
+           is ever needed. There are two ways to give a sound to a slot
+           in SOUND_FILES below:
+
+             1. Leave it as "" (empty string) to use a built-in
+                synthesized "beep" tone instead of a real audio file.
+                This needs no file at all and always works offline.
+
+             2. Paste a base64 "data URI" string, like:
+                "data:audio/mp3;base64,AAAA..."
+                To make one: convert your .mp3 or .wav file to base64
+                text (many free online converters do this, or your
+                own audio editor), then paste that text after the
+                "data:audio/mp3;base64," prefix shown above. This keeps
+                the sound baked directly into this one HTML file, so
+                there is nothing else to ship and nothing to break if
+                the file is moved. Note it makes the file bigger
+                (roughly 1.37x the size of the original audio), so this
+                is best for short sound effects, not music or narration.
+
+             3. Alternatively, point to a separate audio file next to
+                this HTML file, e.g. "sounds/correct.mp3" - but then you
+                must remember to ship that file alongside this one.
+
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+        const SOUND_FILES = {
+            click: "",     // played on general button/option clicks
+            correct: "",   // played when the learner answers correctly
+            wrong: "",     // played when the learner answers incorrectly
+            typing: "",    // played per-keystroke or per-character reveal
+            complete: ""   // played when the simulation/activity finishes
+            // Feel free to add your own keys here (e.g. levelUp: "") and
+            // call playSound("levelUp") from your DEV-EDIT: SIM LOGIC code.
+        };
+
+        /* Each sound belongs to a category. The "effects" category always gets a
+           volume slider in the Help window. Any OTHER category name you use here
+           (for example "voice" for narration you add yourself) automatically gets
+           its own labelled slider in the Help window — and if no sound uses it,
+           no slider appears. */
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects",
+            // narration: "voice",   // example: your own added sound in its own category
+        };
+        /* Optional nicer slider labels. Category name used if missing. */
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
+        /* ---- Audio engine below. Safe to leave untouched. ---- */
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};   // category -> 0..1
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        const SYNTH_SOUNDS = {
+            click:    (v) => playTone(600, 60, "square", 0.06 * v),
+            typing:   (v) => playTone(420, 30, "square", 0.04 * v),
+            correct:  (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(784, 180, "sine", 0.15 * v, 110); },
+            wrong:    (v) => playTone(180, 250, "sawtooth", 0.12 * v),
+            complete: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(659, 120, "sine", 0.15 * v, 120); playTone(784, 250, "sine", 0.15 * v, 240); },
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+        // Example usage from your own sim logic:
+        // playSound("correct"); // call anywhere in your DEV-EDIT: SIM LOGIC code
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1");
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), input.value);
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            modalReturnFocus = document.activeElement;
+            dom.instructionsModal.classList.add("show");
+            window.setTimeout(() => dom.closeInstructionsBtn.focus(), 0);
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+            if (modalReturnFocus && typeof modalReturnFocus.focus === "function") modalReturnFocus.focus();
+        }
+
+        function openResetConfirmModal() {
+            modalReturnFocus = document.activeElement;
+            dom.resetConfirmModal.classList.add("show");
+            window.setTimeout(() => dom.cancelResetBtn.focus(), 0);
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+            if (modalReturnFocus && typeof modalReturnFocus.focus === "function") modalReturnFocus.focus();
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* --- HANDY UTILITIES (examples — uncomment what you need) --- */
+        // function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        // function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        // function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        // Example: const order = shuffle([1, 2, 3, 4]);  const dice = randInt(1, 6);
+        // Storage: storageGet/storageSet are available for saving progress, keyed like `sim:${SIM_CONFIG.simId}:mydata`.
+
+        const LAB_STORAGE_KEY = "sim:SCI-BIO-F2-T1-U1-SEC1-SIM1.3C:state";
+        const SAMPLE_DATA = [
+            {
+                id: "a", screen: "sample-a", step: "Investigation 1 of 3", name: "Sample A: Bread",
+                shortName: "Sample A", instruction: "Choose one reagent, add it to the bread, then record the observation and nutrient.",
+                apply: "Add selected reagent", procedure: null, correctReagent: "iodine", observation: "blue-black", nutrient: "starch",
+                observationLabel: "Blue-black", nutrientLabel: "Starch (complex carbohydrate)"
+            },
+            {
+                id: "b", screen: "sample-b", step: "Investigation 2 of 3", name: "Sample B: Egg White Solution",
+                shortName: "Sample B", instruction: "Choose one reagent, add it to the solution, complete the procedure, then record the result.",
+                apply: "Add selected reagent", procedure: "swirl", correctReagent: "biuret", observation: "purple", nutrient: "protein",
+                observationLabel: "Purple or lilac", nutrientLabel: "Protein"
+            },
+            {
+                id: "c", screen: "sample-c", step: "Investigation 3 of 3", name: "Sample C: Apple Juice",
+                shortName: "Sample C", instruction: "Choose one reagent, add it to the juice, complete the procedure, then record the result.",
+                apply: "Add selected reagent", procedure: "heat", correctReagent: "benedicts", observation: "brick-red", nutrient: "reducing-sugar",
+                observationLabel: "Brick-red precipitate", nutrientLabel: "Reducing sugar (simple carbohydrate)"
+            }
+        ];
+        const REAGENTS = [
+            { id: "iodine", label: "Iodine", bottleClass: "iodine" },
+            { id: "benedicts", label: "Benedict's", bottleClass: "benedicts" },
+            { id: "biuret", label: "Biuret", bottleClass: "biuret" }
+        ];
+        let labState = createInitialLabState();
+        let labBound = false;
+        let modalReturnFocus = null;
+
+        function createInitialLabState() {
+            return {
+                screen: "sample-a",
+                samplePhases: { a: "choose", b: "choose", c: "choose" },
+                selectedReagents: {},
+                appliedStates: {},
+                procedureStates: {},
+                readyToRecord: {},
+                recordChoices: {},
+                recordedSamples: {},
+                feedback: {},
+                assessmentAnswer: "",
+                assessmentMastered: false,
+                assessmentFeedback: "",
+                history: [],
+                instructionsSeen: false,
+                completionShown: false
+            };
+        }
+
+        function loadLabState() {
+            const raw = storageGet(LAB_STORAGE_KEY);
+            if (!raw) return createInitialLabState();
+            try {
+                const parsed = JSON.parse(raw);
+                const allowed = ["sample-a", "sample-b", "sample-c", "assessment", "completion"];
+                if (!parsed || !allowed.includes(parsed.screen)) return createInitialLabState();
+                return Object.assign(createInitialLabState(), parsed);
+            } catch (err) {
+                return createInitialLabState();
+            }
+        }
+
+        function saveLabState() {
+            storageSet(LAB_STORAGE_KEY, JSON.stringify(labState));
+        }
+
+        function announce(message) {
+            const region = document.getElementById("liveRegion");
+            if (!region) return;
+            region.textContent = "";
+            window.setTimeout(() => { region.textContent = message; }, 20);
+        }
+
+        function sampleIndexForScreen(screen) {
+            return SAMPLE_DATA.findIndex((sample) => sample.screen === screen);
+        }
+
+        function completedCount() {
+            return SAMPLE_DATA.filter((sample) => Boolean(labState.recordedSamples[sample.id])).length;
+        }
+
+        function renderProgress() {
+            const done = completedCount();
+            const percent = labState.assessmentMastered ? 100 : done * 25;
+            return `<div aria-label="Laboratory progress: ${done} of 3 samples recorded${labState.assessmentMastered ? ", final question mastered" : ""}">
+                <div class="progress-meta"><span class="status-chip">${done} of 3 samples recorded</span>${labState.assessmentMastered ? `<span class="status-chip">✓ Final question mastered</span>` : ""}</div>
+                <div class="progress-track" style="margin-top:14px"><div class="progress-fill" style="width:${percent}%"></div></div>
+            </div>`;
+        }
+
+        function sampleVisual(sample) {
+            const applied = labState.appliedStates[sample.id] || "";
+            const procedureDone = Boolean(labState.procedureStates[sample.id]);
+            let label = sample.id === "a" ? "Bread is ready for testing." : sample.id === "b" ? "Egg white solution is clear and ready for testing." : "Apple juice is ready beside the hot water bath.";
+            let liquid = sample.id === "c" ? "#e6c35c" : "#d7e7ef";
+            let stageClass = "";
+            if (applied) {
+                if (sample.id === "a") {
+                    if (applied === "iodine") { liquid = "#121932"; label = "Positive result: yellow-brown iodine changed to blue-black."; }
+                    else if (applied === "benedicts") { liquid = "#1989d6"; label = "Negative result: the Benedict's mixture remains blue."; }
+                    else { liquid = "#3d76cf"; label = "Negative result: the Biuret mixture remains blue."; }
+                } else if (sample.id === "b") {
+                    if (applied === "biuret" && procedureDone) { liquid = "#7d3bb8"; label = "Positive result: after swirling, the liquid changed from blue to purple."; stageClass = "swirl"; }
+                    else if (applied === "biuret") { liquid = "#3d76cf"; label = "Biuret added: the mixture is blue. Swirl gently to complete the test."; }
+                    else if (applied === "iodine") { liquid = "#9a5b16"; label = "Negative result: iodine remains yellow-brown."; }
+                    else { liquid = "#1989d6"; label = "Negative result: the Benedict's mixture remains blue."; }
+                } else {
+                    if (applied === "benedicts" && procedureDone) { liquid = "#a63120"; label = "Positive result: after heating, a brick-red precipitate formed."; stageClass = "heating brick-red"; }
+                    else if (applied === "benedicts") { liquid = "#1989d6"; label = "Benedict's added: the mixture remains blue. Heating is required."; }
+                    else if (applied === "iodine") { liquid = "#9a5b16"; label = "Negative result: iodine remains yellow-brown."; }
+                    else { liquid = "#3d76cf"; label = "Negative result: the Biuret mixture remains blue."; }
+                }
+            }
+            if (sample.id === "a") {
+                return `<div class="bench-stage ${stageClass}"><svg class="sample-art" viewBox="0 0 500 240" role="img" aria-label="${label}">
+                    <ellipse cx="250" cy="190" rx="154" ry="27" fill="#e8edf5" stroke="#394660" stroke-width="4"/>
+                    <path d="M154 82 C157 48 190 38 218 50 C239 27 274 27 295 50 C326 38 358 51 360 84 L347 164 C285 181 217 181 154 164 Z" fill="#bd7b35" stroke="#51351d" stroke-width="5" stroke-linejoin="round"/>
+                    <path d="M169 85 C174 61 197 57 220 65 C241 46 270 46 292 65 C316 56 339 64 344 87 L333 151 C281 164 223 164 169 151 Z" fill="#f3d69a"/>
+                    <path d="M169 100 C218 87 288 87 343 101 L333 151 C281 164 223 164 169 151 Z" fill="${liquid}" opacity="${applied ? ".9" : "0"}"/>
+                    ${applied ? `<path d="M196 88 C196 77 207 71 207 60 C218 72 221 80 217 88 Z" fill="${liquid}"/><path d="M275 83 C275 73 285 67 285 57 C296 68 299 76 295 84 Z" fill="${liquid}"/>` : ""}
+                </svg><div class="visual-state">${label}</div></div>`;
+            }
+            const bath = sample.id === "c" ? `<path d="M92 132 H408 L393 202 H107 Z" fill="#74cddd" fill-opacity=".7" stroke="#394660" stroke-width="5" stroke-linejoin="round"/><path d="M111 151 Q250 137 389 151" fill="none" stroke="#e7fbff" stroke-width="4" opacity=".9"/><text x="250" y="226" text-anchor="middle" fill="currentColor" font-size="16" font-weight="700">Hot water bath</text>` : `<path d="M145 191 H355" stroke="#394660" stroke-width="7" stroke-linecap="round"/>`;
+            const heatingDetails = sample.id === "c" && applied === "benedicts" && procedureDone
+                ? `<g class="bubble" fill="#ffffff" opacity=".82"><circle cx="240" cy="146" r="3.5"/><circle cx="263" cy="136" r="4.5"/></g>`
+                : "";
+            return `<div class="bench-stage ${stageClass}"><svg class="sample-art" viewBox="0 0 500 240" role="img" aria-label="${label}">
+                <defs><clipPath id="tubeLiquidClip"><path d="M220 38 H280 L271 166 Q269 185 250 187 Q231 185 229 166 Z"/></clipPath></defs>
+                ${bath}
+                <g clip-path="url(#tubeLiquidClip)">
+                    <path class="liquid" d="M218 99 Q250 92 282 99 L278 176 Q274 194 250 196 Q226 194 222 176 Z" fill="${liquid}"/>
+                    <path class="liquid-meniscus" d="M225 99 Q250 94 275 99"/>
+                    <g class="precipitate" fill="#681c13"><ellipse cx="238" cy="174" rx="7" ry="4"/><ellipse cx="251" cy="179" rx="9" ry="5"/><ellipse cx="265" cy="172" rx="6" ry="3.5"/><circle cx="251" cy="166" r="4"/></g>
+                    ${heatingDetails}
+                </g>
+                <path d="M211 30 H289 L278 168 Q276 194 250 194 Q224 194 222 168 Z" fill="#f7fbff" fill-opacity=".12" stroke="#394660" stroke-width="6" stroke-linejoin="round"/>
+                <path class="glass-highlight" d="M224 45 L230 151 Q231 167 239 177"/>
+                <path d="M211 30 H289" stroke="#eef8ff" stroke-opacity=".8" stroke-width="3" stroke-linecap="round"/>
+            </svg><div class="visual-state">${label}</div></div>`;
+        }
+
+        function reagentButtons(sample) {
+            const selected = labState.selectedReagents[sample.id] || "";
+            const locked = Boolean(labState.recordedSamples[sample.id]);
+            return REAGENTS.map((reagent) => `<button type="button" class="reagent" data-action="select-reagent" data-reagent="${reagent.id}" aria-pressed="${selected === reagent.id}" ${locked ? "disabled" : ""}>
+                <span class="bottle ${reagent.bottleClass}" aria-hidden="true"></span><span>${reagent.label}</span>
+            </button>`).join("");
+        }
+
+        function choiceCards(sample, kind, options) {
+            const current = (labState.recordChoices[sample.id] || {})[kind] || "";
+            const disabled = !labState.readyToRecord[sample.id] || Boolean(labState.recordedSamples[sample.id]);
+            return options.map((option) => `<label class="choice-card"><input type="radio" name="${sample.id}-${kind}" value="${option.id}" data-choice-kind="${kind}" ${current === option.id ? "checked" : ""} ${disabled ? "disabled" : ""}><span>${option.label}</span></label>`).join("");
+        }
+
+        function renderSample(sample) {
+            const applied = labState.appliedStates[sample.id] || "";
+            const recorded = Boolean(labState.recordedSamples[sample.id]);
+            const feedback = labState.feedback[sample.id] || `Select a reagent to begin ${sample.shortName}.`;
+            const procedureReady = applied === sample.correctReagent && !labState.procedureStates[sample.id] && sample.procedure;
+            const nextLabel = sample.id === "c" ? "Go to final question" : "Next sample";
+            const observationOptions = sample.id === "a"
+                ? [{id:"yellow-brown",label:"Yellow-brown"},{id:"blue-black",label:"Blue-black"},{id:"purple",label:"Purple"}]
+                : sample.id === "b"
+                    ? [{id:"blue",label:"Blue"},{id:"purple",label:"Purple or lilac"},{id:"brick-red",label:"Brick-red"}]
+                    : [{id:"blue",label:"Blue"},{id:"blue-black",label:"Blue-black"},{id:"brick-red",label:"Brick-red precipitate"}];
+            const nutrientOptions = [{id:"starch",label:"Starch"},{id:"protein",label:"Protein"},{id:"reducing-sugar",label:"Reducing sugar"}];
+            let focusedStage = "";
+            if (recorded) {
+                const result = labState.recordedSamples[sample.id];
+                focusedStage = `<section class="stage-card" aria-labelledby="stageHeading"><div class="stage-heading"><h3 id="stageHeading">✓ Sample recorded</h3><p>${result.reagent} produced ${result.observation.toLowerCase()}, showing ${result.nutrient.toLowerCase()}.</p></div></section>`;
+            } else if (labState.readyToRecord[sample.id]) {
+                focusedStage = `<section class="stage-card record-panel" aria-labelledby="stageHeading"><div class="stage-heading"><h3 id="stageHeading">Step 3: Record the result</h3><p>Use the observation above, then identify the nutrient it shows.</p></div>
+                    <fieldset class="choice-block"><legend>What did you observe?</legend><div class="choice-grid">${choiceCards(sample,"observation",observationOptions)}</div></fieldset>
+                    <fieldset class="choice-block"><legend>Which nutrient is present?</legend><div class="choice-grid">${choiceCards(sample,"nutrient",nutrientOptions)}</div></fieldset>
+                    <div class="action-row"><button type="button" class="primary-btn" data-action="record-result">Record result</button></div></section>`;
+            } else if (sample.id === "a" && labState.samplePhases.a === "observe") {
+                focusedStage = `<section class="stage-card" aria-labelledby="stageHeading"><div class="stage-heading"><h3 id="stageHeading">Step 2: Observe the result</h3><p>Look at the labelled colour change on the bread. When you are ready, continue to record your observation.</p></div><div class="action-row"><button type="button" class="primary-btn" data-action="continue-observation">Continue to record result</button></div></section>`;
+            } else if (procedureReady) {
+                const isHeat = procedureReady === "heat";
+                focusedStage = `<section class="stage-card" aria-labelledby="stageHeading"><div class="stage-heading"><h3 id="stageHeading">Step 2: Complete the procedure</h3><p>${isHeat ? "The mixture is still blue. Apply thermal energy safely." : "Mix the reagent and sample gently to reveal the result."}</p></div><div class="action-row"><button type="button" class="procedure-btn" data-action="${isHeat ? "heat" : "swirl"}">${isHeat ? "♨ Heat in water bath" : "↻ Swirl gently"}</button></div></section>`;
+            } else {
+                focusedStage = `<section class="stage-card reagent-section" aria-labelledby="stageHeading"><div class="stage-heading"><h3 id="stageHeading">Step 1: Choose one test</h3><p>Select a reagent, then add it to ${sample.shortName}. Use Food Test Guide if you need to look up the tests.</p></div><div class="reagent-grid">${reagentButtons(sample)}</div><div class="action-row"><button type="button" class="primary-btn" data-action="apply-reagent">${sample.apply}</button></div></section>`;
+            }
+            const showFeedback = Boolean(labState.feedback[sample.id]) && !recorded &&
+                !feedback.startsWith("Positive") && !(sample.id === "b" && procedureReady === "swirl");
+            return `${renderProgress()}
+                <div class="lab-header"><div><span class="step-pill">${sample.step}</span><h2>${sample.name}</h2><p>${sample.instruction}</p></div><button type="button" class="secondary-btn" data-action="open-guide">Food Test Guide</button></div>
+                <section class="bench-card" aria-label="Laboratory bench for ${sample.name}">
+                    ${sampleVisual(sample)}
+                    ${focusedStage}
+                    ${showFeedback ? `<div class="feedback ${feedback.startsWith("Correct") || feedback.startsWith("Positive") ? "correct" : applied ? "error" : ""}" id="sampleFeedback" tabindex="-1">${feedback}</div>` : ""}
+                    <div class="nav-row"><button type="button" class="primary-btn gated" data-action="next" ${recorded ? "" : "disabled"}>${nextLabel}</button></div>
+                </section>`;
+        }
+
+        function renderAssessment() {
+            const choices = [
+                {id:"sample-a",label:"Sample A: Bread"},
+                {id:"sample-b",label:"Sample B: Egg white solution"},
+                {id:"sample-c",label:"Sample C: Apple juice"}
+            ].map((choice) => `<label class="choice-card"><input type="radio" name="assessment" value="${choice.id}" data-assessment-choice ${labState.assessmentAnswer === choice.id ? "checked" : ""} ${labState.assessmentMastered ? "disabled" : ""}><span>${choice.label}</span></label>`).join("");
+            return `${renderProgress()}<section class="question-card" aria-labelledby="assessmentPrompt">
+                <div class="lab-header"><span class="step-pill">Final question</span><button type="button" class="secondary-btn" data-action="open-guide">Food Test Guide</button></div>
+                <p class="assessment-copy" id="assessmentPrompt">Based on your results, which sample would provide the highest amount of complex carbohydrates?</p>
+                <p style="margin:0;color:var(--text-soft)">Need to check your recorded evidence? Open Review History in the top bar.</p>
+                <fieldset class="choice-block"><legend class="sr-only">Choose one sample</legend><div class="choice-grid">${choices}</div></fieldset>
+                <div class="action-row"><button type="button" class="primary-btn" data-action="check-assessment" ${labState.assessmentMastered ? "disabled" : ""}>${labState.assessmentMastered ? "✓ Answer mastered" : "Check answer"}</button></div>
+                ${labState.assessmentFeedback ? `<div class="feedback ${labState.assessmentMastered ? "correct" : "error"}" id="assessmentFeedback" tabindex="-1">${labState.assessmentFeedback}</div>` : ""}
+                <p class="model-note">These food tests are qualitative: they show whether a nutrient is present, not an exact amount. Within this activity, use the positive starch result to identify the complex-carbohydrate source.</p>
+                <div class="nav-row"><button type="button" class="primary-btn gated" data-action="finish" ${labState.assessmentMastered ? "" : "disabled"}>Finish</button></div>
+            </section>`;
+        }
+
+        function renderCompletion() {
+            return `<section class="complete-card" aria-labelledby="completeHeading">
+                <span class="step-pill" style="justify-self:center">Laboratory complete</span><h2 id="completeHeading">You identified all three nutrients</h2>
+                <div class="recap-grid">
+                    <div class="recap-item"><strong>Sample A • Bread</strong>Iodine: yellow-brown → blue-black<br><span class="row-check">✓ Starch</span></div>
+                    <div class="recap-item"><strong>Sample B • Egg white</strong>Biuret: blue → purple after swirling<br><span class="row-check">✓ Protein</span></div>
+                    <div class="recap-item"><strong>Sample C • Apple juice</strong>Benedict's: blue → brick-red after heating<br><span class="row-check">✓ Reducing sugar</span></div>
+                </div>
+                <p>Within these samples, bread is the complex-carbohydrate source because its positive iodine test shows starch.</p>
+                <p class="model-note">These qualitative tests show presence, not an exact nutrient amount.</p>
+                <div class="action-row" style="justify-content:center"><button type="button" class="secondary-btn" data-action="open-guide">Food Test Guide</button><button type="button" class="primary-btn" data-action="play-again">Play again</button></div>
+            </section>`;
+        }
+
+        function renderLab(focusId, preserveViewport = true) {
+            const view = document.getElementById("labView");
+            if (!view) return;
+            const previousX = window.scrollX;
+            const previousY = window.scrollY;
+            const index = sampleIndexForScreen(labState.screen);
+            if (index >= 0) view.innerHTML = renderSample(SAMPLE_DATA[index]);
+            else if (labState.screen === "assessment") view.innerHTML = renderAssessment();
+            else view.innerHTML = renderCompletion();
+            window.requestAnimationFrame(() => {
+                if (preserveViewport) window.scrollTo({ left: previousX, top: previousY, behavior: "auto" });
+                if (focusId) {
+                    const target = document.getElementById(focusId) || document.getElementById("assessmentPrompt") || view.querySelector("h2");
+                    if (target) { target.setAttribute("tabindex", "-1"); target.focus({ preventScroll: true }); }
+                }
+            });
+        }
+
+        function setSampleFeedback(sample, message, announceMessage) {
+            labState.feedback[sample.id] = message;
+            saveLabState();
+            renderLab("sampleFeedback");
+            announce(announceMessage || message);
+        }
+
+        function selectReagent(sample, reagent) {
+            if (labState.recordedSamples[sample.id]) return;
+            labState.selectedReagents[sample.id] = reagent;
+            labState.samplePhases[sample.id] = "choose";
+            labState.appliedStates[sample.id] = "";
+            labState.procedureStates[sample.id] = false;
+            labState.readyToRecord[sample.id] = false;
+            labState.recordChoices[sample.id] = {};
+            labState.feedback[sample.id] = `${REAGENTS.find((item) => item.id === reagent).label} selected. Choose Add selected reagent.`;
+            saveLabState();
+            renderLab();
+            const applyButton = document.querySelector('[data-action="apply-reagent"]');
+            if (applyButton) applyButton.focus({ preventScroll: true });
+            announce(`${REAGENTS.find((item) => item.id === reagent).label} selected for ${sample.shortName}.`);
+        }
+
+        function applyReagent(sample) {
+            const reagent = labState.selectedReagents[sample.id];
+            if (!reagent) { setSampleFeedback(sample, "Select a reagent before adding it."); return; }
+            labState.appliedStates[sample.id] = reagent;
+            labState.procedureStates[sample.id] = false;
+            labState.readyToRecord[sample.id] = false;
+            labState.recordChoices[sample.id] = {};
+            labState.samplePhases[sample.id] = sample.id === "a" && reagent === "iodine" ? "observe" : reagent === sample.correctReagent && sample.procedure ? "procedure" : "choose";
+            if (sample.id === "a") {
+                if (reagent === "iodine") setSampleFeedback(sample, "Positive iodine test: the bread changed from yellow-brown to blue-black. Observe the labelled result, then continue.", "Sample A result: iodine changed from yellow-brown to blue-black.");
+                else if (reagent === "benedicts") setSampleFeedback(sample, "This mixture stays blue in the simplified model. Benedict's solution tests for reducing sugars and requires heating; choose the test for starch.");
+                else setSampleFeedback(sample, "This mixture stays blue in the simplified model. Biuret tests for protein; choose the reagent used to test for starch.");
+            } else if (sample.id === "b") {
+                if (reagent === "biuret") setSampleFeedback(sample, "Biuret has been added. Swirl gently to mix the reagent with the egg white solution.", "Sample B result before swirling: the Biuret mixture is blue.");
+                else if (reagent === "iodine") setSampleFeedback(sample, "The iodine remains yellow-brown: a negative starch result. Choose the reagent used to test for protein.");
+                else setSampleFeedback(sample, "The Benedict's mixture remains blue in this simplified sample: a negative reducing-sugar result. Choose the protein test.");
+            } else {
+                if (reagent === "benedicts") setSampleFeedback(sample, "Benedict's solution has been added, but the mixture is still blue. Benedict's solution requires thermal energy to react. Try heating the sample safely.", "Sample C result before heating: the Benedict's mixture remains blue. Heating is required.");
+                else if (reagent === "iodine") setSampleFeedback(sample, "The iodine remains yellow-brown: a negative starch result. Choose the reagent used to test for reducing sugar.");
+                else setSampleFeedback(sample, "The Biuret mixture remains blue: a negative protein result. Choose the reducing-sugar test.");
+            }
+        }
+
+        function completeProcedure(sample) {
+            if (labState.appliedStates[sample.id] !== sample.correctReagent) return;
+            labState.procedureStates[sample.id] = true;
+            labState.readyToRecord[sample.id] = true;
+            labState.samplePhases[sample.id] = "record";
+            if (sample.procedure === "swirl") setSampleFeedback(sample, "Positive Biuret test: after gentle swirling, the liquid changed from blue to purple. Now record the result.", "Sample B result after swirling: the liquid changed from blue to purple.");
+            else setSampleFeedback(sample, "Positive Benedict's test: heating formed a brick-red precipitate. Now record the result.", "Sample C result after heating: the liquid changed from blue to a brick-red precipitate.");
+        }
+
+        function continueObservation(sample) {
+            if (sample.id !== "a" || labState.appliedStates.a !== "iodine" || labState.samplePhases.a !== "observe") return;
+            labState.readyToRecord.a = true;
+            labState.samplePhases.a = "record";
+            labState.feedback.a = "";
+            saveLabState();
+            renderLab();
+            announce("Step 3: Record the result is now available.");
+        }
+
+        function recordResult(sample) {
+            if (!labState.readyToRecord[sample.id]) {
+                if (sample.id === "c" && labState.appliedStates.c === "benedicts") setSampleFeedback(sample, "Benedict's solution requires thermal energy to react. Try heating the sample safely.");
+                else setSampleFeedback(sample, "Complete the correct food test before recording a result.");
+                return;
+            }
+            const choices = labState.recordChoices[sample.id] || {};
+            if (!choices.observation || !choices.nutrient) { setSampleFeedback(sample, "Choose both an observation and a nutrient before recording the result."); return; }
+            const observationCorrect = choices.observation === sample.observation;
+            const nutrientCorrect = choices.nutrient === sample.nutrient;
+            if (!observationCorrect && !nutrientCorrect) { setSampleFeedback(sample, `Use both parts of the evidence: record ${sample.observationLabel.toLowerCase()} and conclude ${sample.nutrientLabel.toLowerCase()}.`); return; }
+            if (!observationCorrect) { setSampleFeedback(sample, `Check the labelled test area. The positive result to record is ${sample.observationLabel.toLowerCase()}.`); return; }
+            if (!nutrientCorrect) { setSampleFeedback(sample, `${sample.observationLabel} in this test shows ${sample.nutrientLabel.toLowerCase()}.`); return; }
+            const reagentLabel = REAGENTS.find((item) => item.id === sample.correctReagent).label;
+            labState.recordedSamples[sample.id] = { reagent: sample.id === "c" ? `${reagentLabel} + heat` : reagentLabel, observation: sample.observationLabel, nutrient: sample.nutrientLabel };
+            labState.samplePhases[sample.id] = "complete";
+            labState.feedback[sample.id] = `Correct. ${sample.observationLabel} is a positive result showing ${sample.nutrientLabel.toLowerCase()}.`;
+            if (!labState.history.some((item) => item.id === `sample-${sample.id}`)) labState.history.push({id:`sample-${sample.id}`, text:`${sample.name}: ${reagentLabel}${sample.procedure === "heat" ? " with heating" : sample.procedure === "swirl" ? " with gentle swirling" : ""} produced ${sample.observationLabel.toLowerCase()}, showing ${sample.nutrientLabel.toLowerCase()}.`});
+            saveLabState();
+            renderLab("sampleFeedback");
+            announce(`${sample.shortName} recorded correctly. Laboratory progress: ${completedCount()} of 3 samples.`);
+        }
+
+        function goNext(sample) {
+            if (!labState.recordedSamples[sample.id]) return;
+            labState.screen = sample.id === "a" ? "sample-b" : sample.id === "b" ? "sample-c" : "assessment";
+            saveLabState();
+            renderLab();
+            const heading = document.getElementById("assessmentPrompt") || document.querySelector("#labView h2");
+            if (heading) { heading.setAttribute("tabindex", "-1"); heading.focus({ preventScroll: true }); }
+            announce(sample.id === "c" ? "All samples are recorded. The final question is available." : `${SAMPLE_DATA[sample.id === "a" ? 1 : 2].name} is ready.`);
+        }
+
+        function checkAssessment() {
+            if (!labState.assessmentAnswer) {
+                labState.assessmentFeedback = "Choose one sample before checking your answer.";
+            } else if (labState.assessmentAnswer === "sample-a") {
+                labState.assessmentMastered = true;
+                labState.assessmentFeedback = "Correct. Sample A, the bread, was the only sample with a positive iodine test for starch, a complex carbohydrate.";
+                if (!labState.history.some((item) => item.id === "assessment")) labState.history.push({id:"assessment", text:"Final question: Sample A, bread, is the complex-carbohydrate source because iodine turned blue-black, showing starch."});
+            } else if (labState.assessmentAnswer === "sample-b") {
+                labState.assessmentFeedback = "Egg white gave a positive Biuret result for protein, not starch. Look for the sample that turned iodine blue-black.";
+            } else {
+                labState.assessmentFeedback = "Apple juice gave a positive Benedict's result for reducing sugar, a simple carbohydrate. Look for the positive starch test.";
+            }
+            saveLabState();
+            renderLab("assessmentFeedback");
+            announce(labState.assessmentFeedback + (labState.assessmentMastered ? " Finish is available." : ""));
+        }
+
+        function finishLab() {
+            if (!labState.assessmentMastered) return;
+            labState.screen = "completion";
+            labState.completionShown = true;
+            saveLabState();
+            renderLab();
+            const heading = document.getElementById("completeHeading");
+            if (heading) { heading.setAttribute("tabindex", "-1"); heading.focus({ preventScroll: true }); }
+            announce("Laboratory complete. You identified starch, protein, and reducing sugar correctly.");
+        }
+
+        function renderReview() {
+            const body = document.getElementById("reviewBody");
+            if (!body) return;
+            if (!labState.history.length) {
+                body.replaceChildren(Object.assign(document.createElement("p"), {textContent:"No correct results recorded yet. Complete a sample to add it here."}));
+                return;
+            }
+            const list = document.createElement("ol");
+            list.className = "history-list";
+            labState.history.forEach((entry) => {
+                const item = document.createElement("li");
+                item.textContent = entry.text;
+                list.appendChild(item);
+            });
+            body.replaceChildren(list);
+        }
+
+        function openReview() {
+            modalReturnFocus = document.activeElement;
+            renderReview();
+            document.getElementById("reviewModal").classList.add("show");
+            document.getElementById("closeReviewBtn").focus();
+        }
+
+        function closeReview() {
+            document.getElementById("reviewModal").classList.remove("show");
+            if (modalReturnFocus && typeof modalReturnFocus.focus === "function") modalReturnFocus.focus();
+        }
+
+        function openGuide() {
+            modalReturnFocus = document.activeElement;
+            document.getElementById("guideModal").classList.add("show");
+            document.getElementById("closeGuideBtn").focus();
+            announce("Food Test Guide opened. Laboratory progress is unchanged.");
+        }
+
+        function closeGuide() {
+            document.getElementById("guideModal").classList.remove("show");
+            if (modalReturnFocus && typeof modalReturnFocus.focus === "function") modalReturnFocus.focus();
+        }
+
+        function handleLabClick(event) {
+            const button = event.target.closest("button[data-action]");
+            if (!button) return;
+            const sampleIndex = sampleIndexForScreen(labState.screen);
+            const sample = sampleIndex >= 0 ? SAMPLE_DATA[sampleIndex] : null;
+            const action = button.dataset.action;
+            if (action === "open-guide") openGuide();
+            else if (action === "select-reagent" && sample) selectReagent(sample, button.dataset.reagent);
+            else if (action === "apply-reagent" && sample) applyReagent(sample);
+            else if (action === "continue-observation" && sample) continueObservation(sample);
+            else if ((action === "swirl" || action === "heat") && sample) completeProcedure(sample);
+            else if (action === "record-result" && sample) recordResult(sample);
+            else if (action === "next" && sample) goNext(sample);
+            else if (action === "check-assessment") checkAssessment();
+            else if (action === "finish") finishLab();
+            else if (action === "play-again") {
+                document.getElementById("resetConfirmHeading").textContent = "Play again?";
+                document.querySelector("#resetConfirmModal p").textContent = "This will clear your laboratory results and return you to the home screen.";
+                dom.confirmResetBtn.textContent = "Play again";
+                openResetConfirmModal();
+                dom.cancelResetBtn.focus();
+            }
+        }
+
+        function handleLabChange(event) {
+            const sampleIndex = sampleIndexForScreen(labState.screen);
+            if (event.target.matches("input[data-choice-kind]") && sampleIndex >= 0) {
+                const sample = SAMPLE_DATA[sampleIndex];
+                if (!labState.recordChoices[sample.id]) labState.recordChoices[sample.id] = {};
+                labState.recordChoices[sample.id][event.target.dataset.choiceKind] = event.target.value;
+                saveLabState();
+            }
+            if (event.target.matches("input[data-assessment-choice]")) {
+                labState.assessmentAnswer = event.target.value;
+                saveLabState();
+            }
+        }
+
+        function trapModalFocus(event) {
+            const openModal = Array.from(document.querySelectorAll(".modal.show")).pop();
+            if (!openModal) return;
+            if (event.key === "Escape" && openModal.id === "reviewModal") { event.preventDefault(); closeReview(); return; }
+            if (event.key === "Escape" && openModal.id === "guideModal") { event.preventDefault(); closeGuide(); return; }
+            if (event.key !== "Tab") return;
+            const focusable = Array.from(openModal.querySelectorAll("button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"));
+            if (!focusable.length) return;
+            const first = focusable[0], last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }
+
+        function ensureLabBindings() {
+            if (!labBound) {
+                document.getElementById("labApp").addEventListener("click", handleLabClick);
+                document.getElementById("labApp").addEventListener("change", handleLabChange);
+                document.getElementById("homeGuideBtn").addEventListener("click", openGuide);
+                document.getElementById("closeGuideBtn").addEventListener("click", closeGuide);
+                document.getElementById("doneGuideBtn").addEventListener("click", closeGuide);
+                document.getElementById("guideModal").addEventListener("click", (event) => { if (event.target.id === "guideModal") closeGuide(); });
+                document.getElementById("reviewBtn").addEventListener("click", openReview);
+                document.getElementById("closeReviewBtn").addEventListener("click", closeReview);
+                document.getElementById("doneReviewBtn").addEventListener("click", closeReview);
+                document.getElementById("reviewModal").addEventListener("click", (event) => { if (event.target.id === "reviewModal") closeReview(); });
+                document.addEventListener("keydown", trapModalFocus);
+                dom.openInstructionsBtn.addEventListener("click", () => window.setTimeout(() => dom.closeInstructionsBtn.focus(), 0));
+                dom.helpBtn.addEventListener("click", () => window.setTimeout(() => dom.closeInstructionsBtn.focus(), 0));
+                labBound = true;
+            }
+        }
+
+        function devInit() {
+            labState = loadLabState();
+            ensureLabBindings();
+            saveLabState();
+            renderLab();
+        }
+
+        function devReset() {
+            try { sessionStorage.removeItem(LAB_STORAGE_KEY); sessionStorage.removeItem(SIM_CONFIG.simId + "-help-seen"); } catch (err) { /* storage unavailable */ }
+            labState = createInitialLabState();
+            const view = document.getElementById("labView");
+            if (view) view.replaceChildren();
+            document.getElementById("resetConfirmHeading").textContent = "Reset simulation?";
+            document.querySelector("#resetConfirmModal p").textContent = "This will clear your current progress and return you to the home screen.";
+            dom.confirmResetBtn.textContent = "Reset";
+            window.setTimeout(() => { openInstructionsModal(); dom.closeInstructionsBtn.focus(); }, 100);
+        }
+
+        window.setTimeout(() => {
+            ensureLabBindings();
+            const saved = storageGet(LAB_STORAGE_KEY);
+            if (saved) {
+                showScreen("sim");
+                devInit();
+            } else if (storageGet(SIM_CONFIG.simId + "-help-seen") !== "true") {
+                openInstructionsModal();
+                dom.closeInstructionsBtn.focus();
+            }
+        }, 0);
+    </script>
+</body>
+
+</html>
