@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Nutrient Role Matcher</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+
+        .activity-view {
+            display: grid;
+            gap: 24px;
+        }
+
+        .activity-view[hidden] {
+            display: none !important;
+        }
+
+        .activity-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .activity-heading h2,
+        .completion-view h2 {
+            margin: 12px 0 10px;
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            line-height: 1.08;
+        }
+
+        .activity-heading p,
+        .completion-summary {
+            max-width: 700px;
+            margin: 0;
+            color: var(--text-soft);
+            font-size: 1.04rem;
+            line-height: 1.6;
+        }
+
+        .progress-card {
+            min-width: 174px;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+        }
+
+        .progress-card span {
+            display: block;
+            color: var(--text-soft);
+            font-size: .82rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .progress-card strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 1.28rem;
+        }
+
+        .progress-track {
+            height: 8px;
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--text) 16%, transparent);
+        }
+
+        .progress-track span {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: var(--success);
+            transition: width .25s ease;
+        }
+
+        .matching-board {
+            display: grid;
+            grid-template-columns: minmax(260px, .9fr) 36px minmax(330px, 1.25fr);
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .role-panel,
+        .scenario-panel {
+            padding: 20px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+        }
+
+        .role-panel h3,
+        .scenario-panel h3 {
+            margin: 0 0 8px;
+            font-size: 1.2rem;
+        }
+
+        .panel-guide {
+            margin: 0 0 18px;
+            color: var(--text-soft);
+            line-height: 1.45;
+        }
+
+        .role-list,
+        .scenario-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .role-card,
+        .scenario-card {
+            width: 100%;
+            min-height: 96px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            color: var(--text);
+            text-align: left;
+            background: var(--surface);
+        }
+
+        .role-card {
+            position: relative;
+            cursor: grab;
+        }
+
+        .role-card::after {
+            content: "Select";
+            position: absolute;
+            top: 9px;
+            right: 10px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            color: var(--text-soft);
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .02em;
+        }
+
+        .role-card:hover,
+        .scenario-card:not(:disabled):hover {
+            border-color: var(--accent);
+        }
+
+        .role-card[aria-pressed="true"] {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 24%, transparent);
+            transform: translateY(-2px);
+        }
+
+        .role-card[aria-pressed="true"]::after {
+            content: "Selected ✓";
+            background: var(--accent);
+            color: #08111f;
+        }
+
+        .role-card.used {
+            opacity: .46;
+            cursor: default;
+            filter: saturate(.55);
+            transform: none;
+        }
+
+        .role-card.used::after {
+            content: "Matched";
+        }
+
+        .role-icon,
+        .scenario-art {
+            width: 64px;
+            height: 64px;
+            flex: 0 0 64px;
+            display: grid;
+            place-items: center;
+            border: 2px solid currentColor;
+            border-radius: 16px;
+        }
+
+        .role-icon svg,
+        .scenario-art svg {
+            width: 46px;
+            height: 46px;
+        }
+
+        .role-energy .role-icon,
+        .mini-role.role-energy {
+            color: #17203f;
+            background: repeating-linear-gradient(135deg, #fde047 0 8px, #facc15 8px 16px);
+        }
+
+        .role-repair .role-icon,
+        .mini-role.role-repair {
+            color: #17203f;
+            background: repeating-linear-gradient(90deg, #93c5fd 0 8px, #60a5fa 8px 16px);
+        }
+
+        .role-protection .role-icon,
+        .mini-role.role-protection {
+            color: #17203f;
+            background: repeating-linear-gradient(45deg, #86efac 0 8px, #4ade80 8px 16px);
+        }
+
+        .role-card strong,
+        .scenario-card strong {
+            display: block;
+            padding-right: 58px;
+            font-size: 1rem;
+        }
+
+        .role-card small,
+        .scenario-card small {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-soft);
+            font-size: .85rem;
+            line-height: 1.35;
+        }
+
+        .clear-selection {
+            min-height: 44px;
+            margin-top: 14px;
+            padding: 10px 14px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            background: transparent;
+            font-weight: 700;
+        }
+
+        .clear-selection:disabled,
+        #finishBtn:disabled {
+            cursor: not-allowed;
+            opacity: .42;
+            transform: none;
+        }
+
+        .match-arrow {
+            display: grid;
+            place-items: center;
+            color: var(--accent);
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .scenario-card {
+            min-height: 116px;
+            cursor: pointer;
+        }
+
+        .scenario-card.drag-ready {
+            border-style: dashed;
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+        }
+
+        .scenario-card.drag-over {
+            border-color: var(--warning);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--warning) 25%, transparent);
+        }
+
+        .scenario-card.matched {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 10%, var(--surface));
+            opacity: 1;
+        }
+
+        .scenario-card:disabled {
+            color: var(--text);
+            cursor: default;
+            transform: none;
+        }
+
+        .scenario-copy {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .match-slot {
+            display: inline-flex;
+            align-items: center;
+            min-height: 30px;
+            margin-top: 10px;
+            padding: 5px 10px;
+            border: 2px dashed var(--muted);
+            border-radius: 999px;
+            color: var(--text-soft);
+            font-size: .8rem;
+            font-weight: 800;
+        }
+
+        .scenario-card.matched .match-slot {
+            border-style: solid;
+            border-color: var(--success);
+            color: var(--text);
+            background: color-mix(in srgb, var(--success) 18%, transparent);
+        }
+
+        .feedback-card {
+            min-height: 74px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+        }
+
+        .feedback-card p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .feedback-icon {
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: #08111f;
+            background: var(--accent);
+            font-weight: 900;
+        }
+
+        .feedback-card.correct {
+            border-color: var(--success);
+        }
+
+        .feedback-card.correct .feedback-icon {
+            background: var(--success);
+        }
+
+        .feedback-card.incorrect {
+            border-color: var(--warning);
+        }
+
+        .feedback-card.incorrect .feedback-icon {
+            background: var(--warning);
+        }
+
+        .finish-row {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .completion-view {
+            min-height: 580px;
+            display: grid;
+            place-items: center;
+            align-content: center;
+            gap: 18px;
+            text-align: center;
+        }
+
+        .completion-view[hidden] {
+            display: none !important;
+        }
+
+        .completion-mark {
+            width: 74px;
+            height: 74px;
+            display: grid;
+            place-items: center;
+            border: 3px solid var(--success);
+            border-radius: 50%;
+            color: #08111f;
+            background: var(--success);
+            font-size: 2.3rem;
+            font-weight: 900;
+        }
+
+        .recap-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin: 8px 0;
+        }
+
+        .recap-grid article {
+            padding: 18px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: left;
+            background: var(--surface-2);
+        }
+
+        .recap-grid h3 {
+            margin: 14px 0 8px;
+        }
+
+        .recap-grid p {
+            margin: 0;
+            color: var(--text-soft);
+            line-height: 1.5;
+        }
+
+        .mini-role {
+            display: inline-flex;
+            padding: 5px 9px;
+            border: 2px solid currentColor;
+            border-radius: 999px;
+            font-size: .77rem;
+            font-weight: 900;
+        }
+
+        .review-modal-card {
+            max-width: 680px;
+        }
+
+        .review-intro {
+            margin-bottom: 16px !important;
+        }
+
+        .review-list {
+            max-height: min(55vh, 480px);
+            display: grid;
+            gap: 10px;
+            overflow: auto;
+            padding: 2px;
+        }
+
+        .review-item,
+        .review-empty {
+            padding: 13px 14px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-2);
+        }
+
+        .review-item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 5px 10px;
+        }
+
+        .review-status {
+            grid-row: 1 / span 2;
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: #08111f;
+            background: var(--warning);
+            font-weight: 900;
+        }
+
+        .review-item.correct .review-status {
+            background: var(--success);
+        }
+
+        .review-item strong,
+        .review-item p,
+        .review-empty {
+            margin: 0;
+        }
+
+        .review-item p,
+        .review-empty {
+            color: var(--text-soft);
+            line-height: 1.45;
+        }
+
+        .review-actions,
+        .local-modal-actions {
+            justify-content: flex-start !important;
+        }
+
+        .local-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+            background: rgba(5, 8, 18, .78);
+        }
+
+        .local-modal[hidden] {
+            display: none !important;
+        }
+
+        @media (max-width: 900px) {
+            .matching-board {
+                grid-template-columns: 1fr;
+            }
+
+            .match-arrow {
+                transform: rotate(90deg);
+                min-height: 22px;
+            }
+
+            .recap-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .activity-heading {
+                display: grid;
+            }
+
+            .progress-card {
+                min-width: 0;
+            }
+
+            .role-panel,
+            .scenario-panel {
+                padding: 14px;
+            }
+
+            .role-card,
+            .scenario-card {
+                align-items: flex-start;
+                min-height: 104px;
+            }
+
+            .role-icon,
+            .scenario-art {
+                width: 52px;
+                height: 52px;
+                flex-basis: 52px;
+            }
+
+            .role-icon svg,
+            .scenario-art svg {
+                width: 38px;
+                height: 38px;
+            }
+
+            .finish-row .primary-btn {
+                width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .role-card,
+            .scenario-card,
+            .progress-track span {
+                transition: none !important;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="reviewBtn" aria-label="Open Review History">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+                    Review History
+                </button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <div id="activityView" class="activity-view" aria-labelledby="activityTitle">
+                        <div class="activity-heading">
+                            <div>
+                                <div class="eyebrow">Match 3 body needs</div>
+                                <h2 id="activityTitle">Which nutrient role is needed most?</h2>
+                                <p>Drag a nutrient role to a scenario, or select a role and then select a scenario.</p>
+                            </div>
+                            <div class="progress-card" aria-label="Matching progress">
+                                <span>Matches complete</span>
+                                <strong id="progressText">0 of 3</strong>
+                                <div class="progress-track" aria-hidden="true"><span id="progressFill"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="matching-board">
+                            <section class="role-panel" aria-labelledby="rolesHeading">
+                                <h3 id="rolesHeading">Nutrient roles</h3>
+                                <p class="panel-guide">Choose one role, then choose where it belongs.</p>
+                                <div class="role-list" id="roleList">
+                                    <button class="role-card role-energy" type="button" draggable="true" data-role="energy" aria-pressed="false">
+                                        <span class="role-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 64 64"><path d="M36 3 14 36h16l-3 25 23-36H34z" fill="currentColor"/><path d="M36 3 14 36h16l-3 25 23-36H34z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>
+                                        </span>
+                                        <span><strong>Energy</strong><small>Fuel for movement and body processes</small></span>
+                                    </button>
+                                    <button class="role-card role-repair" type="button" draggable="true" data-role="growth-repair" aria-pressed="false">
+                                        <span class="role-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 64 64"><path d="M8 23h48v20H8z" fill="currentColor"/><path d="M32 23v20M8 33h48" fill="none" stroke="var(--surface)" stroke-width="5"/><path d="M8 23h48v20H8z" fill="none" stroke="currentColor" stroke-width="4"/></svg>
+                                        </span>
+                                        <span><strong>Growth/Repair</strong><small>Building materials for growth and damaged tissues</small></span>
+                                    </button>
+                                    <button class="role-card role-protection" type="button" draggable="true" data-role="protection" aria-pressed="false">
+                                        <span class="role-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 64 64"><path d="M32 4 54 12v17c0 14-9 25-22 31C19 54 10 43 10 29V12z" fill="currentColor"/><path d="m21 32 7 7 15-16" fill="none" stroke="var(--surface)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </span>
+                                        <span><strong>Protection</strong><small>Support for body defences and healthy functions</small></span>
+                                    </button>
+                                </div>
+                                <button class="clear-selection" id="clearSelectionBtn" type="button" disabled>Clear selection</button>
+                            </section>
+
+                            <div class="match-arrow" aria-hidden="true">→</div>
+
+                            <section class="scenario-panel" aria-labelledby="scenariosHeading">
+                                <h3 id="scenariosHeading">Student scenarios</h3>
+                                <p class="panel-guide">Place the role each scenario needs most.</p>
+                                <div class="scenario-list">
+                                    <button class="scenario-card" type="button" data-scenario="running-a-race" aria-label="Running a race. Empty match target.">
+                                        <span class="scenario-art" aria-hidden="true">
+                                            <svg viewBox="0 0 96 72"><circle cx="50" cy="12" r="8"/><path d="m48 24-10 18 15 4 11-14M39 42 23 62M53 46l20 15M45 28 25 30M20 63h60" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </span>
+                                        <span class="scenario-copy"><strong>Running a race</strong><small>Active muscles need fuel to keep moving.</small><span class="match-slot" data-slot="running-a-race">Choose a role</span></span>
+                                    </button>
+                                    <button class="scenario-card" type="button" data-scenario="healing-a-scraped-knee" aria-label="Healing a scraped knee. Empty match target.">
+                                        <span class="scenario-art" aria-hidden="true">
+                                            <svg viewBox="0 0 96 72"><path d="M28 8c16 9 18 18 11 29L27 57M68 8C52 17 50 26 57 37l12 20" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><path d="m40 37 5-5 5 5 5-5 5 5-5 5 5 5-5 5-5-5-5 5-5-5 5-5z" fill="var(--danger)" stroke="currentColor" stroke-width="2"/></svg>
+                                        </span>
+                                        <span class="scenario-copy"><strong>Healing a scraped knee</strong><small>Damaged skin needs new cells.</small><span class="match-slot" data-slot="healing-a-scraped-knee">Choose a role</span></span>
+                                    </button>
+                                    <button class="scenario-card" type="button" data-scenario="fighting-off-a-cold" aria-label="Fighting off a cold. Empty match target.">
+                                        <span class="scenario-art" aria-hidden="true">
+                                            <svg viewBox="0 0 96 72"><circle cx="48" cy="35" r="23" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="39" cy="31" r="3"/><circle cx="57" cy="31" r="3"/><path d="M38 48c6-5 14-5 20 0M19 13l5 6m53-6-5 6M14 37h8m52 0h8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m74 51 7 3-4 6 7 3" fill="none" stroke="var(--success)" stroke-width="4" stroke-linecap="round"/></svg>
+                                        </span>
+                                        <span class="scenario-copy"><strong>Fighting off a cold</strong><small>The immune system is defending the body.</small><span class="match-slot" data-slot="fighting-off-a-cold">Choose a role</span></span>
+                                    </button>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div class="feedback-card neutral" id="feedbackCard" role="status" aria-live="polite">
+                            <span class="feedback-icon" aria-hidden="true">i</span>
+                            <p id="feedbackText">Choose a nutrient role to begin.</p>
+                        </div>
+
+                        <div class="finish-row">
+                            <button class="primary-btn" id="finishBtn" type="button" disabled>Finish</button>
+                        </div>
+                    </div>
+
+                    <section id="completionView" class="completion-view" aria-labelledby="completionTitle" hidden>
+                        <div class="completion-mark" aria-hidden="true">✓</div>
+                        <div class="eyebrow">Activity complete</div>
+                        <h2 id="completionTitle" tabindex="-1">Every role has an important job</h2>
+                        <p class="completion-summary">Nutrients help the body release energy, grow and repair tissues, and protect health.</p>
+                        <div class="recap-grid">
+                            <article><span class="mini-role role-energy">Energy</span><h3>Running a race</h3><p>Active muscles require fuel to move and function.</p></article>
+                            <article><span class="mini-role role-repair">Growth/Repair</span><h3>Healing a scraped knee</h3><p>The body needs building materials to make new skin cells and repair damage.</p></article>
+                            <article><span class="mini-role role-protection">Protection</span><h3>Fighting off a cold</h3><p>The immune system needs nutrients to help defend the body against illness.</p></article>
+                        </div>
+                        <button class="primary-btn" id="playAgainBtn" type="button">Play again</button>
+                    </section>
+
+                    <div class="sr-only" id="liveRegion" aria-live="assertive" aria-atomic="true"></div>
+
+                    <div class="local-modal" id="playAgainModal" role="dialog" aria-modal="true" aria-labelledby="playAgainHeading" hidden>
+                        <section class="modal-card">
+                            <button class="close-btn" id="closePlayAgainBtn" type="button" aria-label="Close play again confirmation">×</button>
+                            <h3 id="playAgainHeading">Play again?</h3>
+                            <p>This will clear your matches and return to the home screen.</p>
+                            <div class="button-row local-modal-actions">
+                                <button class="secondary-btn" id="cancelPlayAgainBtn" type="button">Cancel</button>
+                                <button class="primary-btn" id="confirmPlayAgainBtn" type="button">Play again</button>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Offline Form 2 Biology learning activity • Progress stays in this tab
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewHeading">
+        <section class="modal-card review-modal-card">
+            <button class="close-btn" id="closeReviewBtn" aria-label="Close Review History">×</button>
+            <h3 id="reviewHeading" tabindex="-1">Review History</h3>
+            <p class="review-intro">Your attempted matches appear here. Unattempted answers stay hidden.</p>
+            <div id="reviewBody" class="review-list"></div>
+            <div class="button-row review-actions">
+                <button class="primary-btn" id="doneReviewBtn" type="button">Done</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "SCI-BIO-F2-T1-U1-SEC1-SIM1.1A2",
+            title: "Nutrient Role Matcher",
+            subtitle: "Form 2 Biology • Why nutrients matter",
+            badgeText: "BIO",
+            homeEyebrow: "Form 2 Biology",
+            homeDescription:
+                "Your body uses nutrients for different jobs. Can you connect each body need to the nutrient role it depends on most?",
+            instructions: [
+                "Choose a nutrient role and then choose the scenario where that role is needed most.",
+                "You can drag with a pointer, or select a role and then select a scenario. With a keyboard, use Tab and press Enter or Space.",
+                "Incorrect matches stay open so you can use the feedback and try again. Correct matches lock in place.",
+                "Review History shows only answers you have attempted. Reset clears progress after confirmation.",
+                "The icons represent broad nutrient functions; they are not pictures of individual nutrient molecules."
+            ]
+        };
+
+        /* Optional audio controls and sound engine intentionally omitted. */
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* --- HANDY UTILITIES (examples — uncomment what you need) --- */
+        // function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        // function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        // function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        // Example: const order = shuffle([1, 2, 3, 4]);  const dice = randInt(1, 6);
+        // Storage: storageGet/storageSet are available for saving progress, keyed like `sim:${SIM_CONFIG.simId}:mydata`.
+
+        const MATCH_STORAGE_KEY = `sim:${SIM_CONFIG.simId}:state`;
+        const ROLE_LABELS = {
+            "energy": "Energy",
+            "growth-repair": "Growth/Repair",
+            "protection": "Protection"
+        };
+        const SCENARIO_LABELS = {
+            "running-a-race": "Running a race",
+            "healing-a-scraped-knee": "Healing a scraped knee",
+            "fighting-off-a-cold": "Fighting off a cold"
+        };
+        const CORRECT_MATCHES = {
+            "running-a-race": "energy",
+            "healing-a-scraped-knee": "growth-repair",
+            "fighting-off-a-cold": "protection"
+        };
+        const ROLE_KEYS = Object.keys(ROLE_LABELS);
+        const SCENARIO_KEYS = Object.keys(SCENARIO_LABELS);
+        const CORRECT_FEEDBACK = {
+            "running-a-race": "Correct. Active muscles require fuel to move and function during the race.",
+            "healing-a-scraped-knee": "Correct. The body needs building materials to create new skin cells and repair the damage.",
+            "fighting-off-a-cold": "Correct. Nutrients support the immune system as it defends the body against illness."
+        };
+        const INCORRECT_FEEDBACK = {
+            "running-a-race": {
+                "growth-repair": "Think about what working muscles need during a race. Which role supplies fuel for movement?",
+                "protection": "Protection supports body defences, but this scenario is about muscles moving. Which role supplies their fuel?"
+            },
+            "healing-a-scraped-knee": {
+                "energy": "Check the function again. Does a scraped knee mainly need energy, or building materials to repair the skin?",
+                "protection": "Protection helps body defences, but the damaged skin must be rebuilt. Which role supplies building materials?"
+            },
+            "fighting-off-a-cold": {
+                "energy": "Energy supplies fuel, but this scenario focuses on defending the body from illness. Which role supports body defences?",
+                "growth-repair": "Growth/Repair helps build tissues, but fighting a cold mainly calls on the body's defences. Which role supports them?"
+            }
+        };
+
+        let matcherState = makeInitialMatcherState();
+        let matcherDom = null;
+        let matcherEventsBound = false;
+        let lastModalTrigger = null;
+
+        function shuffledOrder(items, previousOrder) {
+            const next = items.slice();
+            for (let index = next.length - 1; index > 0; index -= 1) {
+                const swapIndex = Math.floor(Math.random() * (index + 1));
+                [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+            }
+            if (Array.isArray(previousOrder) && previousOrder.length === next.length && next.every((item, index) => item === previousOrder[index])) {
+                next.push(next.shift());
+            }
+            return next;
+        }
+
+        function isValidOrder(candidate, expected) {
+            return Array.isArray(candidate)
+                && candidate.length === expected.length
+                && expected.every((item) => candidate.includes(item))
+                && new Set(candidate).size === expected.length;
+        }
+
+        function makeInitialMatcherState(previousState) {
+            return {
+                screen: "home",
+                selectedRole: null,
+                matches: {},
+                attempts: 0,
+                feedback: { kind: "neutral", text: "Choose a nutrient role to begin." },
+                completionReady: false,
+                instructionsSeen: false,
+                reviewHistory: [],
+                roleOrder: shuffledOrder(ROLE_KEYS, previousState && previousState.roleOrder),
+                scenarioOrder: shuffledOrder(SCENARIO_KEYS, previousState && previousState.scenarioOrder)
+            };
+        }
+
+        function loadMatcherState() {
+            const raw = storageGet(MATCH_STORAGE_KEY);
+            if (!raw) return makeInitialMatcherState();
+            try {
+                const saved = JSON.parse(raw);
+                const clean = makeInitialMatcherState();
+                clean.screen = ["home", "activity", "completion"].includes(saved.screen) ? saved.screen : "home";
+                clean.selectedRole = Object.prototype.hasOwnProperty.call(ROLE_LABELS, saved.selectedRole) ? saved.selectedRole : null;
+                Object.keys(CORRECT_MATCHES).forEach((scenario) => {
+                    if (saved.matches && saved.matches[scenario] === CORRECT_MATCHES[scenario]) {
+                        clean.matches[scenario] = saved.matches[scenario];
+                    }
+                });
+                if (Object.values(clean.matches).includes(clean.selectedRole)) clean.selectedRole = null;
+                clean.attempts = Number.isInteger(saved.attempts) && saved.attempts >= 0 ? Math.min(saved.attempts, 999) : 0;
+                if (saved.feedback && ["neutral", "correct", "incorrect"].includes(saved.feedback.kind) && typeof saved.feedback.text === "string") {
+                    clean.feedback = { kind: saved.feedback.kind, text: saved.feedback.text.slice(0, 500) };
+                }
+                clean.completionReady = Object.keys(clean.matches).length === 3;
+                if (!clean.completionReady && clean.screen === "completion") clean.screen = "activity";
+                clean.instructionsSeen = saved.instructionsSeen === true;
+                clean.roleOrder = isValidOrder(saved.roleOrder, ROLE_KEYS) ? saved.roleOrder.slice() : clean.roleOrder;
+                clean.scenarioOrder = isValidOrder(saved.scenarioOrder, SCENARIO_KEYS) ? saved.scenarioOrder.slice() : clean.scenarioOrder;
+                clean.reviewHistory = Array.isArray(saved.reviewHistory)
+                    ? saved.reviewHistory.slice(-50).filter((item) => item && ROLE_LABELS[item.role] && SCENARIO_LABELS[item.scenario] && typeof item.correct === "boolean")
+                        .map((item) => ({
+                            role: item.role,
+                            scenario: item.scenario,
+                            correct: item.correct,
+                            feedback: typeof item.feedback === "string" ? item.feedback.slice(0, 500) : ""
+                        }))
+                    : [];
+                return clean;
+            } catch (err) {
+                return makeInitialMatcherState();
+            }
+        }
+
+        function saveMatcherState() {
+            storageSet(MATCH_STORAGE_KEY, JSON.stringify(matcherState));
+        }
+
+        function cacheMatcherDom() {
+            if (matcherDom) return;
+            matcherDom = {
+                activityView: document.getElementById("activityView"),
+                completionView: document.getElementById("completionView"),
+                completionTitle: document.getElementById("completionTitle"),
+                roleList: document.getElementById("roleList"),
+                scenarioList: document.querySelector(".scenario-list"),
+                roleCards: Array.from(document.querySelectorAll(".role-card")),
+                scenarioCards: Array.from(document.querySelectorAll(".scenario-card")),
+                progressText: document.getElementById("progressText"),
+                progressFill: document.getElementById("progressFill"),
+                feedbackCard: document.getElementById("feedbackCard"),
+                feedbackText: document.getElementById("feedbackText"),
+                clearSelectionBtn: document.getElementById("clearSelectionBtn"),
+                finishBtn: document.getElementById("finishBtn"),
+                playAgainBtn: document.getElementById("playAgainBtn"),
+                playAgainModal: document.getElementById("playAgainModal"),
+                closePlayAgainBtn: document.getElementById("closePlayAgainBtn"),
+                cancelPlayAgainBtn: document.getElementById("cancelPlayAgainBtn"),
+                confirmPlayAgainBtn: document.getElementById("confirmPlayAgainBtn"),
+                liveRegion: document.getElementById("liveRegion"),
+                reviewBtn: document.getElementById("reviewBtn"),
+                reviewModal: document.getElementById("reviewModal"),
+                reviewHeading: document.getElementById("reviewHeading"),
+                reviewBody: document.getElementById("reviewBody"),
+                closeReviewBtn: document.getElementById("closeReviewBtn"),
+                doneReviewBtn: document.getElementById("doneReviewBtn")
+            };
+        }
+
+        function devInit() {
+            cacheMatcherDom();
+            if (!matcherEventsBound) bindMatcherEvents();
+            if (matcherState.screen === "home") matcherState.screen = "activity";
+            saveMatcherState();
+            renderMatcher();
+        }
+
+        function devReset() {
+            resetMatcher(true);
+        }
+
+        function bindMatcherEvents() {
+            matcherEventsBound = true;
+            matcherDom.roleCards.forEach((card) => {
+                card.addEventListener("click", () => selectRole(card.dataset.role));
+                card.addEventListener("dragstart", (event) => {
+                    const role = card.dataset.role;
+                    if (Object.values(matcherState.matches).includes(role)) {
+                        event.preventDefault();
+                        return;
+                    }
+                    selectRole(role);
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData("text/plain", role);
+                    matcherDom.scenarioCards.forEach((target) => {
+                        if (!matcherState.matches[target.dataset.scenario]) target.classList.add("drag-ready");
+                    });
+                });
+                card.addEventListener("dragend", clearDragClasses);
+            });
+
+            matcherDom.scenarioCards.forEach((card) => {
+                card.addEventListener("click", () => attemptMatch(card.dataset.scenario));
+                card.addEventListener("dragover", (event) => {
+                    if (matcherState.matches[card.dataset.scenario]) return;
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    card.classList.add("drag-over");
+                });
+                card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+                card.addEventListener("drop", (event) => {
+                    event.preventDefault();
+                    const role = event.dataTransfer.getData("text/plain");
+                    if (ROLE_LABELS[role]) matcherState.selectedRole = role;
+                    clearDragClasses();
+                    attemptMatch(card.dataset.scenario);
+                });
+            });
+
+            matcherDom.clearSelectionBtn.addEventListener("click", clearSelection);
+            matcherDom.finishBtn.addEventListener("click", showCompletion);
+            matcherDom.playAgainBtn.addEventListener("click", openPlayAgainModal);
+            matcherDom.closePlayAgainBtn.addEventListener("click", closePlayAgainModal);
+            matcherDom.cancelPlayAgainBtn.addEventListener("click", closePlayAgainModal);
+            matcherDom.confirmPlayAgainBtn.addEventListener("click", () => {
+                closePlayAgainModal();
+                resetMatcher(false);
+                showScreen("home");
+                dom.startBtn.focus({ preventScroll: true });
+            });
+            matcherDom.playAgainModal.addEventListener("click", (event) => {
+                if (event.target === matcherDom.playAgainModal) closePlayAgainModal();
+            });
+
+            matcherDom.reviewBtn.addEventListener("click", openReviewModal);
+            matcherDom.closeReviewBtn.addEventListener("click", closeReviewModal);
+            matcherDom.doneReviewBtn.addEventListener("click", closeReviewModal);
+            matcherDom.reviewModal.addEventListener("click", (event) => {
+                if (event.target === matcherDom.reviewModal) closeReviewModal();
+            });
+
+            [dom.helpBtn, dom.openInstructionsBtn].forEach((button) => {
+                button.addEventListener("click", () => {
+                    lastModalTrigger = button;
+                    markInstructionsSeen();
+                    window.setTimeout(() => dom.gotItBtn.focus({ preventScroll: true }), 0);
+                });
+            });
+            [dom.closeInstructionsBtn, dom.gotItBtn].forEach((button) => {
+                button.addEventListener("click", () => restoreModalFocus());
+            });
+            dom.resetBtn.addEventListener("click", () => {
+                lastModalTrigger = dom.resetBtn;
+                window.setTimeout(() => dom.cancelResetBtn.focus({ preventScroll: true }), 0);
+            });
+            [dom.closeResetConfirmBtn, dom.cancelResetBtn].forEach((button) => {
+                button.addEventListener("click", () => restoreModalFocus());
+            });
+
+            document.addEventListener("keydown", handleMatcherKeys);
+        }
+
+        function selectRole(role) {
+            if (!ROLE_LABELS[role] || Object.values(matcherState.matches).includes(role)) return;
+            if (matcherState.selectedRole === role) {
+                clearSelection();
+                return;
+            }
+            matcherState.selectedRole = role;
+            matcherState.feedback = {
+                kind: "neutral",
+                text: `${ROLE_LABELS[role]} selected. Now choose a student scenario.`
+            };
+            saveMatcherState();
+            renderMatcher();
+            announce(`${ROLE_LABELS[role]} selected. Choose a student scenario.`);
+        }
+
+        function clearSelection() {
+            if (!matcherState.selectedRole) return;
+            matcherState.selectedRole = null;
+            matcherState.feedback = { kind: "neutral", text: "Selection cleared. Choose another nutrient role." };
+            saveMatcherState();
+            renderMatcher();
+            announce("Selection cleared.");
+        }
+
+        function attemptMatch(scenario) {
+            if (!SCENARIO_LABELS[scenario] || matcherState.matches[scenario]) return;
+            const role = matcherState.selectedRole;
+            if (!role) {
+                matcherState.feedback = { kind: "neutral", text: "Choose a nutrient role first, then choose a scenario." };
+                renderMatcher();
+                announce("Choose a nutrient role first.");
+                return;
+            }
+            if (Object.values(matcherState.matches).includes(role)) return;
+
+            const correct = CORRECT_MATCHES[scenario] === role;
+            const feedback = correct ? CORRECT_FEEDBACK[scenario] : INCORRECT_FEEDBACK[scenario][role];
+            matcherState.attempts += 1;
+            matcherState.reviewHistory.push({ role, scenario, correct, feedback });
+            if (matcherState.reviewHistory.length > 50) matcherState.reviewHistory.shift();
+
+            if (correct) {
+                matcherState.matches[scenario] = role;
+                matcherState.feedback = { kind: "correct", text: feedback };
+                matcherState.selectedRole = null;
+                matcherState.completionReady = Object.keys(matcherState.matches).length === 3;
+            } else {
+                matcherState.feedback = { kind: "incorrect", text: feedback };
+                matcherState.selectedRole = null;
+            }
+
+            saveMatcherState();
+            renderMatcher();
+            announce(`${correct ? "Correct match" : "Not a match"}. ${feedback} Matches complete: ${Object.keys(matcherState.matches).length} of 3.`);
+            if (matcherState.completionReady) announce("All three matches are correct. Finish is now available.");
+        }
+
+        function renderMatcher() {
+            if (!matcherDom) return;
+            const isCompleteView = matcherState.screen === "completion";
+            matcherDom.activityView.hidden = isCompleteView;
+            matcherDom.completionView.hidden = !isCompleteView;
+            applyMatcherOrder();
+
+            const usedRoles = Object.values(matcherState.matches);
+            matcherDom.roleCards.forEach((card) => {
+                const role = card.dataset.role;
+                const used = usedRoles.includes(role);
+                card.disabled = used;
+                card.draggable = !used;
+                card.classList.toggle("used", used);
+                card.setAttribute("aria-pressed", String(matcherState.selectedRole === role));
+                card.setAttribute("aria-label", `${ROLE_LABELS[role]}. ${used ? "Already matched." : matcherState.selectedRole === role ? "Selected. Choose a scenario." : "Available. Press Enter or Space to select."}`);
+            });
+
+            matcherDom.scenarioCards.forEach((card) => {
+                const scenario = card.dataset.scenario;
+                const role = matcherState.matches[scenario];
+                const slot = card.querySelector(".match-slot");
+                card.disabled = Boolean(role);
+                card.classList.toggle("matched", Boolean(role));
+                slot.textContent = role ? `✓ ${ROLE_LABELS[role]}` : "Choose a role";
+                card.setAttribute("aria-label", role
+                    ? `${SCENARIO_LABELS[scenario]}. Correctly matched with ${ROLE_LABELS[role]}.`
+                    : `${SCENARIO_LABELS[scenario]}. Empty match target.${matcherState.selectedRole ? ` Attempt match with ${ROLE_LABELS[matcherState.selectedRole]}.` : " Choose a role first."}`);
+            });
+
+            const correctCount = Object.keys(matcherState.matches).length;
+            matcherDom.progressText.textContent = `${correctCount} of 3`;
+            matcherDom.progressFill.style.width = `${(correctCount / 3) * 100}%`;
+            matcherDom.clearSelectionBtn.disabled = !matcherState.selectedRole;
+            matcherDom.finishBtn.disabled = !matcherState.completionReady;
+            matcherDom.feedbackCard.className = `feedback-card ${matcherState.feedback.kind}`;
+            matcherDom.feedbackCard.querySelector(".feedback-icon").textContent = matcherState.feedback.kind === "correct" ? "✓" : matcherState.feedback.kind === "incorrect" ? "!" : "i";
+            matcherDom.feedbackText.textContent = matcherState.feedback.text;
+        }
+
+        function applyMatcherOrder() {
+            matcherState.roleOrder.forEach((role) => {
+                const card = matcherDom.roleCards.find((item) => item.dataset.role === role);
+                if (card) matcherDom.roleList.appendChild(card);
+            });
+            matcherState.scenarioOrder.forEach((scenario) => {
+                const card = matcherDom.scenarioCards.find((item) => item.dataset.scenario === scenario);
+                if (card) matcherDom.scenarioList.appendChild(card);
+            });
+        }
+
+        function showCompletion() {
+            if (!matcherState.completionReady) return;
+            matcherState.screen = "completion";
+            saveMatcherState();
+            renderMatcher();
+            matcherDom.completionTitle.focus({ preventScroll: true });
+            announce("Activity complete. Every nutrient role has an important job.");
+        }
+
+        function resetMatcher(openHelpAfterReset) {
+            try { sessionStorage.removeItem(MATCH_STORAGE_KEY); } catch (err) { /* storage unavailable */ }
+            try { sessionStorage.removeItem(SIM_CONFIG.simId + "-help-seen"); } catch (err) { /* storage unavailable */ }
+            const previousState = matcherState;
+            matcherState = makeInitialMatcherState(previousState);
+            if (matcherDom) {
+                closePlayAgainModal(false);
+                closeReviewModal(false);
+                clearDragClasses();
+                renderMatcher();
+            }
+            if (openHelpAfterReset) {
+                window.setTimeout(() => {
+                    lastModalTrigger = dom.startBtn;
+                    markInstructionsSeen();
+                    openInstructionsModal();
+                    dom.gotItBtn.focus({ preventScroll: true });
+                }, 40);
+            }
+        }
+
+        function clearDragClasses() {
+            if (!matcherDom) return;
+            matcherDom.scenarioCards.forEach((card) => card.classList.remove("drag-ready", "drag-over"));
+        }
+
+        function announce(message) {
+            if (!matcherDom) return;
+            matcherDom.liveRegion.textContent = "";
+            window.setTimeout(() => { matcherDom.liveRegion.textContent = message; }, 20);
+        }
+
+        function openReviewModal() {
+            cacheMatcherDom();
+            lastModalTrigger = matcherDom.reviewBtn;
+            renderReviewHistory();
+            matcherDom.reviewModal.classList.add("show");
+            window.setTimeout(() => matcherDom.reviewHeading.focus({ preventScroll: true }), 0);
+        }
+
+        function closeReviewModal(restoreFocus = true) {
+            if (!matcherDom || !matcherDom.reviewModal.classList.contains("show")) return;
+            matcherDom.reviewModal.classList.remove("show");
+            if (restoreFocus) matcherDom.reviewBtn.focus({ preventScroll: true });
+        }
+
+        function renderReviewHistory() {
+            matcherDom.reviewBody.replaceChildren();
+            if (!matcherState.reviewHistory.length) {
+                const empty = document.createElement("p");
+                empty.className = "review-empty";
+                empty.textContent = "No attempts yet. Start matching when you are ready.";
+                matcherDom.reviewBody.appendChild(empty);
+                return;
+            }
+            matcherState.reviewHistory.forEach((item, index) => {
+                const card = document.createElement("article");
+                card.className = `review-item ${item.correct ? "correct" : "incorrect"}`;
+                const status = document.createElement("span");
+                status.className = "review-status";
+                status.setAttribute("aria-hidden", "true");
+                status.textContent = item.correct ? "✓" : "!";
+                const heading = document.createElement("strong");
+                heading.textContent = `${index + 1}. ${ROLE_LABELS[item.role]} → ${SCENARIO_LABELS[item.scenario]}: ${item.correct ? "Correct" : "Try again"}`;
+                const feedback = document.createElement("p");
+                feedback.textContent = item.feedback;
+                card.append(status, heading, feedback);
+                matcherDom.reviewBody.appendChild(card);
+            });
+        }
+
+        function openPlayAgainModal() {
+            lastModalTrigger = matcherDom.playAgainBtn;
+            matcherDom.playAgainModal.hidden = false;
+            window.setTimeout(() => matcherDom.cancelPlayAgainBtn.focus({ preventScroll: true }), 0);
+        }
+
+        function closePlayAgainModal(restoreFocus = true) {
+            if (!matcherDom || matcherDom.playAgainModal.hidden) return;
+            matcherDom.playAgainModal.hidden = true;
+            if (restoreFocus && lastModalTrigger) lastModalTrigger.focus({ preventScroll: true });
+        }
+
+        function markInstructionsSeen() {
+            matcherState.instructionsSeen = true;
+            saveMatcherState();
+            storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+            dom.helpBtn.classList.remove("pulse-help");
+        }
+
+        function restoreModalFocus() {
+            if (lastModalTrigger) window.setTimeout(() => lastModalTrigger.focus({ preventScroll: true }), 0);
+        }
+
+        function handleMatcherKeys(event) {
+            if (event.key === "Escape") {
+                if (matcherDom && !matcherDom.playAgainModal.hidden) {
+                    closePlayAgainModal();
+                    return;
+                }
+                if (matcherDom && matcherDom.reviewModal.classList.contains("show")) {
+                    closeReviewModal();
+                    return;
+                }
+                if (matcherState.selectedRole) clearSelection();
+            }
+
+            if (event.key !== "Tab") return;
+            const activeModal = getActiveMatcherModal();
+            if (!activeModal) return;
+            const focusable = Array.from(activeModal.querySelectorAll("button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex='-1'])"))
+                .filter((element) => !element.hidden && element.offsetParent !== null);
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        function getActiveMatcherModal() {
+            if (matcherDom && !matcherDom.playAgainModal.hidden) return matcherDom.playAgainModal;
+            if (matcherDom && matcherDom.reviewModal.classList.contains("show")) return matcherDom.reviewModal;
+            if (dom.resetConfirmModal.classList.contains("show")) return dom.resetConfirmModal;
+            if (dom.instructionsModal.classList.contains("show")) return dom.instructionsModal;
+            return null;
+        }
+
+        function restoreMatcherAtLoad() {
+            dom.startBtn.textContent = "Start matching";
+            dom.openInstructionsBtn.textContent = "Help";
+            cacheMatcherDom();
+            matcherState = loadMatcherState();
+            if (!matcherEventsBound) bindMatcherEvents();
+
+            if (matcherState.screen === "activity" || matcherState.screen === "completion") {
+                showScreen("sim");
+                renderMatcher();
+                return;
+            }
+
+            renderMatcher();
+            if (!matcherState.instructionsSeen) {
+                lastModalTrigger = dom.startBtn;
+                markInstructionsSeen();
+                window.setTimeout(() => {
+                    openInstructionsModal();
+                    dom.gotItBtn.focus({ preventScroll: true });
+                }, 60);
+            }
+        }
+
+        restoreMatcherAtLoad();
+    </script>
+</body>
+
+</html>
