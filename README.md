@@ -8,7 +8,7 @@ An interactive maths simulation for Form 1 students (Trinidad and Tobago). It is
 
 | | |
 |---|---|
-| Simulation | [`MATH/Form1/Term1/MATH-FORM1-TERM1-PREWORK-SIM1.html`](MATH/Form1/Term1/MATH-FORM1-TERM1-PREWORK-SIM1.html) |
+| Simulation | [`MATH/Form1/Term1/PreWork/MATH-FORM1-TERM1-PREWORK-SIM1.html`](MATH/Form1/Term1/PreWork/MATH-FORM1-TERM1-PREWORK-SIM1.html) |
 | Built from | Simulation template v2.2.1 (blank template) |
 | Runs | Fully offline, single HTML file, no other assets |
 | Curriculum link | Form 1, Strand 1, Topic 1.1.1 — outcomes 1.1.1.3 (place value) and 1.1.1.8 (problem solving) |
