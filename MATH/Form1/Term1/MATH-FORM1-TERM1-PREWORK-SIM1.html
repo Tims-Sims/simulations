@@ -694,14 +694,17 @@
         }
 
         .frame .col-label {
-            font-size: 0.62rem;
+            font-size: 0.55rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
+            letter-spacing: 0;
+            white-space: normal;
+            line-height: 1.1;
+            max-width: 52px;
             color: var(--muted);
             text-align: center;
             align-self: end;
-            padding-bottom: 2px;
+            padding-bottom: 8px;
         }
 
         .frame .col-label.active-col {
@@ -1263,7 +1266,36 @@
         .cell.carry-cell { width: 46px; height: 28px; font-size: 0.9rem; }
         .keypad { grid-template-columns: repeat(3, 52px); }
         .key-btn { width: 52px; height: 52px; }
-        .key-zero { grid-column: 1 / -1; width: 100%; }
+        /* Higher specificity than every sized .key-btn rule (incl. media queries) */
+        .key-btn.key-zero { grid-column: 1 / -1; width: 100%; }
+
+        /* Reset-confirm modal: equal-sized buttons */
+        #cancelResetBtn,
+        #confirmResetBtn {
+            min-width: 110px;
+            justify-content: center;
+            padding: 11px 16px;
+            font-size: 1rem;
+        }
+
+        /* Background confetti layer behind the sim card */
+        .sim-layout { position: relative; }
+        .sim-card { position: relative; z-index: 1; }
+        .bg-confetti {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-confetti svg {
+            position: absolute;
+            top: -20px;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            to { transform: translateY(110vh) rotate(var(--spin, 540deg)); opacity: 0.9; }
+        }
         .work-tools { margin-bottom: 0; }
         .feedback-area { margin: 6px 0; min-height: 22px; font-size: 0.95rem; }
         .column-help { margin-bottom: 6px; font-size: 0.95rem; }
@@ -1360,6 +1392,7 @@
 
         <main class="screen" id="simScreen">
             <div class="sim-layout">
+                <div class="bg-confetti" id="bgConfetti" aria-hidden="true"></div>
                 <section class="sim-card" id="simContainer">
                     <!-- ============================================================
                          DEV-EDIT: SIM AREA
@@ -2065,7 +2098,9 @@
         function updateEarningsBar() {
             const fill = document.getElementById("earningsFill");
             const amt = document.getElementById("earningsAmt");
-            if (fill) fill.style.width = Math.min(100, (G.dollars / MAX_EARNINGS) * 100) + "%";
+            // Progress = completed questions, not dollars (dollar-proportional
+            // bars barely move on the small early totals).
+            if (fill) fill.style.width = Math.min(100, (Math.min(G.qIndex, QUESTIONS.length) / QUESTIONS.length) * 100) + "%";
             if (amt) amt.textContent = fmt(G.dollars, true);
         }
 
@@ -2551,11 +2586,49 @@
             }
         }
 
+        /* -------- Background SVG confetti burst on a correct total -------- */
+        function burstConfetti() {
+            const layer = document.getElementById("bgConfetti");
+            if (!layer) return;
+            const colours = ["#fbbf24", "#34d399", "#7dd3fc", "#a78bfa", "#fb7185", "#f97316"];
+            for (let i = 0; i < 44; i++) {
+                const size = 8 + Math.random() * 8;              // 8-16px
+                const colour = colours[i % colours.length];
+                const shape = i % 3;
+                let inner;
+                if (shape === 0) {
+                    inner = `<rect width="${size}" height="${size * 0.6}" rx="1.5" fill="${colour}"/>`;
+                } else if (shape === 1) {
+                    inner = `<circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="${colour}"/>`;
+                } else {
+                    inner = `<polygon points="${size / 2},0 ${size},${size} 0,${size}" fill="${colour}"/>`;
+                }
+                const el = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                el.setAttribute("width", size);
+                el.setAttribute("height", size);
+                el.innerHTML = inner;
+                el.style.left = (Math.random() * 100) + "%";
+                el.style.setProperty("--spin", (360 + Math.random() * 540) + "deg"); // 360-900deg
+                el.style.animationDuration = (2 + Math.random() * 1.6) + "s";        // 2-3.6s
+                el.style.animationDelay = (Math.random() * 0.5) + "s";
+                layer.appendChild(el);
+            }
+            setTimeout(() => { layer.replaceChildren(); }, 4500);
+        }
+
         function advanceColumn(quiet) {
             Q.buffer = "";
             Q.colIdx += 1;
             if (Q.colIdx >= Q.cols) {
-                finishRound();
+                // Answer-reveal pause: leave the completed frame on screen
+                // with the green answer before showing the round-done panel.
+                // "reveal" blocks all input (handlers only accept "add").
+                Q.phase = "reveal";
+                renderFrame();
+                updateStepBanner();
+                setFeedback("", ""); // the round-done panel already says "Total correct!"
+                burstConfetti();
+                setTimeout(finishRound, 1800);
                 return;
             }
             if (!quiet) setFeedback("Good! Now the " + (PLACE_NAMES[Q.colIdx] || "").toLowerCase() + " column.", "good");
