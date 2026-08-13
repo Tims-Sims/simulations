@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Clause Circuit</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+
+        .cc-wrap{display:flex;flex-direction:column;gap:16px}
+        .cc-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+        .cc-progress{flex:1;min-width:220px}
+        .cc-progress-label{display:flex;justify-content:space-between;font-weight:700;font-size:.92rem;margin-bottom:7px}
+        .cc-meter{height:12px;border-radius:99px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden}
+        .cc-meter-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .35s ease}
+        .cc-stage{background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 75%,transparent),var(--surface));border:1px solid var(--border);border-radius:20px;padding:18px;min-height:470px}
+        .cc-header{text-align:center;margin-bottom:14px}
+        .cc-header h2{margin:0 0 6px;font-size:clamp(1.35rem,3vw,2rem)}
+        .cc-header p{margin:0;color:var(--text-soft)}
+        .circuit{position:relative;max-width:760px;margin:12px auto 20px;padding:18px 12px 28px}
+        .circuit-line{position:absolute;left:8%;right:8%;top:50%;height:10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);z-index:0}
+        .circuit-line.powered{background:linear-gradient(90deg,var(--success),var(--accent));box-shadow:0 0 18px color-mix(in srgb,var(--success) 45%,transparent)}
+        .circuit-nodes{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;z-index:1}
+        .node{text-align:center}
+        .node-lamp{width:50px;height:50px;margin:0 auto 7px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);border:3px solid var(--border);font-size:1.35rem;transition:.25s}
+        .node.on .node-lamp{background:color-mix(in srgb,var(--success) 25%,var(--surface));border-color:var(--success);box-shadow:0 0 22px color-mix(in srgb,var(--success) 50%,transparent)}
+        .node span{font-size:.78rem;color:var(--muted)}
+        .mission-card{max-width:760px;margin:auto;text-align:center;padding:18px;border:1px solid var(--border);border-radius:18px;background:color-mix(in srgb,var(--surface) 82%,transparent)}
+        .mission-card p{color:var(--text-soft);line-height:1.55}
+        .gate-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:16px auto;max-width:720px}
+        .gate{min-width:96px;min-height:58px;padding:12px 16px;border-radius:15px;border:2px solid var(--border);background:var(--surface-2);color:var(--text);font-weight:800;cursor:grab;user-select:none;touch-action:none}
+        .gate:active{cursor:grabbing}.gate[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+        .drop-zone{min-height:76px;border:2px dashed var(--accent);border-radius:18px;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+        .drop-zone.over{background:color-mix(in srgb,var(--accent) 18%,var(--surface));transform:scale(1.01)}
+        .drop-zone .placeholder{color:var(--muted);font-weight:700}
+        .clause-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;max-width:760px;margin:20px auto}
+        .clause{padding:18px;border-radius:16px;background:var(--surface-2);border:1px solid var(--border);font-weight:700;text-align:center;min-height:82px;display:flex;align-items:center;justify-content:center}
+        .vehicle{display:inline-flex;align-items:center;gap:8px}
+        .vehicle-icon{width:58px;height:38px;flex:none}
+        .sentence-preview{max-width:760px;margin:12px auto;padding:14px 16px;border-radius:14px;background:var(--bg-soft);border:1px solid var(--border);font-size:1.05rem;line-height:1.55;min-height:54px}
+        .token-row{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:780px;margin:14px auto}
+        .token{padding:10px 13px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border);font-weight:700;cursor:grab;touch-action:none}
+        .token.selected{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+        .feedback{max-width:760px;margin:12px auto 0;padding:14px 16px;border-radius:14px;border:1px solid var(--border);display:none}
+        .feedback.show{display:block}.feedback.error{background:color-mix(in srgb,var(--danger) 12%,var(--surface))}
+        .feedback.success{background:color-mix(in srgb,var(--success) 12%,var(--surface))}
+        .feedback strong{display:block;margin-bottom:5px}.feedback p{margin:5px 0;color:var(--text-soft)}
+        .cc-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:14px}
+        .route-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:color-mix(in srgb,var(--accent-2) 16%,var(--surface));border:1px solid var(--border);font-size:.82rem;font-weight:800}
+        .classification{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:720px;margin:14px auto}
+        .class-choice{padding:16px;border-radius:15px;border:2px solid var(--border);background:var(--surface-2);color:var(--text);font-weight:800}
+        .class-choice.selected{border-color:var(--accent);box-shadow:var(--focus)}
+        .final-board{display:grid;gap:14px;max-width:780px;margin:auto}
+        .final-item{padding:14px;border:1px solid var(--border);border-radius:16px;background:var(--surface-2)}
+        .final-item h4{margin:0 0 10px}.final-item .tile-bank{display:flex;flex-wrap:wrap;gap:8px}
+        .tile{padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-weight:700;cursor:grab}
+        .build-line{min-height:58px;margin-top:10px;border:2px dashed var(--accent);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+        .build-line .tile.placed{cursor:default;background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+        .small-note{text-align:center;color:var(--muted);font-size:.88rem;margin-top:8px}
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:700px;margin:18px auto}
+        .stat{padding:14px;border-radius:14px;background:var(--surface-2);border:1px solid var(--border);text-align:center}.stat b{display:block;font-size:1.3rem;margin-top:4px}
+        .cc-exit{margin-left:auto}
+        @media(max-width:700px){.clause-grid{grid-template-columns:1fr}.circuit-nodes{grid-template-columns:repeat(2,1fr)}.circuit-line{display:none}.classification{grid-template-columns:1fr}.cc-stage{min-height:0}}
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+    
+/* FINAL FIXES: persistent navigation */
+.cc-nav {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px solid var(--border);
+}
+.cc-nav-left,.cc-nav-right { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.cc-nav button { min-width:110px; min-height:44px; }
+.cc-nav .next-btn { min-width:140px; }
+.cc-nav .next-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+.cc-feedback { margin-top:12px; }
+.final-token {
+    cursor:pointer;
+    user-select:none;
+}
+.final-token:hover { transform:translateY(-1px); }
+
+
+.cc-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:14px}
+.cc-header h2{margin:0 0 5px;font-size:clamp(1.5rem,3vw,2.2rem)}
+.cc-progress{min-width:120px;text-align:center;padding:10px 14px;border:1px solid var(--border);border-radius:14px;background:var(--surface-2)}
+.cc-progress strong{display:block;font-size:1.35rem}.cc-progress span{font-size:.78rem;color:var(--muted)}
+.cc-circuit{display:flex;gap:5px;margin:10px 0 22px}
+.cc-section{height:12px;flex:1;display:flex;align-items:center;opacity:.35}
+.cc-section.powered{opacity:1}.cc-wire{height:5px;flex:1;background:var(--muted);border-radius:5px}
+.cc-section.powered .cc-wire{background:var(--success);box-shadow:0 0 14px color-mix(in srgb,var(--success) 55%,transparent)}
+.cc-node{width:12px;height:12px;border-radius:50%;background:var(--muted)}
+.cc-section.powered .cc-node{background:var(--success)}
+.cc-visual-row,.cc-vehicles{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center}
+.cc-vehicle-card,.cc-clause-card,.cc-build-card{padding:15px;border:1px solid var(--border);border-radius:16px;background:var(--surface-2);text-align:center}
+.cc-car{width:130px;height:auto;display:block;margin:0 auto 5px;color:var(--accent)}
+.cc-vehicle-card strong{font-size:.88rem}.cc-clause-card p{margin:6px 0 0;line-height:1.45}
+.cc-gates{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;max-width:260px}
+.cc-gate{padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--surface);font-weight:800;font-size:.75rem}
+.cc-rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.cc-rule-grid>div{padding:14px;border:1px solid var(--border);border-radius:14px}.cc-rule-grid span{display:block;color:var(--muted);margin-top:5px;line-height:1.45}
+.cc-gate-zone{text-align:center}.cc-gate-title{font-weight:800;margin-bottom:8px}.cc-gate-choice,.cc-punct,.cc-class{min-height:44px;padding:10px 13px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:800;margin:3px}
+.cc-gate-choice.selected,.cc-punct.selected,.cc-class.selected{background:color-mix(in srgb,var(--accent) 22%,var(--surface));border-color:var(--accent)}
+.cc-preview{margin-top:15px;padding:14px;border-radius:14px;border:1px solid var(--border);background:var(--bg-soft)}
+.cc-preview span{display:block;color:var(--muted);font-size:.8rem;margin-bottom:5px}.cc-preview strong{line-height:1.5}
+.cc-feedback{padding:13px;border-radius:12px;border-left:4px solid var(--danger);background:color-mix(in srgb,var(--danger) 9%,var(--surface));line-height:1.5}
+.cc-feedback.hint{border-left-color:var(--warning);background:color-mix(in srgb,var(--warning) 9%,var(--surface))}
+.cc-feedback strong{font-weight:800}
+.cc-complex{display:grid;gap:14px}.cc-complex-row{padding:15px;border:1px solid var(--border);border-radius:16px;background:var(--surface-2)}
+.cc-sentence{font-size:1.05rem;font-weight:700;margin-bottom:10px}.cc-choice-row{display:flex;flex-wrap:wrap;gap:5px}.cc-punct-note{color:var(--muted);font-size:.88rem;margin-top:8px}
+.cc-final{display:grid;gap:14px}.cc-build-card h3{margin:0 0 10px}.cc-build-area{min-height:62px;padding:10px;border:2px dashed var(--border);border-radius:12px;background:var(--surface);line-height:2}
+.cc-word-token,.final-token{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:7px 10px;margin:3px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:700}
+.cc-word-token:hover{transform:translateY(-1px);background:var(--surface-2)}.final-token{background:color-mix(in srgb,var(--accent) 14%,var(--surface));cursor:pointer}
+.cc-tile-bank{display:flex;flex-wrap:wrap;gap:3px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.cc-class-row{margin-top:10px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}.cc-class-row>span{font-weight:700;margin-right:4px}
+.cc-completion{text-align:center}.cc-completion h2{font-size:clamp(2rem,4vw,3rem);margin:10px 0}
+.cc-success-panel{padding:18px;border-radius:16px;border:1px solid var(--success);background:color-mix(in srgb,var(--success) 10%,var(--surface));margin:18px 0}
+.cc-success-panel p{color:var(--text-soft);line-height:1.5}.cc-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cc-stats>div{padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2)}
+.cc-stats strong,.cc-stats span{display:block}.cc-stats span{font-size:.75rem;color:var(--muted);margin-top:4px}.cc-skills{margin-top:14px;padding:14px;border:1px solid var(--border);border-radius:14px}.cc-skills span{display:block;color:var(--muted);margin-top:5px}
+@media(max-width:760px){.cc-header,.cc-visual-row,.cc-vehicles{grid-template-columns:1fr;display:grid}.cc-progress{justify-self:start}.cc-rule-grid,.cc-stats{grid-template-columns:1fr 1fr}.cc-nav{align-items:stretch}.cc-nav-left,.cc-nav-right{flex:1}.cc-nav button{width:100%}}
+
+
+.cc-feedback.success{
+    border-left-color:var(--success);
+    background:color-mix(in srgb,var(--success) 11%,var(--surface));
+}
+.cc-feedback.success strong{color:var(--success);}
+.cc-feedback.error{border-left-color:var(--danger);}
+.cc-feedback.error strong{color:var(--danger);}
+
+
+.cc-gate-choice:disabled{
+    cursor:default;
+    opacity:1;
+}
+.cc-gate-choice.selected:disabled{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+}
+
+</style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <div class="cc-wrap" id="ccApp">
+                        <div class="cc-top">
+                            <div class="route-badge" id="routeBadge">Mission Brief</div>
+                            <div class="cc-progress" aria-label="Mission progress">
+                                <div class="cc-progress-label"><span id="progressText">Progress: 0 / 4</span><span id="attemptText">First attempts: 0</span></div>
+                                <div class="cc-meter"><div class="cc-meter-fill" id="progressFill"></div></div>
+                            </div>
+                            <button class="secondary-btn cc-exit" id="exitSimBtn" type="button">Exit</button>
+                        </div>
+                        <div class="cc-stage" id="ccStage"></div>
+                        <div class="cc-actions">
+                            <button class="secondary-btn" id="backBtn" type="button">← Back</button>
+                            <button class="secondary-btn" id="hintBtn" type="button">Hint</button>
+                            <button class="secondary-btn" id="tryAgainBtn" type="button">Try Again</button>
+                        </div>
+                        <div class="small-note">Keyboard: Tab to move between controls, Enter/Space to activate. Drag targets also have keyboard selection.</div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Clause Circuit • Offline learning simulation • No audio or narration
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1",
+            simId: "ela-f2-t1-u10-sec1-sim1",
+            title: "Clause Circuit",
+            subtitle: "Compound and complex sentence builder",
+            badgeText: "CC",
+            homeEyebrow: "ELA • Form 2 • Unit 10",
+            homeDescription: "Connect clause vehicles through the correct conjunction gates to power four circuit sections. Build two compound and two complex sentences exactly.",
+            instructions: [
+                "Drag the correct conjunction gate into the glowing drop zone.",
+                "For compound sentences, use comma + coordinating conjunction between two independent clauses.",
+                "For complex sentences, connect an independent clause with a dependent clause using a subordinating conjunction.",
+                "In the final surge, arrange every word tile in order and classify each sentence as compound or complex.",
+                "If you make a mistake, read the feedback, then use Try Again. You can use Hint without losing the ability to retry.",
+                "No typing is required. All actions are checked against exact answers."
+            ]
+        };
+
+        /* ============================================================
+           DEV-EDIT: AUDIO (OPTIONAL)
+           Audio is completely optional. If you don't want sound in your
+           sim, delete this whole section AND the #audioBtn button in the
+           header above (search "OPTIONAL: AUDIO TOGGLE BUTTON").
+
+           All sounds here work fully offline - no internet connection
+           is ever needed. There are two ways to give a sound to a slot
+           in SOUND_FILES below:
+
+             1. Leave it as "" (empty string) to use a built-in
+                synthesized "beep" tone instead of a real audio file.
+                This needs no file at all and always works offline.
+
+             2. Paste a base64 "data URI" string, like:
+                "data:audio/mp3;base64,AAAA..."
+                To make one: convert your .mp3 or .wav file to base64
+                text (many free online converters do this, or your
+                own audio editor), then paste that text after the
+                "data:audio/mp3;base64," prefix shown above. This keeps
+                the sound baked directly into this one HTML file, so
+                there is nothing else to ship and nothing to break if
+                the file is moved. Note it makes the file bigger
+                (roughly 1.37x the size of the original audio), so this
+                is best for short sound effects, not music or narration.
+
+             3. Alternatively, point to a separate audio file next to
+                this HTML file, e.g. "sounds/correct.mp3" - but then you
+                must remember to ship that file alongside this one.
+
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+        const SOUND_FILES = {
+            click: "",     // played on general button/option clicks
+            correct: "",   // played when the learner answers correctly
+            wrong: "",     // played when the learner answers incorrectly
+            typing: "",    // played per-keystroke or per-character reveal
+            complete: ""   // played when the simulation/activity finishes
+            // Feel free to add your own keys here (e.g. levelUp: "") and
+            // call playSound("levelUp") from your DEV-EDIT: SIM LOGIC code.
+        };
+
+        /* Each sound belongs to a category. The "effects" category always gets a
+           volume slider in the Help window. Any OTHER category name you use here
+           (for example "voice" for narration you add yourself) automatically gets
+           its own labelled slider in the Help window — and if no sound uses it,
+           no slider appears. */
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects",
+            // narration: "voice",   // example: your own added sound in its own category
+        };
+        /* Optional nicer slider labels. Category name used if missing. */
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
+        /* ---- Audio engine below. Safe to leave untouched. ---- */
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};   // category -> 0..1
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        const SYNTH_SOUNDS = {
+            click:    (v) => playTone(600, 60, "square", 0.06 * v),
+            typing:   (v) => playTone(420, 30, "square", 0.04 * v),
+            correct:  (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(784, 180, "sine", 0.15 * v, 110); },
+            wrong:    (v) => playTone(180, 250, "sawtooth", 0.12 * v),
+            complete: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(659, 120, "sine", 0.15 * v, 120); playTone(784, 250, "sine", 0.15 * v, 240); },
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+        // Example usage from your own sim logic:
+        // playSound("correct"); // call anywhere in your DEV-EDIT: SIM LOGIC code
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1");
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), input.value);
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           Clause Circuit — final interaction implementation
+           ============================================================ */
+
+        const CC = {
+            screen: 1,
+            totalScreens: 5,
+            attempts: 0,
+            firstAttempts: 0,
+            firstAttemptCorrect: 0,
+            hints: 0,
+            startTime: 0,
+            completed: false,
+            route1: { selected: null, punctuation: null, locked: false },
+            route2: { selected: null, punctuation: null, locked: false },
+            complexA: { selected: null, punctuation: null, locked: false },
+            complexB: { selected: null, punctuation: null, locked: false },
+            final: {
+                sentence1: [],
+                sentence2: [],
+                class1: null,
+                class2: null,
+                active: 1,
+                locked: false
+            }
+        };
+
+        const CC_DATA = {
+            route1: {
+                clauses: ["The team wanted to practise", "the field was flooded"],
+                choices: ["and", "but", "so"],
+                correct: "but",
+                punctuation: true,
+                model: "The team wanted to practise, but the field was flooded."
+            },
+            route2: {
+                clauses: ["The lights went out", "the room became silent"],
+                choices: ["for", "and", "so"],
+                correct: "so",
+                punctuation: true,
+                model: "The lights went out, so the room became silent."
+            },
+            complexA: {
+                before: "___ the rain started, we moved the equipment inside.",
+                choices: ["Because", "Although", "When"],
+                correct: "Because",
+                punctuation: true,
+                model: "Because the rain started, we moved the equipment inside."
+            },
+            complexB: {
+                before: "The players cheered ___ the final whistle blew.",
+                choices: ["because", "although", "when"],
+                correct: "when",
+                punctuation: false,
+                model: "The players cheered when the final whistle blew."
+            }
+        };
+
+        const FINAL_1 = [
+            "Although","the","bus","was","late",",","we","reached","school","before","assembly","."
+        ];
+        const FINAL_2 = [
+            "Maya","checked","the","list",",","and","Joel","packed","the","boxes","."
+        ];
+
+        function ccEscape(v) {
+            return String(v).replace(/[&<>"']/g, c => ({
+                "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+            }[c]));
+        }
+
+        function ccVehicle(label) {
+            return `
+            <svg class="cc-car" viewBox="0 0 180 86" role="img" aria-label="${ccEscape(label)} clause vehicle">
+                <rect x="12" y="34" width="156" height="30" rx="10" fill="currentColor" opacity=".95"/>
+                <path d="M40 34 L55 16 Q59 11 67 11 H111 Q119 11 124 17 L140 34 Z"
+                      fill="currentColor" opacity=".82"/>
+                <path d="M63 17 H83 V33 H48 Z M89 17 H110 Q115 17 119 23 L126 33 H89 Z"
+                      fill="var(--surface)" opacity=".9"/>
+                <circle cx="48" cy="67" r="13" fill="var(--bg)"/>
+                <circle cx="48" cy="67" r="6" fill="var(--muted)"/>
+                <circle cx="132" cy="67" r="13" fill="var(--bg)"/>
+                <circle cx="132" cy="67" r="6" fill="var(--muted)"/>
+                <rect x="20" y="42" width="14" height="8" rx="3" fill="var(--warning)"/>
+                <rect x="148" y="42" width="10" height="8" rx="3" fill="var(--danger)"/>
+            </svg>`;
+        }
+
+        function ccCircuit(activeCount) {
+            return `
+            <div class="cc-circuit" aria-label="Four-section circuit, ${activeCount} sections powered">
+                ${[0,1,2,3].map(i => `
+                    <div class="cc-section ${i < activeCount ? "powered" : ""}">
+                        <span class="cc-node"></span>
+                        <span class="cc-wire"></span>
+                        <span class="cc-node"></span>
+                    </div>`).join("")}
+            </div>`;
+        }
+
+        function ccNav(nextLabel = "Next", nextDisabled = false) {
+            return `
+            <div class="cc-nav" aria-label="Simulation navigation">
+                <div class="cc-nav-left">
+                    <button class="secondary-btn cc-back" type="button">Back</button>
+                    <button class="ghost-btn cc-hint" type="button">Hint</button>
+                    <button class="secondary-btn cc-try" type="button">Try Again</button>
+                </div>
+                <div class="cc-nav-right">
+                    <button class="primary-btn next-btn cc-next" type="button" ${nextDisabled ? "disabled" : ""}>${nextLabel}</button>
+                </div>
+            </div>`;
+        }
+
+        function ccFeedback(message, type = "error") {
+            return `<div class="cc-feedback ${type}" role="alert">${message}</div>`;
+        }
+
+        function ccRenderShell(title, subtitle, body, activeCount, nextLabel, nextDisabled) {
+            dom.simContainer.innerHTML = `
+                <div class="cc-header">
+                    <div>
+                        <div class="eyebrow">Clause Circuit • Screen ${CC.screen} of ${CC.totalScreens}</div>
+                        <h2>${title}</h2>
+                        <p class="muted">${subtitle}</p>
+                    </div>
+                    <div class="cc-progress" aria-label="Mission progress">
+                        <strong>${Math.round((activeCount / 4) * 100)}%</strong>
+                        <span>circuit powered</span>
+                    </div>
+                </div>
+                ${ccCircuit(activeCount)}
+                ${body}
+                ${ccNav(nextLabel, nextDisabled)}
+            `;
+            ccBindNav();
+        }
+
+        function ccBindNav() {
+            const back = dom.simContainer.querySelector(".cc-back");
+            const hint = dom.simContainer.querySelector(".cc-hint");
+            const tryBtn = dom.simContainer.querySelector(".cc-try");
+            const next = dom.simContainer.querySelector(".cc-next");
+
+            if (back) {
+                back.addEventListener("click", () => {
+                    if (CC.screen > 1) ccShowScreen(CC.screen - 1);
+                });
+                back.disabled = CC.screen === 1;
+            }
+            if (hint) hint.addEventListener("click", ccHint);
+            if (tryBtn) tryBtn.addEventListener("click", ccTryAgain);
+            if (next) next.addEventListener("click", () => {
+                if (!next.disabled) ccShowScreen(CC.screen + 1);
+            });
+        }
+
+        function ccShowScreen(n) {
+            CC.screen = Math.max(1, Math.min(5, n));
+            if (!CC.startTime) CC.startTime = Date.now();
+
+            if (CC.screen === 1) ccMission();
+            if (CC.screen === 2) ccRoute("route1");
+            if (CC.screen === 3) ccRoute("route2");
+            if (CC.screen === 4) ccComplex();
+            if (CC.screen === 5) ccFinal();
+        }
+
+        function ccMission() {
+            ccRenderShell(
+                "Mission Brief",
+                "Power four circuit sections by building two compound and two complex sentences exactly.",
+                `<div class="cc-mission">
+                    <div class="cc-visual-row">
+                        <div class="cc-vehicle-card">${ccVehicle("Clause Vehicle A")}<strong>Independent clause</strong></div>
+                        <div class="cc-gates">
+                            ${["AND","BUT","SO","BECAUSE","ALTHOUGH","WHEN"].map(x => `<span class="cc-gate">${x}</span>`).join("")}
+                        </div>
+                        <div class="cc-vehicle-card">${ccVehicle("Clause Vehicle B")}<strong>Clause connection</strong></div>
+                    </div>
+                    <div class="cc-rule-grid">
+                        <div><strong>Compound</strong><span>Independent clause + comma + coordinating conjunction + independent clause.</span></div>
+                        <div><strong>Complex</strong><span>Independent clause + dependent clause using a subordinating conjunction.</span></div>
+                    </div>
+                </div>`,
+                0,
+                "Start Route 1",
+                false
+            );
+        }
+
+        function ccRoute(route) {
+            const d = CC_DATA[route];
+            const s = CC[route];
+            const selected = s.selected;
+            const ready = selected === d.correct;
+
+            const choices = d.choices.map(c =>
+                `<button class="cc-gate-choice ${selected === c ? "selected" : ""}"
+                    data-choice="${ccEscape(c)}" type="button" ${selected ? "disabled" : ""}>
+                    ${c.toUpperCase()}
+                </button>`
+            ).join("");
+
+            ccRenderShell(
+                route === "route1" ? "Compound Route 1" : "Compound Route 2",
+                "Choose the conjunction gate that correctly connects the two independent clauses.",
+                `<div class="cc-route">
+                    <div class="cc-vehicles">
+                        <div class="cc-clause-card">${ccVehicle("First clause")}<p>${ccEscape(d.clauses[0])}</p></div>
+                        <div class="cc-gate-zone">
+                            <div class="cc-gate-title">Choose gate</div>${choices}
+                        </div>
+                        <div class="cc-clause-card">${ccVehicle("Second clause")}<p>${ccEscape(d.clauses[1])}</p></div>
+                    </div>
+                    <div class="cc-preview">
+                        <span>Sentence preview</span>
+                        <strong>${selected ? ccEscape(d.clauses[0]) + ", " + selected + " " + ccEscape(d.clauses[1]) + "." : "Select a conjunction gate."}</strong>
+                    </div>
+                    ${s.message ? ccFeedback(s.message, s.messageType || "error") : ""}
+                </div>`,
+                route === "route1" ? 0 : 1,
+                "Next",
+                !ready
+            );
+
+            dom.simContainer.querySelectorAll(".cc-gate-choice").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    if (s.locked || s.selected) return;
+                    s.selected = btn.dataset.choice;
+                    ccCheckCompound(route);
+                });
+            });
+        }
+
+        function ccCheckCompound(route) {
+            const d = CC_DATA[route], s = CC[route];
+            CC.attempts++;
+            const first = !s.everTried;
+            s.everTried = true;
+
+            if (s.selected === d.correct) {
+                s.locked = true;
+                s.message = `<strong>Correct.</strong> ${ccEscape(d.model)}`;
+                s.messageType = "success";
+                if (first) CC.firstAttemptCorrect++;
+                playSound("correct");
+            } else {
+                const why = `“${s.selected}” does not express the relationship needed between these clauses.`;
+                const fix = "Check whether the ideas add, contrast, show a result, time or reason.";
+                s.message = `<strong>Not quite.</strong> ${ccEscape(why)} ${ccEscape(fix)} Correct model: “${ccEscape(d.model)}”`;
+                s.messageType = "error";
+                playSound("wrong");
+            }
+            ccRoute(route);
+        }
+
+        function ccComplex() {
+            const a = CC.complexA, b = CC.complexB;
+            // Only the conjunction selections determine whether the route is ready.
+            // The comma is part of the displayed sentence model, not a separate
+            // selection/control.
+            const readyA = a.selected === CC_DATA.complexA.correct;
+            const readyB = b.selected === CC_DATA.complexB.correct;
+            const ready = readyA && readyB;
+
+            function row(id, d, s) {
+                return `
+                <div class="cc-complex-row">
+                    <div class="cc-sentence">${ccEscape(d.before)}</div>
+                    <div class="cc-choice-row">
+                        ${d.choices.map(c => `<button class="cc-gate-choice ${s.selected === c ? "selected" : ""}" data-route="${id}" data-choice="${c}" type="button" ${s.selected ? "disabled" : ""}>${c}</button>`).join("")}
+                    </div>
+                    ${s.message ? ccFeedback(s.message, s.messageType || "error") : ""}
+                </div>`;
+            }
+
+            ccRenderShell(
+                "Complex Routes",
+                "Choose the subordinating conjunction that correctly connects each dependent and independent clause.",
+                `<div class="cc-complex">${row("complexA", CC_DATA.complexA, a)}${row("complexB", CC_DATA.complexB, b)}</div>`,
+                2,
+                "Next",
+                !ready
+            );
+
+            dom.simContainer.querySelectorAll(".cc-gate-choice").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const id = btn.dataset.route;
+                    const s = CC[id];
+                    const d = CC_DATA[id];
+                    if (s.locked || s.selected) return;
+
+                    s.selected = btn.dataset.choice;
+                    s.everTried = true;
+                    CC.attempts++;
+
+                    if (s.selected === d.correct) {
+                        s.locked = true;
+                        s.message = `<strong>Correct.</strong> ${ccEscape(d.model)}`;
+                        s.messageType = "success";
+                        playSound("correct");
+                    } else {
+                        const why = `“${s.selected}” does not express the required relationship.`;
+                        const fix = "Look for the conjunction that expresses reason, contrast or time.";
+                        s.message = `<strong>Not quite.</strong> ${ccEscape(why)} ${ccEscape(fix)} Correct model: “${ccEscape(d.model)}”`;
+                        s.messageType = "error";
+                        playSound("wrong");
+                    }
+                    ccComplex();
+                });
+            });
+        }
+
+        function ccFinal() {
+            const f = CC.final;
+            const ready = f.sentence1.join(" ") === FINAL_1.join(" ")
+                && f.sentence2.join(" ") === FINAL_2.join(" ")
+                && f.class1 === "complex"
+                && f.class2 === "compound";
+
+            const tokenButtons = (arr, target) => arr.map((t, i) =>
+                `<button class="cc-word-token" data-target="${target}" data-index="${i}" type="button">${ccEscape(t)}</button>`
+            ).join("");
+
+            const build = (arr, target) => arr.length
+                ? arr.map((t, i) => `<button class="final-token" data-target="${target}" data-index="${i}" type="button">${ccEscape(t)}</button>`).join(" ")
+                : `<span class="muted">Click tiles below to build the sentence.</span>`;
+
+            ccRenderShell(
+                "Final Power Surge",
+                "Build both exact sentences, then classify each sentence as compound or complex.",
+                `<div class="cc-final">
+                    <div class="cc-build-card">
+                        <h3>Sentence 1</h3>
+                        <div class="cc-build-area" aria-label="Sentence 1 drop area">${build(f.sentence1, "sentence1")}</div>
+                        <div class="cc-tile-bank">${tokenButtons(FINAL_1, "sentence1")}</div>
+                        <div class="cc-class-row">
+                            <span>Classification:</span>
+                            <button class="cc-class ${f.class1 === "compound" ? "selected" : ""}" data-target="class1" data-value="compound" type="button">Compound</button>
+                            <button class="cc-class ${f.class1 === "complex" ? "selected" : ""}" data-target="class1" data-value="complex" type="button">Complex</button>
+                        </div>
+                    </div>
+                    <div class="cc-build-card">
+                        <h3>Sentence 2</h3>
+                        <div class="cc-build-area" aria-label="Sentence 2 drop area">${build(f.sentence2, "sentence2")}</div>
+                        <div class="cc-tile-bank">${tokenButtons(FINAL_2, "sentence2")}</div>
+                        <div class="cc-class-row">
+                            <span>Classification:</span>
+                            <button class="cc-class ${f.class2 === "compound" ? "selected" : ""}" data-target="class2" data-value="compound" type="button">Compound</button>
+                            <button class="cc-class ${f.class2 === "complex" ? "selected" : ""}" data-target="class2" data-value="complex" type="button">Complex</button>
+                        </div>
+                    </div>
+                    ${f.message ? ccFeedback(f.message, f.messageType || "error") : ""}
+                </div>`,
+                3,
+                "Finish Mission",
+                !ready
+            );
+
+            dom.simContainer.querySelectorAll(".cc-word-token").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const target = btn.dataset.target;
+                    const value = (target === "sentence1" ? FINAL_1 : FINAL_2)[Number(btn.dataset.index)];
+                    f[target].push(value);
+                    ccFinal();
+                });
+            });
+
+            dom.simContainer.querySelectorAll(".final-token").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const target = btn.dataset.target;
+                    f[target].splice(Number(btn.dataset.index), 1);
+                    ccFinal();
+                });
+            });
+
+            dom.simContainer.querySelectorAll(".cc-class").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    f[btn.dataset.target] = btn.dataset.value;
+                    ccFinal();
+                });
+            });
+        }
+
+        function ccTryAgain() {
+            if (CC.screen === 2) {
+                CC.route1 = { selected:null, punctuation:null, locked:false, message:"", messageType:"error" };
+                ccRoute("route1");
+            } else if (CC.screen === 3) {
+                CC.route2 = { selected:null, punctuation:null, locked:false, message:"", messageType:"error" };
+                ccRoute("route2");
+            } else if (CC.screen === 4) {
+                CC.complexA = { selected:null, punctuation:null, locked:false, message:"", messageType:"error" };
+                CC.complexB = { selected:null, punctuation:null, locked:false, message:"", messageType:"error" };
+                ccComplex();
+            } else if (CC.screen === 5) {
+                CC.final = { sentence1:[], sentence2:[], class1:null, class2:null, active:1, locked:false };
+                ccFinal();
+            }
+        }
+
+        function ccHint() {
+            CC.hints++;
+            const msg = CC.screen === 2
+                ? "Hint: the field being flooded contrasts with the team's wish to practise, so choose BUT and place the comma before it."
+                : CC.screen === 3
+                ? "Hint: the second clause is the result of the lights going out, so choose SO and place the comma before it."
+                : CC.screen === 4
+                ? "Hint: Because gives a reason; when gives a time relationship. An opening dependent clause needs a comma."
+                : "Hint: Sentence 1 begins with Although, so it is complex. Sentence 2 joins two independent clauses with AND, so it is compound.";
+            const existing = dom.simContainer.querySelector(".cc-feedback");
+            if (existing) {
+                existing.innerHTML = `<strong>Hint:</strong> ${msg}`;
+                existing.className = "cc-feedback hint";
+            } else {
+                const nav = dom.simContainer.querySelector(".cc-nav");
+                const el = document.createElement("div");
+                el.className = "cc-feedback hint";
+                el.innerHTML = `<strong>Hint:</strong> ${msg}`;
+                nav.parentNode.insertBefore(el, nav);
+            }
+        }
+
+        function devInit() {
+            CC.screen = 1;
+            CC.startTime = Date.now()
+
+        // Override the persistent Next action so the final button completes the mission.
+        const originalCcBindNav = ccBindNav;
+        ccBindNav = function() {
+            const back = dom.simContainer.querySelector(".cc-back");
+            const hint = dom.simContainer.querySelector(".cc-hint");
+            const tryBtn = dom.simContainer.querySelector(".cc-try");
+            const next = dom.simContainer.querySelector(".cc-next");
+
+            if (back) {
+                back.addEventListener("click", () => { if (CC.screen > 1) ccShowScreen(CC.screen - 1); });
+                back.disabled = CC.screen === 1;
+            }
+            if (hint) hint.addEventListener("click", ccHint);
+            if (tryBtn) tryBtn.addEventListener("click", ccTryAgain);
+            if (next) next.addEventListener("click", () => {
+                if (next.disabled) return;
+                if (CC.screen === 5) {
+                    CC.completed = true;
+                    ccCompletion();
+                } else {
+                    ccShowScreen(CC.screen + 1);
+                }
+            });
+        };
+
+        function ccCompletion() {
+            const seconds = CC.startTime ? Math.round((Date.now() - CC.startTime) / 1000) : 0;
+            const firstAccuracy = CC.attempts ? Math.round((CC.firstAttemptCorrect / 4) * 100) : 0;
+            dom.simContainer.innerHTML = `
+                <div class="cc-completion">
+                    <div class="eyebrow">Mission Complete</div>
+                    <h2>Clause connection stable</h2>
+                    ${ccCircuit(4)}
+                    <div class="cc-success-panel">
+                        <strong>100% circuit power</strong>
+                        <p>You built two compound and two complex sentences with the required conjunctions, punctuation and classifications.</p>
+                    </div>
+                    <div class="cc-stats">
+                        <div><strong>${firstAccuracy}%</strong><span>First-attempt accuracy</span></div>
+                        <div><strong>Mastered</strong><span>Final mastery</span></div>
+                        <div><strong>${CC.attempts}</strong><span>Attempts</span></div>
+                        <div><strong>${CC.hints}</strong><span>Hints</span></div>
+                        <div><strong>${seconds}s</strong><span>Time on task</span></div>
+                    </div>
+                    <div class="cc-skills">
+                        <strong>Skills demonstrated</strong>
+                        <span>Choosing conjunctions • Building compound sentences • Building complex sentences • Accurate punctuation</span>
+                    </div>
+                    <div class="cc-nav">
+                        <div class="cc-nav-left">
+                            <button class="secondary-btn cc-back" type="button">Back</button>
+                        </div>
+                        <div class="cc-nav-right">
+                            <button class="primary-btn cc-next" type="button">Replay Mission</button>
+                        </div>
+                    </div>
+                </div>`;
+            dom.simContainer.querySelector(".cc-back").addEventListener("click", () => ccShowScreen(5));
+            dom.simContainer.querySelector(".cc-next").addEventListener("click", () => {
+                devReset();
+                ccShowScreen(1);
+            });
+            playSound("complete");
+        }
+;
+            CC.completed = false;
+            ccShowScreen(1);
+        }
+
+        function devReset() {
+            CC.screen = 1;
+            CC.attempts = 0;
+            CC.firstAttempts = 0;
+            CC.firstAttemptCorrect = 0;
+            CC.hints = 0;
+            CC.startTime = 0;
+            CC.completed = false;
+            CC.route1 = { selected:null, punctuation:null, locked:false, messageType:"error" };
+            CC.route2 = { selected:null, punctuation:null, locked:false, messageType:"error" };
+            CC.complexA = { selected:null, punctuation:null, locked:false, messageType:"error" };
+            CC.complexB = { selected:null, punctuation:false, locked:false, messageType:"error" };
+            CC.final = { sentence1:[], sentence2:[], class1:null, class2:null, active:1, locked:false };
+            if (dom.simContainer) dom.simContainer.innerHTML = "";
+        }
+
+    </script>
+</body>
+
+</html>
