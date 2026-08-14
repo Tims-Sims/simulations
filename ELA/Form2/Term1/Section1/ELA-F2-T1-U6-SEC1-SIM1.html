@@ -1913,6 +1913,7 @@
                         <path d="M3 12a9 9 0 1 0 3-6.7" />
                         <polyline points="3 4 3 9 8 9" />
                     </svg> Reset</button>
+                <button class="control-btn hidden" id="exitBtn" aria-label="Exit to home screen">Exit</button>
                 <button class="control-btn hidden" id="reviewHistoryBtn" aria-label="Review answer history">Review
                     Answers</button>
             </div>
@@ -2024,12 +2025,16 @@
                             <div class="answer-area" id="answerArea"></div>
 
                             <div class="button-row">
+                                <!-- Back: returns to the previous answered question. Hidden on
+                                     the first question (or when no previous question is
+                                     answered outside testing mode). -->
+                                <button type="button" class="secondary-btn hidden" id="backBtn">← Back</button>
                                 <button type="button" class="secondary-btn" id="hintBtn">💡 Hint</button>
                                 <button type="submit" class="primary-btn" id="submitBtn">Submit Answer</button>
                                 <!-- Shown in place of Submit once the current question is
                                      graded (answered). Label becomes "Finish →" on the
                                      last question. Revisit step dots to reach answered
-                                     questions; there is no Previous button. -->
+                                     questions. -->
                                 <button type="button" class="primary-btn hidden" id="nextBtn">Next Question →</button>
                                 <!-- Shown after a wrong/partial answer when attempts
                                      remain (SIM_CONFIG.attemptsPerQuestion). Clicking it
@@ -3268,6 +3273,7 @@
             answerForm: document.getElementById("answerForm"),
             answerArea: document.getElementById("answerArea"),
             hintBtn: document.getElementById("hintBtn"),
+            backBtn: document.getElementById("backBtn"),
             submitBtn: document.getElementById("submitBtn"),
             hintBox: document.getElementById("hintBox"),
             feedbackBox: document.getElementById("feedbackBox"),
@@ -3402,6 +3408,7 @@
 
             dom.answerForm.addEventListener("submit", handleAnswerSubmit);
             dom.hintBtn.addEventListener("click", showHint);
+            dom.backBtn.addEventListener("click", goBack);
             dom.nextBtn.addEventListener("click", goNext);
             dom.tryAgainBtn.addEventListener("click", tryAgain);
             dom.playAgainBtn.addEventListener("click", () => {
@@ -6562,7 +6569,7 @@
                             chainRejects.map((id) => {
                                 const d = (question.distractors || []).find((x) => x.id === id);
                                 return d ? d.label : id;
-                            }).join("; ") + ". Drag it back to the reject tray.");
+                            }).join("; ") + "Drag it back to the reject tray.");
                     }
                     if (removedItems.length) {
                         notes.push("These cards belong in the chain but were left out: " +
@@ -7096,6 +7103,30 @@
         /* ------------------------------------------------------------
            Navigation, progress, step dots.
            ------------------------------------------------------------ */
+        // Back returns to the previous question (which the student has
+        // already answered). Mirrors goNext: jump to the question, scroll to
+        // the top, re-render, and land keyboard/SR users on the heading.
+        function goBack() {
+            if (state.currentIndex <= 0) return;
+            const targetIndex = state.currentIndex - 1;
+            const target = activeQuestions[targetIndex];
+            // Normal mode: only answered questions are reachable via Back,
+            // matching the step-dot rules. Testing mode navigates freely.
+            if (!isTestMode() && !isAnswered(target.id)) {
+                showAlert("You can only go back to questions you have answered.");
+                return;
+            }
+            // Anti spam / double-tap: disable immediately, before navigation
+            // renders. renderQuestion() re-establishes button state.
+            dom.backBtn.disabled = true;
+            playSound("click"); // sound: button press
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            state.currentIndex = targetIndex;
+            renderQuestion();
+            dom.questionTitle.focus({ preventScroll: false });
+            saveQuizProgress();
+        }
+
         function goNext() {
             const question = currentQuestion();
             // Testing mode: move on (and reach the summary) at any time.
@@ -7134,6 +7165,12 @@
             const isLast = state.currentIndex === activeQuestions.length - 1;
             dom.submitBtn.classList.toggle("hidden", answered);
             dom.submitBtn.disabled = false;
+            // Back is available when a previous question exists and (outside
+            // testing mode) that question has already been answered.
+            const prevQuestion = activeQuestions[state.currentIndex - 1];
+            const canGoBack = Boolean(prevQuestion) && (isTestMode() || isAnswered(prevQuestion.id));
+            dom.backBtn.classList.toggle("hidden", !canGoBack);
+            dom.backBtn.disabled = false;
             // Testing mode: Next is always available so the builder can page
             // through freely and reach the summary at any time.
             dom.nextBtn.classList.toggle("hidden", !answered && !isTestMode());
