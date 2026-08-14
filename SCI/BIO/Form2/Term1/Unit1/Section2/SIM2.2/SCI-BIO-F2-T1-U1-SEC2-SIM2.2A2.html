@@ -131,10 +131,14 @@
         .app-shell {
             max-width: 1280px;
             margin: 0 auto;
-            height: calc(100vh - 32px);
+            min-height: calc(100vh - 32px);
             display: flex;
             flex-direction: column;
             gap: 16px;
+        }
+
+        body.in-game .app-shell {
+            height: calc(100vh - 32px);
         }
 
         /* Topbar Header (Sticky & Persistent) */
@@ -277,7 +281,9 @@
             flex: 1;
             display: grid;
             place-items: center;
-            padding: 12px;
+            padding: 16px 12px 24px;
+            overflow-y: auto;
+            min-height: 0;
         }
 
         .hero-card {
@@ -309,7 +315,8 @@
         .hero-card h2 {
             margin: 0 0 12px;
             font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-            line-height: 1.15;
+            line-height: 1.25;
+            padding-bottom: 6px;
             font-weight: 800;
             background: linear-gradient(135deg, var(--text), var(--text-soft));
             -webkit-background-clip: text;
@@ -988,7 +995,7 @@
 
             <div class="controls">
                 <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
-                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions" style="display: none;">❔ Help</button>
                 <button class="control-btn" id="soundToggleBtn" aria-label="Toggle sound">🔊 Sound On</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
@@ -1042,11 +1049,11 @@
                         <div class="room-title">
                             <span id="pageTitleHeading">📊 Section 1: Plotting Pulse Rate Data (6 Points)</span>
                         </div>
-                        <span style="font-size:0.86rem; color:var(--muted); font-weight:700;">Drag points vertically on the grid or use steppers</span>
+                        <span id="headerSubHint" style="font-size:0.86rem; color:var(--muted); font-weight:700;">Drag points vertically on the grid or use steppers</span>
                     </div>
 
                     <div class="main-stage-scroll" id="mainStageScroll">
-                        <!-- Sample Data Table Card -->
+                        <!-- Sample Data Table Card (Shown during Section 1) -->
                         <div class="data-table-card" id="dataTableCard">
                             <div class="data-table-title">📋 Sample Pulse Rate Data Table</div>
                             <table class="data-table">
@@ -1084,8 +1091,20 @@
                             </table>
                         </div>
 
-                        <!-- Interactive SVG Graph Grid Wrapper -->
+                        <!-- Embedded Assessment Questions Section (TOP of Question Screen - Appears / Unlocks One by One) -->
+                        <div class="questions-card" id="questionsCard" style="display: none;">
+                            <div class="data-table-title" id="questionsCardTitle">🧠 Section 2: Biology Question 1 of 3</div>
+                            <div class="scroll-hint-banner" style="background: color-mix(in srgb, var(--accent) 14%, var(--surface)); border: 1.5px dashed var(--accent); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.88rem; color: var(--accent); font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <span>👇 <strong>Note:</strong> Scroll down to reference your completed pulse rate graph below.</span>
+                            </div>
+                            <div id="questionsContainer" style="display:flex; flex-direction:column; gap:16px;">
+                                <!-- Single Active Question dynamically injected -->
+                            </div>
+                        </div>
+
+                        <!-- Interactive SVG Graph Grid Wrapper (Below Questions during Question Screen) -->
                         <div class="graph-wrapper" id="graphWrapper">
+                            <div class="data-table-title" id="graphCardTitle" style="width: 100%; margin-bottom: 8px;">📈 Pulse Rate Graph (bpm vs min)</div>
                             <div class="graph-svg-container" id="graphSvgContainer">
                                 <svg class="graph-svg" id="graphSvg" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid meet">
                                     <!-- Dynamic Grid Lines, Axes, Ticks, Best Fit Line, and Points rendered via JS -->
@@ -1095,14 +1114,6 @@
                             <!-- Stepper Row for Accessibility & Precise Controls -->
                             <div class="stepper-row" id="stepperRow">
                                 <!-- Steppers generated dynamically -->
-                            </div>
-                        </div>
-
-                        <!-- Embedded Assessment Questions Section (Appears / Unlocks One by One) -->
-                        <div class="questions-card" id="questionsCard" style="display: none;">
-                            <div class="data-table-title" id="questionsCardTitle">🧠 Section 2: Biology Question 1 of 3</div>
-                            <div id="questionsContainer" style="display:flex; flex-direction:column; gap:16px;">
-                                <!-- Single Active Question dynamically injected -->
                             </div>
                         </div>
                     </div>
@@ -1386,6 +1397,7 @@
             historyDrawer: document.getElementById("historyDrawer"),
             resetBtn: document.getElementById("resetBtn"),
             pageTitleHeading: document.getElementById("pageTitleHeading"),
+            headerSubHint: document.getElementById("headerSubHint"),
             matchesCount: document.getElementById("matchesCount"),
             progressPercent: document.getElementById("progressPercent"),
             progressFillBar: document.getElementById("progressFillBar"),
@@ -1425,6 +1437,7 @@
             bindEvents();
             loadState();
             renderDashboard();
+            showScreen("home");
 
             // MANDATORY AUTO-OPEN INSTRUCTIONS MODAL ON LAUNCH
             openModal();
@@ -1511,6 +1524,11 @@
 
             document.body.classList.toggle("in-game", screenName === "game");
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Hide help button on landing page (#homeScreen), show on game and summary screens
+            if (dom.helpBtn) {
+                dom.helpBtn.style.display = (screenName === "home") ? "none" : "inline-flex";
+            }
 
             if (screenName === "game") {
                 setTimeout(renderGraphSvg, 50);
@@ -1826,13 +1844,15 @@
                 dom.inspectorFeedbackBox.className = "feedback-card success";
                 dom.inspectorFeedbackBox.innerHTML = `
                     🎉 <strong>Excellent Graph Plotting!</strong> All 6 data points are precisely placed and the trend line has been drawn!
-                    <br><br>👉 <strong>Now answer Question 1 of 3 below!</strong>
+                    <br><br>👉 <strong>Now answer Question 1 of 3 at the top!</strong> (Scroll down anytime to view your completed graph).
                 `;
 
                 // REMOVE DATA TABLE AND STEPPERS AFTER DRAW LINE CLICKED
                 if (dom.dataTableCard) dom.dataTableCard.style.display = "none";
                 dom.stepperRow.style.display = "none";
                 dom.stepperRow.innerHTML = "";
+
+                if (dom.headerSubHint) dom.headerSubHint.textContent = "Scroll down to reference your completed graph";
 
                 dom.drawLineBtn.style.display = "none";
                 dom.resetPointsBtn.style.display = "none";
@@ -2222,6 +2242,7 @@
 
             if (dom.dataTableCard) dom.dataTableCard.style.display = "block";
             dom.stepperRow.style.display = "flex";
+            if (dom.headerSubHint) dom.headerSubHint.textContent = "Drag points vertically on the grid or use steppers";
 
             dom.pageTitleHeading.textContent = "📊 Section 1: Plotting Pulse Rate Data (6 Points)";
             dom.drawLineBtn.style.display = "inline-flex";
