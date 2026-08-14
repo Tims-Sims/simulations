@@ -686,7 +686,7 @@
         <section class="modal-card">
             <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
             <h3 id="resetConfirmHeading">Reset simulation?</h3>
-            <p>This will clear your current progress and return you to the home screen.</p>
+            <p id="resetConfirmMessage">This will clear your current progress and return you to the home screen.</p>
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
                 <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
                 <button class="danger-btn" id="confirmResetBtn">Reset</button>
@@ -898,7 +898,9 @@
 
         const state = {
             currentScreen: "home",
-            theme: "dark"
+            theme: "dark",
+            resetConfirmAction: "reset",
+            finalSuccess: false
         };
 
         const dom = {
@@ -924,6 +926,8 @@
             closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
             gotItBtn: document.getElementById("gotItBtn"),
             resetConfirmModal: document.getElementById("resetConfirmModal"),
+            resetConfirmHeading: document.getElementById("resetConfirmHeading"),
+            resetConfirmMessage: document.getElementById("resetConfirmMessage"),
             closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
             cancelResetBtn: document.getElementById("cancelResetBtn"),
             confirmResetBtn: document.getElementById("confirmResetBtn"),
@@ -996,8 +1000,18 @@
             dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
             dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
             dom.confirmResetBtn.addEventListener("click", () => {
-                devReset();
-                showScreen("home");
+                if (state.resetConfirmAction === "finalTryAgain") {
+                    devReset();
+                    state.finalSuccess = false;
+                    showScreen("sim");
+                    document.querySelector(".ll-actions").style.display = "";
+                    LL.stage = 1;
+                    llRenderStage();
+                    llScrollToTop();
+                } else {
+                    devReset();
+                    showScreen("home");
+                }
                 closeResetConfirmModal();
             });
             dom.resetConfirmModal.addEventListener("click", (event) => {
@@ -1042,11 +1056,27 @@
         }
 
         function openResetConfirmModal() {
+            state.resetConfirmAction = "reset";
+            dom.resetConfirmHeading.textContent = "Reset simulation?";
+            dom.resetConfirmMessage.textContent = "This will clear your current progress and return you to the home screen.";
+            dom.confirmResetBtn.textContent = "Reset";
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function openFinalTryAgainConfirmModal() {
+            state.resetConfirmAction = "finalTryAgain";
+            dom.resetConfirmHeading.textContent = "Try again?";
+            dom.resetConfirmMessage.textContent = "This will reset the whole simulation and clear all of your progress. Do you want to try again?";
+            dom.confirmResetBtn.textContent = "Try Again";
             dom.resetConfirmModal.classList.add("show");
         }
 
         function closeResetConfirmModal() {
             dom.resetConfirmModal.classList.remove("show");
+            state.resetConfirmAction = "reset";
+            dom.resetConfirmHeading.textContent = "Reset simulation?";
+            dom.resetConfirmMessage.textContent = "This will clear your current progress and return you to the home screen.";
+            dom.confirmResetBtn.textContent = "Reset";
         }
 
         function closeFeedbackModal() {
@@ -1061,7 +1091,15 @@
                 dom.helpBtn.style.display = screenName === "home" ? "none" : "";
             }
             const llSideActions = document.getElementById("llSideActions");
-            if (llSideActions) llSideActions.style.display = screenName === "sim" ? "flex" : "none";
+            if (llSideActions) {
+                llSideActions.style.display = screenName === "sim" ? "flex" : "none";
+                const llTryBtn = document.getElementById("llTryBtn");
+                if (llTryBtn) {
+                    // Keep Try Again in the sidebar on every simulation screen
+                    // except the completed final success screen.
+                    llTryBtn.style.display = (screenName === "sim" && !state.finalSuccess) ? "" : "none";
+                }
+            }
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
 
@@ -1537,6 +1575,9 @@
 
             // 6. Phase 3: Show the final success screen (wait 1.2s for rocket to clear the screen)
             setTimeout(() => {
+                state.finalSuccess = true;
+                const finalSideTry = document.getElementById("llTryBtn");
+                if (finalSideTry) finalSideTry.style.display = "none";
                 const seconds = Math.round((Date.now() - LL.startTime) / 1000);
                 const first = LL.firstAttemptTotal > 0 ? Math.round((LL.firstAttemptCorrect / LL.firstAttemptTotal) * 100) : 100;
                 
@@ -1562,7 +1603,7 @@
                     </div>
                 `;
 
-                document.getElementById("llFinalTryAgainBtn").addEventListener("click", llTryAgain);
+                document.getElementById("llFinalTryAgainBtn").addEventListener("click", openFinalTryAgainConfirmModal);
                 document.getElementById("llStageHint").textContent = "Mission complete";
                 llScrollToTop();
             }, 2800);
@@ -1581,15 +1622,17 @@
 
         function llTryAgain(){
             llClearFeedback();
-            if(LL.stage>=4){
-                llResetState();
-                llShuffleCards();
-                document.querySelector(".ll-actions").style.display="";
-                LL.stage=1;
-                llRenderStage();
+
+            // On the final checklist, Try Again only clears the six checks.
+            // The separate Try Again button on the completed screen performs
+            // the full-simulation reset after confirmation.
+            if(LL.stage === 4){
+                LL.finalChecks = [false,false,false,false,false,false];
+                llRenderFinal();
                 llScrollToTop();
                 return;
             }
+
             const keys=LL_STAGE_DATA[LL.stage-1]?.keys||[];
             keys.forEach(k=>{delete LL.locked[k]});
             llRenderStage();
@@ -1605,6 +1648,7 @@
         }
 
         function devInit(){
+            state.finalSuccess = false;
             llResetState();
             llShuffleCards();
             document.querySelector(".ll-actions").style.display="";
@@ -1629,6 +1673,7 @@
             llProgress();
         }
         function devReset(){
+            state.finalSuccess = false;
             llResetState();
             document.querySelector(".ll-actions").style.display="";
         }
