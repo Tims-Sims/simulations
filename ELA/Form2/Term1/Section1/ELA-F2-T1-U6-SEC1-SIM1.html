@@ -189,7 +189,7 @@
 
         .controls {
             display: flex;
-            flex-wrap: wrap;
+            /*  flex-wrap: wrap; */
             justify-content: flex-end;
             gap: 10px;
         }
@@ -1913,7 +1913,7 @@
                         <path d="M3 12a9 9 0 1 0 3-6.7" />
                         <polyline points="3 4 3 9 8 9" />
                     </svg> Reset</button>
-                <button class="control-btn hidden" id="reviewHistoryBtn" aria-label="Review answer history">Review
+                <button class="control-btn hidden" id="reviewAnswersBtn" aria-label="Review answer history">Review
                     Answers</button>
             </div>
         </header>
@@ -1957,7 +1957,6 @@
                                 theme</span><span class="skill-status"></span></li>
                     </ul>
                     <div class="button-row">
-                        <button class="secondary-btn hidden" id="reviewAnswersBtn">Review Answers</button>
                         <button class="primary-btn" id="briefContinueBtn">Step In</button>
                     </div>
                 </section>
@@ -3293,7 +3292,6 @@
             statStreak: document.getElementById("statStreak"),
             playAgainBtn: document.getElementById("playAgainBtn"),
             summaryBackBtn: document.getElementById("summaryBackBtn"),
-            reviewHistoryBtn: document.getElementById("reviewHistoryBtn"),
             reviewAnswersBtn: document.getElementById("reviewAnswersBtn"),
             liveRegion: document.getElementById("liveRegion")
         };
@@ -3427,11 +3425,6 @@
                 renderSummary();
                 showScreen("summary");
             });
-            dom.reviewHistoryBtn.addEventListener("click", () => {
-                playSound("click"); // sound: button press
-                renderSummary();
-                showScreen("summary");
-            });
         }
 
         function renderInstructions() {
@@ -3534,8 +3527,12 @@
             dom.summaryScreen.classList.toggle("active", screenName === "summary");
             // Exit is only meaningful while playing, not on the home screen.
             // Review Answers is available once a run is in progress (it is
-            // redundant on the summary screen itself, so hide it there).
-            dom.reviewHistoryBtn.classList.toggle("hidden", screenName === "home" || screenName === "summary" || !state.started);
+            // redundant on the summary screen itself, so hide it there). On
+            // the home screen it only appears once the run is completed.
+            const reviewVisible =
+                screenName !== "summary" &&
+                (state.started || (screenName === "home" && state.finished));
+            dom.reviewAnswersBtn.classList.toggle("hidden", !reviewVisible);
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
 
@@ -4089,7 +4086,6 @@
                 dom.briefSkills.hidden = true;
             }
             dom.briefContinueBtn.textContent = complete ? "Exit to Home" : "Step In";
-            dom.reviewAnswersBtn.classList.toggle("hidden", !complete);
         }
 
         // Completes the run back at the briefing screen: each ring lights
