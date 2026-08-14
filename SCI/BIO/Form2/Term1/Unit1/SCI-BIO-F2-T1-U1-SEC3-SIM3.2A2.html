@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Cellular Respiration: Energy Release Animation</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        #simContainer button,
+        #simContainer input[type="range"] {
+            min-height: 44px;
+        }
+
+        .sim-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sim-progress {
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .sim-toolbar-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sim-toolbar-buttons button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hint-panel {
+            margin: 0 0 16px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+        }
+
+        .sim-screen-panel {
+            display: none;
+        }
+
+        .sim-screen-panel.active {
+            display: block;
+        }
+
+        .sim-screen-panel h2 {
+            margin-top: 0;
+        }
+
+        .goal-list {
+            padding-left: 20px;
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .cell-scene-wrap {
+            margin: 18px 0;
+        }
+
+        .bloodstream-label,
+        .cell-stage-label {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin: 0 0 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .bloodstream {
+            position: relative;
+            height: 78px;
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface-2));
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .cell-stage {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 45%, var(--surface-2), var(--surface));
+            border: 3px solid var(--border);
+            overflow: hidden;
+        }
+
+        .mitochondrion {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 44%;
+            height: 34%;
+            border-radius: 50% / 55%;
+            background: var(--surface);
+            border: 3px solid var(--accent-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.78rem;
+            color: var(--text);
+            padding: 6px;
+            box-shadow: var(--shadow);
+            transition: box-shadow 400ms ease;
+        }
+
+        .mitochondrion.reacting {
+            box-shadow: 0 0 0 10px color-mix(in srgb, var(--warning) 30%, transparent);
+        }
+
+        .molecule {
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--text);
+            border: 2px solid var(--border);
+            text-align: center;
+            line-height: 1.1;
+            transition: left var(--step-ms, 900ms) linear, top var(--step-ms, 900ms) linear, opacity 400ms ease;
+        }
+
+        .molecule-o2 { background: color-mix(in srgb, var(--accent) 45%, var(--surface)); }
+        .molecule-glucose { background: color-mix(in srgb, var(--success) 42%, var(--surface)); }
+        .molecule-co2 { background: color-mix(in srgb, var(--muted) 45%, var(--surface)); }
+        .molecule-h2o { background: color-mix(in srgb, var(--accent-2) 38%, var(--surface)); }
+        .molecule-energy { background: color-mix(in srgb, var(--warning) 48%, var(--surface)); }
+
+        .comic-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .comic-panel {
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            background: var(--surface-2);
+            text-align: center;
+        }
+
+        .comic-panel.active {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 14%, var(--surface-2));
+        }
+
+        .comic-icon {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 8px;
+            display: block;
+        }
+
+        .comic-caption {
+            font-size: 0.85rem;
+            color: var(--text-soft);
+            margin: 0;
+        }
+
+        .observe-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            align-items: flex-end;
+            margin-top: 20px;
+        }
+
+        .activity-slider-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 240px;
+            flex: 1;
+        }
+
+        .activity-slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .activity-slider-wrap input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .activity-current {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .reduced-motion-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 44px;
+            padding: 6px 4px;
+        }
+
+        .reduced-motion-toggle input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            accent-color: var(--accent);
+        }
+
+        .play-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .energy-readout {
+            margin-top: 22px;
+        }
+
+        .energy-bar-track {
+            height: 24px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .energy-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width var(--step-ms, 900ms) linear;
+        }
+
+        .energy-total {
+            margin-top: 8px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .molecule-key {
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .molecule-key-heading {
+            font-weight: 700;
+            margin: 0 0 10px;
+        }
+
+        .molecule-key-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .molecule-key-btn {
+            border-radius: 999px;
+            padding: 9px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .molecule-key-btn[aria-expanded="true"] {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 20%, var(--surface-2));
+        }
+
+        .molecule-key-caption {
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+        }
+
+        .choice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .choice-btn {
+            text-align: left;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+        }
+
+        .choice-btn[aria-pressed="true"] {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface-2));
+        }
+
+        .choice-btn.correct-choice {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 18%, var(--surface-2));
+        }
+
+        .choice-btn.wrong-choice {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface-2));
+        }
+
+        .feedback-panel {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+        }
+
+        .feedback-panel.feedback-correct {
+            background: color-mix(in srgb, var(--success) 14%, var(--surface));
+            border-color: var(--success);
+        }
+
+        .feedback-panel.feedback-wrong {
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+            border-color: var(--danger);
+        }
+
+        .completion-summary {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .molecule,
+            .mitochondrion,
+            .energy-bar-fill {
+                transition: none !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .observe-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         This sim builds its markup entirely inside devInit() (see
+                         DEV-EDIT: SIM LOGIC below) so it can be rebuilt cleanly on
+                         every Reset. Nothing static is needed here.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Cellular Respiration: Energy Release Animation — an offline biology simulation for secondary school Integrated Science.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "SCI-BIO-F2-T1-U1-SEC3-SIM3.2A2",
+            title: "Cellular Respiration: Energy Release Animation",
+            subtitle: "Watch glucose and oxygen become energy inside a mitochondrion",
+            badgeText: "BIO",
+            homeEyebrow: "Cell Biology Simulation",
+            homeDescription:
+                "Step inside a single cell and watch its mitochondrion at work. Oxygen and glucose arrive from the bloodstream, and carbon dioxide, water and energy leave. Your goal is to observe how the body's activity level changes how quickly this happens.",
+            instructions: [
+                "Click Start, then use Play/Pause and Step Forward on the observation screen to run the animation.",
+                "Move the Body Activity Level slider between Resting and Sprinting to change how fast oxygen and glucose are delivered.",
+                "Watch the Energy Released bar and total: a higher activity level should make it fill faster.",
+                "Pause the animation at any time to reveal a key of clickable labels naming each molecule.",
+                "Turn on Reduced Motion at any time to replace the flowing animation with a static step-by-step strip, with the same information in text form.",
+                "Every screen has Exit, Rules, Back, Hint and Try Again buttons — use Hint if you get stuck.",
+                "Answer the question on the final screen. You may try again as many times as you need — there is no penalty for a wrong answer.",
+                "Use the Reset button in the top bar any time you want to restart the whole simulation from scratch."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* --- Sim data: screens, hints, molecule names, the assessment question --- */
+
+        const SCREENS = ["mission", "observe", "assess", "complete"];
+        const SCREEN_TITLES = {
+            mission: "Mission",
+            observe: "Observe the Cell",
+            assess: "Check Your Understanding",
+            complete: "Well Done"
+        };
+        const HINTS = {
+            mission: "Use Play, Step Forward and the Body Activity Level slider on the next screen to watch oxygen and glucose enter the mitochondrion and become carbon dioxide, water and energy.",
+            observe: "Watch what happens to the energy bar when you increase the activity level.",
+            assess: "Recall the observation screen: increasing the activity level made oxygen and glucose arrive faster, and the energy bar filled faster too.",
+            complete: "Press Back to revisit the animation, or Exit (top right) to return to the home screen."
+        };
+
+        const STEP_COUNT = 5; // 0=bloodstream, 1=entering, 2=reacting, 3=releasing, 4=exiting
+        const ENERGY_PER_CYCLE = 10;
+        const STEP_MS = { 0: 1400, 1: 500 }; // 0 = Resting, 1 = Sprinting
+
+        const STEP_CAPTIONS = [
+            "Start: oxygen and glucose are travelling in the bloodstream, ready to enter the cell.",
+            "Step 1: oxygen and glucose cross the cell membrane and drift into the cytoplasm.",
+            "Step 2: oxygen and glucose enter the mitochondrion.",
+            "Step 3: inside the mitochondrion, energy is released. Carbon dioxide and water are produced.",
+            "Step 4: carbon dioxide, water and energy sparks drift out of the cell into the bloodstream."
+        ];
+
+        const MOLECULE_NAMES = {
+            o2: "This is oxygen (O₂) — one of the two inputs that travel from the bloodstream into the mitochondrion.",
+            glucose: "This is glucose — the other input that travels from the bloodstream into the mitochondrion.",
+            co2: "This is carbon dioxide (CO₂) — one of the outputs released by the mitochondrion.",
+            h2o: "This is water (H₂O) — one of the outputs released by the mitochondrion.",
+            energy: "This is energy — released by the mitochondrion for the body to use, for example during movement."
+        };
+
+        const CORRECT_FEEDBACK =
+            "Correct. The demand increases because the mitochondria need more fuel to release the extra energy required " +
+            "for movement — exactly what you saw when the activity slider moved from Resting to Sprinting: delivery sped up " +
+            "and the energy bar filled faster.";
+
+        const CHOICES = [
+            {
+                key: "a",
+                label: "The demand increases, because the mitochondria need more fuel to release the extra energy required for movement.",
+                correct: true
+            },
+            {
+                key: "b",
+                label: "The demand decreases, because a higher activity level slows down the delivery of oxygen and glucose.",
+                correct: false,
+                feedback:
+                    "What's wrong: saying the demand decreases is incorrect. Why: on the observation screen, moving the slider " +
+                    "from Resting to Sprinting made oxygen and glucose arrive faster, not slower, and the energy bar filled up " +
+                    "faster too. How to fix: press Back and replay the animation on Sprinting, watching the delivery speed and " +
+                    "the energy bar together. Correct model: the demand increases because the mitochondria need more fuel to " +
+                    "release the extra energy required for movement."
+            },
+            {
+                key: "c",
+                label: "The demand stays the same, because activity level does not change how fast oxygen and glucose are delivered.",
+                correct: false,
+                feedback:
+                    "What's wrong: saying the demand stays the same is incorrect. Why: the observation screen showed activity " +
+                    "level directly changing the delivery speed — Sprinting was clearly faster than Resting. How to fix: press " +
+                    "Back, compare Resting and Sprinting again, and notice the different delivery speed and energy-bar fill " +
+                    "rate. Correct model: the demand increases because the mitochondria need more fuel to release the extra " +
+                    "energy required for movement."
+            },
+            {
+                key: "d",
+                label: "The demand increases, but this has no effect on how quickly energy is released.",
+                correct: false,
+                feedback:
+                    "What's wrong: saying this has no effect on the rate of energy release is incorrect. Why: the observation " +
+                    "screen showed the energy bar filling faster whenever delivery of oxygen and glucose sped up on Sprinting. " +
+                    "How to fix: press Back and watch the energy bar again while switching between Resting and Sprinting to see " +
+                    "the link between delivery speed and energy release. Correct model: the demand increases because the " +
+                    "mitochondria need more fuel to release the extra energy required for movement."
+            }
+        ];
+
+        /* --- Coordinates (percent of the cell-stage box) for each animation step --- */
+        const INPUT_POS = [
+            { o2: { x: 6, y: 62, op: 0 }, glucose: { x: 6, y: 34, op: 0 } },
+            { o2: { x: 14, y: 62, op: 1 }, glucose: { x: 14, y: 34, op: 1 } },
+            { o2: { x: 58, y: 56, op: 1 }, glucose: { x: 42, y: 44, op: 1 } },
+            { o2: { x: 58, y: 56, op: 0 }, glucose: { x: 42, y: 44, op: 0 } },
+            { o2: { x: 58, y: 56, op: 0 }, glucose: { x: 42, y: 44, op: 0 } }
+        ];
+        const OUTPUT_POS = [
+            { co2: { x: 50, y: 30, op: 0 }, h2o: { x: 50, y: 70, op: 0 }, energy: { x: 50, y: 50, op: 0 } },
+            { co2: { x: 50, y: 30, op: 0 }, h2o: { x: 50, y: 70, op: 0 }, energy: { x: 50, y: 50, op: 0 } },
+            { co2: { x: 50, y: 30, op: 0 }, h2o: { x: 50, y: 70, op: 0 }, energy: { x: 50, y: 50, op: 0 } },
+            { co2: { x: 44, y: 38, op: 1 }, h2o: { x: 56, y: 62, op: 1 }, energy: { x: 50, y: 50, op: 1 } },
+            { co2: { x: 88, y: 38, op: 1 }, h2o: { x: 88, y: 62, op: 1 }, energy: { x: 88, y: 50, op: 1 } }
+        ];
+
+        /* --- State --- */
+        const sim = {
+            screen: "mission",
+            step: 0,
+            isPlaying: false,
+            reducedMotion: false,
+            activity: 0, // 0 = Resting, 1 = Sprinting
+            cyclesCompleted: 0,
+            totalEnergy: 0,
+            timerId: null,
+            selectedChoice: null,
+            answered: false
+        };
+
+        const simDom = {};
+
+        function devInit() {
+            resetSimState();
+            dom.simContainer.innerHTML = buildSimMarkup();
+            cacheSimDom();
+            bindSimEvents();
+            goToScreen("mission");
+}
+
+        function devReset() {
+            cancelTick();
+            resetSimState();
+            dom.simContainer.innerHTML = "";
+}
+
+        function resetSimState() {
+            sim.screen = "mission";
+            sim.step = 0;
+            sim.isPlaying = false;
+            sim.reducedMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+            sim.activity = 0;
+            sim.cyclesCompleted = 0;
+            sim.totalEnergy = 0;
+            sim.timerId = null;
+            sim.selectedChoice = null;
+            sim.answered = false;
+        }
+
+        /* --- Markup --- */
+
+        function buildSimMarkup() {
+            return `
+                <div class="sim-toolbar">
+                    <div class="sim-progress" id="simProgress" aria-live="polite"></div>
+                    <div class="sim-toolbar-buttons">
+                        <button class="nav-btn" id="simExitBtn" type="button">Exit</button>
+                        <button class="nav-btn" id="simRulesBtn" type="button">Rules</button>
+                        <button class="nav-btn" id="simBackBtn" type="button">Back</button>
+                        <button class="nav-btn" id="simHintBtn" type="button">Hint</button>
+                        <button class="nav-btn" id="simTryAgainBtn" type="button">Try Again</button>
+                    </div>
+                </div>
+                <div class="hint-panel hidden" id="simMessagePanel" role="status"></div>
+
+                <section class="sim-screen-panel" id="panel-mission" data-screen="mission">
+                    <h2>Explain energy release and the role of mitochondria</h2>
+                    <p>You are looking at a single cell with a mitochondrion at its centre, and a bloodstream flowing past
+                       the outside. Your goal is to observe how the inputs oxygen and glucose turn into the outputs carbon
+                       dioxide, water and energy inside the mitochondrion.</p>
+                    <ul class="goal-list">
+                        <li>Use Play, Pause and Step Forward to run the animation at your own pace.</li>
+                        <li>Move the Body Activity Level slider between Resting and Sprinting.</li>
+                        <li>Watch the Energy Released bar and total to see how activity level changes the rate of energy
+                            release.</li>
+                    </ul>
+                    <div class="button-row" style="justify-content:flex-start;">
+                        <button class="primary-btn" id="missionStartBtn" type="button">Begin Observing</button>
+                    </div>
+                </section>
+
+                <section class="sim-screen-panel" id="panel-observe" data-screen="observe">
+                    <h2>Observe the Cell</h2>
+                    <p>Oxygen and glucose drift in from the bloodstream and enter the mitochondrion. Carbon dioxide, water
+                       and energy sparks drift back out. Press Play or Step Forward to begin.</p>
+
+                    <div class="cell-scene-wrap" id="cellSceneWrap">
+                        <p class="bloodstream-label">Bloodstream</p>
+                        <div class="bloodstream" id="bloodstreamChips">
+                            <div class="molecule molecule-o2" id="bsO2" style="left:10%; top:16px;">O₂</div>
+                            <div class="molecule molecule-glucose" id="bsGlucose" style="left:10%; top:70px;">Glucose</div>
+                        </div>
+                        <p class="cell-stage-label">Cell (mitochondrion at centre)</p>
+                        <div class="cell-stage" id="cellStage">
+                            <div class="mitochondrion" id="mitochondrion">Mitochondrion</div>
+                            <div class="molecule molecule-o2" id="molO2">O₂</div>
+                            <div class="molecule molecule-glucose" id="molGlucose">Glucose</div>
+                            <div class="molecule molecule-co2" id="molCo2">CO₂</div>
+                            <div class="molecule molecule-h2o" id="molH2o">H₂O</div>
+                            <div class="molecule molecule-energy" id="molEnergy">Energy</div>
+                        </div>
+                    </div>
+
+                    <div class="comic-strip hidden" id="comicStrip"></div>
+
+                    <div class="observe-controls">
+                        <div class="play-controls">
+                            <button class="primary-btn" id="playPauseBtn" type="button">Play</button>
+                            <button class="secondary-btn" id="stepForwardBtn" type="button">Step Forward</button>
+                        </div>
+                        <div class="activity-slider-wrap">
+                            <label for="activitySlider">Body Activity Level: <span class="activity-current" id="activityCurrentText">Resting</span></label>
+                            <input type="range" id="activitySlider" min="0" max="1" step="1" value="0"
+                                   aria-valuetext="Resting">
+                            <div class="activity-slider-labels"><span>Resting</span><span>Sprinting</span></div>
+                        </div>
+                        <label class="reduced-motion-toggle">
+                            <input type="checkbox" id="reducedMotionToggle">
+                            Reduced Motion (static steps)
+                        </label>
+                    </div>
+
+                    <div class="energy-readout">
+                        <p class="cell-stage-label">Energy Released</p>
+                        <div class="energy-bar-track"><div class="energy-bar-fill" id="energyBarFill"></div></div>
+                        <p class="energy-total" id="energyTotalText"></p>
+                    </div>
+
+                    <div class="molecule-key hidden" id="moleculeKey">
+                        <p class="molecule-key-heading">Paused: click a molecule to see its name</p>
+                        <div class="molecule-key-buttons">
+                            <button class="molecule-key-btn" type="button" data-mol="o2" aria-expanded="false">O₂</button>
+                            <button class="molecule-key-btn" type="button" data-mol="glucose" aria-expanded="false">Glucose</button>
+                            <button class="molecule-key-btn" type="button" data-mol="co2" aria-expanded="false">CO₂</button>
+                            <button class="molecule-key-btn" type="button" data-mol="h2o" aria-expanded="false">H₂O</button>
+                            <button class="molecule-key-btn" type="button" data-mol="energy" aria-expanded="false">Energy</button>
+                        </div>
+                        <p class="molecule-key-caption hidden" id="moleculeKeyCaption" aria-live="polite"></p>
+                    </div>
+
+                    <p class="muted hidden" id="observeContinueHint">Complete at least one full cycle (press Play or Step
+                        Forward) before continuing.</p>
+                    <div class="button-row" style="justify-content:flex-start;">
+                        <button class="primary-btn" id="observeContinueBtn" type="button" disabled>Continue to Question</button>
+                    </div>
+                </section>
+
+                <section class="sim-screen-panel" id="panel-assess" data-screen="assess">
+                    <h2>Check Your Understanding</h2>
+                    <p>When the body's activity level increases, what happens to the demand for glucose and oxygen?</p>
+                    <div class="choice-list" id="choiceList"></div>
+                    <div class="button-row" style="justify-content:flex-start;">
+                        <button class="primary-btn" id="checkAnswerBtn" type="button" disabled>Check Answer</button>
+                    </div>
+                    <div class="feedback-panel hidden" id="assessFeedback" role="status" aria-live="polite"></div>
+                    <div class="button-row hidden" id="assessContinueRow" style="justify-content:flex-start;">
+                        <button class="primary-btn" id="assessContinueBtn" type="button">Continue</button>
+                    </div>
+                </section>
+
+                <section class="sim-screen-panel" id="panel-complete" data-screen="complete">
+                    <h2>Well Done</h2>
+                    <p class="completion-summary">When the body's activity level rises from Resting to Sprinting, the
+                        delivery of oxygen and glucose to the cell speeds up. As a result, the mitochondria produce carbon
+                        dioxide and water faster, and the rate of energy release increases — because the demand for fuel
+                        rises to release the extra energy required for movement.</p>
+                    <div class="button-row" style="justify-content:flex-start;">
+                        <button class="secondary-btn" id="playAgainBtn" type="button">Play Again</button>
+                    </div>
+                </section>
+            `;
+        }
+
+        function cacheSimDom() {
+            simDom.progress = document.getElementById("simProgress");
+            simDom.messagePanel = document.getElementById("simMessagePanel");
+            simDom.exitBtn = document.getElementById("simExitBtn");
+            simDom.rulesBtn = document.getElementById("simRulesBtn");
+            simDom.backBtn = document.getElementById("simBackBtn");
+            simDom.hintBtn = document.getElementById("simHintBtn");
+            simDom.tryAgainBtn = document.getElementById("simTryAgainBtn");
+
+            simDom.panels = {
+                mission: document.getElementById("panel-mission"),
+                observe: document.getElementById("panel-observe"),
+                assess: document.getElementById("panel-assess"),
+                complete: document.getElementById("panel-complete")
+            };
+            simDom.missionStartBtn = document.getElementById("missionStartBtn");
+
+            simDom.cellSceneWrap = document.getElementById("cellSceneWrap");
+            simDom.bloodstreamChips = document.getElementById("bloodstreamChips");
+            simDom.cellStage = document.getElementById("cellStage");
+            simDom.mitochondrion = document.getElementById("mitochondrion");
+            simDom.molO2 = document.getElementById("molO2");
+            simDom.molGlucose = document.getElementById("molGlucose");
+            simDom.molCo2 = document.getElementById("molCo2");
+            simDom.molH2o = document.getElementById("molH2o");
+            simDom.molEnergy = document.getElementById("molEnergy");
+            simDom.comicStrip = document.getElementById("comicStrip");
+            simDom.playPauseBtn = document.getElementById("playPauseBtn");
+            simDom.stepForwardBtn = document.getElementById("stepForwardBtn");
+            simDom.activitySlider = document.getElementById("activitySlider");
+            simDom.activityCurrentText = document.getElementById("activityCurrentText");
+            simDom.reducedMotionToggle = document.getElementById("reducedMotionToggle");
+            simDom.energyBarFill = document.getElementById("energyBarFill");
+            simDom.energyTotalText = document.getElementById("energyTotalText");
+            simDom.moleculeKey = document.getElementById("moleculeKey");
+            simDom.moleculeKeyBtns = Array.from(document.querySelectorAll(".molecule-key-btn"));
+            simDom.moleculeKeyCaption = document.getElementById("moleculeKeyCaption");
+            simDom.observeContinueHint = document.getElementById("observeContinueHint");
+            simDom.observeContinueBtn = document.getElementById("observeContinueBtn");
+
+            simDom.choiceList = document.getElementById("choiceList");
+            simDom.checkAnswerBtn = document.getElementById("checkAnswerBtn");
+            simDom.assessFeedback = document.getElementById("assessFeedback");
+            simDom.assessContinueRow = document.getElementById("assessContinueRow");
+            simDom.assessContinueBtn = document.getElementById("assessContinueBtn");
+
+            simDom.playAgainBtn = document.getElementById("playAgainBtn");
+
+            buildComicStrip();
+            buildChoiceButtons();
+        }
+
+        function buildComicStrip() {
+            simDom.comicStrip.replaceChildren();
+            simDom.comicPanels = STEP_CAPTIONS.map((caption, i) => {
+                const panel = document.createElement("div");
+                panel.className = "comic-panel";
+                panel.dataset.step = String(i);
+                const label = document.createElement("p");
+                label.className = "molecule-key-heading";
+                label.textContent = `Panel ${i + 1}`;
+                const cap = document.createElement("p");
+                cap.className = "comic-caption";
+                cap.textContent = caption;
+                panel.appendChild(label);
+                panel.appendChild(cap);
+                simDom.comicStrip.appendChild(panel);
+                return panel;
+            });
+        }
+
+        function buildChoiceButtons() {
+            simDom.choiceList.replaceChildren();
+            simDom.choiceButtons = CHOICES.map((choice) => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "choice-btn";
+                btn.dataset.key = choice.key;
+                btn.setAttribute("aria-pressed", "false");
+                btn.textContent = choice.label;
+                btn.addEventListener("click", () => handleChoiceClick(btn));
+                simDom.choiceList.appendChild(btn);
+                return btn;
+            });
+        }
+
+        /* --- Events --- */
+
+        function bindSimEvents() {
+            simDom.exitBtn.addEventListener("click", openResetConfirmModal);
+            simDom.rulesBtn.addEventListener("click", openInstructionsModal);
+            simDom.backBtn.addEventListener("click", goBack);
+            simDom.hintBtn.addEventListener("click", toggleHint);
+            simDom.tryAgainBtn.addEventListener("click", handleTryAgain);
+
+            simDom.missionStartBtn.addEventListener("click", () => goToScreen("observe"));
+
+            simDom.playPauseBtn.addEventListener("click", togglePlay);
+            simDom.stepForwardBtn.addEventListener("click", handleStepForward);
+            simDom.activitySlider.addEventListener("input", handleActivityChange);
+            simDom.reducedMotionToggle.addEventListener("change", handleReducedMotionToggle);
+            simDom.moleculeKeyBtns.forEach((btn) => {
+                btn.addEventListener("click", () => handleMoleculeKeyClick(btn));
+            });
+            simDom.observeContinueBtn.addEventListener("click", () => goToScreen("assess"));
+
+            simDom.checkAnswerBtn.addEventListener("click", handleCheckAnswer);
+            simDom.assessContinueBtn.addEventListener("click", () => goToScreen("complete"));
+
+            simDom.playAgainBtn.addEventListener("click", restartWholeFlow);
+        }
+
+        /* --- Screen navigation --- */
+
+        function goToScreen(name) {
+            sim.screen = name;
+            hideMessage();
+            Object.keys(simDom.panels).forEach((key) => {
+                simDom.panels[key].classList.toggle("active", key === name);
+            });
+            const idx = SCREENS.indexOf(name) + 1;
+            simDom.progress.textContent = `Screen ${idx} of ${SCREENS.length}: ${SCREEN_TITLES[name]}`;
+            simDom.backBtn.disabled = name === "mission";
+            if (name !== "observe") cancelTick();
+            if (name === "observe") renderObserveScreen();
+            if (name === "assess") renderAssessScreen();
+            window.scrollTo(0, 0);
+        }
+
+        function goBack() {
+            const idx = SCREENS.indexOf(sim.screen);
+            if (idx > 0) goToScreen(SCREENS[idx - 1]);
+        }
+
+        function toggleHint() {
+            if (!simDom.messagePanel.classList.contains("hidden") && simDom.messagePanel.dataset.kind === "hint") {
+                hideMessage();
+                return;
+            }
+            showMessage(HINTS[sim.screen], "hint");
+        }
+
+        function showMessage(text, kind) {
+            simDom.messagePanel.textContent = text;
+            simDom.messagePanel.dataset.kind = kind || "message";
+            simDom.messagePanel.classList.remove("hidden");
+        }
+
+        function hideMessage() {
+            simDom.messagePanel.textContent = "";
+            simDom.messagePanel.classList.add("hidden");
+            delete simDom.messagePanel.dataset.kind;
+        }
+
+        function handleTryAgain() {
+            if (sim.screen === "observe") {
+                resetObserveState();
+                showMessage("The animation has been reset to the start of a cycle.", "status");
+            } else if (sim.screen === "assess") {
+                resetAssessState();
+                showMessage("Your answer has been cleared — choose again.", "status");
+            } else if (sim.screen === "complete") {
+                restartWholeFlow();
+            } else {
+                showMessage("There is nothing to try again on the mission screen yet — press Begin Observing.", "status");
+            }
+        }
+
+        /* --- Observation screen --- */
+
+        function renderObserveScreen() {
+            setStepCssVar();
+            renderStepVisuals();
+            renderEnergyReadout();
+            renderMoleculeKeyVisibility();
+            updatePlayPauseButtonLabel();
+            simDom.activitySlider.value = String(sim.activity);
+            simDom.activityCurrentText.textContent = sim.activity === 1 ? "Sprinting" : "Resting";
+            simDom.reducedMotionToggle.checked = sim.reducedMotion;
+            simDom.cellSceneWrap.classList.toggle("hidden", sim.reducedMotion);
+            simDom.comicStrip.classList.toggle("hidden", !sim.reducedMotion);
+            updateObserveContinueState();
+        }
+
+        function computeStepMs() {
+            return STEP_MS[sim.activity];
+        }
+
+        function setStepCssVar() {
+            simDom.cellSceneWrap.style.setProperty("--step-ms", computeStepMs() + "ms");
+            simDom.energyBarFill.style.setProperty("--step-ms", computeStepMs() + "ms");
+        }
+
+        function renderStepVisuals() {
+            if (sim.reducedMotion) {
+                renderComicStrip();
+            } else {
+                renderFlowingScene();
+            }
+        }
+
+        function renderFlowingScene() {
+            const ip = INPUT_POS[sim.step];
+            const op = OUTPUT_POS[sim.step];
+            setMoleculePosition(simDom.molO2, ip.o2);
+            setMoleculePosition(simDom.molGlucose, ip.glucose);
+            setMoleculePosition(simDom.molCo2, op.co2);
+            setMoleculePosition(simDom.molH2o, op.h2o);
+            setMoleculePosition(simDom.molEnergy, op.energy);
+            simDom.mitochondrion.classList.toggle("reacting", sim.step === 2);
+            simDom.bloodstreamChips.classList.toggle("hidden", sim.step !== 0);
+        }
+
+        function setMoleculePosition(el, pos) {
+            el.style.left = pos.x + "%";
+            el.style.top = pos.y + "%";
+            el.style.opacity = String(pos.op);
+        }
+
+        function renderComicStrip() {
+            simDom.comicPanels.forEach((panel, i) => {
+                panel.classList.toggle("active", i === sim.step);
+            });
+        }
+
+        function renderEnergyReadout() {
+            const pct = (sim.step / (STEP_COUNT - 1)) * 100;
+            simDom.energyBarFill.style.width = pct + "%";
+            const cycleWord = sim.cyclesCompleted === 1 ? "cycle" : "cycles";
+            simDom.energyTotalText.textContent =
+                `Energy released: ${sim.totalEnergy} units (${sim.cyclesCompleted} ${cycleWord} completed)`;
+        }
+
+        function renderMoleculeKeyVisibility() {
+            const show = !sim.reducedMotion && !sim.isPlaying;
+            simDom.moleculeKey.classList.toggle("hidden", !show);
+            if (!show) hideMoleculeKeyCaption();
+        }
+
+        function hideMoleculeKeyCaption() {
+            simDom.moleculeKeyCaption.classList.add("hidden");
+            simDom.moleculeKeyCaption.textContent = "";
+            simDom.moleculeKeyBtns.forEach((b) => b.setAttribute("aria-expanded", "false"));
+        }
+
+        function handleMoleculeKeyClick(btn) {
+            const isOpen = btn.getAttribute("aria-expanded") === "true";
+            hideMoleculeKeyCaption();
+            if (isOpen) return;
+            btn.setAttribute("aria-expanded", "true");
+            simDom.moleculeKeyCaption.textContent = MOLECULE_NAMES[btn.dataset.mol];
+            simDom.moleculeKeyCaption.classList.remove("hidden");
+        }
+
+        function advanceStep() {
+            sim.step += 1;
+            if (sim.step >= STEP_COUNT) {
+                sim.step = 0;
+                sim.cyclesCompleted += 1;
+                sim.totalEnergy += ENERGY_PER_CYCLE;
+            }
+            renderStepVisuals();
+            renderEnergyReadout();
+            updateObserveContinueState();
+        }
+
+        function updateObserveContinueState() {
+            const ready = sim.cyclesCompleted >= 1;
+            simDom.observeContinueBtn.disabled = !ready;
+            simDom.observeContinueHint.classList.toggle("hidden", ready);
+        }
+
+        function togglePlay() {
+            sim.isPlaying = !sim.isPlaying;
+            if (sim.isPlaying) {
+                scheduleTick();
+            } else {
+                cancelTick();
+            }
+            updatePlayPauseButtonLabel();
+            renderMoleculeKeyVisibility();
+        }
+
+        function updatePlayPauseButtonLabel() {
+            simDom.playPauseBtn.textContent = sim.isPlaying ? "Pause" : "Play";
+            simDom.playPauseBtn.setAttribute("aria-label", sim.isPlaying ? "Pause the animation" : "Play the animation");
+        }
+
+        function scheduleTick() {
+            cancelTick();
+            sim.timerId = setTimeout(() => {
+                advanceStep();
+                if (sim.isPlaying) scheduleTick();
+            }, computeStepMs());
+        }
+
+        function cancelTick() {
+            if (sim.timerId) {
+                clearTimeout(sim.timerId);
+                sim.timerId = null;
+            }
+        }
+
+        function handleStepForward() {
+            const wasPlaying = sim.isPlaying;
+            cancelTick();
+            advanceStep();
+            if (wasPlaying) scheduleTick();
+        }
+
+        function handleActivityChange() {
+            sim.activity = Number(simDom.activitySlider.value);
+            const label = sim.activity === 1 ? "Sprinting" : "Resting";
+            simDom.activityCurrentText.textContent = label;
+            simDom.activitySlider.setAttribute("aria-valuetext", label);
+            setStepCssVar();
+            if (sim.isPlaying) scheduleTick();
+        }
+
+        function handleReducedMotionToggle() {
+            sim.reducedMotion = simDom.reducedMotionToggle.checked;
+            simDom.cellSceneWrap.classList.toggle("hidden", sim.reducedMotion);
+            simDom.comicStrip.classList.toggle("hidden", !sim.reducedMotion);
+            renderMoleculeKeyVisibility();
+            renderStepVisuals();
+        }
+
+        function resetObserveState() {
+            cancelTick();
+            sim.isPlaying = false;
+            sim.step = 0;
+            sim.cyclesCompleted = 0;
+            sim.totalEnergy = 0;
+            updatePlayPauseButtonLabel();
+            renderObserveScreen();
+        }
+
+        /* --- Assessment screen --- */
+
+        function renderAssessScreen() {
+            simDom.choiceButtons.forEach((btn) => {
+                btn.setAttribute("aria-pressed", String(btn.dataset.key === sim.selectedChoice));
+                btn.classList.remove("correct-choice", "wrong-choice");
+                btn.disabled = sim.answered;
+            });
+            simDom.checkAnswerBtn.disabled = !sim.selectedChoice || sim.answered;
+            if (sim.answered) {
+                const choice = CHOICES.find((c) => c.key === sim.selectedChoice);
+                const btn = simDom.choiceButtons.find((b) => b.dataset.key === sim.selectedChoice);
+                if (btn) btn.classList.add("correct-choice");
+                simDom.assessFeedback.className = "feedback-panel feedback-correct";
+                simDom.assessFeedback.textContent = choice ? CORRECT_FEEDBACK : "";
+                simDom.assessFeedback.classList.remove("hidden");
+                simDom.assessContinueRow.classList.remove("hidden");
+            } else {
+                simDom.assessFeedback.classList.add("hidden");
+                simDom.assessFeedback.textContent = "";
+                simDom.assessContinueRow.classList.add("hidden");
+            }
+        }
+
+        function handleChoiceClick(btn) {
+            if (sim.answered) return;
+            sim.selectedChoice = btn.dataset.key;
+            simDom.choiceButtons.forEach((b) => {
+                b.setAttribute("aria-pressed", String(b === btn));
+                b.classList.remove("wrong-choice");
+            });
+            simDom.checkAnswerBtn.disabled = false;
+            simDom.assessFeedback.classList.add("hidden");
+        }
+
+        function handleCheckAnswer() {
+            if (!sim.selectedChoice) return;
+            const choice = CHOICES.find((c) => c.key === sim.selectedChoice);
+            const btn = simDom.choiceButtons.find((b) => b.dataset.key === sim.selectedChoice);
+            if (choice.correct) {
+                sim.answered = true;
+                renderAssessScreen();
+            } else {
+                btn.classList.add("wrong-choice");
+                simDom.assessFeedback.className = "feedback-panel feedback-wrong";
+                simDom.assessFeedback.textContent = choice.feedback;
+                simDom.assessFeedback.classList.remove("hidden");
+            }
+        }
+
+        function resetAssessState() {
+            sim.selectedChoice = null;
+            sim.answered = false;
+            renderAssessScreen();
+        }
+
+        /* --- Completion / restart --- */
+
+        function restartWholeFlow() {
+            cancelTick();
+            sim.step = 0;
+            sim.isPlaying = false;
+            sim.cyclesCompleted = 0;
+            sim.totalEnergy = 0;
+            sim.selectedChoice = null;
+            sim.answered = false;
+            goToScreen("mission");
+        }
+    </script>
+</body>
+
+</html>
