@@ -947,8 +947,10 @@
         }
 
         .bin-chip {
-            padding: 5px 10px;
-            border-radius: 999px;
+            padding: 6px 14px;
+            border-radius: 14px;
+            /* rounded rectangle: safe at any line count */
+            line-height: 1.35;
             background: var(--surface-2);
             border: 1px solid var(--border);
             font-size: 0.85rem;
@@ -1913,7 +1915,6 @@
                     </svg> Reset</button>
                 <button class="control-btn hidden" id="reviewHistoryBtn" aria-label="Review answer history">Review
                     Answers</button>
-                <button class="control-btn hidden" id="exitBtn" aria-label="Exit to home screen">Exit</button>
             </div>
         </header>
 
@@ -2145,7 +2146,7 @@
              pointsPerQuestion - score awarded for a fully correct answer.
            ============================================================ */
         const SIM_CONFIG = {
-            simId: "premade-question-template",
+            simId: "ELA-F2-T1-U6-SEC1-SIM1",
             title: "Theme Echo",
             subtitle: "Understanding that a theme is a message and the purpose of themes.",
             badgeText: "ELA",
@@ -2475,7 +2476,7 @@
                 id: "chain-real-life",
                 type: "ordering",
                 title: "Build the Chain",
-                prompt: "Arrange the three cards to build the chain that connects the story to real life: first what Kareem does, then what happens to him, then the message the events develop. Leave the reject card out of the chain.",
+                prompt: "Arrange three cards to build the chain that connects the story to real life: first what Kareem does, then what happens to him, then the message the events develop. Leave the reject card out of the chain.",
                 hint: "Think cause then effect: Kareem acts first, his classmates respond later, and the message only appears once both events have happened.",
                 explanation: "Kareem chooses to share resources → his classmates later support him → the events develop the message that cooperation can be returned. The reject card — \"Kareem works alone, so cooperation is unimportant\" — is the opposite of what happens in the story, so it is not part of the chain.",
                 revealRing: "realLife",
@@ -3705,7 +3706,9 @@
             // and token extraction is stable.
             const rawPass = String(text).toLowerCase().replace(/\s+/g, " ");
             const leetPass = deLeet(text).replace(/\s+/g, " ");
-            const passes = [rawPass, leetPass];
+            const lower = text.toLowerCase().replace(/\s+/g, " ");
+            const collapsedLeet = deLeet(collapsed);
+            const passes = [lower, deLeet(lower), collapsed, collapsedLeet];
 
             for (let p = 0; p < passes.length; p++) {
                 const hay = passes[p];
@@ -5386,7 +5389,7 @@
             trayLabel.style.margin = "0";
             trayLabel.textContent = answered
                 ? "Your placements are shown in the bins below."
-                : "Drag an item to a bin, or click an item then click a bin. Drag a placed item (or click it) to send it back to the tray. Keyboard: focus an item, press Enter to pick it up, use arrow keys to target the tray or a bin, press Enter to drop. Use Reset items to start over.";
+                : "Click a placed item to pick it up, then click another bin to move it, or click it again to send it back to the tray.";
             layout.appendChild(trayLabel);
 
             const tray = document.createElement("div");
@@ -5492,14 +5495,24 @@
                             chip.setAttribute("aria-pressed", inter.selectedItemId === item.id ? "true" : "false");
                             if (inter.selectedItemId === item.id) chip.classList.add("selected");
                             chip.setAttribute("aria-label",
-                                item.label + " in " + bin.label + ". Click to return it to the tray, or press Enter to pick it up, then use arrow keys to target the tray or a bin and Enter to drop.");
+                                item.label + " in " + bin.label + ". Click to pick it up, then click a bin to move it or click it again to return it to the tray. Keyboard: press Enter to pick it up, arrow keys to target the tray or a bin, Enter to drop.");
                             chip.addEventListener("click", () => {
                                 if (inter.locked) return;
-                                delete inter.placements[item.id];
-                                inter.selectedItemId = null;
-                                inter.keyboardTargetBin = null;
-                                renderDragSortBoard();
-                                announce(item.label + " returned to the tray.");
+                                if (inter.selectedItemId === item.id) {
+                                    // Second click on the same chip: return it to the tray
+                                    // (preserves the old single-click-to-unassign affordance).
+                                    delete inter.placements[item.id];
+                                    inter.selectedItemId = null;
+                                    inter.keyboardTargetBin = null;
+                                    renderDragSortBoard();
+                                    announce(item.label + " returned to the tray.");
+                                } else {
+                                    // First click: pick the chip up so a bin click can move it.
+                                    inter.selectedItemId = item.id;
+                                    inter.keyboardTargetBin = null;
+                                    renderDragSortBoard();
+                                    announce(item.label + " selected. Click a bin to move it, click it again to return it to the tray.");
+                                }
                             });
                             chip.addEventListener("keydown", (event) => handleDragItemKeydown(event, item));
                             chip.addEventListener("pointerdown", (event) => dragPointerDown(event, chip, item));
