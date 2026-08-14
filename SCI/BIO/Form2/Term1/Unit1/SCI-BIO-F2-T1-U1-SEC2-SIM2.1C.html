@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Blood Cargo and the Double Circuit</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        .circuit-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .map-box {
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 10px;
+        }
+
+        #circuitMap {
+            width: 100%;
+            height: auto;
+            max-height: 260px;
+            display: block;
+        }
+
+        .map-path {
+            fill: none;
+            stroke: var(--muted);
+            stroke-width: 2.5;
+        }
+
+        .map-arrow-fill {
+            fill: var(--muted);
+        }
+
+        .map-node circle {
+            fill: var(--surface-2);
+            stroke: var(--border);
+            stroke-width: 2;
+        }
+
+        .map-node text {
+            fill: var(--text-soft);
+            font-size: 11px;
+            font-weight: 700;
+            text-anchor: middle;
+        }
+
+        .map-node-sub {
+            font-size: 8px !important;
+            font-weight: 500 !important;
+            fill: var(--muted) !important;
+        }
+
+        .map-node.current circle {
+            fill: color-mix(in srgb, var(--accent) 30%, var(--surface-2));
+            stroke: var(--accent);
+            stroke-width: 3;
+        }
+
+        .map-node.current text {
+            fill: var(--text);
+        }
+
+        .blood-drop {
+            transition: transform 0.6s ease;
+        }
+
+        .blood-drop circle {
+            fill: var(--danger);
+            stroke: var(--text);
+            stroke-width: 1.5;
+        }
+
+        .blood-drop text {
+            display: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .blood-drop {
+                transition: none;
+            }
+        }
+
+        .status-bar {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+        }
+
+        .status-bar p {
+            margin: 4px 0;
+            color: var(--text-soft);
+            line-height: 1.5;
+        }
+
+        .status-bar strong {
+            color: var(--text);
+        }
+
+        .nav-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .nav-row button {
+            min-height: 44px;
+        }
+
+        .nav-row button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hint-box {
+            background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            color: var(--text-soft);
+            line-height: 1.55;
+        }
+
+        .feedback-box {
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .feedback-box.show {
+            display: block;
+        }
+
+        .feedback-box.feedback-wrong {
+            background: color-mix(in srgb, var(--danger) 16%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+            color: var(--text);
+        }
+
+        .feedback-box.feedback-right {
+            background: color-mix(in srgb, var(--success) 16%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
+            color: var(--text);
+        }
+
+        .feedback-box p {
+            margin: 4px 0;
+        }
+
+        .feedback-box strong {
+            display: inline;
+        }
+
+        #stageArea {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .stage-heading {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .stage-text {
+            color: var(--text-soft);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .action-group {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            background: var(--bg-soft);
+        }
+
+        .action-group h4 {
+            margin: 0 0 10px;
+            font-size: 0.95rem;
+            color: var(--text-soft);
+        }
+
+        .btn-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-weight: 700;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .action-btn.route-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+        }
+
+        .action-btn[aria-pressed="true"] {
+            background: color-mix(in srgb, var(--success) 30%, var(--surface-2));
+            border-color: var(--success);
+        }
+
+        .action-btn[aria-pressed="true"]::after {
+            content: " ✓";
+        }
+
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .check-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .check-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 22px;
+            font-weight: 700;
+            min-height: 44px;
+        }
+
+        .check-btn.selected-correct {
+            background: color-mix(in srgb, var(--success) 30%, var(--surface-2));
+            border-color: var(--success);
+        }
+
+        .check-btn.selected-wrong {
+            background: color-mix(in srgb, var(--danger) 30%, var(--surface-2));
+            border-color: var(--danger);
+        }
+
+        .completion-summary {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .completion-summary li {
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            color: var(--text-soft);
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <div class="circuit-wrap">
+                        <div class="map-box">
+                            <svg id="circuitMap" viewBox="0 0 400 320" role="img" aria-labelledby="mapTitle" aria-describedby="mapDesc">
+                                <title id="mapTitle">Double circulation map</title>
+                                <desc id="mapDesc">A diagram of the Lungs, Left Heart, Body Tissues and Right Heart, connected in a loop, with a blood drop marker showing the current station.</desc>
+                                <path d="M 200 60 L 130 150" class="map-path" marker-end="url(#arrowHead)" />
+                                <path d="M 130 160 L 190 250" class="map-path" marker-end="url(#arrowHead)" />
+                                <path d="M 210 250 L 270 160" class="map-path" marker-end="url(#arrowHead)" />
+                                <path d="M 270 150 L 200 60" class="map-path" marker-end="url(#arrowHead)" />
+                                <defs>
+                                    <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                                        <path d="M0,0 L8,4 L0,8 z" class="map-arrow-fill" />
+                                    </marker>
+                                </defs>
+                                <g class="map-node" data-node="lungs">
+                                    <circle cx="200" cy="50" r="34" />
+                                    <text x="200" y="46">Lungs</text>
+                                    <text x="200" y="60" class="map-node-sub">Station 1</text>
+                                </g>
+                                <g class="map-node" data-node="leftHeart">
+                                    <circle cx="110" cy="160" r="34" />
+                                    <text x="110" y="156">Left</text>
+                                    <text x="110" y="170" class="map-node-sub">Heart · Station 2</text>
+                                </g>
+                                <g class="map-node" data-node="bodyTissues">
+                                    <circle cx="200" cy="270" r="34" />
+                                    <text x="200" y="266">Body</text>
+                                    <text x="200" y="280" class="map-node-sub">Tissues · Station 3</text>
+                                </g>
+                                <g class="map-node" data-node="rightHeart">
+                                    <circle cx="290" cy="160" r="34" />
+                                    <text x="290" y="156">Right</text>
+                                    <text x="290" y="170" class="map-node-sub">Heart · Station 4</text>
+                                </g>
+                                <g id="bloodDrop" class="blood-drop" aria-hidden="true" transform="translate(200, 50)">
+                                    <circle r="12" />
+                                    <text y="4">•</text>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <div class="status-bar" id="statusBar" aria-live="polite">
+                            <p><strong>Progress:</strong> <span id="progressText">Mission briefing</span></p>
+                            <p><strong>Current location:</strong> <span id="locationText">Not started yet.</span></p>
+                            <p><strong>Cargo on board:</strong> <span id="cargoText">None.</span></p>
+                        </div>
+
+                        <nav class="nav-row" aria-label="Simulation navigation">
+                            <button class="secondary-btn" id="exitStageBtn" type="button">⇦ Exit to Home</button>
+                            <button class="secondary-btn" id="rulesStageBtn" type="button">📖 Rules</button>
+                            <button class="secondary-btn" id="backStageBtn" type="button">⇧ Back</button>
+                            <button class="secondary-btn" id="hintStageBtn" type="button">💡 Hint</button>
+                            <button class="secondary-btn" id="tryAgainStageBtn" type="button">↻ Try Again</button>
+                        </nav>
+
+                        <div id="hintBox" class="hint-box hidden" role="status"></div>
+                        <div id="feedbackBox" class="feedback-box" role="alert" aria-live="assertive"></div>
+
+                        <div id="stageArea"></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Blood Cargo and the Double Circuit — Form 2 Biology, Unit 1. Works fully offline, no internet required.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "SCI-BIO-F2-T1-U1-SEC2-SIM2.1C",
+            title: "Blood Cargo and the Double Circuit",
+            subtitle: "Guide the blood drop around the double circulation pathway",
+            badgeText: "BIO",
+            homeEyebrow: "Form 2 Biology — The Circulatory System",
+            homeDescription:
+                "Guide a drop of blood around the body's double circuit. At each station, load and drop the correct cargo — oxygen, carbon dioxide, and nutrients — then choose the correct route to the next station. Watch out: the heart is only a pump, never a loading zone, and blood can never jump straight from the lungs to the body.",
+            instructions: [
+                "Click Start, then read the mission briefing before you begin.",
+                "The blood drop starts at the Lungs with no cargo on board.",
+                "At each station, use the cargo buttons to load or drop off oxygen, carbon dioxide, or nutrients before you choose a route onward.",
+                "The Lungs and the Body Tissues are the only stations where cargo is loaded or dropped off. The Left Heart and Right Heart are pumps only — they never change the cargo.",
+                "Blood pressure drops sharply after the lungs, so blood must always return to the heart to be pumped onward before it can reach the body.",
+                "Choose a route using the arrow buttons. A wrong route or an incomplete cargo action will explain what went wrong so you can try again — you can retry as many times as you need.",
+                "Use Hint if you are stuck, Back to return to the previous station, and Try Again to redo the current station from scratch.",
+                "Your current location and cargo are always shown in the status bar at the top of the sim area.",
+                "Finish the full circuit and answer the final check question to complete the simulation.",
+                "This file runs completely offline in a browser. No internet is needed."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ---- Node positions on the SVG map (must match the markup above) ---- */
+        const NODE_POS = {
+            lungs: { x: 200, y: 50 },
+            leftHeart: { x: 110, y: 160 },
+            bodyTissues: { x: 200, y: 270 },
+            rightHeart: { x: 290, y: 160 }
+        };
+
+        /* ---- Reusable feedback fragments (kept in one place so the same
+           spec-given fact is never re-worded twice) ---- */
+        const HEART_IS_PUMP_FACT =
+            "The heart acts only as a muscular pump, not a loading zone. It never loads or drops any cargo.";
+        const NUTRIENT_SOURCE_FACT =
+            "Nutrients are picked up by the blood plasma in the digestive system, which is part of the Body Tissues circuit — never at the lungs or in the heart.";
+
+        /* ---- The four circulation stations, in visit order ---- */
+        const STATIONS = {
+            lungs: {
+                key: "lungs",
+                stationNumber: 1,
+                name: "The Lungs",
+                arrivalText: "The blood drop has just arrived at the Lungs, empty of cargo.",
+                explanation: "In the lungs, blood picks up fresh oxygen and gets rid of waste carbon dioxide. It must then return to the heart to get a pressure boost before it can travel on.",
+                hint: "Think about what gas your lungs are full of that the blood needs, and what waste gas the blood is carrying that needs to leave here.",
+                cargoActions: [
+                    {
+                        id: "loadOxygen", label: "Load Oxygen", correct: true,
+                        apply: (c) => { c.oxygen = true; }
+                    },
+                    {
+                        id: "dropCO2", label: "Drop Carbon Dioxide", correct: true,
+                        apply: (c) => { c.carbonDioxide = false; }
+                    },
+                    {
+                        id: "loadNutrientsLungs", label: "Load Nutrients", correct: false,
+                        feedback: {
+                            what: "You tried to load nutrients at the Lungs.",
+                            why: NUTRIENT_SOURCE_FACT,
+                            fix: "At the Lungs, only use Load Oxygen and Drop Carbon Dioxide.",
+                            model: "Correct actions here: Load Oxygen, then Drop Carbon Dioxide."
+                        }
+                    }
+                ],
+                routes: [
+                    {
+                        id: "toLeftHeart", label: "Go to Left Heart", correct: true,
+                        nextView: "station", nextStationKey: "leftHeart"
+                    },
+                    {
+                        id: "toBody", label: "Go to Body", correct: false,
+                        feedback: {
+                            what: "You sent the blood straight from the Lungs to the Body.",
+                            why: "Blood pressure is too low after the lungs! Blood passing through the tiny capillaries in the lungs loses most of its pressure.",
+                            fix: "It must return to the heart first to be pumped to the body with enough force to reach every tissue.",
+                            model: "Correct route: Lungs → Left Heart → Body Tissues."
+                        }
+                    }
+                ]
+            },
+            leftHeart: {
+                key: "leftHeart",
+                stationNumber: 2,
+                name: "The Left Heart",
+                arrivalText: "The blood drop has arrived at the Left Heart, carrying oxygen.",
+                explanation: "The heart acts only as a muscular pump, not a loading zone. The left side pumps the oxygen-rich blood out to the rest of the body.",
+                hint: "The heart chambers are pumps only — no cargo is ever loaded or dropped here. Just choose where the pump sends the blood next.",
+                cargoActions: [
+                    {
+                        id: "loadOxygenHeartL", label: "Load Oxygen", correct: false,
+                        feedback: {
+                            what: "You tried to load cargo at the Left Heart.",
+                            why: HEART_IS_PUMP_FACT,
+                            fix: "Don't select any cargo actions at either heart station — just choose the correct route onward.",
+                            model: "At the Left Heart: no cargo changes — choose Go to Body Tissues."
+                        }
+                    },
+                    {
+                        id: "loadNutrientsHeartL", label: "Load Nutrients", correct: false,
+                        feedback: {
+                            what: "You tried to load cargo at the Left Heart.",
+                            why: HEART_IS_PUMP_FACT,
+                            fix: "Don't select any cargo actions at either heart station — just choose the correct route onward.",
+                            model: "At the Left Heart: no cargo changes — choose Go to Body Tissues."
+                        }
+                    }
+                ],
+                routes: [
+                    {
+                        id: "toBody", label: "Go to Body Tissues", correct: true,
+                        nextView: "station", nextStationKey: "bodyTissues"
+                    },
+                    {
+                        id: "toLungsBack", label: "Go back to Lungs", correct: false,
+                        feedback: {
+                            what: "You sent the blood back to the Lungs from the Left Heart.",
+                            why: "Blood cannot flow backwards through the double circuit. The left heart has just given the oxygen-rich blood a pressure boost so it can travel forward.",
+                            fix: "Send the blood onward to where the oxygen is needed, not back the way it came.",
+                            model: "Correct route: Left Heart → Body Tissues."
+                        }
+                    }
+                ]
+            },
+            bodyTissues: {
+                key: "bodyTissues",
+                stationNumber: 3,
+                name: "Body Tissues",
+                arrivalText: "The blood drop has arrived at the Body Tissues, still carrying oxygen.",
+                explanation: "Body cells take in oxygen and release carbon dioxide as waste during cellular respiration. The blood plasma also picks up soluble nutrients absorbed from the small intestine here.",
+                hint: "Body cells are using up oxygen and making carbon dioxide as waste. This is also where the digestive system adds nutrients to the plasma.",
+                cargoActions: [
+                    {
+                        id: "dropOxygenBody", label: "Drop Oxygen", correct: true,
+                        apply: (c) => { c.oxygen = false; }
+                    },
+                    {
+                        id: "loadCO2Body", label: "Load Carbon Dioxide", correct: true,
+                        apply: (c) => { c.carbonDioxide = true; }
+                    },
+                    {
+                        id: "loadNutrientsBody", label: "Load Nutrients", correct: true,
+                        apply: (c) => { c.nutrients = true; }
+                    },
+                    {
+                        id: "loadOxygenBody", label: "Load Oxygen", correct: false,
+                        feedback: {
+                            what: "You tried to load more oxygen at the Body Tissues.",
+                            why: "Body cells take in oxygen from the blood and release carbon dioxide as waste during cellular respiration — the blood should be dropping oxygen off here, not loading more of it.",
+                            fix: "Select Drop Oxygen instead of Load Oxygen.",
+                            model: "Correct actions here: Drop Oxygen, Load Carbon Dioxide, Load Nutrients."
+                        }
+                    }
+                ],
+                routes: [
+                    {
+                        id: "toRightHeart", label: "Go to Right Heart", correct: true,
+                        nextView: "station", nextStationKey: "rightHeart"
+                    },
+                    {
+                        id: "toLeftHeartBack", label: "Go back to Left Heart", correct: false,
+                        feedback: {
+                            what: "You sent the blood from the Body Tissues back to the Left Heart.",
+                            why: "The left heart only pumps oxygen-rich blood outward to the body. Blood leaving the body tissues is now carrying carbon dioxide, not oxygen, so it cannot go back there.",
+                            fix: "Deoxygenated blood from the tissues must go to the right heart to begin its journey back to the lungs.",
+                            model: "Correct route: Body Tissues → Right Heart."
+                        }
+                    }
+                ]
+            },
+            rightHeart: {
+                key: "rightHeart",
+                stationNumber: 4,
+                name: "The Right Heart",
+                arrivalText: "The blood drop has arrived at the Right Heart, carrying carbon dioxide and nutrients.",
+                explanation: "The right side of the heart receives deoxygenated blood from the body and pumps it back to the lungs to be cleared of carbon dioxide.",
+                hint: "Like the left heart, the right heart is a pump only. It has just collected deoxygenated blood from the body — where does that blood need to go to be refreshed?",
+                cargoActions: [
+                    {
+                        id: "loadCO2HeartR", label: "Load Carbon Dioxide", correct: false,
+                        feedback: {
+                            what: "You tried to load cargo at the Right Heart.",
+                            why: HEART_IS_PUMP_FACT,
+                            fix: "Don't select any cargo actions at either heart station — just send the blood onward.",
+                            model: "At the Right Heart: no cargo changes — choose Go to Lungs."
+                        }
+                    },
+                    {
+                        id: "loadNutrientsHeartR", label: "Load Nutrients", correct: false,
+                        feedback: {
+                            what: "You tried to load cargo at the Right Heart.",
+                            why: HEART_IS_PUMP_FACT,
+                            fix: "Don't select any cargo actions at either heart station — just send the blood onward.",
+                            model: "At the Right Heart: no cargo changes — choose Go to Lungs."
+                        }
+                    }
+                ],
+                routes: [
+                    {
+                        id: "toLungs", label: "Go to Lungs", correct: true,
+                        nextView: "misconception", nextStationKey: null
+                    },
+                    {
+                        id: "toBodyBack", label: "Go back to Body Tissues", correct: false,
+                        feedback: {
+                            what: "You sent the blood from the Right Heart back to the Body Tissues.",
+                            why: "The right heart's job is to pump deoxygenated blood onward to the lungs, not back to the body it just came from.",
+                            fix: "Send the blood on to the lungs so it can drop off carbon dioxide and collect fresh oxygen.",
+                            model: "Correct route: Right Heart → Lungs."
+                        }
+                    }
+                ]
+            }
+        };
+
+        const STATION_ORDER = ["lungs", "leftHeart", "bodyTissues", "rightHeart"];
+
+        /* ---- Embedded misconception check, shown after the loop closes ---- */
+        const MISCONCEPTION = {
+            question: "Does the blood pick up nutrients in the heart?",
+            hint: "Think about what the heart's only job is, and where in the body cargo actually gets loaded and dropped off.",
+            correctExplanation:
+                "Correct — No. The heart is simply a pump that keeps the transport network moving. Nutrients are absorbed into the blood plasma at the digestive system (part of the Body Tissues circuit), not inside the heart chambers.",
+            wrongFeedback: {
+                what: "You answered “Yes” — that blood picks up nutrients inside the heart.",
+                why: "The heart is simply a pump that keeps the transport network moving. It has no digestive tissue capable of adding nutrients to the blood.",
+                fix: "Remember that cargo (oxygen, carbon dioxide and nutrients) is only exchanged at the Lungs and the Body Tissues stations, never at the heart.",
+                model: "No — nutrients are picked up by the blood plasma in the digestive system (part of the Body Tissues circuit), not inside the heart chambers."
+            }
+        };
+
+        /* ---- Simulation state (kept only in memory for this session) ---- */
+        const simState = {
+            started: false,
+            view: "mission",          // "mission" | "station" | "misconception" | "completion"
+            currentStationKey: "lungs",
+            cargo: { oxygen: false, carbonDioxide: false, nutrients: false },
+            doneActionIds: new Set(),
+            history: [],
+            misconceptionAnswered: false,
+            misconceptionSelected: null,
+            misconceptionCorrect: null
+        };
+
+        let simListenersBound = false;
+        const simDom = {}; // populated once devInit() runs, since these elements live in the SIM AREA
+
+        function cargoLabel() {
+            const parts = [];
+            if (simState.cargo.oxygen) parts.push("Oxygen");
+            if (simState.cargo.carbonDioxide) parts.push("Carbon dioxide");
+            if (simState.cargo.nutrients) parts.push("Nutrients");
+            return parts.length ? parts.join(", ") + "." : "None.";
+        }
+
+        function progressLabel() {
+            if (simState.view === "mission") return "Mission briefing";
+            if (simState.view === "station") {
+                const s = STATIONS[simState.currentStationKey];
+                const stepLabels = { 1: "Step 1 of 4", 2: "Step 2 of 4", 3: "Step 3 of 4", 4: "Step 4 of 4" };
+                return stepLabels[s.stationNumber] + " (Station: " + s.name + ")";
+            }
+            if (simState.view === "misconception") return "Final check";
+            if (simState.view === "completion") return "Complete";
+            return "";
+        }
+
+        function locationLabel() {
+            if (simState.view === "mission") return "Not started yet. Read the mission below, then begin at the Lungs.";
+            if (simState.view === "station") return STATIONS[simState.currentStationKey].name + ". " + STATIONS[simState.currentStationKey].arrivalText;
+            if (simState.view === "misconception") return "Back at the Lungs, ready to start the next loop. Answer the final check to finish.";
+            if (simState.view === "completion") return "Circuit complete. The blood drop is back at the Lungs.";
+            return "";
+        }
+
+        function updateStatusBar() {
+            simDom.progressText.textContent = progressLabel();
+            simDom.locationText.textContent = locationLabel();
+            simDom.cargoText.textContent = cargoLabel();
+        }
+
+        function updateMapHighlight() {
+            const key = simState.view === "station" ? simState.currentStationKey : "lungs";
+            simDom.mapNodes.forEach((g) => g.classList.toggle("current", g.getAttribute("data-node") === key));
+            const pos = NODE_POS[key];
+            if (pos) simDom.bloodDrop.setAttribute("transform", "translate(" + pos.x + ", " + pos.y + ")");
+        }
+
+        function updateNavButtons() {
+            simDom.backBtn.disabled = simState.history.length === 0;
+            simDom.tryAgainBtn.disabled = simState.view === "mission" || simState.view === "completion";
+        }
+
+        function clearFeedback() {
+            simDom.feedbackBox.classList.remove("show", "feedback-wrong", "feedback-right");
+            simDom.feedbackBox.replaceChildren();
+        }
+
+        function hideHint() {
+            simDom.hintBox.classList.add("hidden");
+            simDom.hintBox.replaceChildren();
+        }
+
+        function showFeedback(kind, content) {
+            simDom.feedbackBox.replaceChildren();
+            const frag = document.createDocumentFragment();
+            if (content.what) {
+                frag.appendChild(makeFeedbackLine("What went wrong: ", content.what));
+            }
+            if (content.why) {
+                frag.appendChild(makeFeedbackLine("Why: ", content.why));
+            }
+            if (content.fix) {
+                frag.appendChild(makeFeedbackLine("How to fix it: ", content.fix));
+            }
+            if (content.model) {
+                frag.appendChild(makeFeedbackLine(kind === "right" ? "" : "Correct approach: ", content.model));
+            }
+            simDom.feedbackBox.appendChild(frag);
+            simDom.feedbackBox.classList.add("show");
+            simDom.feedbackBox.classList.add(kind === "right" ? "feedback-right" : "feedback-wrong");
+        }
+
+        function makeFeedbackLine(label, text) {
+            const p = document.createElement("p");
+            if (label) {
+                const strong = document.createElement("strong");
+                strong.textContent = label;
+                p.appendChild(strong);
+            }
+            p.appendChild(document.createTextNode(text));
+            return p;
+        }
+
+        function snapshotState() {
+            return {
+                view: simState.view,
+                currentStationKey: simState.currentStationKey,
+                cargo: Object.assign({}, simState.cargo),
+                doneActionIds: Array.from(simState.doneActionIds),
+                misconceptionAnswered: simState.misconceptionAnswered,
+                misconceptionSelected: simState.misconceptionSelected,
+                misconceptionCorrect: simState.misconceptionCorrect
+            };
+        }
+
+        function restoreSnapshot(snap) {
+            simState.view = snap.view;
+            simState.currentStationKey = snap.currentStationKey;
+            simState.cargo = Object.assign({}, snap.cargo);
+            simState.doneActionIds = new Set(snap.doneActionIds);
+            simState.misconceptionAnswered = snap.misconceptionAnswered;
+            simState.misconceptionSelected = snap.misconceptionSelected;
+            simState.misconceptionCorrect = snap.misconceptionCorrect;
+        }
+
+        function pushHistory() {
+            simState.history.push(snapshotState());
+        }
+
+        function goBack() {
+            if (simState.history.length === 0) return;
+            const prev = simState.history.pop();
+            restoreSnapshot(prev);
+            renderCurrentView();
+        }
+
+        function tryAgainCurrent() {
+            if (simState.view === "station") {
+                const base = simState.history.length
+                    ? simState.history[simState.history.length - 1].cargo
+                    : { oxygen: false, carbonDioxide: false, nutrients: false };
+                simState.cargo = Object.assign({}, base);
+                simState.doneActionIds = new Set();
+                renderCurrentView();
+            } else if (simState.view === "misconception") {
+                simState.misconceptionAnswered = false;
+                simState.misconceptionSelected = null;
+                simState.misconceptionCorrect = null;
+                renderCurrentView();
+            }
+        }
+
+        function focusStageHeading() {
+            const heading = simDom.stageArea.querySelector(".stage-heading");
+            if (heading) {
+                heading.setAttribute("tabindex", "-1");
+                heading.focus({ preventScroll: false });
+            }
+        }
+
+        function renderCurrentView() {
+            updateMapHighlight();
+            updateStatusBar();
+            updateNavButtons();
+            hideHint();
+            clearFeedback();
+            simDom.stageArea.replaceChildren();
+            if (simState.view === "mission") renderMission();
+            else if (simState.view === "station") renderStation(simState.currentStationKey);
+            else if (simState.view === "misconception") renderMisconception();
+            else if (simState.view === "completion") renderCompletion();
+            focusStageHeading();
+        }
+
+        function renderMission() {
+            const heading = document.createElement("h3");
+            heading.className = "stage-heading";
+            heading.textContent = "Mission: Deliver the Cargo";
+
+            const p1 = document.createElement("p");
+            p1.className = "stage-text";
+            p1.textContent = "You are guiding a drop of blood on one full lap of the double circuit: Lungs → Left Heart → Body Tissues → Right Heart → back to the Lungs.";
+
+            const p2 = document.createElement("p");
+            p2.className = "stage-text";
+            p2.textContent = "At each station, load or drop the correct cargo, then choose the correct route onward. The heart is a pump, not a loading zone — cargo only changes at the Lungs and the Body Tissues.";
+
+            const group = document.createElement("div");
+            group.className = "action-group";
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "action-btn route-btn";
+            btn.textContent = "Begin at the Lungs →";
+            btn.addEventListener("click", () => {
+                pushHistory();
+                simState.view = "station";
+                simState.currentStationKey = "lungs";
+                simState.doneActionIds = new Set();
+                renderCurrentView();
+            });
+            group.appendChild(btn);
+
+            simDom.stageArea.append(heading, p1, p2, group);
+        }
+
+        function renderStation(key) {
+            const def = STATIONS[key];
+
+            const heading = document.createElement("h3");
+            heading.className = "stage-heading";
+            heading.textContent = def.name;
+
+            const p1 = document.createElement("p");
+            p1.className = "stage-text";
+            p1.textContent = def.arrivalText;
+
+            simDom.stageArea.append(heading, p1);
+
+            if (def.cargoActions.length) {
+                const cargoGroup = document.createElement("div");
+                cargoGroup.className = "action-group";
+                const h4 = document.createElement("h4");
+                h4.textContent = "Cargo actions";
+                cargoGroup.appendChild(h4);
+                const grid = document.createElement("div");
+                grid.className = "btn-grid";
+                def.cargoActions.forEach((action) => {
+                    const b = document.createElement("button");
+                    b.type = "button";
+                    b.className = "action-btn";
+                    b.textContent = action.label;
+                    b.dataset.actionId = action.id;
+                    const done = action.correct && simState.doneActionIds.has(action.id);
+                    b.setAttribute("aria-pressed", done ? "true" : "false");
+                    if (done) b.disabled = true;
+                    b.addEventListener("click", () => handleCargoClick(def, action));
+                    grid.appendChild(b);
+                });
+                cargoGroup.appendChild(grid);
+                simDom.stageArea.appendChild(cargoGroup);
+            }
+
+            const routeGroup = document.createElement("div");
+            routeGroup.className = "action-group";
+            const rh = document.createElement("h4");
+            rh.textContent = "Choose a route";
+            routeGroup.appendChild(rh);
+            const rgrid = document.createElement("div");
+            rgrid.className = "btn-grid";
+            def.routes.forEach((route) => {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.className = "action-btn route-btn";
+                b.textContent = route.label;
+                b.addEventListener("click", () => handleRouteClick(def, route));
+                rgrid.appendChild(b);
+            });
+            routeGroup.appendChild(rgrid);
+            simDom.stageArea.appendChild(routeGroup);
+        }
+
+        function handleCargoClick(stationDef, action) {
+            if (action.correct) {
+                if (simState.doneActionIds.has(action.id)) return;
+                action.apply(simState.cargo);
+                simState.doneActionIds.add(action.id);
+                clearFeedback();
+                updateStatusBar();
+                renderStationButtonsInPlace(stationDef);
+            } else {
+                showFeedback("wrong", action.feedback);
+            }
+        }
+
+        function renderStationButtonsInPlace(stationDef) {
+            stationDef.cargoActions.forEach((action) => {
+                const btn = simDom.stageArea.querySelector('[data-action-id="' + action.id + '"]');
+                if (!btn) return;
+                const done = action.correct && simState.doneActionIds.has(action.id);
+                btn.setAttribute("aria-pressed", done ? "true" : "false");
+                btn.disabled = done;
+            });
+        }
+
+        function handleRouteClick(stationDef, route) {
+            if (!route.correct) {
+                showFeedback("wrong", route.feedback);
+                return;
+            }
+            const required = stationDef.cargoActions.filter((a) => a.correct);
+            const missing = required.filter((a) => !simState.doneActionIds.has(a.id));
+            if (missing.length) {
+                showFeedback("wrong", {
+                    what: "You tried to leave " + stationDef.name + " before finishing the cargo actions.",
+                    why: "The blood's cargo must be updated at this station before it moves on, otherwise it would be carrying the wrong mix of cargo for the next part of its journey.",
+                    fix: "Complete the outstanding action" + (missing.length > 1 ? "s" : "") + " below, then choose a route.",
+                    model: "Still needed here: " + missing.map((a) => a.label).join(" and ") + "."
+                });
+                return;
+            }
+            pushHistory();
+            if (route.nextView === "misconception") {
+                simState.view = "misconception";
+                simState.misconceptionAnswered = false;
+                simState.misconceptionSelected = null;
+                simState.misconceptionCorrect = null;
+            } else {
+                simState.view = "station";
+                simState.currentStationKey = route.nextStationKey;
+                simState.doneActionIds = new Set();
+            }
+            renderCurrentView();
+        }
+
+        function renderMisconception() {
+            const heading = document.createElement("h3");
+            heading.className = "stage-heading";
+            heading.textContent = "Final Check";
+
+            const p1 = document.createElement("p");
+            p1.className = "stage-text";
+            p1.textContent = "The blood drop has completed the full circuit and is back at the Lungs. Before you finish, answer this question.";
+
+            const p2 = document.createElement("p");
+            p2.className = "stage-text";
+            const strong = document.createElement("strong");
+            strong.textContent = MISCONCEPTION.question;
+            p2.appendChild(strong);
+
+            const group = document.createElement("div");
+            group.className = "action-group";
+            const options = document.createElement("div");
+            options.className = "check-options";
+
+            const yesBtn = document.createElement("button");
+            yesBtn.type = "button";
+            yesBtn.className = "check-btn";
+            yesBtn.textContent = "Yes";
+            yesBtn.addEventListener("click", () => handleMisconceptionClick(true));
+
+            const noBtn = document.createElement("button");
+            noBtn.type = "button";
+            noBtn.className = "check-btn";
+            noBtn.textContent = "No";
+            noBtn.addEventListener("click", () => handleMisconceptionClick(false));
+
+            if (simState.misconceptionAnswered) {
+                if (simState.misconceptionSelected === true) yesBtn.classList.add("selected-wrong");
+                if (simState.misconceptionSelected === false) noBtn.classList.add(simState.misconceptionCorrect ? "selected-correct" : "selected-wrong");
+            }
+
+            options.append(yesBtn, noBtn);
+            group.appendChild(options);
+            simDom.stageArea.append(heading, p1, p2, group);
+
+            if (simState.misconceptionAnswered) {
+                showFeedback(simState.misconceptionCorrect ? "right" : "wrong",
+                    simState.misconceptionCorrect ? { model: MISCONCEPTION.correctExplanation } : MISCONCEPTION.wrongFeedback);
+            }
+
+            if (simState.misconceptionCorrect) {
+                const cont = document.createElement("button");
+                cont.type = "button";
+                cont.className = "action-btn route-btn";
+                cont.textContent = "See Results →";
+                cont.addEventListener("click", () => {
+                    pushHistory();
+                    simState.view = "completion";
+                    renderCurrentView();
+                });
+                simDom.stageArea.appendChild(cont);
+            }
+        }
+
+        function handleMisconceptionClick(answer) {
+            simState.misconceptionSelected = answer;
+            simState.misconceptionAnswered = true;
+            simState.misconceptionCorrect = answer === false;
+            simDom.stageArea.replaceChildren();
+            renderMisconception();
+            updateStatusBar();
+        }
+
+        function renderCompletion() {
+            const heading = document.createElement("h3");
+            heading.className = "stage-heading";
+            heading.textContent = "Circuit Complete!";
+
+            const p1 = document.createElement("p");
+            p1.className = "stage-text";
+            p1.textContent = "You guided the blood drop through the full double circuit and delivered the correct cargo at every stop.";
+
+            const list = document.createElement("ul");
+            list.className = "completion-summary";
+            const points = [
+                "Lungs: oxygen loaded, carbon dioxide dropped.",
+                "Left Heart: no cargo change — just a pressure boost onward to the Body Tissues.",
+                "Body Tissues: oxygen dropped, carbon dioxide loaded, nutrients loaded.",
+                "Right Heart: no cargo change — just a pressure boost onward to the Lungs.",
+                "The heart is always a waypoint, never a loading zone."
+            ];
+            points.forEach((text) => {
+                const li = document.createElement("li");
+                li.textContent = text;
+                list.appendChild(li);
+            });
+
+            const group = document.createElement("div");
+            group.className = "action-group";
+            const again = document.createElement("button");
+            again.type = "button";
+            again.className = "action-btn route-btn";
+            again.textContent = "Play Again";
+            again.addEventListener("click", () => {
+                devReset();
+                renderCurrentView();
+            });
+            group.appendChild(again);
+
+            simDom.stageArea.append(heading, p1, list, group);
+        }
+
+        function bindSimNavOnce() {
+            if (simListenersBound) return;
+            simListenersBound = true;
+            simDom.exitBtn.addEventListener("click", () => { showScreen("home"); });
+            simDom.rulesBtn.addEventListener("click", () => { openInstructionsModal(); });
+            simDom.backBtn.addEventListener("click", goBack);
+            simDom.tryAgainBtn.addEventListener("click", tryAgainCurrent);
+            simDom.hintBtn.addEventListener("click", () => {
+                if (!simDom.hintBox.classList.contains("hidden")) {
+                    hideHint();
+                    return;
+                }
+                let text;
+                if (simState.view === "station") text = STATIONS[simState.currentStationKey].hint;
+                else if (simState.view === "misconception") text = MISCONCEPTION.hint;
+                else if (simState.view === "mission") text = "Start by choosing Load Oxygen and Drop Carbon Dioxide at the Lungs, then send the blood to the Left Heart.";
+                else text = "You have finished the circuit. Click Play Again to try it once more.";
+                simDom.hintBox.textContent = text;
+                simDom.hintBox.classList.remove("hidden");
+            });
+        }
+
+        function devInit() {
+            simDom.stageArea = document.getElementById("stageArea");
+            simDom.progressText = document.getElementById("progressText");
+            simDom.locationText = document.getElementById("locationText");
+            simDom.cargoText = document.getElementById("cargoText");
+            simDom.feedbackBox = document.getElementById("feedbackBox");
+            simDom.hintBox = document.getElementById("hintBox");
+            simDom.exitBtn = document.getElementById("exitStageBtn");
+            simDom.rulesBtn = document.getElementById("rulesStageBtn");
+            simDom.backBtn = document.getElementById("backStageBtn");
+            simDom.hintBtn = document.getElementById("hintStageBtn");
+            simDom.tryAgainBtn = document.getElementById("tryAgainStageBtn");
+            simDom.bloodDrop = document.getElementById("bloodDrop");
+            simDom.mapNodes = Array.from(document.querySelectorAll(".map-node"));
+            simDom.feedbackBox.setAttribute("tabindex", "-1");
+
+            bindSimNavOnce();
+
+            if (!simState.started) {
+                devReset();
+            }
+            renderCurrentView();
+}
+
+        function devReset() {
+            // Return the blood drop to its opening position: back at the Lungs,
+            // carrying no cargo, with no history to step Back through and the
+            // final check question un-answered. This is also what "Play Again"
+            // on the completion screen calls.
+            simState.started = true;
+            simState.view = "mission";
+            simState.currentStationKey = "lungs";
+            simState.cargo = { oxygen: false, carbonDioxide: false, nutrients: false };
+            simState.doneActionIds = new Set();
+            simState.history = [];
+            simState.misconceptionAnswered = false;
+            simState.misconceptionSelected = null;
+            simState.misconceptionCorrect = null;
+}
+    </script>
+</body>
+
+</html>
