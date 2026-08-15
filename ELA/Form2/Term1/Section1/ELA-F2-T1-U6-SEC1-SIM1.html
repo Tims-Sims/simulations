@@ -5359,7 +5359,8 @@
                 placements: placements,
                 selectedItemId: null,
                 keyboardTargetBin: null,
-                dragging: null
+                dragging: null,
+                suppressClick: false
             };
 
             // shuffleItems dragSorts show their draggable cards in a per-run
@@ -5493,7 +5494,9 @@
                             if (inter.selectedItemId === item.id) chip.classList.add("selected");
                             chip.setAttribute("aria-label",
                                 item.label + " in " + bin.label + ". Click to pick it up, then click a bin to move it or click it again to return it to the tray. Keyboard: press Enter to pick it up, arrow keys to target the tray or a bin, Enter to drop.");
-                            chip.addEventListener("click", () => {
+                            chip.addEventListener("click", (event) => {
+                                if (inter.suppressClick) { inter.suppressClick = false; return; } // a drag just happened
+                                event.stopPropagation(); // chip clicks are handled here; don't let the bin re-place it
                                 if (inter.locked) return;
                                 if (inter.selectedItemId === item.id) {
                                     // Second click on the same chip: return it to the tray
@@ -5524,7 +5527,8 @@
                 binEl.append(icon, strong, desc, contents);
 
                 if (!inter.locked) {
-                    binEl.addEventListener("click", () => {
+                    binEl.addEventListener("click", (event) => {
+                        if (inter.suppressClick) { inter.suppressClick = false; return; } // a drag just happened
                         if (inter.selectedItemId) {
                             placeDragItem(inter.selectedItemId, bin.id);
                         }
@@ -5549,7 +5553,8 @@
                 itemEl.textContent = (item.icon ? item.icon + " " : "") + item.label;
 
                 if (!inter.locked) {
-                    itemEl.addEventListener("click", () => {
+                    itemEl.addEventListener("click", (event) => {
+                        if (inter.suppressClick) { inter.suppressClick = false; event.stopPropagation(); return; } // a drag just happened
                         inter.selectedItemId = inter.selectedItemId === item.id ? null : item.id;
                         inter.keyboardTargetBin = null;
                         renderDragSortBoard();
@@ -5668,6 +5673,7 @@
             const inter = state.interaction;
             if (!inter || inter.type !== "dragSort" || inter.locked || inter.dragging) return;
             if (event.button !== undefined && event.button !== 0) return;
+            inter.suppressClick = false; // clear any stale "just dragged" marker
             event.preventDefault();
             const rect = itemEl.getBoundingClientRect();
             inter.dragging = {
@@ -5720,6 +5726,7 @@
             itemEl.style.width = "";
             inter.dragging = null;
             if (wasDrag) {
+                inter.suppressClick = true; // a real drag just happened; swallow the trailing click
                 if (bin) {
                     placeDragItem(item.id, bin.dataset.binId);
                 } else if (fromBin) {
