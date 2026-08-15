@@ -2467,14 +2467,17 @@
                     }
                 ]
             },
-            // --- Q3: build the chain (fills the Real Life ring) -------------
+            // --- Q3: build the chain (fills the Real Life ring, and once
+            // answered decides the Message ring) ---------------------------
             // Arrange cause -> effect -> message. The reject card says the
             // opposite of the story and must be left out of the chain. Every
             // card (including the reject) loads inside the chain shuffled, so
             // the student drags the reject card out to the reject tray (or
             // pulls any card out/back in). Correctly ordering all three cards
             // with no card in the tray makes the Real Life ring appear, so all
-            // three echo rings glow.
+            // three echo rings glow. The chain ends with the message, so its
+            // result also overrides the Message ring once answered (see
+            // overridesRing below) — the theme question drives it until then.
             {
                 id: "chain-real-life",
                 type: "ordering",
@@ -2483,6 +2486,7 @@
                 hint: "Think cause then effect: Kareem acts first, his classmates respond later, and the message only appears once both events have happened.",
                 explanation: "Kareem chooses to share resources → his classmates later support him → the events develop the message that cooperation can be returned. The reject card — \"Kareem works alone, so cooperation is unimportant\" — is the opposite of what happens in the story, so it is not part of the chain.",
                 revealRing: "realLife",
+                overridesRing: "message",
                 items: [
                     { id: "chain-share", label: "Kareem chooses to share resources." },
                     { id: "chain-support", label: "Classmates later support Kareem." },
@@ -3937,7 +3941,9 @@
         // final synthesis question, which carries more weight: once the last
         // question is answered, its result drives the ring — a correct
         // synthesis fully lights it, a wrong one dims it to partial when the
-        // chain build was still correct.
+        // chain build was still correct. The Message ring works the same way:
+        // the theme question feeds it until the chain build is answered, whose
+        // result then overrides it (see overridesRing on the chain question).
         function ringStatusFor(key) {
             const norm = normalizeRingKey(key);
             if (norm === "reallife") {
@@ -3952,6 +3958,21 @@
                 }
                 const revealResult = revealQ ? state.results[revealQ.id] : null;
                 return revealResult ? revealResult.status : null;
+            }
+            // A question can override another ring once answered, mirroring
+            // the Real Life override above: the chain build ends with the
+            // message, so it supersedes the theme question's grip on the
+            // Message ring.
+            const overrideQ = activeQuestions.find((q) => q.overridesRing && normalizeRingKey(q.overridesRing) === norm);
+            if (overrideQ) {
+                const overrideResult = state.results[overrideQ.id];
+                if (overrideResult) {
+                    if (overrideResult.status === "correct") return "correct";
+                    if (overrideResult.status === "partial") return "partial";
+                    const revealQ = activeQuestions.find((q) => q.revealRing && normalizeRingKey(q.revealRing) === norm);
+                    const revealResult = revealQ ? state.results[revealQ.id] : null;
+                    return revealResult && revealResult.status === "correct" ? "partial" : null;
+                }
             }
             const question = activeQuestions.find((q) => q.revealRing && normalizeRingKey(q.revealRing) === norm);
             if (!question) return null;
@@ -4034,9 +4055,10 @@
             return counts;
         }
 
-        // Is a skill considered achieved? "theme" is earned when its ring
-        // question is fully correct; "link" needs both the evidence and the
-        // real-life rings fully caught.
+        // Is a skill considered achieved? "theme" is earned when the Message
+        // ring is fully caught (its ring question, or the chain build that
+        // overrides it); "link" needs both the evidence and the real-life
+        // rings fully caught.
         function skillAchieved(kind) {
             if (kind === "theme") {
                 return ringStatusFor("message") === "correct";
@@ -6364,6 +6386,14 @@
                 if (rl === "correct") revealRing("realLife", { announce: false });
                 else if (rl === "partial") setRingPartial("realLife", { announce: false });
                 else clearRing("realLife");
+            }
+            // A question that overrides another ring (the chain build deciding
+            // the Message ring) re-syncs that ring when it is answered.
+            if (question.overridesRing) {
+                const overridden = ringStatusFor(question.overridesRing);
+                if (overridden === "correct") revealRing(question.overridesRing, { announce: false });
+                else if (overridden === "partial") setRingPartial(question.overridesRing, { announce: false });
+                else clearRing(question.overridesRing);
             }
             // The final synthesis question completing makes the chamber show
             // "Clear theme echo" once all parts are connected.
