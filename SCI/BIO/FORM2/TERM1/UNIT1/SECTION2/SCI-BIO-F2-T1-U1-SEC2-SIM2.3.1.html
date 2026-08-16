@@ -21,7 +21,7 @@
          Change the browser tab title here.
          Search "DEV-EDIT" to find every place you need to change.
          ============================================================ -->
-    <title>Simulation Template Shell</title>
+    <title>Heart Health Choices</title>
     <style>
         /* ============================================================
            CHROME — DO NOT EDIT
@@ -472,6 +472,316 @@
            Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
 
+        .sim-card {
+            padding: clamp(18px, 3vw, 30px);
+        }
+
+        .sim-wrapper {
+            display: grid;
+            gap: 20px;
+        }
+
+        .profile-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 80%, var(--surface));
+        }
+
+        .character-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .character-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .character-name {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .character-meta {
+            margin-top: 4px;
+            color: var(--text-soft);
+            font-size: 0.96rem;
+        }
+
+        .risk-card {
+            min-width: min(100%, 280px);
+            flex: 1;
+            display: grid;
+            gap: 10px;
+        }
+
+        .risk-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            color: var(--text-soft);
+            font-weight: 700;
+        }
+
+        .risk-meter {
+            position: relative;
+            width: 100%;
+            height: 24px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .risk-fill {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 50%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #22c55e 0%, #fbbf24 50%, #ef4444 100%);
+            transition: width 0.35s ease, background 0.35s ease;
+        }
+
+        .risk-readout {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            color: var(--text-soft);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+        }
+
+        .decision-panel {
+            display: grid;
+            gap: 16px;
+            background: color-mix(in srgb, var(--surface-2) 70%, var(--surface));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+        }
+
+        .decision-heading {
+            margin: 0;
+            font-size: clamp(1.25rem, 2vw, 1.8rem);
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .choice-btn {
+            text-align: left;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            color: var(--text);
+            display: grid;
+            gap: 8px;
+            min-height: 140px;
+        }
+
+        .choice-btn strong {
+            font-size: 1.06rem;
+        }
+
+        .choice-btn span {
+            color: var(--text-soft);
+            line-height: 1.5;
+        }
+
+        .choice-btn[data-impact="positive"] {
+            border-color: color-mix(in srgb, var(--success) 52%, transparent);
+        }
+
+        .choice-btn[data-impact="negative"] {
+            border-color: color-mix(in srgb, var(--danger) 52%, transparent);
+        }
+
+        .choice-btn[data-impact="positive"]:hover,
+        .choice-btn[data-impact="positive"]:focus-visible {
+            background: color-mix(in srgb, var(--success) 10%, transparent);
+        }
+
+        .choice-btn[data-impact="negative"]:hover,
+        .choice-btn[data-impact="negative"]:focus-visible {
+            background: color-mix(in srgb, var(--danger) 10%, transparent);
+        }
+
+        .feedback-box {
+            display: none;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: color-mix(in srgb, var(--surface) 88%, transparent);
+            color: var(--text-soft);
+            line-height: 1.55;
+        }
+
+        .feedback-box.visible {
+            display: block;
+        }
+
+        .feedback-box.success {
+            border-color: color-mix(in srgb, var(--success) 42%, transparent);
+            background: color-mix(in srgb, var(--success) 11%, transparent);
+        }
+
+        .feedback-box.warning {
+            border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+            background: color-mix(in srgb, var(--warning) 12%, transparent);
+        }
+
+        .feedback-box.danger {
+            border-color: color-mix(in srgb, var(--danger) 42%, transparent);
+            background: color-mix(in srgb, var(--danger) 12%, transparent);
+        }
+
+        .nav-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 8px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 72%, var(--surface));
+        }
+
+        .result-box.visible {
+            display: block;
+        }
+
+        .result-box h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.45rem;
+        }
+
+        .result-box p {
+            margin: 0 0 12px;
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        .assessment {
+            display: none;
+            grid-template-columns: 1fr;
+            gap: 18px;
+            background: color-mix(in srgb, var(--surface-2) 75%, var(--surface));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+        }
+
+        .assessment.visible {
+            display: grid;
+        }
+
+        .question-block {
+            display: grid;
+            gap: 10px;
+        }
+
+        .question-block h4 {
+            margin: 0;
+            font-size: 1.08rem;
+        }
+
+        .choice-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .choice-list label {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: var(--text-soft);
+        }
+
+        .choice-list input {
+            accent-color: var(--accent-2);
+        }
+
+        .assess-input {
+            width: 100%;
+            min-height: 110px;
+            resize: vertical;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            color: var(--text);
+            padding: 12px 14px;
+        }
+
+        .assessment-feedback {
+            display: none;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .assessment-feedback.visible {
+            display: block;
+        }
+
+        .assessment-feedback.correct {
+            border-color: color-mix(in srgb, var(--success) 42%, transparent);
+            background: color-mix(in srgb, var(--success) 11%, transparent);
+        }
+
+        .assessment-feedback.incorrect {
+            border-color: color-mix(in srgb, var(--danger) 42%, transparent);
+            background: color-mix(in srgb, var(--danger) 12%, transparent);
+        }
+
+        @media (max-width: 760px) {
+            .profile-row {
+                align-items: flex-start;
+            }
+        }
+
     </style>
 </head>
 
@@ -538,7 +848,7 @@
              Search "DEV-EDIT" to find every place you need to change.
              ============================================================ -->
         <div class="footer-note">
-            Built as a local, editable shell. Swap the content, keep the structure, and your developers are good to go.
+            Heart Health Choices — a single-file, offline lifestyle-risk simulator for classroom use.
         </div>
     </div>
 
@@ -596,19 +906,19 @@
                                 in the Help/Instructions modal.
            ============================================================ */
         const SIM_CONFIG = {
-            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
-            simId: "blank-simulation-template",
-            title: "Editable Simulation Template",
-            subtitle: "Single-file shell for local student activities",
-            badgeText: "SIM",
-            homeEyebrow: "Template Shell Ready",
+            templateVersion: "2.2.1",
+            simId: "heart-health-choices",
+            title: "Heart Health Choices",
+            subtitle: "Lifestyle-risk decision simulator",
+            badgeText: "HEART",
+            homeEyebrow: "Preventive health",
             homeDescription:
-                "Use this shell to build a child-friendly maths, ELA, or general subject simulation. Replace this description and build your simulation logic in devInit().",
+                "Help Auntie Priya lower her circulatory risk by making everyday lifestyle choices that protect her heart and blood pressure.",
             instructions: [
-                "Read the instructions before starting.",
-                "Click Start to begin the simulation.",
-                "Use the Reset button any time you want to restart from scratch.",
-                "This file runs completely offline in a browser. No internet is needed."
+                "Read the character profile and risk meter before choosing.",
+                "Pick the healthiest option for each daily decision to lower Auntie Priya's risk.",
+                "Use the feedback to understand how meal, activity, and stress choices affect blood pressure.",
+                "Complete the embedded questions and then reset anytime to try a new plan."
             ]
         };
 
@@ -1054,12 +1364,359 @@
         // Sound: playSound("correct"), playSound("levelUp"), etc. are available (see DEV-EDIT: AUDIO).
         // Storage: storageGet/storageSet are available for saving progress, keyed like `sim:${SIM_CONFIG.simId}:mydata`.
 
+        const simulationStages = [
+            {
+                key: "meal",
+                title: "Meal choice",
+                prompt: "What should Auntie Priya eat for dinner?",
+                options: [
+                    {
+                        label: "Balanced plate",
+                        impact: "positive",
+                        delta: -15,
+                        summary: "A balanced meal with fresh vegetables and lean protein supports heart health.",
+                        value: "balanced"
+                    },
+                    {
+                        label: "Highly salted meal",
+                        impact: "negative",
+                        delta: 18,
+                        summary: "High salt intake increases blood pressure. Try balancing this with fresh foods.",
+                        value: "salted"
+                    }
+                ]
+            },
+            {
+                key: "activity",
+                title: "Activity choice",
+                prompt: "How does Auntie Priya spend her evening?",
+                options: [
+                    {
+                        label: "30-minute walk",
+                        impact: "positive",
+                        delta: -12,
+                        summary: "Regular moderate activity strengthens the heart and keeps blood pressure steadier.",
+                        value: "walk"
+                    },
+                    {
+                        label: "Sit all evening",
+                        impact: "negative",
+                        delta: 15,
+                        summary: "Sitting for long periods can raise circulatory risk and make blood pressure harder to manage.",
+                        value: "inactive"
+                    }
+                ]
+            },
+            {
+                key: "stress",
+                title: "Stress management",
+                prompt: "What does Auntie Priya do to unwind?",
+                options: [
+                    {
+                        label: "Breathing break and stretching",
+                        impact: "positive",
+                        delta: -10,
+                        summary: "A calm routine reduces stress and helps support healthy circulation.",
+                        value: "stress-relief"
+                    },
+                    {
+                        label: "No stress management",
+                        impact: "negative",
+                        delta: 10,
+                        summary: "Ongoing stress can raise tension in the body and contribute to high blood pressure over time.",
+                        value: "no-relief"
+                    }
+                ]
+            }
+        ];
+
+        const simulatorState = {
+            risk: 50,
+            stageIndex: 0,
+            choices: {},
+            finalised: false
+        };
+
+        function getSafeZoneLabel(risk) {
+            if (risk <= 35) return "Safe zone";
+            if (risk <= 60) return "Watch zone";
+            return "High risk";
+        }
+
+        function updateRiskMeter() {
+            const fill = document.getElementById("riskMeterFill");
+            const label = document.getElementById("riskLabel");
+            const status = document.getElementById("riskStatus");
+            const safeText = document.getElementById("safeZoneText");
+            fill.style.width = `${simulatorState.risk}%`;
+            label.textContent = `${simulatorState.risk}%`;
+            status.textContent = getSafeZoneLabel(simulatorState.risk);
+            safeText.textContent = "Safe zone: ≤ 35%";
+
+            if (simulatorState.risk <= 35) {
+                fill.style.background = "linear-gradient(90deg, #22c55e 0%, #4ade80 100%)";
+                status.style.color = "var(--success)";
+            } else if (simulatorState.risk <= 60) {
+                fill.style.background = "linear-gradient(90deg, #fbbf24 0%, #facc15 100%)";
+                status.style.color = "var(--warning)";
+            } else {
+                fill.style.background = "linear-gradient(90deg, #ef4444 0%, #f87171 100%)";
+                status.style.color = "var(--danger)";
+            }
+
+            const live = document.getElementById("riskMeterLive");
+            if (live) {
+                live.textContent = `Risk meter changed to ${simulatorState.risk} percent. ${getSafeZoneLabel(simulatorState.risk)}.`;
+            }
+        }
+
+        function renderStage() {
+            const panel = document.getElementById("decisionPanel");
+            const stage = simulationStages[simulatorState.stageIndex];
+            const choiceGrid = document.getElementById("choiceGrid");
+            const feedbackBox = document.getElementById("feedbackBox");
+            const nextBtn = document.getElementById("nextStageBtn");
+            const finishBtn = document.getElementById("finishRoutineBtn");
+
+            document.getElementById("decisionHeading").textContent = stage.title;
+            document.getElementById("decisionPrompt").textContent = stage.prompt;
+            choiceGrid.innerHTML = "";
+
+            stage.options.forEach((option) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "choice-btn";
+                button.dataset.impact = option.impact;
+                button.setAttribute("aria-label", `${option.label}. ${option.summary}`);
+                button.innerHTML = `<strong>${option.label}</strong><span>${option.summary}</span>`;
+                button.addEventListener("click", () => handleChoice(stage.key, option));
+                choiceGrid.appendChild(button);
+            });
+
+            nextBtn.classList.add("hidden");
+            finishBtn.classList.add("hidden");
+            feedbackBox.classList.remove("visible", "success", "warning", "danger");
+
+            if (simulatorState.choices[stage.key]) {
+                const choice = simulatorState.choices[stage.key];
+                const tone = choice.delta < 0 ? "success" : "warning";
+                feedbackBox.textContent = `${choice.summary} Risk is now ${simulatorState.risk}%.`;
+                feedbackBox.classList.add("visible", tone);
+                const isLastStage = simulatorState.stageIndex === simulationStages.length - 1;
+                if (isLastStage) {
+                    finishBtn.classList.remove("hidden");
+                } else {
+                    nextBtn.classList.remove("hidden");
+                }
+            }
+        }
+
+        function handleChoice(stageKey, option) {
+            simulatorState.choices[stageKey] = option;
+            const delta = Number(option.delta);
+            simulatorState.risk = Math.min(100, Math.max(0, simulatorState.risk + delta));
+            updateRiskMeter();
+            renderStage();
+
+            const stage = simulationStages.find((item) => item.key === stageKey);
+            if (option.impact === "negative") {
+                if (stage.key === "meal" && option.value === "salted") {
+                    document.getElementById("feedbackBox").textContent = "High salt intake increases blood pressure. Try balancing this with fresh foods.";
+                } else if (stage.key === "activity" && option.value === "inactive") {
+                    document.getElementById("feedbackBox").textContent = "Not quite. Inactivity can make it harder to keep blood pressure in a healthy range.";
+                } else {
+                    document.getElementById("feedbackBox").textContent = "This choice raises circulatory risk. Try a calmer, more active routine instead.";
+                }
+            } else {
+                document.getElementById("feedbackBox").textContent = `${option.summary} Risk is now ${simulatorState.risk}%.`;
+            }
+
+            const feedbackEl = document.getElementById("feedbackBox");
+            feedbackEl.classList.remove("success", "warning", "danger");
+            feedbackEl.classList.add(option.impact === "positive" ? "success" : "warning");
+            feedbackEl.classList.add("visible");
+        }
+
+        function moveToNextStage() {
+            if (simulatorState.stageIndex < simulationStages.length - 1) {
+                simulatorState.stageIndex += 1;
+                renderStage();
+            }
+        }
+
+        function finalizeRoutine() {
+            simulatorState.finalised = true;
+            document.getElementById("resultBox").classList.add("visible");
+            document.getElementById("assessment").classList.add("visible");
+            document.getElementById("nextStageBtn").classList.add("hidden");
+            document.getElementById("finishRoutineBtn").classList.add("hidden");
+
+            const mealChoice = simulatorState.choices.meal || { value: "salted" };
+            const activityChoice = simulatorState.choices.activity || { value: "inactive" };
+            const stressChoice = simulatorState.choices.stress || { value: "no-relief" };
+            const resultTitle = document.getElementById("resultTitle");
+            const resultText = document.getElementById("resultText");
+
+            const isCorrectPlan = (
+                mealChoice.value === "balanced" &&
+                activityChoice.value === "walk" &&
+                stressChoice.value === "stress-relief"
+            );
+
+            if (simulatorState.risk <= 35 && isCorrectPlan) {
+                resultTitle.textContent = "Excellent work!";
+                resultText.textContent = "Your choices support a healthy circulatory system! A balanced diet and regular moderate activity help maintain a safe blood pressure.";
+            } else if (simulatorState.risk <= 35) {
+                resultTitle.textContent = "Almost there!";
+                resultText.textContent = "The risk is moving into the safe zone, but a healthier routine would be even stronger. Try choosing fresh foods, regular movement, and stress-relief strategies together.";
+            } else {
+                resultTitle.textContent = "Not quite.";
+                resultText.textContent = "High salt intake and inactivity can increase blood pressure over time. Try balancing this with fresh foods and moderate movement.";
+            }
+
+            updateRiskMeter();
+        }
+
+        function checkAssessmentQuestion1() {
+            const selected = document.querySelector('input[name="q1-answer"]:checked');
+            const box = document.getElementById("q1-feedback");
+            if (!selected) {
+                box.textContent = "Choose one risk factor before checking your answer.";
+                box.classList.add("visible", "incorrect");
+                return;
+            }
+            const isCorrect = selected.value === "family";
+            box.textContent = isCorrect
+                ? "The observation is correct. We cannot change our genetics, which makes healthy daily choices even more important."
+                : "Try again: family history is a risk factor Auntie Priya already has that she cannot change.";
+            box.classList.add("visible");
+            box.classList.toggle("correct", isCorrect);
+            box.classList.toggle("incorrect", !isCorrect);
+        }
+
+        function checkAssessmentQuestion2() {
+            const input = document.getElementById("q2-answer");
+            const box = document.getElementById("q2-feedback");
+            const answer = input.value.trim().toLowerCase();
+            const hits = ["walk", "exercise", "heart", "blood pressure", "stronger", "circulatory", "stable"];
+            const found = hits.filter((word) => answer.includes(word));
+            const isCorrect = answer.length > 18 && found.length >= 2;
+            box.textContent = isCorrect
+                ? "That is accurate. A stronger heart pumps blood more effectively, which lowers the risk of circulatory conditions."
+                : "Regular moderate physical activity strengthens the heart muscle and helps keep blood pressure stable.";
+            box.classList.add("visible");
+            box.classList.toggle("correct", isCorrect);
+            box.classList.toggle("incorrect", !isCorrect);
+        }
+
+        function checkAssessmentQuestion3() {
+            const input = document.getElementById("q3-answer");
+            const box = document.getElementById("q3-feedback");
+            const answer = input.value.trim().toLowerCase();
+            const hits = ["salt", "high salt", "blood pressure", "heart", "harder", "vessels", "healthy"];
+            const found = hits.filter((word) => answer.includes(word));
+            const isCorrect = answer.length > 18 && found.length >= 2;
+            box.textContent = isCorrect
+                ? "Correct. Managing your salt intake is a safe and effective way to support blood vessel health."
+                : "A high salt intake is linked to higher blood pressure, which forces the heart to work harder.";
+            box.classList.add("visible");
+            box.classList.toggle("correct", isCorrect);
+            box.classList.toggle("incorrect", !isCorrect);
+        }
+
         function devInit() {
-            // Build your simulation UI/logic inside dom.simContainer here.
+            simulatorState.risk = 50;
+            simulatorState.stageIndex = 0;
+            simulatorState.choices = {};
+            simulatorState.finalised = false;
+
+            dom.simContainer.innerHTML = `
+                <div class="sim-wrapper">
+                    <div class="profile-row">
+                        <div class="character-card">
+                            <div class="character-avatar" aria-hidden="true">AP</div>
+                            <div>
+                                <h2 class="character-name">Auntie Priya</h2>
+                                <div class="character-meta">Age 40 • Family history: Hypertension</div>
+                            </div>
+                        </div>
+
+                        <div class="risk-card" aria-live="polite" aria-atomic="true">
+                            <div class="risk-header">
+                                <span>Circulatory risk meter</span>
+                                <span id="riskStatus" class="status-pill">Watch zone</span>
+                            </div>
+                            <div class="risk-meter" aria-label="Risk meter showing current health risk">
+                                <div id="riskMeterFill" class="risk-fill" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"></div>
+                            </div>
+                            <div class="risk-readout">
+                                <span id="riskLabel">50%</span>
+                                <span id="safeZoneText">Safe zone: ≤ 35%</span>
+                            </div>
+                            <div id="riskMeterLive" class="hidden">Risk meter at 50 percent.</div>
+                        </div>
+                    </div>
+
+                    <div class="decision-panel" id="decisionPanel">
+                        <h3 id="decisionHeading" class="decision-heading">Meal choice</h3>
+                        <p id="decisionPrompt">What should Auntie Priya eat for dinner?</p>
+                        <div id="choiceGrid" class="choice-grid"></div>
+                        <div id="feedbackBox" class="feedback-box" aria-live="polite"></div>
+                        <div class="nav-row">
+                            <button id="nextStageBtn" class="primary-btn hidden" type="button">Next choice</button>
+                            <button id="finishRoutineBtn" class="primary-btn hidden" type="button">Finish routine</button>
+                        </div>
+                    </div>
+
+                    <div id="resultBox" class="result-box" aria-live="polite">
+                        <h3 id="resultTitle">Your result</h3>
+                        <p id="resultText">Review the final outcome and learn which choices best support a healthy heart.</p>
+                    </div>
+
+                    <div id="assessment" class="assessment" aria-live="polite">
+                        <div class="question-block">
+                            <h4>Question 1: Which risk factor for hypertension does the fictional character already have that she cannot change?</h4>
+                            <div class="choice-list">
+                                <label><input type="radio" name="q1-answer" value="family" /> Family history of hypertension</label>
+                                <label><input type="radio" name="q1-answer" value="meal" /> A highly salted meal</label>
+                                <label><input type="radio" name="q1-answer" value="activity" /> A sedentary evening</label>
+                                <label><input type="radio" name="q1-answer" value="stress" /> Stressful daily events</label>
+                            </div>
+                            <button class="secondary-btn" type="button" onclick="checkAssessmentQuestion1()">Check answer</button>
+                            <div id="q1-feedback" class="assessment-feedback"></div>
+                        </div>
+
+                        <div class="question-block">
+                            <h4>Question 2: Explain why selecting a 30-minute walk is a preventative choice for the circulatory system.</h4>
+                            <textarea id="q2-answer" class="assess-input" placeholder="Type your answer here..."></textarea>
+                            <button class="secondary-btn" type="button" onclick="checkAssessmentQuestion2()">Check answer</button>
+                            <div id="q2-feedback" class="assessment-feedback"></div>
+                        </div>
+
+                        <div class="question-block">
+                            <h4>Question 3: Why is replacing a highly salted meal with a balanced meal considered a healthy choice?</h4>
+                            <textarea id="q3-answer" class="assess-input" placeholder="Type your answer here..."></textarea>
+                            <button class="secondary-btn" type="button" onclick="checkAssessmentQuestion3()">Check answer</button>
+                            <div id="q3-feedback" class="assessment-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            updateRiskMeter();
+            renderStage();
+
+            document.getElementById("nextStageBtn").addEventListener("click", moveToNextStage);
+            document.getElementById("finishRoutineBtn").addEventListener("click", finalizeRoutine);
         }
 
         function devReset() {
-            // Clear/reset any simulation-specific state here.
+            simulatorState.risk = 50;
+            simulatorState.stageIndex = 0;
+            simulatorState.choices = {};
+            simulatorState.finalised = false;
+            dom.simContainer.innerHTML = "";
+            devInit();
         }
     </script>
 </body>
