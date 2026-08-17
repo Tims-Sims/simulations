@@ -665,7 +665,7 @@
             <div class="guide-grid">
                 <article class="guide-card"><span class="guide-symbol" style="background:#17203f">I</span><div><h4>Iodine test</h4><p><strong>Tests for:</strong> Starch.<br><strong>Procedure:</strong> Add iodine directly.<br><strong>Positive result:</strong> Yellow-brown changes to blue-black.<br><strong>What it means:</strong> Starch, a complex carbohydrate, is present.</p></div></article>
                 <article class="guide-card"><span class="guide-symbol" style="background:#7d3bb8">B</span><div><h4>Biuret test</h4><p><strong>Tests for:</strong> Protein.<br><strong>Procedure:</strong> Add Biuret reagent and swirl gently.<br><strong>Positive result:</strong> Blue changes to purple or lilac.<br><strong>What it means:</strong> Protein is present.</p></div></article>
-                <article class="guide-card"><span class="guide-symbol" style="background:#a63120">H</span><div><h4>Benedict's test</h4><p><strong>Tests for:</strong> Reducing sugar.<br><strong>Procedure:</strong> Add Benedict's solution and heat safely in a hot water bath.<br><strong>Positive result:</strong> Green, yellow, orange, or brick-red appears.<br><strong>What it means:</strong> Reducing sugar, a simple carbohydrate, is present.</p></div></article>
+                <article class="guide-card"><span class="guide-symbol" style="background:#a63120">Be</span><div><h4>Benedict's test</h4><p><strong>Tests for:</strong> Reducing sugar.<br><strong>Procedure:</strong> Add Benedict's solution and heat safely in a hot water bath.<br><strong>Positive result:</strong> Green, yellow, orange, or brick-red appears.<br><strong>What it means:</strong> Reducing sugar, a simple carbohydrate, is present.</p></div></article>
             </div>
             <div class="button-row" style="margin-top: 22px; justify-content: flex-start;">
                 <button class="primary-btn" id="doneGuideBtn">Close guide</button>
@@ -1222,7 +1222,11 @@
                 const parsed = JSON.parse(raw);
                 const allowed = ["sample-a", "sample-b", "sample-c", "assessment", "completion"];
                 if (!parsed || !allowed.includes(parsed.screen)) return createInitialLabState();
-                return Object.assign(createInitialLabState(), parsed);
+                const restored = Object.assign(createInitialLabState(), parsed);
+                Object.keys(restored.feedback || {}).forEach((sampleId) => {
+                    if (/ selected\. Choose Add selected reagent\.$/.test(restored.feedback[sampleId])) restored.feedback[sampleId] = "";
+                });
+                return restored;
             } catch (err) {
                 return createInitialLabState();
             }
@@ -1427,7 +1431,7 @@
             labState.procedureStates[sample.id] = false;
             labState.readyToRecord[sample.id] = false;
             labState.recordChoices[sample.id] = {};
-            labState.feedback[sample.id] = `${REAGENTS.find((item) => item.id === reagent).label} selected. Choose Add selected reagent.`;
+            labState.feedback[sample.id] = "";
             saveLabState();
             renderLab();
             const applyButton = document.querySelector('[data-action="apply-reagent"]');
@@ -1445,16 +1449,16 @@
             labState.samplePhases[sample.id] = sample.id === "a" && reagent === "iodine" ? "observe" : reagent === sample.correctReagent && sample.procedure ? "procedure" : "choose";
             if (sample.id === "a") {
                 if (reagent === "iodine") setSampleFeedback(sample, "Positive iodine test: the bread changed from yellow-brown to blue-black. Observe the labelled result, then continue.", "Sample A result: iodine changed from yellow-brown to blue-black.");
-                else if (reagent === "benedicts") setSampleFeedback(sample, "This mixture stays blue in the simplified model. Benedict's solution tests for reducing sugars and requires heating; choose the test for starch.");
-                else setSampleFeedback(sample, "This mixture stays blue in the simplified model. Biuret tests for protein; choose the reagent used to test for starch.");
+                else if (reagent === "benedicts") setSampleFeedback(sample, "The mixture remains blue, so this is a negative result for the selected test. Review the Food Test Guide, then try a different reagent.");
+                else setSampleFeedback(sample, "The mixture remains blue, so this is a negative result for the selected test. Review the Food Test Guide, then try a different reagent.");
             } else if (sample.id === "b") {
                 if (reagent === "biuret") setSampleFeedback(sample, "Biuret has been added. Swirl gently to mix the reagent with the egg white solution.", "Sample B result before swirling: the Biuret mixture is blue.");
-                else if (reagent === "iodine") setSampleFeedback(sample, "The iodine remains yellow-brown: a negative starch result. Choose the reagent used to test for protein.");
-                else setSampleFeedback(sample, "The Benedict's mixture remains blue in this simplified sample: a negative reducing-sugar result. Choose the protein test.");
+                else if (reagent === "iodine") setSampleFeedback(sample, "The iodine remains yellow-brown, so this is a negative result. Review the Food Test Guide, then try a different reagent.");
+                else setSampleFeedback(sample, "The mixture remains blue, so this is a negative result for the selected test. Review the Food Test Guide, then try a different reagent.");
             } else {
                 if (reagent === "benedicts") setSampleFeedback(sample, "Benedict's solution has been added, but the mixture is still blue. Benedict's solution requires thermal energy to react. Try heating the sample safely.", "Sample C result before heating: the Benedict's mixture remains blue. Heating is required.");
-                else if (reagent === "iodine") setSampleFeedback(sample, "The iodine remains yellow-brown: a negative starch result. Choose the reagent used to test for reducing sugar.");
-                else setSampleFeedback(sample, "The Biuret mixture remains blue: a negative protein result. Choose the reducing-sugar test.");
+                else if (reagent === "iodine") setSampleFeedback(sample, "The iodine remains yellow-brown, so this is a negative result. Review the Food Test Guide, then try a different reagent.");
+                else setSampleFeedback(sample, "The mixture remains blue, so this is a negative result for the selected test. Review the Food Test Guide, then try a different reagent.");
             }
         }
 
@@ -1487,9 +1491,9 @@
             if (!choices.observation || !choices.nutrient) { setSampleFeedback(sample, "Choose both an observation and a nutrient before recording the result."); return; }
             const observationCorrect = choices.observation === sample.observation;
             const nutrientCorrect = choices.nutrient === sample.nutrient;
-            if (!observationCorrect && !nutrientCorrect) { setSampleFeedback(sample, `Use both parts of the evidence: record ${sample.observationLabel.toLowerCase()} and conclude ${sample.nutrientLabel.toLowerCase()}.`); return; }
-            if (!observationCorrect) { setSampleFeedback(sample, `Check the labelled test area. The positive result to record is ${sample.observationLabel.toLowerCase()}.`); return; }
-            if (!nutrientCorrect) { setSampleFeedback(sample, `${sample.observationLabel} in this test shows ${sample.nutrientLabel.toLowerCase()}.`); return; }
+            if (!observationCorrect && !nutrientCorrect) { setSampleFeedback(sample, "Recheck the labelled test result and use the Food Test Guide to connect that result to a nutrient. Then revise both choices."); return; }
+            if (!observationCorrect) { setSampleFeedback(sample, "Compare your observation choice with the labelled test result above, then try again."); return; }
+            if (!nutrientCorrect) { setSampleFeedback(sample, "Use the Food Test Guide to connect this test's positive result to the nutrient it detects, then try again."); return; }
             const reagentLabel = REAGENTS.find((item) => item.id === sample.correctReagent).label;
             labState.recordedSamples[sample.id] = { reagent: sample.id === "c" ? `${reagentLabel} + heat` : reagentLabel, observation: sample.observationLabel, nutrient: sample.nutrientLabel };
             labState.samplePhases[sample.id] = "complete";
@@ -1518,9 +1522,9 @@
                 labState.assessmentFeedback = "Correct. Sample A, the bread, was the only sample with a positive iodine test for starch, a complex carbohydrate.";
                 if (!labState.history.some((item) => item.id === "assessment")) labState.history.push({id:"assessment", text:"Final question: Sample A, bread, is the complex-carbohydrate source because iodine turned blue-black, showing starch."});
             } else if (labState.assessmentAnswer === "sample-b") {
-                labState.assessmentFeedback = "Egg white gave a positive Biuret result for protein, not starch. Look for the sample that turned iodine blue-black.";
+                labState.assessmentFeedback = "Review the three recorded results and compare the nutrient identified in each sample with the meaning of complex carbohydrate. Then try again.";
             } else {
-                labState.assessmentFeedback = "Apple juice gave a positive Benedict's result for reducing sugar, a simple carbohydrate. Look for the positive starch test.";
+                labState.assessmentFeedback = "Review the three recorded results and compare the nutrient identified in each sample with the meaning of complex carbohydrate. Then try again.";
             }
             saveLabState();
             renderLab("assessmentFeedback");
