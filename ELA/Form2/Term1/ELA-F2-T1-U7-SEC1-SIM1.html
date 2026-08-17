@@ -839,7 +839,8 @@
         }
 
         .task-prompt {
-            margin: 4px 0 14px;
+            margin-top: 8px;
+            margin-bottom: 20px;
             color: var(--text-soft);
             line-height: 1.6;
         }
@@ -864,19 +865,19 @@
         }
 
         .group-block {
-            margin-top: 14px;
+            margin-top: 18px;
         }
 
         .group-label {
             font-weight: 800;
             color: var(--text);
-            margin-bottom: 2px;
+            margin-bottom: 6px;
         }
 
         .group-prompt {
             color: var(--muted);
             font-size: 0.95rem;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
         }
 
         .option-list {
@@ -1231,9 +1232,10 @@
 
             <div class="controls">
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open rules">❔ Rules</button>
+                <button class="control-btn" id="reviewBtn" aria-label="Review progress" disabled>📋 Review</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
-                <button class="danger-btn" id="resetBtn" aria-label="Exit the theatre"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Exit</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset the sim"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Reset</button>
             </div>
         </header>
 
@@ -1422,11 +1424,23 @@
     <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
         <section class="modal-card">
             <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
-            <h3 id="resetConfirmHeading">Exit the theatre?</h3>
+            <h3 id="resetConfirmHeading">Reset the sim?</h3>
             <p>This returns you to the mission brief and clears your current progress.</p>
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
-                <button class="secondary-btn" id="cancelResetBtn">Stay</button>
-                <button class="danger-btn" id="confirmResetBtn">Exit</button>
+                <button class="secondary-btn" id="cancelResetBtn">Keep going</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="playAgainConfirmModal" role="dialog" aria-modal="true" aria-labelledby="playAgainConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closePlayAgainConfirmBtn" aria-label="Close play again confirmation">×</button>
+            <h3 id="playAgainConfirmHeading">Start over?</h3>
+            <p>This will clear your current progress and restart the mission from the beginning.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelPlayAgainBtn">Keep going</button>
+                <button class="danger-btn" id="confirmPlayAgainBtn">Start over</button>
             </div>
         </section>
     </div>
@@ -1517,7 +1531,12 @@
             resetConfirmModal: document.getElementById("resetConfirmModal"),
             closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
             cancelResetBtn: document.getElementById("cancelResetBtn"),
-            confirmResetBtn: document.getElementById("confirmResetBtn")
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            playAgainConfirmModal: document.getElementById("playAgainConfirmModal"),
+            closePlayAgainConfirmBtn: document.getElementById("closePlayAgainConfirmBtn"),
+            cancelPlayAgainBtn: document.getElementById("cancelPlayAgainBtn"),
+            confirmPlayAgainBtn: document.getElementById("confirmPlayAgainBtn"),
+            reviewBtn: document.getElementById("reviewBtn")
         };
 
         initializeApp();
@@ -1561,6 +1580,12 @@
             dom.startBtn.addEventListener("click", () => {
                 showScreen("sim");
                 devInit();
+                var seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+                if (seen !== "true") {
+                    openInstructionsModal();
+                    storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                    dom.helpBtn.classList.remove("pulse-help");
+                }
             });
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
@@ -1591,6 +1616,19 @@
                     closeResetConfirmModal();
                 }
             });
+            dom.closePlayAgainConfirmBtn.addEventListener("click", closePlayAgainConfirmModal);
+            dom.cancelPlayAgainBtn.addEventListener("click", closePlayAgainConfirmModal);
+            dom.confirmPlayAgainBtn.addEventListener("click", () => {
+                closePlayAgainConfirmModal();
+                devReset();
+                showScreen("home");
+            });
+            dom.playAgainConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.playAgainConfirmModal) {
+                    closePlayAgainConfirmModal();
+                }
+            });
+            dom.reviewBtn.addEventListener("click", handleReviewBtn);
             document.addEventListener("fullscreenchange", updateFullscreenButton);
             document.addEventListener("keydown", handleKeyShortcuts);
         }
@@ -1624,6 +1662,14 @@
 
         function closeResetConfirmModal() {
             dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function openPlayAgainConfirmModal() {
+            dom.playAgainConfirmModal.classList.add("show");
+        }
+
+        function closePlayAgainConfirmModal() {
+            dom.playAgainConfirmModal.classList.remove("show");
         }
 
         function showScreen(screenName) {
@@ -1681,6 +1727,7 @@
             if (event.key === "Escape") {
                 closeInstructionsModal();
                 closeResetConfirmModal();
+                closePlayAgainConfirmModal();
             }
         }
 
@@ -1720,6 +1767,13 @@
             { id: "C", label: "Genre and Visual Treatment", steps: ["genre", "visual"] },
             { id: "D", label: "Final Scene", steps: ["theme", "evidence", "parallel"] }
         ];
+
+        function shuffleArray(arr) {
+            for (var i = arr.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+            }
+        }
 
         const STEPS = {
             place: {
@@ -1940,6 +1994,10 @@
             }
         };
 
+        Object.keys(STEPS).forEach(function (k) {
+            STEPS[k].groups.forEach(function (g) { shuffleArray(g.options); });
+        });
+
         const SKILL_LABELS = {
             place: "Using the exact setting words — place",
             time: "Using the exact setting words — time",
@@ -2082,6 +2140,7 @@
             const onFirst = !inReview && gameState.screenIndex === 0 && gameState.stepIndex === 0;
             document.getElementById("backBtn").disabled = inReview ? gameState.reviewIndex === 0 : (onFirst && !gameState.completed);
             document.getElementById("hintBtn").disabled = inReview || gameState.completed;
+            dom.reviewBtn.disabled = inReview || gameState.completed || !hasAnyReviewable();
         }
 
         function renderStep(step, mode) {
@@ -2139,17 +2198,21 @@
 
         function renderReview(idx) {
             const sc = SCREENS[idx];
+            const anyDone = sc.steps.some(function (s) { return gameState.done[s]; });
             let html = '<div class="task-card">' +
                 '<div class="task-kicker">Review — ' + escapeHtml(sc.label) + '</div>' +
-                '<h3 class="task-title">Bolt already opened</h3>' +
-                '<p class="task-prompt">Here are the correct answers for this bolt. Press Continue to return to your place in the mission.</p>';
+                '<h3 class="task-title">' + (anyDone ? 'Bolt already opened' : 'Upcoming bolt') + '</h3>' +
+                '<p class="task-prompt">' + (anyDone
+                    ? 'Here are the correct answers for this bolt. Press Continue to return to your place in the mission.'
+                    : 'You haven\'t opened this bolt yet. Press Continue to return to your place in the mission.') + '</p>';
             sc.steps.forEach(function (sid) {
                 const step = STEPS[sid];
+                const stepDone = !!gameState.done[sid];
                 html += '<div class="group-block"><div class="group-label">' + escapeHtml(step.title) + '</div>';
                 step.groups.forEach(function (g) {
                     html += '<div class="group-prompt">' + escapeHtml(g.label) + '</div><div class="option-list">';
                     g.options.forEach(function (o) {
-                        const cls = "choice-btn " + (o.correct ? "correct-mark" : "");
+                        const cls = "choice-btn" + (stepDone && o.correct ? " correct-mark" : "");
                         html += '<button type="button" class="' + cls + '" disabled>' + escapeHtml(o.label) + '</button>';
                     });
                     html += '</div>';
@@ -2159,7 +2222,11 @@
             html += '<p class="fb-line" style="margin-top:12px;color:var(--success);font-weight:700;">✓ Bolt open — the correct answers are marked.</p></div>';
             document.getElementById("taskArea").innerHTML = html;
             clearFeedback();
-            renderActions([{ action: "reviewcontinue", label: "Continue" }]);
+            var actions = [{ action: "reviewcontinue", label: "Continue" }];
+            if (idx < SCREENS.length - 1) {
+                actions.push({ action: "reviewnext", label: "Next" });
+            }
+            renderActions(actions);
             renderProgress();
             renderDoor();
             renderStage();
@@ -2183,6 +2250,7 @@
                 complete: { label: "Escape the theatre", cls: "primary-btn" },
                 tryagain: { label: "Try Again", cls: "secondary-btn" },
                 reviewcontinue: { label: "Continue", cls: "primary-btn" },
+                reviewnext: { label: "Next", cls: "secondary-btn" },
                 playagain: { label: "Play again", cls: "primary-btn" }
             };
             let html = "";
@@ -2243,7 +2311,7 @@
                         '<p class="fb-line"><b>Correct model:</b> ' + escapeHtml(fb.model) + '</p></div>';
                 });
                 document.getElementById("feedbackArea").innerHTML = html;
-                renderActions([{ action: "tryagain", label: "Try Again" }]);
+                renderActions([{ action: "check", label: "Check answer" }]);
             }
             saveGame();
         }
@@ -2286,6 +2354,28 @@
             renderActions([{ action: "check", label: "Check answer" }]);
         }
 
+        function isScreenReviewable(idx) {
+            var sc = SCREENS[idx];
+            return sc.steps.some(function (s) { return gameState.done[s]; });
+        }
+
+        function hasAnyReviewable() {
+            for (var i = 0; i < SCREENS.length; i++) {
+                if (isScreenReviewable(i)) return true;
+            }
+            return false;
+        }
+
+        function handleReviewBtn() {
+            if (gameState.reviewIndex !== null) return;
+            var startIdx = 0;
+            for (var i = 0; i < SCREENS.length; i++) {
+                if (isScreenReviewable(i)) { startIdx = i; break; }
+            }
+            gameState.reviewIndex = startIdx;
+            renderScreen();
+        }
+
         function handleBack() {
             if (gameState.reviewIndex !== null) {
                 if (gameState.reviewIndex > 0) { gameState.reviewIndex--; renderScreen(); saveGame(); }
@@ -2324,6 +2414,7 @@
             if (gameState.reviewIndex !== null) return;
             const stepId = btn.dataset.step;
             if (gameState.done[stepId]) return;
+            clearFeedback();
             toggleSelection(stepId, btn.dataset.group, btn.dataset.opt, btn.dataset.kind);
             syncGroupClasses(stepId, btn.dataset.group);
         }
@@ -2339,6 +2430,13 @@
                 gameState.reviewIndex = null;
                 renderScreen();
                 saveGame();
+            }
+            else if (a === "reviewnext") {
+                if (gameState.reviewIndex !== null && gameState.reviewIndex < SCREENS.length - 1) {
+                    gameState.reviewIndex++;
+                    renderReview(gameState.reviewIndex);
+                    saveGame();
+                }
             }
             else if (a === "playagain") { handlePlayAgain(); }
         }
@@ -2359,6 +2457,7 @@
         }
 
         function renderCompletion() {
+            clearFeedback();
             const rep = computeReport();
             document.getElementById("taskArea").innerHTML =
                 '<div class="task-card complete-card">' +
@@ -2405,8 +2504,7 @@
         }
 
         function handlePlayAgain() {
-            devReset();
-            showScreen("home");
+            openPlayAgainConfirmModal();
         }
 
         let gameBound = false;
