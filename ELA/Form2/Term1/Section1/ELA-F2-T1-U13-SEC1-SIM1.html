@@ -1892,12 +1892,13 @@
                             <div class="answer-area" id="answerArea"></div>
 
                             <div class="button-row">
+                                <button type="button" class="secondary-btn hidden" id="backBtn">← Back</button>
                                 <button type="button" class="secondary-btn" id="hintBtn">💡 Hint</button>
                                 <button type="submit" class="primary-btn" id="submitBtn">Submit Answer</button>
                                 <!-- Shown in place of Submit once the current question is
                                      graded (answered). Label becomes "Finish →" on the
-                                     last question. Revisit step dots to reach answered
-                                     questions; there is no Previous button. -->
+                                     last question. Revisit step dots or press Back to
+                                     reach earlier questions. -->
                                 <button type="button" class="primary-btn hidden" id="nextBtn">Next Question →</button>
                                 <!-- Shown after a wrong/partial answer when attempts
                                      remain (SIM_CONFIG.attemptsPerQuestion). Clicking it
@@ -3100,6 +3101,7 @@
             answerForm: document.getElementById("answerForm"),
             answerArea: document.getElementById("answerArea"),
             hintBtn: document.getElementById("hintBtn"),
+            backBtn: document.getElementById("backBtn"),
             submitBtn: document.getElementById("submitBtn"),
             hintBox: document.getElementById("hintBox"),
             feedbackBox: document.getElementById("feedbackBox"),
@@ -3226,6 +3228,7 @@
 
             dom.answerForm.addEventListener("submit", handleAnswerSubmit);
             dom.hintBtn.addEventListener("click", showHint);
+            dom.backBtn.addEventListener("click", goBack);
             dom.nextBtn.addEventListener("click", goNext);
             dom.tryAgainBtn.addEventListener("click", tryAgain);
             dom.playAgainBtn.addEventListener("click", () => {
@@ -6223,6 +6226,14 @@
         /* ------------------------------------------------------------
            Navigation, progress, step dots.
            ------------------------------------------------------------ */
+        function goBack() {
+            if (state.currentIndex <= 0) return;
+            state.currentIndex--;
+            renderQuestion();
+            dom.questionTitle.focus({ preventScroll: false });
+            saveQuizProgress();
+        }
+
         function goNext() {
             const question = currentQuestion();
             // Testing mode: move on (and reach the summary) at any time.
@@ -6256,7 +6267,9 @@
         // Revisiting an answered question via the step dots also shows Next.
         function updateNavigationButtons() {
             const answered = isAnswered(currentQuestion().id);
+            const isFirst = state.currentIndex === 0;
             const isLast = state.currentIndex === activeQuestions.length - 1;
+            dom.backBtn.classList.toggle("hidden", isFirst);
             dom.submitBtn.classList.toggle("hidden", answered);
             dom.submitBtn.disabled = false;
             // Testing mode: Next is always available so the builder can page
