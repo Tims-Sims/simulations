@@ -625,11 +625,29 @@
             position: absolute;
             top: 4px;
             left: 50%;
+            display: grid;
             width: 106px;
+            min-height: 44px;
+            padding: 0;
+            border: 0;
+            background: transparent;
             transform: translateX(-50%) rotate(-18deg);
             transform-origin: 74% 88%;
             filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.25));
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
         }
+
+        .hammer svg { width: 100%; overflow: visible; }
+        .hammer:hover {
+            transform: translateX(-50%) rotate(-18deg);
+            outline: 3px solid #facc15;
+            outline-offset: 3px;
+            border-radius: 12px;
+        }
+        .hammer:active { cursor: grabbing; }
+        .hammer:disabled { cursor: default; opacity: 1; }
 
         .physical-stage.is-animating .hammer {
             animation: hammer-strike 0.78s cubic-bezier(.35, .02, .25, 1);
@@ -641,6 +659,13 @@
             min-height: 132px;
             place-items: center;
             padding: 4px;
+        }
+
+        .large-food.is-drag-over {
+            border-radius: 18px;
+            outline: 4px solid #f59e0b;
+            outline-offset: 5px;
+            background: color-mix(in srgb, #f59e0b 15%, transparent);
         }
 
         .chicken-leg {
@@ -833,6 +858,12 @@
 
         .action-btn { min-width: 152px; min-height: 48px; }
         .action-btn:disabled { cursor: not-allowed; opacity: .55; transform: none; }
+
+        #crushBtn {
+            width: auto;
+            min-width: 0;
+            padding-inline: 20px;
+        }
 
         .model-support {
             display: grid;
@@ -1233,25 +1264,27 @@
                                     <div>
                                         <div class="card-label"><span aria-hidden="true">1</span> TEETH MODEL</div>
                                         <h3 id="physicalHeading" tabindex="-1">Use the hammer to crush the food</h3>
-                                        <p>Select <strong>Crush food</strong>. The hammer represents teeth breaking food into smaller pieces.</p>
+                                        <p>Drag the hammer onto the food, or choose <strong>Crush</strong>. The hammer represents teeth breaking food into smaller pieces.</p>
                                     </div>
                                     <span class="step-chip">Step 1 of 3</span>
                                 </div>
 
-                                <div class="model-stage physical-stage" id="physicalStage" aria-label="One cooked chicken leg ready to be crushed">
-                                    <svg class="hammer" id="hammerGraphic" viewBox="0 0 150 150" aria-hidden="true">
-                                        <rect x="68" y="48" width="16" height="88" rx="8" fill="#f2b35d" stroke="#24152c" stroke-width="5"></rect>
-                                        <rect x="30" y="21" width="92" height="42" rx="10" fill="#d8e2ec" stroke="#24152c" stroke-width="6"></rect>
-                                        <path d="M39 31h74" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".72"></path>
-                                    </svg>
+                                <div class="model-stage physical-stage" id="physicalStage" aria-label="One cooked chicken leg ready to be crushed. Drop the hammer here.">
+                                    <button class="hammer" id="hammerTool" type="button" draggable="true" aria-label="Hammer tool. Drag it onto the chicken, or use the Crush button.">
+                                        <svg viewBox="0 0 150 150" aria-hidden="true">
+                                            <rect x="68" y="48" width="16" height="88" rx="8" fill="#f2b35d" stroke="#24152c" stroke-width="5"></rect>
+                                            <rect x="30" y="21" width="92" height="42" rx="10" fill="#d8e2ec" stroke="#24152c" stroke-width="6"></rect>
+                                            <path d="M39 31h74" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".72"></path>
+                                        </svg>
+                                    </button>
                                     <div class="food-block large-food" id="largeFood" role="img" aria-label="One cooked golden-brown chicken leg">
                                         <svg class="chicken-leg" viewBox="0 0 310 160" aria-hidden="true">
+                                            <path d="M214 76L267 95" fill="none" stroke="#7a4b2a" stroke-width="27" stroke-linecap="round"></path>
+                                            <path d="M214 76L267 95" fill="none" stroke="#fff0c2" stroke-width="19" stroke-linecap="round"></path>
+                                            <circle cx="278" cy="92" r="14" fill="#fff0c2" stroke="#7a4b2a" stroke-width="5"></circle>
+                                            <circle cx="270" cy="105" r="13" fill="#fff0c2" stroke="#7a4b2a" stroke-width="5"></circle>
                                             <path d="M66 31C31 43 16 79 31 111C45 140 84 150 121 130C149 115 164 91 184 82C201 74 213 75 226 81L240 59C224 49 211 44 194 45C171 46 153 58 137 48C117 34 94 22 66 31Z" fill="#d9792f" stroke="#5f3219" stroke-width="7" stroke-linejoin="round"></path>
                                             <path d="M50 58C67 40 101 43 124 59" fill="none" stroke="#f9ca76" stroke-width="12" stroke-linecap="round" opacity=".8"></path>
-                                            <path d="M226 81L267 103" fill="none" stroke="#fff0c2" stroke-width="19" stroke-linecap="round"></path>
-                                            <path d="M226 81L267 103" fill="none" stroke="#7a4b2a" stroke-width="5" stroke-linecap="round"></path>
-                                            <circle cx="278" cy="100" r="14" fill="#fff0c2" stroke="#7a4b2a" stroke-width="5"></circle>
-                                            <circle cx="270" cy="113" r="13" fill="#fff0c2" stroke="#7a4b2a" stroke-width="5"></circle>
                                             <circle cx="84" cy="91" r="10" fill="#a44720" opacity=".65"></circle>
                                         </svg>
                                     </div>
@@ -1263,7 +1296,7 @@
                                 </div>
 
                                 <div class="model-actions">
-                                    <button class="primary-btn action-btn" id="crushBtn" type="button">Crush food</button>
+                                    <button class="primary-btn action-btn" id="crushBtn" type="button">Crush</button>
                                     <button class="secondary-btn action-btn" id="replayPhysicalBtn" type="button" hidden>Replay crushing</button>
                                 </div>
                                 <form class="inline-question" id="hammerQuestion" novalidate hidden>
@@ -1288,7 +1321,7 @@
                                     <div>
                                         <div class="card-label"><span aria-hidden="true">2</span> ENZYME MODEL</div>
                                         <h3 id="chemicalHeading" tabindex="-1">Use protease on the protein</h3>
-                                        <p>Select <strong>Protease Scissors</strong>, then choose <strong>Apply enzyme</strong>. You may also drag the scissors onto the protein.</p>
+                                        <p>Drag <strong>Protease Scissors</strong> onto the protein, or choose <strong>Apply enzyme</strong>. Protease catalyzes a chemical reaction that breaks protein into smaller substances.</p>
                                     </div>
                                     <span class="step-chip">Step 2 of 3</span>
                                 </div>
@@ -1310,7 +1343,7 @@
 
                                 <div class="model-stage chemical-stage" id="enzymeDropZone" aria-label="Large protein molecule target for Protease Scissors">
                                     <div class="protein-model" id="proteinModel" role="img" aria-label="One large linked purple protein molecule representation">
-                                        <div class="protein-chain" aria-hidden="true"><span>P</span><span>R</span><span>O</span><span>T</span></div>
+                                        <div class="protein-chain" aria-hidden="true"><span>PR</span><span>OT</span><span>EI</span><span>N</span></div>
                                         <strong>Large protein molecule</strong>
                                     </div>
                                     <div class="amino-products" id="aminoProducts" hidden role="img" aria-label="Four smaller amino-acid representations with different shapes, patterns, colours, and labels">
@@ -1322,7 +1355,7 @@
                                 </div>
 
                                 <div class="model-actions">
-                                    <button class="primary-btn action-btn" id="applyEnzymeBtn" type="button" disabled>Apply enzyme</button>
+                                    <button class="primary-btn action-btn" id="applyEnzymeBtn" type="button">Apply enzyme</button>
                                     <button class="secondary-btn action-btn" id="replayChemicalBtn" type="button" hidden>Replay enzyme action</button>
                                 </div>
                                 <form class="inline-question" id="enzymeQuestion" novalidate hidden>
@@ -1356,7 +1389,7 @@
                                     <fieldset class="check-card wide-check" id="roleCheckCard">
                                         <legend class="sr-only">What do the Protease Scissors represent enzymes doing?</legend>
                                         <p class="question-prompt-inside" aria-hidden="true">What do the Protease Scissors represent enzymes doing?</p>
-                                        <label class="choice-card"><input type="radio" name="enzyme-role-check" value="break-down"><span>Breaking large insoluble food substances into smaller soluble substances</span></label>
+                                        <label class="choice-card"><input type="radio" name="enzyme-role-check" value="break-down"><span>Breaking large insoluble food substances into smaller soluble substances by catalyzing chemical reactions</span></label>
                                         <label class="choice-card"><input type="radio" name="enzyme-role-check" value="crush-only"><span>Only crushing food into smaller pieces of the same substance</span></label>
                                         <label class="choice-card"><input type="radio" name="enzyme-role-check" value="absorb-directly"><span>Absorbing large food molecules directly into the body</span></label>
                                         <p class="check-feedback" id="roleCheckFeedback" role="status"></p>
@@ -1473,8 +1506,8 @@
             homeDescription:
                 "Work through one digestion model at a time. Observe each change, answer its question, then finish with one final challenge.",
             instructions: [
-                "Begin with the hammer model. Crush the food, answer the question, then select Next.",
-                "Next, select Protease Scissors, choose Apply enzyme, and answer its question. Dragging is optional.",
+                "Begin with the hammer model. Drag the hammer onto the food, or choose Crush; answer the question, then select Next.",
+                "Next, drag Protease Scissors onto the protein or choose Apply enzyme, then answer its question.",
                 "Finish with the final multiple-choice question.",
                 "For keyboard-only use, press Tab to move, Space or Enter to activate buttons, and arrow keys to move within an answer group.",
                 "Use Review at any time to see answers recorded so far.",
@@ -1797,9 +1830,9 @@
                 correct: "chemical",
                 correctLabel: "Chemical digestion",
                 choices: { physical: "Physical digestion", chemical: "Chemical digestion" },
-                correctText: "Correct. Different, smaller substances form, so the enzyme model represents chemical digestion.",
+                correctText: "Correct. Protease catalyzes a chemical reaction that forms different, smaller substances, so the model represents chemical digestion.",
                 incorrect: {
-                    physical: "The result is not simply smaller protein pieces. The labels and molecular representations change to amino acids, showing a chemical change."
+                    physical: "Protease catalyzes a chemical reaction. The result is not simply smaller protein pieces: the labels and molecular representations change to amino acids, showing chemical digestion."
                 }
             },
             {
@@ -1809,16 +1842,16 @@
                 cardId: "roleCheckCard",
                 feedbackId: "roleCheckFeedback",
                 correct: "break-down",
-                correctLabel: "Breaking large insoluble food substances into smaller soluble substances",
+                correctLabel: "Breaking large insoluble food substances into smaller soluble substances by catalyzing chemical reactions",
                 choices: {
-                    "break-down": "Breaking large insoluble food substances into smaller soluble substances",
+                    "break-down": "Breaking large insoluble food substances into smaller soluble substances by catalyzing chemical reactions",
                     "crush-only": "Only crushing food into smaller pieces of the same substance",
                     "absorb-directly": "Absorbing large food molecules directly into the body"
                 },
-                correctText: "Correct. Proteases break proteins into amino acids so the smaller soluble products can be absorbed.",
+                correctText: "Correct. Proteases break proteins into amino acids by catalyzing chemical reactions, producing smaller soluble substances that can be absorbed.",
                 incorrect: {
-                    "crush-only": "Crushing alone is physical digestion. Enzymes chemically break large food molecules into smaller soluble substances.",
-                    "absorb-directly": "Enzymes do not absorb food. Their role is to break large molecules down before absorption."
+                    "crush-only": "Crushing alone is physical digestion. Proteases break large food molecules into smaller soluble substances by catalyzing chemical reactions.",
+                    "absorb-directly": "Enzymes do not absorb food. Proteases prepare molecules for absorption by catalyzing chemical reactions that break them into smaller soluble substances."
                 }
             }
         ];
@@ -1829,6 +1862,7 @@
             physicalPanel: document.getElementById("physicalPanel"),
             physicalHeading: document.getElementById("physicalHeading"),
             physicalStage: document.getElementById("physicalStage"),
+            hammerTool: document.getElementById("hammerTool"),
             largeFood: document.getElementById("largeFood"),
             physicalPieces: document.getElementById("physicalPieces"),
             crushBtn: document.getElementById("crushBtn"),
@@ -1877,6 +1911,22 @@
         let physicalTimer = null;
         let chemicalTimer = null;
 
+        function shuffledCopy(values) {
+            const shuffled = values.slice();
+            for (let index = shuffled.length - 1; index > 0; index -= 1) {
+                const swapIndex = Math.floor(Math.random() * (index + 1));
+                [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+            }
+            return shuffled;
+        }
+
+        function createChoiceOrders() {
+            return CHECK_DEFINITIONS.reduce((orders, check) => {
+                orders[check.id] = shuffledCopy(Object.keys(check.choices));
+                return orders;
+            }, {});
+        }
+
         function createDefaultSimState() {
             return {
                 currentStep: 1,
@@ -1884,6 +1934,8 @@
                 chemicalObserved: false,
                 selectedTool: false,
                 answers: {},
+                draftAnswers: {},
+                choiceOrders: createChoiceOrders(),
                 attempts: {
                     "hammer-check": 0,
                     "enzyme-check": 0,
@@ -1915,7 +1967,26 @@
                     CHECK_DEFINITIONS.forEach((check) => {
                         if (typeof saved.answers[check.id] === "string") {
                             clean.answers[check.id] = saved.answers[check.id];
+                            clean.draftAnswers[check.id] = saved.answers[check.id];
                         }
+                    });
+                }
+                if (saved.draftAnswers && typeof saved.draftAnswers === "object") {
+                    CHECK_DEFINITIONS.forEach((check) => {
+                        if (typeof saved.draftAnswers[check.id] === "string") {
+                            clean.draftAnswers[check.id] = saved.draftAnswers[check.id];
+                        }
+                    });
+                }
+                if (saved.choiceOrders && typeof saved.choiceOrders === "object") {
+                    CHECK_DEFINITIONS.forEach((check) => {
+                        const allowed = Object.keys(check.choices);
+                        const order = saved.choiceOrders[check.id];
+                        const validOrder = Array.isArray(order)
+                            && order.length === allowed.length
+                            && new Set(order).size === allowed.length
+                            && order.every((choiceId) => allowed.includes(choiceId));
+                        if (validOrder) clean.choiceOrders[check.id] = order.slice();
                     });
                 }
                 if (saved.attempts && typeof saved.attempts === "object") {
@@ -1971,6 +2042,12 @@
 
             simDom.crushBtn.addEventListener("click", runPhysicalAnimation);
             simDom.replayPhysicalBtn.addEventListener("click", runPhysicalAnimation);
+            simDom.hammerTool.addEventListener("dragstart", handleHammerDragStart);
+            simDom.hammerTool.addEventListener("dragend", handleHammerDragEnd);
+            simDom.largeFood.addEventListener("dragenter", handleHammerDragOver);
+            simDom.largeFood.addEventListener("dragover", handleHammerDragOver);
+            simDom.largeFood.addEventListener("dragleave", handleHammerDragLeave);
+            simDom.largeFood.addEventListener("drop", handleHammerDrop);
             simDom.applyEnzymeBtn.addEventListener("click", runChemicalAnimation);
             simDom.replayChemicalBtn.addEventListener("click", runChemicalAnimation);
             simDom.enzymeTool.addEventListener("click", selectEnzymeTool);
@@ -1993,6 +2070,53 @@
             simDom.reviewModal.addEventListener("click", (event) => {
                 if (event.target === simDom.reviewModal) closeReviewModal();
             });
+            CHECK_DEFINITIONS.forEach((check) => {
+                document.querySelectorAll('input[name="' + check.inputName + '"]').forEach((input) => {
+                    input.addEventListener("change", () => {
+                        if (!input.checked || simState.mastered[check.id]) return;
+                        simState.draftAnswers[check.id] = input.value;
+                        saveSimState();
+                    });
+                });
+            });
+        }
+
+        function handleHammerDragStart(event) {
+            if (physicalBusy || simState.physicalObserved) {
+                event.preventDefault();
+                return;
+            }
+            if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", "digestion-hammer");
+            }
+            announceSim("Hammer picked up. Drop it on the chicken.");
+        }
+
+        function handleHammerDragEnd() {
+            simDom.largeFood.classList.remove("is-drag-over");
+        }
+
+        function handleHammerDragOver(event) {
+            if (physicalBusy || simState.physicalObserved) return;
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+            simDom.largeFood.classList.add("is-drag-over");
+        }
+
+        function handleHammerDragLeave(event) {
+            if (!simDom.largeFood.contains(event.relatedTarget)) {
+                simDom.largeFood.classList.remove("is-drag-over");
+            }
+        }
+
+        function handleHammerDrop(event) {
+            event.preventDefault();
+            simDom.largeFood.classList.remove("is-drag-over");
+            const payload = event.dataTransfer ? event.dataTransfer.getData("text/plain") : "digestion-hammer";
+            if (payload === "digestion-hammer" && !physicalBusy && !simState.physicalObserved) {
+                runPhysicalAnimation();
+            }
         }
 
         function selectEnzymeTool() {
@@ -2053,6 +2177,7 @@
             physicalBusy = true;
             if (physicalTimer) window.clearTimeout(physicalTimer);
 
+            simDom.hammerTool.hidden = false;
             simDom.physicalStage.classList.add("is-animating");
             simDom.largeFood.hidden = false;
             simDom.physicalPieces.hidden = true;
@@ -2074,7 +2199,7 @@
         }
 
         function runChemicalAnimation() {
-            if (chemicalBusy || (!simState.selectedTool && !simState.chemicalObserved)) return;
+            if (chemicalBusy) return;
             chemicalBusy = true;
             if (chemicalTimer) window.clearTimeout(chemicalTimer);
 
@@ -2142,6 +2267,7 @@
                 announceSim("Select an answer before checking.");
             } else {
                 simState.answers[check.id] = answer;
+                simState.draftAnswers[check.id] = answer;
                 simState.attempts[check.id] += 1;
                 if (answer === check.correct) simState.mastered[check.id] = true;
                 saveSimState();
@@ -2177,14 +2303,29 @@
                 const card = document.getElementById(check.cardId);
                 const feedback = document.getElementById(check.feedbackId);
                 const inputList = Array.from(document.querySelectorAll('input[name="' + check.inputName + '"]'));
+                const selectedValue = simState.draftAnswers[check.id] || simState.answers[check.id];
                 inputList.forEach((input) => {
-                    input.checked = simState.answers[check.id] === input.value;
+                    input.checked = selectedValue === input.value;
                     input.disabled = mastered;
                 });
                 card.classList.toggle("is-mastered", mastered);
                 const result = feedbackFor(check);
                 feedback.textContent = result.text;
                 feedback.className = "check-feedback" + (result.kind ? " " + result.kind : "");
+            });
+        }
+
+        function reorderChoiceCards() {
+            CHECK_DEFINITIONS.forEach((check) => {
+                const card = document.getElementById(check.cardId);
+                const feedback = document.getElementById(check.feedbackId);
+                const inputs = Array.from(card.querySelectorAll('input[name="' + check.inputName + '"]'));
+                const order = simState.choiceOrders[check.id] || Object.keys(check.choices);
+                order.forEach((choiceId) => {
+                    const input = inputs.find((candidate) => candidate.value === choiceId);
+                    const label = input ? input.closest("label.choice-card") : null;
+                    if (label) card.insertBefore(label, feedback);
+                });
             });
         }
 
@@ -2202,6 +2343,9 @@
             simDom.largeFood.hidden = simState.physicalObserved;
             simDom.physicalPieces.hidden = !simState.physicalObserved;
             simDom.physicalPieces.classList.toggle("reveal-pieces", Boolean(revealProducts && simState.physicalObserved));
+            simDom.hammerTool.hidden = simState.physicalObserved && !physicalBusy;
+            simDom.hammerTool.disabled = simState.physicalObserved || physicalBusy;
+            simDom.hammerTool.draggable = !simState.physicalObserved && !physicalBusy;
             simDom.crushBtn.hidden = simState.physicalObserved;
             simDom.crushBtn.disabled = physicalBusy;
             simDom.replayPhysicalBtn.hidden = !simState.physicalObserved;
@@ -2209,7 +2353,7 @@
             simDom.hammerQuestion.hidden = !simState.physicalObserved;
             simDom.physicalStage.setAttribute("aria-label", simState.physicalObserved
                 ? "Six irregular pieces of cooked chicken in different shapes and sizes"
-                : "One cooked chicken leg ready to be crushed");
+                : "One cooked chicken leg ready to be crushed. Drop the hammer here.");
 
             simDom.proteinModel.hidden = simState.chemicalObserved;
             simDom.aminoProducts.hidden = !simState.chemicalObserved;
@@ -2219,7 +2363,7 @@
             simDom.enzymeTool.classList.toggle("is-selected", simState.selectedTool && !simState.chemicalObserved);
             simDom.enzymeTool.setAttribute("aria-pressed", String(simState.selectedTool && !simState.chemicalObserved));
             simDom.applyEnzymeBtn.hidden = simState.chemicalObserved;
-            simDom.applyEnzymeBtn.disabled = !simState.selectedTool || chemicalBusy;
+            simDom.applyEnzymeBtn.disabled = chemicalBusy;
             simDom.replayChemicalBtn.hidden = !simState.chemicalObserved;
             simDom.replayChemicalBtn.disabled = chemicalBusy;
             simDom.enzymeQuestion.hidden = !simState.chemicalObserved;
@@ -2227,6 +2371,7 @@
                 ? "Four smaller labelled amino-acid representations with different shapes, patterns, and colours"
                 : "Large protein molecule target for Protease Scissors");
 
+            reorderChoiceCards();
             renderChecks();
             simDom.checkHammerBtn.hidden = simState.mastered["hammer-check"];
             simDom.nextToEnzymeBtn.hidden = !simState.mastered["hammer-check"];
@@ -2337,12 +2482,25 @@
             clearSavedSimState();
             simState = createDefaultSimState();
             simDom.physicalStage.classList.remove("is-animating");
+            simDom.largeFood.classList.remove("is-drag-over");
             simDom.enzymeDropZone.classList.remove("is-animating", "is-drag-over");
             simDom.enzymeTool.classList.remove("is-cutting");
             renderSimState();
         }
 
+        function clearActivityStateOnExit() {
+            clearSavedSimState();
+        }
+
+        function resetActivityAfterHistoryReturn(event) {
+            if (!event.persisted) return;
+            devReset();
+            showScreen("home");
+        }
+
         bindSimEvents();
+        window.addEventListener("pagehide", clearActivityStateOnExit);
+        window.addEventListener("pageshow", resetActivityAfterHistoryReturn);
         dom.startBtn.textContent = "Begin activity";
         dom.startBtn.setAttribute("aria-label", "Begin the digestion activity");
         dom.openInstructionsBtn.addEventListener("click", markInstructionsSeen);
