@@ -609,6 +609,7 @@
     outline-offset:1px;
 }
 
+.cc-hint-final-active{opacity:1!important;filter:none!important;cursor:pointer!important;pointer-events:auto!important}.cc-hint-final-active:hover{transform:translateY(-1px)}
 </style>
 </head>
 
@@ -1219,11 +1220,11 @@
                 model: "The team wanted to practise, but the field was flooded."
             },
             route2: {
-                clauses: ["The lights went out", "the room became silent"],
+                clauses: ["The power went out during the storm", "the emergency lights switched on automatically"],
                 choices: ["for", "and", "so"],
                 correct: "so",
                 punctuation: true,
-                model: "The lights went out, so the room became silent."
+                model: "The power went out during the storm, so the emergency lights switched on automatically."
             },
             complexA: {
                 before: "___ the rain started, we moved the equipment inside.",
@@ -1247,6 +1248,8 @@
         const FINAL_2 = [
             "Maya","checked","the","list",",","and","Joel","packed","the","boxes","."
         ];
+        const SCRAMBLED_1 = ["school","Although","assembly","the","reached",",","was","we","before","late","bus","."];
+        const SCRAMBLED_2 = ["boxes","and","Maya","packed","the","Joel","list",",","checked","the","."];
 
         function ccEscape(v) {
             return String(v).replace(/[&<>"']/g, c => ({
@@ -1288,7 +1291,7 @@
             <div class="cc-nav" aria-label="Simulation navigation">
                 <div class="cc-nav-left">
                     <button class="secondary-btn cc-back" type="button">Back</button>
-                    <button class="ghost-btn cc-hint" type="button">Hint</button>
+                    <button class="ghost-btn cc-hint cc-hint-final-active" type="button">Hint</button>
                     <button class="secondary-btn cc-try" type="button">Try Again</button>
                 </div>
                 <div class="cc-nav-right">
@@ -1519,7 +1522,7 @@
                     <div class="cc-build-card">
                         <h3>Sentence 1</h3>
                         <div class="cc-build-area" aria-label="Sentence 1 drop area">${build(f.sentence1, "sentence1")}</div>
-                        <div class="cc-tile-bank">${tokenButtons(FINAL_1, "sentence1")}</div>
+                        <div class="cc-tile-bank">${tokenButtons(SCRAMBLED_1, "sentence1")}</div>
                         <div class="cc-class-row">
                             <span>Classification:</span>
                             <button class="cc-class ${f.class1 === "compound" ? "selected" : ""}" data-target="class1" data-value="compound" type="button">Compound</button>
@@ -1529,7 +1532,7 @@
                     <div class="cc-build-card">
                         <h3>Sentence 2</h3>
                         <div class="cc-build-area" aria-label="Sentence 2 drop area">${build(f.sentence2, "sentence2")}</div>
-                        <div class="cc-tile-bank">${tokenButtons(FINAL_2, "sentence2")}</div>
+                        <div class="cc-tile-bank">${tokenButtons(SCRAMBLED_2, "sentence2")}</div>
                         <div class="cc-class-row">
                             <span>Classification:</span>
                             <button class="cc-class ${f.class2 === "compound" ? "selected" : ""}" data-target="class2" data-value="compound" type="button">Compound</button>
@@ -1587,23 +1590,61 @@
 
         function ccHint() {
             CC.hints++;
-            const msg = CC.screen === 2
-                ? "Hint: the field being flooded contrasts with the team's wish to practise, so choose BUT and place the comma before it."
-                : CC.screen === 3
-                ? "Hint: the second clause is the result of the lights going out, so choose SO and place the comma before it."
-                : CC.screen === 4
-                ? "Hint: Because gives a reason; when gives a time relationship. An opening dependent clause needs a comma."
-                : "Hint: Sentence 1 begins with Although, so it is complex. Sentence 2 joins two independent clauses with AND, so it is compound.";
-            const existing = dom.simContainer.querySelector(".cc-feedback");
+            let title = "Think about the relationship";
+            let msg = "";
+            if (CC.screen === 2) {
+                title = "Route 1 hint";
+                msg = "Read both clauses together. Do the ideas add information, contrast, or show a result?";
+            } else if (CC.screen === 3) {
+                title = "Route 2 hint";
+                msg = "Think about what happens first and what happens because of it. Which connection best shows that result?";
+            } else if (CC.screen === 4) {
+                const aUnanswered = !CC.complexA.selected;
+                const bUnanswered = !CC.complexB.selected;
+                if (aUnanswered && bUnanswered) {
+                    title = "Complex routes hint";
+                    msg = "One sentence expresses a reason; the other expresses a time relationship. Match each sentence to the relationship it describes.";
+                } else if (aUnanswered) {
+                    title = "First sentence hint";
+                    msg = "The opening clause explains why the equipment was moved. Look for a subordinating conjunction that introduces a reason.";
+                } else if (bUnanswered) {
+                    title = "Second sentence hint";
+                    msg = "The two events are connected by when they happen. Look for a subordinating conjunction that expresses time.";
+                } else {
+                    title = "Complex routes review";
+                    msg = "Review both relationships and make sure each conjunction matches the meaning of its sentence.";
+                }
+            } else if (CC.screen === 5) {
+                const one = CC.final.sentence1.join(" ") === FINAL_1.join(" ");
+                const two = CC.final.sentence2.join(" ") === FINAL_2.join(" ");
+                if (!one && !two) {
+                    title = "Sentence-building hint";
+                    msg = "Look for the words that signal the relationship between the clauses. Use punctuation and sentence meaning to guide the order.";
+                } else if (!one) {
+                    title = "Sentence 1 hint";
+                    msg = "The opening word changes the relationship between the first clause and the main clause. Use the surrounding words and punctuation to build a natural sentence.";
+                } else if (!two) {
+                    title = "Sentence 2 hint";
+                    msg = "Both parts can stand as complete ideas. Look for the conjunction that joins those ideas and use the punctuation as a guide.";
+                } else {
+                    title = "Classification hint";
+                    msg = "Check whether each clause can stand alone. That will help you decide which sentence structure you have.";
+                }
+            } else {
+                title = "Mission hint";
+                msg = "Look at how the ideas relate to one another before choosing a gate.";
+            }
+            const existing = dom.simContainer.querySelector(".cc-feedback.hint");
             if (existing) {
-                existing.innerHTML = `<strong>Hint:</strong> ${msg}`;
-                existing.className = "cc-feedback hint";
+                existing.innerHTML = `<strong>${title}:</strong> ${msg}`;
             } else {
                 const nav = dom.simContainer.querySelector(".cc-nav");
-                const el = document.createElement("div");
-                el.className = "cc-feedback hint";
-                el.innerHTML = `<strong>Hint:</strong> ${msg}`;
-                nav.parentNode.insertBefore(el, nav);
+                if (nav) {
+                    const el = document.createElement("div");
+                    el.className = "cc-feedback hint";
+                    el.innerHTML = `<strong>${title}:</strong> ${msg}`;
+                    nav.parentNode.insertBefore(el, nav);
+                }
             }
         }
 
