@@ -135,6 +135,9 @@
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow);
+            position: sticky;
+            top: 8px;
+            z-index: 100;
         }
 
         .brand-wrap {
@@ -153,6 +156,8 @@
             background: linear-gradient(135deg, var(--accent), var(--accent-2));
             color: white;
             font-weight: 700;
+            font-size: 0.65rem;
+            overflow: hidden;
             box-shadow: var(--shadow);
         }
 
@@ -592,9 +597,9 @@
             align-items: center;
             justify-content: center;
             gap: 2px;
-            min-width: 44px;
-            min-height: 44px;
-            padding: 4px 10px;
+            min-width: 52px;
+            min-height: 52px;
+            padding: 8px 14px;
             border-radius: 12px;
             border: 2px dashed var(--accent);
             background: color-mix(in srgb, var(--accent) 10%, var(--surface));
@@ -986,7 +991,7 @@
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open rules">❔ Rules</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
-                <button class="danger-btn" id="resetBtn" aria-label="Exit the sim and return home"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Exit</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset the sim and return home"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Reset</button>
             </div>
         </header>
 
@@ -1052,11 +1057,23 @@
     <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
         <section class="modal-card">
             <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
-            <h3 id="resetConfirmHeading">Exit the sim?</h3>
+            <h3 id="resetConfirmHeading">Reset the sim?</h3>
             <p>This will clear your current progress and return you to the home screen.</p>
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
-                <button class="secondary-btn" id="cancelResetBtn">Stay</button>
-                <button class="danger-btn" id="confirmResetBtn">Exit</button>
+                <button class="secondary-btn" id="cancelResetBtn">Keep going</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="playAgainConfirmModal" role="dialog" aria-modal="true" aria-labelledby="playAgainConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closePlayAgainConfirmBtn" aria-label="Close play again confirmation">×</button>
+            <h3 id="playAgainConfirmHeading">Start over?</h3>
+            <p>This will clear your current progress and start the poem from the beginning.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelPlayAgainBtn">Keep going</button>
+                <button class="danger-btn" id="confirmPlayAgainBtn">Start over</button>
             </div>
         </section>
     </div>
@@ -1147,7 +1164,11 @@
             resetConfirmModal: document.getElementById("resetConfirmModal"),
             closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
             cancelResetBtn: document.getElementById("cancelResetBtn"),
-            confirmResetBtn: document.getElementById("confirmResetBtn")
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            playAgainConfirmModal: document.getElementById("playAgainConfirmModal"),
+            closePlayAgainConfirmBtn: document.getElementById("closePlayAgainConfirmBtn"),
+            cancelPlayAgainBtn: document.getElementById("cancelPlayAgainBtn"),
+            confirmPlayAgainBtn: document.getElementById("confirmPlayAgainBtn")
         };
 
         initializeApp();
@@ -1190,6 +1211,12 @@
             dom.startBtn.addEventListener("click", () => {
                 showScreen("sim");
                 devInit();
+                var seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+                if (seen !== "true") {
+                    openInstructionsModal();
+                    storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                    dom.helpBtn.classList.remove("pulse-help");
+                }
             });
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
@@ -1218,6 +1245,21 @@
             dom.resetConfirmModal.addEventListener("click", (event) => {
                 if (event.target === dom.resetConfirmModal) {
                     closeResetConfirmModal();
+                }
+            });
+            dom.closePlayAgainConfirmBtn.addEventListener("click", closePlayAgainConfirmModal);
+            dom.cancelPlayAgainBtn.addEventListener("click", closePlayAgainConfirmModal);
+            dom.confirmPlayAgainBtn.addEventListener("click", () => {
+                closePlayAgainConfirmModal();
+                devReset();
+                PP.view = "mission";
+                PP.stageIdx = 0;
+                ppRender();
+                ppAfterNav();
+            });
+            dom.playAgainConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.playAgainConfirmModal) {
+                    closePlayAgainConfirmModal();
                 }
             });
             document.addEventListener("fullscreenchange", updateFullscreenButton);
@@ -1252,6 +1294,14 @@
 
         function closeResetConfirmModal() {
             dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function openPlayAgainConfirmModal() {
+            dom.playAgainConfirmModal.classList.add("show");
+        }
+
+        function closePlayAgainConfirmModal() {
+            dom.playAgainConfirmModal.classList.remove("show");
         }
 
         function showScreen(screenName) {
@@ -1309,6 +1359,7 @@
             if (event.key === "Escape") {
                 closeInstructionsModal();
                 closeResetConfirmModal();
+                closePlayAgainConfirmModal();
             }
         }
 
@@ -1488,6 +1539,14 @@
 
         /* ---- Sim state ---- */
 
+        function ppShuffle(arr) {
+            for (var i = arr.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+            }
+            return arr;
+        }
+
         const PP = {
             view: "mission",
             stageIdx: 0,
@@ -1500,7 +1559,10 @@
             selectedToken: null,
             hintsUsed: 0,
             startTime: 0,
-            reported: false
+            reported: false,
+            stages: PP_STAGES.slice(),
+            effects: PP_EFFECTS.slice(),
+            _bound: false
         };
 
         /* ---- Progress ---- */
@@ -1589,7 +1651,7 @@
         }
 
         function ppRenderStage() {
-            var st = PP_STAGES[PP.stageIdx];
+            var st = PP.stages[PP.stageIdx];
             var lines = st.lines.map(function (k) { return ppLineHTML(k, "stage"); }).join("");
             var done = st.lines.every(function (k) { return ppLineStable(k); });
             var used = {};
@@ -1624,8 +1686,8 @@
 
         function ppRenderFinal() {
             var poem = ["l1", "l2", "l3", "l4"].map(function (k) { return ppLineHTML(k, "filled"); }).join("");
-            var allDone = PP_EFFECTS.every(function (e) { return PP.effectPick[e.key] === e.correct; });
-            var rows = PP_EFFECTS.map(function (e) {
+            var allDone = PP.effects.every(function (e) { return PP.effectPick[e.key] === e.correct; });
+            var rows = PP.effects.map(function (e) {
                 var pick = PP.effectPick[e.key];
                 var done = pick === e.correct;
                 var chips = PP_EFFECT_CHOICES.map(function (c) {
@@ -1783,7 +1845,7 @@
         /* ---- Effect cards (screen 5) ---- */
 
         function ppPickEffect(key, choice) {
-            var e = PP_EFFECTS.filter(function (x) { return x.key === key; })[0];
+            var e = PP.effects.filter(function (x) { return x.key === key; })[0];
             if (PP.effectPick[key] === e.correct) return;
             PP.effectAttempts[key] = (PP.effectAttempts[key] || 0) + 1;
             if (PP.effectFirstCorrect[key] === undefined) PP.effectFirstCorrect[key] = (choice === e.correct);
@@ -1824,7 +1886,7 @@
         }
 
         function ppMaybeShowFinish() {
-            var allDone = PP_EFFECTS.every(function (e) { return PP.effectPick[e.key] === e.correct; });
+            var allDone = PP.effects.every(function (e) { return PP.effectPick[e.key] === e.correct; });
             if (!allDone) return;
             var row = document.querySelector(".pp-card .button-row");
             if (!row || document.getElementById("ppFinish")) return;
@@ -1851,7 +1913,7 @@
 
         function ppNext() {
             PP.stageIdx += 1;
-            PP.view = PP.stageIdx >= PP_STAGES.length ? "final" : "stage";
+            PP.view = PP.stageIdx >= PP.stages.length ? "final" : "stage";
             ppRender();
             ppAfterNav();
         }
@@ -1860,7 +1922,7 @@
             PP.hintsUsed += 1;
             var box = document.getElementById("ppHintBox");
             if (!box) return;
-            var text = PP.view === "stage" ? PP_STAGES[PP.stageIdx].hint :
+            var text = PP.view === "stage" ? PP.stages[PP.stageIdx].hint :
                 "Question mark → uncertainty. Exclamation mark → urgency. Comma → a brief contrast pause. Final full stop → closure.";
             box.innerHTML = '<div class="pp-hint-box" role="note"><b>Hint:</b> ' + escapeHtml(text) + '</div>';
             box.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -1874,10 +1936,7 @@
         }
 
         function ppRestart() {
-            devReset();
-            PP.view = "mission";
-            ppRender();
-            ppAfterNav();
+            openPlayAgainConfirmModal();
         }
 
         /* ---- Reporting ---- */
@@ -1895,7 +1954,7 @@
                 attempts[k] = PP.attempts[k] || 0;
             });
             var eCorrect = 0;
-            PP_EFFECTS.forEach(function (e) {
+                PP.effects.forEach(function (e) {
                 if (PP.effectFirstCorrect[e.key]) eCorrect += 1;
                 if (PP.effectFirstCorrect[e.key] === false) missed.push("explaining punctuation\u2019s effect on pacing and meaning");
             });
@@ -1905,7 +1964,7 @@
                 completedAt: new Date().toISOString(),
                 timeOnTaskSeconds: Math.max(0, Math.round((Date.now() - PP.startTime) / 1000)),
                 firstAttemptAccuracy: {
-                    total: slotKeys.length + PP_EFFECTS.length,
+                    total: slotKeys.length + PP.effects.length,
                     correct: firstCorrectCount + eCorrect
                 },
                 finalMastery: "full",
@@ -1954,6 +2013,8 @@
         }
 
         function ppBindHost() {
+            if (PP._bound) return;
+            PP._bound = true;
             var host = document.getElementById("ppStageHost");
             host.addEventListener("click", function (ev) {
                 var target = ev.target.closest("button");
@@ -1988,19 +2049,26 @@
                 }
             });
             host.addEventListener("dragover", function (ev) {
-                if (ev.target.closest(".pp-slot")) ev.preventDefault();
+                var slotBtn = ev.target.closest(".pp-slot");
+                if (!slotBtn || slotBtn.disabled) return;
+                var data = ev.dataTransfer.types;
+                if (data && data.indexOf("text/plain") !== -1) ev.preventDefault();
             });
             host.addEventListener("drop", function (ev) {
                 var slotBtn = ev.target.closest(".pp-slot");
                 if (!slotBtn || slotBtn.disabled) return;
+                var raw = ev.dataTransfer.getData("text/plain");
+                if (!raw || !PP_TOKEN_BY_ID[raw]) return;
                 ev.preventDefault();
-                var id = ev.dataTransfer.getData("text/plain") || PP.selectedToken;
-                if (id) { PP.selectedToken = id; ppPlace(slotBtn.dataset.slot); }
+                PP.selectedToken = raw;
+                ppPlace(slotBtn.dataset.slot);
             });
         }
 
         function devInit() {
             ppBindHost();
+            PP.stages = ppShuffle(PP_STAGES.slice());
+            PP.effects = ppShuffle(PP_EFFECTS.slice());
             PP.startTime = Date.now();
             PP.view = "mission";
             ppRender();
@@ -2018,6 +2086,8 @@
             PP.selectedToken = null;
             PP.hintsUsed = 0;
             PP.reported = false;
+            PP.stages = ppShuffle(PP_STAGES.slice());
+            PP.effects = ppShuffle(PP_EFFECTS.slice());
             var rep = document.getElementById("ppReport");
             if (rep) rep.remove();
             updateProgress();
