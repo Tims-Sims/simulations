@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE — Virtual Limewater Investigation
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Limewater Investigation</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body { min-height: 100vh; padding: 16px; }
+        button, input, textarea, select { font: inherit; }
+        button { border: 0; cursor: pointer; transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease; }
+        button:hover { transform: translateY(-1px); }
+        button:disabled { opacity: 0.48; cursor: not-allowed; transform: none; }
+        button:focus-visible, input:focus-visible { outline: none; box-shadow: var(--focus); }
+
+        .app-shell { max-width: 1180px; margin: 0 auto; min-height: calc(100vh - 32px); display: flex; flex-direction: column; gap: 16px; }
+
+        .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+        .brand-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .brand-badge { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; font-weight: 700; box-shadow: var(--shadow); }
+        .brand-copy { min-width: 0; }
+        .brand-copy h1, .brand-copy p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .brand-copy h1 { font-size: 1.08rem; }
+        .brand-copy p { color: var(--muted); margin-top: 2px; font-size: 0.92rem; }
+
+        .controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+        .control-btn, .primary-btn, .secondary-btn, .ghost-btn, .danger-btn { border-radius: 999px; padding: 11px 16px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-icon { width: 1em; height: 1em; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .control-btn, .secondary-btn { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+        .primary-btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #ffffff; box-shadow: var(--shadow); }
+        .ghost-btn { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
+        .danger-btn { background: color-mix(in srgb, var(--danger) 18%, var(--surface)); color: var(--text); border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent); }
+
+        .pulse-help { position: relative; }
+        .pulse-help::after { content: ""; position: absolute; inset: -4px; border-radius: 999px; border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent); animation: pulseRing 1.7s infinite; pointer-events: none; }
+        @keyframes pulseRing { 0% { opacity: 0.9; transform: scale(0.98); } 70% { opacity: 0; transform: scale(1.12); } 100% { opacity: 0; } }
+
+        .screen { display: none; flex: 1; }
+        .screen.active { display: flex; }
+        .center-stage { flex: 1; display: grid; place-items: center; padding: 8px; }
+        .hero-card, .modal-card { width: min(100%, 920px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow); }
+        .hero-card { padding: clamp(24px, 4vw, 42px); text-align: center; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 8px 14px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 16%, var(--surface)); color: var(--text-soft); border: 1px solid var(--border); }
+        .hero-card h2 { margin: 0 0 12px; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.08; }
+        .hero-card p { width: min(100%, 700px); margin: 0 auto; color: var(--text-soft); font-size: 1.05rem; line-height: 1.65; }
+        .hero-actions { margin-top: 26px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+
+        .sim-layout { flex: 1; display: grid; place-items: center; padding: 8px; }
+        .sim-card { width: min(100%, 960px); padding: clamp(18px, 3vw, 28px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow); }
+
+        .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(6, 10, 20, 0.64); z-index: 60; }
+        .modal.show { display: flex; }
+        .modal-card { padding: clamp(18px, 3vw, 30px); position: relative; max-height: min(90vh, 90dvh); overflow-y: auto; }
+        .close-btn { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 1.15rem; font-weight: 800; }
+        .modal-card h3 { margin: 0 0 12px; font-size: clamp(1.35rem, 2vw, 1.8rem); }
+        .modal-card p, .modal-card li { color: var(--text-soft); line-height: 1.65; }
+        .modal-card ul { padding-left: 20px; margin-top: 10px; }
+
+        .volume-sliders { margin-top: 18px; }
+        .volume-sliders h3 { margin: 0 0 10px; font-size: 1.05rem; }
+        .volume-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+        .volume-row label { flex: 0 0 150px; color: var(--text-soft); font-size: 0.92rem; }
+        .volume-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+
+        .muted { color: var(--muted); }
+        .hidden { display: none !important; }
+        .button-row { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
+        .footer-note { text-align: center; color: var(--muted); padding-bottom: 4px; font-size: 0.9rem; }
+
+        @media (max-width: 760px) {
+            body { padding: 12px; }
+            .topbar { padding: 12px; }
+            .controls { width: 100%; justify-content: flex-start; }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           ============================================================ */
+
+        .sim-title { margin: 0 0 6px; font-size: 1.4rem; }
+        .sim-subtitle { margin: 0 0 18px; color: var(--muted); font-size: 0.95rem; }
+
+        .apparatus-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .apparatus-svg {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .breath-controls {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .breath-btn {
+            padding: 14px 28px;
+            border-radius: 999px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .inhale-btn {
+            background: color-mix(in srgb, var(--success) 22%, var(--surface));
+            color: var(--text);
+            border: 2px solid color-mix(in srgb, var(--success) 50%, transparent);
+        }
+        .inhale-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--success) 32%, var(--surface)); }
+
+        .exhale-btn {
+            background: color-mix(in srgb, var(--warning) 22%, var(--surface));
+            color: var(--text);
+            border: 2px solid color-mix(in srgb, var(--warning) 50%, transparent);
+        }
+        .exhale-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--warning) 32%, var(--surface)); }
+
+        .breath-count { text-align: center; color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
+        .breath-count strong { color: var(--text-soft); }
+
+        .event-log {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            max-height: 160px;
+            overflow-y: auto;
+            font-size: 0.88rem;
+            line-height: 1.65;
+            color: var(--text-soft);
+        }
+
+        .event-log:empty::before {
+            content: "Events will appear here...";
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .log-entry { padding: 3px 0; border-bottom: 1px solid var(--border); }
+        .log-entry:last-child { border-bottom: none; }
+        .log-entry .log-label { font-weight: 700; color: var(--text); }
+        .log-entry.inhale .log-label { color: var(--success); }
+        .log-entry.exhale .log-label { color: var(--warning); }
+
+        .check-btn {
+            margin-top: 18px;
+        }
+
+        .check-btn .primary-btn {
+            padding: 14px 32px;
+            font-size: 1.05rem;
+        }
+
+        /* Flask milky animation */
+        @keyframes bubbleUp {
+            0% { transform: translateY(0); opacity: 0.8; }
+            100% { transform: translateY(-28px); opacity: 0; }
+        }
+        .bubble-anim { animation: bubbleUp 0.8s ease-out forwards; }
+
+        /* Lungs expand/contract — animate the ellipses, not the group
+           (the group has an SVG translate that CSS transform would override) */
+        @keyframes inhaleLung { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+        @keyframes exhaleLung { 0% { transform: scale(1); } 50% { transform: scale(0.93); } 100% { transform: scale(1); } }
+        #leftLung, #rightLung {
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        .lung-inhale { animation: inhaleLung 1.2s ease-in-out; }
+        .lung-exhale { animation: exhaleLung 1.2s ease-in-out; }
+
+        /* Assessment modal extras */
+        .assessment-options { display: grid; gap: 10px; margin-top: 14px; }
+        .assessment-opt {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            text-align: left;
+            color: var(--text-soft);
+            font-size: 1rem;
+        }
+        .assessment-opt:hover { border-color: var(--accent); }
+        .assessment-opt.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); color: var(--text); }
+        .assessment-opt input { margin-top: 2px; transform: scale(1.15); }
+        .assessment-result { margin-top: 14px; padding: 16px 18px; border-radius: 18px; border: 1px solid var(--border); display: none; line-height: 1.65; }
+        .assessment-result.show { display: block; }
+        .assessment-result.correct { background: color-mix(in srgb, var(--success) 16%, var(--surface)); border-color: color-mix(in srgb, var(--success) 40%, transparent); }
+        .assessment-result.wrong { background: color-mix(in srgb, var(--danger) 12%, var(--surface)); border-color: color-mix(in srgb, var(--danger) 36%, transparent); }
+        .assessment-result strong { display: block; margin-bottom: 6px; }
+
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Virtual Limewater Investigation</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">&#10067; Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">&#127769; Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Virtual Lab</div>
+                    <h2 id="homeTitle">Virtual Limewater Investigation</h2>
+                    <p id="homeDescription">
+                        Explore the difference between inhaled and exhaled air using a simulated double-flask breathing apparatus. Observe how carbon dioxide in exhaled air turns limewater milky.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                </section>
+            </div>
+        </main>
+
+        <div class="footer-note">
+            Virtual Limewater Investigation &mdash; built as a local, editable shell.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">&times;</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">&times;</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Assessment modal (injected content, kept in DOM) -->
+    <div class="modal" id="assessmentModal" role="dialog" aria-modal="true" aria-labelledby="assessmentHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeAssessmentBtn" aria-label="Close assessment">&times;</button>
+            <h3 id="assessmentHeading">Assessment Question</h3>
+            <div id="assessmentBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="submitAssessmentBtn">Submit Answer</button>
+                <button class="secondary-btn hidden" id="closeAssessmentBtn2">Close</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Screen reader live region -->
+    <div class="sr-only" id="liveRegion" aria-live="polite" aria-atomic="true"></div>
+
+    <script>
+        "use strict";
+
+        document.addEventListener("submit", function (event) { event.preventDefault(); }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1",
+            simId: "limewater-investigation",
+            title: "Virtual Limewater Investigation",
+            subtitle: "Offline interactive learning shell",
+            badgeText: "LAB",
+            homeEyebrow: "Virtual Lab",
+            homeDescription:
+                "Explore the difference between inhaled and exhaled air using a simulated double-flask breathing apparatus. Observe how carbon dioxide in exhaled air turns limewater milky.",
+            instructions: [
+                "Read the instructions before starting.",
+                "Click Inhale to draw room air through Flask A. Observe the result.",
+                "Click Exhale to blow air from the lungs through Flask B. Observe the result.",
+                "Repeat 3 or more times to see Flask B turn milky.",
+                "Click 'Check My Understanding' when you are ready to answer the assessment question.",
+                "Use the Reset button any time you want to restart from scratch.",
+                "This file runs completely offline in a browser. No internet is needed."
+            ]
+        };
+
+        /* ============================================================
+           DEV-EDIT: AUDIO
+           ============================================================ */
+        const SOUND_FILES = { click: "", correct: "", wrong: "", typing: "", complete: "" };
+        const SOUND_CATEGORIES = { click: "effects", typing: "effects", correct: "effects", wrong: "effects", complete: "effects" };
+        const CATEGORY_LABELS = { effects: "Sound effects" };
+
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() { const cats = new Set(["effects"]); Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c)); return [...cats]; }
+        function loadVolumes() { getCategories().forEach((cat) => { const raw = storageGet(VOL_STORAGE_KEY(cat)); const n = raw === null || raw === "" ? 100 : Number(raw); channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1; }); }
+        function volumeFor(name) { const cat = SOUND_CATEGORIES[name] || "effects"; return channelVolumes[cat] != null ? channelVolumes[cat] : 1; }
+        function ensureAudioCtx() { if (!audioCtx) { const Ctx = window.AudioContext || window.webkitAudioContext; if (Ctx) audioCtx = new Ctx(); } if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); return audioCtx; }
+        function playTone(freq, durationMs, type, volume, startDelayMs) { const ctx = ensureAudioCtx(); if (!ctx) return; const osc = ctx.createOscillator(); const gain = ctx.createGain(); const t0 = ctx.currentTime + (startDelayMs || 0) / 1000; osc.type = type || "sine"; osc.frequency.setValueAtTime(freq, t0); gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0); gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000); osc.connect(gain).connect(ctx.destination); osc.start(t0); osc.stop(t0 + durationMs / 1000); }
+        const SYNTH_SOUNDS = { click: (v) => playTone(600, 60, "square", 0.06 * v), typing: (v) => playTone(420, 30, "square", 0.04 * v), correct: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(784, 180, "sine", 0.15 * v, 110); }, wrong: (v) => playTone(180, 250, "sawtooth", 0.12 * v), complete: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(659, 120, "sine", 0.15 * v, 120); playTone(784, 250, "sine", 0.15 * v, 240); } };
+
+        function playSound(name) { if (!audioEnabled) return; const v = volumeFor(name); if (v <= 0) return; const src = SOUND_FILES[name]; if (src) { try { const a = new Audio(src); a.volume = v; a.play().catch(() => {}); } catch (err) {} return; } const synth = SYNTH_SOUNDS[name]; if (synth) { try { synth(v); } catch (err) {} } }
+
+        function updateAudioButton() { const btn = dom.audioBtn; if (!btn) return; const onIcon = document.getElementById("audioOnIcon"); const offIcon = document.getElementById("audioOffIcon"); if (audioEnabled) { if (onIcon) onIcon.style.display = ""; if (offIcon) offIcon.style.display = "none"; btn.title = "Audio on"; btn.setAttribute("aria-label", "Audio on"); } else { if (onIcon) onIcon.style.display = "none"; if (offIcon) offIcon.style.display = ""; btn.title = "Audio muted"; btn.setAttribute("aria-label", "Audio muted"); } }
+        function toggleAudio() { audioEnabled = !audioEnabled; storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1"); updateAudioButton(); if (audioEnabled) playSound("click"); }
+        function loadAudioSetting() { loadVolumes(); audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1"; updateAudioButton(); }
+
+        function renderVolumeSliders() { const body = dom.instructionsBody; if (!body) return; const existing = document.getElementById("volumeSliders"); if (existing && existing.parentNode) existing.parentNode.removeChild(existing); const wrap = document.createElement("div"); wrap.id = "volumeSliders"; wrap.className = "volume-sliders"; const heading = document.createElement("h3"); heading.textContent = "Audio volume"; wrap.appendChild(heading); getCategories().forEach((cat) => { const row = document.createElement("div"); row.className = "volume-row"; const label = document.createElement("label"); label.textContent = CATEGORY_LABELS[cat] || cat; const input = document.createElement("input"); input.type = "range"; input.min = "0"; input.max = "100"; input.step = "5"; const cur = channelVolumes[cat] != null ? channelVolumes[cat] : 1; input.value = String(Math.round(cur * 100)); input.addEventListener("input", () => { channelVolumes[cat] = Number(input.value) / 100; storageSet(VOL_STORAGE_KEY(cat), input.value); }); input.addEventListener("change", () => { playSound("click"); }); row.appendChild(label); row.appendChild(input); wrap.appendChild(row); }); body.appendChild(wrap); }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = { currentScreen: "home", theme: "dark" };
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() { try { Object.keys(localStorage).filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0).forEach((k) => localStorage.removeItem(k)); } catch (err) {} applyConfigToUI(); bindEvents(); renderInstructions(); loadTheme(); loadHelpSeen(); try { loadAudioSetting(); } catch (err) {} }
+        function loadHelpSeen() { const seen = storageGet(SIM_CONFIG.simId + "-help-seen"); if (seen === "true") dom.helpBtn.classList.remove("pulse-help"); }
+        function applyConfigToUI() { document.title = SIM_CONFIG.title; dom.brandBadge.textContent = SIM_CONFIG.badgeText; dom.brandTitle.textContent = SIM_CONFIG.title; dom.brandSubtitle.textContent = SIM_CONFIG.subtitle; dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow; dom.homeTitle.textContent = SIM_CONFIG.title; dom.homeDescription.textContent = SIM_CONFIG.homeDescription; }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => { showScreen("sim"); devInit(); });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => { dom.helpBtn.classList.remove("pulse-help"); storageSet(SIM_CONFIG.simId + "-help-seen", "true"); openInstructionsModal(); });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => { if (event.target === dom.instructionsModal) closeInstructionsModal(); });
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => { devReset(); showScreen("home"); closeResetConfirmModal(); });
+            dom.resetConfirmModal.addEventListener("click", (event) => { if (event.target === dom.resetConfirmModal) closeResetConfirmModal(); });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() { const intro = document.createElement("p"); intro.textContent = "Here is how this simulation works:"; const list = document.createElement("ul"); SIM_CONFIG.instructions.forEach((item) => { const li = document.createElement("li"); li.textContent = item; list.appendChild(li); }); dom.instructionsBody.replaceChildren(intro, list); }
+        function openInstructionsModal() { dom.instructionsModal.classList.add("show"); try { renderVolumeSliders(); } catch (err) {} }
+        function closeInstructionsModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetConfirmModal() { dom.resetConfirmModal.classList.add("show"); }
+        function closeResetConfirmModal() { dom.resetConfirmModal.classList.remove("show"); }
+        function showScreen(screenName) { state.currentScreen = screenName; dom.homeScreen.classList.toggle("active", screenName === "home"); dom.simScreen.classList.toggle("active", screenName === "sim"); window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }
+        function toggleTheme() { state.theme = state.theme === "dark" ? "light" : "dark"; dom.html.setAttribute("data-theme", state.theme); updateThemeToggleLabel(); storageSet(SIM_CONFIG.simId + "-theme", state.theme); }
+        function loadTheme() { const saved = storageGet(SIM_CONFIG.simId + "-theme"); if (saved === "light" || saved === "dark") { state.theme = saved; } else { const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches; state.theme = prefersLight ? "light" : "dark"; } dom.html.setAttribute("data-theme", state.theme); updateThemeToggleLabel(); }
+        function updateThemeToggleLabel() { const switchToLight = state.theme === "dark"; dom.themeToggleBtn.textContent = switchToLight ? "\u2600\uFE0F Light Mode" : "\uD83C\uDF19 Dark Mode"; dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode"); }
+        async function toggleFullscreen() { try { if (!document.fullscreenElement) { await document.documentElement.requestFullscreen(); } else { await document.exitFullscreen(); } } catch (error) {} }
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+        function updateFullscreenButton() { dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML; }
+        function handleKeyShortcuts(event) { if (event.key === "Escape") { closeInstructionsModal(); closeResetConfirmModal(); } }
+        function escapeHtml(value) { return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;"); }
+        function storageGet(key) { try { return sessionStorage.getItem(key); } catch (err) { return null; } }
+        function storageSet(key, value) { try { sessionStorage.setItem(key, value); } catch (err) {} }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           ============================================================ */
+
+        /* --- Sim state --- */
+        let inhaleCount = 0;
+        let exhaleCount = 0;
+        let isAnimating = false;
+        let assessmentAnswered = false;
+
+        function devInit() {
+            inhaleCount = 0;
+            exhaleCount = 0;
+            isAnimating = false;
+            assessmentAnswered = false;
+            buildApparatus();
+        }
+
+        function devReset() {
+            inhaleCount = 0;
+            exhaleCount = 0;
+            isAnimating = false;
+            assessmentAnswered = false;
+            dom.simContainer.innerHTML = "";
+        }
+
+        /* --- Build the apparatus markup --- */
+        function buildApparatus() {
+            dom.simContainer.innerHTML = `
+                <h2 class="sim-title">Double-Flask Breathing Apparatus</h2>
+                <p class="sim-subtitle">Inhale draws room air through Flask A. Exhale pushes lung air through Flask B.</p>
+
+                <div class="apparatus-wrap">
+                    <svg class="apparatus-svg" viewBox="0 0 700 430" xmlns="http://www.w3.org/2000/svg" aria-label="Breathing apparatus diagram showing two limewater flasks connected to a mouthpiece and lung model">
+                        <!-- Background -->
+                        <rect x="0" y="0" width="700" height="430" rx="18" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1"/>
+
+                        <!-- Room air arrow -->
+                        <text x="60" y="105" fill="var(--muted)" font-size="14" text-anchor="middle" font-weight="700">ROOM</text>
+                        <text x="60" y="122" fill="var(--muted)" font-size="14" text-anchor="middle" font-weight="700">AIR</text>
+                        <line x1="85" y1="130" x2="130" y2="130" stroke="var(--muted)" stroke-width="2" marker-end="url(#arrowMuted)"/>
+
+                        <!-- Flask A (inhaled air) -->
+                        <rect id="flaskABody" x="120" y="60" width="100" height="160" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="2"/>
+                        <rect id="flaskALiquid" x="124" y="110" width="92" height="106" rx="6" fill="rgba(200, 230, 255, 0.55)" stroke="none">
+                            <title>Flask A liquid — clear limewater</title>
+                        </rect>
+                        <text x="170" y="90" fill="var(--text-soft)" font-size="13" text-anchor="middle" font-weight="700">Flask A</text>
+                        <text x="170" y="258" fill="var(--muted)" font-size="12" text-anchor="middle">Inhaled air</text>
+
+                        <!-- Bubbles container A -->
+                        <g id="bubblesA"></g>
+
+                        <!-- Flask B (exhaled air) -->
+                        <rect id="flaskBBody" x="480" y="60" width="100" height="160" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="2"/>
+                        <rect id="flaskBLiquid" x="484" y="110" width="92" height="106" rx="6" fill="rgba(200, 230, 255, 0.55)" stroke="none">
+                            <title>Flask B liquid — clear limewater</title>
+                        </rect>
+                        <text x="530" y="90" fill="var(--text-soft)" font-size="13" text-anchor="middle" font-weight="700">Flask B</text>
+                        <text x="530" y="258" fill="var(--muted)" font-size="12" text-anchor="middle">Exhaled air</text>
+
+                        <!-- Bubbles container B -->
+                        <g id="bubblesB"></g>
+
+                        <!-- Tube from room to Flask A bottom -->
+                        <path d="M 95 130 Q 108 130, 108 170 L 108 220 Q 108 235, 120 235 L 120 195 Q 120 185, 130 185" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/>
+
+                        <!-- Tube from Flask A top to mouthpiece -->
+                        <path d="M 170 60 L 170 30 Q 170 20, 180 20 L 300 20" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+
+                        <!-- Tube from mouthpiece to Flask B top -->
+                        <path d="M 400 20 L 530 20 Q 530 20, 530 30 L 530 60" fill="none" stroke="var(--accent-2)" stroke-width="3" stroke-linecap="round"/>
+
+                        <!-- Tube from Flask B bottom to mouthpiece (exhale path) -->
+                        <path d="M 580 195 Q 580 185, 590 185 L 600 185 Q 612 185, 612 170 L 612 130 Q 612 120, 600 120" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+                        <path d="M 600 120 Q 590 120, 580 120 L 400 120" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+
+                        <!-- Mouthpiece -->
+                        <rect x="300" y="4" width="100" height="32" rx="8" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
+                        <text x="350" y="24" fill="var(--text)" font-size="13" text-anchor="middle" font-weight="700">Mouthpiece</text>
+
+                        <!-- Lung model -->
+                        <g id="lungModel" transform="translate(350, 310)">
+                            <!-- Trachea -->
+                            <rect x="-6" y="-60" width="12" height="30" rx="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
+                            <!-- Left lung -->
+                            <ellipse id="leftLung" cx="-38" cy="0" rx="36" ry="46" fill="color-mix(in srgb, var(--accent) 12%, var(--surface))" stroke="var(--accent)" stroke-width="2"/>
+                            <!-- Right lung -->
+                            <ellipse id="rightLung" cx="38" cy="0" rx="36" ry="46" fill="color-mix(in srgb, var(--accent) 12%, var(--surface))" stroke="var(--accent)" stroke-width="2"/>
+                            <!-- Diaphragm line -->
+                            <path d="M -74 52 Q 0 70, 74 52" fill="none" stroke="var(--accent-2)" stroke-width="2" stroke-dasharray="5 3"/>
+                            <text x="0" y="82" fill="var(--muted)" font-size="12" text-anchor="middle">Lungs</text>
+                        </g>
+
+                        <!-- Connection: mouthpiece down to lungs -->
+                        <line x1="350" y1="36" x2="350" y2="250" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+
+                        <!-- Labels -->
+                        <text x="350" y="412" fill="var(--muted)" font-size="12" text-anchor="middle" font-style="italic">Click Inhale or Exhale below</text>
+
+                        <!-- Arrow markers -->
+                        <defs>
+                            <marker id="arrowMuted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="var(--muted)"/></marker>
+                        </defs>
+                    </svg>
+
+                    <div class="breath-controls">
+                        <button class="breath-btn inhale-btn" id="inhaleBtn" type="button" aria-label="Inhale — draw room air through Flask A">
+                            &#11014;&#65039; Inhale
+                        </button>
+                        <button class="breath-btn exhale-btn" id="exhaleBtn" type="button" aria-label="Exhale — push lung air through Flask B">
+                            &#11015;&#65039; Exhale
+                        </button>
+                    </div>
+
+                    <div class="breath-count" id="breathCount">
+                        Inhales: <strong id="inhaleCountDisplay">0</strong> &nbsp;|&nbsp;
+                        Exhales: <strong id="exhaleCountDisplay">0</strong>
+                    </div>
+
+                    <div class="event-log" id="eventLog" aria-label="Event log for screen readers" role="log"></div>
+
+                    <div class="check-btn" id="checkBtnWrap">
+                        <button class="primary-btn" id="checkBtn" type="button" aria-label="Check my understanding">
+                            Check My Understanding
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            /* Bind breath buttons */
+            document.getElementById("inhaleBtn").addEventListener("click", doInhale);
+            document.getElementById("exhaleBtn").addEventListener("click", doExhale);
+            document.getElementById("checkBtn").addEventListener("click", openAssessment);
+        }
+
+        /* --- Inhale action --- */
+        function doInhale() {
+            if (isAnimating) return;
+            isAnimating = true;
+            inhaleCount++;
+            document.getElementById("inhaleCountDisplay").textContent = inhaleCount;
+            playSound("click");
+
+            /* Animate lungs expanding — target the ellipses, not the translated group */
+            ["leftLung", "rightLung"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.classList.remove("lung-inhale"); void el.offsetWidth; el.classList.add("lung-inhale"); }
+            });
+
+            /* Bubble animation in Flask A */
+            spawnBubbles("bubblesA", 5);
+
+            /* Log entry */
+            addLog("inhale", "Inhale clicked: Flask A bubbles. Liquid is clear.");
+
+            /* Announce for screen readers */
+            announce("Inhale clicked. Air bubbles through Flask A. The limewater remains clear.");
+
+            setTimeout(() => { isAnimating = false; }, 1200);
+        }
+
+        /* --- Exhale action --- */
+        function doExhale() {
+            if (isAnimating) return;
+            isAnimating = true;
+            exhaleCount++;
+            document.getElementById("exhaleCountDisplay").textContent = exhaleCount;
+            playSound("click");
+
+            /* Animate lungs contracting — target the ellipses, not the translated group */
+            ["leftLung", "rightLung"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.classList.remove("lung-exhale"); void el.offsetWidth; el.classList.add("lung-exhale"); }
+            });
+
+            /* Bubble animation in Flask B */
+            spawnBubbles("bubblesB", 5);
+
+            /* Update Flask B opacity based on exhale count */
+            updateFlaskB();
+
+            /* Log entry */
+            if (exhaleCount < 3) {
+                addLog("exhale", "Exhale clicked: Flask B bubbles. Liquid is still mostly clear.");
+            } else {
+                addLog("exhale", "Exhale clicked: Flask B bubbles. Liquid is turning milky!");
+            }
+
+            /* Announce for screen readers */
+            if (exhaleCount < 3) {
+                announce("Exhale clicked. Air bubbles through Flask B. The limewater is still mostly clear.");
+            } else {
+                announce("Exhale clicked. Air bubbles through Flask B. The limewater is turning milky white!");
+            }
+
+            setTimeout(() => { isAnimating = false; }, 1200);
+        }
+
+        /* --- Flask B opacity update --- */
+        function updateFlaskB() {
+            const liquid = document.getElementById("flaskBLiquid");
+            if (!liquid) return;
+
+            /* After 1 exhale: slightly cloudy. After 2: more. After 3+: milky. */
+            let opacity, color;
+            if (exhaleCount <= 1) {
+                opacity = 0.6;
+                color = "rgba(210, 225, 240,";
+            } else if (exhaleCount === 2) {
+                opacity = 0.72;
+                color = "rgba(225, 230, 235,";
+            } else {
+                /* Each extra exhale increases whiteness */
+                const extra = Math.min(exhaleCount - 3, 4);
+                opacity = Math.min(0.85 + extra * 0.03, 0.97);
+                color = "rgba(240, 242, 244,";
+            }
+            liquid.setAttribute("fill", color + opacity + ")");
+
+            /* Update the title tooltip */
+            const titles = liquid.querySelectorAll("title");
+            titles.forEach(t => {
+                t.textContent = exhaleCount >= 3
+                    ? "Flask B liquid — milky white (CO\u2082 detected)"
+                    : "Flask B liquid — becoming cloudy";
+            });
+        }
+
+        /* --- Spawn bubble circles inside a flask group --- */
+        function spawnBubbles(groupId, count) {
+            const group = document.getElementById(groupId);
+            if (!group) return;
+            const isA = groupId === "bubblesB";
+            const baseX = isA ? 530 : 170;
+            const baseY = 175;
+
+            for (let i = 0; i < count; i++) {
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                const offsetX = (Math.random() - 0.5) * 40;
+                circle.setAttribute("cx", baseX + offsetX);
+                circle.setAttribute("cy", baseY);
+                circle.setAttribute("r", 3 + Math.random() * 4);
+                circle.setAttribute("fill", "rgba(180, 210, 240, 0.6)");
+                circle.style.animationDelay = (i * 0.12) + "s";
+                circle.classList.add("bubble-anim");
+                group.appendChild(circle);
+                setTimeout(() => { if (circle.parentNode) circle.parentNode.removeChild(circle); }, 1000);
+            }
+        }
+
+        /* --- Event log --- */
+        function addLog(type, text) {
+            const log = document.getElementById("eventLog");
+            if (!log) return;
+            const entry = document.createElement("div");
+            entry.className = "log-entry " + type;
+            const label = type === "inhale" ? "Inhale" : "Exhale";
+            entry.innerHTML = '<span class="log-label">' + escapeHtml(label) + ':</span> ' + escapeHtml(text);
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        /* --- Screen reader announce --- */
+        function announce(text) {
+            const region = document.getElementById("liveRegion");
+            if (region) region.textContent = text;
+        }
+
+        /* --- Assessment --- */
+        function openAssessment() {
+            if (assessmentAnswered) return;
+            const modal = document.getElementById("assessmentModal");
+            const body = document.getElementById("assessmentBody");
+            const submitBtn = document.getElementById("submitAssessmentBtn");
+            const closeBtn2 = document.getElementById("closeAssessmentBtn2");
+            const closeBtn = document.getElementById("closeAssessmentBtn");
+
+            body.innerHTML = `
+                <p style="margin:0 0 4px; color:var(--text-soft); line-height:1.65;">Based on your observations, answer the question below.</p>
+                <p style="margin:0 0 8px; color:var(--text); font-weight:700; line-height:1.65;">Why did Flask B turn milky?</p>
+                <div class="assessment-options" id="assessmentOptions">
+                    <label class="assessment-opt" data-value="a">
+                        <input type="radio" name="assess-q" value="a"/>
+                        Flask B received more carbon dioxide from exhaled air.
+                    </label>
+                    <label class="assessment-opt" data-value="b">
+                        <input type="radio" name="assess-q" value="b"/>
+                        Flask B received more oxygen from exhaled air.
+                    </label>
+                    <label class="assessment-opt" data-value="c">
+                        <input type="radio" name="assess-q" value="c"/>
+                        Flask A and Flask B both turned milky at the same time.
+                    </label>
+                    <label class="assessment-opt" data-value="d">
+                        <input type="radio" name="assess-q" value="d"/>
+                        The limewater naturally turns milky over time.
+                    </label>
+                </div>
+                <div class="assessment-result" id="assessmentResult"></div>
+            `;
+
+            /* Highlight selected option */
+            body.querySelectorAll(".assessment-opt").forEach(opt => {
+                opt.addEventListener("click", () => {
+                    body.querySelectorAll(".assessment-opt").forEach(o => o.classList.remove("selected"));
+                    opt.classList.add("selected");
+                    opt.querySelector("input").checked = true;
+                });
+            });
+
+            submitBtn.classList.remove("hidden");
+            closeBtn2.classList.add("hidden");
+
+            submitBtn.onclick = () => {
+                const selected = body.querySelector('input[name="assess-q"]:checked');
+                if (!selected) { alert("Please select an answer before submitting."); return; }
+
+                const result = document.getElementById("assessmentResult");
+                const val = selected.value;
+
+                if (val === "a") {
+                    result.className = "assessment-result show correct";
+                    result.innerHTML = '<strong style="color:var(--success);">&#10003; Correct!</strong> Flask B turned milky because exhaled air contains a higher percentage of carbon dioxide. This gas reacts with the clear limewater, causing the cloudy colour change. Flask A only receives room air, which has very little CO&#x2082.';
+                    playSound("correct");
+                } else {
+                    result.className = "assessment-result show wrong";
+                    result.innerHTML = '<strong style="color:var(--danger);">&#10007; Not quite.</strong> ';
+                    if (val === "b") {
+                        result.innerHTML += 'Exhaled air actually contains <em>less</em> oxygen than inhaled air. The milky change is caused by carbon dioxide, not oxygen.';
+                    } else if (val === "c") {
+                        result.innerHTML += 'Flask A remained clear throughout. Only Flask B turned milky because it received air from the lungs, which is high in CO&#x2082.';
+                    } else {
+                        result.innerHTML += 'The limewater only turned milky after exhaling through Flask B multiple times. It does not change on its own.';
+                    }
+                    result.innerHTML += '<br><br><strong>Hint:</strong> "Which flask is receiving air directly from the lungs?"';
+                    playSound("wrong");
+                }
+
+                assessmentAnswered = true;
+                submitBtn.classList.add("hidden");
+                closeBtn2.classList.remove("hidden");
+                closeBtn2.onclick = () => { modal.classList.remove("show"); };
+            };
+
+            closeBtn.onclick = () => { modal.classList.remove("show"); };
+            modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("show"); });
+
+            modal.classList.add("show");
+            playSound("click");
+        }
+    </script>
+</body>
+</html>
