@@ -2019,6 +2019,7 @@
                 screenIndex: 0,
                 stepIndex: 0,
                 done: {},
+                selections: {},
                 firstTry: {},
                 attempts: {},
                 hintUsed: {},
@@ -2203,23 +2204,30 @@
                 '<div class="task-kicker">Review — ' + escapeHtml(sc.label) + '</div>' +
                 '<h3 class="task-title">' + (anyDone ? 'Bolt already opened' : 'Upcoming bolt') + '</h3>' +
                 '<p class="task-prompt">' + (anyDone
-                    ? 'Here are the correct answers for this bolt. Press Continue to return to your place in the mission.'
+                    ? 'Here are your recorded answers. Correct picks are ticked; wrong picks are crossed. Press Continue to return to your place in the mission.'
                     : 'You haven\'t opened this bolt yet. Press Continue to return to your place in the mission.') + '</p>';
             sc.steps.forEach(function (sid) {
                 const step = STEPS[sid];
                 const stepDone = !!gameState.done[sid];
+                const userSel = gameState.selections[sid] || {};
                 html += '<div class="group-block"><div class="group-label">' + escapeHtml(step.title) + '</div>';
                 step.groups.forEach(function (g) {
+                    const picked = userSel[g.id];
                     html += '<div class="group-prompt">' + escapeHtml(g.label) + '</div><div class="option-list">';
                     g.options.forEach(function (o) {
-                        const cls = "choice-btn" + (stepDone && o.correct ? " correct-mark" : "");
+                        let cls = "choice-btn";
+                        if (stepDone && o.correct) cls += " correct-mark";
+                        else if (stepDone && !o.correct) {
+                            const wasPicked = Array.isArray(picked) ? picked.indexOf(o.id) !== -1 : picked === o.id;
+                            if (wasPicked) cls += " wrong-mark";
+                        }
                         html += '<button type="button" class="' + cls + '" disabled>' + escapeHtml(o.label) + '</button>';
                     });
                     html += '</div>';
                 });
                 html += '</div>';
             });
-            html += '<p class="fb-line" style="margin-top:12px;color:var(--success);font-weight:700;">✓ Bolt open — the correct answers are marked.</p></div>';
+            html += '<p class="fb-line" style="margin-top:12px;color:var(--success);font-weight:700;">✓ Bolt open — your answers and the correct ones are shown above.</p></div>';
             document.getElementById("taskArea").innerHTML = html;
             clearFeedback();
             var actions = [{ action: "reviewcontinue", label: "Continue" }];
@@ -2318,6 +2326,7 @@
 
         function passStep(step) {
             gameState.done[step.id] = true;
+            gameState.selections[step.id] = JSON.parse(JSON.stringify(selection[step.id] || {}));
             if (step.bolt) setBolt(step.bolt, true);
             if (step.id === "parallel") {
                 gameState.completed = true;
