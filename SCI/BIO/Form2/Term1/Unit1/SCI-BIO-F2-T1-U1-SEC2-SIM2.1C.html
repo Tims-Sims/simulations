@@ -472,266 +472,892 @@
            Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
 
-        .circuit-wrap {
+        /* ---- BLOOD COURIER: the double circuit ---- */
+
+        :root {
+            --sim-oxy: hsl(350 88% 64%);
+            --sim-deoxy: hsl(220 85% 70%);
+            --sim-lung: hsl(188 78% 60%);
+            --sim-heart: hsl(345 80% 64%);
+            --sim-body: hsl(150 62% 54%);
+            --sim-o2: hsl(196 90% 64%);
+            --sim-co2: hsl(268 76% 74%);
+            --sim-nutri: hsl(40 95% 64%);
+            --sim-gold: hsl(45 95% 62%);
+            --sim-organ: hsl(232 34% 24%);
+            --sim-organ-edge: hsl(230 30% 56%);
+            --sim-map-a: hsl(234 46% 13%);
+            --sim-map-b: hsl(258 44% 21%);
+            --sim-ink: hsl(230 65% 97%);
+        }
+
+        html[data-theme="light"] {
+            --sim-oxy: hsl(350 74% 46%);
+            --sim-deoxy: hsl(222 70% 48%);
+            --sim-lung: hsl(190 70% 34%);
+            --sim-heart: hsl(345 70% 46%);
+            --sim-body: hsl(152 56% 30%);
+            --sim-o2: hsl(200 90% 34%);
+            --sim-co2: hsl(268 60% 48%);
+            --sim-nutri: hsl(28 92% 40%);
+            --sim-gold: hsl(38 92% 40%);
+            --sim-organ: hsl(220 84% 97%);
+            --sim-organ-edge: hsl(222 34% 58%);
+            --sim-map-a: hsl(202 100% 94%);
+            --sim-map-b: hsl(262 92% 95%);
+            --sim-ink: hsl(228 50% 16%);
+        }
+
+        /* ---------- header ---------- */
+
+        .sim-head {
             display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .map-box {
-            background: var(--bg-soft);
-            border: 1px solid var(--border);
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 16px 20px;
+            margin-bottom: 14px;
             border-radius: var(--radius-lg);
-            padding: 10px;
+            background:
+                linear-gradient(135deg,
+                    color-mix(in srgb, var(--sim-oxy) 26%, var(--surface-2)),
+                    color-mix(in srgb, var(--sim-deoxy) 26%, var(--surface-2)));
+            border: 3px solid color-mix(in srgb, var(--sim-oxy) 34%, var(--border));
         }
 
-        #circuitMap {
+        .sim-head-copy {
+            min-width: 0;
+        }
+
+        .scene-progress {
+            display: inline-block;
+            margin: 0 0 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: var(--surface);
+            border: 2px solid color-mix(in srgb, var(--sim-oxy) 50%, var(--border));
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-size: 0.76rem;
+            color: var(--text);
+        }
+
+        .sim-head h2 {
+            margin: 0;
+            font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+            line-height: 1.12;
+            letter-spacing: -0.015em;
+        }
+
+        .exit-btn {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        /* ---------- HUD ---------- */
+
+        .hud {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .hud-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 3px solid var(--border);
+            background: var(--surface-2);
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .hud-chip .hud-label {
+            font-size: 0.74rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-soft);
+        }
+
+        .hud-score {
+            border-color: color-mix(in srgb, var(--sim-gold) 65%, var(--border));
+            background: color-mix(in srgb, var(--sim-gold) 16%, var(--surface-2));
+        }
+
+        .hud-stars {
+            border-color: color-mix(in srgb, var(--sim-nutri) 55%, var(--border));
+        }
+
+        .hud-rank {
+            border-color: color-mix(in srgb, var(--sim-oxy) 55%, var(--border));
+        }
+
+        .star-strip {
+            letter-spacing: 0.12em;
+            font-size: 1.02rem;
+        }
+
+        .reward-float {
+            position: absolute;
+            left: 0;
+            top: -6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-weight: 900;
+            color: var(--text);
+            background: color-mix(in srgb, var(--success) 30%, var(--surface));
+            border: 2px solid var(--success);
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 0;
+                transform: translateY(6px) scale(0.9);
+            }
+
+            25% {
+                opacity: 1;
+                transform: translateY(-8px) scale(1.06);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(1);
+            }
+        }
+
+        .stage-brief {
+            margin: 0 0 16px;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+            max-width: 70ch;
+        }
+
+        /* ---------- circuit map ---------- */
+
+        .circuit-wrap {
+            position: relative;
+            background: linear-gradient(160deg, var(--sim-map-a), var(--sim-map-b));
+            border: 3px solid color-mix(in srgb, var(--sim-deoxy) 38%, var(--border));
+            border-radius: var(--radius-xl);
+            padding: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        .circuit-map {
+            display: block;
             width: 100%;
             height: auto;
-            max-height: 260px;
-            display: block;
+            max-height: 56vh;
         }
 
-        .map-path {
-            fill: none;
-            stroke: var(--muted);
-            stroke-width: 2.5;
+        .organ-shape {
+            fill: var(--sim-organ);
+            stroke: var(--sim-organ-edge);
+            stroke-width: 3;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            transition: stroke-width 0.3s ease, filter 0.3s ease;
         }
 
-        .map-arrow-fill {
-            fill: var(--muted);
+        .organ-lung {
+            fill: color-mix(in srgb, var(--sim-lung) 34%, var(--sim-organ));
+            stroke: var(--sim-lung);
         }
 
-        .map-node circle {
-            fill: var(--surface-2);
-            stroke: var(--border);
-            stroke-width: 2;
+        .organ-heart {
+            fill: color-mix(in srgb, var(--sim-heart) 36%, var(--sim-organ));
+            stroke: var(--sim-heart);
         }
 
-        .map-node text {
-            fill: var(--text-soft);
-            font-size: 11px;
+        .organ-body {
+            fill: color-mix(in srgb, var(--sim-body) 32%, var(--sim-organ));
+            stroke: var(--sim-body);
+        }
+
+        .organ.is-current .organ-shape {
+            stroke-width: 6;
+            filter: drop-shadow(0 0 12px color-mix(in srgb, var(--sim-oxy) 75%, transparent));
+        }
+
+        .organ.is-visited .organ-shape {
+            stroke-width: 4;
+            filter: drop-shadow(0 0 8px color-mix(in srgb, var(--success) 65%, transparent));
+        }
+
+        .organ-label {
+            fill: var(--sim-ink);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-anchor: middle;
+        }
+
+        .organ-sub {
+            fill: var(--sim-ink);
+            opacity: 0.82;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 15px;
             font-weight: 700;
             text-anchor: middle;
         }
 
-        .map-node-sub {
-            font-size: 8px !important;
-            font-weight: 500 !important;
-            fill: var(--muted) !important;
+        .organ-flag {
+            fill: var(--sim-ink);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 900;
+            text-anchor: middle;
         }
 
-        .map-node.current circle {
-            fill: color-mix(in srgb, var(--accent) 30%, var(--surface-2));
-            stroke: var(--accent);
-            stroke-width: 3;
+        .vessel {
+            fill: none;
+            stroke-width: 11;
+            stroke-linecap: round;
+            opacity: 0.85;
         }
 
-        .map-node.current text {
-            fill: var(--text);
+        .vessel-warm {
+            stroke: var(--sim-oxy);
         }
 
-        .blood-drop {
-            transition: transform 0.6s ease;
+        .vessel-cool {
+            stroke: var(--sim-deoxy);
         }
 
-        .blood-drop circle {
-            fill: var(--danger);
-            stroke: var(--text);
-            stroke-width: 1.5;
+        .flow {
+            fill: none;
+            stroke: var(--sim-ink);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 2 26;
+            opacity: 0.85;
+            animation: flowRun 1.6s linear infinite;
         }
 
-        .blood-drop text {
-            display: none;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .blood-drop {
-                transition: none;
+        @keyframes flowRun {
+            to {
+                stroke-dashoffset: -28;
             }
         }
 
-        .status-bar {
+        .arrow-warm {
+            fill: var(--sim-oxy);
+        }
+
+        .arrow-cool {
+            fill: var(--sim-deoxy);
+        }
+
+        .vessel-tag {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            font-weight: 900;
+            text-anchor: middle;
+        }
+
+        .vessel-tag.warm {
+            fill: var(--sim-oxy);
+        }
+
+        .vessel-tag.cool {
+            fill: var(--sim-deoxy);
+        }
+
+        .drop-body {
+            fill: var(--sim-oxy);
+            stroke: var(--sim-ink);
+            stroke-width: 3;
+        }
+
+        .drop-shine {
+            fill: var(--sim-ink);
+            opacity: 0.6;
+        }
+
+        .drop-face {
+            fill: var(--sim-ink);
+        }
+
+        #bloodDrop {
+            transition: transform 0.8s cubic-bezier(0.5, 0, 0.25, 1);
+        }
+
+        #dropPulse {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: dropBeat 1.4s ease-in-out infinite;
+        }
+
+        @keyframes dropBeat {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            20% {
+                transform: scale(1.18);
+            }
+
+            38% {
+                transform: scale(1);
+            }
+        }
+
+        .beats {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: dropBeat 1.4s ease-in-out infinite;
+        }
+
+        .breathes {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .cargo-orb {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        .cargo-orb.is-off {
+            opacity: 0;
+            transform: scale(0.4);
+        }
+
+        /* ---------- station tracker ---------- */
+
+        .tracker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .tracker-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 15px;
+            border-radius: 999px;
+            border: 3px solid var(--border);
             background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 14px 16px;
-        }
-
-        .status-bar p {
-            margin: 4px 0;
-            color: var(--text-soft);
-            line-height: 1.5;
-        }
-
-        .status-bar strong {
+            font-weight: 800;
+            font-size: 0.94rem;
             color: var(--text);
+        }
+
+        .tracker-chip .chip-mark {
+            font-weight: 900;
+        }
+
+        .tracker-chip.is-current {
+            border-color: var(--sim-oxy);
+            background: color-mix(in srgb, var(--sim-oxy) 22%, var(--surface-2));
+        }
+
+        .tracker-chip.is-visited {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 18%, var(--surface-2));
+        }
+
+        .tracker-chip.is-pending {
+            border-style: dashed;
+            color: var(--text-soft);
+        }
+
+        /* ---------- cargo hold ---------- */
+
+        .hold {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 13px 16px;
+            margin-bottom: 14px;
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+            border: 3px solid var(--border);
+        }
+
+        .hold-title {
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: var(--text-soft);
+        }
+
+        .hold-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.94rem;
+            color: var(--text);
+            border: 3px solid var(--border);
+            background: var(--surface);
+        }
+
+        .hold-pill.cargo-oxygen {
+            border-color: var(--sim-o2);
+            background: color-mix(in srgb, var(--sim-o2) 22%, var(--surface));
+        }
+
+        .hold-pill.cargo-carbonDioxide {
+            border-color: var(--sim-co2);
+            background: color-mix(in srgb, var(--sim-co2) 22%, var(--surface));
+        }
+
+        .hold-pill.cargo-nutrients {
+            border-color: var(--sim-nutri);
+            background: color-mix(in srgb, var(--sim-nutri) 26%, var(--surface));
+        }
+
+        .hold-empty {
+            color: var(--text-soft);
+            font-weight: 700;
+        }
+
+        .cargo-icon {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+        }
+
+        .hold-pill .cargo-icon {
+            width: 22px;
+            height: 22px;
+            flex: 0 0 22px;
+        }
+
+        .icon-oxygen {
+            fill: var(--sim-o2);
+        }
+
+        .icon-carbonDioxide {
+            fill: var(--sim-co2);
+        }
+
+        .icon-nutrients {
+            fill: var(--sim-nutri);
+        }
+
+        .icon-glyph {
+            fill: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            font-weight: 900;
+            text-anchor: middle;
+        }
+
+        /* ---------- status ---------- */
+
+        .status-line {
+            margin: 0 0 16px;
+            padding: 13px 16px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 2px dashed var(--border);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .panel-heading {
+            margin: 0 0 12px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .cargo-panel,
+        .route-panel,
+        .check-panel {
+            margin-bottom: 16px;
+        }
+
+        .cargo-row,
+        .route-row,
+        .choice-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* ---------- cargo cards ---------- */
+
+        .cargo-btn {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            min-height: 78px;
+            min-width: 210px;
+            padding: 14px 18px;
+            border-radius: var(--radius-lg);
+            border: 3px dashed var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            text-align: left;
+            font-weight: 800;
+        }
+
+        .cargo-btn .cargo-name {
+            display: block;
+            font-size: 1.04rem;
+        }
+
+        .cargo-state {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 3px 11px;
+            border-radius: 999px;
+            font-weight: 900;
+            font-size: 0.74rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text-soft);
+        }
+
+        .cargo-btn[aria-pressed="true"] {
+            border-style: solid;
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 20%, var(--surface-2));
+        }
+
+        .cargo-btn[aria-pressed="true"] .cargo-state {
+            border-color: var(--success);
+            color: var(--text);
+        }
+
+        .cargo-btn:active,
+        .route-btn:active,
+        .choice-btn:active,
+        .check-btn:active {
+            transform: translateY(3px);
+        }
+
+        .cargo-btn[disabled] {
+            opacity: 0.75;
+            cursor: default;
+        }
+
+        /* ---------- route + choice buttons ---------- */
+
+        .route-btn,
+        .choice-btn {
+            min-height: 58px;
+            min-width: 48px;
+            padding: 15px 22px;
+            border-radius: var(--radius-lg);
+            border: 3px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-weight: 900;
+            font-size: 1rem;
+            text-align: left;
+        }
+
+        .route-btn {
+            border-color: color-mix(in srgb, var(--sim-deoxy) 50%, var(--border));
+        }
+
+        .check-btn {
+            min-height: 56px;
+            min-width: 48px;
+            font-size: 1.05rem;
+            font-weight: 900;
+            padding: 15px 28px;
+        }
+
+        .cargo-btn:focus-visible,
+        .route-btn:focus-visible,
+        .choice-btn:focus-visible,
+        .check-btn:focus-visible,
+        .exit-btn:focus-visible,
+        .nav-row button:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        /* ---------- feedback ---------- */
+
+        .feedback {
+            margin: 0 0 16px;
+            padding: 16px 18px;
+            border-radius: var(--radius-lg);
+            border: 3px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            line-height: 1.65;
+        }
+
+        .feedback.is-correct {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 14%, var(--surface-2));
+            animation: popIn 0.35s ease-out;
+        }
+
+        .feedback.is-wrong {
+            border-color: var(--danger);
+            border-style: dashed;
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface-2));
+            animation: nudge 0.4s ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.97);
+                opacity: 0.4;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes nudge {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-6px);
+            }
+
+            60% {
+                transform: translateX(5px);
+            }
+        }
+
+        .feedback .feedback-tag {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-weight: 900;
+            font-size: 0.82rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: var(--surface);
+            border: 2px solid currentColor;
+        }
+
+        /* ---------- panels ---------- */
+
+        .review-panel,
+        .confirm-panel {
+            margin-bottom: 16px;
+            padding: 16px 18px;
+            border-radius: var(--radius-lg);
+            border: 3px solid var(--border);
+            background: var(--surface-2);
+        }
+
+        .review-list {
+            margin: 0 0 14px;
+            padding-left: 22px;
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        .review-list li {
+            margin-bottom: 6px;
+        }
+
+        .review-empty {
+            margin: 0 0 14px;
+            color: var(--text-soft);
+        }
+
+        .review-panel button,
+        .confirm-panel button {
+            min-height: 44px;
+            min-width: 44px;
         }
 
         .nav-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
+            padding-top: 16px;
+            border-top: 2px solid var(--border);
         }
 
         .nav-row button {
             min-height: 44px;
-        }
-
-        .nav-row button:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .hint-box {
-            background: color-mix(in srgb, var(--accent) 14%, var(--surface));
-            border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-            border-radius: var(--radius-md);
-            padding: 12px 14px;
-            color: var(--text-soft);
-            line-height: 1.55;
-        }
-
-        .feedback-box {
-            border-radius: var(--radius-md);
-            padding: 12px 14px;
-            line-height: 1.6;
-            display: none;
-        }
-
-        .feedback-box.show {
-            display: block;
-        }
-
-        .feedback-box.feedback-wrong {
-            background: color-mix(in srgb, var(--danger) 16%, var(--surface));
-            border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
-            color: var(--text);
-        }
-
-        .feedback-box.feedback-right {
-            background: color-mix(in srgb, var(--success) 16%, var(--surface));
-            border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
-            color: var(--text);
-        }
-
-        .feedback-box p {
-            margin: 4px 0;
-        }
-
-        .feedback-box strong {
-            display: inline;
-        }
-
-        #stageArea {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .stage-heading {
-            margin: 0;
-            font-size: 1.3rem;
-        }
-
-        .stage-text {
-            color: var(--text-soft);
-            line-height: 1.6;
-            margin: 0;
-        }
-
-        .action-group {
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 12px 14px;
-            background: var(--bg-soft);
-        }
-
-        .action-group h4 {
-            margin: 0 0 10px;
-            font-size: 0.95rem;
-            color: var(--text-soft);
-        }
-
-        .btn-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .action-btn {
-            background: var(--surface-2);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 12px 16px;
-            font-weight: 700;
-            min-height: 44px;
             min-width: 44px;
         }
 
-        .action-btn.route-btn {
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            color: #ffffff;
-        }
+        /* ---------- briefing + completion ---------- */
 
-        .action-btn[aria-pressed="true"] {
-            background: color-mix(in srgb, var(--success) 30%, var(--surface-2));
-            border-color: var(--success);
-        }
-
-        .action-btn[aria-pressed="true"]::after {
-            content: " ✓";
-        }
-
-        .action-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .check-options {
+        .brief-card {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 18px;
             flex-wrap: wrap;
+            padding: 18px;
+            margin-bottom: 16px;
+            border-radius: var(--radius-xl);
+            border: 3px solid color-mix(in srgb, var(--sim-oxy) 40%, var(--border));
+            background: linear-gradient(140deg,
+                    color-mix(in srgb, var(--sim-oxy) 16%, var(--surface-2)),
+                    color-mix(in srgb, var(--sim-deoxy) 16%, var(--surface-2)));
         }
 
-        .check-btn {
-            background: var(--surface-2);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 12px 22px;
-            font-weight: 700;
-            min-height: 44px;
+        .brief-badge {
+            width: 96px;
+            height: 96px;
+            flex: 0 0 96px;
         }
 
-        .check-btn.selected-correct {
-            background: color-mix(in srgb, var(--success) 30%, var(--surface-2));
-            border-color: var(--success);
+        .brief-copy h3 {
+            margin: 0 0 8px;
+            font-size: 1.25rem;
         }
 
-        .check-btn.selected-wrong {
-            background: color-mix(in srgb, var(--danger) 30%, var(--surface-2));
-            border-color: var(--danger);
-        }
-
-        .completion-summary {
-            list-style: none;
-            padding: 0;
+        .brief-copy ul {
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            padding-left: 20px;
+            color: var(--text-soft);
+            line-height: 1.7;
         }
 
-        .completion-summary li {
-            background: var(--bg-soft);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 10px 14px;
+        .medal-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .medal {
+            width: min(170px, 42vw);
+            height: auto;
+            animation: badgePop 0.7s cubic-bezier(0.2, 1.4, 0.4, 1);
+        }
+
+        @keyframes badgePop {
+            0% {
+                transform: scale(0.2) rotate(-25deg);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        .medal-disc {
+            fill: var(--sim-gold);
+            stroke: var(--sim-oxy);
+            stroke-width: 5;
+        }
+
+        .medal-drop {
+            fill: var(--sim-oxy);
+            stroke: var(--sim-ink);
+            stroke-width: 3;
+        }
+
+        .medal-ribbon {
+            fill: var(--sim-deoxy);
+        }
+
+        .rank-line {
+            margin: 0 0 16px;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .recap-list {
+            margin: 0 0 16px;
+            padding-left: 0;
+            list-style: none;
             color: var(--text-soft);
+            line-height: 1.65;
+            max-width: 74ch;
+        }
+
+        .recap-list li {
+            position: relative;
+            margin-bottom: 10px;
+            padding: 13px 15px 13px 44px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+        }
+
+        .recap-list li::before {
+            content: "\2714";
+            position: absolute;
+            left: 15px;
+            top: 13px;
+            font-weight: 900;
+            color: var(--success);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            #bloodDrop,
+            .organ-shape,
+            .cargo-orb,
+            button {
+                transition: none !important;
+            }
+
+            #dropPulse,
+            .beats,
+            .breathes,
+            .flow,
+            .medal,
+            .feedback,
+            .reward-float {
+                animation: none !important;
+            }
+        }
+
+        @media (max-width: 620px) {
+
+            .cargo-btn,
+            .route-btn,
+            .choice-btn {
+                width: 100%;
+            }
         }
 
     </style>
@@ -781,65 +1407,230 @@
                          text below once your simulation UI is in place.
                          Search "DEV-EDIT" to find every place you need to change.
                          ============================================================ -->
-                    <div class="circuit-wrap">
-                        <div class="map-box">
-                            <svg id="circuitMap" viewBox="0 0 400 320" role="img" aria-labelledby="mapTitle" aria-describedby="mapDesc">
-                                <title id="mapTitle">Double circulation map</title>
-                                <desc id="mapDesc">A diagram of the Lungs, Left Heart, Body Tissues and Right Heart, connected in a loop, with a blood drop marker showing the current station.</desc>
-                                <path d="M 200 60 L 130 150" class="map-path" marker-end="url(#arrowHead)" />
-                                <path d="M 130 160 L 190 250" class="map-path" marker-end="url(#arrowHead)" />
-                                <path d="M 210 250 L 270 160" class="map-path" marker-end="url(#arrowHead)" />
-                                <path d="M 270 150 L 200 60" class="map-path" marker-end="url(#arrowHead)" />
-                                <defs>
-                                    <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-                                        <path d="M0,0 L8,4 L0,8 z" class="map-arrow-fill" />
-                                    </marker>
-                                </defs>
-                                <g class="map-node" data-node="lungs">
-                                    <circle cx="200" cy="50" r="34" />
-                                    <text x="200" y="46">Lungs</text>
-                                    <text x="200" y="60" class="map-node-sub">Station 1</text>
-                                </g>
-                                <g class="map-node" data-node="leftHeart">
-                                    <circle cx="110" cy="160" r="34" />
-                                    <text x="110" y="156">Left</text>
-                                    <text x="110" y="170" class="map-node-sub">Heart · Station 2</text>
-                                </g>
-                                <g class="map-node" data-node="bodyTissues">
-                                    <circle cx="200" cy="270" r="34" />
-                                    <text x="200" y="266">Body</text>
-                                    <text x="200" y="280" class="map-node-sub">Tissues · Station 3</text>
-                                </g>
-                                <g class="map-node" data-node="rightHeart">
-                                    <circle cx="290" cy="160" r="34" />
-                                    <text x="290" y="156">Right</text>
-                                    <text x="290" y="170" class="map-node-sub">Heart · Station 4</text>
-                                </g>
-                                <g id="bloodDrop" class="blood-drop" aria-hidden="true" transform="translate(200, 50)">
-                                    <circle r="12" />
-                                    <text y="4">•</text>
-                                </g>
-                            </svg>
+                    <div class="sim-head">
+                        <div class="sim-head-copy">
+                            <p class="scene-progress" id="sceneProgress">Scene 1 of 6</p>
+                            <h2 id="stageTitle">Mission Briefing</h2>
                         </div>
+                        <button type="button" class="danger-btn exit-btn" id="exitBtn">Exit</button>
+                    </div>
 
-                        <div class="status-bar" id="statusBar" aria-live="polite">
-                            <p><strong>Progress:</strong> <span id="progressText">Mission briefing</span></p>
-                            <p><strong>Current location:</strong> <span id="locationText">Not started yet.</span></p>
-                            <p><strong>Cargo on board:</strong> <span id="cargoText">None.</span></p>
+                    <div class="hud">
+                        <span class="hud-chip hud-score"><span class="hud-label">Score</span><span
+                                id="scoreValue">0</span></span>
+                        <span class="hud-chip hud-stars"><span class="hud-label">Stars</span><span
+                                class="star-strip" id="starStrip">0 of 12</span></span>
+                        <span class="hud-chip hud-rank"><span class="hud-label">Rank</span><span
+                                id="rankValue">Trainee</span></span>
+                    </div>
+
+                    <p class="stage-brief" id="stageBrief"></p>
+
+                    <div class="brief-card hidden" id="briefCard">
+                        <svg class="brief-badge" viewBox="0 0 120 120" role="img"
+                            aria-label="Blood Courier mission badge">
+                            <circle class="medal-disc" cx="60" cy="60" r="52" />
+                            <path class="medal-drop"
+                                d="M 60 26 C 80 52 90 66 90 78 A 30 30 0 0 1 30 78 C 30 66 40 52 60 26 Z" />
+                            <circle class="drop-shine" cx="49" cy="76" r="6" />
+                        </svg>
+                        <div class="brief-copy">
+                            <h3>Your mission, courier</h3>
+                            <ul>
+                                <li>You are one red blood cell on delivery duty.</li>
+                                <li>Load and unload the right cargo at each of the four stations.</li>
+                                <li>Pick the right pipe out of every station and complete the whole loop.</li>
+                                <li>Three stars per station if you nail it first time. Twelve stars is a perfect run.
+                                </li>
+                            </ul>
                         </div>
+                    </div>
 
-                        <nav class="nav-row" aria-label="Simulation navigation">
-                            <button class="secondary-btn" id="exitStageBtn" type="button">⇦ Exit to Home</button>
-                            <button class="secondary-btn" id="rulesStageBtn" type="button">📖 Rules</button>
-                            <button class="secondary-btn" id="backStageBtn" type="button">⇧ Back</button>
-                            <button class="secondary-btn" id="hintStageBtn" type="button">💡 Hint</button>
-                            <button class="secondary-btn" id="tryAgainStageBtn" type="button">↻ Try Again</button>
-                        </nav>
+                    <div class="circuit-wrap" id="circuitWrap">
+                        <svg class="circuit-map" viewBox="0 0 720 552" role="img"
+                            aria-labelledby="circuitTitle circuitDesc">
+                            <title id="circuitTitle">Map of the double circulation circuit</title>
+                            <desc id="circuitDesc">A figure-of-eight diagram. The lungs sit at the top, the heart in
+                                the middle split into a right side and a left side, and the body tissues at the
+                                bottom. Oxygen-poor blood runs from the right side of the heart up to the lungs;
+                                oxygen-rich blood runs from the lungs down to the left side of the heart and out to
+                                the body tissues; oxygen-poor blood returns from the body to the right side of the
+                                heart. A blood drop travels around this loop.</desc>
 
-                        <div id="hintBox" class="hint-box hidden" role="status"></div>
-                        <div id="feedbackBox" class="feedback-box" role="alert" aria-live="assertive"></div>
+                            <defs>
+                                <marker id="arrowWarm" viewBox="0 0 16 16" refX="2" refY="8" markerWidth="26"
+                                    markerHeight="26" markerUnits="userSpaceOnUse"
+                                    orient="auto-start-reverse">
+                                    <path class="arrow-warm" d="M 1 1 L 15 8 L 1 15 z" />
+                                </marker>
+                                <marker id="arrowCool" viewBox="0 0 16 16" refX="2" refY="8" markerWidth="26"
+                                    markerHeight="26" markerUnits="userSpaceOnUse"
+                                    orient="auto-start-reverse">
+                                    <path class="arrow-cool" d="M 1 1 L 15 8 L 1 15 z" />
+                                </marker>
+                            </defs>
 
-                        <div id="stageArea"></div>
+                            <text class="vessel-tag cool" x="146" y="196">OXYGEN-POOR</text>
+                            <text class="vessel-tag cool" x="146" y="215">heading up to refuel</text>
+                            <text class="vessel-tag warm" x="592" y="196">OXYGEN-RICH</text>
+                            <text class="vessel-tag warm" x="592" y="215">coming down to the pump</text>
+                            <text class="vessel-tag warm" x="592" y="392">OXYGEN-RICH</text>
+                            <text class="vessel-tag warm" x="592" y="411">shipping out to the body</text>
+                            <text class="vessel-tag cool" x="146" y="392">OXYGEN-POOR</text>
+                            <text class="vessel-tag cool" x="146" y="411">on the way back</text>
+
+                            <g class="organ" id="organLungs">
+                                <g class="breathes">
+                                    <rect class="organ-shape organ-lung" x="353" y="24" width="14" height="44"
+                                        rx="7" />
+                                    <path class="organ-shape organ-lung" d="M 360 62 L 336 84" />
+                                    <path class="organ-shape organ-lung" d="M 360 62 L 384 84" />
+                                    <path class="organ-shape organ-lung"
+                                        d="M 350 78 C 340 58 302 58 294 88 C 284 122 294 148 320 150 C 344 152 350 136 350 114 Z" />
+                                    <path class="organ-shape organ-lung"
+                                        d="M 370 78 C 380 58 418 58 426 88 C 436 122 426 148 400 150 C 376 152 370 136 370 114 Z" />
+                                </g>
+                                <text class="organ-label" x="360" y="184">LUNGS</text>
+                                <text class="organ-flag" id="flagLungs" x="360" y="205"></text>
+                            </g>
+
+                            <text class="organ-sub" x="360" y="212">THE HEART</text>
+                            <g class="organ" id="organRightHeart">
+                                <path class="organ-shape organ-heart beats"
+                                    d="M 360 332 C 286 280 286 228 322 218 C 342 212 358 226 360 240 Z" />
+                                <text class="organ-label" x="296" y="358">RIGHT</text>
+                                <text class="organ-sub" x="296" y="377">side</text>
+                                <text class="organ-flag" id="flagRightHeart" x="296" y="398"></text>
+                            </g>
+                            <g class="organ" id="organLeftHeart">
+                                <path class="organ-shape organ-heart beats"
+                                    d="M 360 332 C 434 280 434 228 398 218 C 378 212 362 226 360 240 Z" />
+                                <text class="organ-label" x="426" y="358">LEFT</text>
+                                <text class="organ-sub" x="426" y="377">side</text>
+                                <text class="organ-flag" id="flagLeftHeart" x="426" y="398"></text>
+                            </g>
+
+                            <g class="organ" id="organBody">
+                                <rect class="organ-shape organ-body" x="288" y="410" width="144" height="72"
+                                    rx="22" />
+                                <circle class="organ-shape organ-body" cx="360" cy="434" r="12" />
+                                <path class="organ-shape organ-body"
+                                    d="M 360 448 L 346 470 M 360 448 L 374 470 M 349 456 L 371 456" />
+                                <text class="organ-label" x="360" y="504">BODY TISSUES</text>
+                                <text class="organ-flag" id="flagBody" x="360" y="527"></text>
+                            </g>
+
+                            <g id="vessels">
+                                <path class="vessel vessel-cool" marker-end="url(#arrowCool)"
+                                    d="M 292 218 C 236 196 240 154 274 146" />
+                                <path class="flow" d="M 292 218 C 236 196 240 154 274 146" />
+                                <path class="vessel vessel-warm" marker-end="url(#arrowWarm)"
+                                    d="M 438 132 C 480 154 482 192 424 212" />
+                                <path class="flow" d="M 438 132 C 480 154 482 192 424 212" />
+                                <path class="vessel vessel-warm" marker-end="url(#arrowWarm)"
+                                    d="M 424 300 C 470 330 470 394 436 416" />
+                                <path class="flow" d="M 424 300 C 470 330 470 394 436 416" />
+                                <path class="vessel vessel-cool" marker-end="url(#arrowCool)"
+                                    d="M 284 430 C 250 398 250 336 290 308" />
+                                <path class="flow" d="M 284 430 C 250 398 250 336 290 308" />
+                            </g>
+
+                            <g id="bloodDrop" transform="translate(360 118)">
+                                <g id="dropPulse">
+                                    <path class="drop-body"
+                                        d="M 0 -22 C 13 -6 20 3 20 10 A 20 20 0 0 1 -20 10 C -20 3 -13 -6 0 -22 Z" />
+                                    <circle class="drop-face" cx="-7" cy="7" r="2.6" />
+                                    <circle class="drop-face" cx="7" cy="7" r="2.6" />
+                                    <path class="drop-face" d="M -6 15 Q 0 20 6 15" fill="none" stroke="currentColor"
+                                        stroke-width="0" />
+                                    <circle class="drop-shine" cx="-9" cy="0" r="3.4" />
+                                </g>
+                                <g id="dropCargo">
+                                    <circle class="cargo-orb is-off icon-oxygen" id="orbOxygen" cx="-26" cy="-20"
+                                        r="8" />
+                                    <circle class="cargo-orb is-off icon-carbonDioxide" id="orbCarbonDioxide" cx="0"
+                                        cy="-32" r="8" />
+                                    <circle class="cargo-orb is-off icon-nutrients" id="orbNutrients" cx="26"
+                                        cy="-20" r="8" />
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="tracker" id="tracker"></div>
+
+                    <div class="hold" id="hold">
+                        <span class="hold-title">Cargo hold</span>
+                        <span id="holdItems"></span>
+                    </div>
+
+                    <p class="status-line" id="statusLine" role="status" aria-live="polite"></p>
+
+                    <div class="cargo-panel" id="cargoPanel">
+                        <p class="panel-heading" id="cargoHeading">Step 1 — load and unload, then check the hold</p>
+                        <div class="cargo-row" id="cargoRow"></div>
+                        <div class="check-panel" style="margin-top: 14px;">
+                            <button type="button" class="primary-btn check-btn" id="checkCargoBtn">Check the
+                                Cargo</button>
+                        </div>
+                    </div>
+
+                    <div class="check-panel hidden" id="questionPanel">
+                        <p class="panel-heading" id="questionText"></p>
+                        <div class="choice-row" id="questionRow"></div>
+                    </div>
+
+                    <div class="route-panel hidden" id="routePanel">
+                        <p class="panel-heading">Step 2 — pick the pipe out of this station</p>
+                        <div class="route-row" id="routeRow"></div>
+                    </div>
+
+                    <div class="feedback hidden" id="feedbackBox"></div>
+
+                    <div class="check-panel hidden" id="startPanel">
+                        <button type="button" class="primary-btn check-btn" id="beginBtn">Start the Delivery</button>
+                    </div>
+
+                    <div class="medal-wrap hidden" id="medalWrap">
+                        <svg class="medal" viewBox="0 0 120 158" role="img" aria-label="Circuit courier badge">
+                            <path class="medal-ribbon" d="M 34 0 L 60 48 L 86 0 L 106 0 L 74 62 L 46 62 L 14 0 Z" />
+                            <circle class="medal-disc" cx="60" cy="108" r="44" />
+                            <path class="medal-drop"
+                                d="M 60 78 C 76 98 84 108 84 117 A 24 24 0 0 1 36 117 C 36 108 44 98 60 78 Z" />
+                        </svg>
+                    </div>
+
+                    <p class="rank-line hidden" id="rankLine"></p>
+
+                    <ul class="recap-list hidden" id="recapList"></ul>
+
+                    <div class="check-panel hidden" id="againPanel">
+                        <button type="button" class="primary-btn check-btn" id="playAgainBtn">Run the Circuit
+                            Again</button>
+                    </div>
+
+                    <div class="confirm-panel hidden" id="confirmPanel" role="group" aria-labelledby="confirmText">
+                        <p class="panel-heading" id="confirmText"></p>
+                        <div class="choice-row">
+                            <button type="button" class="danger-btn" id="confirmYesBtn">Yes, clear it</button>
+                            <button type="button" class="secondary-btn" id="confirmNoBtn">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div class="review-panel hidden" id="reviewPanel">
+                        <p class="panel-heading">Delivery log — everything you have done so far</p>
+                        <p class="review-empty hidden" id="reviewEmpty">Nothing logged yet. Your cargo checks and
+                            route choices will appear here as you make them.</p>
+                        <ol class="review-list" id="reviewList"></ol>
+                        <button type="button" class="secondary-btn" id="closeReviewBtn">Close the log</button>
+                    </div>
+
+                    <div class="nav-row">
+                        <button type="button" class="secondary-btn" id="rulesBtn">Rules</button>
+                        <button type="button" class="secondary-btn" id="reviewBtn">Review</button>
+                        <button type="button" class="secondary-btn" id="backBtn">Back</button>
+                        <button type="button" class="ghost-btn" id="hintBtn">Hint</button>
+                        <button type="button" class="ghost-btn" id="tryAgainBtn">Try Again</button>
                     </div>
                 </section>
             </div>
@@ -851,7 +1642,7 @@
              Search "DEV-EDIT" to find every place you need to change.
              ============================================================ -->
         <div class="footer-note">
-            Blood Cargo and the Double Circuit — Form 2 Biology, Unit 1. Works fully offline, no internet required.
+            SCI-BIO-F2-T1-U1-SEC2-SIM2.1C · Blood Cargo and the Double Circuit · runs offline in a single file.
         </div>
     </div>
 
@@ -912,22 +1703,20 @@
             templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
             simId: "SCI-BIO-F2-T1-U1-SEC2-SIM2.1C",
             title: "Blood Cargo and the Double Circuit",
-            subtitle: "Guide the blood drop around the double circulation pathway",
+            subtitle: "Trace the double circulation pathway and the cargo it carries",
             badgeText: "BIO",
-            homeEyebrow: "Form 2 Biology — The Circulatory System",
+            homeEyebrow: "Form 2 · Integrated Science · Biology",
             homeDescription:
-                "Guide a drop of blood around the body's double circuit. At each station, load and drop the correct cargo — oxygen, carbon dioxide, and nutrients — then choose the correct route to the next station. Watch out: the heart is only a pump, never a loading zone, and blood can never jump straight from the lungs to the body.",
+                "You are one red blood cell on delivery duty. Four stations, one full lap of the double circuit: load the right cargo at the lungs and the body tissues, work out where the heart fits in, and pick the right pipe out of every station. Three stars a station, twelve for a perfect run. Nothing is timed and you cannot lose — every wrong move just tells you why.",
             instructions: [
-                "Click Start, then read the mission briefing before you begin.",
-                "The blood drop starts at the Lungs with no cargo on board.",
-                "At each station, use the cargo buttons to load or drop off oxygen, carbon dioxide, or nutrients before you choose a route onward.",
-                "The Lungs and the Body Tissues are the only stations where cargo is loaded or dropped off. The Left Heart and Right Heart are pumps only — they never change the cargo.",
-                "Blood pressure drops sharply after the lungs, so blood must always return to the heart to be pumped onward before it can reach the body.",
-                "Choose a route using the arrow buttons. A wrong route or an incomplete cargo action will explain what went wrong so you can try again — you can retry as many times as you need.",
-                "Use Hint if you are stuck, Back to return to the previous station, and Try Again to redo the current station from scratch.",
-                "Your current location and cargo are always shown in the status bar at the top of the sim area.",
-                "Finish the full circuit and answer the final check question to complete the simulation.",
-                "This file runs completely offline in a browser. No internet is needed."
+                "You are a red blood cell carrying cargo around the double circulation circuit. Complete the whole lap to win.",
+                "Step 1 at every station: use the Load and Drop cards to sort your cargo hold, then press Check the Cargo.",
+                "Some stations need no changes at all. Press Check the Cargo to confirm that nothing changes there.",
+                "Step 2: pick the correct pipe out of the station. The map shows which way the blood is flowing.",
+                "You earn 10 points for every correct move, plus a bonus for each station. Clear a station first time for all three stars — twelve stars is a perfect run.",
+                "Nothing is timed and you cannot lose. A wrong move costs you nothing but a star, and the feedback tells you exactly why it was wrong.",
+                "Use Hint for a nudge, Review to see your delivery log, Back to revisit the previous station, Try Again to clear this station, and Exit to leave.",
+                "This game is completely silent and works with the sound off. Every control can be reached with the Tab key and used with Enter or the space bar."
             ]
         };
 
@@ -1156,698 +1945,873 @@
            Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
 
-        /* ---- Node positions on the SVG map (must match the markup above) ---- */
-        const NODE_POS = {
-            lungs: { x: 200, y: 50 },
-            leftHeart: { x: 110, y: 160 },
-            bodyTissues: { x: 200, y: 270 },
-            rightHeart: { x: 290, y: 160 }
+        /* ---- BLOOD COURIER: the double circuit ----
+           Stage 0 = mission briefing, stages 1-4 = the four stations,
+           stage 5 = the finish. One mechanic throughout: sort the cargo,
+           check the hold, then pick the pipe out of the station. */
+
+        const CARGO_ORDER = ["oxygen", "carbonDioxide", "nutrients"];
+
+        const CARGO_LABEL = {
+            oxygen: "oxygen",
+            carbonDioxide: "carbon dioxide",
+            nutrients: "nutrients"
         };
 
-        /* ---- Reusable feedback fragments (kept in one place so the same
-           spec-given fact is never re-worded twice) ---- */
-        const HEART_IS_PUMP_FACT =
-            "The heart acts only as a muscular pump, not a loading zone. It never loads or drops any cargo.";
-        const NUTRIENT_SOURCE_FACT =
-            "Nutrients are picked up by the blood plasma in the digestive system, which is part of the Body Tissues circuit — never at the lungs or in the heart.";
+        const CARGO_ICON = {
+            oxygen: '<svg class="cargo-icon" viewBox="0 0 40 40" aria-hidden="true">' +
+                '<circle class="icon-oxygen" cx="15" cy="16" r="12" />' +
+                '<circle class="icon-oxygen" cx="28" cy="27" r="9" />' +
+                '<text class="icon-glyph" x="15" y="20">O₂</text></svg>',
+            carbonDioxide: '<svg class="cargo-icon" viewBox="0 0 40 40" aria-hidden="true">' +
+                '<path class="icon-carbonDioxide" d="M12 31a9 9 0 0 1 1-17.9A11 11 0 0 1 34 17a7 7 0 0 1-2 14z" />' +
+                '<text class="icon-glyph" x="21" y="27">CO₂</text></svg>',
+            nutrients: '<svg class="cargo-icon" viewBox="0 0 40 40" aria-hidden="true">' +
+                '<path class="icon-nutrients" d="M20 13c6-7 15-5 15 4 0 10-8 20-15 20S5 27 5 17c0-9 9-11 15-4z" />' +
+                '<path class="icon-nutrients" d="M21 11c0-5 4-8 8-8 0 5-3 8-8 8z" /></svg>'
+        };
 
-        /* ---- The four circulation stations, in visit order ---- */
-        const STATIONS = {
-            lungs: {
+        const DROP_POSITION = {
+            lungs: [360, 118],
+            leftHeart: [400, 262],
+            body: [306, 444],
+            rightHeart: [320, 262]
+        };
+
+        const NODE_KEYS = ["lungs", "leftHeart", "body", "rightHeart"];
+
+        const NODE_NAME = {
+            lungs: "The Lungs",
+            leftHeart: "The Left Heart",
+            body: "Body Tissues",
+            rightHeart: "The Right Heart"
+        };
+
+        const NODE_SHORT = {
+            lungs: "Lungs",
+            leftHeart: "Left heart",
+            body: "Body tissues",
+            rightHeart: "Right heart"
+        };
+
+        const ORGAN_ID = {
+            lungs: "organLungs",
+            leftHeart: "organLeftHeart",
+            body: "organBody",
+            rightHeart: "organRightHeart"
+        };
+
+        const FLAG_ID = {
+            lungs: "flagLungs",
+            leftHeart: "flagLeftHeart",
+            body: "flagBody",
+            rightHeart: "flagRightHeart"
+        };
+
+        const ORB_ID = {
+            oxygen: "orbOxygen",
+            carbonDioxide: "orbCarbonDioxide",
+            nutrients: "orbNutrients"
+        };
+
+        const HEART_WHY = "The heart acts only as a muscular pump, not a loading zone. No oxygen, carbon dioxide or nutrients are picked up or dropped inside the heart chambers.";
+        const HEART_FIX = "Put every cargo button back the way the drop arrived, then press Check the Cargo to confirm that nothing changes here.";
+
+        const STATIONS = [
+            {
                 key: "lungs",
-                stationNumber: 1,
-                name: "The Lungs",
-                arrivalText: "The blood drop has just arrived at the Lungs, empty of cargo.",
-                explanation: "In the lungs, blood picks up fresh oxygen and gets rid of waste carbon dioxide. It must then return to the heart to get a pressure boost before it can travel on.",
-                hint: "Think about what gas your lungs are full of that the blood needs, and what waste gas the blood is carrying that needs to leave here.",
-                cargoActions: [
-                    {
-                        id: "loadOxygen", label: "Load Oxygen", correct: true,
-                        apply: (c) => { c.oxygen = true; }
-                    },
-                    {
-                        id: "dropCO2", label: "Drop Carbon Dioxide", correct: true,
-                        apply: (c) => { c.carbonDioxide = false; }
-                    },
-                    {
-                        id: "loadNutrientsLungs", label: "Load Nutrients", correct: false,
-                        feedback: {
-                            what: "You tried to load nutrients at the Lungs.",
-                            why: NUTRIENT_SOURCE_FACT,
-                            fix: "At the Lungs, only use Load Oxygen and Drop Carbon Dioxide.",
-                            model: "Correct actions here: Load Oxygen, then Drop Carbon Dioxide."
-                        }
-                    }
-                ],
+                title: "Station 1 — The Lungs",
+                brief: "You have just been pumped in from the right side of the heart, still hauling waste carbon dioxide. This is the refuelling depot. Sort out your load before you move on.",
+                required: { oxygen: true, carbonDioxide: false, nutrients: false },
+                cargoCorrect: "Cargo sorted. In the lungs the blood picks up fresh oxygen and gets rid of its waste carbon dioxide. Now pick your pipe out of here.",
+                cargoWrong: function (cargo) {
+                    const problems = [];
+                    if (!cargo.oxygen) problems.push("the drop has no oxygen on board");
+                    if (cargo.carbonDioxide) problems.push("the drop is still carrying carbon dioxide");
+                    if (cargo.nutrients) problems.push("the drop has picked up nutrients at the lungs");
+                    return {
+                        what: "The hold is not what blood leaving the lungs should carry: " + problems.join("; ") + ".",
+                        why: "In the lungs the blood picks up fresh oxygen and gets rid of its waste carbon dioxide. Nutrients do not join the blood here — the plasma picks those up at the digestive system, which is part of the body tissues station.",
+                        fix: "Load oxygen and drop carbon dioxide, leave nutrients alone, then press Check the Cargo again.",
+                        model: "Leaving the lungs, the drop carries oxygen only."
+                    };
+                },
+                hint: "Air breathed in is rich in oxygen, and breathed-out air carries a waste gas away. Decide which gas you leave behind here and which one you collect. Then remember how low your pressure is once you have squeezed through the tiny capillaries of the lungs.",
                 routes: [
                     {
-                        id: "toLeftHeart", label: "Go to Left Heart", correct: true,
-                        nextView: "station", nextStationKey: "leftHeart"
+                        label: "Take the pipe to the LEFT HEART",
+                        correct: true,
+                        message: "Spot on. Blood must return to the heart after the lungs to get a pressure boost. Rolling on to the left heart."
                     },
                     {
-                        id: "toBody", label: "Go to Body", correct: false,
-                        feedback: {
-                            what: "You sent the blood straight from the Lungs to the Body.",
-                            why: "Blood pressure is too low after the lungs! Blood passing through the tiny capillaries in the lungs loses most of its pressure.",
-                            fix: "It must return to the heart first to be pumped to the body with enough force to reach every tissue.",
-                            model: "Correct route: Lungs → Left Heart → Body Tissues."
-                        }
+                        label: "Take the pipe straight out to the BODY TISSUES",
+                        correct: false,
+                        what: "You sent the blood straight from the lungs out to the body.",
+                        why: "Blood pressure is too low after the lungs. As blood passes through the tiny capillaries in the lungs its pressure drops a long way, so it cannot reach the toes and the brain on its own.",
+                        fix: "Go back to the heart first, so the left side can pump you out to the body with enough force.",
+                        model: "Lungs → left heart → body tissues."
                     }
                 ]
             },
-            leftHeart: {
+            {
                 key: "leftHeart",
-                stationNumber: 2,
-                name: "The Left Heart",
-                arrivalText: "The blood drop has arrived at the Left Heart, carrying oxygen.",
-                explanation: "The heart acts only as a muscular pump, not a loading zone. The left side pumps the oxygen-rich blood out to the rest of the body.",
-                hint: "The heart chambers are pumps only — no cargo is ever loaded or dropped here. Just choose where the pump sends the blood next.",
-                cargoActions: [
-                    {
-                        id: "loadOxygenHeartL", label: "Load Oxygen", correct: false,
-                        feedback: {
-                            what: "You tried to load cargo at the Left Heart.",
-                            why: HEART_IS_PUMP_FACT,
-                            fix: "Don't select any cargo actions at either heart station — just choose the correct route onward.",
-                            model: "At the Left Heart: no cargo changes — choose Go to Body Tissues."
+                title: "Station 2 — The Left Heart",
+                brief: "You are inside the left side of the heart, carrying oxygen. This place is a pump, not a depot. Decide whether anything in your hold changes here at all.",
+                required: { oxygen: true, carbonDioxide: false, nutrients: false },
+                cargoCorrect: "Correct — nothing changes here. The heart acts only as a muscular pump, not a loading zone.",
+                cargoWrong: function () {
+                    return {
+                        what: "You changed the cargo inside the heart.",
+                        why: HEART_WHY,
+                        fix: HEART_FIX,
+                        model: "The drop arrives at the left heart carrying oxygen and leaves still carrying oxygen."
+                    };
+                },
+                question: {
+                    text: "Quick check before you move: does the blood pick up nutrients in the heart?",
+                    choices: [
+                        {
+                            label: "No",
+                            correct: true,
+                            message: "Correct. The heart is simply a pump that keeps the transport network moving. Nutrients are absorbed into the blood plasma at the digestive system, which counts as part of the body tissues circuit, not inside the heart chambers."
+                        },
+                        {
+                            label: "Yes",
+                            correct: false,
+                            what: "You said the blood picks up nutrients in the heart.",
+                            why: "The heart is simply a pump that keeps the transport network moving. No cargo is loaded or unloaded inside its chambers.",
+                            fix: "Choose No, then remember where nutrients really join the blood.",
+                            model: "Nutrients are absorbed into the blood plasma at the digestive system, which counts as part of the body tissues circuit."
                         }
-                    },
-                    {
-                        id: "loadNutrientsHeartL", label: "Load Nutrients", correct: false,
-                        feedback: {
-                            what: "You tried to load cargo at the Left Heart.",
-                            why: HEART_IS_PUMP_FACT,
-                            fix: "Don't select any cargo actions at either heart station — just choose the correct route onward.",
-                            model: "At the Left Heart: no cargo changes — choose Go to Body Tissues."
-                        }
-                    }
-                ],
+                    ]
+                },
+                hint: "The heart is a muscular pump. Ask yourself whether a pump loads and unloads cargo, or only shoves it onward — and which side of the heart fires oxygen-rich blood out to the rest of the body.",
                 routes: [
                     {
-                        id: "toBody", label: "Go to Body Tissues", correct: true,
-                        nextView: "station", nextStationKey: "bodyTissues"
+                        label: "Take the pipe out to the BODY TISSUES",
+                        correct: true,
+                        message: "Spot on. The left side pumps the oxygen-rich blood out to the rest of the body. Shipping out to the tissues."
                     },
                     {
-                        id: "toLungsBack", label: "Go back to Lungs", correct: false,
-                        feedback: {
-                            what: "You sent the blood back to the Lungs from the Left Heart.",
-                            why: "Blood cannot flow backwards through the double circuit. The left heart has just given the oxygen-rich blood a pressure boost so it can travel forward.",
-                            fix: "Send the blood onward to where the oxygen is needed, not back the way it came.",
-                            model: "Correct route: Left Heart → Body Tissues."
-                        }
+                        label: "Take the pipe back to the LUNGS",
+                        correct: false,
+                        what: "You sent oxygen-rich blood back to the lungs.",
+                        why: "The left side of the heart pumps oxygen-rich blood out to the rest of the body. Blood only returns to the lungs from the right side, once it is carrying waste carbon dioxide.",
+                        fix: "Head out to the body tissues, where the oxygen is needed.",
+                        model: "Left heart → body tissues → right heart → lungs."
                     }
                 ]
             },
-            bodyTissues: {
-                key: "bodyTissues",
-                stationNumber: 3,
-                name: "Body Tissues",
-                arrivalText: "The blood drop has arrived at the Body Tissues, still carrying oxygen.",
-                explanation: "Body cells take in oxygen and release carbon dioxide as waste during cellular respiration. The blood plasma also picks up soluble nutrients absorbed from the small intestine here.",
-                hint: "Body cells are using up oxygen and making carbon dioxide as waste. This is also where the digestive system adds nutrients to the plasma.",
-                cargoActions: [
-                    {
-                        id: "dropOxygenBody", label: "Drop Oxygen", correct: true,
-                        apply: (c) => { c.oxygen = false; }
-                    },
-                    {
-                        id: "loadCO2Body", label: "Load Carbon Dioxide", correct: true,
-                        apply: (c) => { c.carbonDioxide = true; }
-                    },
-                    {
-                        id: "loadNutrientsBody", label: "Load Nutrients", correct: true,
-                        apply: (c) => { c.nutrients = true; }
-                    },
-                    {
-                        id: "loadOxygenBody", label: "Load Oxygen", correct: false,
-                        feedback: {
-                            what: "You tried to load more oxygen at the Body Tissues.",
-                            why: "Body cells take in oxygen from the blood and release carbon dioxide as waste during cellular respiration — the blood should be dropping oxygen off here, not loading more of it.",
-                            fix: "Select Drop Oxygen instead of Load Oxygen.",
-                            model: "Correct actions here: Drop Oxygen, Load Carbon Dioxide, Load Nutrients."
-                        }
-                    }
-                ],
+            {
+                key: "body",
+                title: "Station 3 — Body Tissues",
+                brief: "You have reached the body tissues, and the digestive system is here too. Hungry cells are waiting for a delivery, and there is fresh cargo to collect before you head back.",
+                required: { oxygen: false, carbonDioxide: true, nutrients: true },
+                cargoCorrect: "Cargo sorted. Body cells take in oxygen and release carbon dioxide as waste during cellular respiration, and the plasma picks up soluble nutrients absorbed from the small intestine here. Now pick your pipe.",
+                cargoWrong: function (cargo) {
+                    const problems = [];
+                    if (cargo.oxygen) problems.push("the drop is still carrying oxygen");
+                    if (!cargo.carbonDioxide) problems.push("the drop has no carbon dioxide on board");
+                    if (!cargo.nutrients) problems.push("the drop has not picked up any nutrients");
+                    return {
+                        what: "The hold is not what blood leaving the body tissues should carry: " + problems.join("; ") + ".",
+                        why: "Body cells take in oxygen and release carbon dioxide as waste during cellular respiration. The blood plasma also picks up soluble nutrients absorbed from the small intestine here.",
+                        fix: "Drop oxygen, load carbon dioxide and load nutrients, then press Check the Cargo again.",
+                        model: "Leaving the body tissues, the drop carries carbon dioxide and nutrients."
+                    };
+                },
+                hint: "Body cells use oxygen and give out a waste gas during cellular respiration. The small intestine also has something soluble waiting to join the plasma here. Blood leaving the body is on its way back to be cleared of that waste gas.",
                 routes: [
                     {
-                        id: "toRightHeart", label: "Go to Right Heart", correct: true,
-                        nextView: "station", nextStationKey: "rightHeart"
+                        label: "Take the pipe to the RIGHT HEART",
+                        correct: true,
+                        message: "Spot on. Blood returning from the body is received by the right side of the heart. Heading for the pump."
                     },
                     {
-                        id: "toLeftHeartBack", label: "Go back to Left Heart", correct: false,
-                        feedback: {
-                            what: "You sent the blood from the Body Tissues back to the Left Heart.",
-                            why: "The left heart only pumps oxygen-rich blood outward to the body. Blood leaving the body tissues is now carrying carbon dioxide, not oxygen, so it cannot go back there.",
-                            fix: "Deoxygenated blood from the tissues must go to the right heart to begin its journey back to the lungs.",
-                            model: "Correct route: Body Tissues → Right Heart."
-                        }
+                        label: "Take the pipe to the LEFT HEART",
+                        correct: false,
+                        what: "You sent blood coming back from the body into the left side of the heart.",
+                        why: "The left side pumps oxygen-rich blood out to the body. Blood returning from the body carries waste carbon dioxide, and it is the right side of the heart that receives it.",
+                        fix: "Head for the right side of the heart instead.",
+                        model: "Body tissues → right heart → lungs."
                     }
                 ]
             },
-            rightHeart: {
+            {
                 key: "rightHeart",
-                stationNumber: 4,
-                name: "The Right Heart",
-                arrivalText: "The blood drop has arrived at the Right Heart, carrying carbon dioxide and nutrients.",
-                explanation: "The right side of the heart receives deoxygenated blood from the body and pumps it back to the lungs to be cleared of carbon dioxide.",
-                hint: "Like the left heart, the right heart is a pump only. It has just collected deoxygenated blood from the body — where does that blood need to go to be refreshed?",
-                cargoActions: [
-                    {
-                        id: "loadCO2HeartR", label: "Load Carbon Dioxide", correct: false,
-                        feedback: {
-                            what: "You tried to load cargo at the Right Heart.",
-                            why: HEART_IS_PUMP_FACT,
-                            fix: "Don't select any cargo actions at either heart station — just send the blood onward.",
-                            model: "At the Right Heart: no cargo changes — choose Go to Lungs."
-                        }
-                    },
-                    {
-                        id: "loadNutrientsHeartR", label: "Load Nutrients", correct: false,
-                        feedback: {
-                            what: "You tried to load cargo at the Right Heart.",
-                            why: HEART_IS_PUMP_FACT,
-                            fix: "Don't select any cargo actions at either heart station — just send the blood onward.",
-                            model: "At the Right Heart: no cargo changes — choose Go to Lungs."
-                        }
-                    }
-                ],
+                title: "Station 4 — The Right Heart",
+                brief: "You are inside the right side of the heart, hauling carbon dioxide and nutrients. Same question as before: does a pump load anything? One more pipe and the loop is closed.",
+                required: { oxygen: false, carbonDioxide: true, nutrients: true },
+                cargoCorrect: "Correct — nothing changes here either. The right side of the heart is a pump, not a loading zone.",
+                cargoWrong: function () {
+                    return {
+                        what: "You changed the cargo inside the heart.",
+                        why: HEART_WHY,
+                        fix: HEART_FIX,
+                        model: "The drop arrives at the right heart carrying carbon dioxide and nutrients, and leaves still carrying carbon dioxide and nutrients."
+                    };
+                },
+                hint: "Whatever was true at the left side of the heart is true here too. The right side receives blood coming back from the body, and sends it on to the one place where carbon dioxide can be cleared.",
                 routes: [
                     {
-                        id: "toLungs", label: "Go to Lungs", correct: true,
-                        nextView: "misconception", nextStationKey: null
+                        label: "Take the pipe up to the LUNGS",
+                        correct: true,
+                        message: "Spot on. The right side pumps this blood back to the lungs to be cleared of carbon dioxide. Loop closed."
                     },
                     {
-                        id: "toBodyBack", label: "Go back to Body Tissues", correct: false,
-                        feedback: {
-                            what: "You sent the blood from the Right Heart back to the Body Tissues.",
-                            why: "The right heart's job is to pump deoxygenated blood onward to the lungs, not back to the body it just came from.",
-                            fix: "Send the blood on to the lungs so it can drop off carbon dioxide and collect fresh oxygen.",
-                            model: "Correct route: Right Heart → Lungs."
-                        }
+                        label: "Take the pipe back out to the BODY TISSUES",
+                        correct: false,
+                        what: "You sent the drop from the right heart back out to the body.",
+                        why: "The right side of the heart receives deoxygenated blood from the body and pumps it back to the lungs to be cleared of carbon dioxide. It cannot go back to the body until it has collected fresh oxygen.",
+                        fix: "Head up to the lungs instead.",
+                        model: "Right heart → lungs → left heart → body tissues."
                     }
                 ]
             }
+        ];
+
+        const MISSION_BRIEF = "One red blood cell. Four stations. One full lap of the double circuit. Load the right cargo, pick the right pipe, and bring the delivery home.";
+        const MISSION_HINT = "Start at the lungs. At every station ask yourself two things: what should I pick up or drop off here, and which pipe leads out?";
+        const COMPLETE_HINT = "Look back over the lap: oxygen on at the lungs and off at the tissues, carbon dioxide on at the tissues and off at the lungs, and nothing at all loaded or unloaded inside the heart.";
+
+        const RECAP_POINTS = [
+            "Oxygen is picked up at the lungs and dropped off at the body tissues.",
+            "Carbon dioxide is picked up at the body tissues and dropped off at the lungs.",
+            "Nutrients are absorbed into the blood plasma at the digestive system, which is part of the body tissues station.",
+            "The heart is a waypoint and a pump, never a loading zone — no cargo changes inside its chambers.",
+            "Blood cannot go straight from the lungs to the body: its pressure drops in the tiny lung capillaries, so it returns to the heart to be pumped with enough force to reach the toes and the brain. That is why the circuit is a figure-of-eight double circuit."
+        ];
+
+        const RANKS = [
+            { min: 12, name: "Legendary Courier" },
+            { min: 10, name: "Elite Courier" },
+            { min: 7, name: "Ace Courier" },
+            { min: 4, name: "Courier" },
+            { min: 1, name: "Rookie Courier" },
+            { min: 0, name: "Trainee" }
+        ];
+
+        const START_CARGO = { oxygen: false, carbonDioxide: true, nutrients: false };
+        const TOTAL_SCENES = 6;
+        const MAX_STARS = 12;
+
+        const sim = {
+            stage: 0,
+            cargo: Object.assign({}, START_CARGO),
+            entryCargo: Object.assign({}, START_CARGO),
+            cargoConfirmed: false,
+            questionDone: false,
+            visited: [],
+            score: 0,
+            slips: {},
+            stars: {},
+            awarded: {}
         };
 
-        const STATION_ORDER = ["lungs", "leftHeart", "bodyTissues", "rightHeart"];
+        const simDom = {};
+        const history = [];
 
-        /* ---- Embedded misconception check, shown after the loop closes ---- */
-        const MISCONCEPTION = {
-            question: "Does the blood pick up nutrients in the heart?",
-            hint: "Think about what the heart's only job is, and where in the body cargo actually gets loaded and dropped off.",
-            correctExplanation:
-                "Correct — No. The heart is simply a pump that keeps the transport network moving. Nutrients are absorbed into the blood plasma at the digestive system (part of the Body Tissues circuit), not inside the heart chambers.",
-            wrongFeedback: {
-                what: "You answered “Yes” — that blood picks up nutrients inside the heart.",
-                why: "The heart is simply a pump that keeps the transport network moving. It has no digestive tissue capable of adding nutrients to the blood.",
-                fix: "Remember that cargo (oxygen, carbon dioxide and nutrients) is only exchanged at the Lungs and the Body Tissues stations, never at the heart.",
-                model: "No — nutrients are picked up by the blood plasma in the digestive system (part of the Body Tissues circuit), not inside the heart chambers."
+        function cacheSimDom() {
+            const ids = ["sceneProgress", "stageTitle", "stageBrief", "statusLine", "cargoPanel", "cargoHeading",
+                "cargoRow", "checkCargoBtn", "questionPanel", "questionText", "questionRow", "routePanel",
+                "routeRow", "feedbackBox", "startPanel", "beginBtn", "recapList", "againPanel", "playAgainBtn",
+                "exitBtn", "rulesBtn", "backBtn", "hintBtn", "tryAgainBtn", "bloodDrop", "circuitWrap",
+                "reviewBtn", "reviewPanel", "reviewList", "reviewEmpty", "closeReviewBtn", "confirmPanel",
+                "confirmText", "confirmYesBtn", "confirmNoBtn", "tracker", "hold", "holdItems", "scoreValue",
+                "starStrip", "rankValue", "briefCard", "medalWrap", "rankLine"];
+            ids.forEach((id) => { simDom[id] = document.getElementById(id); });
+            simDom.hud = document.querySelector(".hud");
+        }
+
+        let simBound = false;
+
+        function bindSimEvents() {
+            if (simBound) return;
+            simBound = true;
+            simDom.exitBtn.addEventListener("click", () => { showScreen("home"); });
+            simDom.rulesBtn.addEventListener("click", openInstructionsModal);
+            simDom.backBtn.addEventListener("click", handleBack);
+            simDom.hintBtn.addEventListener("click", showHint);
+            simDom.tryAgainBtn.addEventListener("click", handleTryAgain);
+            simDom.beginBtn.addEventListener("click", () => { goToStage(1); });
+            simDom.playAgainBtn.addEventListener("click", askRestart);
+            simDom.checkCargoBtn.addEventListener("click", checkCargo);
+            simDom.reviewBtn.addEventListener("click", toggleReview);
+            simDom.closeReviewBtn.addEventListener("click", closeReview);
+            simDom.confirmYesBtn.addEventListener("click", () => {
+                const action = pendingConfirm;
+                closeConfirm();
+                if (action) action();
+            });
+            simDom.confirmNoBtn.addEventListener("click", () => {
+                closeConfirm();
+                setFeedback("neutral", "Nothing cleared", ["Your run has been left exactly as it was."]);
+            });
+        }
+
+        /* ---------- delivery log (Review) ---------- */
+
+        function record(line) {
+            history.push(line);
+        }
+
+        function renderReview() {
+            const items = history.map((line) => {
+                const li = document.createElement("li");
+                li.textContent = line;
+                return li;
+            });
+            simDom.reviewList.replaceChildren.apply(simDom.reviewList, items);
+            simDom.reviewEmpty.classList.toggle("hidden", history.length > 0);
+        }
+
+        function toggleReview() {
+            if (simDom.reviewPanel.classList.contains("hidden")) {
+                renderReview();
+                simDom.reviewPanel.classList.remove("hidden");
+                simDom.closeReviewBtn.focus();
+            } else {
+                closeReview();
             }
-        };
-
-        /* ---- Simulation state (kept only in memory for this session) ---- */
-        const simState = {
-            started: false,
-            view: "mission",          // "mission" | "station" | "misconception" | "completion"
-            currentStationKey: "lungs",
-            cargo: { oxygen: false, carbonDioxide: false, nutrients: false },
-            doneActionIds: new Set(),
-            history: [],
-            misconceptionAnswered: false,
-            misconceptionSelected: null,
-            misconceptionCorrect: null
-        };
-
-        let simListenersBound = false;
-        const simDom = {}; // populated once devInit() runs, since these elements live in the SIM AREA
-
-        function cargoLabel() {
-            const parts = [];
-            if (simState.cargo.oxygen) parts.push("Oxygen");
-            if (simState.cargo.carbonDioxide) parts.push("Carbon dioxide");
-            if (simState.cargo.nutrients) parts.push("Nutrients");
-            return parts.length ? parts.join(", ") + "." : "None.";
         }
 
-        function progressLabel() {
-            if (simState.view === "mission") return "Mission briefing";
-            if (simState.view === "station") {
-                const s = STATIONS[simState.currentStationKey];
-                const stepLabels = { 1: "Step 1 of 4", 2: "Step 2 of 4", 3: "Step 3 of 4", 4: "Step 4 of 4" };
-                return stepLabels[s.stationNumber] + " (Station: " + s.name + ")";
+        function closeReview() {
+            simDom.reviewPanel.classList.add("hidden");
+            simDom.reviewBtn.focus();
+        }
+
+        /* ---------- confirmation before anything is cleared ---------- */
+
+        let pendingConfirm = null;
+
+        function askConfirm(message, action) {
+            pendingConfirm = action;
+            simDom.confirmText.textContent = message;
+            simDom.confirmPanel.classList.remove("hidden");
+            simDom.confirmYesBtn.focus();
+        }
+
+        function closeConfirm() {
+            pendingConfirm = null;
+            simDom.confirmPanel.classList.add("hidden");
+        }
+
+        function askRestart() {
+            askConfirm("Clear your whole run — score, stars and all — and start the circuit again?", () => {
+                resetSimState();
+                renderStage();
+                setFeedback("neutral", "Run cleared", ["Everything is back to the start. Press Start the Delivery to set off from the lungs."]);
+            });
+        }
+
+        function resetSimState() {
+            sim.stage = 0;
+            sim.cargo = Object.assign({}, START_CARGO);
+            sim.entryCargo = Object.assign({}, START_CARGO);
+            sim.cargoConfirmed = false;
+            sim.questionDone = false;
+            sim.visited = [];
+            sim.score = 0;
+            sim.slips = {};
+            sim.stars = {};
+            sim.awarded = {};
+            history.length = 0;
+        }
+
+        /* ---------- scoring ---------- */
+
+        function addScore(points, caption) {
+            sim.score += points;
+            showReward("+" + points + " " + caption);
+            renderHud();
+        }
+
+        function showReward(text) {
+            if (!simDom.hud) return;
+            const chip = document.createElement("span");
+            chip.className = "reward-float";
+            chip.textContent = text;
+            simDom.hud.appendChild(chip);
+            window.setTimeout(() => { chip.remove(); }, 1000);
+        }
+
+        function totalStars() {
+            return NODE_KEYS.reduce((sum, key) => sum + (sim.stars[key] || 0), 0);
+        }
+
+        function rankName() {
+            const stars = totalStars();
+            for (let i = 0; i < RANKS.length; i += 1) {
+                if (stars >= RANKS[i].min) return RANKS[i].name;
             }
-            if (simState.view === "misconception") return "Final check";
-            if (simState.view === "completion") return "Complete";
-            return "";
+            return RANKS[RANKS.length - 1].name;
         }
 
-        function locationLabel() {
-            if (simState.view === "mission") return "Not started yet. Read the mission below, then begin at the Lungs.";
-            if (simState.view === "station") return STATIONS[simState.currentStationKey].name + ". " + STATIONS[simState.currentStationKey].arrivalText;
-            if (simState.view === "misconception") return "Back at the Lungs, ready to start the next loop. Answer the final check to finish.";
-            if (simState.view === "completion") return "Circuit complete. The blood drop is back at the Lungs.";
-            return "";
+        function slipsAt(key) {
+            return sim.slips[key] || 0;
         }
 
-        function updateStatusBar() {
-            simDom.progressText.textContent = progressLabel();
-            simDom.locationText.textContent = locationLabel();
-            simDom.cargoText.textContent = cargoLabel();
+        function addSlip(key) {
+            sim.slips[key] = slipsAt(key) + 1;
         }
 
-        function updateMapHighlight() {
-            const key = simState.view === "station" ? simState.currentStationKey : "lungs";
-            simDom.mapNodes.forEach((g) => g.classList.toggle("current", g.getAttribute("data-node") === key));
-            const pos = NODE_POS[key];
-            if (pos) simDom.bloodDrop.setAttribute("transform", "translate(" + pos.x + ", " + pos.y + ")");
+        function renderHud() {
+            const stars = totalStars();
+            simDom.scoreValue.textContent = String(sim.score);
+            simDom.starStrip.textContent = "★".repeat(stars) + "☆".repeat(MAX_STARS - stars) +
+                "  " + stars + " of " + MAX_STARS;
+            simDom.rankValue.textContent = rankName();
         }
 
-        function updateNavButtons() {
-            simDom.backBtn.disabled = simState.history.length === 0;
-            simDom.tryAgainBtn.disabled = simState.view === "mission" || simState.view === "completion";
+        /* ---------- stage helpers ---------- */
+
+        function currentStation() {
+            return sim.stage >= 1 && sim.stage <= STATIONS.length ? STATIONS[sim.stage - 1] : null;
+        }
+
+        function currentNodeKey() {
+            const station = currentStation();
+            return station ? station.key : "lungs";
+        }
+
+        function cargoSentence(cargo) {
+            const carried = CARGO_ORDER.filter((key) => cargo[key]).map((key) => CARGO_LABEL[key]);
+            if (carried.length === 0) return "nothing";
+            if (carried.length === 1) return carried[0];
+            return carried.slice(0, -1).join(", ") + " and " + carried[carried.length - 1];
+        }
+
+        function goToStage(stage) {
+            sim.stage = stage;
+            const station = currentStation();
+            sim.entryCargo = Object.assign({}, sim.cargo);
+            sim.cargoConfirmed = false;
+            sim.questionDone = station && station.question ? false : true;
+            renderStage();
+        }
+
+        function handleBack() {
+            if (sim.stage === 0) {
+                showScreen("home");
+                return;
+            }
+            const previous = sim.stage - 1;
+            if (previous === 0) {
+                sim.stage = 0;
+                sim.cargo = Object.assign({}, START_CARGO);
+                sim.entryCargo = Object.assign({}, START_CARGO);
+                sim.cargoConfirmed = false;
+                sim.questionDone = false;
+                sim.visited = [];
+                renderStage();
+                return;
+            }
+            sim.stage = previous;
+            sim.visited = STATIONS.slice(0, previous - 1).map((station) => station.key);
+            rewindCargoTo(previous);
+            sim.entryCargo = Object.assign({}, sim.cargo);
+            sim.cargoConfirmed = false;
+            const station = currentStation();
+            sim.questionDone = station.question ? false : true;
+            renderStage();
+        }
+
+        /* Cargo is fully determined by which stations are behind you, so a
+           rewind can rebuild it exactly. */
+        function rewindCargoTo(stage) {
+            let cargo = Object.assign({}, START_CARGO);
+            for (let i = 0; i < stage - 1; i += 1) {
+                cargo = Object.assign({}, STATIONS[i].required);
+            }
+            sim.cargo = cargo;
+        }
+
+        function handleTryAgain() {
+            if (sim.stage > STATIONS.length) {
+                askRestart();
+                return;
+            }
+            if (sim.stage === 0) {
+                askConfirm("Clear your whole run — score, stars and all — and start the briefing fresh?", () => {
+                    resetSimState();
+                    renderStage();
+                    setFeedback("neutral", "Run cleared", ["Everything is back to the start. Press Start the Delivery to set off from the lungs."]);
+                });
+                return;
+            }
+            askConfirm("Clear your choices at this station and try it again?", () => {
+                const station = currentStation();
+                sim.cargo = Object.assign({}, sim.entryCargo);
+                sim.cargoConfirmed = false;
+                sim.questionDone = station.question ? false : true;
+                record(station.title + ": cleared this station and started it again.");
+                renderStage();
+                setFeedback("neutral", "Station cleared", ["Your choices here have been cleared. Sort the hold again, then press Check the Cargo."]);
+            });
+        }
+
+        function showHint() {
+            const station = currentStation();
+            let text = MISSION_HINT;
+            if (station) text = station.hint;
+            else if (sim.stage > STATIONS.length) text = COMPLETE_HINT;
+            setFeedback("neutral", "Hint", [text]);
+        }
+
+        /* ---------- feedback ---------- */
+
+        function setFeedback(kind, tag, paragraphs) {
+            const box = simDom.feedbackBox;
+            box.classList.remove("hidden", "is-correct", "is-wrong");
+            if (kind === "correct") box.classList.add("is-correct");
+            if (kind === "wrong") box.classList.add("is-wrong");
+            const nodes = [];
+            const tagEl = document.createElement("span");
+            tagEl.className = "feedback-tag";
+            tagEl.textContent = tag;
+            nodes.push(tagEl);
+            paragraphs.forEach((line) => {
+                const p = document.createElement("p");
+                p.style.margin = "0 0 8px";
+                p.textContent = line;
+                nodes.push(p);
+            });
+            box.replaceChildren.apply(box, nodes);
         }
 
         function clearFeedback() {
-            simDom.feedbackBox.classList.remove("show", "feedback-wrong", "feedback-right");
+            simDom.feedbackBox.classList.add("hidden");
             simDom.feedbackBox.replaceChildren();
         }
 
-        function hideHint() {
-            simDom.hintBox.classList.add("hidden");
-            simDom.hintBox.replaceChildren();
-        }
-
-        function showFeedback(kind, content) {
-            simDom.feedbackBox.replaceChildren();
-            const frag = document.createDocumentFragment();
-            if (content.what) {
-                frag.appendChild(makeFeedbackLine("What went wrong: ", content.what));
-            }
-            if (content.why) {
-                frag.appendChild(makeFeedbackLine("Why: ", content.why));
-            }
-            if (content.fix) {
-                frag.appendChild(makeFeedbackLine("How to fix it: ", content.fix));
-            }
-            if (content.model) {
-                frag.appendChild(makeFeedbackLine(kind === "right" ? "" : "Correct approach: ", content.model));
-            }
-            simDom.feedbackBox.appendChild(frag);
-            simDom.feedbackBox.classList.add("show");
-            simDom.feedbackBox.classList.add(kind === "right" ? "feedback-right" : "feedback-wrong");
-        }
-
-        function makeFeedbackLine(label, text) {
-            const p = document.createElement("p");
-            if (label) {
-                const strong = document.createElement("strong");
-                strong.textContent = label;
-                p.appendChild(strong);
-            }
-            p.appendChild(document.createTextNode(text));
-            return p;
-        }
-
-        function snapshotState() {
-            return {
-                view: simState.view,
-                currentStationKey: simState.currentStationKey,
-                cargo: Object.assign({}, simState.cargo),
-                doneActionIds: Array.from(simState.doneActionIds),
-                misconceptionAnswered: simState.misconceptionAnswered,
-                misconceptionSelected: simState.misconceptionSelected,
-                misconceptionCorrect: simState.misconceptionCorrect
-            };
-        }
-
-        function restoreSnapshot(snap) {
-            simState.view = snap.view;
-            simState.currentStationKey = snap.currentStationKey;
-            simState.cargo = Object.assign({}, snap.cargo);
-            simState.doneActionIds = new Set(snap.doneActionIds);
-            simState.misconceptionAnswered = snap.misconceptionAnswered;
-            simState.misconceptionSelected = snap.misconceptionSelected;
-            simState.misconceptionCorrect = snap.misconceptionCorrect;
-        }
-
-        function pushHistory() {
-            simState.history.push(snapshotState());
-        }
-
-        function goBack() {
-            if (simState.history.length === 0) return;
-            const prev = simState.history.pop();
-            restoreSnapshot(prev);
-            renderCurrentView();
-        }
-
-        function tryAgainCurrent() {
-            if (simState.view === "station") {
-                const base = simState.history.length
-                    ? simState.history[simState.history.length - 1].cargo
-                    : { oxygen: false, carbonDioxide: false, nutrients: false };
-                simState.cargo = Object.assign({}, base);
-                simState.doneActionIds = new Set();
-                renderCurrentView();
-            } else if (simState.view === "misconception") {
-                simState.misconceptionAnswered = false;
-                simState.misconceptionSelected = null;
-                simState.misconceptionCorrect = null;
-                renderCurrentView();
-            }
-        }
-
-        function focusStageHeading() {
-            const heading = simDom.stageArea.querySelector(".stage-heading");
-            if (heading) {
-                heading.setAttribute("tabindex", "-1");
-                heading.focus({ preventScroll: false });
-            }
-        }
-
-        function renderCurrentView() {
-            updateMapHighlight();
-            updateStatusBar();
-            updateNavButtons();
-            hideHint();
-            clearFeedback();
-            simDom.stageArea.replaceChildren();
-            if (simState.view === "mission") renderMission();
-            else if (simState.view === "station") renderStation(simState.currentStationKey);
-            else if (simState.view === "misconception") renderMisconception();
-            else if (simState.view === "completion") renderCompletion();
-            focusStageHeading();
-        }
-
-        function renderMission() {
-            const heading = document.createElement("h3");
-            heading.className = "stage-heading";
-            heading.textContent = "Mission: Deliver the Cargo";
-
-            const p1 = document.createElement("p");
-            p1.className = "stage-text";
-            p1.textContent = "You are guiding a drop of blood on one full lap of the double circuit: Lungs → Left Heart → Body Tissues → Right Heart → back to the Lungs.";
-
-            const p2 = document.createElement("p");
-            p2.className = "stage-text";
-            p2.textContent = "At each station, load or drop the correct cargo, then choose the correct route onward. The heart is a pump, not a loading zone — cargo only changes at the Lungs and the Body Tissues.";
-
-            const group = document.createElement("div");
-            group.className = "action-group";
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "action-btn route-btn";
-            btn.textContent = "Begin at the Lungs →";
-            btn.addEventListener("click", () => {
-                pushHistory();
-                simState.view = "station";
-                simState.currentStationKey = "lungs";
-                simState.doneActionIds = new Set();
-                renderCurrentView();
-            });
-            group.appendChild(btn);
-
-            simDom.stageArea.append(heading, p1, p2, group);
-        }
-
-        function renderStation(key) {
-            const def = STATIONS[key];
-
-            const heading = document.createElement("h3");
-            heading.className = "stage-heading";
-            heading.textContent = def.name;
-
-            const p1 = document.createElement("p");
-            p1.className = "stage-text";
-            p1.textContent = def.arrivalText;
-
-            simDom.stageArea.append(heading, p1);
-
-            if (def.cargoActions.length) {
-                const cargoGroup = document.createElement("div");
-                cargoGroup.className = "action-group";
-                const h4 = document.createElement("h4");
-                h4.textContent = "Cargo actions";
-                cargoGroup.appendChild(h4);
-                const grid = document.createElement("div");
-                grid.className = "btn-grid";
-                def.cargoActions.forEach((action) => {
-                    const b = document.createElement("button");
-                    b.type = "button";
-                    b.className = "action-btn";
-                    b.textContent = action.label;
-                    b.dataset.actionId = action.id;
-                    const done = action.correct && simState.doneActionIds.has(action.id);
-                    b.setAttribute("aria-pressed", done ? "true" : "false");
-                    if (done) b.disabled = true;
-                    b.addEventListener("click", () => handleCargoClick(def, action));
-                    grid.appendChild(b);
-                });
-                cargoGroup.appendChild(grid);
-                simDom.stageArea.appendChild(cargoGroup);
-            }
-
-            const routeGroup = document.createElement("div");
-            routeGroup.className = "action-group";
-            const rh = document.createElement("h4");
-            rh.textContent = "Choose a route";
-            routeGroup.appendChild(rh);
-            const rgrid = document.createElement("div");
-            rgrid.className = "btn-grid";
-            def.routes.forEach((route) => {
-                const b = document.createElement("button");
-                b.type = "button";
-                b.className = "action-btn route-btn";
-                b.textContent = route.label;
-                b.addEventListener("click", () => handleRouteClick(def, route));
-                rgrid.appendChild(b);
-            });
-            routeGroup.appendChild(rgrid);
-            simDom.stageArea.appendChild(routeGroup);
-        }
-
-        function handleCargoClick(stationDef, action) {
-            if (action.correct) {
-                if (simState.doneActionIds.has(action.id)) return;
-                action.apply(simState.cargo);
-                simState.doneActionIds.add(action.id);
-                clearFeedback();
-                updateStatusBar();
-                renderStationButtonsInPlace(stationDef);
-            } else {
-                showFeedback("wrong", action.feedback);
-            }
-        }
-
-        function renderStationButtonsInPlace(stationDef) {
-            stationDef.cargoActions.forEach((action) => {
-                const btn = simDom.stageArea.querySelector('[data-action-id="' + action.id + '"]');
-                if (!btn) return;
-                const done = action.correct && simState.doneActionIds.has(action.id);
-                btn.setAttribute("aria-pressed", done ? "true" : "false");
-                btn.disabled = done;
-            });
-        }
-
-        function handleRouteClick(stationDef, route) {
-            if (!route.correct) {
-                showFeedback("wrong", route.feedback);
-                return;
-            }
-            const required = stationDef.cargoActions.filter((a) => a.correct);
-            const missing = required.filter((a) => !simState.doneActionIds.has(a.id));
-            if (missing.length) {
-                showFeedback("wrong", {
-                    what: "You tried to leave " + stationDef.name + " before finishing the cargo actions.",
-                    why: "The blood's cargo must be updated at this station before it moves on, otherwise it would be carrying the wrong mix of cargo for the next part of its journey.",
-                    fix: "Complete the outstanding action" + (missing.length > 1 ? "s" : "") + " below, then choose a route.",
-                    model: "Still needed here: " + missing.map((a) => a.label).join(" and ") + "."
-                });
-                return;
-            }
-            pushHistory();
-            if (route.nextView === "misconception") {
-                simState.view = "misconception";
-                simState.misconceptionAnswered = false;
-                simState.misconceptionSelected = null;
-                simState.misconceptionCorrect = null;
-            } else {
-                simState.view = "station";
-                simState.currentStationKey = route.nextStationKey;
-                simState.doneActionIds = new Set();
-            }
-            renderCurrentView();
-        }
-
-        function renderMisconception() {
-            const heading = document.createElement("h3");
-            heading.className = "stage-heading";
-            heading.textContent = "Final Check";
-
-            const p1 = document.createElement("p");
-            p1.className = "stage-text";
-            p1.textContent = "The blood drop has completed the full circuit and is back at the Lungs. Before you finish, answer this question.";
-
-            const p2 = document.createElement("p");
-            p2.className = "stage-text";
-            const strong = document.createElement("strong");
-            strong.textContent = MISCONCEPTION.question;
-            p2.appendChild(strong);
-
-            const group = document.createElement("div");
-            group.className = "action-group";
-            const options = document.createElement("div");
-            options.className = "check-options";
-
-            const yesBtn = document.createElement("button");
-            yesBtn.type = "button";
-            yesBtn.className = "check-btn";
-            yesBtn.textContent = "Yes";
-            yesBtn.addEventListener("click", () => handleMisconceptionClick(true));
-
-            const noBtn = document.createElement("button");
-            noBtn.type = "button";
-            noBtn.className = "check-btn";
-            noBtn.textContent = "No";
-            noBtn.addEventListener("click", () => handleMisconceptionClick(false));
-
-            if (simState.misconceptionAnswered) {
-                if (simState.misconceptionSelected === true) yesBtn.classList.add("selected-wrong");
-                if (simState.misconceptionSelected === false) noBtn.classList.add(simState.misconceptionCorrect ? "selected-correct" : "selected-wrong");
-            }
-
-            options.append(yesBtn, noBtn);
-            group.appendChild(options);
-            simDom.stageArea.append(heading, p1, p2, group);
-
-            if (simState.misconceptionAnswered) {
-                showFeedback(simState.misconceptionCorrect ? "right" : "wrong",
-                    simState.misconceptionCorrect ? { model: MISCONCEPTION.correctExplanation } : MISCONCEPTION.wrongFeedback);
-            }
-
-            if (simState.misconceptionCorrect) {
-                const cont = document.createElement("button");
-                cont.type = "button";
-                cont.className = "action-btn route-btn";
-                cont.textContent = "See Results →";
-                cont.addEventListener("click", () => {
-                    pushHistory();
-                    simState.view = "completion";
-                    renderCurrentView();
-                });
-                simDom.stageArea.appendChild(cont);
-            }
-        }
-
-        function handleMisconceptionClick(answer) {
-            simState.misconceptionSelected = answer;
-            simState.misconceptionAnswered = true;
-            simState.misconceptionCorrect = answer === false;
-            simDom.stageArea.replaceChildren();
-            renderMisconception();
-            updateStatusBar();
-        }
-
-        function renderCompletion() {
-            const heading = document.createElement("h3");
-            heading.className = "stage-heading";
-            heading.textContent = "Circuit Complete!";
-
-            const p1 = document.createElement("p");
-            p1.className = "stage-text";
-            p1.textContent = "You guided the blood drop through the full double circuit and delivered the correct cargo at every stop.";
-
-            const list = document.createElement("ul");
-            list.className = "completion-summary";
-            const points = [
-                "Lungs: oxygen loaded, carbon dioxide dropped.",
-                "Left Heart: no cargo change — just a pressure boost onward to the Body Tissues.",
-                "Body Tissues: oxygen dropped, carbon dioxide loaded, nutrients loaded.",
-                "Right Heart: no cargo change — just a pressure boost onward to the Lungs.",
-                "The heart is always a waypoint, never a loading zone."
+        function wrongParagraphs(detail) {
+            return [
+                "What is wrong: " + detail.what,
+                "Why: " + detail.why,
+                "How to fix it: " + detail.fix,
+                "Corrected model: " + detail.model
             ];
-            points.forEach((text) => {
-                const li = document.createElement("li");
-                li.textContent = text;
-                list.appendChild(li);
-            });
-
-            const group = document.createElement("div");
-            group.className = "action-group";
-            const again = document.createElement("button");
-            again.type = "button";
-            again.className = "action-btn route-btn";
-            again.textContent = "Play Again";
-            again.addEventListener("click", () => {
-                devReset();
-                renderCurrentView();
-            });
-            group.appendChild(again);
-
-            simDom.stageArea.append(heading, p1, list, group);
         }
 
-        function bindSimNavOnce() {
-            if (simListenersBound) return;
-            simListenersBound = true;
-            simDom.exitBtn.addEventListener("click", () => { showScreen("home"); });
-            simDom.rulesBtn.addEventListener("click", () => { openInstructionsModal(); });
-            simDom.backBtn.addEventListener("click", goBack);
-            simDom.tryAgainBtn.addEventListener("click", tryAgainCurrent);
-            simDom.hintBtn.addEventListener("click", () => {
-                if (!simDom.hintBox.classList.contains("hidden")) {
-                    hideHint();
-                    return;
+        /* ---------- map, tracker and hold ---------- */
+
+        function renderMap() {
+            const activeKey = sim.stage > STATIONS.length ? "lungs" : currentNodeKey();
+            NODE_KEYS.forEach((key) => {
+                const organ = document.getElementById(ORGAN_ID[key]);
+                const flag = document.getElementById(FLAG_ID[key]);
+                const isCurrent = sim.stage >= 1 && sim.stage <= STATIONS.length && key === activeKey;
+                const isVisited = sim.visited.indexOf(key) !== -1;
+                organ.classList.toggle("is-current", isCurrent);
+                organ.classList.toggle("is-visited", isVisited && !isCurrent);
+                if (isCurrent) flag.textContent = "▶ HERE";
+                else if (isVisited) flag.textContent = "★ DONE";
+                else flag.textContent = "";
+            });
+            const position = DROP_POSITION[activeKey];
+            simDom.bloodDrop.setAttribute("transform", "translate(" + position[0] + " " + position[1] + ")");
+            CARGO_ORDER.forEach((key) => {
+                const orb = document.getElementById(ORB_ID[key]);
+                orb.classList.toggle("is-off", !sim.cargo[key]);
+            });
+        }
+
+        function renderTracker() {
+            const chips = NODE_KEYS.map((key, index) => {
+                const chip = document.createElement("span");
+                chip.className = "tracker-chip";
+                const isCurrent = sim.stage === index + 1;
+                const isVisited = sim.visited.indexOf(key) !== -1;
+                const mark = document.createElement("span");
+                mark.className = "chip-mark";
+                const label = document.createElement("span");
+                if (isVisited) {
+                    chip.classList.add("is-visited");
+                    const stars = sim.stars[key] || 0;
+                    mark.textContent = "★".repeat(stars) + "☆".repeat(3 - stars);
+                    label.textContent = NODE_SHORT[key] + " — done, " + stars + " of 3 stars";
+                } else if (isCurrent) {
+                    chip.classList.add("is-current");
+                    mark.textContent = "▶";
+                    label.textContent = NODE_SHORT[key] + " — you are here";
+                } else {
+                    chip.classList.add("is-pending");
+                    mark.textContent = "○";
+                    label.textContent = NODE_SHORT[key] + " — still to do";
                 }
-                let text;
-                if (simState.view === "station") text = STATIONS[simState.currentStationKey].hint;
-                else if (simState.view === "misconception") text = MISCONCEPTION.hint;
-                else if (simState.view === "mission") text = "Start by choosing Load Oxygen and Drop Carbon Dioxide at the Lungs, then send the blood to the Left Heart.";
-                else text = "You have finished the circuit. Click Play Again to try it once more.";
-                simDom.hintBox.textContent = text;
-                simDom.hintBox.classList.remove("hidden");
+                chip.appendChild(mark);
+                chip.appendChild(label);
+                return chip;
             });
+            simDom.tracker.replaceChildren.apply(simDom.tracker, chips);
         }
 
-        function devInit() {
-            simDom.stageArea = document.getElementById("stageArea");
-            simDom.progressText = document.getElementById("progressText");
-            simDom.locationText = document.getElementById("locationText");
-            simDom.cargoText = document.getElementById("cargoText");
-            simDom.feedbackBox = document.getElementById("feedbackBox");
-            simDom.hintBox = document.getElementById("hintBox");
-            simDom.exitBtn = document.getElementById("exitStageBtn");
-            simDom.rulesBtn = document.getElementById("rulesStageBtn");
-            simDom.backBtn = document.getElementById("backStageBtn");
-            simDom.hintBtn = document.getElementById("hintStageBtn");
-            simDom.tryAgainBtn = document.getElementById("tryAgainStageBtn");
-            simDom.bloodDrop = document.getElementById("bloodDrop");
-            simDom.mapNodes = Array.from(document.querySelectorAll(".map-node"));
-            simDom.feedbackBox.setAttribute("tabindex", "-1");
-
-            bindSimNavOnce();
-
-            if (!simState.started) {
-                devReset();
+        function renderHold() {
+            const carried = CARGO_ORDER.filter((key) => sim.cargo[key]);
+            if (carried.length === 0) {
+                const empty = document.createElement("span");
+                empty.className = "hold-empty";
+                empty.textContent = "empty";
+                simDom.holdItems.replaceChildren(empty);
+                return;
             }
-            renderCurrentView();
+            const pills = carried.map((key) => {
+                const pill = document.createElement("span");
+                pill.className = "hold-pill cargo-" + key;
+                pill.innerHTML = CARGO_ICON[key];
+                const text = document.createElement("span");
+                text.textContent = CARGO_LABEL[key];
+                pill.appendChild(text);
+                return pill;
+            });
+            simDom.holdItems.replaceChildren.apply(simDom.holdItems, pills);
+        }
+
+        function renderStatus() {
+            const station = currentStation();
+            let place = "waiting at the lungs, ready to set off";
+            if (station) place = NODE_NAME[station.key];
+            else if (sim.stage > STATIONS.length) place = "back at the lungs — lap complete";
+            simDom.statusLine.textContent = "Location: " + place + ". Cargo on board: " + cargoSentence(sim.cargo) +
+                ". Stations completed: " + sim.visited.length + " of " + STATIONS.length +
+                ". Score: " + sim.score + ". Stars: " + totalStars() + " of " + MAX_STARS + ".";
+        }
+
+        /* ---------- controls ---------- */
+
+        function renderCargoButtons() {
+            const buttons = CARGO_ORDER.map((key) => {
+                const carried = !!sim.cargo[key];
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "cargo-btn";
+                button.setAttribute("aria-pressed", carried ? "true" : "false");
+                button.innerHTML = CARGO_ICON[key];
+                const copy = document.createElement("span");
+                const name = document.createElement("span");
+                name.className = "cargo-name";
+                name.textContent = (carried ? "Drop " : "Load ") + CARGO_LABEL[key];
+                const state = document.createElement("span");
+                state.className = "cargo-state";
+                state.textContent = carried ? "on board" : "not loaded";
+                copy.appendChild(name);
+                copy.appendChild(state);
+                button.appendChild(copy);
+                button.disabled = sim.cargoConfirmed;
+                button.addEventListener("click", () => {
+                    if (sim.cargoConfirmed) return;
+                    sim.cargo[key] = !sim.cargo[key];
+                    renderCargoButtons();
+                    renderHold();
+                    renderMap();
+                    renderStatus();
+                    clearFeedback();
+                });
+                return button;
+            });
+            simDom.cargoRow.replaceChildren.apply(simDom.cargoRow, buttons);
+        }
+
+        function renderRouteButtons() {
+            const station = currentStation();
+            const stationKey = station.key;
+            const buttons = station.routes.map((route) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "route-btn";
+                button.textContent = route.label;
+                button.addEventListener("click", () => {
+                    // Guard against a second click landing after the stage has moved on.
+                    const now = currentStation();
+                    if (!now || now.key !== stationKey) return;
+                    chooseRoute(route);
+                });
+                return button;
+            });
+            simDom.routeRow.replaceChildren.apply(simDom.routeRow, buttons);
+        }
+
+        function renderQuestion() {
+            const station = currentStation();
+            const stationKey = station.key;
+            simDom.questionText.textContent = station.question.text;
+            const buttons = station.question.choices.map((choice) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "choice-btn";
+                button.textContent = choice.label;
+                button.addEventListener("click", () => {
+                    const now = currentStation();
+                    if (!now || now.key !== stationKey || sim.questionDone) return;
+                    answerQuestion(choice);
+                });
+                return button;
+            });
+            simDom.questionRow.replaceChildren.apply(simDom.questionRow, buttons);
+        }
+
+        /* ---------- the three scored actions ---------- */
+
+        function answerQuestion(choice) {
+            const station = currentStation();
+            record(station.title + ": answered “" + choice.label + "” to the nutrients question — " +
+                (choice.correct ? "correct." : "not accepted."));
+            if (choice.correct) {
+                sim.questionDone = true;
+                if (!sim.awarded[station.key + "-question"]) {
+                    sim.awarded[station.key + "-question"] = true;
+                    addScore(10, "good call");
+                }
+                setFeedback("correct", "Correct", [choice.message]);
+                renderStage(true);
+                return;
+            }
+            addSlip(station.key);
+            setFeedback("wrong", "Not yet — try again", wrongParagraphs(choice));
+        }
+
+        function checkCargo() {
+            const station = currentStation();
+            if (!station || sim.cargoConfirmed) return;
+            const matches = CARGO_ORDER.every((key) => !!sim.cargo[key] === !!station.required[key]);
+            record(station.title + ": checked the hold (" + cargoSentence(sim.cargo) + ") — " +
+                (matches ? "correct." : "not accepted."));
+            if (!matches) {
+                addSlip(station.key);
+                setFeedback("wrong", "Hold up — check the hold", wrongParagraphs(station.cargoWrong(sim.cargo)));
+                return;
+            }
+            sim.cargoConfirmed = true;
+            if (!sim.awarded[station.key + "-cargo"]) {
+                sim.awarded[station.key + "-cargo"] = true;
+                addScore(10, "cargo sorted");
+            }
+            setFeedback("correct", "Cargo locked in", [station.cargoCorrect]);
+            renderStage(true);
+        }
+
+        function chooseRoute(route) {
+            const station = currentStation();
+            record(station.title + ": chose “" + route.label + "” — " +
+                (route.correct ? "correct." : "not accepted."));
+            if (!route.correct) {
+                addSlip(station.key);
+                setFeedback("wrong", "Wrong pipe", wrongParagraphs(route));
+                return;
+            }
+
+            const messages = [route.message];
+            if (!sim.awarded[station.key + "-route"]) {
+                sim.awarded[station.key + "-route"] = true;
+                addScore(10, "right pipe");
+            }
+            if (sim.visited.indexOf(station.key) === -1) {
+                sim.visited.push(station.key);
+                const stars = Math.max(1, 3 - slipsAt(station.key));
+                sim.stars[station.key] = stars;
+                if (!sim.awarded[station.key + "-stars"]) {
+                    sim.awarded[station.key + "-stars"] = true;
+                    addScore(stars * 5, "station bonus");
+                }
+                messages.push("Station cleared with " + stars + " of 3 stars. Score so far: " + sim.score + ".");
+            }
+
+            const nextStage = sim.stage + 1;
+            if (nextStage > STATIONS.length) {
+                sim.stage = nextStage;
+                renderStage();
+                setFeedback("correct", "Lap complete", messages);
+                return;
+            }
+            goToStage(nextStage);
+            setFeedback("correct", "Correct", messages);
+        }
+
+        /* ---------- the screen ---------- */
+
+        function renderStage(keepFeedback) {
+            const station = currentStation();
+            const isMission = sim.stage === 0;
+            const isComplete = sim.stage > STATIONS.length;
+
+            simDom.sceneProgress.textContent = "Scene " + (sim.stage + 1) + " of " + TOTAL_SCENES;
+            simDom.startPanel.classList.toggle("hidden", !isMission);
+            simDom.briefCard.classList.toggle("hidden", !isMission);
+            simDom.againPanel.classList.toggle("hidden", !isComplete);
+            simDom.recapList.classList.toggle("hidden", !isComplete);
+            simDom.medalWrap.classList.toggle("hidden", !isComplete);
+            simDom.rankLine.classList.toggle("hidden", !isComplete);
+            simDom.cargoPanel.classList.toggle("hidden", !station);
+            simDom.questionPanel.classList.add("hidden");
+            simDom.routePanel.classList.add("hidden");
+            simDom.reviewPanel.classList.add("hidden");
+            simDom.confirmPanel.classList.add("hidden");
+            pendingConfirm = null;
+
+            if (isMission) {
+                simDom.stageTitle.textContent = "Mission Briefing";
+                simDom.stageBrief.textContent = MISSION_BRIEF;
+            } else if (isComplete) {
+                simDom.stageTitle.textContent = "Delivery Complete";
+                simDom.stageBrief.textContent = "You ran the whole double circuit: lungs, left heart, body tissues, right heart, and home to the lungs. Here is the pattern you followed.";
+                simDom.rankLine.textContent = "Final score " + sim.score + " · " + totalStars() + " of " +
+                    MAX_STARS + " stars · rank: " + rankName();
+                const items = RECAP_POINTS.map((point) => {
+                    const li = document.createElement("li");
+                    li.textContent = point;
+                    return li;
+                });
+                simDom.recapList.replaceChildren.apply(simDom.recapList, items);
+            } else {
+                simDom.stageTitle.textContent = station.title;
+                simDom.stageBrief.textContent = station.brief;
+                simDom.cargoHeading.textContent = sim.cargoConfirmed
+                    ? "Step 1 — hold checked and locked for this station"
+                    : "Step 1 — load and unload, then check the hold";
+                simDom.checkCargoBtn.disabled = sim.cargoConfirmed;
+                renderCargoButtons();
+                if (sim.cargoConfirmed && station.question && !sim.questionDone) {
+                    simDom.questionPanel.classList.remove("hidden");
+                    renderQuestion();
+                }
+                if (sim.cargoConfirmed && sim.questionDone) {
+                    simDom.routePanel.classList.remove("hidden");
+                    renderRouteButtons();
+                }
+            }
+
+            renderMap();
+            renderTracker();
+            renderHold();
+            renderHud();
+            renderStatus();
+            if (!keepFeedback) clearFeedback();
+        }
+
+function devInit() {
+    cacheSimDom();
+    bindSimEvents();
+    renderStage();
+    return true;
 }
 
-        function devReset() {
-            // Return the blood drop to its opening position: back at the Lungs,
-            // carrying no cargo, with no history to step Back through and the
-            // final check question un-answered. This is also what "Play Again"
-            // on the completion screen calls.
-            simState.started = true;
-            simState.view = "mission";
-            simState.currentStationKey = "lungs";
-            simState.cargo = { oxygen: false, carbonDioxide: false, nutrients: false };
-            simState.doneActionIds = new Set();
-            simState.history = [];
-            simState.misconceptionAnswered = false;
-            simState.misconceptionSelected = null;
-            simState.misconceptionCorrect = null;
+function devReset() {
+    cacheSimDom();
+    resetSimState();
+    renderStage();
+    return true;
 }
+
+/* The instructions open by themselves the first time this sim is opened in a
+   session. A page reload keeps the session flag, so a learner already
+   part-way through is never interrupted. */
+(function openInstructionsOnFirstVisit() {
+    if (storageGet(SIM_CONFIG.simId + "-help-seen") === "true") return;
+    storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+    const help = document.getElementById("helpBtn");
+    if (help) help.classList.remove("pulse-help");
+    openInstructionsModal();
+})();
     </script>
 </body>
 
