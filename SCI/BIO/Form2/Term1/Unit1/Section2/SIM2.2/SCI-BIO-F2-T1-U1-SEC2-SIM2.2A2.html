@@ -1623,8 +1623,11 @@
                 activeDragPointIndex = closestIndex;
                 const newBpm = yToBpm(mouseY);
                 state.points[closestIndex].currentBpm = newBpm;
+                delete state.evaluations[state.points[closestIndex].id];
                 renderGraphSvg();
                 renderSteppers();
+                renderDashboard();
+                renderHistoryList();
             }
         }
 
@@ -1637,6 +1640,7 @@
             const newBpm = yToBpm(mouseY);
 
             state.points[activeDragPointIndex].currentBpm = newBpm;
+            delete state.evaluations[state.points[activeDragPointIndex].id];
             renderGraphSvg();
             renderSteppers();
         }
@@ -1645,6 +1649,8 @@
             if (activeDragPointIndex !== null) {
                 activeDragPointIndex = null;
                 renderGraphSvg();
+                renderDashboard();
+                renderHistoryList();
             }
         }
 
@@ -1829,15 +1835,23 @@
             if (state.isGraphVerified) return;
             const newBpm = Math.max(SVG_CONFIG.minBpm, Math.min(SVG_CONFIG.maxBpm, state.points[index].currentBpm + delta));
             state.points[index].currentBpm = newBpm;
+            delete state.evaluations[state.points[index].id];
             renderGraphSvg();
             renderSteppers();
+            renderDashboard();
+            renderHistoryList();
         };
 
         function resetPointsToDefault() {
             if (state.isGraphVerified) return;
-            state.points.forEach(p => p.currentBpm = 60);
+            state.points.forEach(p => {
+                p.currentBpm = 60;
+                delete state.evaluations[p.id];
+            });
             renderGraphSvg();
             renderSteppers();
+            renderDashboard();
+            renderHistoryList();
             dom.inspectorFeedbackBox.className = "feedback-card";
             dom.inspectorFeedbackBox.innerHTML = `↺ Points reset to 60 bpm. Refer to the data table and drag them to the target values!`;
         }
