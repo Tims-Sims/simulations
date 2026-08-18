@@ -837,6 +837,22 @@
             submitBtn.classList.remove("hidden");
             closeBtn2.classList.add("hidden");
 
+            /* Try Again button — reuse closeBtn2, relabel it */
+            closeBtn2.textContent = "Try Again";
+
+            function disableOptions() {
+                body.querySelectorAll('input[name="assess-q"]').forEach(inp => { inp.disabled = true; });
+                body.querySelectorAll(".assessment-opt").forEach(opt => { opt.style.pointerEvents = "none"; opt.style.opacity = "0.55"; });
+            }
+
+            function enableOptions() {
+                body.querySelectorAll('input[name="assess-q"]').forEach(inp => { inp.disabled = false; inp.checked = false; });
+                body.querySelectorAll(".assessment-opt").forEach(opt => { opt.classList.remove("selected"); opt.style.pointerEvents = ""; opt.style.opacity = ""; });
+                const res = document.getElementById("assessmentResult");
+                res.className = "assessment-result";
+                res.innerHTML = "";
+            }
+
             submitBtn.onclick = () => {
                 const selected = body.querySelector('input[name="assess-q"]:checked');
                 if (!selected) { alert("Please select an answer before submitting."); return; }
@@ -844,28 +860,34 @@
                 const result = document.getElementById("assessmentResult");
                 const val = selected.value;
 
+                disableOptions();
+
                 if (val === "a") {
                     result.className = "assessment-result show correct";
                     result.innerHTML = '<strong style="color:var(--success);">&#10003; Correct!</strong> Flask B turned milky because exhaled air contains a higher percentage of carbon dioxide. This gas reacts with the clear limewater, causing the cloudy colour change. Flask A only receives room air, which has very little CO&#x2082.';
                     playSound("correct");
+                    assessmentAnswered = true;
+                    submitBtn.classList.add("hidden");
+                    closeBtn2.textContent = "Close";
+                    closeBtn2.classList.remove("hidden");
+                    closeBtn2.onclick = () => { modal.classList.remove("show"); };
                 } else {
                     result.className = "assessment-result show wrong";
                     result.innerHTML = '<strong style="color:var(--danger);">&#10007; Not quite.</strong> ';
                     if (val === "b") {
                         result.innerHTML += 'Exhaled air actually contains <em>less</em> oxygen than inhaled air. The milky change is caused by carbon dioxide, not oxygen.';
                     } else if (val === "c") {
-                        result.innerHTML += 'Flask A remained clear throughout. Only Flask B turned milky because it received air from the lungs, which is high in CO&#x2082.';
+                        result.innerHTML += 'Flask A remained clear throughout. Only Flask B turned milky because it received air from the lungs, which is high in CO&#x2082;';
                     } else {
                         result.innerHTML += 'The limewater only turned milky after exhaling through Flask B multiple times. It does not change on its own.';
                     }
                     result.innerHTML += '<br><br><strong>Hint:</strong> "Which flask is receiving air directly from the lungs?"';
                     playSound("wrong");
+                    submitBtn.classList.add("hidden");
+                    closeBtn2.textContent = "Try Again";
+                    closeBtn2.classList.remove("hidden");
+                    closeBtn2.onclick = () => { enableOptions(); submitBtn.classList.remove("hidden"); closeBtn2.classList.add("hidden"); };
                 }
-
-                assessmentAnswered = true;
-                submitBtn.classList.add("hidden");
-                closeBtn2.classList.remove("hidden");
-                closeBtn2.onclick = () => { modal.classList.remove("show"); };
             };
 
             closeBtn.onclick = () => { modal.classList.remove("show"); };
