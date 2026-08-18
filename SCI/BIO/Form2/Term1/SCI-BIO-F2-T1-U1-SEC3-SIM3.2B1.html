@@ -244,6 +244,23 @@
             font-size: 1.05rem;
         }
 
+        .scroll-prompt {
+            text-align: center;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+            border: 1px dashed color-mix(in srgb, var(--accent) 50%, transparent);
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.95rem;
+            animation: promptPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes promptPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
         /* Flask milky animation */
         @keyframes bubbleUp {
             0% { transform: translateY(0); opacity: 0.8; }
@@ -622,6 +639,10 @@
                         <div class="event-log" id="eventLog" aria-label="Event log for screen readers" role="log"></div>
                     </div>
 
+                    <div class="scroll-prompt hidden" id="scrollPrompt" role="status">
+                        &#11015;&#65039; Scroll down to answer the assessment question!
+                    </div>
+
                     <div class="breath-controls">
                         <button class="breath-btn inhale-btn" id="inhaleBtn" type="button" aria-label="Inhale — draw room air through Flask A">
                             &#11014;&#65039; Inhale
@@ -636,7 +657,7 @@
                         Exhales: <strong id="exhaleCountDisplay">0</strong>
                     </div>
 
-                    <div class="check-btn" id="checkBtnWrap">
+                    <div class="check-btn hidden" id="checkBtnWrap">
                         <button class="primary-btn" id="checkBtn" type="button" aria-label="Check my understanding">
                             Check My Understanding
                         </button>
@@ -704,6 +725,14 @@
 
             /* Update Flask B opacity based on exhale count */
             updateFlaskB();
+
+            /* Show Check My Understanding once Flask B is milky */
+            if (exhaleCount === 3) {
+                const checkWrap = document.getElementById("checkBtnWrap");
+                if (checkWrap) checkWrap.classList.remove("hidden");
+                const prompt = document.getElementById("scrollPrompt");
+                if (prompt) prompt.classList.remove("hidden");
+            }
 
             /* Log entry */
             if (exhaleCount < 3) {
