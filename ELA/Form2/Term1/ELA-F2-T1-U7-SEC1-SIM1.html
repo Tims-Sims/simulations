@@ -1556,6 +1556,13 @@
             loadTheme();
             loadHelpSeen();
             try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+            var hasSavedGame = !!loadGame();
+            var seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (!hasSavedGame && seen !== "true") {
+                openInstructionsModal();
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                dom.helpBtn.classList.remove("pulse-help");
+            }
         }
 
         function loadHelpSeen() {
@@ -1580,12 +1587,6 @@
             dom.startBtn.addEventListener("click", () => {
                 showScreen("sim");
                 devInit();
-                var seen = storageGet(SIM_CONFIG.simId + "-help-seen");
-                if (seen !== "true") {
-                    openInstructionsModal();
-                    storageSet(SIM_CONFIG.simId + "-help-seen", "true");
-                    dom.helpBtn.classList.remove("pulse-help");
-                }
             });
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
