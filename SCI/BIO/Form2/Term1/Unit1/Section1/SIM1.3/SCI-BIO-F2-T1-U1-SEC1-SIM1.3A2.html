@@ -1,0 +1,2722 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Enzyme Action Animation</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+            --success: #10b981;
+            --success-ink: #6ee7b7;
+            --success-bg: rgba(16, 185, 129, 0.15);
+            --success-border: rgba(16, 185, 129, 0.5);
+            --warning: #f59e0b;
+            --warning-ink: #fcd34d;
+            --warning-bg: rgba(245, 158, 11, 0.15);
+            --warning-border: rgba(245, 158, 11, 0.48);
+            --danger: #ef4444;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+            --success-ink: #047857;
+            --warning-ink: #92400e;
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.08rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            width: min(100%, 860px);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 26px;
+            text-align: left;
+        }
+
+        .feature-item {
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+        }
+
+        .feature-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 10px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .feature-item h3 { margin: 0 0 6px; font-size: .98rem; }
+        .feature-item p { margin: 0; font-size: .9rem; line-height: 1.5; }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 640px);
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .close-icon {
+            width: 18px;
+            height: 18px;
+            display: block;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+        }
+
+        .drawer {
+            position: fixed;
+            inset: 0;
+            display: none;
+            justify-content: flex-end;
+            background: rgba(6, 10, 20, 0.65);
+            z-index: 50;
+        }
+
+        .drawer.show { display: flex; }
+
+        .drawer-panel {
+            width: min(92vw, 470px);
+            height: 100%;
+            overflow-y: auto;
+            padding: 22px;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            box-shadow: -18px 0 40px rgba(0, 0, 0, .28);
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .drawer-head h3 { margin: 0; }
+        .drawer-head p { margin: 5px 0 0; color: var(--muted); line-height: 1.5; }
+        .drawer .close-btn { position: static; flex: 0 0 auto; }
+
+        .modal-card h3 {
+            margin: 0 54px 12px 0;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .hero-features { grid-template-columns: 1fr; }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        .sim-layout { padding: 0; }
+        .sim-card { width: min(100%, 1100px); padding: clamp(14px, 2vw, 20px); }
+        .enzyme-lab { display: grid; gap: clamp(12px, 2vw, 18px); }
+        .enzyme-lab [hidden] { display: none !important; }
+
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+
+        .lab-heading,
+        .mastery-heading-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .lab-heading h2,
+        .mastery-heading-row h3,
+        .completion-panel h3 {
+            margin: 4px 0 8px;
+            color: var(--text);
+            line-height: 1.15;
+        }
+
+        .lab-heading p,
+        .mastery-heading-row p,
+        .completion-panel p {
+            margin: 0;
+            color: var(--text-soft);
+            line-height: 1.55;
+        }
+
+        .section-kicker {
+            margin: 0 !important;
+            color: var(--accent) !important;
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+        }
+
+        .observation-progress {
+            min-width: 220px;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+        }
+
+        .progress-copy {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+            color: var(--text-soft);
+            font-size: 0.88rem;
+        }
+
+        .mini-progress {
+            height: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--bg-soft);
+        }
+
+        .mini-progress span {
+            display: block;
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            transition: width 0.35s ease;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .digestion-card {
+            min-width: 0;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 74%, var(--surface));
+        }
+
+        .physical-card { border-top: 5px solid #f59e0b; }
+        .chemical-card { border-top: 5px solid #22d3ee; }
+
+        .card-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: var(--text-soft);
+            font-size: 0.74rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+        }
+
+        .card-label span {
+            display: grid;
+            width: 28px;
+            height: 28px;
+            place-items: center;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+        }
+
+        .digestion-card h3 {
+            margin: 0 0 8px;
+            color: var(--text);
+            font-size: 1.24rem;
+        }
+
+        .digestion-card > p {
+            min-height: 48px;
+            margin: 0 0 14px;
+            color: var(--text-soft);
+            line-height: 1.5;
+        }
+
+        .model-stage {
+            position: relative;
+            display: grid;
+            min-height: 240px;
+            place-items: center;
+            overflow: hidden;
+            padding: 20px 16px;
+            border: 2px solid var(--border);
+            border-radius: 18px;
+            background:
+                linear-gradient(rgba(125, 211, 252, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(125, 211, 252, 0.05) 1px, transparent 1px),
+                var(--bg-soft);
+            background-size: 24px 24px;
+        }
+
+        .physical-stage { padding-top: 70px; }
+
+        .hammer {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            display: grid;
+            width: 106px;
+            min-height: 44px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            transform: translateX(-50%) rotate(-18deg);
+            transform-origin: 74% 88%;
+            filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.25));
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .hammer svg { width: 100%; overflow: visible; }
+        .hammer:hover {
+            transform: translateX(-50%) rotate(-18deg);
+            outline: 3px solid #facc15;
+            outline-offset: 3px;
+            border-radius: 12px;
+        }
+        .hammer:active { cursor: grabbing; }
+        .hammer:disabled { cursor: default; opacity: 1; }
+
+        .physical-stage.is-animating .hammer {
+            animation: hammer-strike 0.78s cubic-bezier(.35, .02, .25, 1);
+        }
+
+        .food-block {
+            display: grid;
+            width: min(300px, 86%);
+            min-height: 132px;
+            place-items: center;
+            padding: 4px;
+        }
+
+        .large-food.is-drag-over {
+            border-radius: 18px;
+            outline: 4px solid #f59e0b;
+            outline-offset: 5px;
+            background: color-mix(in srgb, #f59e0b 15%, transparent);
+        }
+
+        .chicken-leg {
+            width: 100%;
+            max-height: 150px;
+            overflow: visible;
+            filter: drop-shadow(0 12px 8px rgba(36, 21, 44, 0.24));
+        }
+
+        .physical-stage.is-animating .large-food { animation: food-rumble .7s ease; }
+
+        .physical-pieces {
+            position: relative;
+            display: block;
+            width: min(330px, 92%);
+            min-height: 178px;
+            padding-bottom: 42px;
+        }
+
+        .physical-pieces > span {
+            position: absolute;
+            display: block;
+            border: 4px solid #5f3219;
+            background: linear-gradient(145deg, #f9ca76 0 38%, #dc7d32 39% 72%, #a44720 73%);
+            box-shadow: inset 5px 5px 0 rgba(255, 239, 183, .35), 0 6px 0 rgba(95, 50, 25, 0.22);
+        }
+
+        .physical-pieces > span:nth-child(1) { top: 12px; left: 5%; width: 72px; height: 48px; border-radius: 48% 32% 44% 26%; transform: rotate(-13deg); }
+        .physical-pieces > span:nth-child(2) { top: 2px; left: 38%; width: 54px; height: 70px; border-radius: 28% 52% 36% 48%; transform: rotate(9deg); }
+        .physical-pieces > span:nth-child(3) { top: 14px; right: 5%; width: 83px; height: 56px; clip-path: polygon(12% 7%, 88% 0, 100% 66%, 72% 100%, 8% 86%, 0 34%); transform: rotate(12deg); }
+        .physical-pieces > span:nth-child(4) { top: 82px; left: 13%; width: 47px; height: 62px; clip-path: polygon(28% 0, 100% 16%, 84% 84%, 20% 100%, 0 38%); transform: rotate(8deg); }
+        .physical-pieces > span:nth-child(5) { top: 78px; left: 42%; width: 86px; height: 52px; border-radius: 22% 48% 28% 44%; transform: rotate(-8deg); }
+        .physical-pieces > span:nth-child(6) { top: 83px; right: 7%; width: 52px; height: 43px; clip-path: polygon(18% 0, 100% 21%, 82% 100%, 0 76%); transform: rotate(17deg); }
+
+        .physical-pieces > strong {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .physical-pieces.reveal-pieces > span { animation: piece-pop .42s backwards; }
+        .physical-pieces.reveal-pieces > span:nth-child(2) { animation-delay: .05s; }
+        .physical-pieces.reveal-pieces > span:nth-child(3) { animation-delay: .1s; }
+        .physical-pieces.reveal-pieces > span:nth-child(4) { animation-delay: .15s; }
+        .physical-pieces.reveal-pieces > span:nth-child(5) { animation-delay: .2s; }
+        .physical-pieces.reveal-pieces > span:nth-child(6) { animation-delay: .25s; }
+
+        .tool-tray {
+            display: flex;
+            justify-content: center;
+            min-height: 92px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            background: var(--bg-soft);
+        }
+
+        .enzyme-tool {
+            display: flex;
+            width: min(230px, 100%);
+            min-height: 72px;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border: 3px solid #164e63;
+            border-radius: 16px;
+            background: #22d3ee;
+            box-shadow: 0 6px 0 #164e63;
+            color: #082f49;
+            font-weight: 900;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .enzyme-tool svg { width: 68px; height: 48px; flex: 0 0 auto; }
+        .enzyme-tool:hover { transform: translateY(-2px); }
+
+        .enzyme-tool.is-selected {
+            outline: 4px solid #facc15;
+            outline-offset: 3px;
+            background: #67e8f9;
+        }
+
+        .enzyme-tool.is-cutting { animation: scissors-cut .86s ease; }
+
+        .chemical-stage {
+            min-height: 176px;
+            border-style: dashed;
+        }
+
+        .chemical-stage.is-drag-over {
+            border-color: #22d3ee;
+            background-color: color-mix(in srgb, #22d3ee 15%, var(--bg-soft));
+            box-shadow: inset 0 0 0 3px color-mix(in srgb, #22d3ee 30%, transparent);
+        }
+
+        .protein-model,
+        .amino-products { display: grid; place-items: center; gap: 14px; }
+
+        .protein-model > strong,
+        .molecule-product strong { color: var(--text); text-align: center; }
+
+        .protein-chain {
+            display: flex;
+            align-items: center;
+            filter: drop-shadow(0 8px 8px rgba(0,0,0,.22));
+        }
+
+        .protein-chain span {
+            display: grid;
+            width: 64px;
+            height: 64px;
+            place-items: center;
+            margin-left: -8px;
+            border: 5px solid #24152c;
+            border-radius: 46% 54% 58% 42%;
+            background: repeating-linear-gradient(45deg, rgba(255,255,255,.3) 0 6px, transparent 6px 14px), #8b5cf6;
+            color: #fff;
+            font-weight: 900;
+            text-shadow: 0 2px 2px #24152c;
+        }
+
+        .protein-chain span:first-child { margin-left: 0; }
+        .chemical-stage.is-animating .protein-model { animation: molecule-change .8s ease forwards; }
+
+        .amino-products {
+            width: 100%;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .molecule-product {
+            display: grid;
+            min-width: 0;
+            place-items: center;
+            gap: 8px;
+            font-size: .73rem;
+        }
+
+        .molecule-shape {
+            display: block;
+            width: 58px;
+            height: 58px;
+            border: 5px solid #17203f;
+            box-shadow: 0 6px 0 rgba(23,32,63,.28);
+        }
+
+        .circle-shape {
+            border-radius: 50%;
+            background: repeating-radial-gradient(circle, #fef3c7 0 5px, #f59e0b 6px 12px);
+        }
+
+        .triangle-shape {
+            border: 0;
+            clip-path: polygon(50% 0, 100% 100%, 0 100%);
+            background: repeating-linear-gradient(90deg, #86efac 0 8px, #15803d 8px 15px);
+            filter: drop-shadow(0 4px 0 #17203f);
+        }
+
+        .diamond-shape {
+            width: 48px;
+            height: 48px;
+            transform: rotate(45deg);
+            background: repeating-linear-gradient(135deg, #f0abfc 0 7px, #a21caf 7px 14px);
+        }
+
+        .hexagon-shape {
+            border: 0;
+            clip-path: polygon(25% 6%,75% 6%,100% 50%,75% 94%,25% 94%,0 50%);
+            background: repeating-linear-gradient(0deg, #93c5fd 0 7px, #1d4ed8 7px 14px);
+            filter: drop-shadow(0 4px 0 #17203f);
+        }
+
+        .amino-products.reveal-products .molecule-product { animation: product-pop .48s backwards; }
+        .amino-products.reveal-products .molecule-product:nth-child(2) { animation-delay: .08s; }
+        .amino-products.reveal-products .molecule-product:nth-child(3) { animation-delay: .16s; }
+        .amino-products.reveal-products .molecule-product:nth-child(4) { animation-delay: .24s; }
+
+        .model-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .action-btn { min-width: 152px; min-height: 48px; }
+        .action-btn:disabled { cursor: not-allowed; opacity: .55; transform: none; }
+
+        #crushBtn {
+            width: auto;
+            min-width: 0;
+            padding-inline: 20px;
+        }
+
+        .model-support {
+            display: grid;
+            gap: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+        }
+
+        .text-alternative summary { cursor: pointer; color: var(--text); font-weight: 900; }
+
+        .text-alternative p,
+        .model-note {
+            margin: 10px 0 0;
+            color: var(--text-soft);
+            line-height: 1.55;
+        }
+
+        .model-note { padding-top: 12px; border-top: 1px solid var(--border); }
+
+        .mastery-section,
+        .completion-panel {
+            scroll-margin-top: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+        }
+
+        .mastery-count {
+            flex: 0 0 auto;
+            padding: 10px 14px;
+            border: 2px solid var(--accent);
+            border-radius: 999px;
+            color: var(--text);
+            font-size: .9rem;
+        }
+
+        #masteryForm {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .check-card {
+            min-width: 0;
+            margin: 0;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+        }
+
+        .check-card.is-mastered {
+            border-color: var(--success-border);
+            background: color-mix(in srgb, var(--success-bg) 62%, var(--surface));
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--success) 22%, transparent);
+        }
+
+        .check-card legend {
+            width: 100%;
+            padding: 0 0 12px;
+            color: var(--text);
+            font-weight: 800;
+            line-height: 1.45;
+        }
+
+        .question-prompt-inside {
+            margin: 0 0 12px;
+            color: var(--text);
+            font-weight: 800;
+            line-height: 1.45;
+        }
+
+        .check-number {
+            display: inline-grid;
+            width: 30px;
+            height: 30px;
+            margin-right: 6px;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #082f49;
+        }
+
+        .choice-card {
+            min-width: 0;
+            display: flex;
+            min-height: 48px;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-2);
+            color: var(--text);
+            cursor: pointer;
+            overflow-wrap: anywhere;
+        }
+
+        .choice-card:hover,
+        .choice-card:has(input:focus-visible) { border-color: var(--accent); }
+
+        .choice-card:has(input:checked) {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 14%, var(--surface-2));
+        }
+
+        .choice-card input {
+            width: 20px;
+            height: 20px;
+            flex: 0 0 auto;
+            accent-color: var(--accent);
+        }
+
+        .choice-card > span { min-width: 0; }
+
+        .choice-card:has(input:disabled) { cursor: default; opacity: .82; }
+        .choice-card.is-correct {
+            border-color: var(--success-border);
+            background: var(--success-bg);
+            opacity: 1;
+        }
+        .choice-card.is-incorrect {
+            border-color: var(--warning-border);
+            background: var(--warning-bg);
+        }
+        .choice-card.is-correct::after,
+        .choice-card.is-incorrect::after {
+            flex: 0 0 auto;
+            margin-left: auto;
+            font-size: .78rem;
+            font-weight: 900;
+        }
+        .choice-card.is-correct::after { content: "\2713  Correct"; color: var(--success-ink); }
+        .choice-card.is-incorrect::after { content: "Review"; color: var(--warning-ink); }
+        .wide-check { grid-column: 1 / -1; }
+
+        .check-feedback {
+            min-height: 0;
+            margin: 12px 0 0;
+            color: var(--text-soft);
+            line-height: 1.5;
+        }
+
+        .check-feedback.correct,
+        .check-feedback.incorrect {
+            padding: 11px 13px;
+            border-radius: 12px;
+            color: var(--text);
+            font-weight: 700;
+        }
+        .check-feedback.correct { border: 2px solid var(--success-border); background: var(--success-bg); }
+        .check-feedback.incorrect { border: 1px solid var(--warning-border); border-left-width: 5px; background: var(--warning-bg); }
+
+        .mastery-actions {
+            display: flex;
+            grid-column: 1 / -1;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .form-alert { margin: 0; color: var(--warning); font-weight: 700; }
+
+        .completion-panel {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .badge-container {
+            width: min(100%, 540px);
+            margin: 18px auto;
+            display: grid;
+            place-items: center;
+            gap: 8px;
+            padding: 20px 28px;
+            border: 2px solid var(--success-border);
+            border-radius: var(--radius-xl);
+            background: var(--success-bg);
+            box-shadow: 0 0 24px color-mix(in srgb, var(--success) 18%, transparent);
+        }
+
+        .badge-icon { font-size: 3rem; line-height: 1; }
+        .badge-title { color: var(--success-ink); font-size: 1.3rem; font-weight: 900; }
+        .badge-container p { margin: 0; }
+
+        .recap-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .recap-grid div {
+            display: grid;
+            gap: 6px;
+            padding: 14px;
+            border: 2px solid var(--success-border);
+            border-radius: 14px;
+            background: var(--success-bg);
+            color: var(--text-soft);
+        }
+
+        .recap-grid strong { color: var(--text); }
+        .recap-grid strong::before { content: "\2713  "; color: var(--success-ink); }
+
+        .activity-stack {
+            display: grid;
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .completion-page { display: grid; }
+        .completion-page[hidden] { display: none !important; }
+
+        .step-panel {
+            display: grid;
+            gap: 18px;
+            padding: clamp(16px, 3vw, 24px);
+            border: 1px solid var(--border);
+            border-top: 5px solid var(--accent);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 74%, var(--surface));
+            overflow-wrap: anywhere;
+        }
+
+        .model-column {
+            min-width: 0;
+            display: grid;
+            gap: 14px;
+        }
+
+        .model-column .model-actions { margin-top: 0; }
+
+        .step-panel[hidden] { display: none !important; }
+        .step-panel.physical-card { border-top-color: #f59e0b; }
+        .step-panel.chemical-card { border-top-color: #22d3ee; }
+
+        .step-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .step-heading h3 { margin: 0 0 8px; color: var(--text); font-size: clamp(1.25rem, 2vw, 1.55rem); }
+        .step-heading p { margin: 0; color: var(--text-soft); line-height: 1.5; }
+
+        .step-chip {
+            flex: 0 0 auto;
+            padding: 8px 12px;
+            border: 2px solid var(--accent);
+            border-radius: 999px;
+            color: var(--text);
+            font-size: .84rem;
+            font-weight: 800;
+        }
+
+        .inline-question {
+            display: grid;
+            gap: 14px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        .inline-question[hidden] { display: none !important; }
+        .inline-question .check-card { width: 100%; }
+
+        .question-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .question-actions .primary-btn,
+        .question-actions .secondary-btn { min-height: 48px; }
+
+        .results-list { display: grid; gap: 12px; }
+
+        .result-card {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+            overflow-wrap: anywhere;
+        }
+
+        .result-card.is-correct { border: 2px solid var(--success-border); background: var(--success-bg); }
+        .result-card.is-incorrect { border-color: var(--warning-border); background: var(--warning-bg); }
+
+        .result-card h4 { margin: 0 0 8px; color: var(--text); }
+        .result-card p { margin: 0; color: var(--text-soft); }
+
+        .result-list { margin: 10px 0 0; padding-left: 20px; }
+        .result-list li { margin: 4px 0; color: var(--text-soft); }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            color: var(--text);
+            font-size: .85rem;
+            font-weight: 800;
+        }
+
+        .status-pill.correct { color: var(--success-ink); background: color-mix(in srgb, var(--success) 18%, var(--surface)); }
+        .status-pill.wrong { color: var(--warning-ink); background: color-mix(in srgb, var(--warning) 18%, var(--surface)); }
+
+        .gated { opacity: .42; }
+        .gated:not(:disabled) { opacity: 1; }
+
+        @media (min-width: 820px) {
+            .step-panel.has-question {
+                grid-template-columns: minmax(0, 1.08fr) minmax(330px, .92fr);
+                align-items: start;
+            }
+            .step-panel.has-question > .step-heading { grid-column: 1 / -1; }
+            .step-panel.has-question > .model-column { grid-column: 1; grid-row: 2; }
+            .step-panel.has-question > .inline-question {
+                grid-column: 2;
+                grid-row: 2;
+                padding-top: 0;
+                border-top: 0;
+            }
+            .step-panel.has-question .model-stage { min-height: 225px; }
+            .chemical-card.has-question .tool-tray { display: none; }
+        }
+
+        .scissors-svg { overflow: visible; }
+        .scissors-svg .blade { fill: #f8fafc; stroke: #0f172a; stroke-width: 4; stroke-linejoin: round; }
+        .scissors-svg .handle { fill: #fb7185; stroke: #0f172a; stroke-width: 5; }
+        .scissors-svg .handle-hole { fill: #fff7ed; stroke: #0f172a; stroke-width: 3; }
+        .scissors-svg .pivot { fill: #facc15; stroke: #0f172a; stroke-width: 4; }
+
+        @keyframes hammer-strike {
+            0%,100% { transform: translateX(-50%) rotate(-18deg); }
+            38% { transform: translateX(-50%) translateY(72px) rotate(17deg); }
+            55% { transform: translateX(-50%) translateY(60px) rotate(10deg); }
+        }
+
+        @keyframes food-rumble {
+            0%,100% { transform: translateX(0); }
+            45% { transform: translateX(-7px) rotate(-1deg); }
+            55% { transform: translateX(7px) rotate(1deg); }
+        }
+
+        @keyframes piece-pop {
+            from { opacity: 0; transform: translateY(-18px) scale(.72); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes scissors-cut {
+            0%,100% { transform: translateY(0) rotate(0); }
+            35% { transform: translateY(54px) rotate(-8deg); }
+            60% { transform: translateY(44px) rotate(8deg); }
+        }
+
+        @keyframes molecule-change {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(.68); }
+        }
+
+        @keyframes product-pop {
+            from { opacity: 0; transform: translateY(18px) scale(.62); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @media (max-width: 860px) {
+            .compare-grid,
+            #masteryForm { grid-template-columns: 1fr; }
+            .wide-check { grid-column: auto; }
+            .lab-heading,
+            .mastery-heading-row { flex-direction: column; }
+            .observation-progress { width: 100%; }
+        }
+
+        @media (max-width: 560px) {
+            .digestion-card,
+            .mastery-section,
+            .completion-panel { padding: 14px; }
+            .model-stage { min-height: 220px; }
+            .protein-chain span { width: 52px; height: 52px; }
+            .amino-products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 8px; }
+            .mastery-actions,
+            .recap-grid { display: grid; grid-template-columns: 1fr; }
+            .mastery-actions .primary-btn { width: 100%; }
+            .step-heading { flex-direction: column; }
+            .question-actions { display: grid; grid-template-columns: 1fr; }
+            .question-actions button { width: 100%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .enzyme-lab *,
+            .enzyme-lab *::before,
+            .enzyme-lab *::after {
+                scroll-behavior: auto !important;
+                animation-duration: .001ms !important;
+                animation-delay: 0ms !important;
+                transition-duration: .001ms !important;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">BIO</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 Enzyme Action Animation</h1>
+                    <p id="brandSubtitle">Form 2 Biology | Physical and chemical digestion</p>
+                </div>
+            </div>
+
+            <div class="controls">
+<button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="control-btn" id="reviewBtn" aria-label="Open Review History"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h5"/></svg> Review History</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Form 2 Biology Lab</div>
+                    <h2 id="homeTitle">Enzyme Action Animation</h2>
+                    <p id="homeDescription">
+                        Work through one digestion model at a time. Observe each change, answer its question, then finish with one final challenge.
+                    </p>
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon" aria-hidden="true">🔨</div>
+                            <h3>Model physical digestion</h3>
+                            <p>Crush a food model and observe what changes.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon" aria-hidden="true">✂</div>
+                            <h3>Explore enzyme action</h3>
+                            <p>Apply protease and compare the new products.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon" aria-hidden="true">✓</div>
+                            <h3>Check your evidence</h3>
+                            <p>Answer each question and review verified results.</p>
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Begin activity</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <div class="enzyme-lab" id="enzymeLab">
+                        <header class="lab-heading" id="labHeading">
+                            <div>
+                                <p class="section-kicker">DIGESTION LAB</p>
+                                <h2 id="labTitle" tabindex="-1">What changes during digestion?</h2>
+                                <p>Work through one model and one question at a time.</p>
+                            </div>
+                            <div class="observation-progress" aria-labelledby="observationProgressLabel">
+                                <div class="progress-copy">
+                                    <span id="observationProgressLabel">Activity progress</span>
+                                    <strong id="observationProgressText">Step 1 of 3</strong>
+                                </div>
+                                <div class="mini-progress" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" id="observationProgress">
+                                    <span id="observationProgressFill"></span>
+                                </div>
+                            </div>
+                        </header>
+
+                        <div class="activity-stack">
+                            <section class="step-panel physical-card" id="physicalPanel" aria-labelledby="physicalHeading">
+                                <div class="step-heading">
+                                    <div>
+                                        <div class="card-label"><span aria-hidden="true">1</span> TEETH MODEL</div>
+                                        <h3 id="physicalHeading" tabindex="-1">Use the hammer to crush the food</h3>
+                                        <p>Drag the hammer onto the food, or choose <strong>Crush</strong>. The hammer represents teeth breaking food into smaller pieces.</p>
+                                    </div>
+                                    <span class="step-chip">Step 1 of 3</span>
+                                </div>
+
+                                <div class="model-column">
+                                <div class="model-stage physical-stage" id="physicalStage" aria-label="One cooked chicken leg ready to be crushed. Drop the hammer here.">
+                                    <button class="hammer" id="hammerTool" type="button" draggable="true" aria-label="Hammer tool. Drag it onto the chicken, or use the Crush button.">
+                                        <svg viewBox="0 0 150 150" aria-hidden="true">
+                                            <rect x="68" y="48" width="16" height="88" rx="8" fill="#f2b35d" stroke="#24152c" stroke-width="5"></rect>
+                                            <rect x="30" y="21" width="92" height="42" rx="10" fill="#d8e2ec" stroke="#24152c" stroke-width="6"></rect>
+                                            <path d="M39 31h74" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".72"></path>
+                                        </svg>
+                                    </button>
+                                    <div class="food-block large-food" id="largeFood" role="img" aria-label="One cooked golden-brown chicken leg">
+                                        <svg class="chicken-leg" viewBox="0 0 310 160" aria-hidden="true">
+                                            <path d="M214 76L267 95" fill="none" stroke="#7a4b2a" stroke-width="27" stroke-linecap="round"></path>
+                                            <path d="M214 76L267 95" fill="none" stroke="#fff0c2" stroke-width="19" stroke-linecap="round"></path>
+                                            <circle cx="278" cy="92" r="14" fill="#fff0c2" stroke="#7a4b2a" stroke-width="5"></circle>
+                                            <circle cx="270" cy="105" r="13" fill="#fff0c2" stroke="#7a4b2a" stroke-width="5"></circle>
+                                            <path d="M66 31C31 43 16 79 31 111C45 140 84 150 121 130C149 115 164 91 184 82C201 74 213 75 226 81L240 59C224 49 211 44 194 45C171 46 153 58 137 48C117 34 94 22 66 31Z" fill="#d9792f" stroke="#5f3219" stroke-width="7" stroke-linejoin="round"></path>
+                                            <path d="M50 58C67 40 101 43 124 59" fill="none" stroke="#f9ca76" stroke-width="12" stroke-linecap="round" opacity=".8"></path>
+                                            <circle cx="84" cy="91" r="10" fill="#a44720" opacity=".65"></circle>
+                                        </svg>
+                                    </div>
+                                    <div class="physical-pieces" id="physicalPieces" hidden aria-label="Six irregular pieces of cooked chicken in different shapes and sizes">
+                                        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+                                        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+                                        <strong>Chicken pieces</strong>
+                                    </div>
+                                </div>
+
+                                <div class="model-actions">
+                                    <button class="primary-btn action-btn" id="crushBtn" type="button">Crush</button>
+                                    <button class="secondary-btn action-btn" id="replayPhysicalBtn" type="button" hidden>Replay crushing</button>
+                                </div>
+                                </div>
+                                <form class="inline-question" id="hammerQuestion" novalidate hidden>
+                                    <fieldset class="check-card is-current" id="hammerCheckCard">
+                                        <legend class="sr-only">The hammer broke the chicken into smaller pieces. Is this physical or chemical digestion?</legend>
+                                        <p class="question-prompt-inside" aria-hidden="true">The hammer broke the chicken into smaller pieces. Is this physical or chemical digestion?</p>
+                                        <label class="choice-card"><input type="radio" name="hammer-check" value="physical"><span>Physical digestion</span></label>
+                                        <label class="choice-card"><input type="radio" name="hammer-check" value="chemical"><span>Chemical digestion</span></label>
+                                        <p class="check-feedback" id="hammerCheckFeedback" role="status"></p>
+                                    </fieldset>
+                                    <div class="question-actions">
+                                        <p class="form-alert" id="hammerAlert" role="alert"></p>
+                                        <button class="primary-btn" id="checkHammerBtn" type="submit">Check answer</button>
+                                        <button class="primary-btn" id="nextToEnzymeBtn" type="button" hidden>Next: Protease model</button>
+                                    </div>
+                                </form>
+
+                            </section>
+
+                            <section class="step-panel chemical-card" id="chemicalPanel" aria-labelledby="chemicalHeading" hidden>
+                                <div class="step-heading">
+                                    <div>
+                                        <div class="card-label"><span aria-hidden="true">2</span> ENZYME MODEL</div>
+                                        <h3 id="chemicalHeading" tabindex="-1">Use protease on the protein</h3>
+                                        <p>Drag <strong>Protease Scissors</strong> onto the protein, or choose <strong>Apply enzyme</strong>. Protease catalyzes a chemical reaction that breaks protein into smaller substances.</p>
+                                    </div>
+                                    <span class="step-chip">Step 2 of 3</span>
+                                </div>
+
+                                <div class="model-column">
+                                <div class="tool-tray" aria-label="Enzyme tool tray">
+                                    <button class="enzyme-tool" id="enzymeTool" type="button" draggable="true" aria-pressed="false">
+                                        <svg class="scissors-svg" viewBox="0 0 132 82" aria-hidden="true">
+                                            <path class="blade" d="M44 36L116 7L58 43Z"></path>
+                                            <path class="blade" d="M44 47L116 75L58 40Z"></path>
+                                            <circle class="handle" cx="27" cy="23" r="18"></circle>
+                                            <circle class="handle-hole" cx="27" cy="23" r="9"></circle>
+                                            <circle class="handle" cx="27" cy="59" r="18"></circle>
+                                            <circle class="handle-hole" cx="27" cy="59" r="9"></circle>
+                                            <circle class="pivot" cx="52" cy="41" r="7"></circle>
+                                        </svg>
+                                        <span>Protease Scissors</span>
+                                    </button>
+                                </div>
+
+                                <div class="model-stage chemical-stage" id="enzymeDropZone" aria-label="Large protein molecule target for Protease Scissors">
+                                    <div class="protein-model" id="proteinModel" role="img" aria-label="One large linked purple protein molecule representation">
+                                        <div class="protein-chain" aria-hidden="true"><span>PR</span><span>OT</span><span>EI</span><span>N</span></div>
+                                        <strong>Large protein molecule</strong>
+                                    </div>
+                                    <div class="amino-products" id="aminoProducts" hidden role="img" aria-label="Four smaller amino-acid representations with different shapes, patterns, colours, and labels">
+                                        <div class="molecule-product"><span class="molecule-shape circle-shape" aria-hidden="true"></span><strong>Amino acid A</strong></div>
+                                        <div class="molecule-product"><span class="molecule-shape triangle-shape" aria-hidden="true"></span><strong>Amino acid B</strong></div>
+                                        <div class="molecule-product"><span class="molecule-shape diamond-shape" aria-hidden="true"></span><strong>Amino acid C</strong></div>
+                                        <div class="molecule-product"><span class="molecule-shape hexagon-shape" aria-hidden="true"></span><strong>Amino acid D</strong></div>
+                                    </div>
+                                </div>
+
+                                <div class="model-actions">
+                                    <button class="primary-btn action-btn" id="applyEnzymeBtn" type="button">Apply enzyme</button>
+                                    <button class="secondary-btn action-btn" id="replayChemicalBtn" type="button" hidden>Replay enzyme action</button>
+                                </div>
+                                </div>
+                                <form class="inline-question" id="enzymeQuestion" novalidate hidden>
+                                    <fieldset class="check-card" id="enzymeCheckCard">
+                                        <legend class="sr-only">The protein changed into amino-acid representations. Is this physical or chemical digestion?</legend>
+                                        <p class="question-prompt-inside" aria-hidden="true">The protein changed into amino-acid representations. Is this physical or chemical digestion?</p>
+                                        <label class="choice-card"><input type="radio" name="enzyme-check" value="physical"><span>Physical digestion</span></label>
+                                        <label class="choice-card"><input type="radio" name="enzyme-check" value="chemical"><span>Chemical digestion</span></label>
+                                        <p class="check-feedback" id="enzymeCheckFeedback" role="status"></p>
+                                    </fieldset>
+                                    <div class="question-actions">
+                                        <p class="form-alert" id="enzymeAlert" role="alert"></p>
+                                        <button class="primary-btn" id="checkEnzymeBtn" type="submit">Check answer</button>
+                                        <button class="primary-btn" id="nextToFinalBtn" type="button" hidden>Next: Final question</button>
+                                    </div>
+                                </form>
+
+                            </section>
+
+                            <section class="step-panel" id="finalPanel" aria-labelledby="finalHeading" hidden>
+                                <div class="step-heading">
+                                    <div>
+                                        <div class="card-label"><span aria-hidden="true">3</span> FINAL CHALLENGE</div>
+                                        <h3 id="finalHeading" tabindex="-1">Final challenge</h3>
+                                        <p>Use what you observed in both models to choose the best answer.</p>
+                                    </div>
+                                    <span class="step-chip">Step 3 of 3</span>
+                                </div>
+
+                                <form class="inline-question" id="finalQuestion" novalidate>
+                                    <fieldset class="check-card wide-check" id="roleCheckCard">
+                                        <legend class="sr-only">What do the Protease Scissors represent enzymes doing?</legend>
+                                        <p class="question-prompt-inside" aria-hidden="true">What do the Protease Scissors represent enzymes doing?</p>
+                                        <label class="choice-card"><input type="radio" name="enzyme-role-check" value="break-down"><span>Breaking large insoluble food substances into smaller soluble substances by catalyzing chemical reactions</span></label>
+                                        <label class="choice-card"><input type="radio" name="enzyme-role-check" value="crush-only"><span>Only crushing food into smaller pieces of the same substance</span></label>
+                                        <label class="choice-card"><input type="radio" name="enzyme-role-check" value="absorb-directly"><span>Absorbing large food molecules directly into the body</span></label>
+                                        <p class="check-feedback" id="roleCheckFeedback" role="status"></p>
+                                    </fieldset>
+                                    <div class="question-actions">
+                                        <p class="form-alert" id="finalAlert" role="alert"></p>
+                                        <button class="primary-btn" id="checkFinalBtn" type="submit">Check final answer</button>
+                                        <button class="primary-btn" id="finishActivityBtn" type="button" hidden>Finish activity</button>
+                                    </div>
+                                </form>
+
+                            </section>
+
+                            <section class="completion-page" id="completionPage" aria-labelledby="completionHeading" hidden>
+                                <section class="completion-panel" id="completionPanel">
+                                    <p class="section-kicker">ACTIVITY COMPLETE</p>
+                                    <h3 id="completionHeading" tabindex="-1">You identified both types of digestion</h3>
+                                    <p>Physical digestion makes food pieces smaller without forming a new substance. Chemical digestion uses enzymes to change large insoluble food molecules into smaller soluble substances.</p>
+                                    <div class="badge-container">
+                                        <div class="badge-icon" aria-hidden="true">🎓</div>
+                                        <div class="badge-title">Digestion Investigator</div>
+                                        <p>All three evidence questions are verified.</p>
+                                    </div>
+                                    <div class="recap-grid">
+                                        <div><strong>Teeth: physical digestion</strong><span>Teeth break food into smaller pieces without forming a new substance.</span></div>
+                                        <div><strong>Protease enzyme: chemical digestion</strong><span>Protease breaks proteins into amino acids, forming smaller soluble substances.</span></div>
+                                    </div>
+                                    <button class="primary-btn" id="playAgainBtn" type="button">Play again</button>
+                                </section>
+                            </section>
+
+                        <div class="sr-only" id="customLiveRegion" aria-live="polite" aria-atomic="true"></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Form 2 Biology | Enzyme Action Animation | Offline learning simulation
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions"><svg class="close-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 18 18M18 6 6 18"/></svg></button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation"><svg class="close-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 18 18M18 6 6 18"/></svg></button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p id="resetConfirmMessage">This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="drawer" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewHeading">
+        <aside class="drawer-panel">
+            <div class="drawer-head">
+                <div>
+                    <h3 id="reviewHeading">Review History</h3>
+                    <p>Your recorded digestion evidence appears here.</p>
+                </div>
+                <button class="close-btn" id="closeReviewBtn" aria-label="Close Review History"><svg class="close-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 18 18M18 6 6 18"/></svg></button>
+            </div>
+            <div class="results-list" id="reviewBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="closeReviewFooterBtn" type="button">Close</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "SCI-BIO-F2-T1-U1-SEC1-SIM1.3A2",
+            title: "Enzyme Action Animation",
+            subtitle: "Form 2 Biology | Physical and chemical digestion",
+            badgeText: "BIO",
+            homeEyebrow: "Form 2 Biology Lab",
+            homeDescription:
+                "Work through one digestion model at a time. Observe each change, answer its question, then finish with one final challenge.",
+            instructions: [
+                "Begin with the hammer model. Drag the hammer onto the food, or choose Crush; answer the question, then select Next.",
+                "Next, drag Protease Scissors onto the protein or choose Apply enzyme, then answer its question.",
+                "Finish with the final multiple-choice question.",
+                "For keyboard-only use, press Tab to move, Space or Enter to activate buttons, and arrow keys to move within an answer group.",
+                "Use Review at any time to see answers recorded so far.",
+                "Use Reset when you want to clear all activity progress. This file works completely offline."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsHeading: document.getElementById("instructionsHeading"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            resetConfirmHeading: document.getElementById("resetConfirmHeading"),
+            resetConfirmMessage: document.getElementById("resetConfirmMessage"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        let modalReturnFocus = null;
+        let resetDestination = "home";
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            const helpSeen = loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+            if (!helpSeen) window.setTimeout(openInstructionsModal, 80);
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+                return true;
+            }
+            return false;
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = "Form 2 " + SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.helpBtn.addEventListener("click", () => {
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", () => openResetConfirmModal("home"));
+            dom.closeResetConfirmBtn.addEventListener("click", () => closeResetConfirmModal());
+            dom.cancelResetBtn.addEventListener("click", () => closeResetConfirmModal());
+            dom.confirmResetBtn.addEventListener("click", () => {
+                const destination = resetDestination;
+                closeResetConfirmModal();
+                devReset();
+                if (destination === "activity") {
+                    simState.instructionsSeen = true;
+                    saveSimState();
+                    showScreen("sim");
+                    renderSimState();
+                    focusElement(simDom.physicalHeading);
+                } else {
+                    try { sessionStorage.removeItem(SIM_CONFIG.simId + "-help-seen"); } catch (err) { /* storage unavailable */ }
+                    dom.helpBtn.classList.add("pulse-help");
+                    showScreen("home");
+                    window.setTimeout(openInstructionsModal, 80);
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            modalReturnFocus = document.activeElement;
+            dom.helpBtn.classList.remove("pulse-help");
+            storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+            window.setTimeout(() => dom.closeInstructionsBtn.focus(), 20);
+        }
+
+        function closeInstructionsModal() {
+            if (!dom.instructionsModal.classList.contains("show")) return;
+            dom.instructionsModal.classList.remove("show");
+            restoreModalFocus();
+        }
+
+        function openResetConfirmModal(destination = "home") {
+            resetDestination = destination;
+            modalReturnFocus = document.activeElement;
+            const replaying = destination === "activity";
+            dom.resetConfirmHeading.textContent = replaying ? "Play again?" : "Reset simulation?";
+            dom.resetConfirmMessage.textContent = replaying
+                ? "This will clear your answers and restart the activity from the hammer model."
+                : "This will clear your current progress and return you to the home screen.";
+            dom.confirmResetBtn.textContent = replaying ? "Play again" : "Reset";
+            dom.resetConfirmModal.classList.add("show");
+            window.setTimeout(() => dom.cancelResetBtn.focus(), 20);
+        }
+
+        function closeResetConfirmModal() {
+            if (!dom.resetConfirmModal.classList.contains("show")) return;
+            dom.resetConfirmModal.classList.remove("show");
+            restoreModalFocus();
+        }
+
+        function restoreModalFocus() {
+            const fallback = state.currentScreen === "sim" ? document.getElementById("labTitle") : dom.startBtn;
+            const target = modalReturnFocus && !modalReturnFocus.closest("[hidden], .screen:not(.active)")
+                ? modalReturnFocus
+                : fallback;
+            modalReturnFocus = null;
+            if (target) window.setTimeout(() => target.focus(), 20);
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+                closeReviewModal();
+                return;
+            }
+            if (event.key !== "Tab") return;
+            const activeModal = [dom.instructionsModal, dom.resetConfirmModal, document.getElementById("reviewModal")]
+                .find((modal) => modal && modal.classList.contains("show"));
+            if (!activeModal) return;
+            const focusable = Array.from(activeModal.querySelectorAll("button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex='-1'])"));
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* --- HANDY UTILITIES (examples — uncomment what you need) --- */
+        // function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        // function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        // function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        // Example: const order = shuffle([1, 2, 3, 4]);  const dice = randInt(1, 6);
+        // Audio is intentionally omitted from this silent visual comparison.
+        // Storage: storageGet/storageSet are available for saving progress, keyed like `sim:${SIM_CONFIG.simId}:mydata`.
+
+        const SIM_STATE_KEY = "sim:SCI-BIO-F2-T1-U1-SEC1-SIM1.3A2:state";
+        const CHECK_DEFINITIONS = [
+            {
+                id: "hammer-check",
+                title: "Teeth model observation",
+                inputName: "hammer-check",
+                cardId: "hammerCheckCard",
+                feedbackId: "hammerCheckFeedback",
+                correct: "physical",
+                correctLabel: "Physical digestion",
+                choices: { physical: "Physical digestion", chemical: "Chemical digestion" },
+                correctText: "Correct. In this model, the hammer represents teeth breaking food into smaller pieces without forming a new substance.",
+                incorrect: {
+                    chemical: "Look again at the pieces. Their size changed, but they still represent the same substance. Choose the digestion type that changes size only."
+                }
+            },
+            {
+                id: "enzyme-check",
+                title: "Protease observation",
+                inputName: "enzyme-check",
+                cardId: "enzymeCheckCard",
+                feedbackId: "enzymeCheckFeedback",
+                correct: "chemical",
+                correctLabel: "Chemical digestion",
+                choices: { physical: "Physical digestion", chemical: "Chemical digestion" },
+                correctText: "Correct. Protease catalyzes a chemical reaction that forms different, smaller substances, so the model represents chemical digestion.",
+                incorrect: {
+                    physical: "Protease catalyzes a chemical reaction. The result is not simply smaller protein pieces: the labels and molecular representations change to amino acids, showing chemical digestion."
+                }
+            },
+            {
+                id: "enzyme-role-check",
+                title: "Final protease question",
+                inputName: "enzyme-role-check",
+                cardId: "roleCheckCard",
+                feedbackId: "roleCheckFeedback",
+                correct: "break-down",
+                correctLabel: "Breaking large insoluble food substances into smaller soluble substances by catalyzing chemical reactions",
+                choices: {
+                    "break-down": "Breaking large insoluble food substances into smaller soluble substances by catalyzing chemical reactions",
+                    "crush-only": "Only crushing food into smaller pieces of the same substance",
+                    "absorb-directly": "Absorbing large food molecules directly into the body"
+                },
+                correctText: "Correct. Proteases break proteins into amino acids by catalyzing chemical reactions, producing smaller soluble substances that can be absorbed.",
+                incorrect: {
+                    "crush-only": "Crushing alone is physical digestion. Proteases break large food molecules into smaller soluble substances by catalyzing chemical reactions.",
+                    "absorb-directly": "Enzymes do not absorb food. Proteases prepare molecules for absorption by catalyzing chemical reactions that break them into smaller soluble substances."
+                }
+            }
+        ];
+
+        const simDom = {
+            labHeading: document.getElementById("labHeading"),
+            labTitle: document.getElementById("labTitle"),
+            physicalPanel: document.getElementById("physicalPanel"),
+            physicalHeading: document.getElementById("physicalHeading"),
+            physicalStage: document.getElementById("physicalStage"),
+            hammerTool: document.getElementById("hammerTool"),
+            largeFood: document.getElementById("largeFood"),
+            physicalPieces: document.getElementById("physicalPieces"),
+            crushBtn: document.getElementById("crushBtn"),
+            replayPhysicalBtn: document.getElementById("replayPhysicalBtn"),
+            hammerQuestion: document.getElementById("hammerQuestion"),
+            hammerAlert: document.getElementById("hammerAlert"),
+            checkHammerBtn: document.getElementById("checkHammerBtn"),
+            nextToEnzymeBtn: document.getElementById("nextToEnzymeBtn"),
+            chemicalPanel: document.getElementById("chemicalPanel"),
+            chemicalHeading: document.getElementById("chemicalHeading"),
+            enzymeTool: document.getElementById("enzymeTool"),
+            enzymeDropZone: document.getElementById("enzymeDropZone"),
+            proteinModel: document.getElementById("proteinModel"),
+            aminoProducts: document.getElementById("aminoProducts"),
+            applyEnzymeBtn: document.getElementById("applyEnzymeBtn"),
+            replayChemicalBtn: document.getElementById("replayChemicalBtn"),
+            enzymeQuestion: document.getElementById("enzymeQuestion"),
+            enzymeAlert: document.getElementById("enzymeAlert"),
+            checkEnzymeBtn: document.getElementById("checkEnzymeBtn"),
+            nextToFinalBtn: document.getElementById("nextToFinalBtn"),
+            finalPanel: document.getElementById("finalPanel"),
+            finalHeading: document.getElementById("finalHeading"),
+            finalQuestion: document.getElementById("finalQuestion"),
+            finalAlert: document.getElementById("finalAlert"),
+            checkFinalBtn: document.getElementById("checkFinalBtn"),
+            finishActivityBtn: document.getElementById("finishActivityBtn"),
+            observationProgress: document.getElementById("observationProgress"),
+            observationProgressFill: document.getElementById("observationProgressFill"),
+            observationProgressText: document.getElementById("observationProgressText"),
+            completionPage: document.getElementById("completionPage"),
+            completionHeading: document.getElementById("completionHeading"),
+            playAgainBtn: document.getElementById("playAgainBtn"),
+            reviewBtn: document.getElementById("reviewBtn"),
+            reviewModal: document.getElementById("reviewModal"),
+            reviewBody: document.getElementById("reviewBody"),
+            closeReviewBtn: document.getElementById("closeReviewBtn"),
+            closeReviewFooterBtn: document.getElementById("closeReviewFooterBtn"),
+            customLiveRegion: document.getElementById("customLiveRegion")
+        };
+
+        let simState = createDefaultSimState();
+        let simEventsBound = false;
+        let physicalBusy = false;
+        let chemicalBusy = false;
+        let checkingBusy = false;
+        let physicalTimer = null;
+        let chemicalTimer = null;
+
+        function shuffledCopy(values) {
+            const shuffled = values.slice();
+            for (let index = shuffled.length - 1; index > 0; index -= 1) {
+                const swapIndex = Math.floor(Math.random() * (index + 1));
+                [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+            }
+            return shuffled;
+        }
+
+        function createChoiceOrders() {
+            return CHECK_DEFINITIONS.reduce((orders, check) => {
+                orders[check.id] = shuffledCopy(Object.keys(check.choices));
+                return orders;
+            }, {});
+        }
+
+        function createDefaultSimState() {
+            return {
+                currentStep: 1,
+                physicalObserved: false,
+                chemicalObserved: false,
+                selectedTool: false,
+                answers: {},
+                draftAnswers: {},
+                choiceOrders: createChoiceOrders(),
+                attempts: {
+                    "hammer-check": 0,
+                    "enzyme-check": 0,
+                    "enzyme-role-check": 0
+                },
+                mastered: {
+                    "hammer-check": false,
+                    "enzyme-check": false,
+                    "enzyme-role-check": false
+                },
+                completionShown: false,
+                instructionsSeen: false
+            };
+        }
+
+        function loadSimState() {
+            const clean = createDefaultSimState();
+            const raw = storageGet(SIM_STATE_KEY);
+            if (!raw) return clean;
+            try {
+                const saved = JSON.parse(raw);
+                if (!saved || typeof saved !== "object") return clean;
+                ["physicalObserved", "chemicalObserved", "selectedTool", "completionShown", "instructionsSeen"].forEach((key) => {
+                    clean[key] = saved[key] === true;
+                });
+                const savedStep = Number(saved.currentStep);
+                clean.currentStep = Number.isInteger(savedStep) ? Math.min(4, Math.max(1, savedStep)) : 1;
+                if (saved.answers && typeof saved.answers === "object") {
+                    CHECK_DEFINITIONS.forEach((check) => {
+                        if (typeof saved.answers[check.id] === "string") {
+                            clean.answers[check.id] = saved.answers[check.id];
+                            clean.draftAnswers[check.id] = saved.answers[check.id];
+                        }
+                    });
+                }
+                if (saved.draftAnswers && typeof saved.draftAnswers === "object") {
+                    CHECK_DEFINITIONS.forEach((check) => {
+                        if (typeof saved.draftAnswers[check.id] === "string") {
+                            clean.draftAnswers[check.id] = saved.draftAnswers[check.id];
+                        }
+                    });
+                }
+                if (saved.choiceOrders && typeof saved.choiceOrders === "object") {
+                    CHECK_DEFINITIONS.forEach((check) => {
+                        const allowed = Object.keys(check.choices);
+                        const order = saved.choiceOrders[check.id];
+                        const validOrder = Array.isArray(order)
+                            && order.length === allowed.length
+                            && new Set(order).size === allowed.length
+                            && order.every((choiceId) => allowed.includes(choiceId));
+                        if (validOrder) clean.choiceOrders[check.id] = order.slice();
+                    });
+                }
+                if (saved.attempts && typeof saved.attempts === "object") {
+                    CHECK_DEFINITIONS.forEach((check) => {
+                        const value = Number(saved.attempts[check.id]);
+                        clean.attempts[check.id] = Number.isInteger(value) && value >= 0 ? value : 0;
+                    });
+                }
+                if (saved.mastered && typeof saved.mastered === "object") {
+                    CHECK_DEFINITIONS.forEach((check) => {
+                        clean.mastered[check.id] = saved.mastered[check.id] === true;
+                    });
+                }
+                const allMastered = CHECK_DEFINITIONS.every((check) => clean.mastered[check.id]);
+                clean.completionShown = saved.completionShown === true && allMastered;
+                if (!clean.mastered["hammer-check"]) clean.currentStep = 1;
+                else if (!clean.mastered["enzyme-check"] && clean.currentStep > 2) clean.currentStep = 2;
+                else if (!clean.mastered["enzyme-role-check"] && clean.currentStep > 3) clean.currentStep = 3;
+                else if (clean.completionShown) clean.currentStep = 4;
+                else if (clean.currentStep === 4) clean.currentStep = 3;
+                return clean;
+            } catch (error) {
+                return clean;
+            }
+        }
+
+        function saveSimState() {
+            storageSet(SIM_STATE_KEY, JSON.stringify(simState));
+        }
+
+        function clearSavedSimState() {
+            try {
+                sessionStorage.removeItem(SIM_STATE_KEY);
+            } catch (error) {
+                storageSet(SIM_STATE_KEY, "");
+            }
+        }
+
+        function prefersReducedMotion() {
+            return Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+        }
+
+        function announceSim(message) {
+            simDom.customLiveRegion.textContent = "";
+            window.setTimeout(() => {
+                simDom.customLiveRegion.textContent = message;
+            }, 10);
+        }
+
+        function bindSimEvents() {
+            if (simEventsBound) return;
+            simEventsBound = true;
+
+            simDom.crushBtn.addEventListener("click", runPhysicalAnimation);
+            simDom.replayPhysicalBtn.addEventListener("click", runPhysicalAnimation);
+            simDom.hammerTool.addEventListener("dragstart", handleHammerDragStart);
+            simDom.hammerTool.addEventListener("dragend", handleHammerDragEnd);
+            simDom.largeFood.addEventListener("dragenter", handleHammerDragOver);
+            simDom.largeFood.addEventListener("dragover", handleHammerDragOver);
+            simDom.largeFood.addEventListener("dragleave", handleHammerDragLeave);
+            simDom.largeFood.addEventListener("drop", handleHammerDrop);
+            simDom.applyEnzymeBtn.addEventListener("click", runChemicalAnimation);
+            simDom.replayChemicalBtn.addEventListener("click", runChemicalAnimation);
+            simDom.enzymeTool.addEventListener("click", selectEnzymeTool);
+            simDom.enzymeTool.addEventListener("dragstart", handleEnzymeDragStart);
+            simDom.enzymeTool.addEventListener("dragend", handleEnzymeDragEnd);
+            simDom.enzymeDropZone.addEventListener("dragenter", handleEnzymeDragOver);
+            simDom.enzymeDropZone.addEventListener("dragover", handleEnzymeDragOver);
+            simDom.enzymeDropZone.addEventListener("dragleave", handleEnzymeDragLeave);
+            simDom.enzymeDropZone.addEventListener("drop", handleEnzymeDrop);
+            simDom.hammerQuestion.addEventListener("submit", (event) => checkOneAnswer(event, "hammer-check", simDom.hammerQuestion, simDom.hammerAlert));
+            simDom.enzymeQuestion.addEventListener("submit", (event) => checkOneAnswer(event, "enzyme-check", simDom.enzymeQuestion, simDom.enzymeAlert));
+            simDom.finalQuestion.addEventListener("submit", (event) => checkOneAnswer(event, "enzyme-role-check", simDom.finalQuestion, simDom.finalAlert));
+            simDom.nextToEnzymeBtn.addEventListener("click", () => goToStep(2));
+            simDom.nextToFinalBtn.addEventListener("click", () => goToStep(3));
+            simDom.finishActivityBtn.addEventListener("click", showCompletionPage);
+            simDom.playAgainBtn.addEventListener("click", () => openResetConfirmModal("activity"));
+            simDom.reviewBtn.addEventListener("click", openReviewModal);
+            simDom.closeReviewBtn.addEventListener("click", closeReviewModal);
+            simDom.closeReviewFooterBtn.addEventListener("click", closeReviewModal);
+            CHECK_DEFINITIONS.forEach((check) => {
+                document.querySelectorAll('input[name="' + check.inputName + '"]').forEach((input) => {
+                    input.addEventListener("change", () => {
+                        if (!input.checked || simState.mastered[check.id]) return;
+                        simState.draftAnswers[check.id] = input.value;
+                        document.querySelectorAll('input[name="' + check.inputName + '"]').forEach((candidate) => {
+                            candidate.closest(".choice-card").classList.remove("is-correct", "is-incorrect");
+                        });
+                        saveSimState();
+                    });
+                });
+            });
+        }
+
+        function handleHammerDragStart(event) {
+            if (physicalBusy || simState.physicalObserved) {
+                event.preventDefault();
+                return;
+            }
+            if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", "digestion-hammer");
+            }
+            announceSim("Hammer picked up. Drop it on the chicken.");
+        }
+
+        function handleHammerDragEnd() {
+            simDom.largeFood.classList.remove("is-drag-over");
+        }
+
+        function handleHammerDragOver(event) {
+            if (physicalBusy || simState.physicalObserved) return;
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+            simDom.largeFood.classList.add("is-drag-over");
+        }
+
+        function handleHammerDragLeave(event) {
+            if (!simDom.largeFood.contains(event.relatedTarget)) {
+                simDom.largeFood.classList.remove("is-drag-over");
+            }
+        }
+
+        function handleHammerDrop(event) {
+            event.preventDefault();
+            simDom.largeFood.classList.remove("is-drag-over");
+            const payload = event.dataTransfer ? event.dataTransfer.getData("text/plain") : "digestion-hammer";
+            if (payload === "digestion-hammer" && !physicalBusy && !simState.physicalObserved) {
+                runPhysicalAnimation();
+            }
+        }
+
+        function selectEnzymeTool() {
+            if (chemicalBusy || simState.chemicalObserved) return;
+            simState.selectedTool = !simState.selectedTool;
+            saveSimState();
+            renderSimState();
+            announceSim(simState.selectedTool
+                ? "Protease Scissors selected. Move to Apply enzyme and press Enter or Space."
+                : "Protease Scissors deselected.");
+        }
+
+        function handleEnzymeDragStart(event) {
+            if (chemicalBusy || simState.chemicalObserved) {
+                event.preventDefault();
+                return;
+            }
+            simState.selectedTool = true;
+            saveSimState();
+            simDom.enzymeTool.classList.add("is-selected");
+            simDom.enzymeTool.setAttribute("aria-pressed", "true");
+            simDom.applyEnzymeBtn.disabled = false;
+            if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", "protease-scissors");
+            }
+            announceSim("Protease Scissors picked up. Drop them on the large protein molecule.");
+        }
+
+        function handleEnzymeDragEnd() {
+            simDom.enzymeDropZone.classList.remove("is-drag-over");
+        }
+
+        function handleEnzymeDragOver(event) {
+            if (chemicalBusy || simState.chemicalObserved) return;
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+            simDom.enzymeDropZone.classList.add("is-drag-over");
+        }
+
+        function handleEnzymeDragLeave(event) {
+            if (!simDom.enzymeDropZone.contains(event.relatedTarget)) {
+                simDom.enzymeDropZone.classList.remove("is-drag-over");
+            }
+        }
+
+        function handleEnzymeDrop(event) {
+            event.preventDefault();
+            simDom.enzymeDropZone.classList.remove("is-drag-over");
+            if (!chemicalBusy && !simState.chemicalObserved) {
+                simState.selectedTool = true;
+                runChemicalAnimation();
+            }
+        }
+
+        function runPhysicalAnimation() {
+            if (physicalBusy) return;
+            physicalBusy = true;
+            if (physicalTimer) window.clearTimeout(physicalTimer);
+
+            simDom.hammerTool.hidden = false;
+            simDom.physicalStage.classList.add("is-animating");
+            simDom.largeFood.hidden = false;
+            simDom.physicalPieces.hidden = true;
+            simDom.physicalPieces.classList.remove("reveal-pieces");
+            simDom.crushBtn.disabled = true;
+            simDom.replayPhysicalBtn.disabled = true;
+
+            const delay = prefersReducedMotion() ? 20 : 780;
+            physicalTimer = window.setTimeout(() => {
+                simDom.physicalStage.classList.remove("is-animating");
+                simState.physicalObserved = true;
+                physicalBusy = false;
+                physicalTimer = null;
+                saveSimState();
+                renderSimState(true);
+                announceSim("The chicken leg has broken into smaller irregular pieces. It is still chicken.");
+                if (!simState.mastered["hammer-check"]) focusElement(simDom.hammerQuestion, prefersReducedMotion() ? 40 : 760);
+            }, delay);
+        }
+
+        function runChemicalAnimation() {
+            if (chemicalBusy) return;
+            chemicalBusy = true;
+            if (chemicalTimer) window.clearTimeout(chemicalTimer);
+
+            simDom.enzymeTool.classList.add("is-cutting");
+            simDom.enzymeDropZone.classList.add("is-animating");
+            simDom.proteinModel.hidden = false;
+            simDom.aminoProducts.hidden = true;
+            simDom.aminoProducts.classList.remove("reveal-products");
+            simDom.applyEnzymeBtn.disabled = true;
+            simDom.replayChemicalBtn.disabled = true;
+
+            const delay = prefersReducedMotion() ? 20 : 900;
+            chemicalTimer = window.setTimeout(() => {
+                simDom.enzymeTool.classList.remove("is-cutting");
+                simDom.enzymeDropZone.classList.remove("is-animating");
+                simState.chemicalObserved = true;
+                simState.selectedTool = false;
+                chemicalBusy = false;
+                chemicalTimer = null;
+                saveSimState();
+                renderSimState(true);
+                announceSim("The protein model has changed into smaller amino-acid models.");
+                if (!simState.mastered["enzyme-check"]) focusElement(simDom.enzymeQuestion, prefersReducedMotion() ? 40 : 820);
+            }, delay);
+        }
+
+        function focusElement(element, delay = 60) {
+            window.setTimeout(() => {
+                element.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+                const focusTarget = element.matches("[tabindex], button, input, select, textarea, a[href]")
+                    ? element
+                    : element.querySelector(".question-prompt-inside, h3, input, button, legend");
+                if (focusTarget) {
+                    if (!focusTarget.hasAttribute("tabindex") && !focusTarget.matches("input, button")) focusTarget.setAttribute("tabindex", "-1");
+                    focusTarget.focus({ preventScroll: true });
+                }
+            }, delay);
+        }
+
+        function checkedValue(form, name) {
+            const inputs = form.elements[name];
+            if (!inputs) return null;
+            if (typeof inputs.length === "number") {
+                for (const input of inputs) {
+                    if (input.checked) return input.value;
+                }
+                return null;
+            }
+            return inputs.checked ? inputs.value : null;
+        }
+
+        function findCheck(checkId) {
+            return CHECK_DEFINITIONS.find((check) => check.id === checkId);
+        }
+
+        function checkOneAnswer(event, checkId, form, alertElement) {
+            event.preventDefault();
+            if (checkingBusy) return;
+            checkingBusy = true;
+            alertElement.textContent = "";
+            const check = findCheck(checkId);
+            const answer = checkedValue(form, check.inputName);
+            if (!answer) {
+                alertElement.textContent = "Select an answer before checking.";
+                announceSim("Select an answer before checking.");
+            } else {
+                simState.answers[check.id] = answer;
+                simState.draftAnswers[check.id] = answer;
+                simState.attempts[check.id] += 1;
+                if (answer === check.correct) simState.mastered[check.id] = true;
+                saveSimState();
+                renderSimState();
+                if (simState.mastered[check.id]) {
+                    announceSim(check.correctText + (checkId === "enzyme-role-check" ? " Select Finish activity when ready." : " Select Next when ready."));
+                    const nextAction = checkId === "hammer-check"
+                        ? simDom.nextToEnzymeBtn
+                        : checkId === "enzyme-check"
+                            ? simDom.nextToFinalBtn
+                            : simDom.finishActivityBtn;
+                    focusElement(nextAction);
+                } else {
+                    announceSim(feedbackFor(check).text + " Try again.");
+                }
+            }
+            checkingBusy = false;
+        }
+
+        function feedbackFor(check) {
+            if (!simState.attempts[check.id]) return { text: "", kind: "" };
+            if (simState.mastered[check.id]) return { text: check.correctText, kind: "correct" };
+            const selected = simState.answers[check.id];
+            return {
+                text: check.incorrect[selected] || "Review the model and choose a different answer.",
+                kind: "incorrect"
+            };
+        }
+
+        function renderChecks() {
+            CHECK_DEFINITIONS.forEach((check) => {
+                const mastered = simState.mastered[check.id] === true;
+                const card = document.getElementById(check.cardId);
+                const feedback = document.getElementById(check.feedbackId);
+                const inputList = Array.from(document.querySelectorAll('input[name="' + check.inputName + '"]'));
+                const selectedValue = simState.draftAnswers[check.id] || simState.answers[check.id];
+                inputList.forEach((input) => {
+                    input.checked = selectedValue === input.value;
+                    input.disabled = mastered;
+                    const choice = input.closest(".choice-card");
+                    const evaluated = simState.attempts[check.id] > 0 && simState.answers[check.id] === input.value;
+                    choice.classList.toggle("is-correct", evaluated && mastered);
+                    choice.classList.toggle("is-incorrect", evaluated && !mastered);
+                });
+                card.classList.toggle("is-mastered", mastered);
+                const result = feedbackFor(check);
+                feedback.textContent = result.text;
+                feedback.className = "check-feedback" + (result.kind ? " " + result.kind : "");
+            });
+        }
+
+        function reorderChoiceCards() {
+            CHECK_DEFINITIONS.forEach((check) => {
+                const card = document.getElementById(check.cardId);
+                const feedback = document.getElementById(check.feedbackId);
+                const inputs = Array.from(card.querySelectorAll('input[name="' + check.inputName + '"]'));
+                const order = simState.choiceOrders[check.id] || Object.keys(check.choices);
+                order.forEach((choiceId) => {
+                    const input = inputs.find((candidate) => candidate.value === choiceId);
+                    const label = input ? input.closest("label.choice-card") : null;
+                    if (label) card.insertBefore(label, feedback);
+                });
+            });
+        }
+
+        function renderSimState(revealProducts) {
+            const step = Math.min(4, Math.max(1, simState.currentStep));
+            simDom.labHeading.hidden = step === 4;
+            simDom.physicalPanel.hidden = step !== 1;
+            simDom.chemicalPanel.hidden = step !== 2;
+            simDom.finalPanel.hidden = step !== 3;
+            simDom.completionPage.hidden = step !== 4;
+            simDom.observationProgressText.textContent = step === 4 ? "Complete" : "Step " + step + " of 3";
+            simDom.observationProgress.setAttribute("aria-valuenow", String(Math.min(step, 3)));
+            simDom.observationProgressFill.style.width = (Math.min(step, 3) / 3 * 100) + "%";
+
+            simDom.largeFood.hidden = simState.physicalObserved;
+            simDom.physicalPieces.hidden = !simState.physicalObserved;
+            simDom.physicalPieces.classList.toggle("reveal-pieces", Boolean(revealProducts && simState.physicalObserved));
+            simDom.hammerTool.hidden = simState.physicalObserved && !physicalBusy;
+            simDom.hammerTool.disabled = simState.physicalObserved || physicalBusy;
+            simDom.hammerTool.draggable = !simState.physicalObserved && !physicalBusy;
+            simDom.crushBtn.hidden = simState.physicalObserved;
+            simDom.crushBtn.disabled = physicalBusy;
+            simDom.replayPhysicalBtn.hidden = !simState.physicalObserved;
+            simDom.replayPhysicalBtn.disabled = physicalBusy;
+            simDom.hammerQuestion.hidden = !simState.physicalObserved;
+            simDom.physicalPanel.classList.toggle("has-question", simState.physicalObserved);
+            simDom.physicalStage.setAttribute("aria-label", simState.physicalObserved
+                ? "Six irregular pieces of cooked chicken in different shapes and sizes"
+                : "One cooked chicken leg ready to be crushed. Drop the hammer here.");
+
+            simDom.proteinModel.hidden = simState.chemicalObserved;
+            simDom.aminoProducts.hidden = !simState.chemicalObserved;
+            simDom.aminoProducts.classList.toggle("reveal-products", Boolean(revealProducts && simState.chemicalObserved));
+            simDom.enzymeTool.disabled = simState.chemicalObserved || chemicalBusy;
+            simDom.enzymeTool.draggable = !simState.chemicalObserved && !chemicalBusy;
+            simDom.enzymeTool.classList.toggle("is-selected", simState.selectedTool && !simState.chemicalObserved);
+            simDom.enzymeTool.setAttribute("aria-pressed", String(simState.selectedTool && !simState.chemicalObserved));
+            simDom.applyEnzymeBtn.hidden = simState.chemicalObserved;
+            simDom.applyEnzymeBtn.disabled = chemicalBusy;
+            simDom.replayChemicalBtn.hidden = !simState.chemicalObserved;
+            simDom.replayChemicalBtn.disabled = chemicalBusy;
+            simDom.enzymeQuestion.hidden = !simState.chemicalObserved;
+            simDom.chemicalPanel.classList.toggle("has-question", simState.chemicalObserved);
+            simDom.enzymeDropZone.setAttribute("aria-label", simState.chemicalObserved
+                ? "Four smaller labelled amino-acid representations with different shapes, patterns, and colours"
+                : "Large protein molecule target for Protease Scissors");
+
+            reorderChoiceCards();
+            renderChecks();
+            simDom.checkHammerBtn.hidden = simState.mastered["hammer-check"];
+            simDom.nextToEnzymeBtn.hidden = false;
+            simDom.nextToEnzymeBtn.disabled = !simState.mastered["hammer-check"];
+            simDom.nextToEnzymeBtn.classList.toggle("gated", !simState.mastered["hammer-check"]);
+            simDom.checkEnzymeBtn.hidden = simState.mastered["enzyme-check"];
+            simDom.nextToFinalBtn.hidden = false;
+            simDom.nextToFinalBtn.disabled = !simState.mastered["enzyme-check"];
+            simDom.nextToFinalBtn.classList.toggle("gated", !simState.mastered["enzyme-check"]);
+            simDom.checkFinalBtn.hidden = simState.mastered["enzyme-role-check"];
+            simDom.finishActivityBtn.hidden = false;
+            simDom.finishActivityBtn.disabled = !simState.mastered["enzyme-role-check"];
+            simDom.finishActivityBtn.classList.toggle("gated", !simState.mastered["enzyme-role-check"]);
+            simDom.hammerAlert.textContent = "";
+            simDom.enzymeAlert.textContent = "";
+            simDom.finalAlert.textContent = "";
+        }
+
+        function goToStep(step) {
+            if (step === 2 && !simState.mastered["hammer-check"]) return;
+            if (step === 3 && !simState.mastered["enzyme-check"]) return;
+            simState.currentStep = step;
+            saveSimState();
+            renderSimState();
+            const heading = step === 1 ? simDom.physicalHeading : step === 2 ? simDom.chemicalHeading : simDom.finalHeading;
+            focusElement(heading);
+            announceSim("Step " + step + " of 3.");
+        }
+
+        function showCompletionPage() {
+            if (!CHECK_DEFINITIONS.every((check) => simState.mastered[check.id])) return;
+            simState.completionShown = true;
+            simState.currentStep = 4;
+            saveSimState();
+            renderSimState();
+            focusElement(simDom.completionHeading);
+            announceSim("Activity complete. Your digestion summary is ready.");
+        }
+
+        function openReviewModal() {
+            simState = loadSimState();
+            renderReview();
+            simDom.reviewModal.classList.add("show");
+            window.setTimeout(() => simDom.closeReviewBtn.focus(), 20);
+        }
+
+        function closeReviewModal() {
+            if (!simDom.reviewModal.classList.contains("show")) return;
+            simDom.reviewModal.classList.remove("show");
+            simDom.reviewBtn.focus();
+        }
+
+        function renderReview() {
+            simDom.reviewBody.replaceChildren();
+            const answered = CHECK_DEFINITIONS.filter((check) => simState.attempts[check.id] > 0);
+            if (!answered.length) {
+                const empty = document.createElement("p");
+                empty.textContent = "No answers recorded yet. Answer a question and it will appear here.";
+                simDom.reviewBody.appendChild(empty);
+                return;
+            }
+            answered.forEach((check, index) => {
+                const card = document.createElement("article");
+                card.className = "result-card";
+                const heading = document.createElement("h4");
+                heading.textContent = (index + 1) + ". " + check.title;
+                const statusLine = document.createElement("p");
+                const pill = document.createElement("span");
+                const correct = simState.mastered[check.id] === true;
+                card.classList.add(correct ? "is-correct" : "is-incorrect");
+                pill.className = "status-pill " + (correct ? "correct" : "wrong");
+                pill.textContent = correct ? "✓ Correct" : "↻ Try again";
+                statusLine.appendChild(pill);
+                const list = document.createElement("ul");
+                list.className = "result-list";
+                const answer = document.createElement("li");
+                answer.textContent = "Your answer: " + (check.choices[simState.answers[check.id]] || "Not recorded");
+                list.appendChild(answer);
+                const explanation = document.createElement("li");
+                explanation.textContent = feedbackFor(check).text;
+                list.appendChild(explanation);
+                card.append(heading, statusLine, list);
+                simDom.reviewBody.appendChild(card);
+            });
+        }
+
+        function devInit() {
+            simState = loadSimState();
+            bindSimEvents();
+            renderSimState();
+            const helpSeen = storageGet(SIM_CONFIG.simId + "-help-seen") === "true";
+            if (!simState.instructionsSeen && !helpSeen) {
+                simState.instructionsSeen = true;
+                saveSimState();
+                openInstructionsModal();
+            } else {
+                if (!simState.instructionsSeen) {
+                    simState.instructionsSeen = true;
+                    saveSimState();
+                }
+                const resumeTarget = simState.currentStep === 4 ? simDom.completionHeading : simDom.labTitle;
+                window.setTimeout(() => resumeTarget.focus(), 20);
+            }
+        }
+
+        function devReset() {
+            if (physicalTimer) window.clearTimeout(physicalTimer);
+            if (chemicalTimer) window.clearTimeout(chemicalTimer);
+            physicalTimer = null;
+            chemicalTimer = null;
+            physicalBusy = false;
+            chemicalBusy = false;
+            checkingBusy = false;
+            clearSavedSimState();
+            simState = createDefaultSimState();
+            simDom.physicalStage.classList.remove("is-animating");
+            simDom.largeFood.classList.remove("is-drag-over");
+            simDom.enzymeDropZone.classList.remove("is-animating", "is-drag-over");
+            simDom.enzymeTool.classList.remove("is-cutting");
+            renderSimState();
+        }
+
+        function clearActivityStateOnExit() {
+            clearSavedSimState();
+        }
+
+        function resetActivityAfterHistoryReturn(event) {
+            if (!event.persisted) return;
+            devReset();
+            showScreen("home");
+        }
+
+        bindSimEvents();
+        window.addEventListener("pagehide", clearActivityStateOnExit);
+        window.addEventListener("pageshow", resetActivityAfterHistoryReturn);
+        dom.startBtn.textContent = "Begin activity";
+        dom.startBtn.setAttribute("aria-label", "Begin the digestion activity");
+    </script>
+</body>
+
+</html>
