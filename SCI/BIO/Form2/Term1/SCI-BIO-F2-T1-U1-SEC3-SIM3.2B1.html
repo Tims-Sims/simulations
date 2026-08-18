@@ -303,6 +303,18 @@
         .assessment-result.wrong { background: color-mix(in srgb, var(--danger) 12%, var(--surface)); border-color: color-mix(in srgb, var(--danger) 36%, transparent); }
         .assessment-result strong { display: block; margin-bottom: 6px; }
 
+        .alert-box {
+            margin-top: 14px;
+            padding: 14px 18px;
+            border-radius: 18px;
+            border: 1px solid color-mix(in srgb, var(--danger) 36%, transparent);
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+            color: var(--text-soft);
+            line-height: 1.65;
+            display: none;
+        }
+        .alert-box.show { display: block; }
+
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
     </style>
 </head>
@@ -850,6 +862,7 @@
                 '<p style="margin:0 0 4px; color:var(--text-soft); line-height:1.65;">Based on your observations, answer the question below.</p>' +
                 '<p style="margin:0 0 8px; color:var(--text); font-weight:700; line-height:1.65;">Why did Flask B turn milky?</p>' +
                 '<div class="assessment-options" id="assessmentOptions">' + optionsHtml + '</div>' +
+                '<div class="alert-box" id="assessmentAlert"><strong>Please select an answer before submitting.</strong></div>' +
                 '<div class="assessment-result" id="assessmentResult"></div>';
 
             body.querySelectorAll(".assessment-opt").forEach(opt => {
@@ -857,6 +870,8 @@
                     body.querySelectorAll(".assessment-opt").forEach(o => o.classList.remove("selected"));
                     opt.classList.add("selected");
                     opt.querySelector("input").checked = true;
+                    const alertEl = document.getElementById("assessmentAlert");
+                    if (alertEl) alertEl.classList.remove("show");
                 });
             });
         }
@@ -881,7 +896,11 @@
 
             submitBtn.onclick = () => {
                 const selected = body.querySelector('input[name="assess-q"]:checked');
-                if (!selected) { alert("Please select an answer before submitting."); return; }
+                if (!selected) {
+                    const alertEl = document.getElementById("assessmentAlert");
+                    if (alertEl) alertEl.classList.add("show");
+                    return;
+                }
 
                 const result = document.getElementById("assessmentResult");
                 const val = selected.value;
