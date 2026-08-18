@@ -793,6 +793,45 @@
         }
 
         /* --- Assessment --- */
+        /* Assessment answer options — shuffled every time the modal opens */
+        const ASSESS_OPTIONS = [
+            { value: "a", text: "Flask B received more carbon dioxide from exhaled air." },
+            { value: "b", text: "Flask B received more oxygen from exhaled air." },
+            { value: "c", text: "Flask A and Flask B both turned milky at the same time." },
+            { value: "d", text: "The limewater naturally turns milky over time." }
+        ];
+
+        function shuffleArray(arr) {
+            const copy = arr.slice();
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const tmp = copy[i]; copy[i] = copy[j]; copy[j] = tmp;
+            }
+            return copy;
+        }
+
+        function renderAssessmentOptions(body) {
+            const optionsHtml = shuffleArray(ASSESS_OPTIONS).map(o =>
+                '<label class="assessment-opt" data-value="' + o.value + '">' +
+                '<input type="radio" name="assess-q" value="' + o.value + '"/>' +
+                o.text + '</label>'
+            ).join("");
+
+            body.innerHTML =
+                '<p style="margin:0 0 4px; color:var(--text-soft); line-height:1.65;">Based on your observations, answer the question below.</p>' +
+                '<p style="margin:0 0 8px; color:var(--text); font-weight:700; line-height:1.65;">Why did Flask B turn milky?</p>' +
+                '<div class="assessment-options" id="assessmentOptions">' + optionsHtml + '</div>' +
+                '<div class="assessment-result" id="assessmentResult"></div>';
+
+            body.querySelectorAll(".assessment-opt").forEach(opt => {
+                opt.addEventListener("click", () => {
+                    body.querySelectorAll(".assessment-opt").forEach(o => o.classList.remove("selected"));
+                    opt.classList.add("selected");
+                    opt.querySelector("input").checked = true;
+                });
+            });
+        }
+
         function openAssessment() {
             if (assessmentAnswered) return;
             const modal = document.getElementById("assessmentModal");
@@ -801,56 +840,14 @@
             const closeBtn2 = document.getElementById("closeAssessmentBtn2");
             const closeBtn = document.getElementById("closeAssessmentBtn");
 
-            body.innerHTML = `
-                <p style="margin:0 0 4px; color:var(--text-soft); line-height:1.65;">Based on your observations, answer the question below.</p>
-                <p style="margin:0 0 8px; color:var(--text); font-weight:700; line-height:1.65;">Why did Flask B turn milky?</p>
-                <div class="assessment-options" id="assessmentOptions">
-                    <label class="assessment-opt" data-value="a">
-                        <input type="radio" name="assess-q" value="a"/>
-                        Flask B received more carbon dioxide from exhaled air.
-                    </label>
-                    <label class="assessment-opt" data-value="b">
-                        <input type="radio" name="assess-q" value="b"/>
-                        Flask B received more oxygen from exhaled air.
-                    </label>
-                    <label class="assessment-opt" data-value="c">
-                        <input type="radio" name="assess-q" value="c"/>
-                        Flask A and Flask B both turned milky at the same time.
-                    </label>
-                    <label class="assessment-opt" data-value="d">
-                        <input type="radio" name="assess-q" value="d"/>
-                        The limewater naturally turns milky over time.
-                    </label>
-                </div>
-                <div class="assessment-result" id="assessmentResult"></div>
-            `;
-
-            /* Highlight selected option */
-            body.querySelectorAll(".assessment-opt").forEach(opt => {
-                opt.addEventListener("click", () => {
-                    body.querySelectorAll(".assessment-opt").forEach(o => o.classList.remove("selected"));
-                    opt.classList.add("selected");
-                    opt.querySelector("input").checked = true;
-                });
-            });
+            renderAssessmentOptions(body);
 
             submitBtn.classList.remove("hidden");
             closeBtn2.classList.add("hidden");
 
-            /* Try Again button — reuse closeBtn2, relabel it */
-            closeBtn2.textContent = "Try Again";
-
             function disableOptions() {
                 body.querySelectorAll('input[name="assess-q"]').forEach(inp => { inp.disabled = true; });
                 body.querySelectorAll(".assessment-opt").forEach(opt => { opt.style.pointerEvents = "none"; opt.style.opacity = "0.55"; });
-            }
-
-            function enableOptions() {
-                body.querySelectorAll('input[name="assess-q"]').forEach(inp => { inp.disabled = false; inp.checked = false; });
-                body.querySelectorAll(".assessment-opt").forEach(opt => { opt.classList.remove("selected"); opt.style.pointerEvents = ""; opt.style.opacity = ""; });
-                const res = document.getElementById("assessmentResult");
-                res.className = "assessment-result";
-                res.innerHTML = "";
             }
 
             submitBtn.onclick = () => {
@@ -864,13 +861,17 @@
 
                 if (val === "a") {
                     result.className = "assessment-result show correct";
-                    result.innerHTML = '<strong style="color:var(--success);">&#10003; Correct!</strong> Flask B turned milky because exhaled air contains a higher percentage of carbon dioxide. This gas reacts with the clear limewater, causing the cloudy colour change. Flask A only receives room air, which has very little CO&#x2082.';
+                    result.innerHTML = '<strong style="color:var(--success);">&#10003; Correct!</strong> Flask B turned milky because exhaled air contains a higher percentage of carbon dioxide. This gas reacts with the clear limewater, causing the cloudy colour change. Flask A only receives room air, which has very little CO&#x2082;';
                     playSound("correct");
                     assessmentAnswered = true;
                     submitBtn.classList.add("hidden");
-                    closeBtn2.textContent = "Close";
-                    closeBtn2.classList.remove("hidden");
-                    closeBtn2.onclick = () => { modal.classList.remove("show"); };
+                    closeBtn2.classList.add("hidden");
+                    /* Swap Check My Understanding → Play Again */
+                    const checkWrap = document.getElementById("checkBtnWrap");
+                    if (checkWrap) {
+                        checkWrap.innerHTML = '<button class="primary-btn" id="playAgainBtn" type="button">Play Again</button>';
+                        document.getElementById("playAgainBtn").addEventListener("click", () => { modal.classList.remove("show"); openResetConfirmModal(); });
+                    }
                 } else {
                     result.className = "assessment-result show wrong";
                     result.innerHTML = '<strong style="color:var(--danger);">&#10007; Not quite.</strong> ';
@@ -886,7 +887,12 @@
                     submitBtn.classList.add("hidden");
                     closeBtn2.textContent = "Try Again";
                     closeBtn2.classList.remove("hidden");
-                    closeBtn2.onclick = () => { enableOptions(); submitBtn.classList.remove("hidden"); closeBtn2.classList.add("hidden"); };
+                    closeBtn2.onclick = () => {
+                        /* Re-shuffle and re-render options for the next attempt */
+                        renderAssessmentOptions(body);
+                        submitBtn.classList.remove("hidden");
+                        closeBtn2.classList.add("hidden");
+                    };
                 }
             };
 
