@@ -379,7 +379,8 @@
                 oxygenPerSec: 0, smoothedCount: 0,
                 countWindow: [],
                 answered: false, selectedChoice: null,
-                attempts: 0, firstAttemptCorrect: null
+                attempts: 0, firstAttemptCorrect: null,
+                startTime: Date.now(), hintUsed: false
             };
             initBloodCells();
             initCanvas();
@@ -421,6 +422,8 @@
                                 <ellipse id="svgShoeL" cx="50" cy="204" rx="10" ry="5" fill="#a78bfa"/>
                                 <!-- Right Shoe -->
                                 <ellipse id="svgShoeR" cx="110" cy="204" rx="10" ry="5" fill="#a78bfa"/>
+                                <!-- Ground line -->
+                                <line x1="10" y1="210" x2="150" y2="210" stroke="#c7d0f0" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.35"/>
                             </svg>
                         </div>
                     </div>
@@ -564,6 +567,19 @@
             const swingAmt = 5 + (v / 100) * 35;
             const swing = Math.sin(phase * Math.PI * 2) * swingAmt;
 
+            /* Vertical bounce when running */
+            const bounce = (v / 100) * Math.abs(Math.sin(phase * Math.PI * 2)) * 12;
+            const svg = document.getElementById("personSvg");
+            if (svg) svg.style.transform = `translateY(${-bounce}px)`;
+
+            /* Torso expansion with breathing */
+            const breathExpansion = Math.sin(phase * Math.PI * 2);
+            const torsoExtraW = breathExpansion * (2 + (v / 100) * 8);
+            const torsoX = 56 - torsoExtraW / 2;
+            const torsoW = 48 + torsoExtraW;
+            const torsoEl = document.getElementById("svgTorso");
+            if (torsoEl) { torsoEl.setAttribute("x", torsoX); torsoEl.setAttribute("width", torsoW); }
+
             /* Arms */
             const armLY = 115 + Math.sin(phase * Math.PI * 2) * swingAmt * 0.4;
             const armRY = 115 - Math.sin(phase * Math.PI * 2) * swingAmt * 0.4;
@@ -584,7 +600,6 @@
             setEllipse("svgShoeR", 110 - legSwing, legRY + 4, 10, 5);
 
             /* Lungs — breathing expansion */
-            const breathExpansion = Math.sin(phase * Math.PI * 2);
             const lungRx = 12 + breathExpansion * (3 + (v / 100) * 8);
             const lungRy = 18 + breathExpansion * (2 + (v / 100) * 6);
             const lungOpacity = 0.15 + (v / 100) * 0.35;
@@ -845,6 +860,8 @@
         function showHint() {
             const section = document.getElementById("assessmentSection");
             if (document.getElementById("hintText")) return;
+            simState.hintUsed = true;
+            storageSet(SIM_CONFIG.simId + ":hintUsed", "true");
             const div = document.createElement("div");
             div.id = "hintText"; div.className = "hint-text";
             div.textContent = "Look at how many oxygen particles are needed when the muscles work harder.";
@@ -855,10 +872,21 @@
             const area = document.getElementById("completionArea");
             const attempts = simState.attempts;
             const first = simState.firstAttemptCorrect;
+            const elapsed = Math.round((Date.now() - simState.startTime) / 1000);
+            const mins = Math.floor(elapsed / 60);
+            const secs = elapsed % 60;
+            const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+            storageSet(SIM_CONFIG.simId + ":timeOnTask", String(elapsed));
+            storageSet(SIM_CONFIG.simId + ":completion", "true");
+
+            let extra = "";
+            if (simState.hintUsed) extra += " You used a hint.";
+            extra += ` Time on task: ${timeStr}.`;
+
             area.innerHTML = `
                 <div class="completion-banner">
                     <h3>Simulation Complete</h3>
-                    <p>You answered the assessment question in ${attempts} attempt${attempts > 1 ? "s" : ""}.${first ? " You got it right on your first try!" : " Keep studying and try to get it right first time next attempt."}</p>
+                    <p>You answered the assessment question in ${attempts} attempt${attempts > 1 ? "s" : ""}.${first ? " You got it right on your first try!" : " Keep studying and try to get it right first time next attempt."}${extra}</p>
                 </div>
             `;
         }
