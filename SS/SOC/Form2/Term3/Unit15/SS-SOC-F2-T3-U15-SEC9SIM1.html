@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Resource Rangers: The 4Rs Household Rescue</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        .rr-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .rr-toolbar .control-btn {
+            padding: 9px 14px;
+        }
+
+        .rr-status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .rr-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .rr-pill.rr-pill-badge {
+            background: color-mix(in srgb, var(--accent-2) 22%, var(--surface-2));
+            border-color: color-mix(in srgb, var(--accent-2) 45%, var(--border));
+        }
+
+        .rr-ecobar-wrap {
+            flex: 1 1 220px;
+            min-width: 180px;
+        }
+
+        .rr-ecobar {
+            height: 14px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .rr-ecobar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--success), var(--accent));
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .rr-ecobar-fill {
+                transition: none;
+            }
+        }
+
+        .rr-mascot-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+            border: 1px solid var(--border);
+        }
+
+        .rr-mascot-avatar {
+            flex: 0 0 auto;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 1.9rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            box-shadow: var(--shadow);
+        }
+
+        .rr-mascot-bubble {
+            flex: 1;
+            min-width: 0;
+            color: var(--text-soft);
+            font-size: 0.98rem;
+            line-height: 1.4;
+        }
+
+        .rr-mascot-bubble strong {
+            color: var(--text);
+        }
+
+        .rr-scene {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 2.4;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background:
+                linear-gradient(180deg, color-mix(in srgb, var(--accent) 14%, var(--surface)) 0%, color-mix(in srgb, var(--accent) 14%, var(--surface)) 62%, color-mix(in srgb, var(--warning) 22%, var(--surface)) 62%, color-mix(in srgb, var(--warning) 22%, var(--surface)) 100%);
+        }
+
+        .rr-room-divider {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: color-mix(in srgb, var(--text) 12%, transparent);
+        }
+
+        .rr-window {
+            position: absolute;
+            top: 6%;
+            left: 6%;
+            width: 15%;
+            height: 26%;
+            border-radius: 10px;
+            background: color-mix(in srgb, var(--accent) 55%, white 10%);
+            border: 4px solid color-mix(in srgb, var(--surface) 70%, black 5%);
+        }
+
+        .rr-window::before,
+        .rr-window::after {
+            content: "";
+            position: absolute;
+            background: color-mix(in srgb, var(--surface) 70%, black 5%);
+        }
+
+        .rr-window::before {
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            transform: translateX(-50%);
+        }
+
+        .rr-window::after {
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            transform: translateY(-50%);
+        }
+
+        .rr-sun {
+            position: absolute;
+            top: 9%;
+            left: 27%;
+            font-size: clamp(1.1rem, 3vw, 1.8rem);
+        }
+
+        .rr-counter {
+            position: absolute;
+            left: 0;
+            right: 50%;
+            bottom: 0;
+            height: 22%;
+            background: color-mix(in srgb, var(--surface) 55%, black 8%);
+            border-top: 4px solid color-mix(in srgb, var(--surface) 30%, black 20%);
+        }
+
+        .rr-rug {
+            position: absolute;
+            right: 6%;
+            bottom: 5%;
+            width: 34%;
+            height: 14%;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent-2) 45%, var(--surface));
+            opacity: 0.75;
+        }
+
+        .rr-tv-stand {
+            position: absolute;
+            right: 10%;
+            top: 30%;
+            width: 22%;
+            height: 22%;
+            border-radius: 10px;
+            background: color-mix(in srgb, var(--surface) 60%, black 10%);
+            border: 2px solid color-mix(in srgb, var(--surface) 30%, black 20%);
+            display: grid;
+            place-items: center;
+            font-size: clamp(1.4rem, 4vw, 2.4rem);
+            transition: background 0.4s ease;
+        }
+
+        .rr-tv-stand[data-on="true"] {
+            background: color-mix(in srgb, var(--accent) 45%, var(--surface));
+            box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 55%, transparent);
+        }
+
+        .rr-plant {
+            position: absolute;
+            left: 3%;
+            bottom: 4%;
+            font-size: clamp(1.3rem, 4vw, 2rem);
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .rr-plant .rr-leaf {
+            opacity: 0.12;
+            transform: scale(0.5) translateY(6px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .rr-plant .rr-leaf.rr-leaf-on {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .rr-plant .rr-leaf {
+                transition: none;
+            }
+        }
+
+        .rr-hotspot {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            min-width: 56px;
+            min-height: 56px;
+            border-radius: 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            border: 2px solid var(--warning);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 6px;
+            box-shadow: var(--shadow);
+            font-weight: 700;
+        }
+
+        .rr-hotspot .rr-hotspot-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .rr-hotspot .rr-hotspot-label {
+            font-size: 0.68rem;
+            color: var(--text-soft);
+            max-width: 84px;
+            text-align: center;
+            line-height: 1.15;
+        }
+
+        .rr-hotspot[data-solved="true"] {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 18%, var(--surface));
+        }
+
+        .rr-hotspot[data-solved="true"] .rr-hotspot-label {
+            color: var(--text);
+        }
+
+        .rr-hotspot-check {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--success);
+            color: #06210f;
+            display: grid;
+            place-items: center;
+            font-size: 0.8rem;
+            font-weight: 900;
+            border: 2px solid var(--surface);
+        }
+
+        .rr-hotspot:not([data-solved="true"])::after {
+            content: "";
+            position: absolute;
+            inset: -5px;
+            border-radius: 20px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: rrPulse 1.8s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rrPulse {
+            0% { opacity: 0.85; transform: scale(1); }
+            70% { opacity: 0; transform: scale(1.18); }
+            100% { opacity: 0; transform: scale(1.18); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .rr-hotspot:not([data-solved="true"])::after {
+                animation: none;
+            }
+        }
+
+        .rr-confetti-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .rr-confetti-piece {
+            position: absolute;
+            top: -10%;
+            font-size: 1.3rem;
+            animation: rrFall 1.1s ease-in forwards;
+        }
+
+        @keyframes rrFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(220%) rotate(160deg); opacity: 0; }
+        }
+
+        .rr-panel-body p {
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        .rr-scenario-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            border: 1px solid var(--border);
+            font-size: 0.82rem;
+            color: var(--text-soft);
+            margin-bottom: 10px;
+        }
+
+        .rr-choice-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 520px) {
+            .rr-choice-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .rr-choice-btn {
+            min-height: 52px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            color: var(--text);
+            font-weight: 700;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rr-choice-btn .rr-choice-icon {
+            font-size: 1.2rem;
+        }
+
+        .rr-choice-btn[data-state="correct"] {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 22%, var(--surface-2));
+        }
+
+        .rr-choice-btn[data-state="incorrect"] {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface-2));
+        }
+
+        .rr-feedback {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            line-height: 1.5;
+        }
+
+        .rr-feedback-icon {
+            font-size: 1.2rem;
+            flex: 0 0 auto;
+        }
+
+        .rr-feedback[data-kind="correct"] {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 16%, var(--surface));
+            color: var(--text);
+        }
+
+        .rr-feedback[data-kind="incorrect"] {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 14%, var(--surface));
+            color: var(--text);
+        }
+
+        .rr-hint-box {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            border: 1px dashed var(--border);
+            background: color-mix(in srgb, var(--accent-2) 10%, var(--surface));
+            color: var(--text-soft);
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .rr-progress-text {
+            font-weight: 700;
+        }
+
+        .rr-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .rr-stat-card {
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .rr-stat-card .rr-stat-value {
+            display: block;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .rr-stat-card .rr-stat-label {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .rr-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            font-size: 0.94rem;
+        }
+
+        .rr-table th,
+        .rr-table td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .rr-table th {
+            color: var(--muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .rr-review-row {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .rr-review-row:last-child {
+            border-bottom: none;
+        }
+
+        .rr-review-row .rr-review-status {
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .rr-review-row[data-solved="true"] .rr-review-status {
+            color: var(--success);
+        }
+
+        .rr-review-row[data-solved="false"] .rr-review-status {
+            color: var(--warning);
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <!-- Built entirely at runtime by devInit() below. -->
+                    <div id="rrRoot"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Resource Rangers: The 4Rs Household Rescue — a Social Sciences simulation for the 4Rs of conservation. Works fully offline.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "SS-SOC-F2-T3-U15-SEC9SIM1",
+            title: "Resource Rangers: The 4Rs Household Rescue",
+            subtitle: "Fix the wasteful home with Rethink, Reduce, Reuse and Recycle",
+            badgeText: "4R",
+            homeEyebrow: "Eco Mission Briefing",
+            homeDescription:
+                "Some resources are being wasted in this home. Investigate each object and choose the correct 4R strategy to solve the problem.",
+            instructions: [
+                "Select a highlighted object in the home.",
+                "Read the situation carefully.",
+                "Choose Rethink, Reduce, Reuse or Recycle.",
+                "A correct choice will fix the problem.",
+                "If your choice is incorrect, read the feedback and try again.",
+                "Fix all five problems to complete the household audit.",
+                "Rethink — think before buying or using something. Consider whether it is necessary and whether there is a less wasteful option.",
+                "Reduce — use less of a resource or product to prevent unnecessary waste.",
+                "Reuse — use an item again instead of throwing it away.",
+                "Recycle — send used materials to be processed and made into new products."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ---------------------------------------------------------------
+           Resource Rangers: The 4Rs Household Rescue
+           Content below is taken verbatim from issue #178 — object names,
+           scenarios, correct answers, and every feedback string. Only the
+           surrounding game framing (mascot lines, points, badges) is added.
+           --------------------------------------------------------------- */
+
+        const RR_STRATEGIES = {
+            rethink: { label: "Rethink", icon: "🤔" },
+            reduce: { label: "Reduce", icon: "📉" },
+            reuse: { label: "Reuse", icon: "🔄" },
+            recycle: { label: "Recycle", icon: "♻️" }
+        };
+        const RR_STRATEGY_ORDER = ["rethink", "reduce", "reuse", "recycle"];
+
+        const RR_HINT_GENERAL = "Rethink means changing a decision or habit before waste is created. Reduce means using less. Reuse means using an item again. Recycle means processing the material to make new products.";
+        const RR_HINT_REUSE_RECYCLE = "If the same item is used again at home, it is Reuse. If the material is processed to make another product, it is Recycle.";
+
+        const RR_ITEMS = [
+            {
+                id: "tap",
+                name: "Running Tap",
+                summaryLabel: "Running tap",
+                icon: "🚰",
+                fixedIcon: "🚰",
+                left: 14, top: 85,
+                scenario: "Water is running while someone brushes their teeth. Which strategy should be used?",
+                correct: "reduce",
+                correctFeedback: "Correct! Turning off the tap reduces water waste and conserves the household’s water supply.",
+                incorrectFeedback: "Not quite. Choose the strategy that means using less of a resource."
+            },
+            {
+                id: "tv",
+                name: "Television Left On",
+                summaryLabel: "Unused television",
+                icon: "📺",
+                fixedIcon: "📴",
+                left: 79, top: 41,
+                scenario: "The television is on, but no one is watching it. Which strategy should be used?",
+                correct: "reduce",
+                correctFeedback: "Correct! Turning off an unused television reduces electricity consumption.",
+                incorrectFeedback: "Not quite. The television does not need to be reused or recycled. Think about how the household can use less electricity."
+            },
+            {
+                id: "bottles",
+                name: "Empty Plastic Bottles",
+                summaryLabel: "Plastic bottles",
+                icon: "🧴",
+                fixedIcon: "♻️",
+                left: 33, top: 82,
+                scenario: "Several empty plastic bottles have been left on the kitchen counter. Which strategy should be used?",
+                correct: "recycle",
+                correctFeedback: "Correct! The plastic bottles can be collected and processed to create new products.",
+                incorrectFeedback: "Not quite. Choose the strategy that sends used materials to be processed into new products."
+            },
+            {
+                id: "bags",
+                name: "Single-Use Plastic Bags",
+                summaryLabel: "Single-use plastic bags",
+                icon: "🛍️",
+                fixedIcon: "🧺",
+                left: 68, top: 84,
+                scenario: "The household continues to collect single-use plastic grocery bags. Which strategy should be used before the next shopping trip?",
+                correct: "rethink",
+                correctFeedback: "Correct! Rethinking this habit means choosing a reusable market bag instead of taking more single-use plastic bags.",
+                incorrectFeedback: "Not quite. Think about how the household can change the habit before more waste is created."
+            },
+            {
+                id: "jar",
+                name: "Glass Jam Jar",
+                summaryLabel: "Glass jam jar",
+                icon: "🫙",
+                fixedIcon: "🗃️",
+                left: 45, top: 82,
+                scenario: "An empty glass jam jar is still in good condition. It can be used to store small household items. Which strategy is being used?",
+                correct: "reuse",
+                correctFeedback: "Correct! Using the jar again for storage is an example of reusing an item.",
+                incorrectFeedback: "Not quite. The jar is being used again at home rather than being processed into a new product."
+            }
+        ];
+
+        const RR_FINAL = {
+            prompt: "Which of the 4Rs prevents waste from being created in the first place?",
+            correct: "rethink",
+            correctFeedback: "Correct! Rethinking a purchase or habit can prevent unnecessary waste before it is created.",
+            incorrectFeedback: "Not quite. Choose the strategy that involves reconsidering a decision before buying, using or discarding something."
+        };
+
+        const RR_ITEM_POINTS = 20;
+        const RR_ITEM_BONUS = 10;
+        const RR_FINAL_POINTS = 40;
+        const RR_FINAL_BONUS = 15;
+        const RR_MAX_POINTS = (RR_ITEM_POINTS + RR_ITEM_BONUS) * RR_ITEMS.length + RR_FINAL_POINTS + RR_FINAL_BONUS;
+
+        const RR_BADGES = [
+            { min: 0, name: "Eco Rookie", icon: "🌱" },
+            { min: 80, name: "Eco Guardian", icon: "🌿" },
+            { min: 150, name: "Planet Hero", icon: "🌎" }
+        ];
+
+        function rrBadgeFor(points) {
+            let badge = RR_BADGES[0];
+            RR_BADGES.forEach((b) => { if (points >= b.min) badge = b; });
+            return badge;
+        }
+
+        function rrStarsFor(attempts) {
+            if (attempts <= 1) return 3;
+            if (attempts === 2) return 2;
+            return 1;
+        }
+
+        /* ---- Game state. Rebuilt fresh by resetGameState(); persists in
+           memory (sessionStorage-style, never localStorage) for the length
+           of the tab, matching every other sim in this project. ---- */
+        let rr = null;
+        let rrSkeletonBuilt = false;
+        let rrLastFocus = null;
+
+        function resetGameState() {
+            rr = {
+                view: "house",              // "house" | "complete"
+                openTask: null,             // null | "final" | an item id
+                attemptedWrong: {},         // itemId/"final" -> true once a wrong pick has been made on the open attempt
+                items: RR_ITEMS.map((it) => ({ id: it.id, solved: false, attempts: 0, firstTry: false })),
+                finalSolved: false,
+                finalAttempts: 0,
+                finalFirstTry: false,
+                points: 0
+            };
+        }
+        resetGameState();
+
+        function rrSolvedCount() {
+            return rr.items.filter((i) => i.solved).length;
+        }
+
+        function rrItemState(id) {
+            return rr.items.find((i) => i.id === id);
+        }
+
+        function rrItemDef(id) {
+            return RR_ITEMS.find((i) => i.id === id);
+        }
+
+        /* ---------------------------------------------------------------
+           Build (once): static skeleton + the three reusable modals.
+           --------------------------------------------------------------- */
+        function devInit() {
+            if (!rrSkeletonBuilt) {
+                buildRRSkeleton();
+                buildRRModals();
+                rrSkeletonBuilt = true;
+            }
+            refreshRRView();
+        }
+
+        function devReset() {
+            resetGameState();
+            closeAllRRModals();
+            if (rrSkeletonBuilt) refreshRRView();
+        }
+
+        function buildRRSkeleton() {
+            const root = document.getElementById("rrRoot");
+
+            const toolbar = document.createElement("div");
+            toolbar.className = "rr-toolbar";
+            toolbar.innerHTML =
+                '<button class="control-btn" type="button" data-action="rules">📜 Rules</button>' +
+                '<button class="control-btn" type="button" data-action="review">🔍 Review</button>' +
+                '<button class="control-btn" type="button" data-action="tryagain">🔁 Try Again</button>' +
+                '<button class="control-btn" type="button" data-action="exit">🚪 Exit</button>';
+            root.appendChild(toolbar);
+
+            const statusRow = document.createElement("div");
+            statusRow.className = "rr-status-row";
+            statusRow.innerHTML =
+                '<div class="rr-ecobar-wrap">' +
+                '  <span class="rr-progress-text" id="rrProgressText">Problems solved: 0 of 5</span>' +
+                '  <div class="rr-ecobar"><div class="rr-ecobar-fill" id="rrEcobarFill"></div></div>' +
+                "</div>" +
+                '<span class="rr-pill" id="rrPointsPill">⭐ 0 pts</span>' +
+                '<span class="rr-pill rr-pill-badge" id="rrBadgePill">🌱 Eco Rookie</span>';
+            root.appendChild(statusRow);
+
+            const mascotRow = document.createElement("div");
+            mascotRow.className = "rr-mascot-row";
+            mascotRow.innerHTML =
+                '<div class="rr-mascot-avatar" aria-hidden="true">🐦</div>' +
+                '<div class="rr-mascot-bubble"><strong>Kis the Kiskadee says:</strong> <span id="rrMascotLine">Welcome, Ranger! Select a glowing object to begin your household audit.</span></div>';
+            root.appendChild(mascotRow);
+
+            const scene = document.createElement("div");
+            scene.className = "rr-scene";
+            scene.setAttribute("role", "group");
+            scene.setAttribute("aria-label", "An illustrated kitchen and living room with five objects to investigate");
+            scene.innerHTML =
+                '<div class="rr-room-divider" aria-hidden="true"></div>' +
+                '<div class="rr-window" aria-hidden="true"></div>' +
+                '<span class="rr-sun" aria-hidden="true">☀️</span>' +
+                '<div class="rr-counter" aria-hidden="true"></div>' +
+                '<div class="rr-rug" aria-hidden="true"></div>' +
+                '<div class="rr-tv-stand" id="rrTvStand" data-on="true" aria-hidden="true">📺</div>' +
+                '<div class="rr-plant" aria-hidden="true">🪴' +
+                [0, 1, 2, 3, 4].map((i) => '<span class="rr-leaf" data-leaf="' + i + '">🌿</span>').join("") +
+                "</div>" +
+                '<div class="rr-confetti-layer" id="rrConfetti" aria-hidden="true"></div>';
+            root.appendChild(scene);
+
+            RR_ITEMS.forEach((item) => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "rr-hotspot";
+                btn.id = "rrHotspot-" + item.id;
+                btn.style.left = item.left + "%";
+                btn.style.top = item.top + "%";
+                btn.dataset.action = "open-item";
+                btn.dataset.item = item.id;
+                btn.dataset.solved = "false";
+                btn.innerHTML =
+                    '<span class="rr-hotspot-icon" id="rrIcon-' + item.id + '" aria-hidden="true">' + item.icon + "</span>" +
+                    '<span class="rr-hotspot-label">' + escapeHtml(item.name) + "</span>";
+                scene.appendChild(btn);
+            });
+
+            const finalBtn = document.createElement("button");
+            finalBtn.type = "button";
+            finalBtn.className = "primary-btn hidden";
+            finalBtn.id = "rrFinalBtn";
+            finalBtn.dataset.action = "open-final";
+            finalBtn.style.marginTop = "16px";
+            finalBtn.textContent = "🌍 Answer the Final Question";
+            root.appendChild(finalBtn);
+
+            const completeView = document.createElement("section");
+            completeView.id = "rrComplete";
+            completeView.className = "hidden";
+            root.appendChild(completeView);
+
+            root.addEventListener("click", onRRRootClick);
+            document.addEventListener("keydown", onRRKeydown);
+        }
+
+        function buildRRModals() {
+            const taskModal = document.createElement("div");
+            taskModal.className = "modal";
+            taskModal.id = "rrTaskModal";
+            taskModal.setAttribute("role", "dialog");
+            taskModal.setAttribute("aria-modal", "true");
+            taskModal.setAttribute("aria-labelledby", "rrTaskHeading");
+            taskModal.innerHTML =
+                '<section class="modal-card">' +
+                '<button class="close-btn" type="button" data-action="close-task" aria-label="Back to the household">×</button>' +
+                '<div class="rr-scenario-tag" id="rrTaskTag">Investigate</div>' +
+                '<h3 id="rrTaskHeading"></h3>' +
+                '<div class="rr-panel-body"><p id="rrTaskScenario"></p></div>' +
+                '<div class="rr-choice-grid" id="rrTaskChoices"></div>' +
+                '<div class="rr-feedback hidden" id="rrTaskFeedback" aria-live="polite"></div>' +
+                '<div class="rr-hint-box hidden" id="rrTaskHint"></div>' +
+                '<div class="button-row" style="justify-content: flex-start;">' +
+                '<button class="secondary-btn" type="button" data-action="back-house">⬅ Back</button>' +
+                '<button class="ghost-btn" type="button" data-action="toggle-hint">💡 Hint</button>' +
+                '<button class="primary-btn hidden" type="button" id="rrContinueBtn" data-action="continue">Continue ▶</button>' +
+                "</div>" +
+                "</section>";
+            document.body.appendChild(taskModal);
+
+            const reviewModal = document.createElement("div");
+            reviewModal.className = "modal";
+            reviewModal.id = "rrReviewModal";
+            reviewModal.setAttribute("role", "dialog");
+            reviewModal.setAttribute("aria-modal", "true");
+            reviewModal.setAttribute("aria-labelledby", "rrReviewHeading");
+            reviewModal.innerHTML =
+                '<section class="modal-card">' +
+                '<button class="close-btn" type="button" data-action="close-review" aria-label="Close review">×</button>' +
+                '<h3 id="rrReviewHeading">Household Audit — Review</h3>' +
+                '<div id="rrReviewBody"></div>' +
+                '<div class="button-row" style="justify-content: flex-start;">' +
+                '<button class="primary-btn" type="button" data-action="close-review">Close</button>' +
+                "</div>" +
+                "</section>";
+            document.body.appendChild(reviewModal);
+
+            const exitModal = document.createElement("div");
+            exitModal.className = "modal";
+            exitModal.id = "rrExitModal";
+            exitModal.setAttribute("role", "dialog");
+            exitModal.setAttribute("aria-modal", "true");
+            exitModal.setAttribute("aria-labelledby", "rrExitHeading");
+            exitModal.innerHTML =
+                '<section class="modal-card">' +
+                '<button class="close-btn" type="button" data-action="close-exit" aria-label="Close">×</button>' +
+                '<h3 id="rrExitHeading">Exit to Lesson</h3>' +
+                "<p>Your teacher can bring you back to this simulation at any time. You may now close this tab or window to return to your lesson.</p>" +
+                '<div class="button-row" style="justify-content: flex-start;">' +
+                '<button class="primary-btn" type="button" data-action="close-exit">OK</button>' +
+                "</div>" +
+                "</section>";
+            document.body.appendChild(exitModal);
+
+            [taskModal, reviewModal, exitModal].forEach((modal) => {
+                modal.addEventListener("click", (event) => {
+                    if (event.target === modal) closeAllRRModals();
+                });
+            });
+        }
+
+        function closeAllRRModals() {
+            ["rrTaskModal", "rrReviewModal", "rrExitModal"].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove("show");
+            });
+            rr.openTask = null;
+            if (rrLastFocus && document.body.contains(rrLastFocus)) {
+                rrLastFocus.focus();
+            }
+            rrLastFocus = null;
+        }
+
+        function onRRKeydown(event) {
+            if (event.key !== "Escape") return;
+            const anyOpen = ["rrTaskModal", "rrReviewModal", "rrExitModal"].some((id) => {
+                const el = document.getElementById(id);
+                return el && el.classList.contains("show");
+            });
+            if (anyOpen) closeAllRRModals();
+        }
+
+        /* ---------------------------------------------------------------
+           Click delegation
+           --------------------------------------------------------------- */
+        function onRRRootClick(event) {
+            const el = event.target.closest("[data-action]");
+            if (!el) return;
+            const action = el.dataset.action;
+
+            if (action === "rules") { openInstructionsModal(); return; }
+            if (action === "review") { openRRReview(); return; }
+            if (action === "tryagain") { openResetConfirmModal(); return; }
+            if (action === "exit") { rrLastFocus = el; openRRModal("rrExitModal"); return; }
+            if (action === "open-item") { openRRTask(el.dataset.item, el); return; }
+            if (action === "open-final") { openRRTask("final", el); return; }
+        }
+
+        document.addEventListener("click", (event) => {
+            const el = event.target.closest("[data-action]");
+            if (!el) return;
+            const action = el.dataset.action;
+            if (action === "close-task") { closeAllRRModals(); return; }
+            if (action === "back-house") { closeAllRRModals(); return; }
+            if (action === "close-review") { closeAllRRModals(); return; }
+            if (action === "close-exit") { closeAllRRModals(); showScreen("home"); return; }
+            if (action === "toggle-hint") { toggleRRHint(); return; }
+            if (action === "choose") { chooseRRAnswer(el.dataset.strategy); return; }
+            if (action === "continue") { continueAfterCorrect(); return; }
+            if (action === "review-house") { rr.view = "house"; closeAllRRModals(); refreshRRView(); return; }
+        });
+
+        function openRRModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add("show");
+            const focusTarget = modal.querySelector("button, [href], input, select, textarea");
+            if (focusTarget) focusTarget.focus();
+        }
+
+        /* ---------------------------------------------------------------
+           Task (scenario / final question) panel
+           --------------------------------------------------------------- */
+        function currentTaskDef() {
+            if (rr.openTask === "final") return RR_FINAL;
+            return rrItemDef(rr.openTask);
+        }
+
+        function openRRTask(id, triggerEl) {
+            if (id !== "final") {
+                const state = rrItemState(id);
+                if (state.solved) { openRRReview(); return; }
+            } else if (rr.finalSolved) {
+                openRRReview();
+                return;
+            }
+            rrLastFocus = triggerEl || document.activeElement;
+            rr.openTask = id;
+            const def = currentTaskDef();
+
+            document.getElementById("rrTaskTag").textContent = id === "final" ? "Final Question" : "Investigate";
+            document.getElementById("rrTaskHeading").textContent = id === "final" ? "Final Question" : rrItemDef(id).name;
+            document.getElementById("rrTaskScenario").textContent = def.prompt || def.scenario;
+
+            const choices = document.getElementById("rrTaskChoices");
+            choices.innerHTML = "";
+            RR_STRATEGY_ORDER.forEach((key) => {
+                const strat = RR_STRATEGIES[key];
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "rr-choice-btn";
+                btn.dataset.action = "choose";
+                btn.dataset.strategy = key;
+                btn.innerHTML = '<span class="rr-choice-icon" aria-hidden="true">' + strat.icon + "</span><span>" + strat.label + "</span>";
+                choices.appendChild(btn);
+            });
+
+            const feedback = document.getElementById("rrTaskFeedback");
+            feedback.className = "rr-feedback hidden";
+            feedback.textContent = "";
+            const hint = document.getElementById("rrTaskHint");
+            hint.className = "rr-hint-box hidden";
+            hint.textContent = hintTextFor(def.correct);
+            document.getElementById("rrContinueBtn").classList.add("hidden");
+
+            openRRModal("rrTaskModal");
+        }
+
+        function hintTextFor(correctKey) {
+            if (correctKey === "reuse" || correctKey === "recycle") {
+                return RR_HINT_GENERAL + " " + RR_HINT_REUSE_RECYCLE;
+            }
+            return RR_HINT_GENERAL;
+        }
+
+        function toggleRRHint() {
+            const hint = document.getElementById("rrTaskHint");
+            hint.classList.toggle("hidden");
+        }
+
+        function chooseRRAnswer(strategy) {
+            const id = rr.openTask;
+            const def = currentTaskDef();
+            const choices = document.getElementById("rrTaskChoices").children;
+            const feedback = document.getElementById("rrTaskFeedback");
+            const correct = strategy === def.correct;
+
+            Array.from(choices).forEach((btn) => {
+                btn.disabled = correct; // lock choices once solved; keep enabled while retrying
+                delete btn.dataset.state;
+                if (btn.dataset.strategy === strategy) {
+                    btn.dataset.state = correct ? "correct" : "incorrect";
+                }
+            });
+
+            if (id === "final") {
+                rr.finalAttempts += 1;
+                if (correct && rr.finalAttempts === 1) rr.finalFirstTry = true;
+            } else {
+                const state = rrItemState(id);
+                state.attempts += 1;
+                if (correct && state.attempts === 1) state.firstTry = true;
+            }
+
+            feedback.classList.remove("hidden");
+            if (correct) {
+                feedback.dataset.kind = "correct";
+                feedback.innerHTML = '<span class="rr-feedback-icon" aria-hidden="true">✔</span><span><strong>Correct.</strong> ' + escapeHtml(def.correctFeedback) + "</span>";
+                document.getElementById("rrContinueBtn").classList.remove("hidden");
+                setRRMascot(id === "final" ? "All five fixed and the final question answered — well done, Ranger!" : "Nice fix! The home is looking greener already.");
+            } else {
+                feedback.dataset.kind = "incorrect";
+                feedback.innerHTML = '<span class="rr-feedback-icon" aria-hidden="true">✘</span><span><strong>Not correct.</strong> ' + escapeHtml(def.incorrectFeedback) + "</span>";
+                setRRMascot("Not this time — read the feedback and pick again.");
+            }
+        }
+
+        function continueAfterCorrect() {
+            const id = rr.openTask;
+            if (id === "final") {
+                rr.points += RR_FINAL_POINTS + (rr.finalFirstTry ? RR_FINAL_BONUS : 0);
+                rr.finalSolved = true;
+                closeAllRRModals();
+                spawnConfetti(true);
+                rr.view = "complete";
+                refreshRRView();
+                return;
+            }
+
+            const state = rrItemState(id);
+            state.solved = true;
+            rr.points += RR_ITEM_POINTS + (state.firstTry ? RR_ITEM_BONUS : 0);
+            closeAllRRModals();
+            spawnConfetti(false);
+            refreshRRView();
+
+            if (rrSolvedCount() === RR_ITEMS.length && !rr.finalSolved) {
+                setRRMascot("All five fixed! One more question to complete the audit.");
+                window.setTimeout(() => {
+                    if (rrSolvedCount() === RR_ITEMS.length && !rr.finalSolved) {
+                        openRRTask("final", document.getElementById("rrFinalBtn"));
+                    }
+                }, 450);
+            }
+        }
+
+        function spawnConfetti(big) {
+            if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            const layer = document.getElementById("rrConfetti");
+            if (!layer) return;
+            const pieces = ["🌿", "♻️", "✨", "🌎", "💚"];
+            const count = big ? 18 : 10;
+            for (let i = 0; i < count; i++) {
+                const span = document.createElement("span");
+                span.className = "rr-confetti-piece";
+                span.textContent = pieces[i % pieces.length];
+                span.style.left = Math.round(Math.random() * 92) + "%";
+                span.style.animationDelay = (Math.random() * 0.3) + "s";
+                layer.appendChild(span);
+                window.setTimeout(() => span.remove(), 1600);
+            }
+        }
+
+        function setRRMascot(text) {
+            const line = document.getElementById("rrMascotLine");
+            if (line) line.textContent = text;
+        }
+
+        /* ---------------------------------------------------------------
+           Review / History panel (QA checklist 3.5 / 4.1)
+           --------------------------------------------------------------- */
+        function openRRReview() {
+            const body = document.getElementById("rrReviewBody");
+            body.innerHTML = "";
+
+            RR_ITEMS.forEach((item) => {
+                const state = rrItemState(item.id);
+                const row = document.createElement("div");
+                row.className = "rr-review-row";
+                row.dataset.solved = String(state.solved);
+                row.innerHTML =
+                    "<strong>" + item.icon + " " + escapeHtml(item.name) + "</strong><br>" +
+                    '<span class="rr-review-status">' + (state.solved ? "Solved — " + "★".repeat(rrStarsFor(state.attempts)) + "☆".repeat(3 - rrStarsFor(state.attempts)) : "Not yet solved") + "</span><br>" +
+                    "<span>" + (state.solved ? escapeHtml(item.correctFeedback) : "Investigate this object in the house to see the correct 4R strategy.") + "</span>";
+                body.appendChild(row);
+            });
+
+            const finalRow = document.createElement("div");
+            finalRow.className = "rr-review-row";
+            finalRow.dataset.solved = String(rr.finalSolved);
+            finalRow.innerHTML =
+                "<strong>🌍 Final Question</strong><br>" +
+                '<span class="rr-review-status">' + (rr.finalSolved ? "Solved" : "Not yet solved") + "</span><br>" +
+                "<span>" + (rr.finalSolved ? escapeHtml(RR_FINAL.correctFeedback) : "Fix all five household problems first to unlock the final question.") + "</span>";
+            body.appendChild(finalRow);
+
+            openRRModal("rrReviewModal");
+        }
+
+        /* ---------------------------------------------------------------
+           Render — sync the DOM to the current game state
+           --------------------------------------------------------------- */
+        function refreshRRView() {
+            const solvedCount = rrSolvedCount();
+            const progressText = document.getElementById("rrProgressText");
+            if (progressText) progressText.textContent = "Problems solved: " + solvedCount + " of " + RR_ITEMS.length;
+            const fill = document.getElementById("rrEcobarFill");
+            if (fill) fill.style.width = Math.round((solvedCount / RR_ITEMS.length) * 100) + "%";
+
+            const pointsPill = document.getElementById("rrPointsPill");
+            if (pointsPill) pointsPill.textContent = "⭐ " + rr.points + " pts";
+            const badge = rrBadgeFor(rr.points);
+            const badgePill = document.getElementById("rrBadgePill");
+            if (badgePill) badgePill.textContent = badge.icon + " " + badge.name;
+
+            RR_ITEMS.forEach((item) => {
+                const state = rrItemState(item.id);
+                const hotspot = document.getElementById("rrHotspot-" + item.id);
+                if (!hotspot) return;
+                hotspot.dataset.solved = String(state.solved);
+                const icon = document.getElementById("rrIcon-" + item.id);
+                if (icon) icon.textContent = state.solved ? item.fixedIcon : item.icon;
+                let check = hotspot.querySelector(".rr-hotspot-check");
+                if (state.solved && !check) {
+                    check = document.createElement("span");
+                    check.className = "rr-hotspot-check";
+                    check.setAttribute("aria-hidden", "true");
+                    check.textContent = "✔";
+                    hotspot.appendChild(check);
+                } else if (!state.solved && check) {
+                    check.remove();
+                }
+                hotspot.setAttribute(
+                    "aria-label",
+                    item.name + (state.solved ? " — solved, fixed with " + RR_STRATEGIES[item.correct].label + ". Select to review." : " — not yet solved. Select to investigate.")
+                );
+            });
+
+            const tvSolved = rrItemState("tv").solved;
+            const tvStand = document.getElementById("rrTvStand");
+            if (tvStand) tvStand.dataset.on = String(!tvSolved);
+
+            for (let i = 0; i < 5; i++) {
+                const leaf = document.querySelector('.rr-leaf[data-leaf="' + i + '"]');
+                if (leaf) leaf.classList.toggle("rr-leaf-on", i < solvedCount);
+            }
+
+            const finalBtn = document.getElementById("rrFinalBtn");
+            if (finalBtn) {
+                const unlocked = solvedCount === RR_ITEMS.length && !rr.finalSolved;
+                finalBtn.classList.toggle("hidden", !unlocked);
+            }
+
+            if (solvedCount === 0) {
+                setRRMascot("Welcome, Ranger! Select a glowing object to begin your household audit.");
+            } else if (solvedCount < RR_ITEMS.length) {
+                setRRMascot("Great work! " + solvedCount + " of " + RR_ITEMS.length + " problems fixed. Keep going!");
+            } else if (!rr.finalSolved) {
+                setRRMascot("All five fixed! Answer the final question to complete the audit.");
+            }
+
+            const houseView = document.getElementById("rrRoot");
+            const completeView = document.getElementById("rrComplete");
+            if (rr.view === "complete") {
+                renderRRComplete();
+                Array.from(houseView.children).forEach((child) => {
+                    if (child.id !== "rrComplete") child.classList.add("hidden");
+                });
+                completeView.classList.remove("hidden");
+            } else {
+                Array.from(houseView.children).forEach((child) => {
+                    if (child.id !== "rrComplete") child.classList.remove("hidden");
+                });
+                completeView.classList.add("hidden");
+            }
+        }
+
+        function renderRRComplete() {
+            const badge = rrBadgeFor(rr.points);
+            const firstTryCount = rr.items.filter((i) => i.firstTry).length + (rr.finalFirstTry ? 1 : 0);
+            const rows = RR_ITEMS.map((item) =>
+                "<tr><td>" + escapeHtml(item.summaryLabel) + "</td><td>" + RR_STRATEGIES[item.correct].icon + " " + escapeHtml(RR_STRATEGIES[item.correct].label) + "</td></tr>"
+            ).join("");
+
+            const completeView = document.getElementById("rrComplete");
+            completeView.innerHTML = `
+                <div class="hero-card" style="padding: clamp(18px, 3vw, 30px);">
+                    <h2>Household audit complete!</h2>
+                    <p>You applied the 4Rs correctly and made the household more environmentally friendly.</p>
+                    <div class="rr-stat-grid">
+                        <div class="rr-stat-card"><span class="rr-stat-value">${rr.points}</span><span class="rr-stat-label">Points (of ${RR_MAX_POINTS})</span></div>
+                        <div class="rr-stat-card"><span class="rr-stat-value">${badge.icon}</span><span class="rr-stat-label">${escapeHtml(badge.name)}</span></div>
+                        <div class="rr-stat-card"><span class="rr-stat-value">${firstTryCount} / 6</span><span class="rr-stat-label">Solved first try</span></div>
+                    </div>
+                    <table class="rr-table">
+                        <thead><tr><th>Household situation</th><th>Correct strategy</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div class="hero-actions">
+                        <button class="secondary-btn" type="button" data-action="review-house">Review Household</button>
+                        <button class="secondary-btn" type="button" data-action="tryagain">Try Again</button>
+                        <button class="primary-btn" type="button" data-action="exit">Exit to Lesson</button>
+                    </div>
+                </div>`;
+        }
+    </script>
+</body>
+
+</html>
