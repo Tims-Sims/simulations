@@ -601,6 +601,17 @@
             color: var(--text-soft);
         }
 
+        .hint-text {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: color-mix(in srgb, var(--warning) 10%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            color: var(--text-soft);
+            line-height: 1.5;
+        }
+
         @media (max-width: 600px) {
             .split-screen {
                 grid-template-columns: 1fr;
@@ -908,7 +919,9 @@
                 oxygenPerSec: 0,
                 countWindow: [],
                 answered: false,
-                selectedChoice: null
+                selectedChoice: null,
+                attempts: 0,
+                firstAttemptCorrect: null
             };
             initCanvas();
             startAnimation();
@@ -984,12 +997,18 @@
                             Oxygen particles become lighter and move on their own.
                         </button>
                     </div>
+                    <div class="button-row" style="margin-top: 10px; justify-content: flex-start;">
+                        <button class="ghost-btn" id="hintBtn">Hint</button>
+                        <button class="secondary-btn hidden" id="retryBtn">Try Again</button>
+                    </div>
                     <div class="assessment-feedback" id="assessmentFeedback"></div>
                 </div>
             `;
 
             document.getElementById("energySlider").addEventListener("input", onSliderChange);
             document.getElementById("pauseBtn").addEventListener("click", togglePause);
+            document.getElementById("hintBtn").addEventListener("click", showHint);
+            document.getElementById("retryBtn").addEventListener("click", retryAssessment);
 
             const choices = document.querySelectorAll(".assessment-choice");
             choices.forEach((btn) => btn.addEventListener("click", () => onAssessmentChoice(btn)));
@@ -1209,30 +1228,66 @@
         }
 
         /* Assessment */
+        const CORRECT_INDEX = 1;
+
         function onAssessmentChoice(btn) {
             if (simState.answered) return;
-            simState.answered = true;
+            simState.attempts++;
             simState.selectedChoice = Number(btn.dataset.index);
 
-            const correctIndex = 1;
             const allChoices = document.querySelectorAll(".assessment-choice");
             allChoices.forEach((c) => c.classList.add("disabled"));
+            document.getElementById("hintBtn").classList.add("hidden");
 
             const feedback = document.getElementById("assessmentFeedback");
 
-            if (simState.selectedChoice === correctIndex) {
+            if (simState.selectedChoice === CORRECT_INDEX) {
                 btn.classList.add("correct");
                 feedback.className = "assessment-feedback correct";
                 feedback.innerHTML = "<strong>Correct!</strong> Active cells require more oxygen to carry out cellular respiration at a faster rate. This process releases the extra energy needed for the increased physical activity.";
+                simState.answered = true;
+                simState.firstAttemptCorrect = simState.attempts === 1;
+                storageSet(SIM_CONFIG.simId + ":firstAttempt", simState.firstAttemptCorrect ? "correct" : "wrong");
+                storageSet(SIM_CONFIG.simId + ":attempts", String(simState.attempts));
             } else {
                 btn.classList.add("incorrect");
-                allChoices[correctIndex].classList.add("correct");
+                allChoices[CORRECT_INDEX].classList.add("correct");
                 feedback.className = "assessment-feedback incorrect";
-                feedback.innerHTML = "<strong>Not quite.</strong> The correct answer is: Active cells require more oxygen to carry out cellular respiration at a faster rate. This process releases the extra energy needed for the increased physical activity.";
+                if (simState.attempts < 2) {
+                    feedback.innerHTML = "<strong>Not quite.</strong> Think about what happens inside the body's cells when they need more energy. Try again!";
+                    document.getElementById("retryBtn").classList.remove("hidden");
+                } else {
+                    feedback.innerHTML = "<strong>Not quite.</strong> The correct answer is: Active cells require more oxygen to carry out cellular respiration at a faster rate. This process releases the extra energy needed for the increased physical activity.";
+                    simState.answered = true;
+                    simState.firstAttemptCorrect = false;
+                    storageSet(SIM_CONFIG.simId + ":firstAttempt", "wrong");
+                    storageSet(SIM_CONFIG.simId + ":attempts", String(simState.attempts));
+                }
             }
+        }
 
-            /* First attempt tracking */
-            storageSet(SIM_CONFIG.simId + ":firstAttempt", simState.selectedChoice === correctIndex ? "correct" : "wrong");
+        function retryAssessment() {
+            simState.answered = false;
+            simState.selectedChoice = null;
+            document.getElementById("retryBtn").classList.add("hidden");
+            document.getElementById("assessmentFeedback").className = "assessment-feedback";
+            document.getElementById("assessmentFeedback").innerHTML = "";
+            const allChoices = document.querySelectorAll(".assessment-choice");
+            allChoices.forEach((c) => {
+                c.classList.remove("disabled", "correct", "incorrect", "selected");
+            });
+        }
+
+        function showHint() {
+            const section = document.getElementById("assessmentSection");
+            let existing = document.getElementById("hintText");
+            if (!existing) {
+                existing = document.createElement("div");
+                existing.id = "hintText";
+                existing.className = "hint-text";
+                existing.textContent = "Look at how many oxygen particles are needed when the muscles work harder.";
+                section.appendChild(existing);
+            }
         }
     </script>
 </body>
