@@ -2019,6 +2019,8 @@
             return {
                 screenIndex: 0,
                 stepIndex: 0,
+                maxScreenIndex: 0,
+                maxStepIndex: 0,
                 done: {},
                 selections: {},
                 firstTry: {},
@@ -2260,6 +2262,7 @@
                 tryagain: { label: "Try Again", cls: "secondary-btn" },
                 reviewcontinue: { label: "Continue", cls: "primary-btn" },
                 reviewnext: { label: "Next", cls: "secondary-btn" },
+                next: { label: "Next", cls: "secondary-btn" },
                 playagain: { label: "Play again", cls: "primary-btn" }
             };
             let html = "";
@@ -2351,6 +2354,8 @@
                 gameState.screenIndex++;
                 gameState.stepIndex = 0;
             }
+            gameState.maxScreenIndex = gameState.screenIndex;
+            gameState.maxStepIndex = gameState.stepIndex;
             renderScreen();
             saveGame();
         }
@@ -2397,8 +2402,55 @@
                 return;
             }
             if (gameState.screenIndex === 0 && gameState.stepIndex === 0) return;
-            gameState.reviewIndex = gameState.stepIndex > 0 ? gameState.screenIndex : gameState.screenIndex - 1;
-            renderScreen();
+            if (gameState.stepIndex > 0) {
+                gameState.stepIndex--;
+            } else {
+                gameState.screenIndex--;
+                gameState.stepIndex = SCREENS[gameState.screenIndex].steps.length - 1;
+            }
+            var step = currentStep();
+            var mode = gameState.done[step.id] ? "done" : "interact";
+            resetSelection(step.id);
+            renderStep(step, mode);
+            var actions = [];
+            if (mode === "done") {
+                actions.push({ action: "continue", label: "Continue" });
+            } else {
+                actions.push({ action: "check", label: "Check answer" });
+            }
+            var atMax = gameState.screenIndex === gameState.maxScreenIndex && gameState.stepIndex === gameState.maxStepIndex;
+            if (!atMax) {
+                actions.push({ action: "next", label: "Next" });
+            }
+            renderActions(actions);
+            clearFeedback();
+            saveGame();
+        }
+
+        function handleNext() {
+            var sc = SCREENS[gameState.screenIndex];
+            if (gameState.stepIndex < sc.steps.length - 1) {
+                gameState.stepIndex++;
+            } else {
+                gameState.screenIndex++;
+                gameState.stepIndex = 0;
+            }
+            var step = currentStep();
+            var mode = gameState.done[step.id] ? "done" : "interact";
+            resetSelection(step.id);
+            renderStep(step, mode);
+            var actions = [];
+            if (mode === "done") {
+                actions.push({ action: "continue", label: "Continue" });
+            } else {
+                actions.push({ action: "check", label: "Check answer" });
+            }
+            var atMax = gameState.screenIndex === gameState.maxScreenIndex && gameState.stepIndex === gameState.maxStepIndex;
+            if (!atMax) {
+                actions.push({ action: "next", label: "Next" });
+            }
+            renderActions(actions);
+            clearFeedback();
             saveGame();
         }
 
@@ -2449,6 +2501,7 @@
                 }
             }
             else if (a === "playagain") { handlePlayAgain(); }
+            else if (a === "next") { handleNext(); }
         }
 
         function computeReport() {
