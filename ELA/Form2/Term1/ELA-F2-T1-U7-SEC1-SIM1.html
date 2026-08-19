@@ -822,7 +822,7 @@
             background: var(--surface-2);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 16px;
+            padding: 20px 22px;
         }
 
         .task-kicker {
@@ -839,8 +839,8 @@
         }
 
         .task-prompt {
-            margin-top: 8px;
-            margin-bottom: 20px;
+            margin-top: 10px;
+            margin-bottom: 24px;
             color: var(--text-soft);
             line-height: 1.6;
         }
@@ -865,13 +865,13 @@
         }
 
         .group-block {
-            margin-top: 18px;
+            margin-top: 22px;
         }
 
         .group-label {
             font-weight: 800;
             color: var(--text);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .group-prompt {
@@ -883,7 +883,7 @@
         .option-list {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 10px;
+            gap: 12px;
         }
 
         .option-grid-2 {
@@ -1263,7 +1263,6 @@
                     </div>
                     <div class="hero-actions">
                         <button class="primary-btn" id="startBtn">Start</button>
-                        <button class="secondary-btn" id="openInstructionsBtn">Read Rules</button>
                     </div>
                 </section>
             </div>
@@ -1518,7 +1517,6 @@
             simScreen: document.getElementById("simScreen"),
             simContainer: document.getElementById("simContainer"),
             startBtn: document.getElementById("startBtn"),
-            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
             helpBtn: document.getElementById("helpBtn"),
             themeToggleBtn: document.getElementById("themeToggleBtn"),
@@ -1588,7 +1586,6 @@
                 showScreen("sim");
                 devInit();
             });
-            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
                 dom.helpBtn.classList.remove("pulse-help");
                 storageSet(SIM_CONFIG.simId + "-help-seen", "true");
@@ -2230,11 +2227,14 @@
                 });
                 html += '</div>';
             });
-            html += '<p class="fb-line" style="margin-top:12px;color:var(--success);font-weight:700;">✓ Bolt open — your answers and the correct ones are shown above.</p></div>';
+            if (anyDone) {
+                html += '<p class="fb-line" style="margin-top:12px;color:var(--success);font-weight:700;">✓ Bolt open — your answers and the correct ones are shown above.</p>';
+            }
+            html += '</div>';
             document.getElementById("taskArea").innerHTML = html;
             clearFeedback();
             var actions = [{ action: "reviewcontinue", label: "Continue" }];
-            if (idx < SCREENS.length - 1) {
+            if (idx < SCREENS.length - 1 && isScreenReviewable(idx + 1)) {
                 actions.push({ action: "reviewnext", label: "Next" });
             }
             renderActions(actions);
@@ -2248,10 +2248,17 @@
             if (gameState.completed && gameState.reviewIndex === null) { renderCompletion(); return; }
             if (gameState.reviewIndex !== null) { renderReview(gameState.reviewIndex); return; }
             const step = currentStep();
-            resetSelection(step.id);
-            renderStep(step, "interact");
-            renderActions([{ action: "check", label: "Check answer" }]);
-            clearFeedback();
+            if (gameState.done[step.id]) {
+                resetSelection(step.id);
+                renderStep(step, "done");
+                renderActions([{ action: "continue", label: "Continue" }]);
+                clearFeedback();
+            } else {
+                resetSelection(step.id);
+                renderStep(step, "interact");
+                renderActions([{ action: "check", label: "Check answer" }]);
+                clearFeedback();
+            }
         }
 
         function renderActions(buttons) {
@@ -2581,10 +2588,17 @@
             document.getElementById("gameActions").addEventListener("click", handleActionClick);
         }
 
+        function shuffleStepOptions() {
+            Object.keys(STEPS).forEach(function (k) {
+                STEPS[k].groups.forEach(function (g) { shuffleArray(g.options); });
+            });
+        }
+
         function devInit() {
             const saved = loadGame();
             gameState = saved ? saved : freshState();
             selection = {};
+            if (!saved) shuffleStepOptions();
             bindGame();
             renderStage();
             renderDoor();
@@ -2596,6 +2610,7 @@
             clearGame();
             gameState = freshState();
             selection = {};
+            shuffleStepOptions();
             renderStage();
             renderDoor();
             renderProgress();
