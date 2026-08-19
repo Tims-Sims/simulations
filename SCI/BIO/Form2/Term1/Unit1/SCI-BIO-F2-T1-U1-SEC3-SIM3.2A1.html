@@ -1,0 +1,2152 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Respiration Equation Builder</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        #simContainer {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sub-screen {
+            display: none;
+            flex-direction: column;
+            gap: 18px;
+            width: 100%;
+        }
+
+        .sub-screen.active {
+            display: flex;
+        }
+
+        /* ---------- shared sim nav row (Exit / progress / Rules / Review) ---------- */
+
+        .sim-navbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .sim-progress {
+            font-weight: 700;
+            color: var(--text-soft);
+            font-size: 0.95rem;
+        }
+
+        .sim-navbar .nav-cluster {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sim-navbar button,
+        .action-row button,
+        .choice-btn,
+        .badge {
+            min-height: 44px;
+        }
+
+        .rank-chip,
+        .combo-chip,
+        .score-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: var(--text-soft);
+        }
+
+        .hud-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* ---------- mission screen ---------- */
+
+        .mission-hero {
+            text-align: center;
+            padding: 8px;
+        }
+
+        .mascot-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .mascot-svg {
+            width: 96px;
+            height: 96px;
+        }
+
+        .mission-hero h2 {
+            margin: 6px 0;
+            font-size: clamp(1.4rem, 3vw, 2rem);
+        }
+
+        .mission-hero p {
+            color: var(--text-soft);
+            max-width: 620px;
+            margin: 8px auto;
+            line-height: 1.6;
+        }
+
+        .objective-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            text-align: left;
+            max-width: 620px;
+            margin: 14px auto 0;
+        }
+
+        .objective-card h3 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+        }
+
+        .objective-card ul {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        /* ---------- reactor rig ---------- */
+
+        .rig-wrap {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: clamp(14px, 3vw, 26px);
+        }
+
+        .rig {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .rig-side {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rig-op {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--muted);
+            padding: 0 2px;
+        }
+
+        .reactor-core {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 14px;
+            border-radius: var(--radius-md);
+        }
+
+        .reactor-core-arrow {
+            font-size: 2rem;
+            line-height: 1;
+            color: var(--accent);
+            transition: transform 0.4s ease, color 0.4s ease, text-shadow 0.4s ease;
+        }
+
+        .reactor-core.firing .reactor-core-arrow {
+            color: var(--success);
+            text-shadow: 0 0 18px color-mix(in srgb, var(--success) 60%, transparent);
+        }
+
+        .reactor-core.firing:not(.reduced-motion) .reactor-core-arrow {
+            animation: reactorPulse 1.1s ease-in-out infinite;
+        }
+
+        @keyframes reactorPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+        }
+
+        .reactor-core-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .bay {
+            width: 108px;
+            min-height: 108px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px;
+            text-align: center;
+            transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .bay-label {
+            font-size: 0.66rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .bay.drag-over {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+        }
+
+        .bay.kb-target {
+            border-color: var(--accent-2);
+            box-shadow: var(--focus);
+        }
+
+        .bay.bay-correct {
+            border-style: solid;
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 14%, var(--surface));
+        }
+
+        .bay.bay-wrong {
+            border-style: solid;
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 14%, var(--surface));
+        }
+
+        .bay-status {
+            font-size: 0.68rem;
+            font-weight: 800;
+        }
+
+        .bay-status.status-correct { color: var(--success); }
+        .bay-status.status-wrong { color: var(--danger); }
+
+        /* ---------- fuel tiles ---------- */
+
+        .tray {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            padding: 14px;
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            min-height: 92px;
+        }
+
+        .fuel-tile {
+            width: 96px;
+            min-height: 44px;
+            padding: 10px 8px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-align: center;
+            cursor: grab;
+            user-select: none;
+            box-shadow: var(--shadow);
+        }
+
+        .fuel-tile .tile-icon {
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .fuel-tile:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .fuel-tile.kb-selected {
+            border-color: #ffffff;
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent);
+        }
+
+        .fuel-tile.placed-tile {
+            width: 100%;
+            cursor: grab;
+        }
+
+        .fuel-tile[aria-disabled="true"] {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .bay-empty-hint {
+            color: var(--muted);
+            font-size: 0.72rem;
+        }
+
+        /* ---------- action rows / buttons ---------- */
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        /* ---------- feedback panel (never colour alone) ---------- */
+
+        .feedback-panel {
+            border-radius: var(--radius-lg);
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .feedback-panel.show {
+            display: flex;
+        }
+
+        .feedback-panel.feedback-correct {
+            background: color-mix(in srgb, var(--success) 14%, var(--surface));
+            border-color: color-mix(in srgb, var(--success) 45%, transparent);
+        }
+
+        .feedback-panel.feedback-wrong {
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+            border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+        }
+
+        .feedback-title {
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feedback-item {
+            border-top: 1px dashed var(--border);
+            padding-top: 8px;
+            margin-top: 2px;
+            font-size: 0.92rem;
+            color: var(--text-soft);
+            line-height: 1.55;
+        }
+
+        .feedback-item strong {
+            color: var(--text);
+        }
+
+        /* ---------- assessment screen ---------- */
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        @media (max-width: 560px) {
+            .choice-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .choice-btn {
+            text-align: left;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .choice-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .choice-btn.choice-correct {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 16%, var(--surface));
+        }
+
+        .choice-btn.choice-wrong {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 14%, var(--surface));
+        }
+
+        .choice-btn[aria-disabled="true"] {
+            cursor: not-allowed;
+        }
+
+        .choice-tag {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-top: 6px;
+        }
+
+        .choice-tag.tag-correct { color: var(--success); }
+        .choice-tag.tag-wrong { color: var(--danger); }
+
+        /* ---------- badges / combo ---------- */
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: 112px;
+            padding: 12px 8px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            text-align: center;
+        }
+
+        .badge .badge-icon {
+            font-size: 1.6rem;
+        }
+
+        .badge .badge-name {
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .badge .badge-state {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .badge.unlocked {
+            border-color: var(--warning);
+            background: color-mix(in srgb, var(--warning) 16%, var(--surface));
+        }
+
+        .badge.unlocked .badge-state {
+            color: var(--warning);
+        }
+
+        /* ---------- completion / certificate ---------- */
+
+        .certificate {
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            padding: clamp(18px, 4vw, 32px);
+            text-align: center;
+            background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 420px) {
+            .stat-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .stat-tile {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+        }
+
+        .stat-tile .stat-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .stat-tile .stat-label {
+            font-size: 0.76rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* ---------- custom sim confirm + review modals (own markup, chrome untouched) ---------- */
+
+        .sim-modal-card p,
+        .sim-modal-card li {
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        .review-log {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .review-log li {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            font-size: 0.88rem;
+        }
+
+        .review-log .rl-tag {
+            font-weight: 800;
+            margin-right: 6px;
+        }
+
+        .review-log .rl-tag.ok { color: var(--success); }
+        .review-log .rl-tag.no { color: var(--danger); }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reactor-core.firing .reactor-core-arrow {
+                animation: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <!-- Built entirely by devInit() in DEV-EDIT: SIM LOGIC below. -->
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            SCI-BIO-F2-T1-U1-SEC3-SIM3.2A1 · Reactor Bay: Respiration Equation Builder · runs fully offline
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "SCI-BIO-F2-T1-U1-SEC3-SIM3.2A1",
+            title: "Reactor Bay: Respiration Equation Builder",
+            subtitle: "Load the reactants, fire the reactor, ship the products",
+            badgeText: "BAY",
+            homeEyebrow: "Cell Energy Foundry",
+            homeDescription:
+                "Suit up as a Reactor Bay technician. Load the two raw materials the cell breathes in, then confirm the three things the reaction makes — and fire up the cellular respiration reactor for real.",
+            instructions: [
+                "Drag each cargo tile into a bay on the equation rig — two Reactant Bays before the arrow, three Product Bays after it.",
+                "Reactants are what goes IN at the start. Products are what comes OUT once the reaction has happened.",
+                "Press Check Equation when all five bays are full. A wrong bay lights up amber with a note on what to fix — nothing is ever locked in wrong.",
+                "Use Hint any time you are stuck. Try Again and Back always ask before clearing your work.",
+                "Once the reactor fires, answer one quick question about the equation to earn your Reactor Technician badge.",
+                "This file runs completely offline in a browser. No internet is needed, and closing the tab clears everything."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* --- HANDY UTILITIES --- */
+        function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+        /* ---- Sim data (from issue #163 spec + answer key) ---- */
+        const TILE_DEFS = {
+            glucose: { id: "glucose", label: "Glucose", icon: "🍬", side: "reactant" },
+            oxygen: { id: "oxygen", label: "Oxygen", icon: "💨", side: "reactant" },
+            co2: { id: "co2", label: "Carbon Dioxide", icon: "☁️", side: "product" },
+            water: { id: "water", label: "Water", icon: "💧", side: "product" },
+            energy: { id: "energy", label: "Energy", icon: "⚡", side: "product" }
+        };
+        const BAY_DEFS = [
+            { id: "r1", side: "reactant", label: "Reactant Bay 1" },
+            { id: "r2", side: "reactant", label: "Reactant Bay 2" },
+            { id: "p1", side: "product", label: "Product Bay 1" },
+            { id: "p2", side: "product", label: "Product Bay 2" },
+            { id: "p3", side: "product", label: "Product Bay 3" }
+        ];
+        const HINTS = [
+            "What do you breathe in?",
+            "What is the fuel from your food?"
+        ];
+        const MODEL_EQUATION = "Glucose + Oxygen → Carbon Dioxide + Water + Energy";
+        const BADGE_DEFS = [
+            { id: "bronze", name: "Bronze Technician", icon: "🥉", threshold: 30 },
+            { id: "silver", name: "Silver Engineer", icon: "🥈", threshold: 60 },
+            { id: "gold", name: "Gold Reactor Master", icon: "🥇", threshold: 100 }
+        ];
+        const ASSESS_CHOICES = [
+            {
+                id: "a", correct: true, text: "Glucose and Oxygen"
+            },
+            {
+                id: "b", correct: false, text: "Carbon Dioxide and Water",
+                what: "You picked Carbon Dioxide and Water.",
+                why: "Both of these are made during the reaction — they are products, not the substances the cell starts with.",
+                fix: "Look for the two substances shown on the left of the arrow, before the reaction happens.",
+            },
+            {
+                id: "c", correct: false, text: "Glucose and Water",
+                what: "You picked Glucose and Water.",
+                why: "Glucose is a reactant, but Water is a product made by the reaction — it isn't there at the start.",
+                fix: "Both reactants have to come from the left side of the equation.",
+            },
+            {
+                id: "d", correct: false, text: "Oxygen and Energy",
+                what: "You picked Oxygen and Energy.",
+                why: "Oxygen is a reactant, but Energy is released once the reaction happens — it isn't something the cell starts with.",
+                fix: "Both reactants have to come from the left side of the equation.",
+            }
+        ];
+
+        /* ---- mascot (hand-authored inline SVG, no external assets) ---- */
+        function mascotSvg(mood) {
+            const mouth = mood === "celebrating" ? '<path d="M20 30 Q28 40 36 30" stroke="#17203f" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+                : mood === "excited" ? '<circle cx="28" cy="31" r="4.5" fill="#17203f"/>'
+                : '<path d="M21 30 Q28 34 35 30" stroke="#17203f" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+            const arms = mood === "celebrating" ? '<path d="M8 34 L2 22" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/><path d="M48 34 L54 22" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>' : "";
+            return '<svg class="mascot-svg" viewBox="0 0 56 56" role="img" aria-label="Blaze the energy spark mascot, ' + mood + '">' +
+                arms +
+                '<circle cx="28" cy="28" r="22" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>' +
+                '<circle cx="19" cy="24" r="3.4" fill="#17203f"/>' +
+                '<circle cx="37" cy="24" r="3.4" fill="#17203f"/>' +
+                mouth +
+                '</svg>';
+        }
+
+        /* ---- mutable sim state ---- */
+        const sim = {
+            currentStage: "mission",
+            placements: {},
+            trayIds: [],
+            pickedTile: null,
+            hintIndex: -1,
+            hintsUsed: 0,
+            score: 0,
+            combo: 0,
+            equationAttempts: 0,
+            equationSolved: false,
+            equationFlawless: true,
+            assessAttempts: 0,
+            assessSolved: false,
+            assessSelected: null,
+            reviewLog: [],
+            reducedMotion: false,
+            pendingConfirm: null
+        };
+
+        function announce(text) {
+            const el = document.getElementById("liveAnnouncer");
+            if (el) el.textContent = text;
+        }
+
+        function updateProgressText() {
+            const el = document.getElementById("simProgress");
+            if (!el) return;
+            const map = {
+                mission: "Mission Briefing",
+                build: "Stage 1 of 2 — Build the Equation",
+                assess: "Stage 2 of 2 — Check Your Understanding",
+                complete: "Certificate"
+            };
+            el.textContent = map[sim.currentStage] || "";
+        }
+
+        function showStage(stage) {
+            sim.currentStage = stage;
+            ["mission", "build", "assess", "complete"].forEach((s) => {
+                const el = document.getElementById("stage-" + s);
+                if (el) el.classList.toggle("active", s === stage);
+            });
+            updateProgressText();
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        /* ---- HUD ---- */
+        function currentRank() {
+            let rank = "Trainee";
+            if (sim.score >= 100) rank = "Reactor Master";
+            else if (sim.score >= 60) rank = "Engineer";
+            else if (sim.score >= 30) rank = "Technician";
+            return rank;
+        }
+
+        function refreshHud() {
+            const pts = sim.score + " pts";
+            ["scoreChip", "scoreChipAssess"].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = "⚡ " + pts;
+            });
+            const combo = document.getElementById("comboChip");
+            if (combo) combo.textContent = "🔥 Combo ×" + sim.combo;
+            const rank = document.getElementById("rankChip");
+            if (rank) rank.textContent = currentRank();
+        }
+
+        function addScore(points, comboIncrement) {
+            sim.score += points;
+            if (comboIncrement) sim.combo += 1;
+            refreshHud();
+        }
+
+        function logReview(type, correct, detail) {
+            sim.reviewLog.push({ type: type, correct: correct, detail: detail, at: new Date().toLocaleTimeString() });
+        }
+
+        /* ---- rig + tray rendering ---- */
+        function bayShellHTML(bay) {
+            return '<div class="bay" id="bay-' + bay.id + '" data-bay="' + bay.id + '" data-side="' + bay.side +
+                '" tabindex="0" role="button" aria-label="' + bay.label + ', empty"></div>';
+        }
+
+        function renderRigShell() {
+            const rig = document.getElementById("rigArea");
+            const r = BAY_DEFS;
+            rig.innerHTML =
+                '<div class="rig-side">' + bayShellHTML(r[0]) + '<span class="rig-op" aria-hidden="true">+</span>' + bayShellHTML(r[1]) + '</div>' +
+                '<div class="reactor-core" id="reactorCore"><span class="reactor-core-arrow" aria-hidden="true">→</span><span class="reactor-core-label">Reactor</span></div>' +
+                '<div class="rig-side">' + bayShellHTML(r[2]) + '<span class="rig-op" aria-hidden="true">+</span>' + bayShellHTML(r[3]) + '<span class="rig-op" aria-hidden="true">+</span>' + bayShellHTML(r[4]) + '</div>';
+        }
+
+        function tileHTML(id, placed) {
+            const t = TILE_DEFS[id];
+            const extra = placed ? " placed-tile" : "";
+            const label = placed
+                ? t.label + " cargo tile placed. Press Enter or Space to pick it back up."
+                : t.label + " cargo tile, not yet placed. Press Enter or Space to pick it up.";
+            return '<div class="fuel-tile' + extra + '" id="tile-' + id + '" data-tile="' + id +
+                '" tabindex="0" role="button" draggable="true" aria-label="' + label + '">' +
+                '<span class="tile-icon" aria-hidden="true">' + t.icon + '</span><span>' + t.label + '</span></div>';
+        }
+
+        function renderRig() {
+            BAY_DEFS.forEach((b) => {
+                const bayEl = document.getElementById("bay-" + b.id);
+                if (!bayEl) return;
+                bayEl.classList.remove("bay-correct", "bay-wrong", "kb-target");
+                const tileId = sim.placements[b.id];
+                if (tileId) {
+                    const t = TILE_DEFS[tileId];
+                    bayEl.innerHTML = '<span class="bay-label">' + b.label + '</span>' + tileHTML(tileId, true);
+                    bayEl.setAttribute("aria-label", b.label + ", holding " + t.label);
+                } else {
+                    bayEl.innerHTML = '<span class="bay-label">' + b.label + '</span><span class="bay-empty-hint">Drop here</span>';
+                    bayEl.setAttribute("aria-label", b.label + ", empty");
+                }
+            });
+            const tray = document.getElementById("tileTray");
+            tray.innerHTML = sim.trayIds.length
+                ? sim.trayIds.map((id) => tileHTML(id, false)).join("")
+                : '<span class="bay-empty-hint">All cargo loaded — press Check Equation.</span>';
+
+            if (sim.pickedTile) {
+                const el = document.getElementById("tile-" + sim.pickedTile);
+                if (el) el.classList.add("kb-selected");
+            }
+            updateCheckButton();
+        }
+
+        function updateCheckButton() {
+            const btn = document.getElementById("checkEquationBtn");
+            if (!btn) return;
+            const allFull = BAY_DEFS.every((b) => sim.placements[b.id]);
+            btn.disabled = !allFull;
+        }
+
+        /* ---- tile pick up / place (shared by mouse, touch-via-click, keyboard, and drag) ---- */
+        function pickUpTile(tileId) {
+            if (sim.pickedTile === tileId) {
+                sim.pickedTile = null; // toggle off
+            } else {
+                sim.pickedTile = tileId;
+            }
+            renderRig();
+            focusTile(tileId);
+            const t = TILE_DEFS[tileId];
+            if (sim.pickedTile) announce(t.label + " picked up. Choose a bay and press Enter to drop it.");
+            else announce(t.label + " no longer selected.");
+        }
+
+        /* Rendering replaces DOM nodes, which silently drops keyboard focus onto
+           <body>. Every state change below must re-focus the node the student is
+           now interacting with, or the keyboard-only path breaks after one move. */
+        function focusTile(tileId) {
+            const el = document.getElementById("tile-" + tileId);
+            if (el) el.focus();
+        }
+        function focusBay(bayId) {
+            const el = document.getElementById("bay-" + bayId);
+            if (el) el.focus();
+        }
+
+        function findTileLocation(tileId) {
+            const bay = BAY_DEFS.find((b) => sim.placements[b.id] === tileId);
+            return bay ? bay.id : null;
+        }
+
+        function placeTileInBay(tileId, bayId) {
+            // if the bay already holds a tile, send it back to the tray
+            const occupant = sim.placements[bayId];
+            const fromBay = findTileLocation(tileId);
+            if (fromBay) sim.placements[fromBay] = null;
+            else sim.trayIds = sim.trayIds.filter((id) => id !== tileId);
+
+            if (occupant) sim.trayIds.push(occupant);
+            sim.placements[bayId] = tileId;
+            sim.pickedTile = null;
+            clearBuildFeedback();
+            renderRig();
+            focusBay(bayId);
+            const t = TILE_DEFS[tileId];
+            const b = BAY_DEFS.find((x) => x.id === bayId);
+            announce(t.label + " placed in " + b.label + ".");
+        }
+
+        function returnTileToTray(tileId) {
+            const fromBay = findTileLocation(tileId);
+            if (fromBay) sim.placements[fromBay] = null;
+            if (!sim.trayIds.includes(tileId)) sim.trayIds.push(tileId);
+            sim.pickedTile = null;
+            clearBuildFeedback();
+            renderRig();
+            focusTile(tileId);
+        }
+
+        function handleTileActivate(tileId) {
+            if (sim.pickedTile && sim.pickedTile !== tileId) {
+                // a different tile is already picked up; ignore stray tile clicks
+                return;
+            }
+            if (findTileLocation(tileId)) {
+                // tile currently in a bay: clicking it again (or re-pressing) sends it back to tray
+                if (sim.pickedTile === tileId) { returnTileToTray(tileId); return; }
+            }
+            pickUpTile(tileId);
+        }
+
+        function handleBayActivate(bayId) {
+            if (sim.pickedTile) {
+                placeTileInBay(sim.pickedTile, bayId);
+                return;
+            }
+            const occupant = sim.placements[bayId];
+            if (occupant) pickUpTile(occupant);
+        }
+
+        function clearBuildFeedback() {
+            const panel = document.getElementById("buildFeedback");
+            if (!panel) return;
+            panel.classList.remove("show", "feedback-correct", "feedback-wrong");
+            panel.innerHTML = "";
+        }
+
+        /* ---- drag and drop (mouse/touch); click + keyboard above are the full alternative ---- */
+        let dragTileId = null;
+        function onContainerDragStart(e) {
+            const tileEl = e.target.closest(".fuel-tile");
+            if (!tileEl || sim.currentStage !== "build") return;
+            dragTileId = tileEl.dataset.tile;
+            try { e.dataTransfer.setData("text/plain", dragTileId); } catch (err) { /* some browsers restrict this */ }
+            e.dataTransfer.effectAllowed = "move";
+        }
+        function onContainerDragOver(e) {
+            const bayEl = e.target.closest(".bay");
+            if (!bayEl || sim.currentStage !== "build") return;
+            e.preventDefault();
+            bayEl.classList.add("drag-over");
+        }
+        function onContainerDragLeave(e) {
+            const bayEl = e.target.closest(".bay");
+            if (bayEl) bayEl.classList.remove("drag-over");
+        }
+        function onContainerDrop(e) {
+            const bayEl = e.target.closest(".bay");
+            if (!bayEl || sim.currentStage !== "build") return;
+            e.preventDefault();
+            bayEl.classList.remove("drag-over");
+            const tileId = dragTileId || (e.dataTransfer && e.dataTransfer.getData("text/plain"));
+            if (tileId) placeTileInBay(tileId, bayEl.dataset.bay);
+            dragTileId = null;
+        }
+
+        /* ---- click + keyboard delegation ---- */
+        function onContainerClick(e) {
+            if (sim.currentStage !== "build") return;
+            const tileEl = e.target.closest(".fuel-tile");
+            const bayEl = e.target.closest(".bay");
+            if (tileEl) { handleTileActivate(tileEl.dataset.tile); return; }
+            if (bayEl) { handleBayActivate(bayEl.dataset.bay); return; }
+        }
+
+        function onContainerKeydown(e) {
+            if (sim.currentStage !== "build") return;
+            if (e.key !== "Enter" && e.key !== " " && e.key !== "Escape") return;
+            const tileEl = e.target.closest(".fuel-tile");
+            const bayEl = e.target.closest(".bay");
+            if (e.key === "Escape") {
+                if (sim.pickedTile) {
+                    const cancelledId = sim.pickedTile;
+                    sim.pickedTile = null;
+                    renderRig();
+                    focusTile(cancelledId);
+                    announce("Cancelled.");
+                }
+                return;
+            }
+            if (tileEl) { e.preventDefault(); handleTileActivate(tileEl.dataset.tile); return; }
+            if (bayEl) { e.preventDefault(); handleBayActivate(bayEl.dataset.bay); return; }
+        }
+
+        /* ---- check equation ---- */
+        function buildTermsForSide(side) {
+            return BAY_DEFS.filter((b) => b.side === side)
+                .map((b) => sim.placements[b.id])
+                .filter(Boolean)
+                .map((id) => TILE_DEFS[id].label)
+                .join(", ");
+        }
+
+        function checkEquation() {
+            sim.equationAttempts += 1;
+            const wrongBays = [];
+            BAY_DEFS.forEach((b) => {
+                const tileId = sim.placements[b.id];
+                const tile = TILE_DEFS[tileId];
+                const bayEl = document.getElementById("bay-" + b.id);
+                if (tile.side === b.side) {
+                    bayEl.classList.add("bay-correct");
+                } else {
+                    bayEl.classList.add("bay-wrong");
+                    wrongBays.push({ bay: b, tile: tile });
+                }
+            });
+
+            const panel = document.getElementById("buildFeedback");
+            const core = document.getElementById("reactorCore");
+
+            if (wrongBays.length === 0) {
+                sim.equationSolved = true;
+                core.classList.add("firing");
+                if (sim.reducedMotion) core.classList.add("reduced-motion");
+                const firstTry = sim.equationAttempts === 1;
+                addScore(firstTry ? 70 : 50, firstTry);
+                panel.className = "feedback-panel feedback-correct show";
+                panel.innerHTML =
+                    '<div class="feedback-title">✅ Reactor fired!</div>' +
+                    '<div class="feedback-item"><strong>Equation:</strong> ' + escapeHtml(MODEL_EQUATION) + '</div>' +
+                    '<div class="feedback-item">Reactants (' + escapeHtml(buildTermsForSide("reactant")) + ') go in at the start. Products (' +
+                    escapeHtml(buildTermsForSide("product")) + ') come out once the reaction has happened.</div>';
+                document.getElementById("checkEquationBtn").classList.add("hidden");
+                document.getElementById("continueToAssessBtn").classList.remove("hidden");
+                logReview("Equation build", true, "Solved in " + sim.equationAttempts + " check" + (sim.equationAttempts === 1 ? "" : "s") + ": " + MODEL_EQUATION);
+                announce("Correct! The reactor has fired.");
+            } else {
+                sim.equationFlawless = false;
+                panel.className = "feedback-panel feedback-wrong show";
+                let html = '<div class="feedback-title">⚠️ Not quite — ' + wrongBays.length + " bay" + (wrongBays.length > 1 ? "s" : "") + ' need fixing</div>';
+                wrongBays.forEach((w) => {
+                    const isProductInReactant = w.tile.side === "product";
+                    const what = "<strong>" + escapeHtml(w.tile.label) + "</strong> is in " + escapeHtml(w.bay.label) + ".";
+                    const why = isProductInReactant
+                        ? escapeHtml(w.tile.label) + " is made during the reaction — it doesn't go in at the start."
+                        : escapeHtml(w.tile.label) + " is a reactant — it's used up right at the start of the reaction, before anything is produced.";
+                    const fix = isProductInReactant
+                        ? "Move it to a Product Bay instead."
+                        : "Move it to a Reactant Bay instead.";
+                    html += '<div class="feedback-item"><strong>What:</strong> ' + what + '<br>' +
+                        '<strong>Why:</strong> ' + why + '<br>' +
+                        '<strong>Fix:</strong> ' + fix + '<br>' +
+                        '<strong>Model:</strong> ' + escapeHtml(MODEL_EQUATION) + '</div>';
+                });
+                panel.innerHTML = html;
+                logReview("Equation build", false, wrongBays.length + " bay(s) wrong on attempt " + sim.equationAttempts);
+                announce(wrongBays.length + " bay" + (wrongBays.length > 1 ? "s" : "") + " need fixing. Check the feedback panel.");
+            }
+        }
+
+        /* ---- hints ---- */
+        function showHint(targetPanelId) {
+            sim.hintIndex = (sim.hintIndex + 1) % HINTS.length;
+            sim.hintsUsed += 1;
+            const panel = document.getElementById(targetPanelId);
+            if (!panel) return;
+            panel.className = "feedback-panel feedback-correct show";
+            panel.innerHTML = '<div class="feedback-title">💡 Hint</div><div class="feedback-item">' + escapeHtml(HINTS[sim.hintIndex]) + '</div>';
+            announce("Hint: " + HINTS[sim.hintIndex]);
+        }
+
+        /* ---- assessment ---- */
+        function renderAssessChoices() {
+            const wrap = document.getElementById("assessChoices");
+            wrap.innerHTML = shuffleStableFirst(ASSESS_CHOICES).map((c) =>
+                '<button class="choice-btn" id="choice-' + c.id + '" data-choice="' + c.id + '" type="button">' + escapeHtml(c.text) + '</button>'
+            ).join("");
+        }
+        // Choices keep a fixed order (no shuffle) — spec content, screen-by-screen order per CLAUDE.md §7.
+        function shuffleStableFirst(arr) { return arr; }
+
+        function handleAssessChoice(choiceId) {
+            if (sim.assessSolved) return;
+            sim.assessAttempts += 1;
+            sim.assessSelected = choiceId;
+            const choice = ASSESS_CHOICES.find((c) => c.id === choiceId);
+            const panel = document.getElementById("assessFeedback");
+            document.querySelectorAll(".choice-btn").forEach((b) => b.classList.remove("choice-correct", "choice-wrong"));
+            const btn = document.getElementById("choice-" + choiceId);
+
+            if (choice.correct) {
+                sim.assessSolved = true;
+                btn.classList.add("choice-correct");
+                const firstTry = sim.assessAttempts === 1;
+                addScore(firstTry ? 40 : 25, false);
+                panel.className = "feedback-panel feedback-correct show";
+                panel.innerHTML = '<div class="feedback-title">✅ Correct</div>' +
+                    '<div class="feedback-item">The reactants are <strong>Glucose and Oxygen</strong> — the two substances the cell starts with, before the reaction happens.</div>';
+                document.querySelectorAll(".choice-btn").forEach((b) => b.setAttribute("aria-disabled", "true"));
+                document.getElementById("continueToCompleteBtn").classList.remove("hidden");
+                logReview("Understanding check", true, "Answered “Glucose and Oxygen” correctly");
+                announce("Correct. Glucose and Oxygen are the reactants.");
+            } else {
+                btn.classList.add("choice-wrong");
+                panel.className = "feedback-panel feedback-wrong show";
+                panel.innerHTML = '<div class="feedback-title">⚠️ Not the reactants</div>' +
+                    '<div class="feedback-item"><strong>What:</strong> ' + escapeHtml(choice.what) + '<br>' +
+                    '<strong>Why:</strong> ' + escapeHtml(choice.why) + '<br>' +
+                    '<strong>Fix:</strong> ' + escapeHtml(choice.fix) + '<br>' +
+                    '<strong>Model:</strong> The reactants are Glucose and Oxygen: ' + escapeHtml(MODEL_EQUATION) + '</div>';
+                logReview("Understanding check", false, "Picked “" + choice.text + "”");
+                announce("Not quite. See the feedback panel and try again.");
+            }
+        }
+
+        /* ---- completion ---- */
+        function renderCompletion() {
+            const badgeRow = document.getElementById("badgeRow");
+            badgeRow.innerHTML = BADGE_DEFS.map((b) => {
+                const unlocked = sim.score >= b.threshold;
+                return '<div class="badge' + (unlocked ? " unlocked" : "") + '">' +
+                    '<span class="badge-icon" aria-hidden="true">' + b.icon + '</span>' +
+                    '<span class="badge-name">' + b.name + '</span>' +
+                    '<span class="badge-state">' + (unlocked ? "Earned" : "Locked") + '</span></div>';
+            }).join("");
+
+            const stats = [
+                { label: "Final Score", value: sim.score + " pts" },
+                { label: "Rank", value: currentRank() },
+                { label: "Equation Checks", value: String(sim.equationAttempts) },
+                { label: "Understanding Attempts", value: String(sim.assessAttempts) },
+                { label: "Hints Used", value: String(sim.hintsUsed) },
+                { label: "Flawless Build", value: sim.equationFlawless ? "Yes" : "No" }
+            ];
+            document.getElementById("statGrid").innerHTML = stats.map((s) =>
+                '<div class="stat-tile"><div class="stat-value">' + escapeHtml(s.value) + '</div><div class="stat-label">' + escapeHtml(s.label) + '</div></div>'
+            ).join("");
+        }
+
+        /* ---- custom confirm + review modals (own markup; chrome's modal is untouched) ---- */
+        function ensureSimModals() {
+            if (document.getElementById("simConfirmModal")) return;
+            const wrap = document.createElement("div");
+            wrap.innerHTML =
+                '<div class="modal" id="simConfirmModal" role="dialog" aria-modal="true" aria-labelledby="simConfirmHeading">' +
+                '  <section class="modal-card sim-modal-card">' +
+                '    <button class="close-btn" id="simConfirmCloseBtn" aria-label="Close">×</button>' +
+                '    <h3 id="simConfirmHeading">Clear this attempt?</h3>' +
+                '    <p id="simConfirmBody">This will clear the cargo you have placed so far.</p>' +
+                '    <div class="button-row" style="margin-top:18px; justify-content:flex-start;">' +
+                '      <button class="secondary-btn" id="simConfirmCancelBtn">Cancel</button>' +
+                '      <button class="danger-btn" id="simConfirmOkBtn">Yes, clear it</button>' +
+                '    </div>' +
+                '  </section>' +
+                '</div>' +
+                '<div class="modal" id="simReviewModal" role="dialog" aria-modal="true" aria-labelledby="simReviewHeading">' +
+                '  <section class="modal-card sim-modal-card">' +
+                '    <button class="close-btn" id="simReviewCloseBtn" aria-label="Close review">×</button>' +
+                '    <h3 id="simReviewHeading">Review — your attempts</h3>' +
+                '    <ul class="review-log" id="reviewLogList"></ul>' +
+                '    <div class="button-row" style="margin-top:18px; justify-content:flex-start;">' +
+                '      <button class="primary-btn" id="simReviewCloseBtn2">Close</button>' +
+                '    </div>' +
+                '  </section>' +
+                '</div>';
+            document.body.appendChild(wrap);
+
+            document.getElementById("simConfirmCloseBtn").addEventListener("click", closeSimConfirm);
+            document.getElementById("simConfirmCancelBtn").addEventListener("click", closeSimConfirm);
+            document.getElementById("simConfirmOkBtn").addEventListener("click", () => {
+                const action = sim.pendingConfirm;
+                sim.pendingConfirm = null;
+                closeSimConfirm();
+                if (action) action();
+            });
+            document.getElementById("simConfirmModal").addEventListener("click", (e) => {
+                if (e.target.id === "simConfirmModal") closeSimConfirm();
+            });
+            document.getElementById("simReviewCloseBtn").addEventListener("click", closeSimReview);
+            document.getElementById("simReviewCloseBtn2").addEventListener("click", closeSimReview);
+            document.getElementById("simReviewModal").addEventListener("click", (e) => {
+                if (e.target.id === "simReviewModal") closeSimReview();
+            });
+        }
+
+        function openSimConfirm(bodyText, onConfirm) {
+            document.getElementById("simConfirmBody").textContent = bodyText;
+            sim.pendingConfirm = onConfirm;
+            document.getElementById("simConfirmModal").classList.add("show");
+        }
+        function closeSimConfirm() {
+            document.getElementById("simConfirmModal").classList.remove("show");
+            sim.pendingConfirm = null;
+        }
+        function openSimReview() {
+            const list = document.getElementById("reviewLogList");
+            if (!sim.reviewLog.length) {
+                list.innerHTML = "<li>No attempts logged yet — build the equation to get started.</li>";
+            } else {
+                list.innerHTML = sim.reviewLog.map((entry) =>
+                    "<li><span class=\"rl-tag " + (entry.correct ? "ok" : "no") + "\">" + (entry.correct ? "✓" : "✗") + "</span>" +
+                    "<strong>" + escapeHtml(entry.type) + "</strong> — " + escapeHtml(entry.detail) + " (" + entry.at + ")</li>"
+                ).join("");
+            }
+            document.getElementById("simReviewModal").classList.add("show");
+        }
+        function closeSimReview() {
+            document.getElementById("simReviewModal").classList.remove("show");
+        }
+
+        /* ---- wiring ---- */
+        function wireStaticControls() {
+            document.getElementById("simExitBtn").addEventListener("click", () => {
+                if (sim.currentStage === "mission") { showScreen("home"); return; }
+                openSimConfirm("Leaving now clears your progress on this attempt. Return to the home screen?", () => {
+                    showScreen("home");
+                });
+            });
+            document.getElementById("simRulesBtn").addEventListener("click", openInstructionsModal);
+            document.getElementById("simReviewBtn").addEventListener("click", openSimReview);
+
+            document.getElementById("reducedMotionToggle").addEventListener("change", (e) => {
+                sim.reducedMotion = e.target.checked;
+                const core = document.getElementById("reactorCore");
+                if (core) core.classList.toggle("reduced-motion", sim.reducedMotion);
+            });
+
+            document.getElementById("beginBuildBtn").addEventListener("click", () => showStage("build"));
+
+            document.getElementById("buildHintBtn").addEventListener("click", () => showHint("buildFeedback"));
+            document.getElementById("buildTryAgainBtn").addEventListener("click", () => {
+                openSimConfirm("This clears every cargo tile you've placed and reshuffles the tray. Continue?", () => {
+                    resetBuildStage();
+                });
+            });
+            document.getElementById("checkEquationBtn").addEventListener("click", checkEquation);
+            document.getElementById("continueToAssessBtn").addEventListener("click", () => showStage("assess"));
+
+            document.getElementById("assessBackBtn").addEventListener("click", () => showStage("build"));
+            document.getElementById("assessHintBtn").addEventListener("click", () => showHint("assessFeedback"));
+            document.getElementById("continueToCompleteBtn").addEventListener("click", () => {
+                renderCompletion();
+                showStage("complete");
+            });
+
+            document.getElementById("playAgainBtn").addEventListener("click", () => {
+                openSimConfirm("Play Again clears your score and badges and starts a fresh attempt. Continue?", () => {
+                    devInit();
+                    showStage("mission");
+                });
+            });
+
+            document.getElementById("assessChoices").addEventListener("click", (e) => {
+                const btn = e.target.closest(".choice-btn");
+                if (btn) handleAssessChoice(btn.dataset.choice);
+            });
+        }
+
+        function resetBuildStage() {
+            sim.placements = {}; BAY_DEFS.forEach((b) => { sim.placements[b.id] = null; });
+            sim.trayIds = shuffle(Object.keys(TILE_DEFS));
+            sim.pickedTile = null;
+            sim.equationAttempts = 0;
+            sim.equationSolved = false;
+            sim.equationFlawless = true;
+            document.getElementById("reactorCore").classList.remove("firing", "reduced-motion");
+            document.getElementById("checkEquationBtn").classList.remove("hidden");
+            document.getElementById("continueToAssessBtn").classList.add("hidden");
+            clearBuildFeedback();
+            renderRig();
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           ============================================================ */
+        function devInit() {
+    sim.currentStage = "mission";
+    sim.placements = {}; BAY_DEFS.forEach((b) => { sim.placements[b.id] = null; });
+    sim.trayIds = shuffle(Object.keys(TILE_DEFS));
+    sim.pickedTile = null;
+    sim.hintIndex = -1;
+    sim.hintsUsed = 0;
+    sim.score = 0;
+    sim.combo = 0;
+    sim.equationAttempts = 0;
+    sim.equationSolved = false;
+    sim.equationFlawless = true;
+    sim.assessAttempts = 0;
+    sim.assessSolved = false;
+    sim.assessSelected = null;
+    sim.reviewLog = [];
+    sim.reducedMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    sim.pendingConfirm = null;
+
+    dom.simContainer.innerHTML =
+        '<div class="sr-only" id="liveAnnouncer" aria-live="polite"></div>' +
+        '<div class="sim-navbar">' +
+        '  <button class="ghost-btn" id="simExitBtn" aria-label="Exit to home">⏏ Exit</button>' +
+        '  <div class="sim-progress" id="simProgress">Mission Briefing</div>' +
+        '  <div class="nav-cluster">' +
+        '    <button class="control-btn" id="simRulesBtn">📜 Rules</button>' +
+        '    <button class="control-btn" id="simReviewBtn">🗂 Review</button>' +
+        '  </div>' +
+        '</div>' +
+        '<section class="sub-screen active" id="stage-mission">' +
+        '  <div class="mission-hero">' +
+        '    <div class="mascot-wrap">' + mascotSvg("content") + '</div>' +
+        '    <h2>Welcome, Reactor Bay Technician</h2>' +
+        '    <p>Every cell in the body runs its own tiny power reactor. Your job: load the raw materials in correctly, fire the reactor, and prove you know what goes in — and what comes out.</p>' +
+        '    <div class="objective-card">' +
+        '      <h3>Your mission</h3>' +
+        '      <ul>' +
+        '        <li>Load the two reactants into the Reactant Bays and the three products into the Product Bays.</li>' +
+        '        <li>Press Check Equation. Fix anything amber — nothing is ever locked in wrong.</li>' +
+        '        <li>Fire the reactor, then answer one question to earn your badge.</li>' +
+        '      </ul>' +
+        '    </div>' +
+        '    <div class="hud-row" style="justify-content:center; margin-top:14px;">' +
+        '      <label class="rank-chip" style="cursor:pointer;"><input type="checkbox" id="reducedMotionToggle" style="margin-right:6px;" /> Reduce motion</label>' +
+        '    </div>' +
+        '  </div>' +
+        '  <div class="action-row"><button class="primary-btn" id="beginBuildBtn">▶ Begin Assembly</button></div>' +
+        '</section>' +
+        '<section class="sub-screen" id="stage-build">' +
+        '  <div class="hud-row">' +
+        '    <span class="score-chip" id="scoreChip">⚡ 0 pts</span>' +
+        '    <span class="combo-chip" id="comboChip">🔥 Combo ×0</span>' +
+        '    <span class="rank-chip" id="rankChip">Trainee</span>' +
+        '  </div>' +
+        '  <div class="rig-wrap"><div class="rig" id="rigArea"></div></div>' +
+        '  <div class="tray" id="tileTray" aria-label="Fuel cargo tray"></div>' +
+        '  <div class="feedback-panel" id="buildFeedback" role="status" aria-live="polite"></div>' +
+        '  <div class="action-row">' +
+        '    <button class="secondary-btn" id="buildHintBtn">💡 Hint</button>' +
+        '    <button class="secondary-btn" id="buildTryAgainBtn">↺ Try Again</button>' +
+        '    <button class="primary-btn" id="checkEquationBtn" disabled>✅ Check Equation</button>' +
+        '    <button class="primary-btn hidden" id="continueToAssessBtn">Continue ▶</button>' +
+        '  </div>' +
+        '</section>' +
+        '<section class="sub-screen" id="stage-assess">' +
+        '  <div class="hud-row"><span class="score-chip" id="scoreChipAssess">⚡ 0 pts</span></div>' +
+        '  <div class="objective-card" style="max-width:none;">' +
+        '    <h3>Check Your Understanding</h3>' +
+        '    <p id="assessPrompt">Which two substances are the reactants?</p>' +
+        '  </div>' +
+        '  <div class="choice-grid" id="assessChoices"></div>' +
+        '  <div class="feedback-panel" id="assessFeedback" role="status" aria-live="polite"></div>' +
+        '  <div class="action-row">' +
+        '    <button class="secondary-btn" id="assessBackBtn">◀ Back</button>' +
+        '    <button class="secondary-btn" id="assessHintBtn">💡 Hint</button>' +
+        '    <button class="primary-btn hidden" id="continueToCompleteBtn">Continue ▶</button>' +
+        '  </div>' +
+        '</section>' +
+        '<section class="sub-screen" id="stage-complete">' +
+        '  <div class="certificate">' +
+        '    <div class="mascot-wrap">' + mascotSvg("celebrating") + '</div>' +
+        '    <h2>Certificate of Reactor Engineering</h2>' +
+        '    <p>Awarded to a technician who can build and explain the cellular respiration equation.</p>' +
+        '    <div class="badge-row" id="badgeRow"></div>' +
+        '    <div class="stat-grid" id="statGrid"></div>' +
+        '  </div>' +
+        '  <div class="action-row"><button class="primary-btn" id="playAgainBtn">🔁 Play Again</button></div>' +
+        '</section>';
+
+    ensureSimModals();
+    wireStaticControls();
+    renderRigShell();
+    renderRig();
+    renderAssessChoices();
+    refreshHud();
+    showStage("mission");
+
+    dom.simContainer.addEventListener("click", onContainerClick);
+    dom.simContainer.addEventListener("keydown", onContainerKeydown);
+    dom.simContainer.addEventListener("dragstart", onContainerDragStart);
+    dom.simContainer.addEventListener("dragover", onContainerDragOver);
+    dom.simContainer.addEventListener("dragleave", onContainerDragLeave);
+    dom.simContainer.addEventListener("drop", onContainerDrop);
+}
+
+        function devReset() {
+    sim.currentStage = "mission";
+    sim.placements = {};
+    sim.trayIds = [];
+    sim.pickedTile = null;
+    sim.hintIndex = -1;
+    sim.hintsUsed = 0;
+    sim.score = 0;
+    sim.combo = 0;
+    sim.equationAttempts = 0;
+    sim.equationSolved = false;
+    sim.equationFlawless = true;
+    sim.assessAttempts = 0;
+    sim.assessSolved = false;
+    sim.assessSelected = null;
+    sim.reviewLog = [];
+    sim.pendingConfirm = null;
+    dom.simContainer.innerHTML = "";
+}
+
+    </script>
+</body>
+
+</html>
