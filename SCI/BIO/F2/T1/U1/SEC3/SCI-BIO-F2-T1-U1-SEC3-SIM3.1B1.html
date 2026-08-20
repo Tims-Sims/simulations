@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <!-- ============================================================
      The Pressure Pump — SCI-BIO-F2-T1-U1-SEC3-SIM3.1B1
      Built on blank-template v2.2.1
@@ -148,6 +148,33 @@
         .completion-banner h3 { margin: 0 0 8px; font-size: 1.15rem; color: var(--success); }
         .completion-banner p { margin: 0; font-size: 0.92rem; color: var(--text-soft); line-height: 1.6; }
 
+        .sim-extras { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 12px; padding: 14px 16px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+        .sim-extras label { font-size: 0.82rem; font-weight: 700; color: var(--text-soft); }
+        .auto-btn { border-radius: 999px; padding: 10px 18px; font-weight: 700; font-size: 0.88rem; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px; }
+        .auto-btn.active { background: color-mix(in srgb, var(--accent) 20%, var(--surface)); border-color: var(--accent); color: var(--accent); }
+        .obstruction-btn { border-radius: 999px; padding: 10px 18px; font-weight: 700; font-size: 0.88rem; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px; }
+        .obstruction-btn.active { background: color-mix(in srgb, var(--danger) 18%, var(--surface)); border-color: var(--danger); color: var(--danger); }
+
+        .graph-section { margin-top: 12px; padding: 14px 16px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+        .graph-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .graph-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+        .graph-legend { display: flex; gap: 14px; font-size: 0.75rem; color: var(--muted); }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+        .graph-wrap { width: 100%; height: 90px; position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+        .graph-wrap canvas { width: 100%; height: 100%; display: block; }
+
+        .walkthrough-banner { padding: 18px 20px; background: color-mix(in srgb, var(--accent-2) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent-2) 22%, transparent); border-radius: var(--radius-lg); margin-bottom: 14px; }
+        .walkthrough-progress { font-size: 0.78rem; font-weight: 700; color: var(--accent-2); margin-bottom: 8px; }
+        .walkthrough-text { font-size: 0.95rem; color: var(--text-soft); line-height: 1.65; margin-bottom: 14px; }
+        .walkthrough-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .q-progress { display: flex; gap: 7px; margin-bottom: 12px; }
+        .q-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--border); transition: background 0.25s; }
+        .q-dot.active { background: var(--accent); }
+        .q-dot.correct { background: var(--success); }
+        .q-dot.incorrect { background: var(--danger); }
+
         @media (max-width: 700px) {
             .sim-main { grid-template-columns: auto 1fr auto; }
             .cavity-canvas-wrap { width: 300px; height: 280px; }
@@ -157,7 +184,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="app-shell">
         <header class="topbar">
@@ -241,8 +267,10 @@
                 "Move the Diaphragm Position slider up and down.",
                 "Observe how the ribs, chest volume, and air pressure change.",
                 "Watch the blue air particles flow in and out through the trachea.",
-                "Read the descriptive caption for observations at each position.",
-                "Answer the assessment question when you are ready."
+                "Use Auto-Breathe to watch the full breathing cycle automatically.",
+                "Try Obstructed Airway mode to see how a narrowed airway affects breathing.",
+                "Read the Volume-Pressure graph to see the inverse relationship.",
+                "Answer the three assessment questions when you are ready."
             ]
         };
 
@@ -331,7 +359,6 @@
         function handleKeyShortcuts(e) { if (e.key === "Escape") { closeInstructionsModal(); closeResetConfirmModal(); } }
         function storageGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
         function storageSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
-
         /* ============================================================
            DEV-EDIT: SIM LOGIC
            ============================================================ */
@@ -339,7 +366,58 @@
         let animFrame = null;
         let cavityCanvas, cavityCtx;
         let gaugeCanvas, gaugeCtx;
-        const CORRECT_INDEX = 0;
+        let graphCanvas, graphCtx;
+
+        const WALKTHROUGH_STEPS = [
+            "Welcome to The Pressure Pump! This simulation shows how your diaphragm, ribs, and air pressure work together during breathing.",
+            "Use the Diaphragm Position slider to move it DOWN slowly. Watch how the ribs, lungs, and diaphragm change in the chest cavity.",
+            "Look at the Air Pressure gauge on the right. What zone does the pointer enter when the diaphragm moves down?",
+            "Watch the blue air particles flowing through the trachea. Which direction do they travel?",
+            "Try the Auto-Breathe button to watch the full breathing cycle automatically. You can also toggle Obstructed Airway to see what happens when the airway is narrowed.",
+            "Observe the Volume & Pressure graph below. Notice how the two lines move in opposite directions. You are ready for the assessment!"
+        ];
+
+        const QUESTIONS = [
+            {
+                question: "What happens to the air pressure immediately after the diaphragm moves down?",
+                choices: [
+                    "The air pressure inside the chest decreases.",
+                    "The air pressure inside the chest increases.",
+                    "The air pressure stays exactly the same.",
+                    "The ribs move inward and reduce the space."
+                ],
+                correctIndex: 0,
+                feedbackCorrect: "Your observation is correct! When the diaphragm contracts and moves downwards, the volume inside the chest cavity increases. This extra space causes the internal air pressure to drop. Because the pressure inside the lungs is now lower than the pressure outside the body, air is drawn inwards to balance it out.",
+                feedbackIncorrect: "Think about what happens to the space inside the chest when the diaphragm moves downward.",
+                hint: "Think about what happens to the volume of the chest cavity when the diaphragm moves down. How does a change in volume affect air pressure?"
+            },
+            {
+                question: "What happens to the rib position during inhalation?",
+                choices: [
+                    "The ribs move upward and outward.",
+                    "The ribs move downward and inward.",
+                    "The ribs stay in the same position.",
+                    "The ribs pull the diaphragm upward."
+                ],
+                correctIndex: 0,
+                feedbackCorrect: "Correct! During inhalation, the intercostal muscles contract and pull the ribs upward and outward. This increases the width of the chest cavity, contributing to the increase in volume.",
+                feedbackIncorrect: "Watch the rib animation carefully when you move the slider down. The ribs move to create more space in the chest.",
+                hint: "Watch the rib lines in the chest cavity carefully as you move the slider down. Do they spread apart or come together?"
+            },
+            {
+                question: "Why does air flow into the lungs during inhalation?",
+                choices: [
+                    "Because the internal air pressure drops below the outside pressure.",
+                    "Because the diaphragm pushes air in directly.",
+                    "Because the ribs squeeze the trachea open.",
+                    "Because the lungs generate their own suction force."
+                ],
+                correctIndex: 0,
+                feedbackCorrect: "Correct! Air always flows from areas of higher pressure to areas of lower pressure. When the diaphragm moves down and the chest expands, the pressure inside the lungs becomes lower than the atmospheric pressure outside, so air rushes in to equalise.",
+                feedbackIncorrect: "Air moves from high pressure to low pressure. Think about what happens to the pressure inside the lungs compared to the pressure outside the body.",
+                hint: "Air always moves from high pressure to low pressure. What happens to the pressure inside the lungs compared to outside?"
+            }
+        ];
 
         function devInit() {
             buildSimUI();
@@ -348,14 +426,36 @@
                 smoothPos: 0,
                 particles: [],
                 lastTime: 0,
-                answered: false, selectedChoice: null,
-                attempts: 0, firstAttemptCorrect: null,
-                startTime: Date.now(), hintUsed: false,
                 pressureLabel: "Equal to outside",
-                phase: "exhaled"
+                phase: "exhaled",
+                smoothPressure: 50,
+                volumeHistory: [],
+                pressureHistory: [],
+                autoBreathing: false,
+                autoPhase: 0,
+                obstructed: false,
+                lungFill: 0,
+                walkthroughStep: 0,
+                walkthroughDone: false,
+                currentQuestion: 0,
+                questionAnswered: false,
+                questionAttempts: [0, 0, 0],
+                questionCorrectCount: 0,
+                questionResults: [],
+                hintUsed: false,
+                startTime: Date.now()
             };
             initCanvases();
             startAnimation();
+
+            if (storageGet(SIM_CONFIG.simId + ":walkthroughDone") === "true") {
+                simState.walkthroughDone = true;
+                document.getElementById("assessmentSection").style.display = "block";
+                renderQuestion(0);
+            } else {
+                document.getElementById("walkthroughBanner").style.display = "block";
+                renderWalkthroughStep();
+            }
         }
 
         function devReset() {
@@ -366,6 +466,7 @@
 
         function buildSimUI() {
             dom.simContainer.innerHTML = `
+                <div class="walkthrough-banner" id="walkthroughBanner" style="display:none;"></div>
                 <div class="sim-main">
                     <div class="slider-col">
                         <label for="diaphragmSlider">Diaphragm Position</label>
@@ -391,31 +492,48 @@
                         <div class="readout-item"><strong>Airflow:</strong> None</div>
                     </div>
                 </div>
+                <div class="sim-extras">
+                    <button class="auto-btn" id="autoBreathBtn" aria-label="Toggle auto-breathe">&#9654; Auto-Breathe</button>
+                    <button class="obstruction-btn" id="obstructionBtn" aria-label="Toggle obstructed airway">&#9711; Normal Airway</button>
+                </div>
+                <div class="graph-section">
+                    <div class="graph-header">
+                        <span class="graph-title">Volume &amp; Pressure Over Time</span>
+                        <div class="graph-legend">
+                            <span class="legend-item"><span class="legend-swatch" style="background:#34d399;"></span> Volume</span>
+                            <span class="legend-item"><span class="legend-swatch" style="background:#fb7185;"></span> Pressure</span>
+                        </div>
+                    </div>
+                    <div class="graph-wrap"><canvas id="graphCanvas"></canvas></div>
+                </div>
                 <div class="caption-bar" id="captionBar" role="status" aria-live="polite">
                     Exhalation complete. The diaphragm is relaxed and domed. Air pressure inside the chest is equal to the pressure outside.
                 </div>
-                <div class="assessment-section" id="assessmentSection">
-                    <h3>Assessment Question</h3>
-                    <p class="assessment-question">What happens to the air pressure immediately after the diaphragm moves down?</p>
-                    <div class="assessment-choices" id="assessmentChoices">
-                        <button class="assessment-choice" data-index="0" aria-label="Choice 1">The air pressure inside the chest decreases.</button>
-                        <button class="assessment-choice" data-index="1" aria-label="Choice 2">The air pressure inside the chest increases.</button>
-                        <button class="assessment-choice" data-index="2" aria-label="Choice 3">The air pressure stays exactly the same.</button>
-                        <button class="assessment-choice" data-index="3" aria-label="Choice 4">The ribs move inward and reduce the space.</button>
-                    </div>
+                <div class="assessment-section" id="assessmentSection" style="display:none;">
+                    <div class="q-progress" id="qProgress"></div>
+                    <h3 id="assessHeading">Question 1 of 3</h3>
+                    <p class="assessment-question" id="assessQuestion"></p>
+                    <div class="assessment-choices" id="assessmentChoices"></div>
                     <div class="button-row" style="margin-top: 10px; justify-content: flex-start;">
                         <button class="ghost-btn" id="hintBtn">Hint</button>
                         <button class="secondary-btn hidden" id="retryBtn">Try Again</button>
                     </div>
                     <div class="assessment-feedback" id="assessmentFeedback"></div>
+                    <div id="assessNav"></div>
                 </div>
                 <div id="completionArea"></div>
             `;
 
             document.getElementById("diaphragmSlider").addEventListener("input", onSliderChange);
+            document.getElementById("autoBreathBtn").addEventListener("click", toggleAutoBreathe);
+            document.getElementById("obstructionBtn").addEventListener("click", toggleObstruction);
             document.getElementById("hintBtn").addEventListener("click", showHint);
-            document.getElementById("retryBtn").addEventListener("click", retryAssessment);
-            document.querySelectorAll(".assessment-choice").forEach((btn) => btn.addEventListener("click", () => onAssessmentChoice(btn)));
+            document.getElementById("retryBtn").addEventListener("click", retryQuestion);
+
+            const slider = document.getElementById("diaphragmSlider");
+            slider.addEventListener("mousedown", () => { if (simState && simState.autoBreathing) toggleAutoBreathe(); });
+            slider.addEventListener("touchstart", () => { if (simState && simState.autoBreathing) toggleAutoBreathe(); });
+            slider.addEventListener("keydown", () => { if (simState && simState.autoBreathing) toggleAutoBreathe(); });
         }
 
         function initCanvases() {
@@ -430,10 +548,110 @@
             gaugeCanvas.width = gWrap.clientWidth * 2;
             gaugeCanvas.height = gWrap.clientHeight * 2;
             gaugeCtx = gaugeCanvas.getContext("2d");
+
+            graphCanvas = document.getElementById("graphCanvas");
+            const grWrap = graphCanvas.parentElement;
+            graphCanvas.width = grWrap.clientWidth * 2;
+            graphCanvas.height = grWrap.clientHeight * 2;
+            graphCtx = graphCanvas.getContext("2d");
         }
 
         function onSliderChange() {
             simState.diaphragmPos = Number(document.getElementById("diaphragmSlider").value);
+        }
+        /* ---- Auto-Breathe ---- */
+        function toggleAutoBreathe() {
+            simState.autoBreathing = !simState.autoBreathing;
+            const btn = document.getElementById("autoBreathBtn");
+            if (simState.autoBreathing) {
+                simState.autoPhase = Math.asin((simState.diaphragmPos - 50) / 50) || 0;
+                btn.innerHTML = "&#9646;&#9646; Pause";
+                btn.classList.add("active");
+            } else {
+                btn.innerHTML = "&#9654; Auto-Breathe";
+                btn.classList.remove("active");
+            }
+        }
+
+        function updateAutoBreathe(dt) {
+            if (!simState.autoBreathing) return;
+            simState.autoPhase += dt * 1.57;
+            const newPos = 50 + 50 * Math.sin(simState.autoPhase);
+            simState.diaphragmPos = Math.round(Math.max(0, Math.min(100, newPos)));
+            document.getElementById("diaphragmSlider").value = simState.diaphragmPos;
+        }
+
+        /* ---- Obstruction ---- */
+        function toggleObstruction() {
+            simState.obstructed = !simState.obstructed;
+            const btn = document.getElementById("obstructionBtn");
+            if (simState.obstructed) {
+                btn.innerHTML = "&#9888; Obstructed Airway";
+                btn.classList.add("active");
+            } else {
+                btn.innerHTML = "&#9711; Normal Airway";
+                btn.classList.remove("active");
+            }
+        }
+
+        /* ---- Walkthrough ---- */
+        function renderWalkthroughStep() {
+            const banner = document.getElementById("walkthroughBanner");
+            const step = simState.walkthroughStep;
+            const total = WALKTHROUGH_STEPS.length;
+            const isLast = step >= total - 1;
+            banner.innerHTML = '<div class="walkthrough-progress">Step ' + (step + 1) + ' of ' + total + '</div>' +
+                '<div class="walkthrough-text">' + WALKTHROUGH_STEPS[step] + '</div>' +
+                '<div class="walkthrough-actions">' +
+                '<button class="primary-btn" id="walkNextBtn">' + (isLast ? 'Start Assessment' : 'Next') + '</button>' +
+                '<button class="ghost-btn" id="walkSkipBtn">Skip Walkthrough</button>' +
+                '</div>';
+            document.getElementById("walkNextBtn").addEventListener("click", nextWalkthroughStep);
+            document.getElementById("walkSkipBtn").addEventListener("click", completeWalkthrough);
+        }
+
+        function nextWalkthroughStep() {
+            simState.walkthroughStep++;
+            if (simState.walkthroughStep >= WALKTHROUGH_STEPS.length) {
+                completeWalkthrough();
+            } else {
+                renderWalkthroughStep();
+            }
+        }
+
+        function completeWalkthrough() {
+            simState.walkthroughDone = true;
+            document.getElementById("walkthroughBanner").style.display = "none";
+            document.getElementById("assessmentSection").style.display = "block";
+            renderQuestion(0);
+            storageSet(SIM_CONFIG.simId + ":walkthroughDone", "true");
+        }
+
+        /* ---- Lung Fill ---- */
+        function updateLungFill() {
+            const settled = simState.particles.filter(p => p.settled).length;
+            const target = Math.min(1, settled / 40);
+            simState.lungFill += (target - simState.lungFill) * 0.05;
+        }
+
+        /* ---- Smooth Pressure ---- */
+        function updateSmoothPressure(dt) {
+            let target = 50;
+            if (simState.phase === "inhaling") target = 25;
+            else if (simState.phase === "exhaling") target = 75;
+            else target = 50;
+            simState.smoothPressure += (target - simState.smoothPressure) * Math.min(1, dt * 4);
+        }
+
+        /* ---- Graph History ---- */
+        function updateGraphHistory() {
+            simState.volumeHistory.push(simState.smoothPos);
+            const ph = simState.smoothPressure;
+            simState.pressureHistory.push(ph);
+            if (simState.volumeHistory.length > 200) {
+                simState.volumeHistory.shift();
+                simState.pressureHistory.shift();
+            }
         }
 
         /* ---- Animation loop ---- */
@@ -444,15 +662,20 @@
             const dt = Math.min((ts - simState.lastTime) / 1000, 0.1);
             simState.lastTime = ts;
 
+            updateAutoBreathe(dt);
             const target = simState.diaphragmPos;
             simState.smoothPos += (target - simState.smoothPos) * Math.min(1, dt * 5);
 
             updatePressureAndPhase();
+            updateSmoothPressure(dt);
+            updateLungFill();
             updateReadout();
             updateCaption();
             spawnAndMoveParticles(dt);
+            updateGraphHistory();
             drawCavity();
             drawGauge();
+            drawGraph();
 
             animFrame = requestAnimationFrame(animationLoop);
         }
@@ -500,6 +723,15 @@
         function updateCaption() {
             const c = document.getElementById("captionBar");
             if (!c) return;
+
+            if (simState.obstructed && (simState.phase === "inhaling" || simState.phase === "exhaling")) {
+                const base = simState.phase === "inhaling"
+                    ? "Obstructed airway: The trachea is narrowed. Airflow is restricted and breathing requires more effort."
+                    : "Obstructed airway: The trachea is narrowed. Exhaled air is pushed out slowly through the restricted passage.";
+                c.textContent = base;
+                return;
+            }
+
             const pos = simState.smoothPos;
             const phase = simState.phase;
 
@@ -515,7 +747,6 @@
                 c.textContent = "The diaphragm is between positions. Move the slider to observe the full breathing cycle.";
             }
         }
-
         /* ---- Particles ---- */
         function spawnAndMoveParticles(dt) {
             const w = cavityCanvas.width;
@@ -528,24 +759,26 @@
             const lungTop = h * 0.18;
             const lungBottom = h * (0.55 + pos * 0.002);
 
-            if (phase === "inhaling" && Math.random() < (pos / 100) * 12 * dt) {
+            const spawnRate = simState.obstructed ? 4 : 12;
+
+            if (phase === "inhaling" && Math.random() < (pos / 100) * spawnRate * dt) {
                 simState.particles.push({
                     x: tracheaX + (Math.random() - 0.5) * 14,
                     y: tracheaTop,
                     vx: (Math.random() - 0.5) * 30,
-                    vy: 60 + Math.random() * 80,
+                    vy: (60 + Math.random() * 80) * (simState.obstructed ? 0.6 : 1),
                     size: 5 + Math.random() * 3,
                     alpha: 1,
                     settled: false
                 });
             }
 
-            if (phase === "exhaling" && Math.random() < ((100 - pos) / 100) * 12 * dt) {
+            if (phase === "exhaling" && Math.random() < ((100 - pos) / 100) * spawnRate * dt) {
                 simState.particles.push({
                     x: tracheaX + (Math.random() - 0.5) * 30,
                     y: lungTop + Math.random() * (lungBottom - lungTop),
                     vx: (Math.random() - 0.5) * 40,
-                    vy: -60 - Math.random() * 80,
+                    vy: (-60 - Math.random() * 80) * (simState.obstructed ? 0.6 : 1),
                     size: 5 + Math.random() * 3,
                     alpha: 1,
                     settled: false
@@ -619,7 +852,8 @@
             }
 
             /* Lungs */
-            ctx.fillStyle = isDark ? "rgba(125,211,252,0.12)" : "rgba(14,165,233,0.08)";
+            const fillAlpha = 0.08 + simState.lungFill * 0.25;
+            ctx.fillStyle = isDark ? `rgba(125,211,252,${fillAlpha})` : `rgba(14,165,233,${fillAlpha * 0.8})`;
             ctx.strokeStyle = isDark ? "rgba(125,211,252,0.4)" : "rgba(14,165,233,0.3)";
             ctx.lineWidth = 2;
 
@@ -634,13 +868,23 @@
             ctx.stroke();
 
             /* Trachea */
-            ctx.strokeStyle = isDark ? "rgba(167,139,250,0.5)" : "rgba(124,58,237,0.4)";
-            ctx.lineWidth = 6;
+            const tracheaWidth = simState.obstructed ? 3 : 6;
+            const tracheaColor = simState.obstructed
+                ? (isDark ? "rgba(251,113,133,0.7)" : "rgba(225,29,72,0.5)")
+                : (isDark ? "rgba(167,139,250,0.5)" : "rgba(124,58,237,0.4)");
+            ctx.strokeStyle = tracheaColor;
+            ctx.lineWidth = tracheaWidth;
             ctx.lineCap = "round";
             ctx.beginPath();
             ctx.moveTo(cx, h * 0.02);
             ctx.lineTo(cx, lungTop);
             ctx.stroke();
+
+            if (simState.obstructed) {
+                ctx.fillStyle = isDark ? "rgba(251,113,133,0.25)" : "rgba(225,29,72,0.15)";
+                ctx.beginPath(); ctx.ellipse(cx - 9, h * 0.09, 7, 14, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.ellipse(cx + 9, h * 0.09, 7, 14, 0, 0, Math.PI * 2); ctx.fill();
+            }
 
             ctx.lineWidth = 3;
             ctx.strokeStyle = isDark ? "rgba(167,139,250,0.2)" : "rgba(124,58,237,0.15)";
@@ -709,7 +953,6 @@
             ctx.fillText("Volume", cx, lungTop - 8);
             ctx.textAlign = "start";
         }
-
         /* ---- Draw pressure gauge ---- */
         function drawGauge() {
             const w = gaugeCanvas.width;
@@ -778,50 +1021,136 @@
             ctx.textAlign = "start";
         }
 
+        /* ---- Draw graph ---- */
+        function drawGraph() {
+            const w = graphCanvas.width;
+            const h = graphCanvas.height;
+            const ctx = graphCtx;
+            const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = isDark ? "#1d2340" : "#ffffff";
+            ctx.fillRect(0, 0, w, h);
+
+            const pad = 20;
+            const gw = w - pad * 2;
+            const gh = h - pad * 2;
+
+            ctx.strokeStyle = isDark ? "rgba(200,210,240,0.08)" : "rgba(50,60,100,0.08)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = pad + (gh / 4) * i;
+                ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w - pad, y); ctx.stroke();
+            }
+
+            const vol = simState.volumeHistory;
+            const prs = simState.pressureHistory;
+            if (vol.length < 2) return;
+
+            function drawLine(data, color) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < data.length; i++) {
+                    const x = pad + (gw * i) / 200;
+                    const y = pad + gh - (data[i] / 100) * gh;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            drawLine(vol, "#34d399");
+            drawLine(prs, "#fb7185");
+        }
+
         /* ---- Assessment ---- */
+        function renderQuestion(idx) {
+            const q = QUESTIONS[idx];
+            const dots = QUESTIONS.map((_, i) => {
+                let cls = "q-dot";
+                if (i < idx) cls += simState.questionResults[i] ? " correct" : " incorrect";
+                if (i === idx) cls += " active";
+                return '<div class="' + cls + '"></div>';
+            }).join("");
+            document.getElementById("qProgress").innerHTML = dots;
+            document.getElementById("assessHeading").textContent = "Question " + (idx + 1) + " of " + QUESTIONS.length;
+            document.getElementById("assessQuestion").textContent = q.question;
+
+            const choicesHTML = q.choices.map((c, i) =>
+                '<button class="assessment-choice" data-index="' + i + '" aria-label="Choice ' + (i + 1) + '">' + c + '</button>'
+            ).join("");
+            document.getElementById("assessmentChoices").innerHTML = choicesHTML;
+            document.querySelectorAll(".assessment-choice").forEach(btn => {
+                btn.addEventListener("click", () => onAssessmentChoice(btn));
+            });
+            document.getElementById("assessmentFeedback").className = "assessment-feedback";
+            document.getElementById("assessmentFeedback").innerHTML = "";
+            document.getElementById("hintBtn").classList.remove("hidden");
+            document.getElementById("retryBtn").classList.add("hidden");
+            document.getElementById("assessNav").innerHTML = "";
+            const hintEl = document.getElementById("hintText");
+            if (hintEl) hintEl.remove();
+            simState.questionAnswered = false;
+        }
+
         function onAssessmentChoice(btn) {
-            if (simState.answered) return;
-            simState.attempts++;
-            simState.selectedChoice = Number(btn.dataset.index);
+            if (simState.questionAnswered) return;
+            const qi = simState.currentQuestion;
+            const q = QUESTIONS[qi];
+            const choiceIdx = Number(btn.dataset.index);
+            simState.questionAttempts[qi]++;
             const allChoices = document.querySelectorAll(".assessment-choice");
-            allChoices.forEach((c) => c.classList.add("disabled"));
+            allChoices.forEach(c => c.classList.add("disabled"));
             document.getElementById("hintBtn").classList.add("hidden");
             const feedback = document.getElementById("assessmentFeedback");
 
-            if (simState.selectedChoice === CORRECT_INDEX) {
+            if (choiceIdx === q.correctIndex) {
                 btn.classList.add("correct");
                 feedback.className = "assessment-feedback correct";
-                feedback.innerHTML = "<strong>Correct!</strong> Your observation is correct! When the diaphragm contracts and moves downwards, the volume inside the chest cavity increases. This extra space causes the internal air pressure to drop. Because the pressure inside the lungs is now lower than the pressure outside the body, air is drawn inwards to balance it out.";
-                simState.answered = true;
-                simState.firstAttemptCorrect = simState.attempts === 1;
-                storageSet(SIM_CONFIG.simId + ":firstAttempt", simState.firstAttemptCorrect ? "correct" : "wrong");
-                storageSet(SIM_CONFIG.simId + ":attempts", String(simState.attempts));
-                showCompletion();
+                feedback.innerHTML = "<strong>Correct!</strong> " + q.feedbackCorrect;
+                simState.questionResults[qi] = true;
+                simState.questionCorrectCount++;
+                onQuestionDone();
             } else {
                 btn.classList.add("incorrect");
-                allChoices[CORRECT_INDEX].classList.add("correct");
+                allChoices[q.correctIndex].classList.add("correct");
                 feedback.className = "assessment-feedback incorrect";
-                if (simState.attempts < 2) {
-                    feedback.innerHTML = "<strong>Not quite.</strong> Think about what happens to the space inside the chest when the diaphragm moves downward. Try again!";
+                if (simState.questionAttempts[qi] < 2) {
+                    feedback.innerHTML = "<strong>Not quite.</strong> " + q.feedbackIncorrect + " Try again!";
                     document.getElementById("retryBtn").classList.remove("hidden");
                 } else {
-                    feedback.innerHTML = "<strong>Not quite.</strong> The correct answer is: The air pressure inside the chest decreases. When the diaphragm contracts and moves down, the volume increases, which causes the pressure to drop. Air then rushes in to equalise the pressure.";
-                    simState.answered = true;
-                    simState.firstAttemptCorrect = false;
-                    storageSet(SIM_CONFIG.simId + ":firstAttempt", "wrong");
-                    storageSet(SIM_CONFIG.simId + ":attempts", String(simState.attempts));
-                    showCompletion();
+                    feedback.innerHTML = "<strong>Not quite.</strong> The correct answer is: " + q.choices[q.correctIndex] + ". " + q.feedbackCorrect;
+                    simState.questionResults[qi] = false;
+                    onQuestionDone();
                 }
             }
         }
 
-        function retryAssessment() {
-            simState.answered = false;
-            simState.selectedChoice = null;
+        function onQuestionDone() {
+            simState.questionAnswered = true;
+            const nav = document.getElementById("assessNav");
+            const isLast = simState.currentQuestion >= QUESTIONS.length - 1;
+            const btn = document.createElement("button");
+            btn.className = "primary-btn";
+            btn.style.marginTop = "12px";
+            btn.textContent = isLast ? "See Results" : "Next Question";
+            btn.addEventListener("click", () => {
+                if (isLast) {
+                    showFinalCompletion();
+                } else {
+                    simState.currentQuestion++;
+                    renderQuestion(simState.currentQuestion);
+                }
+            });
+            nav.innerHTML = "";
+            nav.appendChild(btn);
+        }
+
+        function retryQuestion() {
+            simState.questionAnswered = false;
             document.getElementById("retryBtn").classList.add("hidden");
             const fb = document.getElementById("assessmentFeedback");
             fb.className = "assessment-feedback"; fb.innerHTML = "";
-            document.querySelectorAll(".assessment-choice").forEach((c) => c.classList.remove("disabled", "correct", "incorrect"));
+            document.querySelectorAll(".assessment-choice").forEach(c => c.classList.remove("disabled", "correct", "incorrect"));
         }
 
         function showHint() {
@@ -831,31 +1160,43 @@
             storageSet(SIM_CONFIG.simId + ":hintUsed", "true");
             const div = document.createElement("div");
             div.id = "hintText"; div.className = "hint-text";
-            div.textContent = "Think about what happens to the volume of the chest cavity when the diaphragm moves down. How does a change in volume affect air pressure?";
+            div.textContent = QUESTIONS[simState.currentQuestion].hint;
             section.appendChild(div);
         }
 
-        function showCompletion() {
+        function showFinalCompletion() {
             const area = document.getElementById("completionArea");
-            const attempts = simState.attempts;
-            const first = simState.firstAttemptCorrect;
+            const total = QUESTIONS.length;
+            const correct = simState.questionCorrectCount;
+            const totalAttempts = simState.questionAttempts.reduce((a, b) => a + b, 0);
+            const allFirstTry = simState.questionResults.every((r, i) => simState.questionAttempts[i] === 1);
             const elapsed = Math.round((Date.now() - simState.startTime) / 1000);
             const mins = Math.floor(elapsed / 60);
             const secs = elapsed % 60;
-            const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-            storageSet(SIM_CONFIG.simId + ":timeOnTask", String(elapsed));
+            const timeStr = mins > 0 ? mins + "m " + secs + "s" : secs + "s";
+            const mastery = Math.round((correct / total) * 100);
+
             storageSet(SIM_CONFIG.simId + ":completion", "true");
+            storageSet(SIM_CONFIG.simId + ":questionsCorrect", String(correct));
+            storageSet(SIM_CONFIG.simId + ":questionsTotal", String(total));
+            storageSet(SIM_CONFIG.simId + ":totalAttempts", String(totalAttempts));
+            storageSet(SIM_CONFIG.simId + ":firstAttemptCorrect", allFirstTry ? "true" : "false");
+            storageSet(SIM_CONFIG.simId + ":hintUsed", simState.hintUsed ? "true" : "false");
+            storageSet(SIM_CONFIG.simId + ":timeOnTask", String(elapsed));
+            storageSet(SIM_CONFIG.simId + ":finalMastery", String(mastery));
 
             let extra = "";
-            if (simState.hintUsed) extra += " You used a hint.";
-            extra += ` Time on task: ${timeStr}.`;
+            if (simState.hintUsed) extra += " You used hints.";
+            extra += " Time on task: " + timeStr + ".";
 
-            area.innerHTML = `
-                <div class="completion-banner">
-                    <h3>Simulation Complete</h3>
-                    <p>You answered the assessment question in ${attempts} attempt${attempts > 1 ? "s" : ""}.${first ? " You got it right on your first try!" : " Keep studying the breathing mechanics!"}${extra}</p>
-                </div>
-            `;
+            area.innerHTML =
+                '<div class="completion-banner">' +
+                '<h3>Simulation Complete</h3>' +
+                '<p>You got ' + correct + ' out of ' + total + ' questions correct (' + mastery + '% mastery).' +
+                (allFirstTry ? " You got every question right on your first try!" : " Keep studying the breathing mechanics!") +
+                extra + '</p></div>';
+
+            document.getElementById("assessmentSection").style.display = "none";
         }
     </script>
 </body>
