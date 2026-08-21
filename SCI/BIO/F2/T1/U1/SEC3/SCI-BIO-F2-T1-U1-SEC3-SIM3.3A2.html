@@ -207,7 +207,7 @@
                     <div class="eyebrow" id="homeEyebrow">Biology</div>
                     <h2 id="homeTitle">Oxygen Demand Animation</h2>
                     <p id="homeDescription">
-                        Observe how oxygen particles move across the alveolar membrane and into the bloodstream.
+                        Observe how oxygen molecules move across the alveolar membrane and into the bloodstream.
                         Adjust the energy demand to see how activity level affects the speed of gas exchange.
                     </p>
                     <div class="hero-actions">
@@ -265,7 +265,7 @@
             subtitle: "Biology — Gas Exchange",
             badgeText: "BIO",
             homeEyebrow: "Biology",
-            homeDescription: "Observe how oxygen particles move across the alveolar membrane and into the bloodstream. Adjust the energy demand to see how activity level affects the speed of gas exchange.",
+            homeDescription: "Observe how oxygen molecules move across the alveolar membrane and into the bloodstream. Adjust the energy demand to see how activity level affects the speed of gas exchange.",
             instructions: [
                 "Move the Energy Demand slider from Low to High to change the activity level.",
                 "Watch how the breathing rate and oxygen particle speed change.",
@@ -449,15 +449,15 @@
                     </div>
                     <button class="control-btn pause-btn" id="pauseBtn" aria-label="Pause animation">Pause</button>
                 </div>
-                <div class="caption-bar" id="captionBar" role="status" aria-live="polite">Low energy demand: Oxygen particles are moving slowly into the blood.</div>
+                <div class="caption-bar" id="captionBar" role="status" aria-live="polite">Low energy demand: Oxygen molecules are moving slowly into the blood.</div>
                 <div class="assessment-section" id="assessmentSection">
                     <h3>Assessment Question</h3>
-                    <p class="assessment-question">Why do more oxygen particles cross the membrane when the energy demand is high?</p>
+                    <p class="assessment-question">Why do more oxygen molecules cross the membrane when the energy demand is high?</p>
                     <div class="assessment-choices" id="assessmentChoices">
                         <button class="assessment-choice" data-index="0" aria-label="Choice 1">The alveolus gets bigger and pushes more oxygen through.</button>
                         <button class="assessment-choice" data-index="1" aria-label="Choice 2">Active cells require more oxygen to carry out cellular respiration at a faster rate.</button>
                         <button class="assessment-choice" data-index="2" aria-label="Choice 3">The membrane becomes thinner when the person exercises.</button>
-                        <button class="assessment-choice" data-index="3" aria-label="Choice 4">Oxygen particles become lighter and move on their own.</button>
+                        <button class="assessment-choice" data-index="3" aria-label="Choice 4">Oxygen molecules become lighter and move on their own.</button>
                     </div>
                     <div class="button-row" style="margin-top: 10px; justify-content: flex-start;">
                         <button class="ghost-btn" id="hintBtn">Hint</button>
@@ -485,19 +485,21 @@
         function updateCaption() {
             const v = simState.energyDemand;
             const c = document.getElementById("captionBar");
-            if (v < 25) c.textContent = "Low energy demand: Oxygen particles are moving slowly into the blood.";
-            else if (v < 50) c.textContent = "Moderate energy demand: Oxygen particles are moving at a steady pace across the membrane.";
-            else if (v < 75) c.textContent = "High energy demand: Oxygen particles are moving quickly into the blood as breathing rate increases.";
-            else c.textContent = "Very high energy demand: Oxygen particles are moving very quickly into the blood. The body needs maximum oxygen for intense activity.";
+            if (v < 25) c.textContent = "Low energy demand: Oxygen molecules are moving slowly into the blood.";
+            else if (v < 50) c.textContent = "Moderate energy demand: Oxygen molecules are moving at a steady pace across the membrane.";
+            else if (v < 75) c.textContent = "High energy demand: Oxygen molecules are moving quickly into the blood as breathing rate increases.";
+            else c.textContent = "Very high energy demand: Oxygen molecules are moving very quickly into the blood. The body needs maximum oxygen for intense activity.";
         }
 
         function updateActivityState() {
             const v = simState.energyDemand;
             const el = document.getElementById("activityState");
-            if (v < 30) el.textContent = "Walking slowly";
-            else if (v < 60) el.textContent = "Walking briskly";
-            else if (v < 80) el.textContent = "Jogging";
-            else el.textContent = "Running";
+            if (v < 15) el.textContent = "Resting";
+            else if (v < 35) el.textContent = "Walking slowly";
+            else if (v < 55) el.textContent = "Walking briskly";
+            else if (v < 75) el.textContent = "Jogging";
+            else if (v < 90) el.textContent = "Running";
+            else el.textContent = "Sprinting";
         }
 
         function togglePause() {
@@ -565,11 +567,12 @@
         function updatePersonSVG(dt, speed) {
             const phase = simState.breathPhase;
             const v = simState.energyDemand;
-            const swingAmt = 5 + (v / 100) * 35;
+            const t = v / 100;
+            const swingAmt = 3 + t * 40;
             const swing = Math.sin(phase * Math.PI * 2) * swingAmt;
 
             /* Vertical bounce when running */
-            const bounce = (v / 100) * Math.abs(Math.sin(phase * Math.PI * 2)) * 12;
+            const bounce = t * Math.abs(Math.sin(phase * Math.PI * 2)) * (4 + t * 16);
             const svg = document.getElementById("personSvg");
             if (svg) svg.style.transform = `translateY(${-bounce}px)`;
 
@@ -648,28 +651,13 @@
                 p.x += p.vx * dt * 60;
                 p.y += p.vy * dt * 60;
 
-                if (!p.crossed && p.y >= memY) {
+                if (!p.crossed && p.y + p.size >= memY) {
                     p.crossed = true;
-                    p.vy *= 0.5;
+                    p.vy = -Math.abs(p.vy) * 0.6;
+                    p.y = memY - p.size;
                 }
 
-                if (p.crossed && !p.absorbed) {
-                    for (const cell of simState.bloodCells) {
-                        const cellX = cell.x * w;
-                        const cellY = h * 0.7 + Math.sin(cell.x * 10) * 8;
-                        const dx = p.x - cellX;
-                        const dy = p.y - cellY;
-                        if (Math.sqrt(dx * dx + dy * dy) < cell.size + p.size) {
-                            p.absorbed = true;
-                            p.alpha = 0.5;
-                            cell.hasOxygen = true;
-                            cell.oxygenAlpha = 1;
-                            break;
-                        }
-                    }
-                }
-
-                if (p.x > w + 20 || p.y > h + 20 || (p.absorbed && p.alpha <= 0)) {
+                if (p.x > w + 20 || p.y > h + 20) {
                     simState.particles.splice(i, 1);
                 }
             }
@@ -690,11 +678,9 @@
 
         /* ---- Smoothed counter ---- */
         function trackOxygenRate(dt) {
-            const now = performance.now();
-            simState.countWindow.push(now);
-            while (simState.countWindow.length > 0 && simState.countWindow[0] < now - 1000) simState.countWindow.shift();
-            const raw = simState.countWindow.length;
-            simState.smoothedCount += (raw - simState.smoothedCount) * Math.min(1, dt * 4);
+            const v = simState.energyDemand;
+            const target = Math.round(2 + (v / 100) * 38);
+            simState.smoothedCount += (target - simState.smoothedCount) * Math.min(1, dt * 3);
             const display = Math.round(simState.smoothedCount);
             const counter = document.getElementById("oxygenCounter");
             if (counter) counter.textContent = display;
@@ -750,7 +736,7 @@
             ctx.fillStyle = tc;
             ctx.font = "bold 20px Arial, sans-serif";
             ctx.globalAlpha = 0.55;
-            ctx.fillText("Alveolus (air)", w * 0.04, h * 0.07);
+            ctx.fillText("Alveolus (air)", w * 0.04, h * 0.16);
             ctx.fillText("Capillary (blood)", w * 0.04, capY - 4);
             ctx.globalAlpha = 1;
 
@@ -774,25 +760,15 @@
                 ctx.strokeStyle = isDark ? "rgba(220,50,80,0.35)" : "rgba(220,50,80,0.25)";
                 ctx.lineWidth = 1;
                 ctx.stroke();
-
-                /* Oxygen absorbed glow */
-                if (cell.hasOxygen && cell.oxygenAlpha > 0) {
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, cell.size * 0.4, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(52,211,153,${cell.oxygenAlpha * 0.7})`;
-                    ctx.fill();
-                }
             }
 
             /* O2 particles */
             for (const p of simState.particles) {
-                if (p.absorbed && p.alpha <= 0) continue;
-                ctx.globalAlpha = p.crossed ? Math.max(0, p.alpha) : 1;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = p.crossed ? "rgba(52,211,153,0.9)" : "rgba(125,211,252,0.9)";
+                ctx.fillStyle = "rgba(125,211,252,0.9)";
                 ctx.fill();
-                ctx.strokeStyle = p.crossed ? "rgba(52,211,153,0.5)" : "rgba(125,211,252,0.4)";
+                ctx.strokeStyle = "rgba(125,211,252,0.4)";
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
 
@@ -806,7 +782,6 @@
                     ctx.textAlign = "start";
                     ctx.textBaseline = "alphabetic";
                 }
-                ctx.globalAlpha = 1;
             }
         }
 
@@ -865,7 +840,7 @@
             storageSet(SIM_CONFIG.simId + ":hintUsed", "true");
             const div = document.createElement("div");
             div.id = "hintText"; div.className = "hint-text";
-            div.textContent = "Look at how many oxygen particles are needed when the muscles work harder.";
+            div.textContent = "Look at how many oxygen molecules are needed when the muscles work harder.";
             section.appendChild(div);
         }
 
