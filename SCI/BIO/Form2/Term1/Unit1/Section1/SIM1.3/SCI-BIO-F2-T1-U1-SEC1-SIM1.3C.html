@@ -732,7 +732,7 @@
             </div>
 
             <div class="controls">
-                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">&#10067; Help</button>
+                <button class="control-btn pulse-help hidden" id="helpBtn" aria-label="Open instructions">&#10067; Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
                 <button class="control-btn" id="reviewBtn" aria-label="Open Review History">&#129504; Review History</button>
@@ -768,6 +768,7 @@
                     <p class="safety-note"><strong>Virtual lab safety:</strong> In a real laboratory, wear eye protection, never taste samples or reagents, and use a supervised hot water bath.</p>
                     <div class="hero-actions">
                         <button class="primary-btn" id="startBtn">Enter the lab</button>
+                        <button class="secondary-btn" id="openInstructionsBtn" type="button">Read Instructions</button>
                         <button class="secondary-btn" id="homeGuideBtn">Food Test Guide</button>
                     </div>
                 </section>
@@ -1262,6 +1263,7 @@
             state.currentScreen = screenName;
             dom.homeScreen.classList.toggle("active", screenName === "home");
             dom.simScreen.classList.toggle("active", screenName === "sim");
+            dom.helpBtn.classList.toggle("hidden", screenName === "home");
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
 
@@ -1953,7 +1955,10 @@
             document.getElementById("resetConfirmHeading").textContent = "Reset simulation?";
             document.querySelector("#resetConfirmModal p").textContent = "This will clear your current progress and return you to the home screen.";
             dom.confirmResetBtn.textContent = "Reset";
-            window.setTimeout(() => { openInstructionsModal(); dom.closeInstructionsBtn.focus(); }, 100);
+            window.setTimeout(() => {
+                dom.openInstructionsBtn.focus({ preventScroll: true });
+                openInstructionsModal();
+            }, 100);
         }
 
         window.setTimeout(() => {
@@ -1963,8 +1968,8 @@
                 showScreen("sim");
                 devInit();
             } else if (storageGet(SIM_CONFIG.simId + "-help-seen") !== "true") {
+                dom.openInstructionsBtn.focus({ preventScroll: true });
                 openInstructionsModal();
-                dom.closeInstructionsBtn.focus();
             }
         }, 0);
     </script>
