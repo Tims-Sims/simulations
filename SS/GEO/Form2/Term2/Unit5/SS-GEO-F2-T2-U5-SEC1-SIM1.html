@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Hotspot Heroes: Community Land-Use Patrol</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        .cl-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-bottom: 14px;
+        }
+
+        .cl-toolbar .control-btn,
+        .cl-toolbar .danger-btn {
+            padding: 10px 14px;
+            min-height: 44px;
+        }
+
+        .cl-status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .cl-progress-wrap {
+            flex: 1 1 260px;
+            min-width: 220px;
+        }
+
+        .cl-progress-text {
+            display: block;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            margin-bottom: 6px;
+        }
+
+        .cl-bar {
+            height: 14px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .cl-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.45s ease;
+        }
+
+        .cl-pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cl-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            font-weight: 800;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .cl-pill-xp {
+            border-color: rgba(251, 191, 36, 0.55);
+        }
+
+        .cl-pill-rank {
+            border-color: rgba(167, 139, 250, 0.55);
+        }
+
+        .cl-pill-streak {
+            border-color: rgba(52, 211, 153, 0.55);
+        }
+
+        .cl-pill.cl-pop {
+            animation: clPop 0.5s ease;
+        }
+
+        @keyframes clPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.16); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- Guide / mascot ------------------------------------------------ */
+
+        .cl-guide {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 12px 14px;
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            margin-bottom: 14px;
+        }
+
+        .cl-guide-avatar {
+            font-size: 1.7rem;
+            line-height: 1;
+            flex: 0 0 auto;
+        }
+
+        .cl-guide-bubble {
+            font-size: 0.95rem;
+            color: var(--text-soft);
+        }
+
+        /* --- Map ------------------------------------------------------------ */
+
+        .cl-map-frame {
+            position: relative;
+            width: 100%;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 2px solid var(--border);
+            box-shadow: var(--shadow);
+            background: #7ec8e3;
+        }
+
+        .cl-map-svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .cl-hotspot {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            min-width: 56px;
+            min-height: 56px;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            border-radius: 16px;
+            border: 3px solid #10203a;
+            background: #fef3c7;
+            color: #10203a;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.66rem;
+            line-height: 1.1;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .cl-hotspot:hover {
+            transform: translate(-50%, -50%) scale(1.08);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.45);
+        }
+
+        .cl-hotspot:focus-visible {
+            outline: 4px solid #1d4ed8;
+            outline-offset: 3px;
+            box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.75);
+        }
+
+        .cl-hotspot-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .cl-hotspot-name {
+            display: block;
+            max-width: 92px;
+            padding: 0 2px;
+        }
+
+        .cl-hotspot-tag {
+            display: block;
+            font-size: 0.58rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .cl-hotspot[data-state="open"] {
+            animation: clPing 2.4s ease-in-out infinite;
+        }
+
+        @keyframes clPing {
+            0%, 100% { box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), 0 0 0 0 rgba(29, 78, 216, 0.55); }
+            50% { box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), 0 0 0 12px rgba(29, 78, 216, 0); }
+        }
+
+        .cl-hotspot[data-state="solved"] {
+            background: #dcfce7;
+            border-color: #14532d;
+            border-style: double;
+            border-width: 5px;
+            animation: none;
+        }
+
+        .cl-hotspot[data-state="solved"] .cl-hotspot-tag::before {
+            content: "\2714\00a0";
+        }
+
+        .cl-hotspot.cl-stamp {
+            animation: clStamp 0.55s ease;
+        }
+
+        @keyframes clStamp {
+            0% { transform: translate(-50%, -50%) scale(1.9) rotate(-12deg); opacity: 0.2; }
+            60% { transform: translate(-50%, -50%) scale(0.94) rotate(3deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+        }
+
+        .cl-map-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .cl-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px dashed var(--border);
+            color: var(--muted);
+        }
+
+        /* --- Location panel ------------------------------------------------- */
+
+        .cl-panel-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+            gap: 16px;
+            align-items: start;
+        }
+
+        @media (max-width: 860px) {
+            .cl-panel-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .cl-evidence {
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+
+        .cl-evidence h4 {
+            margin: 0 0 8px;
+            font-size: 1.05rem;
+        }
+
+        .cl-evidence-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .cl-evidence-scene {
+            width: 100%;
+            height: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            display: block;
+            margin-bottom: 12px;
+            background: #cfe8ff;
+        }
+
+        .cl-evidence p {
+            margin: 0;
+            color: var(--text-soft);
+            font-size: 0.95rem;
+        }
+
+        .cl-question {
+            margin: 0 0 12px;
+            font-size: 1.15rem;
+        }
+
+        .cl-choice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 10px;
+        }
+
+        .cl-choice {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            min-height: 60px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .cl-choice:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .cl-choice:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+            border-color: var(--accent);
+        }
+
+        .cl-choice[aria-pressed="true"] {
+            border-color: var(--accent-2);
+            border-style: solid;
+            background: var(--surface);
+        }
+
+        .cl-choice[aria-pressed="true"]::after {
+            content: "Selected";
+            margin-left: auto;
+            font-size: 0.68rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent-2);
+        }
+
+        .cl-choice:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .cl-choice-icon {
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+
+        .cl-choice-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .cl-choice-copy small {
+            font-weight: 600;
+            color: var(--muted);
+            font-size: 0.74rem;
+        }
+
+        .cl-feedback {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.94rem;
+        }
+
+        .cl-feedback[data-tone="correct"] {
+            border-color: var(--success);
+        }
+
+        .cl-feedback[data-tone="incorrect"] {
+            border-color: var(--warning);
+            border-style: dashed;
+        }
+
+        .cl-feedback-icon {
+            font-size: 1.2rem;
+            line-height: 1.2;
+        }
+
+        .cl-feedback p {
+            margin: 0 0 6px;
+        }
+
+        .cl-feedback p:last-child {
+            margin-bottom: 0;
+        }
+
+        .cl-model {
+            font-style: italic;
+            color: var(--text-soft);
+        }
+
+        .cl-hint-box {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            border: 2px dotted var(--accent);
+            background: var(--surface-2);
+            font-size: 0.92rem;
+        }
+
+        .cl-attempt-note {
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        /* --- Review, exit, completion ---------------------------------------- */
+
+        .cl-review-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cl-review-row:last-child {
+            border-bottom: none;
+        }
+
+        .cl-review-status {
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+
+        .cl-review-row[data-solved="true"] .cl-review-status {
+            color: var(--success);
+        }
+
+        .cl-review-row[data-solved="false"] .cl-review-status {
+            color: var(--warning);
+        }
+
+        .cl-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.94rem;
+        }
+
+        .cl-summary-table th,
+        .cl-summary-table td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cl-summary-table th {
+            font-size: 0.76rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .cl-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .cl-stat-card {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+
+        .cl-stat-value {
+            font-size: 1.35rem;
+            font-weight: 900;
+        }
+
+        .cl-stat-label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .cl-badge-hero {
+            text-align: center;
+            padding: 18px;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--accent-2);
+            background: var(--surface-2);
+            margin-bottom: 6px;
+        }
+
+        .cl-badge-hero .cl-badge-icon {
+            font-size: 3rem;
+            line-height: 1;
+            display: block;
+        }
+
+        .cl-confetti-layer {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .cl-confetti {
+            position: absolute;
+            top: -14px;
+            width: 9px;
+            height: 14px;
+            border-radius: 2px;
+            opacity: 0.9;
+            animation: clFall 2.6s linear forwards;
+        }
+
+        @keyframes clFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(420px) rotate(540deg); opacity: 0; }
+        }
+
+        .cl-stage {
+            position: relative;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .cl-sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cl-hotspot,
+            .cl-hotspot[data-state="open"],
+            .cl-hotspot.cl-stamp,
+            .cl-pill.cl-pop,
+            .cl-confetti,
+            .cl-bar-fill,
+            .cl-choice {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <!-- Built entirely at runtime by devInit() below. -->
+                    <div id="clRoot"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Hotspot Heroes: Community Land-Use Patrol — a Geography simulation on types of land use in a Caribbean community. Works fully offline.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "SS-GEO-F2-T2-U5-SEC1-SIM1",
+            title: "Hotspot Heroes: Community Land-Use Patrol",
+            subtitle: "Classify six types of land use in Palmiste Bay",
+            badgeText: "GEO",
+            homeEyebrow: "Land-Use Patrol Briefing",
+            homeDescription:
+                "Explore the community and classify its different types of land use. Select a hotspot, examine the location and choose the correct land-use category.",
+            instructions: [
+                "Select one hotspot on the community map.",
+                "Examine the location shown.",
+                "Choose the correct type of land use.",
+                "Correct answers will remain labelled on the map.",
+                "If an answer is incorrect, read the feedback and try again.",
+                "Classify all six locations to complete the community map.",
+                "Keyboard: press Tab to move between hotspots, then press Enter or Space to open the selected hotspot. Escape closes any panel and returns you to the map.",
+                "Settlement — land used for homes where people live.",
+                "Agriculture — land used to grow crops or rear animals.",
+                "Industry — land used to manufacture or process goods.",
+                "Services — land used to provide services such as health care, education or banking.",
+                "Recreation — land used for enjoyment, relaxation and sport.",
+                "Communication/Transport — land used to move people, goods and messages between places."
+            ]
+        };
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ---------------------------------------------------------------
+           Hotspot Heroes: Community Land-Use Patrol
+           Land-use categories, the answer key and every feedback string
+           below are taken verbatim from issue #176. Only the surrounding
+           game framing — the patrol guide, patrol points, ranks and the
+           patrol log — is added on top of the specified content.
+           --------------------------------------------------------------- */
+
+        const CL_CATEGORIES = {
+            settlement: { label: "Settlement", icon: "🏘️", blurb: "Land used for homes", example: "a village of family houses is a place where people live, so it is classified as Settlement" },
+            agriculture: { label: "Agriculture", icon: "🌾", blurb: "Land used for crops and animals", example: "a cocoa estate grows crops to be sold, so it is classified as Agriculture" },
+            industry: { label: "Industry", icon: "🏭", blurb: "Land used to make goods", example: "a cement plant processes limestone into cement, so it is classified as Industry" },
+            services: { label: "Services", icon: "🏥", blurb: "Land used to serve the public", example: "a police station gives help to members of the public, so it is classified as Services" },
+            recreation: { label: "Recreation", icon: "⚽", blurb: "Land used for leisure and sport", example: "a savannah where people jog and play football is used for leisure, so it is classified as Recreation" },
+            transport: { label: "Communication/Transport", icon: "🚢", blurb: "Land used to move people and goods", example: "a bus terminal moves people between places, so it is classified as Communication/Transport" }
+        };
+
+        const CL_CATEGORY_ORDER = ["settlement", "agriculture", "industry", "services", "recreation", "transport"];
+
+        const CL_LOCATIONS = [
+            {
+                id: "hospital",
+                name: "Hospital",
+                mapLabel: "Hospital",
+                icon: "🏥",
+                x: 60,
+                y: 47.7,
+                correct: "services",
+                evidence: "Palmiste Bay District Hospital. A red cross sign stands over the entrance. An ambulance waits at the Accident and Emergency door. Signs point to the pharmacy and the clinic. Nurses and doctors care for people who are sick or injured.",
+                correctFeedback: "Correct! A hospital provides health services to the community, so it is classified as Services.",
+                incorrectFeedback: "Not quite. Think about what the hospital provides to members of the community.",
+                hint: "This location provides essential health assistance to the public.",
+                model: "Model answer: a health centre gives medical care to members of the public, so it is classified as Services."
+            },
+            {
+                id: "farm",
+                name: "Farm",
+                mapLabel: "Farm",
+                icon: "🚜",
+                x: 64,
+                y: 87,
+                correct: "agriculture",
+                evidence: "Ramlogan's farm on the eastern flat. Long rows of dasheen and tomatoes run down the field. Two cows graze behind a fence and a tractor sits beside the crop beds. The crops are taken to the market each Saturday.",
+                correctFeedback: "Correct! A farm is used to grow crops or raise animals, so it is classified as Agriculture.",
+                incorrectFeedback: "Not quite. Think about the production of crops and animals.",
+                hint: "Food and other agricultural products are produced here.",
+                model: "Model answer: a cocoa estate grows crops to be sold, so it is classified as Agriculture."
+            },
+            {
+                id: "factory",
+                name: "Factory",
+                mapLabel: "Factory",
+                icon: "🏭",
+                x: 83.5,
+                y: 31,
+                correct: "industry",
+                evidence: "The Palmiste Bay bottling plant. Tall chimneys rise above the roof and steam drifts from the vents. Inside, machines and workers process raw materials and package finished goods for sale.",
+                correctFeedback: "Correct! A factory is used to manufacture or process goods, so it is classified as Industry.",
+                incorrectFeedback: "Not quite. Think about where goods are manufactured or processed.",
+                hint: "Workers and machinery are used here to produce goods.",
+                model: "Model answer: a sugar factory processes cane into sugar, so it is classified as Industry."
+            },
+            {
+                id: "residential",
+                name: "Residential neighbourhood",
+                mapLabel: "Homes",
+                icon: "🏘️",
+                x: 18.8,
+                y: 46,
+                correct: "settlement",
+                evidence: "Coconut Drive. A group of family homes stands side by side with galvanise roofs, front steps and small yards. Washing hangs on a line, a dog sleeps in the shade and children walk home from school.",
+                correctFeedback: "Correct! A residential neighbourhood is an area where people live, so it is classified as Settlement.",
+                incorrectFeedback: "Not quite. Consider the main purpose of the houses in this area.",
+                hint: "This area contains homes where people live.",
+                model: "Model answer: a village of family houses is a place where people live, so it is classified as Settlement."
+            },
+            {
+                id: "seaport",
+                name: "Seaport",
+                mapLabel: "Seaport",
+                icon: "🚢",
+                x: 30,
+                y: 26,
+                correct: "transport",
+                evidence: "Palmiste Bay seaport. A cargo ship is tied up at the dock and a crane lifts containers onto waiting trucks. Boxes of goods arrive from other islands, and passengers board the ferry for the crossing.",
+                correctFeedback: "Correct! A seaport helps transport people and goods and connects places, so it is classified as Communication/Transport.",
+                incorrectFeedback: "Not quite. A seaport does not manufacture goods. It is used to move goods and connect places.",
+                hint: "Ships use this location to transport people or goods between places.",
+                model: "Model answer: an airport moves people and goods between places, so it is classified as Communication/Transport."
+            },
+            {
+                id: "park",
+                name: "Public park",
+                mapLabel: "Park",
+                icon: "⚽",
+                x: 20,
+                y: 87,
+                correct: "recreation",
+                evidence: "Palmiste Bay public park. Open grass, a football goal, a pavilion and shady samaan trees. Children use the swings, a group plays football and families sit and relax in the late afternoon.",
+                correctFeedback: "Correct! A public park is used for enjoyment, relaxation and sports, so it is classified as Recreation.",
+                incorrectFeedback: "Not quite. Think about what people normally visit a public park to do.",
+                hint: "People use this location for enjoyment, relaxation and physical activities.",
+                model: "Model answer: a savannah where people jog and play football is used for leisure, so it is classified as Recreation."
+            }
+        ];
+
+        const CL_RANKS = [
+            { at: 0, icon: "🧭", name: "Trainee Surveyor" },
+            { at: 1, icon: "🔎", name: "Field Scout" },
+            { at: 3, icon: "🗺️", name: "Map Reader" },
+            { at: 5, icon: "📐", name: "Land-Use Officer" },
+            { at: 6, icon: "🏆", name: "Chief Surveyor" }
+        ];
+
+        const CL_GUIDE_NAME = "Scout the Scarlet Ibis";
+
+        const CL_GUIDE_LINES = {
+            welcome: "Welcome to Palmiste Bay, patroller! Six hotspots are still unclassified. Select a glowing hotspot to begin.",
+            examine: "Read the field notes beside the map, then choose the land use that matches.",
+            correct: "Sharp work! That marker is locked on the map for good.",
+            incorrect: "Not this time. Read the feedback, check the field notes and try again.",
+            hint: "Here is a clue. Use it, then choose again.",
+            nearlyDone: "One hotspot left. Finish the patrol!",
+            done: "The whole community map is classified. Outstanding patrol!"
+        };
+
+        /* --- Illustrated community map (inline SVG, no external assets) ----- */
+
+        const CL_MAP_SVG =
+            '<svg class="cl-map-svg" viewBox="0 0 1000 620" role="img" ' +
+            'aria-label="Illustrated map of the community of Palmiste Bay showing a seaport on the coast, a factory, a residential neighbourhood of homes, a hospital, a farm and a public park.">' +
+            '<defs>' +
+            '<linearGradient id="clSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd0f7"/><stop offset="1" stop-color="#d6ecfb"/></linearGradient>' +
+            '<linearGradient id="clSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f92cc"/><stop offset="1" stop-color="#1c6ea6"/></linearGradient>' +
+            '<linearGradient id="clGrass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc76a"/><stop offset="1" stop-color="#4a9743"/></linearGradient>' +
+            '</defs>' +
+
+            /* sky, sun, clouds, hills */
+            '<rect x="0" y="0" width="1000" height="180" fill="url(#clSky)"/>' +
+            '<circle cx="905" cy="48" r="30" fill="#ffe066"/>' +
+            '<g fill="#ffffff" opacity="0.85"><ellipse cx="180" cy="52" rx="46" ry="20"/><ellipse cx="220" cy="44" rx="34" ry="18"/>' +
+            '<ellipse cx="620" cy="40" rx="40" ry="17"/><ellipse cx="660" cy="50" rx="28" ry="14"/></g>' +
+            '<path d="M0 180 L0 132 Q90 78 190 128 Q260 92 330 130 Q430 74 520 128 Q620 84 700 130 Q800 88 880 132 Q940 108 1000 138 L1000 180 Z" fill="#3f7d5a"/>' +
+            '<path d="M0 180 L0 152 Q120 118 250 152 Q380 118 520 154 Q660 120 800 152 Q900 132 1000 156 L1000 180 Z" fill="#4f9169"/>' +
+
+            /* sea and waves */
+            '<rect x="0" y="176" width="1000" height="96" fill="url(#clSea)"/>' +
+            '<g stroke="#bfe6ff" stroke-width="4" fill="none" opacity="0.7" stroke-linecap="round">' +
+            '<path d="M420 208 q14 -10 28 0 t28 0"/><path d="M540 236 q14 -10 28 0 t28 0"/>' +
+            '<path d="M700 200 q14 -10 28 0 t28 0"/><path d="M840 240 q14 -10 28 0 t28 0"/>' +
+            '<path d="M620 262 q14 -10 28 0 t28 0"/></g>' +
+
+            /* coastline and land */
+            '<path d="M0 262 Q160 250 320 268 Q500 288 700 268 Q860 252 1000 266 L1000 620 L0 620 Z" fill="#e8d9a6"/>' +
+            '<path d="M0 282 Q160 270 320 288 Q500 308 700 288 Q860 272 1000 286 L1000 620 L0 620 Z" fill="url(#clGrass)"/>' +
+
+            /* main road */
+            '<path d="M-10 470 Q250 430 500 452 Q760 474 1010 424" stroke="#6b7280" stroke-width="30" fill="none"/>' +
+            '<path d="M-10 470 Q250 430 500 452 Q760 474 1010 424" stroke="#f8fafc" stroke-width="4" stroke-dasharray="22 20" fill="none"/>' +
+            '<path d="M195 300 L200 452" stroke="#6b7280" stroke-width="18" fill="none"/>' +
+            '<path d="M505 452 L505 400" stroke="#6b7280" stroke-width="18" fill="none"/>' +
+            '<path d="M835 300 L840 448" stroke="#6b7280" stroke-width="16" fill="none"/>' +
+
+            /* --- seaport: dock, crane, containers, cargo ship --- */
+            '<g>' +
+            '<rect x="70" y="228" width="250" height="46" rx="6" fill="#9a8468"/>' +
+            '<rect x="70" y="266" width="250" height="10" fill="#7a6850"/>' +
+            '<g fill="#6b7280"><rect x="96" y="274" width="12" height="26"/><rect x="176" y="274" width="12" height="26"/><rect x="266" y="274" width="12" height="26"/></g>' +
+            '<rect x="238" y="186" width="14" height="86" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>' +
+            '<rect x="150" y="182" width="108" height="12" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>' +
+            '<path d="M166 194 L166 218" stroke="#475569" stroke-width="4"/>' +
+            '<rect x="150" y="216" width="34" height="24" rx="3" fill="#f97316" stroke="#7c2d12" stroke-width="3"/>' +
+            '<g stroke="#7c2d12" stroke-width="3">' +
+            '<rect x="82" y="238" width="52" height="24" rx="3" fill="#ef4444"/>' +
+            '<rect x="140" y="238" width="52" height="24" rx="3" fill="#0ea5e9"/>' +
+            '<rect x="112" y="212" width="52" height="24" rx="3" fill="#facc15"/>' +
+            '</g>' +
+            '<g><path d="M300 236 L470 236 L448 274 L318 274 Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="3"/>' +
+            '<rect x="332" y="206" width="60" height="30" fill="#f8fafc" stroke="#334155" stroke-width="3"/>' +
+            '<rect x="404" y="214" width="16" height="22" fill="#334155"/>' +
+            '<g stroke="#7f1d1d" stroke-width="2"><rect x="330" y="240" width="34" height="18" fill="#22c55e"/><rect x="372" y="240" width="34" height="18" fill="#3b82f6"/></g></g>' +
+            '<text x="300" y="306" text-anchor="middle" font-family="Verdana,sans-serif" font-size="17" font-weight="bold" fill="#1f2937">SEAPORT</text>' +
+            '</g>' +
+
+            /* --- residential neighbourhood --- */
+            '<g>' +
+            '<g stroke="#7c3a1d" stroke-width="3">' +
+            '<rect x="64" y="352" width="74" height="52" fill="#fde68a"/><path d="M58 352 L101 320 L144 352 Z" fill="#b45309"/>' +
+            '<rect x="152" y="358" width="70" height="46" fill="#fecaca"/><path d="M146 358 L187 330 L228 358 Z" fill="#b45309"/>' +
+            '<rect x="236" y="350" width="76" height="54" fill="#bfdbfe"/><path d="M230 350 L274 318 L318 350 Z" fill="#b45309"/>' +
+            '</g>' +
+            '<g fill="#1e3a8a"><rect x="92" y="378" width="18" height="26"/><rect x="178" y="382" width="18" height="22"/><rect x="266" y="376" width="18" height="28"/></g>' +
+            '<g fill="#93c5fd" stroke="#1f2937" stroke-width="2"><rect x="70" y="362" width="16" height="14"/><rect x="118" y="362" width="16" height="14"/><rect x="242" y="360" width="16" height="14"/><rect x="290" y="360" width="16" height="14"/></g>' +
+            '<path d="M330 340 L330 404" stroke="#7c3a1d" stroke-width="4"/><circle cx="330" cy="332" r="18" fill="#15803d"/>' +
+            '<text x="188" y="424" text-anchor="middle" font-family="Verdana,sans-serif" font-size="17" font-weight="bold" fill="#1f2937">COCONUT DRIVE</text>' +
+            '</g>' +
+
+            /* --- hospital --- */
+            '<g>' +
+            '<rect x="418" y="330" width="176" height="86" rx="6" fill="#f8fafc" stroke="#334155" stroke-width="3"/>' +
+            '<rect x="418" y="330" width="176" height="20" fill="#e2e8f0" stroke="#334155" stroke-width="3"/>' +
+            '<g fill="#dc2626"><rect x="492" y="296" width="28" height="10"/><rect x="497" y="286" width="18" height="30"/></g>' +
+            '<rect x="486" y="316" width="40" height="14" fill="#f8fafc" stroke="#334155" stroke-width="2"/>' +
+            '<g fill="#7dd3fc" stroke="#334155" stroke-width="2"><rect x="432" y="360" width="26" height="22"/><rect x="470" y="360" width="26" height="22"/><rect x="516" y="360" width="26" height="22"/><rect x="554" y="360" width="26" height="22"/></g>' +
+            '<rect x="486" y="392" width="40" height="24" fill="#1e293b"/>' +
+            '<g><rect x="602" y="374" width="62" height="34" rx="5" fill="#f8fafc" stroke="#334155" stroke-width="3"/>' +
+            '<rect x="602" y="374" width="22" height="20" fill="#bae6fd" stroke="#334155" stroke-width="2"/>' +
+            '<g fill="#dc2626"><rect x="634" y="386" width="20" height="6"/><rect x="641" y="379" width="6" height="20"/></g>' +
+            '<circle cx="616" cy="410" r="8" fill="#1f2937"/><circle cx="652" cy="410" r="8" fill="#1f2937"/></g>' +
+            '<text x="506" y="430" text-anchor="middle" font-family="Verdana,sans-serif" font-size="17" font-weight="bold" fill="#1f2937">HOSPITAL</text>' +
+            '</g>' +
+
+            /* --- factory --- */
+            '<g>' +
+            '<rect x="742" y="292" width="184" height="72" fill="#cbd5e1" stroke="#334155" stroke-width="3"/>' +
+            '<path d="M742 292 L774 262 L806 292 L838 262 L870 292 L902 262 L926 292 Z" fill="#94a3b8" stroke="#334155" stroke-width="3"/>' +
+            '<rect x="766" y="222" width="26" height="72" fill="#94a3b8" stroke="#334155" stroke-width="3"/>' +
+            '<rect x="812" y="238" width="22" height="56" fill="#94a3b8" stroke="#334155" stroke-width="3"/>' +
+            '<g fill="#e2e8f0" opacity="0.9"><ellipse cx="779" cy="212" rx="22" ry="14"/><ellipse cx="806" cy="200" rx="17" ry="11"/><ellipse cx="823" cy="228" rx="16" ry="10"/></g>' +
+            '<g fill="#38bdf8" stroke="#334155" stroke-width="2"><rect x="756" y="312" width="28" height="22"/><rect x="798" y="312" width="28" height="22"/><rect x="840" y="312" width="28" height="22"/><rect x="882" y="312" width="28" height="22"/></g>' +
+            '<rect x="806" y="340" width="44" height="24" fill="#1e293b"/>' +
+            '<g stroke="#334155" stroke-width="2"><rect x="716" y="330" width="20" height="34" fill="#f59e0b"/><rect x="716" y="300" width="20" height="26" fill="#ef4444"/></g>' +
+            '<text x="834" y="386" text-anchor="middle" font-family="Verdana,sans-serif" font-size="17" font-weight="bold" fill="#1f2937">FACTORY</text>' +
+            '</g>' +
+
+            /* --- farm --- */
+            '<g>' +
+            '<rect x="700" y="486" width="278" height="112" rx="8" fill="#9ccb73" stroke="#3f6212" stroke-width="3"/>' +
+            '<g stroke="#4d7c0f" stroke-width="7" stroke-linecap="round">' +
+            '<path d="M714 500 L964 500"/><path d="M714 524 L964 524"/><path d="M714 548 L964 548"/><path d="M714 572 L964 572"/></g>' +
+            '<g fill="#166534"><circle cx="742" cy="500" r="7"/><circle cx="806" cy="500" r="7"/><circle cx="870" cy="500" r="7"/><circle cx="934" cy="500" r="7"/>' +
+            '<circle cx="774" cy="548" r="7"/><circle cx="838" cy="548" r="7"/><circle cx="902" cy="548" r="7"/></g>' +
+            '<g><rect x="700" y="418" width="96" height="62" fill="#dc2626" stroke="#7f1d1d" stroke-width="3"/>' +
+            '<path d="M694 418 L748 384 L802 418 Z" fill="#991b1b" stroke="#7f1d1d" stroke-width="3"/>' +
+            '<rect x="732" y="440" width="34" height="40" fill="#fde68a" stroke="#7f1d1d" stroke-width="3"/>' +
+            '<path d="M732 440 L766 480 M766 440 L732 480" stroke="#7f1d1d" stroke-width="3"/></g>' +
+            '<g><rect x="816" y="404" width="42" height="76" rx="6" fill="#e5e7eb" stroke="#4b5563" stroke-width="3"/>' +
+            '<path d="M812 404 L837 380 L862 404 Z" fill="#9ca3af" stroke="#4b5563" stroke-width="3"/></g>' +
+            '<g><ellipse cx="908" cy="450" rx="34" ry="20" fill="#f8fafc" stroke="#1f2937" stroke-width="3"/>' +
+            '<circle cx="880" cy="440" r="13" fill="#f8fafc" stroke="#1f2937" stroke-width="3"/>' +
+            '<g fill="#1f2937"><ellipse cx="914" cy="446" rx="10" ry="7"/><ellipse cx="898" cy="458" rx="8" ry="5"/>' +
+            '<rect x="888" y="468" width="5" height="16"/><rect x="922" y="468" width="5" height="16"/></g></g>' +
+            '<text x="838" y="618" text-anchor="middle" font-family="Verdana,sans-serif" font-size="17" font-weight="bold" fill="#1f2937">FARM</text>' +
+            '</g>' +
+
+            /* --- public park --- */
+            '<g>' +
+            '<rect x="238" y="496" width="330" height="104" rx="14" fill="#86d67a" stroke="#3f6212" stroke-width="3"/>' +
+            '<ellipse cx="300" cy="566" rx="40" ry="20" fill="#38bdf8" stroke="#0369a1" stroke-width="3"/>' +
+            '<g><rect x="366" y="512" width="6" height="56" fill="#78350f"/><rect x="428" y="512" width="6" height="56" fill="#78350f"/>' +
+            '<rect x="360" y="506" width="80" height="8" rx="3" fill="#78350f"/>' +
+            '<path d="M380 514 L380 544 M414 514 L414 544" stroke="#4b5563" stroke-width="3"/>' +
+            '<rect x="372" y="544" width="16" height="6" fill="#ef4444"/><rect x="406" y="544" width="16" height="6" fill="#ef4444"/></g>' +
+            '<g><rect x="470" y="510" width="6" height="58" fill="#f8fafc" stroke="#334155" stroke-width="2"/>' +
+            '<rect x="540" y="510" width="6" height="58" fill="#f8fafc" stroke="#334155" stroke-width="2"/>' +
+            '<rect x="466" y="506" width="84" height="8" fill="#f8fafc" stroke="#334155" stroke-width="2"/>' +
+            '<path d="M472 514 L472 566 L544 566 L544 514" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="6 6"/></g>' +
+            '<circle cx="506" cy="580" r="9" fill="#f8fafc" stroke="#1f2937" stroke-width="3"/>' +
+            '<g><circle cx="262" cy="520" r="22" fill="#15803d"/><rect x="258" y="536" width="8" height="22" fill="#7c3a1d"/>' +
+            '<circle cx="556" cy="586" r="18" fill="#15803d"/></g>' +
+            '<g stroke="#1f2937" stroke-width="3" fill="none"><circle cx="336" cy="524" r="7" fill="#fbbf24"/><path d="M336 531 L336 548 M336 536 L326 542 M336 536 L346 542 M336 548 L328 562 M336 548 L344 562"/></g>' +
+            '<text x="402" y="618" text-anchor="middle" font-family="Verdana,sans-serif" font-size="17" font-weight="bold" fill="#1f2937">PUBLIC PARK</text>' +
+            '</g>' +
+            '</svg>';
+
+        /* Zoomed views of the same illustration — a cropped viewBox, so the
+           whole simulation still needs only one drawing and no assets. */
+        const CL_CROPS = {
+            seaport: "60 170 430 165",
+            residential: "50 300 300 150",
+            hospital: "400 275 290 175",
+            factory: "700 195 250 205",
+            farm: "690 370 300 255",
+            park: "230 486 350 140"
+        };
+
+        function clSceneSvg(loc) {
+            return CL_MAP_SVG
+                .replace('class="cl-map-svg" viewBox="0 0 1000 620"', 'class="cl-evidence-scene" viewBox="' + CL_CROPS[loc.id] + '"')
+                .replace(/aria-label="[^"]*"/, 'aria-label="Zoomed view of the ' + loc.name.toLowerCase() + ' in Palmiste Bay."');
+        }
+
+        /* --- Game state ----------------------------------------------------- */
+
+        const clState = {
+            started: false,
+            view: "map",
+            activeId: null,
+            pendingChoice: null,
+            hintShown: false,
+            points: 0,
+            streak: 0,
+            bestStreak: 0,
+            hintsUsed: 0,
+            totalAttempts: 0,
+            firstAttemptCorrect: 0,
+            startedAt: 0,
+            finishedAt: 0,
+            progress: {}
+        };
+
+        function clFreshProgress() {
+            const map = {};
+            CL_LOCATIONS.forEach((loc) => {
+                map[loc.id] = { solved: false, attempts: 0, chosen: null, wrongChoices: [], hintUsed: false };
+            });
+            return map;
+        }
+
+        function clSolvedCount() {
+            return CL_LOCATIONS.filter((loc) => clState.progress[loc.id].solved).length;
+        }
+
+        function clRank() {
+            const solved = clSolvedCount();
+            let rank = CL_RANKS[0];
+            CL_RANKS.forEach((r) => { if (solved >= r.at) rank = r; });
+            return rank;
+        }
+
+        /* --- Entry points called by the chrome ------------------------------- */
+
+        function devInit() {
+            if (clState.started) {
+                clRender();
+                return;
+            }
+            clState.started = true;
+            clState.startedAt = Date.now();
+            clState.progress = clFreshProgress();
+            clBuildShell();
+            clRender();
+        }
+
+        function devReset() {
+            clState.started = false;
+            clState.view = "map";
+            clState.activeId = null;
+            clState.pendingChoice = null;
+            clState.hintShown = false;
+            clState.points = 0;
+            clState.streak = 0;
+            clState.bestStreak = 0;
+            clState.hintsUsed = 0;
+            clState.totalAttempts = 0;
+            clState.firstAttemptCorrect = 0;
+            clState.startedAt = 0;
+            clState.finishedAt = 0;
+            clState.progress = clFreshProgress();
+            const root = document.getElementById("clRoot");
+            if (root) root.replaceChildren();
+        }
+
+        /* --- Shell ----------------------------------------------------------- */
+
+        function clBuildShell() {
+            const root = document.getElementById("clRoot");
+            if (!root) return;
+            root.innerHTML =
+                '<div class="cl-toolbar">' +
+                '<button class="control-btn" type="button" data-action="rules">📋 Rules</button>' +
+                '<button class="control-btn" type="button" data-action="hint">💡 Hint</button>' +
+                '<button class="control-btn" type="button" data-action="review">🗒️ Review</button>' +
+                '<button class="control-btn" type="button" data-action="back">◀ Back</button>' +
+                '<button class="control-btn" type="button" data-action="tryagain">🔁 Try Again</button>' +
+                '<button class="danger-btn" type="button" data-action="exit">🚪 Exit</button>' +
+                '</div>' +
+                '<div class="cl-status-row">' +
+                '<div class="cl-progress-wrap">' +
+                '<span class="cl-progress-text" id="clProgressText">Locations classified: 0 of 6</span>' +
+                '<div class="cl-bar"><div class="cl-bar-fill" id="clBarFill"></div></div>' +
+                '</div>' +
+                '<div class="cl-pill-row">' +
+                '<span class="cl-pill cl-pill-xp" id="clPointsPill">⭐ 0 patrol points</span>' +
+                '<span class="cl-pill cl-pill-streak" id="clStreakPill">🔥 Streak 0</span>' +
+                '<span class="cl-pill cl-pill-rank" id="clRankPill">🧭 Trainee Surveyor</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="cl-guide">' +
+                '<span class="cl-guide-avatar" aria-hidden="true">🦩</span>' +
+                '<p class="cl-guide-bubble"><strong>' + CL_GUIDE_NAME + ' says:</strong> <span id="clGuideLine">' + escapeHtml(CL_GUIDE_LINES.welcome) + '</span></p>' +
+                '</div>' +
+                '<div class="cl-stage"><div id="clView"></div><div class="cl-confetti-layer" id="clConfetti" aria-hidden="true"></div></div>' +
+                '<p class="cl-sr-only" id="clLive" role="status" aria-live="polite"></p>';
+
+            root.addEventListener("click", clHandleClick);
+        }
+
+        function clAnnounce(message) {
+            const live = document.getElementById("clLive");
+            if (live) live.textContent = message;
+        }
+
+        function clSetGuide(text) {
+            const line = document.getElementById("clGuideLine");
+            if (line) line.textContent = text;
+        }
+
+        function clPop(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove("cl-pop");
+            void el.offsetWidth;
+            el.classList.add("cl-pop");
+        }
+
+        function clUpdateStatus() {
+            const solved = clSolvedCount();
+            const text = document.getElementById("clProgressText");
+            const fill = document.getElementById("clBarFill");
+            const points = document.getElementById("clPointsPill");
+            const streak = document.getElementById("clStreakPill");
+            const rankPill = document.getElementById("clRankPill");
+            const rank = clRank();
+            if (text) text.textContent = "Locations classified: " + solved + " of " + CL_LOCATIONS.length;
+            if (fill) fill.style.width = Math.round((solved / CL_LOCATIONS.length) * 100) + "%";
+            if (points) points.textContent = "⭐ " + clState.points + " patrol points";
+            if (streak) streak.textContent = "🔥 Streak " + clState.streak;
+            if (rankPill) rankPill.textContent = rank.icon + " " + rank.name;
+        }
+
+        /* --- Views ----------------------------------------------------------- */
+
+        function clRender() {
+            const view = document.getElementById("clView");
+            if (!view) return;
+            if (clState.view === "location") {
+                view.innerHTML = clLocationHtml();
+            } else if (clState.view === "review") {
+                view.innerHTML = clReviewHtml();
+            } else if (clState.view === "exit") {
+                view.innerHTML = clExitHtml();
+            } else if (clState.view === "confirm") {
+                view.innerHTML = clConfirmHtml();
+            } else if (clState.view === "complete") {
+                view.innerHTML = clCompleteHtml();
+            } else {
+                view.innerHTML = clMapHtml();
+            }
+            clUpdateStatus();
+            clFocusView();
+        }
+
+        function clFocusView() {
+            const view = document.getElementById("clView");
+            if (!view) return;
+            const target = view.querySelector("[data-autofocus]");
+            if (target) target.focus();
+        }
+
+        function clMapHtml() {
+            const hotspots = CL_LOCATIONS.map((loc) => {
+                const p = clState.progress[loc.id];
+                const solved = p.solved;
+                const tag = solved ? CL_CATEGORIES[loc.correct].label : "Unclassified";
+                const label = solved
+                    ? loc.name + ": classified as " + CL_CATEGORIES[loc.correct].label + ". Select to review this classification."
+                    : loc.name + ": hotspot not yet classified. Select to examine this location.";
+                return '<button class="cl-hotspot" type="button" data-action="open" data-id="' + loc.id + '"' +
+                    ' data-state="' + (solved ? "solved" : "open") + '"' +
+                    ' style="left:' + loc.x + '%; top:' + loc.y + '%;"' +
+                    ' aria-label="' + escapeHtml(label) + '">' +
+                    '<span class="cl-hotspot-icon" aria-hidden="true">' + (solved ? CL_CATEGORIES[loc.correct].icon : loc.icon) + '</span>' +
+                    '<span class="cl-hotspot-name">' + escapeHtml(loc.mapLabel) + '</span>' +
+                    '<span class="cl-hotspot-tag">' + escapeHtml(tag) + '</span>' +
+                    '</button>';
+            }).join("");
+
+            return '<h3>Palmiste Bay community map</h3>' +
+                '<p>Explore the community and classify its different types of land use. Select a hotspot, examine the location and choose the correct land-use category.</p>' +
+                '<div class="cl-map-frame">' + CL_MAP_SVG + hotspots + '</div>' +
+                '<div class="cl-map-legend">' +
+                '<span class="cl-legend-item">🔵 Pulsing marker = still unclassified</span>' +
+                '<span class="cl-legend-item">✔ Double-edged marker = classified and locked</span>' +
+                '<span class="cl-legend-item">⌨️ Tab moves between hotspots, Enter or Space opens one</span>' +
+                '</div>';
+        }
+
+        function clLocationHtml() {
+            const loc = CL_LOCATIONS.find((l) => l.id === clState.activeId);
+            if (!loc) return clMapHtml();
+            const p = clState.progress[loc.id];
+            const locked = p.solved;
+
+            const choices = CL_CATEGORY_ORDER.map((key) => {
+                const cat = CL_CATEGORIES[key];
+                const pressed = clState.pendingChoice === key || (locked && key === loc.correct);
+                return '<button class="cl-choice" type="button" data-action="choose" data-choice="' + key + '"' +
+                    ' aria-pressed="' + (pressed ? "true" : "false") + '"' + (locked ? " disabled" : "") + '>' +
+                    '<span class="cl-choice-icon" aria-hidden="true">' + cat.icon + '</span>' +
+                    '<span class="cl-choice-copy"><span>' + escapeHtml(cat.label) + '</span><small>' + escapeHtml(cat.blurb) + '</small></span>' +
+                    '</button>';
+            }).join("");
+
+            let feedback = "";
+            if (locked) {
+                feedback = '<div class="cl-feedback" data-tone="correct">' +
+                    '<span class="cl-feedback-icon" aria-hidden="true">✔</span>' +
+                    '<div><p><strong>Correct.</strong> ' + escapeHtml(loc.correctFeedback) + '</p>' +
+                    '<p class="cl-model">' + escapeHtml(loc.model) + '</p></div></div>';
+            }
+
+            const attemptNote = p.attempts > 0
+                ? '<p class="cl-attempt-note">Attempts at this location: ' + p.attempts + (p.hintUsed ? " · hint used" : "") + '</p>'
+                : '';
+
+            return '<div class="cl-panel-grid">' +
+                '<section class="cl-evidence">' +
+                '<span class="cl-evidence-tag">' + (locked ? "Classified" : "Field notes") + '</span>' +
+                '<h4>' + escapeHtml(loc.name) + '</h4>' +
+                clSceneSvg(loc) +
+                '<p>' + escapeHtml(loc.evidence) + '</p>' +
+                '</section>' +
+                '<section>' +
+                '<h3 class="cl-question">Which type of land use is this?</h3>' +
+                '<div class="cl-choice-grid">' + choices + '</div>' +
+                (locked ? "" : '<div class="hero-actions" style="margin-top:14px;">' +
+                    '<button class="primary-btn" type="button" data-action="confirm" data-autofocus>✅ Confirm Answer</button>' +
+                    '<button class="secondary-btn" type="button" data-action="hint">💡 Hint</button>' +
+                    '<button class="secondary-btn" type="button" data-action="back">◀ Back to map</button>' +
+                    '</div>') +
+                '<div id="clFeedbackSlot">' + feedback + '</div>' +
+                '<div id="clHintSlot">' + (clState.hintShown && !locked ? clHintHtml(loc) : "") + '</div>' +
+                attemptNote +
+                (locked ? '<div class="hero-actions" style="margin-top:14px;">' +
+                    '<button class="primary-btn" type="button" data-action="back" data-autofocus>◀ Back to map</button></div>' : "") +
+                '</section>' +
+                '</div>';
+        }
+
+        function clHintHtml(loc) {
+            return '<div class="cl-hint-box"><strong>💡 Hint:</strong> ' + escapeHtml(loc.hint) + '</div>';
+        }
+
+        function clReviewHtml() {
+            const rows = CL_LOCATIONS.map((loc) => {
+                const p = clState.progress[loc.id];
+                const status = p.solved ? "✔ Classified" : "○ Still to classify";
+                const answer = p.solved
+                    ? CL_CATEGORIES[loc.correct].icon + " " + CL_CATEGORIES[loc.correct].label
+                    : "Not yet answered";
+                const detail = p.solved
+                    ? loc.correctFeedback
+                    : "Open this hotspot on the map and examine the location.";
+                return '<div class="cl-review-row" data-solved="' + (p.solved ? "true" : "false") + '">' +
+                    '<div><strong>' + loc.icon + " " + escapeHtml(loc.name) + '</strong><br><span>' + escapeHtml(answer) + '</span><br>' +
+                    '<span style="font-size:0.85rem;">' + escapeHtml(detail) + '</span></div>' +
+                    '<span class="cl-review-status">' + status + ' · ' + p.attempts + ' attempt' + (p.attempts === 1 ? "" : "s") +
+                    (p.hintUsed ? " · hint used" : "") + '</span>' +
+                    '</div>';
+            }).join("");
+
+            return '<h3>Patrol log</h3>' +
+                '<p>Every answer you have recorded so far in this session.</p>' +
+                rows +
+                '<div class="hero-actions" style="margin-top:16px;">' +
+                '<button class="primary-btn" type="button" data-action="back" data-autofocus>◀ Back to map</button>' +
+                '</div>';
+        }
+
+        function clExitHtml() {
+            return '<h3>Exit to lesson</h3>' +
+                '<p>Your patrol log is kept only while this tab is open. Close this tab or return to your lesson page to leave the simulation. Nothing is saved once the tab is closed.</p>' +
+                '<p><strong>Locations classified so far:</strong> ' + clSolvedCount() + ' of ' + CL_LOCATIONS.length + '.</p>' +
+                '<div class="hero-actions" style="margin-top:16px;">' +
+                '<button class="primary-btn" type="button" data-action="back" data-autofocus>◀ Return to the map</button>' +
+                '<button class="secondary-btn" type="button" data-action="review">🗒️ Review my answers</button>' +
+                '</div>';
+        }
+
+        function clConfirmHtml() {
+            return '<h3>Start the patrol again?</h3>' +
+                '<p>This will clear every classification, your patrol points and your patrol log, and return you to an empty community map.</p>' +
+                '<div class="hero-actions" style="margin-top:16px;">' +
+                '<button class="secondary-btn" type="button" data-action="cancel-restart" data-autofocus>Cancel</button>' +
+                '<button class="danger-btn" type="button" data-action="do-restart">Yes, start again</button>' +
+                '</div>';
+        }
+
+        function clFormatTime(ms) {
+            const total = Math.max(0, Math.round(ms / 1000));
+            const mins = Math.floor(total / 60);
+            const secs = total % 60;
+            return mins + " min " + (secs < 10 ? "0" : "") + secs + " s";
+        }
+
+        function clCompleteHtml() {
+            const rows = CL_LOCATIONS.map((loc) =>
+                "<tr><td>" + escapeHtml(loc.name) + "</td><td>" + CL_CATEGORIES[loc.correct].icon + " " + escapeHtml(CL_CATEGORIES[loc.correct].label) + "</td></tr>"
+            ).join("");
+            const rank = CL_RANKS[CL_RANKS.length - 1];
+            const elapsed = clFormatTime((clState.finishedAt || Date.now()) - clState.startedAt);
+
+            return '<div class="cl-badge-hero">' +
+                '<span class="cl-badge-icon" aria-hidden="true">' + rank.icon + '</span>' +
+                '<strong>Rank earned: ' + escapeHtml(rank.name) + '</strong>' +
+                '</div>' +
+                '<h3>Community map complete!</h3>' +
+                '<p>You correctly identified the six types of land use and completed the community map.</p>' +
+                '<div class="cl-stat-grid">' +
+                '<div class="cl-stat-card"><span class="cl-stat-value">⭐ ' + clState.points + '</span><span class="cl-stat-label">Patrol points</span></div>' +
+                '<div class="cl-stat-card"><span class="cl-stat-value">' + clState.firstAttemptCorrect + ' of ' + CL_LOCATIONS.length + '</span><span class="cl-stat-label">Correct on the first attempt</span></div>' +
+                '<div class="cl-stat-card"><span class="cl-stat-value">' + clState.totalAttempts + '</span><span class="cl-stat-label">Total attempts</span></div>' +
+                '<div class="cl-stat-card"><span class="cl-stat-value">' + clState.hintsUsed + '</span><span class="cl-stat-label">Hints used</span></div>' +
+                '<div class="cl-stat-card"><span class="cl-stat-value">🔥 ' + clState.bestStreak + '</span><span class="cl-stat-label">Best first-attempt streak</span></div>' +
+                '<div class="cl-stat-card"><span class="cl-stat-value">' + elapsed + '</span><span class="cl-stat-label">Time on task</span></div>' +
+                '</div>' +
+                '<table class="cl-summary-table">' +
+                '<caption class="cl-sr-only">Completed answer summary</caption>' +
+                '<thead><tr><th>Location</th><th>Land-use category</th></tr></thead>' +
+                '<tbody>' + rows + '</tbody></table>' +
+                '<div class="hero-actions">' +
+                '<button class="primary-btn" type="button" data-action="back" data-autofocus>🗺️ Review Map</button>' +
+                '<button class="secondary-btn" type="button" data-action="tryagain">🔁 Try Again</button>' +
+                '<button class="secondary-btn" type="button" data-action="exit">🚪 Exit to Lesson</button>' +
+                '</div>';
+        }
+
+        /* --- Interaction ------------------------------------------------------ */
+
+        function clHandleClick(event) {
+            const btn = event.target.closest("button[data-action]");
+            if (!btn || btn.disabled) return;
+            const action = btn.getAttribute("data-action");
+
+            if (action === "open") {
+                clOpenLocation(btn.getAttribute("data-id"));
+            } else if (action === "choose") {
+                clChoose(btn.getAttribute("data-choice"));
+            } else if (action === "confirm") {
+                clConfirmAnswer();
+            } else if (action === "hint") {
+                clShowHint();
+            } else if (action === "back") {
+                clGoBack();
+            } else if (action === "review") {
+                clState.view = "review";
+                clSetGuide("Here is your patrol log. Every recorded answer is listed.");
+                clRender();
+            } else if (action === "rules") {
+                openInstructionsModal();
+            } else if (action === "exit") {
+                clState.view = "exit";
+                clRender();
+            } else if (action === "tryagain") {
+                clState.view = "confirm";
+                clRender();
+            } else if (action === "cancel-restart") {
+                clState.view = clSolvedCount() === CL_LOCATIONS.length ? "complete" : "map";
+                clRender();
+            } else if (action === "do-restart") {
+                clRestart();
+            }
+        }
+
+        function clGoBack() {
+            if (clState.view === "map") {
+                showScreen("home");
+                return;
+            }
+            if (clState.view === "location" || clState.view === "review" || clState.view === "exit" || clState.view === "confirm") {
+                if (clSolvedCount() === CL_LOCATIONS.length && clState.view !== "location") {
+                    clState.view = "complete";
+                } else {
+                    clState.view = "map";
+                }
+                clState.activeId = null;
+                clState.pendingChoice = null;
+                clState.hintShown = false;
+                clRender();
+                return;
+            }
+            clState.view = "map";
+            clRender();
+        }
+
+        function clOpenLocation(id) {
+            const loc = CL_LOCATIONS.find((l) => l.id === id);
+            if (!loc) return;
+            clState.activeId = id;
+            clState.pendingChoice = null;
+            clState.hintShown = false;
+            clState.view = "location";
+            const solved = clState.progress[id].solved;
+            clSetGuide(solved
+                ? "This location is already classified. Read the explanation, then go back to the map."
+                : CL_GUIDE_LINES.examine);
+            clAnnounce(loc.name + " selected. " + (solved ? "Already classified." : "Choose the correct type of land use."));
+            clRender();
+        }
+
+        function clChoose(key) {
+            if (!CL_CATEGORIES[key]) return;
+            clState.pendingChoice = key;
+            const view = document.getElementById("clView");
+            if (!view) return;
+            view.querySelectorAll(".cl-choice").forEach((el) => {
+                el.setAttribute("aria-pressed", el.getAttribute("data-choice") === key ? "true" : "false");
+            });
+            clAnnounce(CL_CATEGORIES[key].label + " selected. Press Confirm Answer to check it.");
+        }
+
+        function clConfirmAnswer() {
+            const loc = CL_LOCATIONS.find((l) => l.id === clState.activeId);
+            if (!loc) return;
+            const p = clState.progress[loc.id];
+            if (p.solved || clState.busy) return;
+
+            const slot = document.getElementById("clFeedbackSlot");
+            if (!clState.pendingChoice) {
+                if (slot) {
+                    slot.innerHTML = '<div class="cl-feedback" data-tone="incorrect">' +
+                        '<span class="cl-feedback-icon" aria-hidden="true">✘</span>' +
+                        '<div><p><strong>No category chosen yet.</strong> Select one of the six land-use categories above, then press Confirm Answer.</p></div></div>';
+                }
+                clAnnounce("No category chosen yet. Select one of the six categories, then press Confirm Answer.");
+                return;
+            }
+
+            clState.busy = true;
+            const choice = clState.pendingChoice;
+            const firstAttempt = p.attempts === 0;
+            p.attempts += 1;
+            clState.totalAttempts += 1;
+
+            if (choice === loc.correct) {
+                p.solved = true;
+                p.chosen = choice;
+                let award = firstAttempt ? 100 : (p.attempts === 2 ? 60 : 40);
+                if (p.hintUsed) award -= 15;
+                if (firstAttempt) {
+                    clState.firstAttemptCorrect += 1;
+                    clState.streak += 1;
+                    if (clState.streak > clState.bestStreak) clState.bestStreak = clState.streak;
+                    if (clState.streak >= 2) award += 25;
+                } else {
+                    clState.streak = 0;
+                }
+                clState.points += award;
+
+                if (slot) {
+                    slot.innerHTML = '<div class="cl-feedback" data-tone="correct">' +
+                        '<span class="cl-feedback-icon" aria-hidden="true">✔</span>' +
+                        '<div><p><strong>Correct.</strong> ' + escapeHtml(loc.correctFeedback) + '</p>' +
+                        '<p class="cl-model">' + escapeHtml(loc.model) + '</p>' +
+                        '<p><strong>+' + award + ' patrol points.</strong> The marker is now locked on the community map.</p></div></div>';
+                }
+                clAnnounce("Correct. " + loc.correctFeedback + " Locations classified: " + clSolvedCount() + " of " + CL_LOCATIONS.length + ".");
+                clSetGuide(clSolvedCount() === CL_LOCATIONS.length - 1 ? CL_GUIDE_LINES.nearlyDone : CL_GUIDE_LINES.correct);
+                clUpdateStatus();
+                clPop("clPointsPill");
+                clPop("clRankPill");
+
+                window.setTimeout(() => {
+                    clState.busy = false;
+                    clState.pendingChoice = null;
+                    clState.hintShown = false;
+                    clState.activeId = null;
+                    if (clSolvedCount() === CL_LOCATIONS.length) {
+                        clState.finishedAt = Date.now();
+                        clState.view = "complete";
+                        clSetGuide(CL_GUIDE_LINES.done);
+                        clRender();
+                        clCelebrate();
+                    } else {
+                        clState.view = "map";
+                        clRender();
+                        const marker = document.querySelector('.cl-hotspot[data-id="' + loc.id + '"]');
+                        if (marker) {
+                            marker.classList.add("cl-stamp");
+                            marker.focus();
+                        }
+                    }
+                }, 1700);
+                return;
+            }
+
+            p.chosen = null;
+            if (p.wrongChoices.indexOf(choice) === -1) p.wrongChoices.push(choice);
+            clState.streak = 0;
+            clState.pendingChoice = null;
+
+            const chosenCat = CL_CATEGORIES[choice];
+            if (slot) {
+                slot.innerHTML = '<div class="cl-feedback" data-tone="incorrect">' +
+                    '<span class="cl-feedback-icon" aria-hidden="true">✘</span>' +
+                    '<div><p><strong>Try again.</strong> ' + escapeHtml(loc.incorrectFeedback) + '</p>' +
+                    '<p><strong>Why ' + escapeHtml(chosenCat.label) + ' does not fit:</strong> ' + escapeHtml(chosenCat.label) + ' means ' + escapeHtml(chosenCat.blurb.toLowerCase()) + ', which is not the main purpose of this location.</p>' +
+                    '<p><strong>How to fix it:</strong> re-read the field notes beside the map, decide what this land is mainly used for, then choose the matching category and press Confirm Answer.</p>' +
+                    '<p class="cl-model">Model of a correct ' + escapeHtml(chosenCat.label) + ' answer: ' + escapeHtml(chosenCat.example) + '. This location does not match that description.</p></div></div>';
+            }
+            const view = document.getElementById("clView");
+            if (view) view.querySelectorAll(".cl-choice").forEach((el) => el.setAttribute("aria-pressed", "false"));
+            clAnnounce("Try again. " + loc.incorrectFeedback);
+            clSetGuide(CL_GUIDE_LINES.incorrect);
+            clUpdateStatus();
+            clState.busy = false;
+        }
+
+        function clShowHint() {
+            const loc = CL_LOCATIONS.find((l) => l.id === clState.activeId);
+            if (!loc || clState.progress[loc.id].solved) {
+                clSetGuide("Open a hotspot on the map first. Each location has its own hint, and the Rules panel explains all six categories.");
+                clAnnounce("Open a hotspot on the map first. Each location has its own hint.");
+                return;
+            }
+            const p = clState.progress[loc.id];
+            if (!p.hintUsed) {
+                p.hintUsed = true;
+                clState.hintsUsed += 1;
+            }
+            clState.hintShown = true;
+            const slot = document.getElementById("clHintSlot");
+            if (slot) slot.innerHTML = clHintHtml(loc);
+            clSetGuide(CL_GUIDE_LINES.hint);
+            clAnnounce("Hint: " + loc.hint);
+        }
+
+        function clRestart() {
+            const wasStarted = clState.started;
+            devReset();
+            clState.started = wasStarted;
+            clState.startedAt = Date.now();
+            clBuildShell();
+            clState.view = "map";
+            clSetGuide(CL_GUIDE_LINES.welcome);
+            clRender();
+            clAnnounce("Patrol restarted. Locations classified: 0 of 6.");
+        }
+
+        const CL_CONFETTI_COLOURS = ["#f97316", "#22c55e", "#38bdf8", "#a78bfa", "#facc15", "#f43f5e"];
+
+        function clCelebrate() {
+            const layer = document.getElementById("clConfetti");
+            if (!layer) return;
+            const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (reduced) return;
+            layer.replaceChildren();
+            for (let i = 0; i < 40; i += 1) {
+                const piece = document.createElement("span");
+                piece.className = "cl-confetti";
+                piece.style.left = Math.round(Math.random() * 100) + "%";
+                piece.style.background = CL_CONFETTI_COLOURS[i % CL_CONFETTI_COLOURS.length];
+                piece.style.animationDelay = (Math.random() * 0.9).toFixed(2) + "s";
+                layer.appendChild(piece);
+            }
+            window.setTimeout(() => { layer.replaceChildren(); }, 4200);
+        }
+
+        /* Escape returns the student to the community map from any sub-view. */
+        document.addEventListener("keydown", (event) => {
+            if (event.key !== "Escape") return;
+            if (!clState.started || state.currentScreen !== "sim") return;
+            if (document.querySelector(".modal.show")) return;
+            if (clState.view === "map" || clState.view === "complete") return;
+            clGoBack();
+        });
+
+        /* QA 2.6 — the instructions open once at the start of a new session and
+           do not interrupt a session already in progress after a reload. */
+        (function clAutoIntro() {
+            if (storageGet(SIM_CONFIG.simId + "-intro-seen") === "true") return;
+            storageSet(SIM_CONFIG.simId + "-intro-seen", "true");
+            openInstructionsModal();
+        })();
+    </script>
+</body>
+
+</html>
