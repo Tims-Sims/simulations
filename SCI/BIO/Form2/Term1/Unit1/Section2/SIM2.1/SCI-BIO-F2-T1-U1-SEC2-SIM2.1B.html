@@ -667,7 +667,7 @@
             </div>
 
             <div class="controls">
-                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn pulse-help hidden" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
                 <button class="control-btn" id="reviewBtn" type="button" aria-label="Open Review History"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h5"/></svg> Review History</button>
@@ -702,7 +702,7 @@
                     </div>
                     <div class="hero-actions">
                         <button class="primary-btn" id="startBtn">Start tracing</button>
-                        <button class="secondary-btn hidden" id="openInstructionsBtn" type="button" tabindex="-1" aria-hidden="true">Read Instructions</button>
+                        <button class="secondary-btn" id="openInstructionsBtn" type="button">Read Instructions</button>
                     </div>
                 </section>
             </div>
@@ -736,7 +736,7 @@
                                 <div class="vessel-tools">
                                     <button class="vessel-tool" type="button" data-vessel="artery" draggable="true" aria-pressed="false">
                                         <svg class="cross-section" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" fill="#c2415a" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="32" r="12" fill="var(--surface)" stroke="#ffe4e6" stroke-width="3"/></svg>
-                                        <span><strong>Artery</strong><small>Thick, muscular wall · away from heart</small></span>
+                                        <span><strong>Artery</strong><small>Thick, muscular wall · high blood pressure · away from heart</small></span>
                                     </button>
                                     <button class="vessel-tool" type="button" data-vessel="vein" draggable="true" aria-pressed="false">
                                         <svg class="cross-section" viewBox="0 0 64 64" aria-hidden="true">
@@ -745,11 +745,11 @@
                                             <path d="M13.5 24 C20 25 27 29 31.5 37 C26 35 20 35 15 37" fill="#bfdbfe" stroke="#315caa" stroke-width="1.5" stroke-linejoin="round"/>
                                             <path d="M50.5 24 C44 25 37 29 32.5 37 C38 35 44 35 49 37" fill="#bfdbfe" stroke="#315caa" stroke-width="1.5" stroke-linejoin="round"/>
                                         </svg>
-                                        <span><strong>Vein</strong><small>Thinner wall with valves · towards heart</small></span>
+                                        <span><strong>Vein</strong><small>Thinner wall with valves · low blood pressure · towards heart</small></span>
                                     </button>
                                     <button class="vessel-tool" type="button" data-vessel="capillary" draggable="true" aria-pressed="false">
                                         <svg class="cross-section" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="25" fill="none" stroke="#b88000" stroke-width="5" stroke-dasharray="5 4"/><circle cx="32" cy="32" r="20" fill="var(--surface)"/></svg>
-                                        <span><strong>Capillary</strong><small>Wall one cell thick · exchange</small></span>
+                                        <span><strong>Capillary</strong><small>Wall one cell thick · lowest blood pressure · exchange</small></span>
                                     </button>
                                 </div>
                                 <h4 class="results-heading">Results</h4>
@@ -849,9 +849,9 @@
                             </div>
                             <h2 id="completionHeading">You traced the transport network</h2>
                             <ul class="completion-points">
-                                <li><strong>Arteries</strong> carry blood away from the heart. Their walls are thick and muscular.</li>
-                                <li><strong>Veins</strong> carry blood towards the heart. Their walls are thinner, and valves help prevent backflow.</li>
-                                <li><strong>Capillaries</strong> have walls one cell thick. This allows exchange in the lungs and body tissues.</li>
+                                <li><strong>Arteries</strong> carry blood away from the heart at high blood pressure. Their walls are thick and muscular.</li>
+                                <li><strong>Veins</strong> carry blood towards the heart at low blood pressure. Their walls are thinner, and valves help prevent backflow.</li>
+                                <li><strong>Capillaries</strong> have the lowest blood pressure and walls one cell thick. This allows exchange in the lungs and body tissues.</li>
                                 <li>The <strong>pulmonary artery</strong> is an exception. It carries <strong>deoxygenated</strong> blood from the heart to the lungs.</li>
                                 <li>The <strong>pulmonary vein</strong> is an exception. It carries <strong>oxygenated</strong> blood from the lungs to the heart.</li>
                             </ul>
@@ -1100,6 +1100,7 @@
             state.currentScreen = screenName;
             dom.homeScreen.classList.toggle("active", screenName === "home");
             dom.simScreen.classList.toggle("active", screenName === "sim");
+            dom.helpBtn.classList.toggle("hidden", screenName === "home");
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
 
@@ -1206,12 +1207,12 @@
             "body-capillaries": "capillary"
         };
         const REVIEW_ENTRIES = {
-            "heart-to-lungs": "Heart to lungs route: artery - thick, muscular wall; de-oxygenated blood travels away from the heart.",
-            "heart-to-body": "Heart to body route: artery - thick, muscular wall; oxygenated blood travels away from the heart.",
-            "lungs-to-heart": "Lungs to heart route: vein - thinner wall with valves; oxygenated blood travels towards the heart.",
-            "body-to-heart": "Body to heart route: vein - thinner wall with valves; de-oxygenated blood travels towards the heart.",
-            "lung-capillaries": "Lung exchange zone: capillary - wall one cell thick for gaseous exchange with the lungs.",
-            "body-capillaries": "Body tissue exchange zone: capillary - wall one cell thick for gaseous exchange with body tissue."
+            "heart-to-lungs": "Heart to lungs route: artery - thick, muscular wall and high blood pressure; de-oxygenated blood travels away from the heart.",
+            "heart-to-body": "Heart to body route: artery - thick, muscular wall and high blood pressure; oxygenated blood travels away from the heart.",
+            "lungs-to-heart": "Lungs to heart route: vein - thinner wall with valves and low blood pressure; oxygenated blood travels towards the heart.",
+            "body-to-heart": "Body to heart route: vein - thinner wall with valves and low blood pressure; de-oxygenated blood travels towards the heart.",
+            "lung-capillaries": "Lung exchange zone: capillary - wall one cell thick and lowest blood pressure for gaseous exchange with the lungs.",
+            "body-capillaries": "Body tissue exchange zone: capillary - wall one cell thick and lowest blood pressure for gaseous exchange with body tissue."
         };
         const FLOW_DEFS = [
             { id: "systemic-out", vessel: "Systemic artery", from: "Heart", to: "Body tissue" },
@@ -1368,7 +1369,7 @@
             renderTransportState();
             showTransportView("placement", false);
             window.setTimeout(() => {
-                chromeReturnFocus = dom.startBtn;
+                chromeReturnFocus = dom.openInstructionsBtn;
                 openInstructionsModal();
                 dom.closeInstructionsBtn.focus({ preventScroll: true });
             }, 30);
@@ -1504,10 +1505,10 @@
             addHistory(REVIEW_ENTRIES[route]);
             const count = Object.keys(transportState.placements).length;
             const feedback = vessel === "artery"
-                ? "Correct. An artery belongs here because this route carries blood away from the heart. Its thick, muscular wall handles higher pressure."
+                ? "Correct. An artery belongs here because this route carries blood away from the heart. Its thick, muscular wall handles high blood pressure."
                 : vessel === "vein"
-                    ? "Correct. A vein belongs here because this route carries blood towards the heart. Valves help prevent backflow."
-                    : "Correct. Capillaries form exchange networks inside the lungs and body tissues. Their walls are one cell thick.";
+                    ? "Correct. A vein belongs here because this route carries blood towards the heart at low blood pressure. Valves help prevent backflow."
+                    : "Correct. Capillaries form the lowest-pressure exchange networks inside the lungs and body tissues. Their walls are one cell thick.";
             saveTransportState();
             renderPlacements();
             setFeedback("placementFeedback", feedback, "success");
@@ -1809,7 +1810,7 @@
                 showTransportView(transportState.view, false);
             } else if (storageGet(SIM_CONFIG.simId + "-help-seen") !== "true") {
                 window.setTimeout(() => {
-                    chromeReturnFocus = dom.startBtn;
+                    chromeReturnFocus = dom.openInstructionsBtn;
                     openInstructionsModal();
                     dom.closeInstructionsBtn.focus({ preventScroll: true });
                 }, 30);
