@@ -526,6 +526,26 @@
            Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
 
+        .close-btn {
+            display: grid;
+            place-items: center;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .control-btn:disabled {
+            opacity: .38;
+            cursor: not-allowed;
+            filter: grayscale(.65);
+            transform: none;
+        }
+
+        .valve { transition: opacity .28s ease; }
+        .heart-visual[data-stage="fill"] .outlet-valve,
+        .heart-visual[data-stage="contracting"] .outlet-valve,
+        .heart-visual[data-stage="eject"] .av-valve,
+        .heart-visual[data-stage="relaxing"] .av-valve { opacity: .38; }
+
         .sr-only {
             position: absolute;
             width: 1px;
@@ -848,10 +868,10 @@
             </div>
 
             <div class="controls">
-                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn pulse-help hidden" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
-                <button class="control-btn" id="reviewHistoryBtn" type="button" aria-label="Open Review History"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h5"/></svg> Review History</button>
+                <button class="control-btn" id="reviewHistoryBtn" type="button" aria-label="Review History is available after starting" disabled><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h5"/></svg> Review History</button>
                 <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
             </div>
         </header>
@@ -883,6 +903,7 @@
                     </div>
                     <div class="hero-actions">
                         <button class="primary-btn" id="startBtn">Start activity</button>
+                        <button class="secondary-btn" id="openInstructionsBtn" type="button">Read Instructions</button>
                     </div>
                 </section>
             </div>
@@ -1317,7 +1338,7 @@
                 showScreen("home");
                 closeResetConfirmModal();
                 setTimeout(() => {
-                    lastChromeModalFocus = dom.startBtn;
+                    lastChromeModalFocus = dom.openInstructionsBtn;
                     storageSet(SIM_CONFIG.simId + "-help-seen", "true");
                     dom.helpBtn.classList.remove("pulse-help");
                     openInstructionsModal();
@@ -1368,6 +1389,13 @@
             state.currentScreen = screenName;
             dom.homeScreen.classList.toggle("active", screenName === "home");
             dom.simScreen.classList.toggle("active", screenName === "sim");
+            const isHome = screenName === "home";
+            dom.helpBtn.classList.toggle("hidden", isHome);
+            const reviewButton = document.getElementById("reviewHistoryBtn");
+            if (reviewButton) {
+                reviewButton.disabled = isHome;
+                reviewButton.setAttribute("aria-label", isHome ? "Review History is available after starting" : "Open Review History");
+            }
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
 
@@ -1467,12 +1495,6 @@
             try { sessionStorage.removeItem(SIM_CONFIG.simId + "-help-seen"); } catch (err) { /* storage unavailable */ }
             simState = makeInitialSimState();
             renderSimulation();
-            setTimeout(() => {
-                lastChromeModalFocus = dom.startBtn;
-                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
-                openInstructionsModal();
-                dom.instructionsModal.querySelector("button").focus();
-            }, 0);
         }
 
         const SIM_STATE_KEY = "sim:SCI-BIO-F2-T1-U1-SEC2-SIM2.1A:state";
@@ -2043,7 +2065,7 @@
             devInit();
         } else {
             setTimeout(() => {
-                lastChromeModalFocus = dom.startBtn;
+                lastChromeModalFocus = dom.openInstructionsBtn;
                 storageSet(SIM_CONFIG.simId + "-help-seen", "true");
                 dom.helpBtn.classList.remove("pulse-help");
                 openInstructionsModal();
