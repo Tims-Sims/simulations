@@ -1,0 +1,2439 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Simulation Template Shell</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ---------- Paragraph Playlist ---------- */
+        .pp-root {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .pp-root *:focus-visible {
+            outline: 3px solid var(--focus, #4d9dff);
+            outline-offset: 2px;
+        }
+
+        .pp-hud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+        }
+
+        .pp-hud-left { display: flex; align-items: center; gap: 12px; }
+        .pp-hud-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .pp-hud-copy p { margin: 0; }
+        .pp-scene { font-weight: 700; font-size: 1rem; color: var(--text); }
+        .pp-rank { font-size: 0.85rem; color: var(--text-soft); }
+
+        .pp-mascot { width: 62px; height: 62px; flex: 0 0 auto; }
+        .pp-mascot svg { width: 100%; height: 100%; display: block; }
+
+        .pp-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 84px;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+        }
+        .pp-stat-k { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+        .pp-stat-v { font-size: 1.2rem; font-weight: 800; color: var(--text); }
+
+        .pp-flow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+        }
+        .pp-flow-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+        .pp-flow-track {
+            flex: 1 1 200px;
+            height: 16px;
+            min-width: 160px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--surface);
+            overflow: hidden;
+        }
+        .pp-flow-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 420ms ease;
+        }
+        .pp-flow-pct { font-weight: 800; min-width: 46px; text-align: right; }
+
+        .pp-eq { display: flex; align-items: flex-end; gap: 3px; height: 26px; }
+        .pp-eq span {
+            width: 6px;
+            height: 4px;
+            border-radius: 3px;
+            background: var(--border);
+            transition: height 380ms ease, background 380ms ease;
+        }
+        .pp-eq span.is-live { background: var(--accent); }
+
+        .pp-badges {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pp-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            min-height: 44px;
+            border: 1px dashed var(--border);
+            border-radius: 999px;
+            background: var(--surface-2);
+            color: var(--text-soft);
+            font-size: 0.82rem;
+        }
+        .pp-badge .pp-badge-icon { font-size: 1.1rem; }
+        .pp-badge .pp-badge-state {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+        }
+        .pp-badge.is-earned {
+            border-style: solid;
+            border-color: var(--success);
+            color: var(--text);
+            background: var(--surface);
+            box-shadow: 0 0 0 2px rgba(46, 160, 96, 0.18);
+        }
+        .pp-badge.is-earned .pp-badge-state { border-color: var(--success); color: var(--success); }
+
+        .pp-stage {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+            padding: 16px;
+        }
+        .pp-stage h2 { margin: 0 0 6px; font-size: 1.25rem; }
+        .pp-stage h3 { margin: 0 0 8px; font-size: 0.95rem; }
+        .pp-brief { margin: 0 0 12px; color: var(--text-soft); max-width: 66ch; }
+
+        .pp-columns {
+            display: grid;
+            grid-template-columns: minmax(240px, 1fr) minmax(260px, 1.15fr);
+            gap: 14px;
+        }
+        @media (max-width: 860px) {
+            .pp-columns { grid-template-columns: 1fr; }
+        }
+
+        .pp-panel {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            padding: 12px;
+        }
+
+        .pp-crate { display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+
+        .pp-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            min-height: 52px;
+            padding: 10px 12px;
+            text-align: left;
+            font: inherit;
+            font-size: 0.92rem;
+            color: var(--text);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--accent);
+            border-radius: var(--radius-md);
+            cursor: grab;
+            transition: box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+        .pp-card:hover { border-color: var(--accent); }
+        .pp-card .pp-grip { color: var(--muted); font-size: 1rem; line-height: 1; }
+        .pp-card.is-selected {
+            border-color: var(--accent-2);
+            box-shadow: 0 0 0 3px rgba(90, 140, 255, 0.35);
+        }
+        .pp-card.is-locked { cursor: default; border-left-color: var(--success); background: var(--surface); }
+        .pp-card.is-wrong { border-left-color: var(--danger); }
+
+        .pp-slot {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+            width: 100%;
+            min-height: 60px;
+            margin-bottom: 8px;
+            padding: 8px;
+            font: inherit;
+            text-align: left;
+            color: var(--text);
+            background: var(--surface-2);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+        }
+        .pp-slot:hover, .pp-slot.is-over { border-color: var(--accent); background: var(--surface); }
+        .pp-slot.is-filled { border-style: solid; }
+        .pp-slot.is-correct { border-color: var(--success); box-shadow: 0 0 0 2px rgba(46, 160, 96, 0.18); }
+        .pp-slot.is-wrong { border-color: var(--danger); }
+        .pp-slot-no {
+            flex: 0 0 66px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            border-right: 1px solid var(--border);
+            padding-right: 8px;
+        }
+        .pp-slot-no b { font-size: 1.05rem; }
+        .pp-slot-no span { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); text-align: center; }
+        .pp-slot-body { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; font-size: 0.92rem; }
+        .pp-slot-empty { color: var(--muted); font-style: italic; }
+        .pp-mark { font-weight: 800; font-size: 0.78rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+        .pp-mark.ok { color: var(--success); border-color: var(--success); }
+        .pp-mark.no { color: var(--danger); border-color: var(--danger); }
+
+        .pp-skip { border-style: dashed; border-color: var(--warning); }
+        .pp-skip .pp-slot-no b { font-size: 0.8rem; }
+
+        .pp-gap-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            font-size: 0.95rem;
+        }
+        .pp-gap-slot {
+            min-width: 116px;
+            min-height: 44px;
+            padding: 8px 12px;
+            font: inherit;
+            font-weight: 700;
+            color: var(--text);
+            background: var(--surface-2);
+            border: 2px dashed var(--accent);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+        }
+        .pp-gap-slot.is-filled { border-style: solid; }
+        .pp-gap-slot.is-correct { border-color: var(--success); }
+        .pp-gap-slot.is-wrong { border-color: var(--danger); }
+        .pp-tiles { display: flex; flex-wrap: wrap; gap: 8px; }
+        .pp-tile {
+            min-height: 44px;
+            padding: 10px 16px;
+            font: inherit;
+            font-weight: 700;
+            color: var(--text);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--accent-2);
+            border-radius: var(--radius-md);
+            cursor: grab;
+        }
+        .pp-tile.is-selected { box-shadow: 0 0 0 3px rgba(90, 140, 255, 0.35); }
+        .pp-tile.is-used { opacity: 0.45; cursor: default; }
+
+        .pp-feedback {
+            min-height: 24px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            font-size: 0.92rem;
+        }
+        .pp-feedback.is-good { border-left-color: var(--success); }
+        .pp-feedback.is-bad { border-left-color: var(--danger); }
+        .pp-feedback.is-hint { border-left-color: var(--warning); }
+        .pp-feedback p { margin: 0 0 6px; }
+        .pp-feedback p:last-child { margin-bottom: 0; }
+        .pp-feedback b { color: var(--text); }
+
+        .pp-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .pp-toolbar-gap { flex: 1 1 auto; }
+
+        .pp-btn {
+            min-height: 44px;
+            min-width: 44px;
+            padding: 10px 16px;
+            font: inherit;
+            font-weight: 600;
+            color: var(--text);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: box-shadow 160ms ease, border-color 160ms ease;
+        }
+        .pp-btn:hover { border-color: var(--accent); }
+        .pp-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+        .pp-btn-primary { background: var(--accent); border-color: var(--accent); color: #06121f; }
+        .pp-btn-exit { background: var(--surface); }
+
+        .pp-preview {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+            padding: 14px;
+        }
+        .pp-preview h3 { margin: 0 0 8px; font-size: 0.86rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+        .pp-preview-empty { color: var(--muted); font-style: italic; margin: 0; }
+        .pp-episode { margin: 0 0 10px; padding: 10px 12px; border-left: 4px solid var(--success); background: var(--surface); border-radius: var(--radius-md); }
+        .pp-episode h4 { margin: 0 0 4px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+        .pp-episode p { margin: 0; font-size: 0.92rem; }
+
+        .pp-toasts {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 60;
+            pointer-events: none;
+        }
+        .pp-toast {
+            padding: 10px 16px;
+            font-weight: 800;
+            color: #06121f;
+            background: var(--accent);
+            border-radius: 999px;
+            box-shadow: var(--shadow);
+            animation: pp-rise 1500ms ease forwards;
+        }
+        @keyframes pp-rise {
+            0% { opacity: 0; }
+            12% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .pp-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(4, 8, 16, 0.68);
+            z-index: 70;
+        }
+        .pp-modal.is-open { display: flex; }
+        .pp-modal-card {
+            width: min(560px, 100%);
+            max-height: 80vh;
+            overflow: auto;
+            padding: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+        .pp-modal-card h3 { margin: 0 0 10px; }
+        .pp-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+        .pp-log-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+        .pp-log-list li { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 0.86rem; }
+
+        .pp-report { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+        .pp-report div { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+        .pp-report dt { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+        .pp-report dd { margin: 2px 0 0; font-size: 1.1rem; font-weight: 800; }
+        .pp-cert {
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            background: var(--surface);
+        }
+        .pp-cert-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 0 0 4px; }
+        .pp-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--success);
+            color: var(--success);
+            font-weight: 800;
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+        }
+        .pp-ranks { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+        .pp-ranks li { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; font-size: 0.8rem; color: var(--text-soft); }
+        .pp-ranks li.is-now { border-color: var(--accent); color: var(--text); font-weight: 800; }
+
+        .pp-mission-list { margin: 0 0 12px; padding-left: 20px; color: var(--text-soft); }
+        .pp-mission-list li { margin-bottom: 4px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pp-flow-fill, .pp-eq span, .pp-card, .pp-btn { transition: none !important; }
+            .pp-toast { animation: none; }
+        }
+        .pp-reduce .pp-flow-fill,
+        .pp-reduce .pp-eq span,
+        .pp-reduce .pp-card,
+        .pp-reduce .pp-btn { transition: none !important; }
+        .pp-reduce .pp-toast { animation: none; }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <div class="pp-root pp-scope" id="ppRoot">
+
+                        <div class="pp-hud">
+                            <div class="pp-hud-left">
+                                <div class="pp-mascot" id="ppMascot" aria-hidden="true"></div>
+                                <div class="pp-hud-copy">
+                                    <p class="pp-scene" id="ppSceneLabel">Scene 1 of 6</p>
+                                    <p class="pp-rank" id="ppRankLine">Rank: Sound Check</p>
+                                </div>
+                            </div>
+                            <div class="pp-hud-right">
+                                <div class="pp-stat"><span class="pp-stat-k">XP</span><span class="pp-stat-v" id="ppXp">0</span></div>
+                                <div class="pp-stat"><span class="pp-stat-k">First-try streak</span><span class="pp-stat-v" id="ppCombo">0</span></div>
+                                <button type="button" class="pp-btn pp-btn-exit" id="ppExitBtn">Exit</button>
+                            </div>
+                        </div>
+
+                        <div class="pp-flow">
+                            <span class="pp-flow-label">Flow bar</span>
+                            <div class="pp-flow-track" id="ppFlowTrack" role="img" aria-label="Flow bar: 0 per cent complete">
+                                <div class="pp-flow-fill" id="ppFlowFill"></div>
+                            </div>
+                            <span class="pp-flow-pct" id="ppFlowPct">0%</span>
+                            <div class="pp-eq" id="ppEq" aria-hidden="true"></div>
+                        </div>
+
+                        <ul class="pp-badges" id="ppBadges"></ul>
+
+                        <div class="pp-stage" id="ppStage"></div>
+
+                        <div class="pp-feedback" id="ppFeedback" role="status" aria-live="polite"></div>
+
+                        <div class="pp-toolbar">
+                            <button type="button" class="pp-btn" id="ppRulesBtn">Rules</button>
+                            <button type="button" class="pp-btn" id="ppBackBtn">Back</button>
+                            <button type="button" class="pp-btn" id="ppHintBtn">Hint</button>
+                            <button type="button" class="pp-btn" id="ppRetryBtn">Try Again</button>
+                            <button type="button" class="pp-btn" id="ppLogBtn">Log</button>
+                            <button type="button" class="pp-btn" id="ppMotionBtn" aria-pressed="false">Reduce motion</button>
+                            <span class="pp-toolbar-gap"></span>
+                            <button type="button" class="pp-btn pp-btn-primary" id="ppCheckBtn">Check playlist</button>
+                            <button type="button" class="pp-btn pp-btn-primary" id="ppNextBtn">Next</button>
+                        </div>
+
+                        <section class="pp-preview" aria-labelledby="ppPreviewHead">
+                            <h3 id="ppPreviewHead">Episode description preview</h3>
+                            <div class="pp-preview-body" id="ppPreviewBody">
+                                <p class="pp-preview-empty">No episode descriptions published yet.</p>
+                            </div>
+                        </section>
+
+                        <div class="pp-toasts" id="ppToasts" aria-hidden="true"></div>
+
+                        <div class="pp-modal" id="ppLogModal" role="dialog" aria-modal="true" aria-labelledby="ppLogHead">
+                            <div class="pp-modal-card">
+                                <h3 id="ppLogHead">Your progress log</h3>
+                                <div class="pp-modal-body" id="ppLogBody"></div>
+                                <div class="pp-modal-actions">
+                                    <button type="button" class="pp-btn pp-btn-primary" id="ppLogCloseBtn">Close</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pp-modal" id="ppRetryModal" role="dialog" aria-modal="true" aria-labelledby="ppRetryHead">
+                            <div class="pp-modal-card">
+                                <h3 id="ppRetryHead">Clear this scene?</h3>
+                                <div class="pp-modal-body">
+                                    <p>Try Again takes every track out of the playlist for this scene and sets your first-try streak back to zero. Your XP, badges and rank are kept.</p>
+                                </div>
+                                <div class="pp-modal-actions">
+                                    <button type="button" class="pp-btn" id="ppRetryCancelBtn">Cancel</button>
+                                    <button type="button" class="pp-btn pp-btn-primary" id="ppRetryConfirmBtn">Yes, clear the scene</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            ELA-F1-T1-U5-SEC1-SIM1 · Paragraph Playlist · Unit 5: topic sentences, supporting details, transitions and paragraph sense.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "ELA-F1-T1-U5-SEC1-SIM1",
+            title: "Paragraph Playlist",
+            subtitle: "Order a focused paragraph for the school podcast page",
+            badgeText: "ELA",
+            homeEyebrow: "Form 1 · Term 1 · Unit 5",
+            homeDescription:
+                "You are the producer for Belmont Secondary's school podcast page. Each episode needs a short written description that flows clearly. Sentence cards arrive as tracks — drag them into the playlist so the topic sentence opens, the details connect with suitable transitions and the closing track ends the paragraph. One track does not belong at all: send it to the Skip tray.",
+            instructions: [
+                "Track 1 introduces the main idea of the paragraph — the topic sentence.",
+                "Middle tracks add connected details, in the order their transitions signal (First, then Next, then Finally).",
+                "The final track concludes the paragraph; skip any off-topic track by dropping it in the Skip tray.",
+                "In Transition Remix, drop each transition word into the gap where its meaning fits: Next shows sequence, However shows contrast, Therefore shows result.",
+                "To move a track you can drag it, or select it with Enter or Space and then choose a slot. Choosing a filled slot with nothing selected takes that track back out.",
+                "Press Check playlist when every slot is filled. If something is out of place you are told what is wrong, why, how to fix it and shown a correct model.",
+                "There is no timer, no lives and no way to fail. Try as often as you like — Hint is on every scene.",
+                "Exit is at the top right of the activity, and Rules, Back, Hint, Try Again and Log sit under the playlist.",
+                "This file runs completely offline in a browser. No sound is used anywhere."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+/* ---------- Paragraph Playlist — sim logic ---------- */
+
+const PP_RANKS = [
+    { xp: 0, name: "Sound Check" },
+    { xp: 40, name: "Junior Producer" },
+    { xp: 90, name: "Studio Producer" },
+    { xp: 150, name: "Head of Podcast" }
+];
+
+const PP_BADGES = [
+    { id: "onAir", icon: "\u{1F3A7}", label: "On Air" },
+    { id: "cleanFlow", icon: "\u{1F30A}", label: "Clean Flow" },
+    { id: "linkMaster", icon: "\u{1F517}", label: "Link Master" },
+    { id: "skipSpotter", icon: "\u{1F441}", label: "Skip Spotter" },
+    { id: "published", icon: "\u{1F4E1}", label: "Episode Published" }
+];
+
+const PP_SCENES = [
+    {
+        kind: "mission",
+        name: "Mission Brief"
+    },
+    {
+        kind: "order",
+        id: "guided",
+        name: "Guided Playlist",
+        episode: "Episode 1 — The Reading Corner",
+        brief: "Belmont Secondary's podcast page needs a short episode description. Put the three tracks in order so the paragraph flows.",
+        slots: ["Opening", "Detail 1", "Closing"],
+        cards: [
+            { id: "g1", text: "The reading corner is a useful classroom space.", pos: 1 },
+            { id: "g2", text: "It contains stories and reference books.", pos: 2 },
+            { id: "g3", text: "For these reasons, it supports regular reading.", pos: 3 }
+        ],
+        hint: "Track 1 introduces the main idea in a broad way. A closing track often begins with a phrase such as “For these reasons”."
+    },
+    {
+        kind: "order",
+        id: "recycling",
+        name: "Recycling Playlist",
+        episode: "Episode 2 — The Recycling Station",
+        brief: "A longer description this time. Five tracks, five slots. Sequence transitions such as “First” and “Next” tell you where a detail belongs.",
+        slots: ["Opening", "Detail 1", "Detail 2", "Detail 3", "Closing"],
+        cards: [
+            { id: "r1", text: "The recycling station helps the school manage waste responsibly.", pos: 1 },
+            { id: "r2", text: "First, labelled bins separate paper, plastic and metal.", pos: 2 },
+            { id: "r3", text: "Next, the eco-club checks the bins each Friday.", pos: 3 },
+            { id: "r4", text: "The collected materials are sent for recycling.", pos: 4 },
+            { id: "r5", text: "Therefore, the station makes recycling easier for the whole school.", pos: 5 }
+        ],
+        hint: "Read the first word of each track. “First” comes before “Next”, and “Therefore” signals the closing track."
+    },
+    {
+        kind: "gap",
+        id: "remix",
+        name: "Transition Remix",
+        episode: "Episode 3 — The Bottle Drive",
+        brief: "Three tracks have a gap where the transition should be. Drop each transition word into the gap where its meaning fits.",
+        rows: [
+            {
+                id: "m1",
+                before: "First, we collected the bottles.",
+                after: "we washed and sorted them.",
+                answer: "Next",
+                why: "This gap needs a sequence word, because one step happens after another.",
+                model: "First, we collected the bottles. Next, we washed and sorted them."
+            },
+            {
+                id: "m2",
+                before: "The courtyard was small.",
+                after: "the group found space for three planters.",
+                answer: "However",
+                why: "This gap needs a contrast word, because the second idea goes against what the first idea suggests.",
+                model: "The courtyard was small. However, the group found space for three planters."
+            },
+            {
+                id: "m3",
+                before: "The project reduced waste.",
+                after: "the class continued it.",
+                answer: "Therefore",
+                why: "This gap needs a result word, because the second idea happens because of the first.",
+                model: "The project reduced waste. Therefore, the class continued it."
+            }
+        ],
+        tiles: ["Next", "However", "Therefore"],
+        hint: "“Next” shows sequence, “However” shows contrast and “Therefore” shows result. Each word is used once."
+    },
+    {
+        kind: "order",
+        id: "final",
+        name: "Final Playlist",
+        episode: "Episode 4 — The Class Clean-Up",
+        brief: "The last episode. One track does not belong in this paragraph at all — send it to the Skip tray.",
+        slots: ["Opening", "Detail 1", "Detail 2", "Detail 3", "Closing"],
+        hasSkip: true,
+        cards: [
+            { id: "f1", text: "Our class clean-up improved the school in several ways.", pos: 1 },
+            { id: "f2", text: "First, students removed litter from the courtyard.", pos: 2 },
+            { id: "f3", text: "The football team won two matches.", pos: "SKIP" },
+            { id: "f4", text: "Next, they sorted reusable materials.", pos: 3 },
+            { id: "f5", text: "Finally, they placed labelled bins near the canteen.", pos: 4 },
+            { id: "f6", text: "The project made the area cleaner and easier to maintain.", pos: 5 }
+        ],
+        hint: "Ask of every track: does this support the opening idea about the clean-up? One track is about something else entirely."
+    },
+    {
+        kind: "complete",
+        name: "Episode Published"
+    }
+];
+
+const PP_ERRORS = {
+    opening: {
+        what: "The Opening slot does not hold the topic sentence.",
+        why: "The paragraph does not begin with its broad main idea, so the details have nothing to support.",
+        fix: "Place the topic sentence first — the track that names the whole subject rather than one small detail.",
+        model: "“The recycling station helps the school manage waste responsibly.”"
+    },
+    order: {
+        what: "One or more detail tracks are in the wrong slot.",
+        why: "The details are not in the order the transitions signal, so the paragraph does not flow from one idea to the next.",
+        fix: "Read the first word of each track: “First” comes before “Next”, and a closing word such as “Therefore” or “For these reasons” goes last.",
+        model: "First, labelled bins separate paper, plastic and metal. Next, the eco-club checks the bins each Friday."
+    },
+    skip: {
+        what: "An off-topic track has been kept in the playlist.",
+        why: "The sentence does not support the topic sentence, so it breaks the sense of the paragraph.",
+        fix: "Move it to the Skip tray and put the supporting tracks in the slots instead.",
+        model: "A football score does not belong in a clean-up paragraph."
+    }
+};
+
+let pp = null;
+
+function ppDefaultState() {
+    return {
+        index: 0,
+        xp: 0,
+        combo: 0,
+        bestCombo: 0,
+        attempts: 0,
+        hints: 0,
+        firstTryWins: 0,
+        scored: 0,
+        badges: {},
+        scenes: {},
+        episodes: [],
+        log: [],
+        reduce: false,
+        startedAt: Date.now()
+    };
+}
+
+function ppSceneState(scene) {
+    if (!pp.scenes[scene.id]) {
+        pp.scenes[scene.id] = {
+            slots: scene.kind === "order" ? scene.slots.map(function () { return null; }) : scene.rows.map(function () { return null; }),
+            skip: null,
+            attempts: 0,
+            hinted: false,
+            solved: false,
+            marked: false,
+            selected: null
+        };
+    }
+    return pp.scenes[scene.id];
+}
+
+/* ---------- mascot ---------- */
+
+function ppMascot(mood) {
+    const face = {
+        idle: '<circle cx="26" cy="30" r="2.6"/><circle cx="38" cy="30" r="2.6"/><path d="M25 39 q7 4 14 0" stroke-width="2.6" fill="none" stroke-linecap="round"/>',
+        happy: '<path d="M22 29 q4 -4 8 0" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M34 29 q4 -4 8 0" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M23 37 q9 8 18 0" stroke-width="2.8" fill="none" stroke-linecap="round"/>',
+        thinking: '<circle cx="26" cy="30" r="2.6"/><circle cx="38" cy="30" r="2.6"/><path d="M26 40 h12" stroke-width="2.6" fill="none" stroke-linecap="round"/>',
+        oops: '<path d="M23 28 l6 4 M41 28 l-6 4" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M25 42 q7 -5 14 0" stroke-width="2.6" fill="none" stroke-linecap="round"/>',
+        star: '<path d="M22 29 q4 -4 8 0" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M34 29 q4 -4 8 0" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M23 37 q9 9 18 0" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M50 12 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z" stroke-width="1.6"/>'
+    }[mood] || face_default();
+    return '<svg viewBox="0 0 64 64" role="presentation" focusable="false">'
+        + '<g fill="none" stroke="currentColor" stroke-width="2.6">'
+        + '<path d="M14 32 v-3 a18 18 0 0 1 36 0 v3"/>'
+        + '<rect x="8" y="31" width="10" height="14" rx="5"/>'
+        + '<rect x="46" y="31" width="10" height="14" rx="5"/>'
+        + '<rect x="18" y="18" width="28" height="34" rx="12"/>'
+        + '</g>'
+        + '<g fill="currentColor" stroke="currentColor">' + face + '</g>'
+        + '</svg>';
+}
+
+function face_default() {
+    return '<circle cx="26" cy="30" r="2.6"/><circle cx="38" cy="30" r="2.6"/><path d="M25 39 q7 4 14 0" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+}
+
+function ppSetMood(mood) {
+    const host = document.getElementById("ppMascot");
+    if (host) host.innerHTML = ppMascot(mood);
+}
+
+/* ---------- HUD ---------- */
+
+function ppRankNow() {
+    let current = PP_RANKS[0];
+    for (let i = 0; i < PP_RANKS.length; i++) {
+        if (pp.xp >= PP_RANKS[i].xp) current = PP_RANKS[i];
+    }
+    return current;
+}
+
+function ppRankNext() {
+    for (let i = 0; i < PP_RANKS.length; i++) {
+        if (pp.xp < PP_RANKS[i].xp) return PP_RANKS[i];
+    }
+    return null;
+}
+
+function ppUpdateHud() {
+    const scene = PP_SCENES[pp.index];
+    document.getElementById("ppSceneLabel").textContent = "Scene " + (pp.index + 1) + " of " + PP_SCENES.length + " — " + scene.name;
+    document.getElementById("ppXp").textContent = String(pp.xp);
+    document.getElementById("ppCombo").textContent = String(pp.combo);
+
+    const next = ppRankNext();
+    document.getElementById("ppRankLine").textContent = next
+        ? "Rank: " + ppRankNow().name + " — " + (next.xp - pp.xp) + " XP to " + next.name
+        : "Rank: " + ppRankNow().name + " — top rank reached";
+
+    const playable = 4;
+    const pct = Math.round((pp.scored / playable) * 100);
+    document.getElementById("ppFlowFill").style.width = pct + "%";
+    document.getElementById("ppFlowPct").textContent = pct + "%";
+    document.getElementById("ppFlowTrack").setAttribute("aria-label", "Flow bar: " + pct + " per cent complete");
+
+    const eq = document.getElementById("ppEq");
+    eq.replaceChildren();
+    for (let i = 0; i < 12; i++) {
+        const bar = document.createElement("span");
+        const live = i < Math.round((pp.scored / playable) * 12);
+        if (live) {
+            bar.className = "is-live";
+            bar.style.height = (8 + ((i * 7) % 18)) + "px";
+        }
+        eq.appendChild(bar);
+    }
+
+    const badges = document.getElementById("ppBadges");
+    badges.replaceChildren();
+    PP_BADGES.forEach(function (b) {
+        const li = document.createElement("li");
+        const earned = !!pp.badges[b.id];
+        li.className = "pp-badge" + (earned ? " is-earned" : "");
+        const icon = document.createElement("span");
+        icon.className = "pp-badge-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = b.icon;
+        const name = document.createElement("span");
+        name.textContent = b.label;
+        const st = document.createElement("span");
+        st.className = "pp-badge-state";
+        st.textContent = earned ? "Earned" : "Locked";
+        li.appendChild(icon);
+        li.appendChild(name);
+        li.appendChild(st);
+        badges.appendChild(li);
+    });
+}
+
+function ppAward(points, label) {
+    pp.xp += points;
+    ppToast("+" + points + " XP — " + label);
+    ppUpdateHud();
+}
+
+function ppEarnBadge(id) {
+    if (pp.badges[id]) return;
+    pp.badges[id] = true;
+    const b = PP_BADGES.filter(function (x) { return x.id === id; })[0];
+    pp.xp += 10;
+    ppToast("Badge earned: " + (b ? b.label : id));
+    ppLog("Badge earned: " + (b ? b.label : id));
+    ppUpdateHud();
+}
+
+function ppToast(text) {
+    const host = document.getElementById("ppToasts");
+    if (!host) return;
+    if (pp.reduce || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    while (host.children.length >= 3) host.removeChild(host.firstChild);
+    const t = document.createElement("div");
+    t.className = "pp-toast";
+    t.textContent = text;
+    host.appendChild(t);
+    window.setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 1600);
+}
+
+function ppLog(text) {
+    pp.log.push({ scene: PP_SCENES[pp.index].name, text: text });
+}
+
+function ppSaveReport() {
+    const playable = 4;
+    const report = {
+        simId: SIM_CONFIG.simId,
+        completion: pp.scored === playable,
+        firstAttemptAccuracy: Math.round((pp.firstTryWins / playable) * 100),
+        finalMastery: pp.scored === playable ? 100 : Math.round((pp.scored / playable) * 100),
+        attempts: pp.attempts,
+        hints: pp.hints,
+        secondsOnTask: Math.round((Date.now() - pp.startedAt) / 1000),
+        lastScreen: PP_SCENES[pp.index].name,
+        missedFocusSkill: pp.firstTryWins === playable ? "none" : "Ordering a focused paragraph: topic sentence, connected details, transitions and conclusion",
+        xp: pp.xp,
+        rank: ppRankNow().name,
+        badges: Object.keys(pp.badges)
+    };
+    try { storageSet("report", JSON.stringify(report)); } catch (err) { /* storage unavailable */ }
+    return report;
+}
+
+/* ---------- feedback ---------- */
+
+function ppFeedback(kind, parts) {
+    const host = document.getElementById("ppFeedback");
+    host.className = "pp-feedback" + (kind ? " is-" + kind : "");
+    host.replaceChildren();
+    parts.forEach(function (part) {
+        const p = document.createElement("p");
+        if (part.label) {
+            const b = document.createElement("b");
+            b.textContent = part.label + " ";
+            p.appendChild(b);
+        }
+        p.appendChild(document.createTextNode(part.text));
+        host.appendChild(p);
+    });
+}
+
+function ppErrorFeedback(err) {
+    ppSetMood("oops");
+    ppFeedback("bad", [
+        { label: "Not yet — what is wrong:", text: err.what },
+        { label: "Why:", text: err.why },
+        { label: "How to fix it:", text: err.fix },
+        { label: "Correct model:", text: err.model }
+    ]);
+}
+
+/* ---------- rendering ---------- */
+
+function ppRender() {
+    const scene = PP_SCENES[pp.index];
+    const stage = document.getElementById("ppStage");
+    stage.replaceChildren();
+
+    if (scene.kind === "mission") ppRenderMission(stage, scene);
+    else if (scene.kind === "order") ppRenderOrder(stage, scene);
+    else if (scene.kind === "gap") ppRenderGap(stage, scene);
+    else ppRenderComplete(stage, scene);
+
+    ppUpdateHud();
+    ppUpdateToolbar();
+    ppRenderPreview();
+}
+
+function ppRenderMission(stage, scene) {
+    ppSetMood("idle");
+    const h = document.createElement("h2");
+    h.textContent = "Mission Brief — Paragraph Playlist";
+    const p = document.createElement("p");
+    p.className = "pp-brief";
+    p.textContent = "You are the producer for Belmont Secondary's school podcast page. Every episode needs a short written description that flows clearly from start to finish. Sentence cards arrive as tracks; you drag them into the playlist in the order that makes sense.";
+    const ul = document.createElement("ul");
+    ul.className = "pp-mission-list";
+    [
+        "Track 1 introduces the main idea.",
+        "Middle tracks add connected details with suitable transitions.",
+        "The final track concludes; skip any off-topic track.",
+        "Drag a track, or select it with Enter and then choose a slot. There is no timer and no limit on tries."
+    ].forEach(function (t) {
+        const li = document.createElement("li");
+        li.textContent = t;
+        ul.appendChild(li);
+    });
+
+    const cols = document.createElement("div");
+    cols.className = "pp-columns";
+
+    const left = document.createElement("div");
+    left.className = "pp-panel";
+    const lh = document.createElement("h3");
+    lh.textContent = "The playlist you will build";
+    left.appendChild(lh);
+    ["Opening", "Detail 1", "Detail 2", "Detail 3", "Closing"].forEach(function (label, i) {
+        const slot = document.createElement("div");
+        slot.className = "pp-slot";
+        const no = document.createElement("div");
+        no.className = "pp-slot-no";
+        const b = document.createElement("b");
+        b.textContent = "Track " + (i + 1);
+        const s = document.createElement("span");
+        s.textContent = label;
+        no.appendChild(b);
+        no.appendChild(s);
+        const body = document.createElement("div");
+        body.className = "pp-slot-body";
+        const em = document.createElement("span");
+        em.className = "pp-slot-empty";
+        em.textContent = "Empty slot";
+        body.appendChild(em);
+        slot.appendChild(no);
+        slot.appendChild(body);
+        left.appendChild(slot);
+    });
+    const tray = document.createElement("div");
+    tray.className = "pp-slot pp-skip";
+    const tno = document.createElement("div");
+    tno.className = "pp-slot-no";
+    const tb = document.createElement("b");
+    tb.textContent = "Skip tray";
+    tno.appendChild(tb);
+    const tbody = document.createElement("div");
+    tbody.className = "pp-slot-body";
+    const tem = document.createElement("span");
+    tem.className = "pp-slot-empty";
+    tem.textContent = "For a track that does not belong";
+    tbody.appendChild(tem);
+    tray.appendChild(tno);
+    tray.appendChild(tbody);
+    left.appendChild(tray);
+
+    const right = document.createElement("div");
+    right.className = "pp-panel";
+    const rh = document.createElement("h3");
+    rh.textContent = "Rank ladder";
+    right.appendChild(rh);
+    const ranks = document.createElement("ul");
+    ranks.className = "pp-ranks";
+    PP_RANKS.forEach(function (r, i) {
+        const li = document.createElement("li");
+        if (i === 0) li.className = "is-now";
+        li.textContent = r.name + " — " + r.xp + " XP";
+        ranks.appendChild(li);
+    });
+    right.appendChild(ranks);
+    const rp = document.createElement("p");
+    rp.className = "pp-brief";
+    rp.style.marginTop = "12px";
+    rp.textContent = "Earn XP for every playlist you get flowing. Five badges are waiting. Press Next to start Episode 1.";
+    right.appendChild(rp);
+
+    cols.appendChild(left);
+    cols.appendChild(right);
+
+    stage.appendChild(h);
+    stage.appendChild(p);
+    stage.appendChild(ul);
+    stage.appendChild(cols);
+
+    ppFeedback("", [{ text: "Press Next when you are ready to produce Episode 1." }]);
+}
+
+function ppCardById(scene, id) {
+    return scene.cards.filter(function (c) { return c.id === id; })[0];
+}
+
+function ppRenderOrder(stage, scene) {
+    const st = ppSceneState(scene);
+
+    const h = document.createElement("h2");
+    h.textContent = scene.episode;
+    const p = document.createElement("p");
+    p.className = "pp-brief";
+    p.textContent = scene.brief;
+    stage.appendChild(h);
+    stage.appendChild(p);
+
+    const cols = document.createElement("div");
+    cols.className = "pp-columns";
+
+    /* crate */
+    const left = document.createElement("div");
+    left.className = "pp-panel";
+    const lh = document.createElement("h3");
+    lh.textContent = "Track crate — sentence cards";
+    left.appendChild(lh);
+    const crate = document.createElement("div");
+    crate.className = "pp-crate";
+    crate.id = "ppCrate";
+    left.appendChild(crate);
+
+    const placed = st.slots.concat([st.skip]);
+    const remaining = scene.cards.filter(function (c) { return placed.indexOf(c.id) === -1; });
+    if (!remaining.length) {
+        const done = document.createElement("p");
+        done.className = "pp-slot-empty";
+        done.textContent = "Every track is in the playlist. Press Check playlist.";
+        crate.appendChild(done);
+    }
+    remaining.forEach(function (card) {
+        crate.appendChild(ppBuildCard(scene, st, card));
+    });
+
+    /* playlist */
+    const right = document.createElement("div");
+    right.className = "pp-panel";
+    const rh = document.createElement("h3");
+    rh.textContent = "Playlist";
+    right.appendChild(rh);
+
+    scene.slots.forEach(function (label, i) {
+        right.appendChild(ppBuildSlot(scene, st, i, label, false));
+    });
+    if (scene.hasSkip) right.appendChild(ppBuildSlot(scene, st, -1, "Skip tray", true));
+
+    cols.appendChild(left);
+    cols.appendChild(right);
+    stage.appendChild(cols);
+
+    if (st.solved) {
+        ppSetMood("star");
+        ppFeedback("good", [{ label: "Locked in.", text: "This episode description flows from start to finish. Press Next." }]);
+    } else if (!document.getElementById("ppFeedback").textContent.trim()) {
+        ppSetMood("thinking");
+        ppFeedback("", [{ text: "Drag a track into a slot, or select a track with Enter and then choose a slot." }]);
+    }
+}
+
+function ppBuildCard(scene, st, card) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "pp-card" + (st.selected === card.id ? " is-selected" : "");
+    btn.setAttribute("draggable", "true");
+    btn.dataset.cardId = card.id;
+    btn.setAttribute("aria-pressed", st.selected === card.id ? "true" : "false");
+    const grip = document.createElement("span");
+    grip.className = "pp-grip";
+    grip.setAttribute("aria-hidden", "true");
+    grip.textContent = "☰";
+    const txt = document.createElement("span");
+    txt.textContent = card.text;
+    btn.appendChild(grip);
+    btn.appendChild(txt);
+    btn.addEventListener("click", function () { ppSelectCard(scene, card.id); });
+    btn.addEventListener("dragstart", function (ev) {
+        st.selected = card.id;
+        try { ev.dataTransfer.setData("text/plain", card.id); } catch (err) { /* ignore */ }
+    });
+    return btn;
+}
+
+function ppBuildSlot(scene, st, index, label, isSkip) {
+    const slot = document.createElement("button");
+    slot.type = "button";
+    slot.className = "pp-slot" + (isSkip ? " pp-skip" : "");
+    const heldId = isSkip ? st.skip : st.slots[index];
+
+    const no = document.createElement("div");
+    no.className = "pp-slot-no";
+    const b = document.createElement("b");
+    b.textContent = isSkip ? "Skip tray" : "Track " + (index + 1);
+    no.appendChild(b);
+    if (!isSkip) {
+        const s = document.createElement("span");
+        s.textContent = label;
+        no.appendChild(s);
+    }
+
+    const body = document.createElement("div");
+    body.className = "pp-slot-body";
+
+    if (heldId) {
+        slot.classList.add("is-filled");
+        const card = ppCardById(scene, heldId);
+        const txt = document.createElement("span");
+        txt.textContent = card.text;
+        body.appendChild(txt);
+        if (st.marked) {
+            const correct = isSkip ? card.pos === "SKIP" : card.pos === index + 1;
+            slot.classList.add(correct ? "is-correct" : "is-wrong");
+            const mark = document.createElement("span");
+            mark.className = "pp-mark " + (correct ? "ok" : "no");
+            mark.textContent = correct ? "✓ Correct" : "✗ Move me";
+            body.appendChild(mark);
+        }
+        slot.setAttribute("aria-label", b.textContent + ", holding: " + card.text + ". Activate to take this track out.");
+    } else {
+        const em = document.createElement("span");
+        em.className = "pp-slot-empty";
+        em.textContent = isSkip ? "Drop the off-topic track here" : "Empty — drop a track here";
+        body.appendChild(em);
+        slot.setAttribute("aria-label", b.textContent + ", empty. Activate to place the selected track.");
+    }
+
+    slot.appendChild(no);
+    slot.appendChild(body);
+
+    if (st.solved) {
+        slot.disabled = true;
+        return slot;
+    }
+
+    slot.addEventListener("click", function () { ppPlace(scene, isSkip ? -1 : index, isSkip); });
+    slot.addEventListener("dragover", function (ev) { ev.preventDefault(); slot.classList.add("is-over"); });
+    slot.addEventListener("dragleave", function () { slot.classList.remove("is-over"); });
+    slot.addEventListener("drop", function (ev) {
+        ev.preventDefault();
+        slot.classList.remove("is-over");
+        let id = "";
+        try { id = ev.dataTransfer.getData("text/plain"); } catch (err) { id = ""; }
+        if (id) ppSceneState(scene).selected = id;
+        ppPlace(scene, isSkip ? -1 : index, isSkip);
+    });
+    return slot;
+}
+
+function ppSelectCard(scene, id) {
+    const st = ppSceneState(scene);
+    st.selected = st.selected === id ? null : id;
+    ppRender();
+    const card = ppCardById(scene, id);
+    ppFeedback("", [{ text: st.selected ? "Selected: “" + card.text + "” Now choose a slot." : "Selection cleared." }]);
+}
+
+function ppPlace(scene, index, isSkip) {
+    const st = ppSceneState(scene);
+    if (st.solved) return;
+    const held = isSkip ? st.skip : st.slots[index];
+
+    if (!st.selected) {
+        if (held) {
+            if (isSkip) st.skip = null; else st.slots[index] = null;
+            st.marked = false;
+            ppRender();
+            ppFeedback("", [{ text: "Track returned to the crate." }]);
+        } else {
+            ppFeedback("hint", [{ text: "Choose a track from the crate first, then choose a slot." }]);
+        }
+        return;
+    }
+
+    const movingId = st.selected;
+    for (let i = 0; i < st.slots.length; i++) if (st.slots[i] === movingId) st.slots[i] = null;
+    if (st.skip === movingId) st.skip = null;
+
+    if (isSkip) st.skip = movingId; else st.slots[index] = movingId;
+    st.selected = null;
+    st.marked = false;
+    ppRender();
+    ppFeedback("", [{ text: "Track placed. Keep going, then press Check playlist." }]);
+    ppSetMood("thinking");
+}
+
+/* ---------- gap scene ---------- */
+
+function ppRenderGap(stage, scene) {
+    const st = ppSceneState(scene);
+
+    const h = document.createElement("h2");
+    h.textContent = scene.episode;
+    const p = document.createElement("p");
+    p.className = "pp-brief";
+    p.textContent = scene.brief;
+    stage.appendChild(h);
+    stage.appendChild(p);
+
+    const tiles = document.createElement("div");
+    tiles.className = "pp-panel";
+    const th = document.createElement("h3");
+    th.textContent = "Transition tracks";
+    tiles.appendChild(th);
+    const tileRow = document.createElement("div");
+    tileRow.className = "pp-tiles";
+    scene.tiles.forEach(function (word) {
+        const used = st.slots.indexOf(word) !== -1;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "pp-tile" + (used ? " is-used" : "") + (st.selected === word ? " is-selected" : "");
+        btn.textContent = word;
+        btn.setAttribute("draggable", used || st.solved ? "false" : "true");
+        btn.disabled = used || st.solved;
+        btn.addEventListener("click", function () {
+            st.selected = st.selected === word ? null : word;
+            ppRender();
+            ppFeedback("", [{ text: st.selected ? "Selected “" + word + "”. Now choose a gap." : "Selection cleared." }]);
+        });
+        btn.addEventListener("dragstart", function (ev) {
+            st.selected = word;
+            try { ev.dataTransfer.setData("text/plain", word); } catch (err) { /* ignore */ }
+        });
+        tileRow.appendChild(btn);
+    });
+    tiles.appendChild(tileRow);
+    stage.appendChild(tiles);
+
+    const rows = document.createElement("div");
+    rows.className = "pp-panel";
+    rows.style.marginTop = "12px";
+    scene.rows.forEach(function (row, i) {
+        const div = document.createElement("div");
+        div.className = "pp-gap-row";
+        const before = document.createElement("span");
+        before.textContent = row.before;
+        const slot = document.createElement("button");
+        slot.type = "button";
+        slot.className = "pp-gap-slot" + (st.slots[i] ? " is-filled" : "");
+        slot.textContent = st.slots[i] ? st.slots[i] + "," : "— gap —";
+        slot.setAttribute("aria-label", "Gap " + (i + 1) + ": " + (st.slots[i] ? "holding " + st.slots[i] : "empty"));
+        if (st.marked && st.slots[i]) {
+            const ok = st.slots[i] === row.answer;
+            slot.classList.add(ok ? "is-correct" : "is-wrong");
+            slot.textContent = (ok ? "✓ " : "✗ ") + st.slots[i] + ",";
+        }
+        if (st.solved) slot.disabled = true;
+        slot.addEventListener("click", function () { ppPlaceGap(scene, i); });
+        slot.addEventListener("dragover", function (ev) { ev.preventDefault(); });
+        slot.addEventListener("drop", function (ev) {
+            ev.preventDefault();
+            let w = "";
+            try { w = ev.dataTransfer.getData("text/plain"); } catch (err) { w = ""; }
+            if (w) st.selected = w;
+            ppPlaceGap(scene, i);
+        });
+        const after = document.createElement("span");
+        after.textContent = row.after;
+        div.appendChild(before);
+        div.appendChild(slot);
+        div.appendChild(after);
+        rows.appendChild(div);
+    });
+    stage.appendChild(rows);
+
+    if (st.solved) {
+        ppSetMood("star");
+        ppFeedback("good", [{ label: "Locked in.", text: "Every transition signals the right relationship. Press Next." }]);
+    } else if (!document.getElementById("ppFeedback").textContent.trim()) {
+        ppSetMood("thinking");
+        ppFeedback("", [{ text: "Choose a transition, then choose the gap where it belongs." }]);
+    }
+}
+
+function ppPlaceGap(scene, index) {
+    const st = ppSceneState(scene);
+    if (st.solved) return;
+    if (!st.selected) {
+        if (st.slots[index]) {
+            st.slots[index] = null;
+            st.marked = false;
+            ppRender();
+            ppFeedback("", [{ text: "Transition returned to the tracks." }]);
+        } else {
+            ppFeedback("hint", [{ text: "Choose a transition track first, then choose a gap." }]);
+        }
+        return;
+    }
+    const word = st.selected;
+    for (let i = 0; i < st.slots.length; i++) if (st.slots[i] === word) st.slots[i] = null;
+    st.slots[index] = word;
+    st.selected = null;
+    st.marked = false;
+    ppRender();
+    ppSetMood("thinking");
+    ppFeedback("", [{ text: "Transition placed. Fill every gap, then press Check playlist." }]);
+}
+
+/* ---------- checking ---------- */
+
+function ppCheck() {
+    const scene = PP_SCENES[pp.index];
+    if (scene.kind === "mission" || scene.kind === "complete") return;
+    const st = ppSceneState(scene);
+    if (st.solved) return;
+
+    const empty = st.slots.some(function (v) { return !v; }) || (scene.hasSkip && !st.skip);
+    if (empty) {
+        ppSetMood("thinking");
+        ppFeedback("hint", [{ label: "Not checked yet.", text: scene.kind === "gap" ? "Fill every gap before you check." : "Fill every slot" + (scene.hasSkip ? ", including the Skip tray," : "") + " before you check." }]);
+        return;
+    }
+
+    st.attempts += 1;
+    pp.attempts += 1;
+    st.marked = true;
+
+    let err = null;
+    if (scene.kind === "gap") {
+        for (let i = 0; i < scene.rows.length; i++) {
+            if (st.slots[i] !== scene.rows[i].answer) {
+                const row = scene.rows[i];
+                err = {
+                    what: "Gap " + (i + 1) + " holds “" + st.slots[i] + "”, which is not the transition that fits.",
+                    why: row.why + " “" + st.slots[i] + "” signals a different relationship.",
+                    fix: "Choose a word that matches the relationship: “Next” for sequence, “However” for contrast, “Therefore” for result.",
+                    model: "“" + row.model + "”"
+                };
+                break;
+            }
+        }
+    } else {
+        const skipCard = scene.cards.filter(function (c) { return c.pos === "SKIP"; })[0];
+        if (skipCard && st.slots.indexOf(skipCard.id) !== -1) {
+            err = PP_ERRORS.skip;
+        } else {
+            const first = ppCardById(scene, st.slots[0]);
+            if (first.pos !== 1) {
+                err = PP_ERRORS.opening;
+            } else {
+                for (let i = 0; i < st.slots.length; i++) {
+                    if (ppCardById(scene, st.slots[i]).pos !== i + 1) { err = PP_ERRORS.order; break; }
+                }
+            }
+        }
+    }
+
+    if (err) {
+        pp.combo = 0;
+        ppLog("Attempt " + st.attempts + ": not yet correct.");
+        ppErrorFeedback(err);
+        ppUpdateHud();
+        ppRender();
+        return;
+    }
+
+    st.solved = true;
+    pp.scored += 1;
+    const firstTry = st.attempts === 1 && !st.hinted;
+    if (firstTry) {
+        pp.firstTryWins += 1;
+        pp.combo += 1;
+        if (pp.combo > pp.bestCombo) pp.bestCombo = pp.combo;
+    }
+    ppAward(firstTry ? 30 : 15, firstTry ? "first-try lock-in" : "playlist flowing");
+    ppLog("Solved after " + st.attempts + " attempt" + (st.attempts === 1 ? "" : "s") + (st.hinted ? ", hint used" : "") + ".");
+
+    if (scene.id === "guided") ppEarnBadge("onAir");
+    if (scene.id === "recycling" && firstTry) ppEarnBadge("cleanFlow");
+    if (scene.id === "remix") ppEarnBadge("linkMaster");
+    if (scene.id === "final") ppEarnBadge("skipSpotter");
+
+    ppBuildEpisode(scene, st);
+    ppRender();
+    ppSetMood("star");
+    ppFeedback("good", [
+        { label: "Locked in.", text: "Every track is in the exact right place." },
+        { text: "The episode description has been added to the podcast page below. Press Next." }
+    ]);
+    ppSaveReport();
+}
+
+function ppBuildEpisode(scene, st) {
+    let text = "";
+    if (scene.kind === "gap") {
+        text = scene.rows.map(function (r) { return r.model; }).join(" ");
+    } else {
+        text = st.slots.map(function (id) { return ppCardById(scene, id).text; }).join(" ");
+    }
+    pp.episodes.push({ title: scene.episode, text: text });
+}
+
+function ppRenderPreview() {
+    const host = document.getElementById("ppPreviewBody");
+    host.replaceChildren();
+    if (!pp.episodes.length) {
+        const p = document.createElement("p");
+        p.className = "pp-preview-empty";
+        p.textContent = "No episode descriptions published yet.";
+        host.appendChild(p);
+        return;
+    }
+    pp.episodes.forEach(function (ep) {
+        const wrap = document.createElement("div");
+        wrap.className = "pp-episode";
+        const h = document.createElement("h4");
+        h.textContent = ep.title;
+        const p = document.createElement("p");
+        p.textContent = ep.text;
+        wrap.appendChild(h);
+        wrap.appendChild(p);
+        host.appendChild(wrap);
+    });
+}
+
+/* ---------- completion ---------- */
+
+function ppRenderComplete(stage) {
+    ppSetMood("happy");
+    const report = ppSaveReport();
+
+    const cert = document.createElement("div");
+    cert.className = "pp-cert";
+
+    const eyebrow = document.createElement("p");
+    eyebrow.className = "pp-cert-eyebrow";
+    eyebrow.textContent = "Belmont Secondary Podcast — Producer's Report";
+
+    const live = document.createElement("span");
+    live.className = "pp-live";
+    live.textContent = "● ON AIR — ALL FOUR EPISODES PUBLISHED";
+
+    const h = document.createElement("h2");
+    h.textContent = "Playlist flows from start to finish";
+
+    const p = document.createElement("p");
+    p.className = "pp-brief";
+    p.textContent = "Every episode description opens with its topic sentence, keeps its details connected with suitable transitions and closes properly. The off-topic track was skipped.";
+
+    const dl = document.createElement("dl");
+    dl.className = "pp-report";
+    [
+        ["Final XP", String(pp.xp)],
+        ["Rank", ppRankNow().name],
+        ["First-try accuracy", report.firstAttemptAccuracy + "%"],
+        ["Final mastery", report.finalMastery + "%"],
+        ["Total attempts", String(pp.attempts)],
+        ["Hints used", String(pp.hints)],
+        ["Best first-try streak", String(pp.bestCombo)],
+        ["Badges earned", Object.keys(pp.badges).length + " of " + PP_BADGES.length],
+        ["Time on task", Math.floor(report.secondsOnTask / 60) + " min " + (report.secondsOnTask % 60) + " s"]
+    ].forEach(function (pair) {
+        const box = document.createElement("div");
+        const dt = document.createElement("dt");
+        dt.textContent = pair[0];
+        const dd = document.createElement("dd");
+        dd.textContent = pair[1];
+        box.appendChild(dt);
+        box.appendChild(dd);
+        dl.appendChild(box);
+    });
+
+    const ranks = document.createElement("ul");
+    ranks.className = "pp-ranks";
+    PP_RANKS.forEach(function (r) {
+        const li = document.createElement("li");
+        if (r.name === ppRankNow().name) li.className = "is-now";
+        li.textContent = r.name + " — " + r.xp + " XP";
+        ranks.appendChild(li);
+    });
+
+    cert.appendChild(eyebrow);
+    cert.appendChild(live);
+    cert.appendChild(h);
+    cert.appendChild(p);
+    cert.appendChild(dl);
+    cert.appendChild(ranks);
+    stage.appendChild(cert);
+
+    ppEarnBadge("published");
+    ppFeedback("good", [{ label: "Mission complete.", text: "Use Back to look over any episode again, Log to read your attempt history, or Try Again to produce the whole series from scratch." }]);
+}
+
+/* ---------- toolbar ---------- */
+
+function ppUpdateToolbar() {
+    const scene = PP_SCENES[pp.index];
+    const st = (scene.kind === "order" || scene.kind === "gap") ? ppSceneState(scene) : null;
+    const check = document.getElementById("ppCheckBtn");
+    const next = document.getElementById("ppNextBtn");
+    const hint = document.getElementById("ppHintBtn");
+    const back = document.getElementById("ppBackBtn");
+
+    check.disabled = !st || st.solved;
+    check.style.display = st ? "" : "none";
+    hint.disabled = !st || st.solved;
+    back.disabled = pp.index === 0;
+
+    const isLast = pp.index === PP_SCENES.length - 1;
+    next.disabled = isLast || (st ? !st.solved : false);
+    next.textContent = pp.index === 0 ? "Start Episode 1" : (isLast ? "Finished" : "Next scene");
+}
+
+function ppHint() {
+    const scene = PP_SCENES[pp.index];
+    if (scene.kind !== "order" && scene.kind !== "gap") return;
+    const st = ppSceneState(scene);
+    if (st.solved) return;
+    if (!st.hinted) { st.hinted = true; pp.hints += 1; }
+    ppSetMood("thinking");
+    ppFeedback("hint", [{ label: "Hint:", text: scene.hint }]);
+    ppLog("Hint used.");
+    ppSaveReport();
+}
+
+function ppNext() {
+    if (pp.index < PP_SCENES.length - 1) {
+        pp.index += 1;
+        ppFeedback("", []);
+        ppRender();
+        ppSaveReport();
+    }
+}
+
+function ppBack() {
+    if (pp.index > 0) {
+        pp.index -= 1;
+        ppFeedback("", []);
+        ppRender();
+    }
+}
+
+function ppRetryConfirmed() {
+    const scene = PP_SCENES[pp.index];
+    if (scene.kind === "order" || scene.kind === "gap") {
+        const st = ppSceneState(scene);
+        if (st.solved) {
+            st.solved = false;
+            pp.scored = Math.max(0, pp.scored - 1);
+            pp.episodes = pp.episodes.filter(function (e) { return e.title !== scene.episode; });
+        }
+        st.slots = st.slots.map(function () { return null; });
+        st.skip = null;
+        st.marked = false;
+        st.selected = null;
+        pp.combo = 0;
+        ppLog("Try Again: scene cleared.");
+        ppRender();
+        ppFeedback("", [{ text: "Scene cleared. Your XP, badges and rank are unchanged — build the playlist again." }]);
+    } else {
+        ppFullRestart();
+    }
+    ppSaveReport();
+}
+
+function ppFullRestart() {
+    const reduce = pp.reduce;
+    pp = ppDefaultState();
+    pp.reduce = reduce;
+    ppRender();
+    ppFeedback("", [{ text: "The whole series has been reset. Press Next to start Episode 1 again." }]);
+}
+
+function ppOpenModal(id) {
+    document.getElementById(id).classList.add("is-open");
+}
+
+function ppCloseModal(id) {
+    document.getElementById(id).classList.remove("is-open");
+}
+
+function ppShowLog() {
+    const body = document.getElementById("ppLogBody");
+    body.replaceChildren();
+    const ul = document.createElement("ul");
+    ul.className = "pp-log-list";
+    if (!pp.log.length) {
+        const li = document.createElement("li");
+        li.textContent = "Nothing recorded yet. Your checks, hints and badges will appear here.";
+        ul.appendChild(li);
+    }
+    pp.log.forEach(function (entry) {
+        const li = document.createElement("li");
+        li.textContent = entry.scene + ": " + entry.text;
+        ul.appendChild(li);
+    });
+    body.appendChild(ul);
+    ppOpenModal("ppLogModal");
+}
+
+function ppToggleMotion() {
+    pp.reduce = !pp.reduce;
+    document.body.classList.toggle("pp-reduce", pp.reduce);
+    const btn = document.getElementById("ppMotionBtn");
+    btn.setAttribute("aria-pressed", pp.reduce ? "true" : "false");
+    btn.textContent = pp.reduce ? "Motion reduced" : "Reduce motion";
+}
+
+function ppBindOnce() {
+    if (ppBindOnce.done) return;
+    ppBindOnce.done = true;
+    document.getElementById("ppCheckBtn").addEventListener("click", ppCheck);
+    document.getElementById("ppNextBtn").addEventListener("click", ppNext);
+    document.getElementById("ppBackBtn").addEventListener("click", ppBack);
+    document.getElementById("ppHintBtn").addEventListener("click", ppHint);
+    document.getElementById("ppRulesBtn").addEventListener("click", function () {
+        if (dom.helpBtn) dom.helpBtn.click();
+    });
+    document.getElementById("ppExitBtn").addEventListener("click", function () {
+        ppSaveReport();
+        showScreen("home");
+    });
+    document.getElementById("ppLogBtn").addEventListener("click", ppShowLog);
+    document.getElementById("ppLogCloseBtn").addEventListener("click", function () { ppCloseModal("ppLogModal"); });
+    document.getElementById("ppMotionBtn").addEventListener("click", ppToggleMotion);
+    document.getElementById("ppRetryBtn").addEventListener("click", function () { ppOpenModal("ppRetryModal"); });
+    document.getElementById("ppRetryCancelBtn").addEventListener("click", function () { ppCloseModal("ppRetryModal"); });
+    document.getElementById("ppRetryConfirmBtn").addEventListener("click", function () {
+        ppCloseModal("ppRetryModal");
+        ppRetryConfirmed();
+    });
+    document.addEventListener("keydown", function (ev) {
+        if (ev.key !== "Escape") return;
+        ppCloseModal("ppLogModal");
+        ppCloseModal("ppRetryModal");
+    });
+}
+
+function devInit() {
+    pp = ppDefaultState();
+    pp.reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.body.classList.toggle("pp-reduce", pp.reduce);
+    ppBindOnce();
+    const motionBtn = document.getElementById("ppMotionBtn");
+    motionBtn.setAttribute("aria-pressed", pp.reduce ? "true" : "false");
+    motionBtn.textContent = pp.reduce ? "Motion reduced" : "Reduce motion";
+    ppRender();
+}
+
+function devReset() {
+    ppCloseModal("ppLogModal");
+    ppCloseModal("ppRetryModal");
+    pp = ppDefaultState();
+    document.body.classList.toggle("pp-reduce", pp.reduce);
+    const motionBtn = document.getElementById("ppMotionBtn");
+    if (motionBtn) {
+        motionBtn.setAttribute("aria-pressed", "false");
+        motionBtn.textContent = "Reduce motion";
+    }
+    try { storageSet("report", ""); } catch (err) { /* storage unavailable */ }
+    ppRender();
+    ppFeedback("", [{ text: "Everything has been reset. Press Next to start Episode 1." }]);
+}
+
+    </script>
+</body>
+
+</html>
