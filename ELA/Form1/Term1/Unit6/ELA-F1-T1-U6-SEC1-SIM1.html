@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Fact Catcher — Explicit Details and Evidence</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ===== FACT CATCHER — sim styles ===== */
+        .fc-wrap { display: flex; flex-direction: column; gap: 14px; }
+        .fc-topline {
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+            justify-content: space-between;
+        }
+        .fc-progress {
+            font-weight: 700; letter-spacing: .02em; color: var(--text);
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 8px 12px; font-size: .95rem;
+        }
+        .fc-navbar { display: flex; flex-wrap: wrap; gap: 8px; }
+        .fc-btn {
+            min-height: 44px; min-width: 44px; padding: 10px 14px;
+            border-radius: var(--radius-md); border: 1px solid var(--border);
+            background: var(--surface-2); color: var(--text); font: inherit;
+            font-weight: 600; cursor: pointer; display: inline-flex; align-items: center;
+            gap: 6px; justify-content: center;
+        }
+        .fc-btn:hover { background: var(--surface); border-color: var(--accent); }
+        .fc-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+        .fc-btn[disabled] { opacity: .45; cursor: not-allowed; }
+        .fc-btn-exit { border-color: var(--danger); color: var(--danger); }
+        .fc-btn-primary { background: var(--accent); border-color: var(--accent); color: #06122b; }
+        .fc-btn-catch { background: var(--success); border-color: var(--success); color: #06220f; font-size: 1.05rem; padding: 14px 26px; }
+        .fc-btn-pass { background: var(--warning); border-color: var(--warning); color: #2a1a02; font-size: 1.05rem; padding: 14px 26px; }
+        .fc-btn-catch:hover, .fc-btn-pass:hover { filter: brightness(1.08); }
+
+        /* --- HUD --- */
+        .fc-hud {
+            display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 12px 14px;
+        }
+        .fc-mascot { width: 74px; height: 74px; flex: none; }
+        .fc-mascot svg { width: 100%; height: 100%; display: block; }
+        .fc-hud-mid { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+        .fc-hud-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .fc-chip {
+            display: inline-flex; align-items: center; gap: 6px; font-weight: 700;
+            font-size: .85rem; padding: 5px 10px; border-radius: 999px;
+            background: var(--surface); border: 1px solid var(--border); color: var(--text);
+        }
+        .fc-chip strong { color: var(--accent); }
+        .fc-rankbar {
+            position: relative; height: 12px; border-radius: 999px; overflow: hidden;
+            background: var(--surface); border: 1px solid var(--border);
+        }
+        .fc-rankbar span { display: block; height: 100%; width: 0%; background: var(--accent); }
+        .fc-rank-text { font-size: .82rem; color: var(--text-soft); }
+        .fc-badges { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+        .fc-badge {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            border: 1px solid var(--border); border-radius: var(--radius-md);
+            padding: 6px 8px; min-width: 76px; background: var(--surface);
+            font-size: .68rem; text-align: center; color: var(--muted);
+        }
+        .fc-badge .fc-badge-icon { font-size: 1.25rem; filter: grayscale(1) opacity(.5); }
+        .fc-badge .fc-badge-name { font-weight: 700; color: var(--text-soft); font-size: .7rem; line-height: 1.2; }
+        .fc-badge .fc-badge-state { font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+        .fc-badge.is-earned { border-color: var(--success); background: color-mix(in srgb, var(--success) 14%, var(--surface)); }
+        .fc-badge.is-earned .fc-badge-icon { filter: none; }
+        .fc-badge.is-earned .fc-badge-state { color: var(--success); }
+        .fc-badge.is-earned .fc-badge-name { color: var(--text); }
+
+        /* --- passage --- */
+        .fc-passage {
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-left: 5px solid var(--accent-2);
+            border-radius: var(--radius-lg); padding: 14px 16px;
+        }
+        .fc-passage h3 { margin: 0 0 6px; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+        .fc-passage p { margin: 0; font-size: 1.05rem; line-height: 1.65; color: var(--text); }
+        .fc-proof { border-radius: 5px; }
+        .fc-proof.is-lit {
+            background: var(--success); color: #06220f; font-weight: 800; padding: 0 4px;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 40%, transparent);
+        }
+        .fc-proof.is-lit::after { content: " ✓ proof"; font-size: .72rem; font-weight: 800; }
+
+        /* --- play area --- */
+        .fc-stage {
+            position: relative; min-height: 150px; display: flex;
+            align-items: center; justify-content: center; padding: 10px;
+            background: var(--bg-soft); border: 1px dashed var(--border);
+            border-radius: var(--radius-lg); overflow: hidden;
+        }
+        .fc-bubble {
+            max-width: 520px; text-align: center; font-size: 1.12rem; font-weight: 700;
+            color: var(--text); background: var(--surface);
+            border: 2px solid var(--accent-2); border-radius: 26px;
+            padding: 18px 24px; box-shadow: var(--shadow);
+        }
+        .fc-bubble .fc-bubble-tag {
+            display: block; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase;
+            color: var(--muted); font-weight: 700; margin-bottom: 6px;
+        }
+        .fc-anim .fc-bubble { animation: fcRise .55s ease-out both; }
+        @keyframes fcRise { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .fc-question {
+            font-weight: 800; font-size: 1rem; color: var(--accent);
+            text-align: center; margin: 0 0 4px;
+        }
+        .fc-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+        .fc-basket {
+            font-weight: 800; font-size: 1rem; padding: 10px 16px; border-radius: var(--radius-md);
+            background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+        }
+
+        /* --- feedback --- */
+        .fc-feedback {
+            border-radius: var(--radius-lg); padding: 14px 16px; border: 2px solid var(--border);
+            background: var(--surface-2);
+        }
+        .fc-feedback h4 { margin: 0 0 8px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+        .fc-feedback p { margin: 4px 0; line-height: 1.55; }
+        .fc-feedback.is-right { border-color: var(--success); }
+        .fc-feedback.is-right h4 { color: var(--success); }
+        .fc-feedback.is-wrong { border-color: var(--danger); }
+        .fc-feedback.is-wrong h4 { color: var(--danger); }
+        .fc-feedback.is-hint { border-color: var(--warning); }
+        .fc-feedback.is-hint h4 { color: var(--warning); }
+        .fc-feedback dt { font-weight: 800; color: var(--text); }
+        .fc-feedback dl { margin: 6px 0 0; display: grid; gap: 6px; }
+        .fc-feedback dd { margin: 0 0 0 0; color: var(--text-soft); }
+
+        /* --- notice board (progressive world) --- */
+        .fc-board {
+            background: linear-gradient(180deg, var(--surface-2), var(--surface));
+            border: 3px solid var(--accent-2); border-radius: var(--radius-lg);
+            padding: 12px 14px 14px;
+        }
+        .fc-board-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .fc-board-title { font-weight: 800; letter-spacing: .04em; font-size: .95rem; color: var(--text); }
+        .fc-board-title .fc-board-sub { display: block; font-size: .72rem; font-weight: 600; color: var(--muted); letter-spacing: .02em; }
+        .fc-lights { display: flex; gap: 5px; }
+        .fc-lights i {
+            width: 12px; height: 12px; border-radius: 50%; background: var(--surface);
+            border: 1px solid var(--border); display: block;
+        }
+        .fc-lights i.on { background: var(--warning); border-color: var(--warning); }
+        .fc-pins { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; min-height: 46px; align-content: flex-start; }
+        .fc-pin {
+            font-size: .74rem; font-weight: 700; line-height: 1.25; max-width: 210px;
+            padding: 7px 9px; border-radius: 8px; color: #1b1200;
+            background: #f6d98a; border: 1px solid #c9a24b;
+        }
+        .fc-pin.is-pass { background: var(--surface); color: var(--text-soft); border: 1px dashed var(--muted); }
+        .fc-pin-empty { color: var(--muted); font-size: .82rem; font-style: italic; }
+        .fc-meter-wrap { margin-top: 10px; }
+        .fc-meter {
+            height: 16px; border-radius: 999px; background: var(--surface);
+            border: 1px solid var(--border); overflow: hidden;
+        }
+        .fc-meter span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-2), var(--success)); }
+        .fc-meter-text { font-size: .78rem; color: var(--text-soft); margin-top: 4px; font-weight: 600; }
+
+        /* --- toasts --- */
+        .fc-toasts {
+            position: fixed; right: 18px; bottom: 18px; display: flex; flex-direction: column;
+            gap: 8px; z-index: 60; pointer-events: none;
+        }
+        .fc-toast {
+            background: var(--success); color: #06220f; font-weight: 800;
+            padding: 10px 16px; border-radius: 999px; box-shadow: var(--shadow);
+            animation: fcToast 1.6s ease-out both;
+        }
+        @keyframes fcToast { 0% { opacity: 0; } 12% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* --- mission / completion --- */
+        .fc-panel {
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 18px;
+        }
+        .fc-panel h2 { margin: 0 0 8px; }
+        .fc-panel ul { margin: 8px 0 0; padding-left: 20px; line-height: 1.7; }
+        .fc-cert {
+            border: 4px double var(--accent); border-radius: var(--radius-lg);
+            padding: 20px; text-align: center; background: var(--surface-2);
+        }
+        .fc-cert h2 { margin: 6px 0; font-size: 1.6rem; letter-spacing: .04em; }
+        .fc-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; }
+        .fc-stat {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 10px;
+        }
+        .fc-stat b { display: block; font-size: 1.3rem; color: var(--accent); }
+        .fc-stat span { font-size: .76rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+        .fc-log { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; text-align: left; }
+        .fc-log li { font-size: .85rem; padding: 7px 9px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); }
+        .fc-log .fc-log-mark { font-weight: 800; }
+
+        .fc-visually-hidden {
+            position: absolute; width: 1px; height: 1px; overflow: hidden;
+            clip: rect(0 0 0 0); white-space: nowrap;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fc-anim .fc-bubble, .fc-toast { animation: none !important; }
+        }
+        @media (max-width: 640px) {
+            .fc-hud { grid-template-columns: 1fr; }
+            .fc-badges { justify-content: flex-start; }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <p class="muted">Loading the mission…</p>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Fact Catcher — ELA Form 1, Term 1, Unit 6: Explicit Details and Evidence. Runs offline in a single file. No sound required.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "ELA-F1-T1-U6-SEC1-SIM1",
+            title: "Fact Catcher",
+            subtitle: "Unit 6 — Explicit details and evidence",
+            badgeText: "ELA",
+            homeEyebrow: "Form 1 · Term 1 · Unit 6",
+            homeDescription:
+                "Pip the school information bot is collecting facts for the notice board — but only facts the passage actually states. Fact bubbles rise from the bottom of the screen: CATCH the ones stated in the text, and LET PASS the guesses, opinions and invented reasons. Every correct catch flashes the proof phrase and pins a card to the board.",
+            instructions: [
+                "Catch only information stated directly in the passage.",
+                "A literal answer must match an exact word or phrase in the text.",
+                "Let guesses, opinions and invented reasons pass.",
+                "Press CATCH when the passage states the bubble, and LET PASS when it does not.",
+                "Correct catches flash the proof phrase in the passage and pin a card to the notice board.",
+                "There is no timer, no lives and no way to fail permanently. Keep trying until each bubble is right.",
+                "Use Hint on any bubble, Back to revisit an earlier scene, and Try Again to restart the whole mission.",
+                "This simulation is completely silent. Nothing depends on sound, and no microphone is used.",
+                "It runs offline in a browser. No internet is needed."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ==========================================================
+           FACT CATCHER — Unit 6: Explicit Details and Evidence
+           Focus objectives: 6.1, 6.2, 6.3, 6.5
+           One mechanic throughout: CATCH a stated fact, LET PASS a guess.
+           ========================================================== */
+
+        const FC_SCENES = [
+            {
+                key: "guided",
+                name: "Guided Catch",
+                board: "Notice board: Science Club trip",
+                passage: "On Friday, the science club travelled by bus to the Caroni Bird Sanctuary.",
+                proofs: ["On Friday"],
+                bubbles: [
+                    {
+                        text: "The trip happened on Friday.",
+                        answer: "catch",
+                        proof: "On Friday",
+                        hint: "Read the first two words of the passage. Do they name a day?",
+                        why: "The passage names the day directly, so this is an explicit detail.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The passage states the day in its own words, so the detail is explicit.",
+                        wrongFix: "Find the matching phrase in the passage before you let a bubble pass.",
+                        wrongModel: "“On Friday” proves the trip happened on Friday, so it should be caught."
+                    },
+                    {
+                        text: "The weather was sunny.",
+                        answer: "pass",
+                        proof: null,
+                        hint: "Search the passage for any word about weather, sun or rain.",
+                        why: "The passage says nothing about the weather, so this is a guess.",
+                        wrongWhat: "You caught a guess.",
+                        wrongWhy: "The passage does not state the information. No words in it describe the weather.",
+                        wrongFix: "Look for the exact words in the passage before catching it.",
+                        wrongModel: "“The weather was sunny” must pass because no weather is given."
+                    }
+                ]
+            },
+            {
+                key: "sanctuary",
+                name: "Sanctuary Catch",
+                board: "Notice board: Caroni Bird Sanctuary visit",
+                passage: "On Friday, the Form 1 science club visited the Caroni Bird Sanctuary. The group left school at 8:00 a.m. and travelled by bus. A guide showed them scarlet ibis nesting areas. They returned at 2:30 p.m.",
+                proofs: ["left school at 8:00 a.m.", "travelled by bus", "A guide showed them scarlet ibis nesting areas", "They returned at 2:30 p.m."],
+                bubbles: [
+                    {
+                        text: "The group left at 8:00 a.m.",
+                        answer: "catch",
+                        proof: "left school at 8:00 a.m.",
+                        hint: "Look for a clock time in the second sentence.",
+                        why: "The passage gives the leaving time in words you can point to.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“left school at 8:00 a.m.” proves the leaving time, so it should be caught."
+                    },
+                    {
+                        text: "They ate lunch there.",
+                        answer: "pass",
+                        proof: null,
+                        hint: "Search the passage for any word about food, lunch or eating.",
+                        why: "No food or meal is mentioned anywhere in the passage.",
+                        wrongWhat: "You caught a guess.",
+                        wrongWhy: "The passage does not state the information. Nothing in it mentions eating.",
+                        wrongFix: "Look for the exact words in the passage before catching it.",
+                        wrongModel: "“They ate lunch there” must pass because no meal is given."
+                    },
+                    {
+                        text: "They travelled by bus.",
+                        answer: "catch",
+                        proof: "travelled by bus",
+                        hint: "Look for the word that names the transport in the second sentence.",
+                        why: "The passage names the transport directly.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“travelled by bus” proves the transport, so it should be caught."
+                    },
+                    {
+                        text: "A guide showed nesting areas.",
+                        answer: "catch",
+                        proof: "A guide showed them scarlet ibis nesting areas",
+                        hint: "Read the sentence that names a person working at the sanctuary.",
+                        why: "The passage states what the guide showed the group.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“A guide showed them scarlet ibis nesting areas” proves it, so it should be caught."
+                    },
+                    {
+                        text: "Everyone enjoyed the trip.",
+                        answer: "pass",
+                        proof: null,
+                        hint: "Ask yourself: does the passage tell you how anybody felt?",
+                        why: "Feelings are never stated in the passage, so this is an opinion.",
+                        wrongWhat: "You caught an opinion.",
+                        wrongWhy: "The passage does not state the information. It reports actions and times, never feelings.",
+                        wrongFix: "Look for the exact words in the passage before catching it.",
+                        wrongModel: "“Everyone enjoyed the trip” must pass because no feelings are given."
+                    },
+                    {
+                        text: "They returned at 2:30 p.m.",
+                        answer: "catch",
+                        proof: "They returned at 2:30 p.m.",
+                        hint: "Look at the last sentence of the passage.",
+                        why: "The passage gives the return time word for word.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“They returned at 2:30 p.m.” proves the return time, so it should be caught."
+                    }
+                ]
+            },
+            {
+                key: "proof",
+                name: "Proof Flash",
+                board: "Notice board: answering with evidence",
+                passage: "On Friday, the Form 1 science club visited the Caroni Bird Sanctuary. The group left school at 8:00 a.m. and travelled by bus. A guide showed them scarlet ibis nesting areas. They returned at 2:30 p.m.",
+                proofs: ["travelled by bus", "scarlet ibis"],
+                bubbles: [
+                    {
+                        question: "How did they travel?",
+                        text: "by bus",
+                        answer: "catch",
+                        proof: "travelled by bus",
+                        hint: "Find the words in the passage that answer a “how” question about transport.",
+                        why: "The answer matches an exact phrase in the passage.",
+                        wrongWhat: "You let a supported answer pass.",
+                        wrongWhy: "The passage answers the question in its own words.",
+                        wrongFix: "Match the answer to an exact phrase before you let it pass.",
+                        wrongModel: "“travelled by bus” proves the transport, so “by bus” should be caught."
+                    },
+                    {
+                        question: "Why did they return at 2:30 p.m.?",
+                        text: "Because the guide had to leave",
+                        answer: "pass",
+                        proof: null,
+                        hint: "The passage tells you when they returned. Does it tell you why?",
+                        why: "The passage gives the time of the return but never the reason, so the correct response is “not stated”.",
+                        wrongWhat: "You caught an invented reason.",
+                        wrongWhy: "A why-answer was supplied without evidence. The passage gives no reason for the time.",
+                        wrongFix: "Choose LET PASS when the text gives no reason, because the reason is not stated.",
+                        wrongModel: "The passage says when they returned, not why."
+                    },
+                    {
+                        question: "What bird was named?",
+                        text: "scarlet ibis",
+                        answer: "catch",
+                        proof: "scarlet ibis",
+                        hint: "Find the two words in the passage that name a bird.",
+                        why: "The bird is named word for word in the passage.",
+                        wrongWhat: "You let a supported answer pass.",
+                        wrongWhy: "The passage names the bird directly.",
+                        wrongFix: "Match the answer to an exact phrase before you let it pass.",
+                        wrongModel: "“scarlet ibis” is stated in the passage, so it should be caught."
+                    }
+                ]
+            },
+            {
+                key: "fooddrive",
+                name: "Final Food Drive",
+                board: "Notice board: school food drive",
+                passage: "The school food drive ended on 18 November. Students collected 126 tins and 84 packets of rice. The items were packed in the hall and delivered to the Couva community centre by the student council.",
+                proofs: ["ended on 18 November", "126 tins", "84 packets of rice", "packed in the hall", "delivered to the Couva community centre", "by the student council"],
+                bubbles: [
+                    {
+                        text: "The drive ended on 18 November.",
+                        answer: "catch",
+                        proof: "ended on 18 November",
+                        hint: "Look for a date in the first sentence.",
+                        why: "The passage gives the closing date directly.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“ended on 18 November” proves the date, so it should be caught."
+                    },
+                    {
+                        text: "Students collected 126 tins.",
+                        answer: "catch",
+                        proof: "126 tins",
+                        hint: "Look for the first number in the second sentence.",
+                        why: "The exact number of tins is stated.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“126 tins” proves the amount, so it should be caught."
+                    },
+                    {
+                        text: "Families requested the items.",
+                        answer: "pass",
+                        proof: null,
+                        hint: "Search the passage for the word “families” or anyone asking for items.",
+                        why: "No one is described as requesting anything, so this is a guess.",
+                        wrongWhat: "You caught a guess.",
+                        wrongWhy: "The passage does not state the information. Nobody in it asks for the items.",
+                        wrongFix: "Look for the exact words in the passage before catching it.",
+                        wrongModel: "“Families requested the items” must pass because no request is given."
+                    },
+                    {
+                        text: "Students collected 84 packets of rice.",
+                        answer: "catch",
+                        proof: "84 packets of rice",
+                        hint: "Look for the second number in the passage.",
+                        why: "The exact number of packets is stated.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“84 packets of rice” proves the amount, so it should be caught."
+                    },
+                    {
+                        text: "The items were packed in the hall.",
+                        answer: "catch",
+                        proof: "packed in the hall",
+                        hint: "Look for the place named in the last sentence, before the delivery.",
+                        why: "The passage names the packing place directly.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“packed in the hall” proves the place, so it should be caught."
+                    },
+                    {
+                        text: "The drive was the best project.",
+                        answer: "pass",
+                        proof: null,
+                        hint: "Ask yourself: is “best” a fact you can point to, or an opinion?",
+                        why: "“Best” is a judgement, and the passage never makes it.",
+                        wrongWhat: "You caught an opinion.",
+                        wrongWhy: "The passage does not state the information. It reports what happened, never a judgement.",
+                        wrongFix: "Look for the exact words in the passage before catching it.",
+                        wrongModel: "“The drive was the best project” must pass because no judgement is given."
+                    },
+                    {
+                        text: "The items went to the Couva community centre.",
+                        answer: "catch",
+                        proof: "delivered to the Couva community centre",
+                        hint: "Look for the place named at the end of the passage.",
+                        why: "The delivery place is stated directly.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“delivered to the Couva community centre” proves the place, so it should be caught."
+                    },
+                    {
+                        text: "The student council delivered the items.",
+                        answer: "catch",
+                        proof: "by the student council",
+                        hint: "Look for the group named in the very last words of the passage.",
+                        why: "The passage names who delivered the items.",
+                        wrongWhat: "You let a stated fact pass.",
+                        wrongWhy: "The statement is directly supported by the passage.",
+                        wrongFix: "Find the matching phrase in the passage before deciding.",
+                        wrongModel: "“by the student council” proves who delivered, so it should be caught."
+                    }
+                ]
+            }
+        ];
+
+        const FC_RANKS = [
+            { at: 0, name: "Rumour Rookie" },
+            { at: 60, name: "Fact Finder" },
+            { at: 130, name: "Proof Officer" },
+            { at: 200, name: "Chief of the Board" }
+        ];
+
+        const FC_BADGES = [
+            { id: "firstProof", icon: "📌", name: "First Proof", desc: "Catch your first stated fact." },
+            { id: "guessBlocker", icon: "🛡️", name: "Guess Blocker", desc: "Let four guesses pass." },
+            { id: "boardBuilder", icon: "🧱", name: "Board Builder", desc: "Finish the Proof Flash scene." },
+            { id: "chiefVerifier", icon: "🏅", name: "Chief Verifier", desc: "Publish the verified notice." }
+        ];
+
+        const FC_TOTAL_BUBBLES = FC_SCENES.reduce((sum, sc) => sum + sc.bubbles.length, 0);
+        const FC_TOTAL_SCREENS = FC_SCENES.length + 2; /* mission + 4 scenes + completion */
+
+        let fc = null;
+        let fcConfirmModal = null;
+
+        function fcFreshState() {
+            return {
+                phase: "mission",
+                sceneIndex: 0,
+                bubbleIndex: 0,
+                attemptsOnBubble: 0,
+                hintOnBubble: false,
+                locked: false,
+                score: 0,
+                combo: 0,
+                bestCombo: 0,
+                attempts: 0,
+                hints: 0,
+                firstTryRight: 0,
+                answered: 0,
+                pinned: [],
+                passesBlocked: 0,
+                badges: {},
+                log: [],
+                litProofs: {},
+                startedAt: Date.now(),
+                motion: !window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            };
+        }
+
+function devInit() {
+    fc = fcFreshState();
+    fcEnsureConfirmModal();
+    fcRender();
+}
+
+function devReset() {
+    fc = fcFreshState();
+    const stage = document.getElementById("fcToasts");
+    if (stage) stage.replaceChildren();
+    if (dom.simContainer) dom.simContainer.replaceChildren();
+}
+
+        /* ---------- helpers ---------- */
+
+        function fcCurrentScene() { return FC_SCENES[fc.sceneIndex]; }
+        function fcCurrentBubble() { return fcCurrentScene().bubbles[fc.bubbleIndex]; }
+
+        function fcRankFor(score) {
+            let current = FC_RANKS[0];
+            let next = null;
+            for (let i = 0; i < FC_RANKS.length; i++) {
+                if (score >= FC_RANKS[i].at) { current = FC_RANKS[i]; next = FC_RANKS[i + 1] || null; }
+            }
+            return { current: current, next: next };
+        }
+
+        function fcPassageHtml(scene) {
+            let html = escapeHtml(scene.passage);
+            scene.proofs.forEach((proof, i) => {
+                const safe = escapeHtml(proof);
+                const at = html.indexOf(safe);
+                if (at === -1) return;
+                const lit = fc.litProofs[scene.key + "|" + i] ? " is-lit" : "";
+                html = html.slice(0, at) +
+                    '<span class="fc-proof' + lit + '" id="fcProof-' + i + '">' + safe + "</span>" +
+                    html.slice(at + safe.length);
+            });
+            return html;
+        }
+
+        function fcAwardBadge(id) {
+            if (fc.badges[id]) return;
+            fc.badges[id] = true;
+            const badge = FC_BADGES.filter((b) => b.id === id)[0];
+            if (badge) fcToast("Badge earned: " + badge.name);
+        }
+
+        function fcToast(message) {
+            if (!fc.motion) return;
+            const holder = document.getElementById("fcToasts");
+            if (!holder) return;
+            while (holder.children.length >= 3) holder.removeChild(holder.firstChild);
+            const el = document.createElement("div");
+            el.className = "fc-toast";
+            el.textContent = message;
+            holder.appendChild(el);
+            window.setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1700);
+        }
+
+        function fcAnnounce(message) {
+            const live = document.getElementById("fcLive");
+            if (live) live.textContent = message;
+        }
+
+        /* ---------- mascot ---------- */
+
+        function fcMascotSvg(mood) {
+            const eyes = mood === "happy"
+                ? '<path d="M22 30 q5 -6 10 0" /><path d="M48 30 q5 -6 10 0" />'
+                : mood === "oops"
+                    ? '<path d="M22 32 q5 6 10 0" /><path d="M48 32 q5 6 10 0" />'
+                    : mood === "think"
+                        ? '<circle cx="27" cy="31" r="4" /><path d="M48 31 h10" />'
+                        : '<circle cx="27" cy="31" r="4.5" /><circle cx="53" cy="31" r="4.5" />';
+            const mouth = mood === "happy"
+                ? '<path d="M28 46 q12 12 24 0" />'
+                : mood === "oops"
+                    ? '<path d="M30 50 q10 -8 20 0" />'
+                    : mood === "think"
+                        ? '<path d="M32 48 h16" />'
+                        : '<path d="M30 47 q10 6 20 0" />';
+            const glow = mood === "happy" ? "var(--success)" : mood === "oops" ? "var(--warning)" : "var(--accent)";
+            return '<svg viewBox="0 0 80 80" aria-hidden="true" focusable="false">' +
+                '<rect x="8" y="14" width="64" height="52" rx="16" fill="var(--surface)" stroke="' + glow + '" stroke-width="3"/>' +
+                '<rect x="36" y="4" width="8" height="12" rx="3" fill="' + glow + '"/>' +
+                '<circle cx="40" cy="4" r="4" fill="' + glow + '"/>' +
+                '<g fill="none" stroke="var(--text)" stroke-width="3.4" stroke-linecap="round">' + eyes + mouth + "</g>" +
+                '<rect x="18" y="60" width="44" height="6" rx="3" fill="' + glow + '" opacity="0.5"/>' +
+                "</svg>";
+        }
+
+        function fcMoodLabel(mood) {
+            if (mood === "happy") return "Pip is delighted — that proof is pinned.";
+            if (mood === "oops") return "Pip is checking the passage with you.";
+            if (mood === "think") return "Pip is reading the passage.";
+            return "Pip is ready for the next fact bubble.";
+        }
+
+        /* ---------- HUD, board, nav ---------- */
+
+        function fcHudHtml(mood) {
+            const rank = fcRankFor(fc.score);
+            const nextText = rank.next
+                ? escapeHtml((rank.next.at - fc.score) + " XP to " + rank.next.name)
+                : "Top rank reached — Chief of the Board";
+            const span = rank.next ? rank.next.at - rank.current.at : 1;
+            const pct = rank.next ? Math.min(100, Math.round(((fc.score - rank.current.at) / span) * 100)) : 100;
+            const badges = FC_BADGES.map((b) => {
+                const earned = !!fc.badges[b.id];
+                return '<li class="fc-badge' + (earned ? " is-earned" : "") + '" title="' + escapeHtml(b.desc) + '">' +
+                    '<span class="fc-badge-icon" aria-hidden="true">' + b.icon + "</span>" +
+                    '<span class="fc-badge-name">' + escapeHtml(b.name) + "</span>" +
+                    '<span class="fc-badge-state">' + (earned ? "Earned" : "Locked") + "</span>" +
+                    "</li>";
+            }).join("");
+            return '<div class="fc-hud">' +
+                '<div class="fc-mascot" id="fcMascot">' + fcMascotSvg(mood) + "</div>" +
+                '<div class="fc-hud-mid">' +
+                '<div class="fc-hud-row">' +
+                '<span class="fc-chip">⭐ Score: <strong>' + fc.score + ' XP</strong></span>' +
+                '<span class="fc-chip">🔥 First-try streak: <strong>' + fc.combo + "</strong></span>" +
+                '<span class="fc-chip">🎖️ Rank: <strong>' + escapeHtml(rank.current.name) + "</strong></span>" +
+                "</div>" +
+                '<div class="fc-rankbar" role="img" aria-label="Rank progress: ' + nextText + '"><span style="width:' + pct + '%"></span></div>' +
+                '<p class="fc-rank-text">' + nextText + "</p>" +
+                '<p class="fc-rank-text fc-visually-hidden">' + escapeHtml(fcMoodLabel(mood)) + "</p>" +
+                "</div>" +
+                '<ul class="fc-badges" aria-label="Badges">' + badges + "</ul>" +
+                "</div>";
+        }
+
+        function fcBoardHtml(subtitle) {
+            const lights = FC_SCENES.map((sc, i) =>
+                '<i class="' + (i < fc.sceneIndex || fc.phase === "done" ? "on" : "") + '"></i>').join("");
+            const pins = fc.pinned.length
+                ? fc.pinned.map((p) =>
+                    '<li class="fc-pin' + (p.kind === "pass" ? " is-pass" : "") + '">' +
+                    (p.kind === "pass" ? "✗ Not stated: " : "📌 ") + escapeHtml(p.text) + "</li>").join("")
+                : '<li class="fc-pin-empty">The board is empty. Catch a stated fact to pin the first card.</li>';
+            const pct = Math.round((fc.pinned.length / FC_TOTAL_BUBBLES) * 100);
+            return '<section class="fc-board" aria-labelledby="fcBoardHead">' +
+                '<div class="fc-board-head">' +
+                '<p class="fc-board-title" id="fcBoardHead">📋 Verified Facts Notice Board' +
+                '<span class="fc-board-sub">' + escapeHtml(subtitle) + "</span></p>" +
+                '<span class="fc-lights" role="img" aria-label="Scenes completed: ' + Math.min(fc.sceneIndex, FC_SCENES.length) + ' of ' + FC_SCENES.length + '">' + lights + "</span>" +
+                "</div>" +
+                '<ul class="fc-pins">' + pins + "</ul>" +
+                '<div class="fc-meter-wrap">' +
+                '<div class="fc-meter" role="img" aria-label="Board completion: ' + pct + ' per cent"><span style="width:' + pct + '%"></span></div>' +
+                '<p class="fc-meter-text">Board power: ' + pct + '% — ' + fc.pinned.length + " of " + FC_TOTAL_BUBBLES + " bubbles sorted correctly.</p>" +
+                "</div></section>";
+        }
+
+        function fcNavHtml(screenNumber, options) {
+            const opts = options || {};
+            return '<div class="fc-topline">' +
+                '<p class="fc-progress">Scene ' + screenNumber + " of " + FC_TOTAL_SCREENS + (opts.label ? " — " + escapeHtml(opts.label) : "") + "</p>" +
+                '<div class="fc-navbar">' +
+                '<button type="button" class="fc-btn" id="fcBackBtn"' + (opts.canBack ? "" : " disabled") + ">← Back</button>" +
+                '<button type="button" class="fc-btn" id="fcRulesBtn">📖 Rules</button>' +
+                '<button type="button" class="fc-btn" id="fcHintBtn"' + (opts.canHint ? "" : " disabled") + ">💡 Hint</button>" +
+                '<button type="button" class="fc-btn" id="fcRetryBtn">↺ Try Again</button>' +
+                '<button type="button" class="fc-btn fc-btn-exit" id="fcExitBtn">✖ Exit</button>' +
+                "</div></div>";
+        }
+
+        function fcBindNav() {
+            const rules = document.getElementById("fcRulesBtn");
+            if (rules) rules.addEventListener("click", openInstructionsModal);
+            const exit = document.getElementById("fcExitBtn");
+            if (exit) exit.addEventListener("click", () => {
+                fcConfirm("Exit the mission?", "Your board progress will be cleared and you will return to the home screen.", "Exit", () => {
+                    devReset();
+                    showScreen("home");
+                });
+            });
+            const retry = document.getElementById("fcRetryBtn");
+            if (retry) retry.addEventListener("click", () => {
+                const isDone = fc.phase === "done";
+                fcConfirm(isDone ? "Play again?" : "Try this scene again?",
+                    isDone ? "This clears your score, streak, badges and the whole notice board, and starts the mission from the beginning."
+                        : "This clears your score, streak, badges and the whole notice board, and starts the mission from the beginning.",
+                    isDone ? "Play again" : "Try again", () => {
+                        fc = fcFreshState();
+                        fc.phase = "mission";
+                        fcRender();
+                    });
+            });
+            const back = document.getElementById("fcBackBtn");
+            if (back) back.addEventListener("click", () => {
+                if (fc.phase === "play" && fc.sceneIndex === 0) { fc.phase = "mission"; fcRender(); return; }
+                if (fc.phase === "play" && fc.sceneIndex > 0) {
+                    fc.sceneIndex -= 1; fc.bubbleIndex = 0; fc.attemptsOnBubble = 0; fc.hintOnBubble = false;
+                    fc.locked = false; fcRender(); return;
+                }
+            });
+            const hint = document.getElementById("fcHintBtn");
+            if (hint) hint.addEventListener("click", fcShowHint);
+        }
+
+        /* ---------- confirm modal ---------- */
+
+        function fcEnsureConfirmModal() {
+            if (fcConfirmModal) return;
+            const modal = document.createElement("div");
+            modal.className = "modal";
+            modal.id = "fcConfirmModal";
+            modal.setAttribute("role", "dialog");
+            modal.setAttribute("aria-modal", "true");
+            modal.setAttribute("aria-labelledby", "fcConfirmHeading");
+            modal.innerHTML = '<section class="modal-card">' +
+                '<button class="close-btn" id="fcConfirmClose" aria-label="Close">×</button>' +
+                '<h3 id="fcConfirmHeading">Are you sure?</h3><p id="fcConfirmBody"></p>' +
+                '<div class="button-row" style="margin-top:18px;justify-content:flex-start;">' +
+                '<button class="secondary-btn" id="fcConfirmCancel">Cancel</button>' +
+                '<button class="danger-btn" id="fcConfirmOk">Confirm</button></div></section>';
+            document.body.appendChild(modal);
+            fcConfirmModal = modal;
+            const close = () => modal.classList.remove("show");
+            document.getElementById("fcConfirmClose").addEventListener("click", close);
+            document.getElementById("fcConfirmCancel").addEventListener("click", close);
+            modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+            document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+        }
+
+        function fcConfirm(heading, body, okText, onOk) {
+            fcEnsureConfirmModal();
+            document.getElementById("fcConfirmHeading").textContent = heading;
+            document.getElementById("fcConfirmBody").textContent = body;
+            const ok = document.getElementById("fcConfirmOk");
+            const fresh = ok.cloneNode(true);
+            fresh.textContent = okText;
+            ok.parentNode.replaceChild(fresh, ok);
+            fresh.addEventListener("click", () => {
+                fcConfirmModal.classList.remove("show");
+                onOk();
+            });
+            fcConfirmModal.classList.add("show");
+            fresh.focus();
+        }
+
+        /* ---------- rendering ---------- */
+
+        function fcRender() {
+            if (fc.phase === "mission") return fcRenderMission();
+            if (fc.phase === "done") return fcRenderDone();
+            return fcRenderPlay();
+        }
+
+        function fcShell(inner) {
+            dom.simContainer.innerHTML =
+                '<div class="fc-wrap' + (fc.motion ? " fc-anim" : "") + '">' + inner + "</div>" +
+                '<div class="fc-toasts" id="fcToasts" aria-hidden="true"></div>' +
+                '<p class="fc-visually-hidden" id="fcLive" role="status" aria-live="polite"></p>';
+        }
+
+        function fcRenderMission() {
+            fcShell(
+                fcNavHtml(1, { label: "Mission Brief", canBack: false, canHint: false }) +
+                fcHudHtml("idle") +
+                '<section class="fc-panel">' +
+                "<h2>🤖 Mission: help Pip fill the notice board</h2>" +
+                "<p>Pip is the school information bot. Pip is collecting reliable facts for the school notice board, and only <strong>stated facts</strong> may be pinned. Guesses, opinions and invented reasons must be allowed to float past.</p>" +
+                "<ul>" +
+                "<li><strong>CATCH</strong> a bubble when the passage states it directly.</li>" +
+                "<li><strong>LET PASS</strong> a bubble when the passage does not state it.</li>" +
+                "<li>A literal answer must match an exact word or phrase in the text.</li>" +
+                "<li>Every correct catch flashes the proof phrase in the passage and pins a card to the board.</li>" +
+                "<li>There is no timer and there are no lives. Keep trying until each bubble is right.</li>" +
+                "</ul></section>" +
+                '<div class="fc-passage"><h3>Passage panel</h3><p>' + escapeHtml(FC_SCENES[0].passage) + "</p></div>" +
+                '<div class="fc-actions">' +
+                '<span class="fc-basket">🧺 Fact basket: 0 / ' + FC_SCENES[0].bubbles.length + " (Scene 1)</span>" +
+                '<button type="button" class="fc-btn fc-btn-primary" id="fcStartMission">Start catching →</button>' +
+                "</div>" +
+                fcBoardHtml("Nothing verified yet")
+            );
+            fcBindNav();
+            document.getElementById("fcStartMission").addEventListener("click", () => {
+                fc.phase = "play"; fc.sceneIndex = 0; fc.bubbleIndex = 0;
+                fc.attemptsOnBubble = 0; fc.hintOnBubble = false; fc.locked = false;
+                fcRender();
+            });
+        }
+
+        function fcRenderPlay() {
+            const scene = fcCurrentScene();
+            const bubble = fcCurrentBubble();
+            const done = fc.bubbleIndex + (fc.locked ? 1 : 0);
+            const caught = scene.bubbles.filter((b, i) => i < done && b.answer === "catch").length;
+            const totalCatch = scene.bubbles.filter((b) => b.answer === "catch").length;
+            const mood = fc.locked ? "happy" : (fc.attemptsOnBubble > 0 ? "oops" : "think");
+            fcShell(
+                fcNavHtml(fc.sceneIndex + 2, { label: scene.name, canBack: true, canHint: !fc.locked }) +
+                fcHudHtml(mood) +
+                '<div class="fc-passage"><h3>Passage panel — keep it beside you</h3><p id="fcPassage">' + fcPassageHtml(scene) + "</p></div>" +
+                (bubble.question ? '<p class="fc-question">Question ' + (fc.bubbleIndex + 1) + ": " + escapeHtml(bubble.question) + "</p>" : "") +
+                '<div class="fc-stage"><div class="fc-bubble" id="fcBubble">' +
+                '<span class="fc-bubble-tag">Fact bubble ' + (fc.bubbleIndex + 1) + " of " + scene.bubbles.length + "</span>" +
+                escapeHtml(bubble.text) + "</div></div>" +
+                '<div class="fc-actions">' +
+                '<button type="button" class="fc-btn fc-btn-catch" id="fcCatchBtn">🧺 CATCH — it is stated</button>' +
+                '<button type="button" class="fc-btn fc-btn-pass" id="fcPassBtn">💨 LET PASS — not stated</button>' +
+                "</div>" +
+                '<div class="fc-actions"><span class="fc-basket">🧺 Fact basket: ' + caught + " / " + totalCatch + " — " + escapeHtml(scene.name) + "</span></div>" +
+                '<div id="fcFeedback"></div>' +
+                fcBoardHtml(scene.board)
+            );
+            fcBindNav();
+            document.getElementById("fcCatchBtn").addEventListener("click", () => fcAnswer("catch"));
+            document.getElementById("fcPassBtn").addEventListener("click", () => fcAnswer("pass"));
+            if (fc.locked) fcLockButtons();
+        }
+
+        function fcLockButtons() {
+            const c = document.getElementById("fcCatchBtn");
+            const p = document.getElementById("fcPassBtn");
+            if (c) c.disabled = true;
+            if (p) p.disabled = true;
+        }
+
+        function fcShowHint() {
+            if (fc.locked) return;
+            const bubble = fcCurrentBubble();
+            if (!fc.hintOnBubble) { fc.hintOnBubble = true; fc.hints += 1; }
+            const box = document.getElementById("fcFeedback");
+            if (!box) return;
+            box.innerHTML = '<div class="fc-feedback is-hint"><h4>💡 Hint</h4><p>' + escapeHtml(bubble.hint) + "</p></div>";
+            fcAnnounce("Hint: " + bubble.hint);
+            const mascot = document.getElementById("fcMascot");
+            if (mascot) mascot.innerHTML = fcMascotSvg("think");
+        }
+
+        function fcAnswer(choice) {
+            if (fc.locked) return;
+            const scene = fcCurrentScene();
+            const bubble = fcCurrentBubble();
+            fc.attempts += 1;
+            const right = choice === bubble.answer;
+            const box = document.getElementById("fcFeedback");
+
+            if (!right) {
+                fc.attemptsOnBubble += 1;
+                fc.combo = 0;
+                const mascot = document.getElementById("fcMascot");
+                if (mascot) mascot.innerHTML = fcMascotSvg("oops");
+                box.innerHTML = '<div class="fc-feedback is-wrong"><h4>✖ Not right yet — check the passage</h4>' +
+                    "<dl>" +
+                    "<dt>What is wrong</dt><dd>" + escapeHtml(bubble.wrongWhat) + "</dd>" +
+                    "<dt>Why</dt><dd>" + escapeHtml(bubble.wrongWhy) + "</dd>" +
+                    "<dt>How to fix it</dt><dd>" + escapeHtml(bubble.wrongFix) + "</dd>" +
+                    "<dt>Corrected model</dt><dd>" + escapeHtml(bubble.wrongModel) + "</dd>" +
+                    "</dl><p>The bubble is still floating. Read the passage again, then choose once more.</p></div>";
+                fcAnnounce("Not right yet. " + bubble.wrongWhat + " " + bubble.wrongFix);
+                return;
+            }
+
+            /* correct */
+            const firstTry = fc.attemptsOnBubble === 0 && !fc.hintOnBubble;
+            fc.locked = true;
+            fc.answered += 1;
+            if (firstTry) {
+                fc.firstTryRight += 1;
+                fc.combo += 1;
+                fc.bestCombo = Math.max(fc.bestCombo, fc.combo);
+                fc.score += 10;
+                fcToast("+10 XP — first try!");
+                if (fc.combo > 0 && fc.combo % 3 === 0) { fc.score += 5; fcToast("+5 XP streak bonus ×" + fc.combo); }
+            } else {
+                fc.score += 5;
+                fcToast("+5 XP — corrected");
+            }
+
+            if (bubble.answer === "catch") {
+                const idx = scene.proofs.indexOf(bubble.proof);
+                if (idx > -1) fc.litProofs[scene.key + "|" + idx] = true;
+                fc.pinned.push({ kind: "fact", text: bubble.text });
+                fcAwardBadge("firstProof");
+            } else {
+                fc.passesBlocked += 1;
+                fc.pinned.push({ kind: "pass", text: bubble.text });
+                if (fc.passesBlocked >= 4) fcAwardBadge("guessBlocker");
+            }
+            fc.log.push({
+                scene: scene.name,
+                text: (bubble.question ? bubble.question + " → " : "") + bubble.text,
+                answer: bubble.answer,
+                firstTry: firstTry,
+                proof: bubble.proof
+            });
+
+            fcRerenderAfterCorrect(scene, bubble, firstTry);
+        }
+
+        function fcRerenderAfterCorrect(scene, bubble, firstTry) {
+            fcRenderPlay();
+            const box = document.getElementById("fcFeedback");
+            const proofLine = bubble.answer === "catch"
+                ? '<p><strong>Proof in the passage:</strong> “' + escapeHtml(bubble.proof) + "” — flashing above.</p>"
+                : "<p><strong>Nothing in the passage supports it,</strong> so letting it pass was right.</p>";
+            const last = fc.bubbleIndex >= scene.bubbles.length - 1;
+            box.innerHTML = '<div class="fc-feedback is-right"><h4>✔ Correct — ' +
+                (bubble.answer === "catch" ? "fact caught and pinned" : "guess allowed to pass") + "</h4>" +
+                "<p>" + escapeHtml(bubble.why) + "</p>" + proofLine +
+                "<p>" + (firstTry ? "+10 XP, first try. Streak is now " + fc.combo + "." : "+5 XP after a correction. Read carefully and the streak builds again.") + "</p>" +
+                '<div class="fc-actions" style="justify-content:flex-start;margin-top:10px;">' +
+                '<button type="button" class="fc-btn fc-btn-primary" id="fcNextBtn">' +
+                (last ? (fc.sceneIndex >= FC_SCENES.length - 1 ? "Publish the notice →" : "Next scene →") : "Next bubble →") +
+                "</button></div></div>";
+            fcAnnounce("Correct. " + bubble.why);
+            document.getElementById("fcNextBtn").addEventListener("click", fcNext);
+            document.getElementById("fcNextBtn").focus();
+        }
+
+        function fcNext() {
+            const scene = fcCurrentScene();
+            fc.attemptsOnBubble = 0;
+            fc.hintOnBubble = false;
+            fc.locked = false;
+            if (fc.bubbleIndex < scene.bubbles.length - 1) {
+                fc.bubbleIndex += 1;
+                fcRender();
+                return;
+            }
+            if (fc.sceneIndex < FC_SCENES.length - 1) {
+                fc.sceneIndex += 1;
+                fc.bubbleIndex = 0;
+                if (fc.sceneIndex >= 3) fcAwardBadge("boardBuilder");
+                fcRender();
+                return;
+            }
+            fc.sceneIndex = FC_SCENES.length;
+            fc.phase = "done";
+            fcAwardBadge("chiefVerifier");
+            fcRender();
+        }
+
+        function fcRenderDone() {
+            const minutes = Math.max(1, Math.round((Date.now() - fc.startedAt) / 60000));
+            const accuracy = fc.answered ? Math.round((fc.firstTryRight / FC_TOTAL_BUBBLES) * 100) : 0;
+            const rank = fcRankFor(fc.score);
+            const earned = FC_BADGES.filter((b) => fc.badges[b.id]).length;
+            const log = fc.log.map((entry) =>
+                "<li><span class=\"fc-log-mark\">" + (entry.answer === "catch" ? "📌 Caught" : "✗ Passed") + "</span> — " +
+                escapeHtml(entry.text) +
+                (entry.proof ? ' <em>(proof: “' + escapeHtml(entry.proof) + "”)</em>" : " <em>(not stated)</em>") +
+                " — " + (entry.firstTry ? "first try" : "after a correction") + "</li>").join("");
+            fcShell(
+                fcNavHtml(FC_TOTAL_SCREENS, { label: "Notice Published", canBack: false, canHint: false }) +
+                fcHudHtml("happy") +
+                '<section class="fc-cert">' +
+                '<div class="fc-mascot" style="margin:0 auto;width:96px;height:96px;">' + fcMascotSvg("happy") + "</div>" +
+                "<p class=\"fc-rank-text\">Pip publishes the school notice board</p>" +
+                "<h2>✅ VERIFIED FACTS ONLY</h2>" +
+                "<p>Every stated fact was caught and every unsupported statement was allowed to pass. The notice board now carries evidence, not guesses.</p>" +
+                '<p class="fc-chip">🎖️ Final rank: <strong>' + escapeHtml(rank.current.name) + "</strong></p>" +
+                '<div class="fc-stats">' +
+                '<div class="fc-stat"><b>' + fc.score + '</b><span>Score (XP)</span></div>' +
+                '<div class="fc-stat"><b>' + accuracy + '%</b><span>First-attempt accuracy</span></div>' +
+                '<div class="fc-stat"><b>' + FC_TOTAL_BUBBLES + '/' + FC_TOTAL_BUBBLES + '</b><span>Final mastery</span></div>' +
+                '<div class="fc-stat"><b>' + fc.attempts + '</b><span>Attempts</span></div>' +
+                '<div class="fc-stat"><b>' + fc.hints + '</b><span>Hints used</span></div>' +
+                '<div class="fc-stat"><b>' + fc.bestCombo + '</b><span>Best first-try streak</span></div>' +
+                '<div class="fc-stat"><b>' + earned + '/' + FC_BADGES.length + '</b><span>Badges earned</span></div>' +
+                '<div class="fc-stat"><b>' + minutes + '</b><span>Minutes on task</span></div>' +
+                "</div></section>" +
+                '<section class="fc-panel"><h2>📜 Your evidence log</h2><ul class="fc-log">' + log + "</ul></section>" +
+                fcBoardHtml("Published — verified facts only")
+            );
+            fcBindNav();
+        }
+
+    </script>
+</body>
+
+</html>
