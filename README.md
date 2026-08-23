@@ -27,9 +27,9 @@ The player is a market vendor in San Fernando cashing up stalls at the end of ma
 2. **Drag each digit** into the correct place-value column of the addition frame. A wrong column snaps the digit back.
 3. **Add each column from the Ones**, typing the whole column total (for 8 + 5, type 13). The sim writes the ones digit and visibly carries the tens digit to the next column.
 
-There are 5 fixed cash-ups across 4 levels (3-digit sums up to three 4-digit addends with carries of 2). Correct totals bank the actual money counted; a clean cash-up (no hints or wrong tries) earns a $50 tip. Escalating hints help after wrong tries — the answer is only revealed on the third miss, with a reason. Finishing all five earns **Best Vendor of the Day** and an animated review of every cash-up with mistakes made.
+There are 5 fixed cash-ups across 4 levels (3-digit sums up to three 4-digit addends with carries of 2). Correct totals bank the actual money counted; a clean cash-up (no hints or wrong tries) earns a $50 tip. Escalating hints help after wrong tries — first a nudge, then the shaded column, then counting-on strategies — the answer itself is never given; the student always works it out. Finishing all five earns **Best Vendor of the Day** and an animated review of every cash-up with mistakes made.
 
-Features: Miss Tanty the vendor coach with speech bubbles, offline synthesised sound (mutable, volume slider in Help), dark/light theme, fullscreen, calculator-style keypad, keyboard and touch input, idle nudge highlighting the next action, progress restored on reload, all learner data cleared when the tab closes.
+Features: a market lane of stall checkpoints — the open stall glows, a money bag flies into it on a correct total and the next stall opens — coach speech bubbles, offline synthesised sound (mutable, volume slider in Help), dark/light theme, fullscreen, calculator-style keypad, keyboard and touch input, idle nudge highlighting the next action, progress restored on reload, all learner data cleared when the tab closes.
 
 ## The marking key
 

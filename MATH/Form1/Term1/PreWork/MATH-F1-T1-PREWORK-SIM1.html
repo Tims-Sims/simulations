@@ -486,59 +486,12 @@
             font-size: 1.1rem;
         }
 
-        .earnings-wrap {
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .earnings-label {
-            font-size: 0.8rem;
-            color: var(--muted);
-            margin-bottom: 3px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .earnings-bar {
-            height: 14px;
-            border-radius: 999px;
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .earnings-fill {
-            height: 100%;
-            width: 0;
-            border-radius: 999px;
-            background: linear-gradient(90deg, var(--success), var(--warning));
-            transition: width 0.6s ease;
-        }
-
-        /* Coach (vendor character + speech bubble) */
+        /* Coach message bar (the market van "speaks" here) */
         .coach-row {
             display: flex;
             align-items: flex-end;
             gap: 12px;
             margin-bottom: 14px;
-        }
-
-        .vendor-svg {
-            flex: 0 0 92px;
-            width: 92px;
-            height: 108px;
-            filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.25));
-        }
-
-        .vendor-bounce {
-            animation: vendorBounce 0.7s ease;
-        }
-
-        @keyframes vendorBounce {
-            0%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-10px) rotate(-3deg); }
-            60% { transform: translateY(0); }
-            80% { transform: translateY(-4px); }
         }
 
         .speech-bubble {
@@ -552,16 +505,6 @@
             line-height: 1.5;
             color: var(--text);
             min-height: 48px;
-        }
-
-        .speech-bubble::before {
-            content: "";
-            position: absolute;
-            left: -10px;
-            bottom: 18px;
-            border: 10px solid transparent;
-            border-right-color: var(--surface-2);
-            border-left: 0;
         }
 
         .speech-bubble.cheer {
@@ -687,20 +630,21 @@
 
         .frame {
             display: grid;
-            gap: 4px 12px;
+            gap: 4px 40px;
             justify-content: center;
             min-width: max-content;
             margin: 0 auto;
         }
 
         .frame .col-label {
-            font-size: 0.55rem;
+            font-size: 0.58rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0;
+            letter-spacing: 0.02em;
             white-space: normal;
-            line-height: 1.1;
-            max-width: 52px;
+            line-height: 1.15;
+            max-width: 58px;
+            justify-self: center;
             color: var(--muted);
             text-align: center;
             align-self: end;
@@ -1237,7 +1181,7 @@
         /* Compact single-screen layout — everything fits without scrolling */
         body { padding: 8px; }
         .app-shell { gap: 8px; min-height: calc(100vh - 16px); }
-        .topbar { padding: 8px 12px; }
+        .topbar { padding: 10px 14px; }
         .control-btn, .danger-btn { padding: 8px 12px; font-size: 0.85rem; }
         .brand-badge { width: 38px; height: 38px; }
         .sim-card { padding: 22px 18px; }
@@ -1245,7 +1189,6 @@
         .hud { margin-bottom: 12px; gap: 8px 12px; }
         .hud-pill { padding: 4px 10px; font-size: 0.82rem; }
         .coach-row { margin-bottom: 14px; gap: 10px; }
-        .vendor-svg { flex: 0 0 64px; width: 64px; height: 76px; }
         .speech-bubble { padding: 8px 12px; font-size: 0.95rem; min-height: 38px; }
         .story-card { padding: 8px 12px; margin-bottom: 14px; font-size: 0.98rem; }
         .story-tag { margin-bottom: 2px; }
@@ -1316,7 +1259,7 @@
         @media (max-height: 800px) {
             body { padding: 6px; }
             .app-shell { gap: 6px; min-height: calc(100vh - 12px); }
-            .topbar { padding: 6px 12px; }
+            .topbar { padding: 8px 12px; }
             .brand-badge { width: 34px; height: 34px; }
             .cell { width: 42px; height: 38px; font-size: 1.05rem; }
             .cell.carry-cell { width: 42px; height: 22px; }
@@ -1325,7 +1268,6 @@
             .sim-card { padding: 14px 18px; }
             .hud { margin-bottom: 10px; }
             .hud-pill { padding: 3px 9px; font-size: 0.78rem; }
-            .vendor-svg { flex: 0 0 52px; width: 52px; height: 62px; }
             .speech-bubble { font-size: 0.88rem; padding: 6px 10px; min-height: 32px; }
             .slip { padding: 5px 12px 4px; font-size: 0.92rem; }
             .coach-row { margin-bottom: 10px; }
@@ -1342,7 +1284,315 @@
             .cell.carry-cell { height: 26px; }
             .keypad { grid-template-columns: repeat(3, 44px); }
             .key-btn { width: 44px; height: 44px; }
-            .vendor-svg { flex-basis: 56px; width: 56px; height: 68px; }
+        }
+
+        /* ============================================================
+           DEV-EDIT: MARKET LANE (stall checkpoints)
+           Replaces the vendor avatar. A lane of market stalls with
+           striped awnings — the open stall glows; a money bag flies
+           into it on a correct cash-up, it stamps a tick and closes,
+           and the next stall opens.
+           ============================================================ */
+
+        .route-wrap {
+            margin-bottom: 12px;
+        }
+
+        .route-track {
+            position: relative;
+            height: 56px;
+        }
+
+        .route-inner {
+            position: absolute;
+            left: 30px;
+            right: 30px;
+            top: 0;
+            bottom: 0;
+        }
+
+        .route-road {
+            position: absolute;
+            left: 30px;
+            right: 30px;
+            bottom: 20px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .route-road-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.8s ease-in-out;
+        }
+
+        /* A stall: striped awning on top, produce on the counter below */
+        .route-node {
+            position: absolute;
+            bottom: 4px;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 38px;
+            border-radius: 8px;
+            display: grid;
+            place-items: end center;
+            padding-bottom: 3px;
+            font-size: 1.05rem;
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .route-node::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 9px;
+            background: repeating-linear-gradient(90deg,
+                    var(--accent) 0 6px,
+                    color-mix(in srgb, var(--accent-2) 80%, transparent) 6px 12px);
+        }
+
+        .route-node.passed {
+            border-color: var(--success);
+        }
+
+        .route-node.passed::after {
+            content: "✓";
+            position: absolute;
+            inset: 9px 0 0 0;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--success);
+            background: color-mix(in srgb, var(--success) 24%, var(--surface-2));
+        }
+
+        .route-node.current {
+            border-color: var(--accent);
+            box-shadow: var(--focus);
+            animation: stallBob 1.6s ease-in-out infinite;
+        }
+
+        @keyframes stallBob {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-3px); }
+        }
+
+        .route-node.stall-pop {
+            animation: stallPop 0.45s ease;
+        }
+
+        @keyframes stallPop {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.25); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+
+        /* Money bag flying from the total into the stall */
+        .fly-bag {
+            position: fixed;
+            z-index: 100;
+            pointer-events: none;
+            font-size: 1.6rem;
+            transform: translate(-50%, -50%);
+            transition: left 0.8s cubic-bezier(0.3, 0, 0.6, 1),
+                        top 0.8s cubic-bezier(0.3, 0, 0.6, 1),
+                        transform 0.8s ease;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+        }
+
+        @media (max-height: 800px) {
+            .route-track { height: 48px; }
+            .route-node { width: 34px; height: 33px; font-size: 0.9rem; }
+            .route-node.passed::after { font-size: 0.85rem; }
+            .route-wrap { margin-bottom: 8px; }
+        }
+
+        /* ============================================================
+           DEV-EDIT: INSTRUCTION STEP CARDS
+           Four cards slapped onto the screen one by one.
+           ============================================================ */
+
+        .instr-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .instr-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+            opacity: 0;
+        }
+
+        .instr-card:nth-child(even) {
+            transform: rotate(0.6deg);
+        }
+
+        .instr-num {
+            flex: 0 0 auto;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        }
+
+        .instr-emoji {
+            font-size: 1.7rem;
+            flex: 0 0 auto;
+        }
+
+        .instr-copy h4 {
+            margin: 0 0 2px;
+            font-size: 1rem;
+        }
+
+        .instr-copy p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .instr-card.slap {
+            animation: cardSlap 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+        }
+
+        @keyframes cardSlap {
+            0% { opacity: 0; transform: scale(2.1) rotate(-7deg); }
+            55% { opacity: 1; transform: scale(0.94) rotate(2deg); }
+            75% { transform: scale(1.03) rotate(-0.5deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+
+        .instr-fine {
+            margin-top: 14px;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .instr-card { opacity: 1; }
+            .instr-card.slap { animation: none; }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SCROLLING
+           Styled, theme-matched scrollbars everywhere a scroll can
+           happen (page, modal, frame overflow), plus an extra-compact
+           tier so short or zoomed-in windows avoid scrolling at all.
+           ============================================================ */
+
+        /* Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: color-mix(in srgb, var(--accent) 45%, var(--surface-2)) transparent;
+        }
+
+        /* Chrome / Edge / Safari */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: color-mix(in srgb, var(--accent) 45%, var(--surface-2));
+            border-radius: 999px;
+            border: 2px solid var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* Modal: scroll INSIDE the card body, not the card itself — the
+           heading and Got it button stay fixed and the scrollbar sits
+           inset, clear of the card's rounded corners. */
+        .modal-card {
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-card > h3,
+        .modal-card > .button-row {
+            flex: 0 0 auto;
+        }
+
+        .modal-scroll {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-right: -6px;
+        }
+
+        /* Very short windows (small laptops, high zoom): shrink harder
+           so the whole sim still fits without a page scrollbar. */
+        @media (max-height: 640px) {
+            body { padding: 4px; }
+            .app-shell { gap: 4px; min-height: calc(100vh - 8px); }
+            .topbar { padding: 6px 10px; }
+            .brand-badge { width: 30px; height: 30px; border-radius: 10px; }
+            .brand-copy p { display: none; }
+            .control-btn, .danger-btn { padding: 6px 10px; font-size: 0.78rem; }
+            .sim-card { padding: 10px 14px; }
+            .hud { margin-bottom: 4px; }
+            .route-track { height: 40px; }
+            .route-node { width: 28px; height: 27px; font-size: 0.75rem; bottom: 2px; }
+            .route-node::before { height: 7px; }
+            .route-node.passed::after { inset: 7px 0 0 0; font-size: 0.72rem; }
+            .route-road { bottom: 14px; }
+            .route-wrap { margin-bottom: 6px; }
+            .coach-row { margin-bottom: 4px; }
+            .speech-bubble { font-size: 0.82rem; padding: 4px 9px; min-height: 24px; }
+            .story-card { margin-bottom: 6px; padding: 5px 10px; font-size: 0.86rem; }
+            .story-tag { display: none; }
+            .step-banner { margin-bottom: 6px; padding: 4px 8px; font-size: 0.86rem; }
+            .slips-tray { margin-bottom: 4px; gap: 8px; }
+            .slip { padding: 4px 10px 3px; font-size: 0.85rem; }
+            .work-row { padding: 0; }
+            .frame-drop { padding: 2px; }
+            .cell { width: 36px; height: 28px; font-size: 0.9rem; }
+            .cell.carry-cell { width: 36px; height: 16px; font-size: 0.72rem; }
+            .keypad { grid-template-columns: repeat(3, 46px); gap: 5px; }
+            .key-btn { width: 46px; height: 30px; font-size: 1rem; }
+            .work-row { padding: 2px 0; gap: 32px; }
+            .feedback-area { margin: 3px 0; min-height: 18px; font-size: 0.85rem; }
+            .column-help { margin-bottom: 4px; font-size: 0.85rem; }
+            .hero-card { padding: 16px 18px; }
+            .hero-card h2 { font-size: clamp(1.3rem, 3.5vw, 1.8rem); }
+            .hero-card p { font-size: 0.9rem; line-height: 1.45; }
+            .hero-actions { margin-top: 14px; }
         }
     </style>
 </head>
@@ -1377,7 +1627,6 @@
         <main class="screen active" id="homeScreen">
             <div class="center-stage">
                 <section class="hero-card">
-                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
                     <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
                     <p id="homeDescription">
                         This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
@@ -1412,7 +1661,9 @@
         <section class="modal-card">
             <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
             <h3 id="instructionsHeading">How to Use This Simulation</h3>
-            <div id="instructionsBody"></div>
+            <div class="modal-scroll">
+                <div id="instructionsBody"></div>
+            </div>
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
                 <button class="primary-btn" id="gotItBtn">Got it</button>
             </div>
@@ -1452,22 +1703,21 @@
             title: "Market Day Cash-Up",
             subtitle: "Add big numbers. Carry over. Balance the float.",
             badgeText: "$",
-            homeEyebrow: "Getting Back Into Maths · SIM 1 of 4",
             homeDescription:
                 "You run a market stall in San Fernando. Total the money made at each stall. Line up the digits, add each column, and carry over when a column makes ten or more. Finish all four levels to become Best Vendor of the Day.",
-            instructions: [
-                "Step 1: Tap a sales slip to pop out its digits.",
-                "Drag each digit into its place-value column.",
-                "Wrong column? The digit snaps back. Try again.",
-                "Step 2: Add each column, starting from the Ones.",
-                "Type the whole column total. For 8 + 5, type 13.",
-                "The sim writes the 3 and carries the 1 over for you to see.",
-                "Type on your keyboard or tap the number pad.",
-                "Wrong tries are safe. Hints will guide you.",
-                "Five correct totals win Best Vendor of the Day.",
-                "This file works fully offline. No internet is needed."
-            ]
+            // Rendered as animated step cards — see INSTRUCTION_CARDS below.
+            instructions: []
         };
+
+        /* DEV-EDIT: instructions render as four animated step cards
+           (slapped onto the screen one by one) instead of a bullet list.
+           Declared before initializeApp() runs — renderInstructions needs it. */
+        const INSTRUCTION_CARDS = [
+            { emoji: "🧾", title: "Tap a sales slip", text: "Its digits pop out as chips." },
+            { emoji: "👆", title: "Drag each digit into its column", text: "Ones under Ones. A wrong column snaps back — no harm done." },
+            { emoji: "🔢", title: "Add each column, starting from the Ones", text: "Type the whole total — for 8 + 5, type 13. The sim writes the 3 and carries the 1 for you." },
+            { emoji: "🏆", title: "Five correct totals = Best Vendor of the Day", text: "Wrong tries are safe. Hints arrive when you need them." }
+        ];
 
         /* ============================================================
            DEV-EDIT: AUDIO (OPTIONAL)
@@ -1718,7 +1968,7 @@
             dom.brandBadge.textContent = SIM_CONFIG.badgeText;
             dom.brandTitle.textContent = SIM_CONFIG.title;
             dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
-            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            if (dom.homeEyebrow) dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow || "";
             dom.homeTitle.textContent = SIM_CONFIG.title;
             dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
         }
@@ -1763,22 +2013,29 @@
         }
 
         function renderInstructions() {
-            const intro = document.createElement("p");
-            intro.textContent = "Here is how this simulation works:";
-            const list = document.createElement("ul");
+            const cards = INSTRUCTION_CARDS.map((c, i) => `
+                <div class="instr-card" style="animation-delay:${(i * 0.3).toFixed(2)}s">
+                    <span class="instr-num" aria-hidden="true">${i + 1}</span>
+                    <span class="instr-emoji" aria-hidden="true">${c.emoji}</span>
+                    <div class="instr-copy"><h4>${c.title}</h4><p>${c.text}</p></div>
+                </div>`).join("");
+            dom.instructionsBody.innerHTML = `
+                <div class="instr-cards">${cards}</div>
+                <p class="instr-fine">Keyboard? Tab to a digit, press Enter to pick it up, then Tab to its column and press Enter. Works fully offline.</p>`;
+        }
 
-            SIM_CONFIG.instructions.forEach((item) => {
-                const li = document.createElement("li");
-                li.textContent = item;
-                list.appendChild(li);
+        function replayInstructionCards() {
+            document.querySelectorAll(".instr-card").forEach((el) => {
+                el.classList.remove("slap");
+                void el.offsetWidth; // reflow so the animation restarts
+                el.classList.add("slap");
             });
-
-            dom.instructionsBody.replaceChildren(intro, list);
         }
 
         function openInstructionsModal() {
             dom.instructionsModal.classList.add("show");
             try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+            replayInstructionCards();
         }
 
         function closeInstructionsModal() {
@@ -1991,9 +2248,8 @@
                 buffer: "",                 // digits typed so far for this column's total
                 carryPlaced: {},             // target col -> carry value written there
                 wrongInCol: 0,
-                usedHelp: false,             // any wrong try or reveal → no tip
+                usedHelp: false,             // any wrong try → no tip
                 mistakes: 0,                 // count of wrong actions this question
-                reveals: 0,                  // columns the sim revealed on 3rd wrong try
                 answered: []                 // written answer digits by column
             };
             renderQuestion();
@@ -2006,51 +2262,86 @@
             return money ? "$" + s : s;
         }
 
-        /* -------- Vendor coach -------- */
-        const VENDOR_SVG = `
-        <svg class="vendor-svg" id="vendorSvg" viewBox="0 0 100 118" role="img" aria-label="Miss Tanty, the market vendor">
-          <ellipse cx="50" cy="112" rx="30" ry="5" fill="rgba(0,0,0,0.25)"/>
-          <rect x="30" y="62" width="40" height="42" rx="12" fill="#e85d9e"/>
-          <rect x="34" y="78" width="32" height="26" rx="6" fill="#fff3d6"/>
-          <rect x="34" y="78" width="32" height="6" fill="#f7b32b"/>
-          <circle cx="24" cy="76" r="7" fill="#8a5a2b"/>
-          <circle cx="76" cy="76" r="7" fill="#8a5a2b"/>
-          <rect x="22" y="60" width="9" height="20" rx="4.5" fill="#e85d9e"/>
-          <rect x="69" y="60" width="9" height="20" rx="4.5" fill="#e85d9e"/>
-          <circle cx="50" cy="38" r="22" fill="#a06a3c"/>
-          <path d="M28 34 Q30 12 50 12 Q70 12 72 34 Q60 26 50 27 Q40 26 28 34 Z" fill="#f7b32b"/>
-          <path d="M27 33 q6 -5 12 -3" stroke="#d99414" stroke-width="2" fill="none"/>
-          <path d="M61 30 q6 -2 12 3" stroke="#d99414" stroke-width="2" fill="none"/>
-          <rect x="64" y="8" width="12" height="12" rx="3" fill="#f7b32b" transform="rotate(18 70 14)"/>
-          <circle cx="42" cy="38" r="3.2" fill="#241a12"/>
-          <circle cx="58" cy="38" r="3.2" fill="#241a12"/>
-          <circle cx="43.2" cy="36.8" r="1" fill="#fff"/>
-          <circle cx="59.2" cy="36.8" r="1" fill="#fff"/>
-          <path id="vendorMouth" d="M42 48 Q50 56 58 48" stroke="#241a12" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-          <circle cx="34" cy="45" r="3.5" fill="rgba(232,93,158,0.55)"/>
-          <circle cx="66" cy="45" r="3.5" fill="rgba(232,93,158,0.55)"/>
-          <circle cx="26" cy="42" r="2.6" fill="#ffd24a"/>
-          <circle cx="74" cy="42" r="2.6" fill="#ffd24a"/>
-        </svg>`;
+        /* -------- Market lane: a row of stalls. The open stall glows;
+                   on a correct cash-up a money bag flies into it, it
+                   stamps a tick, and the next stall opens. -------- */
+        let routePos = 0; // stall index currently marked open
+
+        function routePct(i) {
+            return (i / QUESTIONS.length) * 100;
+        }
+
+        function renderRoute() {
+            const wrap = document.getElementById("routeWrap");
+            if (!wrap) return;
+            let nodes = "";
+            for (let i = 0; i <= QUESTIONS.length; i++) {
+                const icon = i < QUESTIONS.length ? LEVEL_STALLS[QUESTIONS[i].level - 1].icon : "🏆";
+                const cls = i < G.qIndex ? " passed" : (i === G.qIndex ? " current" : "");
+                nodes += `<span class="route-node${cls}" style="left:${routePct(i)}%">${icon}</span>`;
+            }
+            wrap.innerHTML = `
+                <div class="route-track" aria-hidden="true">
+                    <div class="route-road"><div class="route-road-fill" id="routeFill"></div></div>
+                    <div class="route-inner">${nodes}</div>
+                </div>`;
+            routePos = Math.min(G.qIndex, QUESTIONS.length);
+            document.getElementById("routeFill").style.width = routePct(routePos) + "%";
+        }
+
+        function bankToStall(index) {
+            const target = Math.min(index, QUESTIONS.length);
+            const nodes = document.querySelectorAll(".route-node");
+            const fill = document.getElementById("routeFill");
+            const doneStall = nodes[target - 1];
+            if (!fill || !doneStall || target === routePos) return;
+
+            // Fly a money bag from the shown total into the finished stall.
+            const src = document.querySelector(".round-done .big-total") ||
+                        document.querySelector(".win-banner") ||
+                        document.querySelector(".sim-card");
+            const sr = src.getBoundingClientRect();
+            const dr = doneStall.getBoundingClientRect();
+            const bag = document.createElement("div");
+            bag.className = "fly-bag";
+            bag.textContent = "💰";
+            bag.style.left = (sr.left + sr.width / 2) + "px";
+            bag.style.top = (sr.top + sr.height / 2) + "px";
+            document.body.appendChild(bag);
+            void bag.offsetWidth; // reflow so the transition runs
+            bag.style.left = (dr.left + dr.width / 2) + "px";
+            bag.style.top = (dr.top + dr.height / 2) + "px";
+            bag.style.transform = "translate(-50%, -50%) scale(0.55)";
+
+            const finish = () => {
+                if (!bag.parentNode) return; // already finished
+                bag.remove();
+                routePos = target;
+                nodes.forEach((n, i) => {
+                    n.classList.toggle("passed", i < target);
+                    n.classList.toggle("current", i === target);
+                });
+                doneStall.classList.add("stall-pop");
+                setTimeout(() => doneStall.classList.remove("stall-pop"), 500);
+                fill.style.width = routePct(target) + "%";
+                playSound("place");
+            };
+            bag.addEventListener("transitionend", finish);
+            setTimeout(finish, 950); // fallback: transitions pause in hidden tabs
+        }
 
         function coachSay(text, mood) {
             const bubble = document.getElementById("coachBubble");
-            const svg = document.getElementById("vendorSvg");
             if (!bubble) return;
             bubble.textContent = text;
             bubble.classList.remove("cheer", "oops");
             if (mood === "cheer") bubble.classList.add("cheer");
             if (mood === "oops") bubble.classList.add("oops");
-            if (svg && mood === "cheer") {
-                svg.classList.remove("vendor-bounce");
-                void svg.getBoundingClientRect();
-                svg.classList.add("vendor-bounce");
-            }
             announce(text);
         }
 
         function coachIntroLine(qIndex) {
-            if (qIndex === 0) return "Welcome to the market! I’m Miss Tanty. Tap the first slip to begin.";
+            if (qIndex === 0) return "Welcome to market day! Your first stall is open. Tap the first slip to begin.";
             const q = QUESTIONS[qIndex];
             if (q.level === 3) return "Careful — these numbers have different lengths. Ones under ones!";
             if (q.level === 4) return "Three amounts this time! A column can make 20 or more.";
@@ -2074,13 +2365,10 @@
                     <span class="hud-pill">Level ${q.level} / 4</span>
                     <span class="hud-pill"><span class="stall-icon">${stall.icon}</span> ${stall.name}</span>
                     <span class="hud-pill">Cash-up ${G.qIndex + 1} of ${QUESTIONS.length}</span>
-                    <div class="earnings-wrap">
-                        <div class="earnings-label"><span>Day’s earnings</span><span id="earningsAmt">${fmt(G.dollars, true)}</span></div>
-                        <div class="earnings-bar"><div class="earnings-fill" id="earningsFill"></div></div>
-                    </div>
+                    <span class="hud-pill">💰 Day’s earnings: <span id="earningsAmt">${fmt(G.dollars, true)}</span></span>
                 </div>
+                <div class="route-wrap" id="routeWrap"></div>
                 <div class="coach-row">
-                    ${VENDOR_SVG}
                     <div class="speech-bubble" id="coachBubble"></div>
                 </div>
                 <div class="story-card">
@@ -2091,16 +2379,14 @@
                 <div class="feedback-area" id="feedback" role="status"></div>
             `;
             document.getElementById("storyText").textContent = q.story;
+            renderRoute();
             updateEarningsBar();
             renderPhase();
         }
 
         function updateEarningsBar() {
-            const fill = document.getElementById("earningsFill");
+            // Run progress is shown by the route (road fill + bus position).
             const amt = document.getElementById("earningsAmt");
-            // Progress = completed questions, not dollars (dollar-proportional
-            // bars barely move on the small early totals).
-            if (fill) fill.style.width = Math.min(100, (Math.min(G.qIndex, QUESTIONS.length) / QUESTIONS.length) * 100) + "%";
             if (amt) amt.textContent = fmt(G.dollars, true);
         }
 
@@ -2200,9 +2486,21 @@
                 c.textContent = String(chip.digit);
                 c.style.animationDelay = (idx * 70) + "ms";
                 c.setAttribute("aria-label", "Digit " + chip.digit + " for the " + (PLACE_NAMES[chip.place] || "") + " column");
+                c.setAttribute("aria-pressed", Q.selChip === idx ? "true" : "false");
                 attachChipDrag(c, idx);
+                // Keyboard activation (Enter/Space fires a click with detail 0;
+                // pointer taps are handled in pointerup and never reach here
+                // because pointerdown's preventDefault suppresses the click).
+                c.addEventListener("click", (e) => {
+                    if (e.detail !== 0) return;
+                    playSound("click");
+                    Q.selChip = Q.selChip === idx ? -1 : idx;
+                    renderChips();
+                });
                 tray.appendChild(c);
             });
+            // Keep keyboard focus on the picked-up chip across re-renders.
+            if (Q.selChip >= 0 && tray.children[Q.selChip]) tray.children[Q.selChip].focus();
         }
 
         function attachChipDrag(chip, idx) {
@@ -2323,6 +2621,9 @@
                 finishOpenSlip();
             } else {
                 renderWorkspace(document.getElementById("phaseArea"));
+                // Keyboard flow: land focus on the next waiting chip.
+                const trayEl = document.getElementById("chipsTray");
+                if (trayEl && trayEl.children.length) trayEl.children[0].focus();
             }
             const cell = document.getElementById(cellId("add", row, col));
             if (cell) {
@@ -2348,6 +2649,15 @@
                 coachSay("Good! Tap the next slip.", "cheer");
             }
             renderWorkspace(document.getElementById("phaseArea"));
+            // Keyboard flow: focus the next thing to use.
+            if (Q.phase === "add") {
+                const key = document.querySelector("#workTools .key-btn");
+                if (key) key.focus();
+            } else {
+                const slips = document.getElementById("slipsTray");
+                const nextIdx = Q.slipUsed.findIndex((u) => !u);
+                if (slips && nextIdx >= 0 && slips.children[nextIdx]) slips.children[nextIdx].focus();
+            }
         }
 
         /* -------- Addition frame -------- */
@@ -2563,18 +2873,28 @@
                 setFeedback("Look at the shaded digits. Add just those.", "bad");
                 coachSay("Slow down. Add only the shaded column.", "oops");
                 renderFrame(); // triggers shading via updateColumnHelp
+            } else if (Q.wrongInCol === 3) {
+                // Third wrong: teach a strategy — counting on — and say how
+                // many digits the total has. Never the total itself.
+                const allDigits = info.digits.concat(info.carryIn > 0 ? [info.carryIn] : []);
+                const biggest = Math.max.apply(null, allDigits);
+                const sizeNote = expected.length > 1
+                    ? " The total is ten or more, so type two digits."
+                    : " The total is less than ten — just one digit.";
+                setFeedback("Try counting on: start at " + biggest + " and count up the rest one at a time." + sizeNote, "info");
+                coachSay("Use your fingers if it helps — start at " + biggest + " and count on.", "oops");
             } else {
-                // Third wrong try: reveal with a one-line reason, then continue.
-                const reason = "The column makes " + info.sum + ", so write " + info.write +
-                    (info.carryOut > 0 ? " and carry over " + info.carryOut + "." : ".");
-                setFeedback(reason, "info");
-                coachSay("No worries — " + reason + " Keep going.", "oops");
-                Q.reveals += 1;
-                Q.answered[Q.colIdx] = info.write;
-                Q.wrongInCol = 0;
-                shadeColumn(Q.colIdx, false);
-                if (info.carryOut > 0) Q.carryPlaced[Q.colIdx + 1] = info.carryOut;
-                advanceColumn(true);
+                // Fourth wrong and beyond: keep rotating strategy hints —
+                // the answer is never given (teacher decision, Aug 2026).
+                const strategies = [
+                    info.carryIn > 0
+                        ? "Don't forget the carry digit " + info.carryIn + " waiting above the column — add it too."
+                        : "Add the digits two at a time: the first two together, then add the next to that.",
+                    "Add the shaded digits out loud, slowly, then type the whole total you said.",
+                    "You are close. Check each shaded digit once more and count carefully — no rush."
+                ];
+                setFeedback(strategies[(Q.wrongInCol - 4) % strategies.length], "info");
+                coachSay("Keep trying — you will get it. The shaded column has everything you need.", "oops");
             }
         }
 
@@ -2646,7 +2966,7 @@
             G.dollars += earned;
             G.history.push({
                 story: q.story, answer: q.answer, money: q.money, level: q.level,
-                mistakes: Q.mistakes, reveals: Q.reveals, tip: tip, banked: earned
+                mistakes: Q.mistakes, tip: tip, banked: earned
             });
             const finishedLevel = Q.q.level;
             G.qIndex += 1;
@@ -2656,6 +2976,7 @@
             updateEarningsBar();
             coachSay(CHEERS[Math.floor(Math.random() * CHEERS.length)], "cheer");
             renderPhase();
+            bankToStall(G.qIndex); // money bag flies in, next stall opens
 
             const isWin = G.qIndex >= QUESTIONS.length;
             const leveledUp = !isWin && QUESTIONS[G.qIndex].level > finishedLevel;
@@ -2677,9 +2998,7 @@
                     if (h.mistakes === 0) {
                         result = "✅ Perfect — no mistakes. + $50 tip";
                     } else {
-                        result = "✏️ " + h.mistakes + " wrong tr" + (h.mistakes === 1 ? "y" : "ies") +
-                            (h.reveals > 0 ? ", sim showed " + h.reveals + " column" + (h.reveals === 1 ? "" : "s") : "") +
-                            " — no tip";
+                        result = "✏️ " + h.mistakes + " wrong tr" + (h.mistakes === 1 ? "y" : "ies") + " — worked it out — no tip";
                     }
                     return `
                         <div class="review-card${h.mistakes === 0 ? " perfect" : ""}" style="animation-delay:${(i * 0.12).toFixed(2)}s; animation-fill-mode: both;">
