@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     The Diffusion Station — SCI-BIO-F2-T1-U1-SEC3-SIM3.1B2
+     Built on blank-template v2.2.1
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Diffusion Station</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body { min-height: 100vh; padding: 16px; }
+        button, input, textarea, select { font: inherit; }
+        button { border: 0; cursor: pointer; transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease; }
+        button:hover { transform: translateY(-1px); }
+        button:focus-visible, input:focus-visible { outline: none; box-shadow: var(--focus); }
+
+        .app-shell { max-width: 1180px; margin: 0 auto; min-height: calc(100vh - 32px); display: flex; flex-direction: column; gap: 16px; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+        .brand-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .brand-badge { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; font-weight: 700; box-shadow: var(--shadow); }
+        .brand-copy { min-width: 0; }
+        .brand-copy h1, .brand-copy p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .brand-copy h1 { font-size: 1.08rem; }
+        .brand-copy p { color: var(--muted); margin-top: 2px; font-size: 0.92rem; }
+        .controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+        .control-btn, .primary-btn, .secondary-btn, .ghost-btn, .danger-btn, .nav-btn { border-radius: 999px; padding: 11px 16px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-icon { width: 1em; height: 1em; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .control-btn, .secondary-btn, .nav-btn { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+        .primary-btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #ffffff; box-shadow: var(--shadow); }
+        .ghost-btn { background: transparent; color: var(--text-soft); border: 1px dashed var(--border); }
+        .danger-btn { background: color-mix(in srgb, var(--danger) 18%, var(--surface)); color: var(--text); border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent); }
+
+        .pulse-help { position: relative; }
+        .pulse-help::after { content: ""; position: absolute; inset: -4px; border-radius: 999px; border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent); animation: pulseRing 1.7s infinite; pointer-events: none; }
+        @keyframes pulseRing { 0% { opacity: 0.9; transform: scale(0.98); } 70% { opacity: 0; transform: scale(1.12); } 100% { opacity: 0; } }
+
+        .screen { display: none; flex: 1; }
+        .screen.active { display: flex; }
+        .center-stage { flex: 1; display: grid; place-items: center; padding: 8px; }
+        .hero-card, .modal-card { width: min(100%, 920px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow); }
+        .hero-card { padding: clamp(24px, 4vw, 42px); text-align: center; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 8px 14px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 16%, var(--surface)); color: var(--text-soft); border: 1px solid var(--border); }
+        .hero-card h2 { margin: 0 0 12px; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.08; }
+        .hero-card p { width: min(100%, 700px); margin: 0 auto; color: var(--text-soft); font-size: 1.05rem; line-height: 1.65; }
+        .hero-actions { margin-top: 26px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+        .sim-layout { flex: 1; display: grid; place-items: center; padding: 8px; }
+        .sim-card { width: min(100%, 960px); padding: clamp(18px, 3vw, 28px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow); }
+
+        .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(6, 10, 20, 0.64); z-index: 60; }
+        .modal.show { display: flex; }
+        .modal-card { padding: clamp(18px, 3vw, 30px); position: relative; max-height: min(90vh, 90dvh); overflow-y: auto; }
+        .close-btn { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 1.15rem; font-weight: 800; }
+        .modal-card h3 { margin: 0 0 12px; font-size: clamp(1.35rem, 2vw, 1.8rem); }
+        .modal-card p, .modal-card li { color: var(--text-soft); line-height: 1.65; }
+        .modal-card ul { padding-left: 20px; margin-top: 10px; }
+
+        .muted { color: var(--muted); }
+        .hidden { display: none !important; }
+        .button-row { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
+        .footer-note { text-align: center; color: var(--muted); padding-bottom: 4px; font-size: 0.9rem; }
+
+        @media (max-width: 760px) { body { padding: 12px; } .topbar { padding: 12px; } .controls { width: 100%; justify-content: flex-start; } }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           ============================================================ */
+
+        .sim-canvas-wrap { width: 100%; height: 420px; position: relative; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
+        .sim-canvas-wrap canvas { width: 100%; height: 100%; display: block; }
+
+        .sim-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; padding: 16px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+
+        .toggle-group { display: flex; align-items: center; gap: 8px; }
+        .toggle-label { font-size: 0.85rem; font-weight: 700; color: var(--text-soft); }
+        .toggle-switch { position: relative; width: 48px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; inset: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 13px; cursor: pointer; transition: background 0.25s; }
+        .toggle-slider::before { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--muted); transition: transform 0.25s, background 0.25s; }
+        .toggle-switch input:checked + .toggle-slider { background: color-mix(in srgb, var(--accent) 30%, var(--surface-2)); border-color: var(--accent); }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(22px); background: var(--accent); }
+        .toggle-switch input:focus-visible + .toggle-slider { box-shadow: var(--focus); }
+
+        .play-btn { min-width: 110px; justify-content: center; }
+
+        .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-soft); }
+        .legend-shape { width: 18px; height: 18px; display: inline-block; }
+
+        .concentration-panel { display: none; margin-top: 12px; padding: 16px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+        .concentration-panel.visible { display: block; }
+        .concentration-panel h4 { margin: 0 0 12px; font-size: 0.95rem; color: var(--text); }
+        .conc-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .conc-side { }
+        .conc-side-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+        .conc-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .conc-bar-label { font-size: 0.8rem; color: var(--text-soft); min-width: 40px; }
+        .conc-bar-track { flex: 1; height: 14px; background: var(--surface); border-radius: 7px; overflow: hidden; border: 1px solid var(--border); }
+        .conc-bar-fill { height: 100%; border-radius: 7px; transition: width 0.3s ease; }
+        .conc-bar-value { font-size: 0.78rem; color: var(--muted); min-width: 28px; text-align: right; }
+
+        .caption-bar { margin-top: 12px; padding: 12px 16px; background: color-mix(in srgb, var(--accent) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); border-radius: var(--radius-md); font-size: 0.92rem; color: var(--text-soft); line-height: 1.5; min-height: 3em; transition: background 0.3s; }
+
+        .walkthrough-banner { display: none; margin-top: 16px; padding: 16px 20px; background: color-mix(in srgb, var(--accent-2) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent-2) 30%, transparent); border-radius: var(--radius-lg); }
+        .walkthrough-banner.visible { display: block; }
+        .walkthrough-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .walkthrough-header h4 { margin: 0; font-size: 0.95rem; color: var(--text); }
+        .walkthrough-step-text { font-size: 0.92rem; color: var(--text-soft); line-height: 1.6; margin-bottom: 12px; }
+        .walkthrough-dots { display: flex; gap: 6px; margin-bottom: 12px; }
+        .walkthrough-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border); }
+        .walkthrough-dot.active { background: var(--accent-2); border-color: var(--accent-2); }
+        .walkthrough-dot.done { background: color-mix(in srgb, var(--accent-2) 50%, var(--surface-2)); border-color: var(--accent-2); }
+        .walkthrough-nav { display: flex; gap: 8px; }
+
+        .assessment-section { margin-top: 16px; padding: 20px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+        .assessment-section h3 { margin: 0 0 6px; font-size: 1.05rem; color: var(--text); }
+        .assessment-progress { font-size: 0.8rem; color: var(--muted); margin-bottom: 12px; }
+        .assessment-dots { display: flex; gap: 6px; margin-bottom: 10px; }
+        .assessment-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border); }
+        .assessment-dot.active { background: var(--accent); border-color: var(--accent); }
+        .assessment-dot.correct { background: var(--success); border-color: var(--success); }
+        .assessment-dot.incorrect { background: var(--danger); border-color: var(--danger); }
+        .assessment-question { font-size: 0.95rem; color: var(--text-soft); margin-bottom: 12px; }
+        .assessment-choices { display: flex; flex-direction: column; gap: 8px; }
+        .assessment-choice { padding: 12px 16px; background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius-md); cursor: pointer; font-size: 0.92rem; color: var(--text-soft); text-align: left; transition: border-color 0.2s, background 0.2s; min-height: 44px; }
+        .assessment-choice:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+        .assessment-choice:focus-visible { box-shadow: var(--focus); outline: none; }
+        .assessment-choice.correct { border-color: var(--success); background: color-mix(in srgb, var(--success) 15%, var(--surface)); color: var(--text); }
+        .assessment-choice.incorrect { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, var(--surface)); color: var(--text); }
+        .assessment-choice.disabled { pointer-events: none; opacity: 0.6; }
+
+        .assessment-feedback { margin-top: 12px; padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.92rem; line-height: 1.6; display: none; }
+        .assessment-feedback.correct { display: block; background: color-mix(in srgb, var(--success) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--success) 30%, transparent); color: var(--text-soft); }
+        .assessment-feedback.incorrect { display: block; background: color-mix(in srgb, var(--danger) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent); color: var(--text-soft); }
+
+        .hint-text { margin-top: 10px; padding: 10px 14px; background: color-mix(in srgb, var(--warning) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent); border-radius: var(--radius-md); font-size: 0.9rem; color: var(--text-soft); line-height: 1.5; }
+
+        .completion-banner { margin-top: 16px; padding: 20px; background: color-mix(in srgb, var(--success) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--success) 30%, transparent); border-radius: var(--radius-lg); text-align: center; }
+        .completion-banner h3 { margin: 0 0 8px; font-size: 1.15rem; color: var(--success); }
+        .completion-banner p { margin: 0; font-size: 0.92rem; color: var(--text-soft); line-height: 1.6; }
+
+        @media (max-width: 600px) {
+            .conc-bars { grid-template-columns: 1fr; }
+            .sim-controls { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Biology</div>
+                    <h2 id="homeTitle">The Diffusion Station</h2>
+                    <p id="homeDescription">
+                        Observe how oxygen and carbon dioxide particles move across the alveolar membrane by diffusion.
+                        Watch concentration gradients drive the net movement of gases between the alveolus and the capillary.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer"></section>
+            </div>
+        </main>
+
+        <div class="footer-note">The Diffusion Station — SCI-BIO-F2-T1-U1-SEC3-SIM3.1B2</div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">&times;</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">&times;</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        document.addEventListener("submit", function (event) { event.preventDefault(); }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1",
+            simId: "diffusion-station",
+            title: "The Diffusion Station",
+            subtitle: "Biology — Gas Exchange",
+            badgeText: "BIO",
+            homeEyebrow: "Biology",
+            homeDescription: "Observe how oxygen and carbon dioxide particles move across the alveolar membrane by diffusion. Watch concentration gradients drive the net movement of gases between the alveolus and the capillary.",
+            instructions: [
+                "Press Play to start the diffusion animation.",
+                "Watch how oxygen (blue circles) and carbon dioxide (red triangles) move randomly across the membrane.",
+                "Toggle 'Show Concentration' to see bar graphs of gas levels on each side.",
+                "Notice the net movement: oxygen moves into the blood, carbon dioxide moves into the alveolus.",
+                "Click Pause to freeze the animation for closer observation.",
+                "Answer the assessment questions when you are ready."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = { currentScreen: "home", theme: "dark" };
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            try { Object.keys(localStorage).filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0).forEach((k) => localStorage.removeItem(k)); } catch (e) {}
+            applyConfigToUI(); bindEvents(); renderInstructions(); loadTheme(); loadHelpSeen();
+            setTimeout(() => openInstructionsModal(), 300);
+        }
+
+        function loadHelpSeen() { const s = storageGet(SIM_CONFIG.simId + "-help-seen"); if (s === "true") dom.helpBtn.classList.remove("pulse-help"); }
+        function applyConfigToUI() { document.title = SIM_CONFIG.title; dom.brandBadge.textContent = SIM_CONFIG.badgeText; dom.brandTitle.textContent = SIM_CONFIG.title; dom.brandSubtitle.textContent = SIM_CONFIG.subtitle; dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow; dom.homeTitle.textContent = SIM_CONFIG.title; dom.homeDescription.textContent = SIM_CONFIG.homeDescription; }
+
+        function bindEvents() {
+            dom.startBtn.addEventListener("click", () => { showScreen("sim"); devInit(); });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => { dom.helpBtn.classList.remove("pulse-help"); storageSet(SIM_CONFIG.simId + "-help-seen", "true"); openInstructionsModal(); });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (e) => { if (e.target === dom.instructionsModal) closeInstructionsModal(); });
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => { devReset(); showScreen("home"); closeResetConfirmModal(); });
+            dom.resetConfirmModal.addEventListener("click", (e) => { if (e.target === dom.resetConfirmModal) closeResetConfirmModal(); });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p"); intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+            SIM_CONFIG.instructions.forEach((item) => { const li = document.createElement("li"); li.textContent = item; list.appendChild(li); });
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() { dom.instructionsModal.classList.add("show"); }
+        function closeInstructionsModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetConfirmModal() { dom.resetConfirmModal.classList.add("show"); }
+        function closeResetConfirmModal() { dom.resetConfirmModal.classList.remove("show"); }
+
+        function showScreen(name) { state.currentScreen = name; dom.homeScreen.classList.toggle("active", name === "home"); dom.simScreen.classList.toggle("active", name === "sim"); window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }
+
+        function toggleTheme() { state.theme = state.theme === "dark" ? "light" : "dark"; dom.html.setAttribute("data-theme", state.theme); updateThemeToggleLabel(); storageSet(SIM_CONFIG.simId + "-theme", state.theme); }
+        function loadTheme() { const s = storageGet(SIM_CONFIG.simId + "-theme"); if (s === "light" || s === "dark") { state.theme = s; } else { state.theme = (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark"; } dom.html.setAttribute("data-theme", state.theme); updateThemeToggleLabel(); }
+        function updateThemeToggleLabel() { const tl = state.theme === "dark"; dom.themeToggleBtn.textContent = tl ? "Light Mode" : "Dark Mode"; dom.themeToggleBtn.setAttribute("aria-label", tl ? "Switch to light mode" : "Switch to dark mode"); }
+
+        async function toggleFullscreen() { try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen(); else await document.exitFullscreen(); } catch (e) {} }
+        const FS_ENTER = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+        function updateFullscreenButton() { dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT : FS_ENTER; }
+        function handleKeyShortcuts(e) { if (e.key === "Escape") { closeInstructionsModal(); closeResetConfirmModal(); } }
+        function storageGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+        function storageSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           ============================================================ */
+        let simState = null;
+        let animFrame = null;
+        let canvas, ctx;
+
+        const CORRECT_INDEX = 2;
+
+        const QUESTIONS = [
+            {
+                q: "What do the blue circles and red triangles represent?",
+                choices: [
+                    "Blue circles are carbon dioxide and red triangles are oxygen.",
+                    "Blue circles are blood cells and red triangles are air molecules.",
+                    "Blue circles are oxygen and red triangles are carbon dioxide.",
+                    "Both shapes represent the same gas."
+                ],
+                hint: "Think about which gas is found in higher amounts inside the alveolus.",
+                explanation: "Correct! Blue circles represent oxygen (O\u2082), which is found in high concentration in the alveolus. Red triangles represent carbon dioxide (CO\u2082), which is found in high concentration in the capillary blood."
+            },
+            {
+                q: "Why does oxygen move into the blood rather than staying in the alveolus?",
+                choices: [
+                    "The blood actively pulls oxygen in using energy.",
+                    "Oxygen is heavier than carbon dioxide so it sinks downward.",
+                    "Oxygen moves from an area of high concentration to an area of low concentration.",
+                    "The membrane pushes oxygen through like a filter."
+                ],
+                hint: "Diffusion is the movement of particles from where there are many to where there are fewer.",
+                explanation: "Correct! Oxygen moves from an area of high concentration (in the alveolus) to an area of low concentration (in the blood). This process is called diffusion."
+            },
+            {
+                q: "What happens to the concentration of gases when diffusion reaches equilibrium?",
+                choices: [
+                    "All oxygen disappears from the alveolus.",
+                    "The particles stop existing entirely.",
+                    "Gases become evenly distributed across both sides of the membrane.",
+                    "Carbon dioxide builds up on both sides."
+                ],
+                hint: "Think about what 'evenly distributed' means for particle movement.",
+                explanation: "Correct! At equilibrium, the particles are evenly distributed. Oxygen and carbon dioxide are spread out across both sides, so there is no net movement in either direction."
+            }
+        ];
+
+        const WALKTHROUGH_STEPS = [
+            { title: "Welcome", text: "This simulation shows gas exchange at the alveolar membrane. The top half is the alveolus (air) and the bottom half is the capillary (blood)." },
+            { title: "The Particles", text: "Blue circles are oxygen molecules. Red triangles are carbon dioxide molecules. They move randomly in all directions." },
+            { title: "Concentration Gradient", text: "Notice that the alveolus starts with many oxygen molecules (high concentration) and few carbon dioxide molecules (low concentration)." },
+            { title: "Net Movement", text: "Even though particles move randomly, more oxygen moves from the alveolus into the blood because there is a higher concentration on the alveolus side. This is diffusion." },
+            { title: "Show Concentration", text: "Toggle 'Show Concentration' to see the bar graphs. Watch how the bars change as gases move across the membrane." },
+            { title: "Ready to Explore", text: "Press Play to start the animation. Use Pause to stop it at any time. When you are ready, answer the assessment questions below." }
+        ];
+
+        function devInit() {
+            buildSimUI();
+            simState = {
+                playing: false,
+                particles: [],
+                lastTime: 0,
+                showConcentration: false,
+                questionIndex: 0,
+                questionAnswered: false,
+                selectedChoice: null,
+                attempts: 0,
+                firstAttemptCorrect: null,
+                startTime: Date.now(),
+                hintUsed: false,
+                questionResults: [],
+                walkthroughStep: 0,
+                walkthroughDone: false
+            };
+            initCanvas();
+            initParticles();
+            drawScene();
+            updateConcentrationBars();
+        }
+
+        function devReset() {
+            if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+            simState = null;
+            dom.simContainer.innerHTML = "";
+        }
+
+        function buildSimUI() {
+            dom.simContainer.innerHTML = `
+                <div class="walkthrough-banner" id="walkthroughBanner">
+                    <div class="walkthrough-header">
+                        <h4 id="walkthroughTitle">Welcome</h4>
+                        <button class="ghost-btn" id="skipWalkthroughBtn" style="padding:6px 12px;font-size:0.8rem;">Skip</button>
+                    </div>
+                    <div class="walkthrough-step-text" id="walkthroughText"></div>
+                    <div class="walkthrough-dots" id="walkthroughDots"></div>
+                    <div class="walkthrough-nav">
+                        <button class="secondary-btn" id="walkthroughPrevBtn" style="padding:8px 14px;font-size:0.82rem;">Previous</button>
+                        <button class="primary-btn" id="walkthroughNextBtn" style="padding:8px 14px;font-size:0.82rem;">Next</button>
+                    </div>
+                </div>
+
+                <div class="sim-canvas-wrap">
+                    <canvas id="diffusionCanvas"></canvas>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <svg class="legend-shape" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7" fill="#7dd3fc" stroke="#5ab8e8" stroke-width="1.5"/></svg>
+                        Oxygen (O\u2082)
+                    </div>
+                    <div class="legend-item">
+                        <svg class="legend-shape" viewBox="0 0 18 18"><polygon points="9,2 16,16 2,16" fill="#fb7185" stroke="#e11d48" stroke-width="1.5"/></svg>
+                        Carbon dioxide (CO\u2082)
+                    </div>
+                </div>
+
+                <div class="sim-controls">
+                    <button class="control-btn play-btn" id="playBtn" aria-label="Play animation">\u25B6 Play</button>
+                    <div class="toggle-group">
+                        <span class="toggle-label">Show Concentration</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="concToggle" aria-label="Toggle concentration display">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="concentration-panel" id="concPanel">
+                    <h4>Gas Concentrations</h4>
+                    <div class="conc-bars">
+                        <div class="conc-side">
+                            <div class="conc-side-label">Alveolus (Air)</div>
+                            <div class="conc-bar-row">
+                                <span class="conc-bar-label" style="color:#7dd3fc;">O\u2082</span>
+                                <div class="conc-bar-track"><div class="conc-bar-fill" id="alvO2Bar" style="background:#7dd3fc;width:80%;"></div></div>
+                                <span class="conc-bar-value" id="alvO2Val">80%</span>
+                            </div>
+                            <div class="conc-bar-row">
+                                <span class="conc-bar-label" style="color:#fb7185;">CO\u2082</span>
+                                <div class="conc-bar-track"><div class="conc-bar-fill" id="alvCO2Bar" style="background:#fb7185;width:20%;"></div></div>
+                                <span class="conc-bar-value" id="alvCO2Val">20%</span>
+                            </div>
+                        </div>
+                        <div class="conc-side">
+                            <div class="conc-side-label">Capillary (Blood)</div>
+                            <div class="conc-bar-row">
+                                <span class="conc-bar-label" style="color:#7dd3fc;">O\u2082</span>
+                                <div class="conc-bar-track"><div class="conc-bar-fill" id="capO2Bar" style="background:#7dd3fc;width:20%;"></div></div>
+                                <span class="conc-bar-value" id="capO2Val">20%</span>
+                            </div>
+                            <div class="conc-bar-row">
+                                <span class="conc-bar-label" style="color:#fb7185;">CO\u2082</span>
+                                <div class="conc-bar-track"><div class="conc-bar-fill" id="capCO2Bar" style="background:#fb7185;width:80%;"></div></div>
+                                <span class="conc-bar-value" id="capCO2Val">80%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="caption-bar" id="captionBar" role="status" aria-live="polite">Press Play to begin observing diffusion across the alveolar membrane.</div>
+
+                <div class="assessment-section" id="assessmentSection">
+                    <h3>Assessment Questions</h3>
+                    <div class="assessment-progress" id="assessProgress"></div>
+                    <div class="assessment-dots" id="assessDots"></div>
+                    <div id="questionArea"></div>
+                    <div class="button-row" style="margin-top: 10px; justify-content: flex-start;">
+                        <button class="ghost-btn hidden" id="hintBtn">Hint</button>
+                        <button class="secondary-btn hidden" id="retryBtn">Try Again</button>
+                        <button class="primary-btn hidden" id="nextQuestionBtn">Next Question</button>
+                    </div>
+                    <div class="assessment-feedback" id="assessmentFeedback"></div>
+                </div>
+
+                <div id="completionArea"></div>
+            `;
+
+            document.getElementById("playBtn").addEventListener("click", togglePlay);
+            document.getElementById("concToggle").addEventListener("change", (e) => {
+                simState.showConcentration = e.target.checked;
+                document.getElementById("concPanel").classList.toggle("visible", simState.showConcentration);
+            });
+            document.getElementById("hintBtn").addEventListener("click", showHint);
+            document.getElementById("retryBtn").addEventListener("click", retryQuestion);
+            document.getElementById("nextQuestionBtn").addEventListener("click", nextQuestion);
+            document.getElementById("skipWalkthroughBtn").addEventListener("click", skipWalkthrough);
+            document.getElementById("walkthroughPrevBtn").addEventListener("click", walkthroughPrev);
+            document.getElementById("walkthroughNextBtn").addEventListener("click", walkthroughNext);
+
+            renderAssessmentDots();
+            renderQuestion();
+            showWalkthrough();
+        }
+
+        /* ---- Walkthrough ---- */
+        function showWalkthrough() {
+            const banner = document.getElementById("walkthroughBanner");
+            banner.classList.add("visible");
+            renderWalkthroughStep();
+        }
+
+        function renderWalkthroughStep() {
+            const step = WALKTHROUGH_STEPS[simState.walkthroughStep];
+            document.getElementById("walkthroughTitle").textContent = step.title;
+            document.getElementById("walkthroughText").textContent = step.text;
+            const dotsEl = document.getElementById("walkthroughDots");
+            dotsEl.innerHTML = "";
+            for (let i = 0; i < WALKTHROUGH_STEPS.length; i++) {
+                const d = document.createElement("span");
+                d.className = "walkthrough-dot" + (i === simState.walkthroughStep ? " active" : i < simState.walkthroughStep ? " done" : "");
+                dotsEl.appendChild(d);
+            }
+            document.getElementById("walkthroughPrevBtn").disabled = simState.walkthroughStep === 0;
+            document.getElementById("walkthroughNextBtn").textContent = simState.walkthroughStep === WALKTHROUGH_STEPS.length - 1 ? "Got it" : "Next";
+        }
+
+        function walkthroughNext() {
+            if (simState.walkthroughStep < WALKTHROUGH_STEPS.length - 1) {
+                simState.walkthroughStep++;
+                renderWalkthroughStep();
+            } else {
+                skipWalkthrough();
+            }
+        }
+
+        function walkthroughPrev() {
+            if (simState.walkthroughStep > 0) {
+                simState.walkthroughStep--;
+                renderWalkthroughStep();
+            }
+        }
+
+        function skipWalkthrough() {
+            simState.walkthroughDone = true;
+            document.getElementById("walkthroughBanner").classList.remove("visible");
+            storageSet(SIM_CONFIG.simId + "-walkthrough", "done");
+        }
+
+        /* ---- Play / Pause ---- */
+        function togglePlay() {
+            simState.playing = !simState.playing;
+            const btn = document.getElementById("playBtn");
+            if (simState.playing) {
+                btn.textContent = "\u23F8 Pause";
+                btn.setAttribute("aria-label", "Pause animation");
+                simState.lastTime = performance.now();
+                startAnimation();
+                updateCaption("playing");
+            } else {
+                btn.textContent = "\u25B6 Play";
+                btn.setAttribute("aria-label", "Play animation");
+                if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+                updateCaption("paused");
+            }
+        }
+
+        function updateCaption(mode) {
+            const c = document.getElementById("captionBar");
+            if (mode === "paused") {
+                c.textContent = "Animation paused. Press Play to continue observing diffusion.";
+                return;
+            }
+            const o2Alv = countParticlesInRegion("o2", "alveolus");
+            const o2Cap = countParticlesInRegion("o2", "capillary");
+            if (o2Alv > o2Cap * 2) {
+                c.textContent = "Oxygen concentration is higher in the alveolus. Net diffusion moves oxygen into the blood.";
+            } else if (Math.abs(o2Alv - o2Cap) < 5) {
+                c.textContent = "The system is approaching equilibrium. Oxygen levels are becoming similar on both sides.";
+            } else {
+                c.textContent = "Diffusion continues to balance gas concentrations across the membrane.";
+            }
+        }
+
+        function countParticlesInRegion(type, region) {
+            const h = canvas.height;
+            const memY = h * 0.5;
+            let count = 0;
+            for (const p of simState.particles) {
+                if (p.type !== type) continue;
+                if (region === "alveolus" && p.y < memY) count++;
+                if (region === "capillary" && p.y >= memY) count++;
+            }
+            return count;
+        }
+
+        /* ---- Canvas ---- */
+        function initCanvas() {
+            canvas = document.getElementById("diffusionCanvas");
+            const wrap = canvas.parentElement;
+            canvas.width = wrap.clientWidth * 2;
+            canvas.height = wrap.clientHeight * 2;
+            ctx = canvas.getContext("2d");
+            window.addEventListener("resize", () => { canvas.width = wrap.clientWidth * 2; canvas.height = wrap.clientHeight * 2; });
+        }
+
+        function initParticles() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const memY = h * 0.5;
+
+            simState.particles = [];
+
+            for (let i = 0; i < 24; i++) {
+                simState.particles.push(createParticle("o2", "alveolus", w, memY));
+            }
+            for (let i = 0; i < 6; i++) {
+                simState.particles.push(createParticle("co2", "alveolus", w, memY));
+            }
+            for (let i = 0; i < 6; i++) {
+                simState.particles.push(createParticle("o2", "capillary", w, memY));
+            }
+            for (let i = 0; i < 24; i++) {
+                simState.particles.push(createParticle("co2", "capillary", w, memY));
+            }
+        }
+
+        function createParticle(type, region, w, memY) {
+            const pad = 30;
+            let x, y;
+            if (region === "alveolus") {
+                x = pad + Math.random() * (w - pad * 2);
+                y = pad + Math.random() * (memY - pad * 2);
+            } else {
+                x = pad + Math.random() * (w - pad * 2);
+                y = memY + pad + Math.random() * (h - memY - pad * 2);
+            }
+            const speed = 0.4 + Math.random() * 0.6;
+            const angle = Math.random() * Math.PI * 2;
+            return {
+                type: type,
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                size: type === "o2" ? 8 : 10
+            };
+        }
+
+        /* ---- Animation ---- */
+        function startAnimation() {
+            if (animFrame) cancelAnimationFrame(animFrame);
+            simState.lastTime = performance.now();
+            animFrame = requestAnimationFrame(animationLoop);
+        }
+
+        function animationLoop(timestamp) {
+            if (!simState || !simState.playing) return;
+            const dt = Math.min((timestamp - simState.lastTime) / 1000, 0.1);
+            simState.lastTime = timestamp;
+
+            updateParticles(dt);
+            drawScene();
+            updateConcentrationBars();
+            updateCaption("playing");
+
+            animFrame = requestAnimationFrame(animationLoop);
+        }
+
+        function updateParticles(dt) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const memY = h * 0.5;
+            const pad = 15;
+
+            for (const p of simState.particles) {
+                p.x += p.vx * dt * 60;
+                p.y += p.vy * dt * 60;
+
+                if (p.x < pad) { p.x = pad; p.vx = Math.abs(p.vx); }
+                if (p.x > w - pad) { p.x = w - pad; p.vx = -Math.abs(p.vx); }
+                if (p.y < pad) { p.y = pad; p.vy = Math.abs(p.vy); }
+                if (p.y > h - pad) { p.y = h - pad; p.vy = -Math.abs(p.vy); }
+
+                if (p.y > memY - 4 && p.y < memY + 4) {
+                    if (p.vy > 0) p.vy = Math.abs(p.vy) * 0.8;
+                    else p.vy = -Math.abs(p.vy) * 0.8;
+                }
+
+                p.vx += (Math.random() - 0.5) * 0.08;
+                p.vy += (Math.random() - 0.5) * 0.08;
+                const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+                const maxSpd = 1.2;
+                if (spd > maxSpd) { p.vx = (p.vx / spd) * maxSpd; p.vy = (p.vy / spd) * maxSpd; }
+            }
+        }
+
+        /* ---- Draw ---- */
+        function drawScene() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const memY = h * 0.5;
+            ctx.clearRect(0, 0, w, h);
+
+            const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+
+            ctx.fillStyle = isDark ? "#171b31" : "#e7edff";
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.fillStyle = isDark ? "rgba(125,211,252,0.06)" : "rgba(14,165,233,0.06)";
+            ctx.fillRect(0, 0, w, memY);
+
+            ctx.fillStyle = isDark ? "rgba(251,113,133,0.06)" : "rgba(225,29,72,0.04)";
+            ctx.fillRect(0, memY, w, h - memY);
+
+            ctx.strokeStyle = isDark ? "rgba(251,191,36,0.6)" : "rgba(217,119,6,0.5)";
+            ctx.lineWidth = 3;
+            ctx.setLineDash([12, 8]);
+            ctx.beginPath();
+            ctx.moveTo(w * 0.03, memY);
+            ctx.lineTo(w * 0.97, memY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const tc = isDark ? "#c7d0f0" : "#344267";
+            ctx.fillStyle = tc;
+            ctx.font = "bold 22px Arial, sans-serif";
+            ctx.globalAlpha = 0.5;
+            ctx.fillText("Alveolus (air)", w * 0.04, 36);
+            ctx.fillText("Capillary (blood)", w * 0.04, memY + 32);
+            ctx.globalAlpha = 1;
+
+            ctx.fillStyle = isDark ? "rgba(251,191,36,0.8)" : "rgba(217,119,6,0.7)";
+            ctx.font = "bold 17px Arial, sans-serif";
+            ctx.fillText("Membrane", w * 0.78, memY - 10);
+
+            for (const p of simState.particles) {
+                ctx.beginPath();
+                if (p.type === "o2") {
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = isDark ? "rgba(125,211,252,0.85)" : "rgba(14,165,233,0.8)";
+                    ctx.fill();
+                    ctx.strokeStyle = isDark ? "rgba(125,211,252,0.4)" : "rgba(14,165,233,0.35)";
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#fff";
+                    ctx.font = `bold ${Math.round(p.size * 1.1)}px Arial`;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("O\u2082", p.x, p.y);
+                    ctx.textAlign = "start";
+                    ctx.textBaseline = "alphabetic";
+                } else {
+                    const s = p.size;
+                    ctx.moveTo(p.x, p.y - s);
+                    ctx.lineTo(p.x + s * 0.87, p.y + s * 0.5);
+                    ctx.lineTo(p.x - s * 0.87, p.y + s * 0.5);
+                    ctx.closePath();
+                    ctx.fillStyle = isDark ? "rgba(251,113,133,0.85)" : "rgba(225,29,72,0.75)";
+                    ctx.fill();
+                    ctx.strokeStyle = isDark ? "rgba(251,113,133,0.4)" : "rgba(225,29,72,0.35)";
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#fff";
+                    ctx.font = `bold ${Math.round(p.size * 0.7)}px Arial`;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("CO\u2082", p.x, p.y + 1);
+                    ctx.textAlign = "start";
+                    ctx.textBaseline = "alphabetic";
+                }
+            }
+        }
+
+        /* ---- Concentration bars ---- */
+        function updateConcentrationBars() {
+            const h = canvas.height;
+            const memY = h * 0.5;
+            let o2Alv = 0, co2Alv = 0, o2Cap = 0, co2Cap = 0;
+            for (const p of simState.particles) {
+                if (p.y < memY) {
+                    if (p.type === "o2") o2Alv++; else co2Alv++;
+                } else {
+                    if (p.type === "o2") o2Cap++; else co2Cap++;
+                }
+            }
+            const totalAlv = o2Alv + co2Alv || 1;
+            const totalCap = o2Cap + co2Cap || 1;
+
+            const aO2 = Math.round((o2Alv / totalAlv) * 100);
+            const aCO2 = Math.round((co2Alv / totalAlv) * 100);
+            const cO2 = Math.round((o2Cap / totalCap) * 100);
+            const cCO2 = Math.round((co2Cap / totalCap) * 100);
+
+            document.getElementById("alvO2Bar").style.width = aO2 + "%";
+            document.getElementById("alvO2Val").textContent = aO2 + "%";
+            document.getElementById("alvCO2Bar").style.width = aCO2 + "%";
+            document.getElementById("alvCO2Val").textContent = aCO2 + "%";
+            document.getElementById("capO2Bar").style.width = cO2 + "%";
+            document.getElementById("capO2Val").textContent = cO2 + "%";
+            document.getElementById("capCO2Bar").style.width = cCO2 + "%";
+            document.getElementById("capCO2Val").textContent = cCO2 + "%";
+        }
+
+        /* ---- Assessment ---- */
+        function renderAssessmentDots() {
+            const dotsEl = document.getElementById("assessDots");
+            dotsEl.innerHTML = "";
+            for (let i = 0; i < QUESTIONS.length; i++) {
+                const d = document.createElement("span");
+                let cls = "assessment-dot";
+                if (i === simState.questionIndex) cls += " active";
+                if (i < simState.questionResults.length) cls += simState.questionResults[i] ? " correct" : " incorrect";
+                d.className = cls;
+                dotsEl.appendChild(d);
+            }
+            document.getElementById("assessProgress").textContent = `Question ${simState.questionIndex + 1} of ${QUESTIONS.length}`;
+        }
+
+        function renderQuestion() {
+            const q = QUESTIONS[simState.questionIndex];
+            const area = document.getElementById("questionArea");
+            area.innerHTML = `
+                <p class="assessment-question">${q.q}</p>
+                <div class="assessment-choices" id="assessmentChoices">
+                    ${q.choices.map((c, i) => `<button class="assessment-choice" data-index="${i}" aria-label="Choice ${i + 1}">${c}</button>`).join("")}
+                </div>
+            `;
+            document.querySelectorAll(".assessment-choice").forEach((btn) => {
+                btn.addEventListener("click", () => onAssessmentChoice(btn));
+            });
+            document.getElementById("hintBtn").classList.remove("hidden");
+            document.getElementById("retryBtn").classList.add("hidden");
+            document.getElementById("nextQuestionBtn").classList.add("hidden");
+            document.getElementById("assessmentFeedback").className = "assessment-feedback";
+            document.getElementById("assessmentFeedback").innerHTML = "";
+            simState.questionAnswered = false;
+            simState.selectedChoice = null;
+            renderAssessmentDots();
+        }
+
+        function onAssessmentChoice(btn) {
+            if (simState.questionAnswered) return;
+            simState.attempts++;
+            simState.selectedChoice = Number(btn.dataset.index);
+            const allChoices = document.querySelectorAll(".assessment-choice");
+            allChoices.forEach((c) => c.classList.add("disabled"));
+            document.getElementById("hintBtn").classList.add("hidden");
+            const feedback = document.getElementById("assessmentFeedback");
+            const q = QUESTIONS[simState.questionIndex];
+
+            if (simState.selectedChoice === CORRECT_INDEX) {
+                btn.classList.add("correct");
+                feedback.className = "assessment-feedback correct";
+                feedback.innerHTML = `<strong>Correct!</strong> ${q.explanation}`;
+                simState.questionAnswered = true;
+                simState.questionResults[simState.questionIndex] = true;
+                const isLast = simState.questionIndex === QUESTIONS.length - 1;
+                if (!isLast) {
+                    document.getElementById("nextQuestionBtn").classList.remove("hidden");
+                } else {
+                    showCompletion();
+                }
+            } else {
+                btn.classList.add("incorrect");
+                feedback.className = "assessment-feedback incorrect";
+                if (simState.attempts < 2) {
+                    feedback.innerHTML = "<strong>Not quite.</strong> Think about how particles behave when there are more of them on one side. Try again!";
+                    document.getElementById("retryBtn").classList.remove("hidden");
+                } else {
+                    allChoices[CORRECT_INDEX].classList.add("correct");
+                    feedback.innerHTML = `<strong>Not quite.</strong> ${q.explanation}`;
+                    simState.questionAnswered = true;
+                    simState.questionResults[simState.questionIndex] = false;
+                    const isLast = simState.questionIndex === QUESTIONS.length - 1;
+                    if (!isLast) {
+                        document.getElementById("nextQuestionBtn").classList.remove("hidden");
+                    } else {
+                        showCompletion();
+                    }
+                }
+            }
+            renderAssessmentDots();
+        }
+
+        function retryQuestion() {
+            simState.questionAnswered = false;
+            simState.selectedChoice = null;
+            simState.attempts = 0;
+            document.getElementById("retryBtn").classList.add("hidden");
+            document.getElementById("assessmentFeedback").className = "assessment-feedback";
+            document.getElementById("assessmentFeedback").innerHTML = "";
+            document.querySelectorAll(".assessment-choice").forEach((c) => c.classList.remove("disabled", "correct", "incorrect"));
+        }
+
+        function nextQuestion() {
+            simState.questionIndex++;
+            simState.attempts = 0;
+            simState.questionAnswered = false;
+            renderQuestion();
+        }
+
+        function showHint() {
+            const section = document.getElementById("assessmentSection");
+            if (document.getElementById("hintText")) return;
+            simState.hintUsed = true;
+            storageSet(SIM_CONFIG.simId + ":hintUsed", "true");
+            const div = document.createElement("div");
+            div.id = "hintText"; div.className = "hint-text";
+            div.textContent = QUESTIONS[simState.questionIndex].hint;
+            section.appendChild(div);
+        }
+
+        function showCompletion() {
+            const area = document.getElementById("completionArea");
+            const correctCount = simState.questionResults.filter(Boolean).length;
+            const total = QUESTIONS.length;
+            const mastery = Math.round((correctCount / total) * 100);
+            const elapsed = Math.round((Date.now() - simState.startTime) / 1000);
+            const mins = Math.floor(elapsed / 60);
+            const secs = elapsed % 60;
+            const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+            storageSet(SIM_CONFIG.simId + ":completion", "true");
+            storageSet(SIM_CONFIG.simId + ":mastery", String(mastery));
+            storageSet(SIM_CONFIG.simId + ":timeOnTask", String(elapsed));
+            storageSet(SIM_CONFIG.simId + ":attempts", String(simState.attempts));
+
+            let extra = "";
+            if (simState.hintUsed) extra += " You used a hint.";
+
+            area.innerHTML = `
+                <div class="completion-banner">
+                    <h3>Simulation Complete</h3>
+                    <p>You scored ${correctCount}/${total} (${mastery}% mastery). Time on task: ${timeStr}.${extra}${mastery === 100 ? " Perfect score!" : " Keep practising to improve your understanding of diffusion."}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>
