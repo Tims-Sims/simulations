@@ -1,0 +1,2600 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     MATH-F2-T1-2.1.1.1-SIM1 — Number Line Explorer
+     Built from BLANK SIMULATION TEMPLATE v2.2.1
+     Search "DEV-EDIT" to find all 6 zones:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         ============================================================ -->
+    <title>Number Line Explorer</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Number Line Explorer — night-sky palette, scoped to the sim
+           card and summary. Straight lines only, no gradients, square-ish
+           corners (no pills) on sim-owned controls.
+           ============================================================ */
+
+        #simContainer {
+            /* Keep the card inside narrow viewports; the number line
+               scrolls inside .nle-linewrap instead of widening the page. */
+            min-width: 0;
+            max-width: 100%;
+            /* Firefly meadow at night: deep BLUE night sky is the field —
+               the meadow shows as SVG grass along the bottom of the box.
+               Palette #25 "Night amber" (AGENT.md palette library). */
+            --nle-field: #101426;
+            --nle-panel: #1a2036;
+            --nle-panel-2: #232b4a;
+            --nle-ink: #f2f4fb;
+            --nle-ink-soft: #c3cbe6;
+            --nle-amber: #f5b942;
+            --nle-amber-deep: #c98f1b;
+            --nle-teal: #3ec9b0;
+            --nle-coral: #ef8a7c;
+            --nle-grass: #4c8a5a;
+            --nle-bolt: #cfe2ff;
+            --nle-good: #4cd68e;
+            --nle-bad: #f2766b;
+            --nle-border: rgba(255, 255, 255, 0.14);
+        }
+
+        html[data-theme="light"] #simContainer {
+            /* Same meadow in daylight: pale sky field, brighter grass. */
+            --nle-field: #e3edf7;
+            --nle-panel: #ffffff;
+            --nle-panel-2: #eef0de;
+            --nle-ink: #232741;
+            --nle-ink-soft: #4d5470;
+            --nle-amber: #b07d10;
+            --nle-amber-deep: #8a6208;
+            --nle-teal: #0d7d68;
+            --nle-coral: #b8473a;
+            --nle-grass: #3f7d2e;
+            --nle-bolt: #4a5a8a;
+            --nle-good: #147a46;
+            --nle-bad: #b8473a;
+            --nle-border: rgba(35, 39, 65, 0.16);
+        }
+
+        /* Grid, not space-between: 1fr|auto|1fr keeps the star row on the
+           TRUE centre of the card even though the label and the action
+           buttons have different widths. */
+        .nle-head {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .nle-round-label {
+            justify-self: start;
+        }
+
+        .nle-head-actions {
+            justify-self: end;
+        }
+
+        @media (max-width: 560px) {
+            .nle-head {
+                grid-template-columns: 1fr auto;
+            }
+
+            .nle-stars {
+                grid-column: 1 / -1;
+                justify-content: center;
+                order: 3;
+            }
+        }
+
+        .nle-round-label {
+            font-weight: 700;
+            color: var(--nle-ink-soft);
+            font-size: 0.98rem;
+        }
+
+        .nle-stars {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .nle-star {
+            display: block;
+            width: 20px;
+            height: 20px;
+        }
+
+        .nle-star .star-shape {
+            fill: none;
+            stroke: var(--nle-ink-soft);
+            stroke-width: 1.5;
+            opacity: 0.45;
+        }
+
+        .nle-star.gold .star-shape {
+            fill: var(--nle-amber);
+            stroke: var(--nle-amber-deep);
+            opacity: 1;
+        }
+
+        .nle-star.silver .star-shape {
+            fill: var(--nle-ink-soft);
+            stroke: var(--nle-ink-soft);
+            opacity: 0.85;
+        }
+
+        .nle-star.miss .star-shape {
+            fill: none;
+            stroke: var(--nle-ink-soft);
+            opacity: 0.3;
+        }
+
+        .nle-head-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nle-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            background: var(--nle-panel-2);
+            color: var(--nle-ink);
+            border: 1px solid var(--nle-border);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nle-btn-primary {
+            background: var(--nle-amber);
+            border-color: var(--nle-amber-deep);
+            color: #241a03;
+        }
+
+        html[data-theme="light"] .nle-btn-primary {
+            color: #ffffff;
+        }
+
+        .nle-btn-small {
+            padding: 7px 12px;
+            font-size: 0.9rem;
+        }
+
+        .nle-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nle-prompt {
+            background: var(--nle-panel);
+            border: 1px solid var(--nle-border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 14px;
+        }
+
+        .nle-prompt-task {
+            margin: 0;
+            color: var(--nle-ink-soft);
+            font-size: 0.95rem;
+        }
+
+        .nle-prompt-target {
+            margin: 4px 0 0;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--nle-ink);
+        }
+
+        .nle-prompt-target .nle-target-number {
+            color: var(--nle-amber);
+        }
+
+        .nle-linewrap {
+            background: var(--nle-field);
+            border: 1px solid var(--nle-border);
+            border-radius: 12px;
+            padding: 10px 6px 6px;
+            overflow-x: auto;
+            margin-bottom: 14px;
+        }
+
+        .nle-linewrap svg {
+            display: block;
+            min-width: 640px;
+            width: 100%;
+            height: auto;
+        }
+
+        #nleExplorer {
+            transition: transform 0.16s ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #nleExplorer {
+                transition: none;
+            }
+        }
+
+        .nle-shake {
+            animation: nleShake 0.28s linear;
+        }
+
+        @keyframes nleShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .nle-shake {
+                animation: none;
+            }
+        }
+
+        .nle-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .nle-choices {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .nle-choice {
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            background: var(--nle-panel-2);
+            color: var(--nle-ink);
+            border: 1px solid var(--nle-border);
+        }
+
+        .nle-choice[data-picked="true"] {
+            border-color: var(--nle-amber);
+            box-shadow: 0 0 0 2px var(--nle-amber) inset;
+        }
+
+        .nle-feedback {
+            min-height: 54px;
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid var(--nle-border);
+            background: var(--nle-panel);
+            color: var(--nle-ink-soft);
+            line-height: 1.55;
+        }
+
+        .nle-feedback.good {
+            border-color: var(--nle-good);
+            color: var(--nle-ink);
+        }
+
+        .nle-feedback.good .nle-feedback-tag {
+            color: var(--nle-good);
+        }
+
+        .nle-feedback.bad {
+            border-color: var(--nle-bad);
+            color: var(--nle-ink);
+        }
+
+        .nle-feedback.bad .nle-feedback-tag {
+            color: var(--nle-bad);
+        }
+
+        .nle-feedback-tag {
+            font-weight: 800;
+            margin-right: 6px;
+        }
+
+        .nle-after {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .nle-summary {
+            text-align: center;
+        }
+
+        .nle-summary h3 {
+            margin: 6px 0 8px;
+            font-size: 1.5rem;
+            color: var(--nle-ink);
+        }
+
+        .nle-summary p {
+            color: var(--nle-ink-soft);
+            line-height: 1.6;
+            margin: 6px auto;
+            max-width: 560px;
+        }
+
+        .nle-summary .nle-stars {
+            justify-content: center;
+            margin: 12px 0;
+        }
+
+        .nle-summary .nle-star {
+            width: 28px;
+            height: 28px;
+        }
+
+        .nle-review-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .nle-review-table th,
+        .nle-review-table td {
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        .nle-review-table th {
+            background: var(--surface-2);
+        }
+
+        .nle-review-good {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .nle-review-bad {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .nle-visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* ---- Sim-wide palette override (bespoke per sim — night-sky amber,
+           replaces the template's default blue/violet look, no gradients) ---- */
+
+        :root {
+            /* Night-sky chrome — palette #25 "Night amber" (deep blue). */
+            --bg: #0d1120;
+            --bg-soft: #141a30;
+            --surface: #161c33;
+            --surface-2: #1f2745;
+            --accent: #f5b942;
+            --accent-2: #3ec9b0;
+            --bolt: #cfe2ff;
+            --focus: 0 0 0 3px rgba(245, 185, 66, 0.4);
+        }
+
+        html[data-theme="light"] {
+            /* Daylight chrome — light complement of palette #25. */
+            --bg: #f5f2ea;
+            --bg-soft: #ece7d9;
+            --surface: #ffffff;
+            --surface-2: #f0ebdd;
+            --accent: #b07d10;
+            --accent-2: #0d7d68;
+            --bolt: #4a5a8a;
+            --focus: 0 0 0 3px rgba(176, 125, 16, 0.35);
+        }
+
+        html,
+        body {
+            background: var(--bg);
+        }
+
+        /* Chrome buttons keep the template's rounded pill shape (user
+           preference); only the gradients are flattened to solid colour. */
+        .brand-badge {
+            background: var(--accent);
+            color: #241a03;
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            color: #241a03;
+        }
+
+        html[data-theme="light"] .brand-badge,
+        html[data-theme="light"] .primary-btn {
+            color: #ffffff;
+        }
+
+        /* Nav-bar buttons: emoji/icons sit visibly low without a tight
+           line-height — pin everything to the true vertical centre. */
+        .topbar .control-btn,
+        .topbar .danger-btn {
+            line-height: 1;
+            align-items: center;
+        }
+
+        /* Nav bar is NOT sticky — when the page scrolls it must scroll away
+           rather than cover part of the working area. */
+
+        /* The topbar's space-between would otherwise spread its three
+           children (brand | controls | switch) with a huge gap before the
+           switch. Pull the controls to the right so buttons and switch sit
+           together, split only by the divider. */
+        .topbar .controls {
+            margin-left: auto;
+            flex: 0 0 auto;
+        }
+
+        /* Compact theme switch (knob shows the mode you will switch TO).
+           Lives OUTSIDE the controls group as the topbar's last child, so it
+           always sits at the far right edge of the nav bar, past the buttons,
+           separated by a divider line. */
+        #themeToggleBtn.theme-switch {
+            width: 58px;
+            height: 30px;
+            padding: 3px;
+            border-radius: 15px;
+            position: relative;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            margin-left: 12px;
+            padding-left: 0;
+            flex: 0 0 auto;
+            align-self: center;
+        }
+
+        #themeToggleBtn.theme-switch::before {
+            content: "";
+            position: absolute;
+            left: -13px;
+            top: -4px;
+            bottom: -4px;
+            width: 1px;
+            background: var(--border);
+        }
+
+        .theme-switch-knob {
+            position: absolute;
+            top: 2px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            line-height: 1;
+            text-align: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            transition: left 0.18s ease;
+        }
+
+        #themeToggleBtn.theme-switch[data-mode="dark"] .theme-switch-knob {
+            left: 2px;
+        }
+
+        #themeToggleBtn.theme-switch[data-mode="light"] .theme-switch-knob {
+            left: 30px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .theme-switch-knob {
+                transition: none;
+            }
+        }
+
+        /* Help modal: step cards that deal in one after the other. */
+        .help-deck {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .help-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            opacity: 0;
+            animation: helpDeal 0.4s ease forwards;
+        }
+
+        .help-card-icon {
+            font-size: 1.6rem;
+            flex: 0 0 auto;
+        }
+
+        .help-card strong {
+            display: block;
+            color: var(--text);
+        }
+
+        .help-card p {
+            margin: 2px 0 0;
+            font-size: 0.95rem;
+        }
+
+        @keyframes helpDeal {
+            0% {
+                opacity: 0;
+                transform: translateY(-18px) scale(1.06) rotate(-2deg);
+            }
+            70% {
+                opacity: 1;
+                transform: translateY(2px) scale(1.01) rotate(0.5deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotate(0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .help-card {
+                animation: none;
+                opacity: 1;
+            }
+        }
+
+        /* Feedback box only appears once there is something to say. */
+        .nle-feedback:empty {
+            display: none;
+        }
+
+        /* Sky effects: shooting stars streak across the night sky on a
+           correct answer; a lightning bolt flickers on a wrong one. They
+           play on a full-page background overlay BEHIND the cards (visible
+           in the page margins), never over the working area, and are
+           removed from the DOM when their animation ends. */
+        /* Effects overlay sits ABOVE everything (z-index over modals) so
+           the animation is fully visible; pointer-events: none keeps every
+           click passing straight through to the sim. */
+        #nleSkyFx {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .nle-shoot {
+            /* travel distance injected per star via --shoot-dx/--shoot-dy —
+               spans the whole viewport, not a fixed few hundred px */
+            animation: nleShoot 1.1s cubic-bezier(0.2, 0.4, 0.6, 1) forwards;
+        }
+
+        @keyframes nleShoot {
+            /* enters from off-screen and exits off-screen — full opacity the
+               whole flight, since both ends are outside the page boundary */
+            0% { transform: translate(0, 0); opacity: 1; }
+            100% { transform: translate(var(--shoot-dx, 1800px), var(--shoot-dy, 420px)); opacity: 1; }
+        }
+
+        .nle-bolt {
+            animation: nleBolt 0.7s ease-out forwards;
+        }
+
+        @keyframes nleBolt {
+            0% { opacity: 0; }
+            8% { opacity: 1; }
+            22% { opacity: 0.1; }
+            34% { opacity: 1; }
+            50% { opacity: 0.2; }
+            62% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Whole-page sky flash behind the cards during a lightning strike. */
+        .nle-flash {
+            animation: nleFlash 0.6s ease-out forwards;
+        }
+
+        @keyframes nleFlash {
+            0% { opacity: 0; }
+            10% { opacity: 0.3; }
+            30% { opacity: 0.05; }
+            45% { opacity: 0.22; }
+            100% { opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .nle-shoot,
+            .nle-bolt,
+            .nle-flash {
+                animation: none;
+                display: none;
+            }
+        }
+
+        /* Invisible watermark: bottom-right, same colour as the page
+           background so it only appears when text-selected. */
+        .made-by {
+            text-align: right;
+            font-size: 10px;
+            color: var(--bg);
+            user-select: text;
+            padding: 0 6px 2px 0;
+        }
+
+        /* Live position readout — the teaching line under the number line. */
+        .nle-readout {
+            text-align: center;
+            margin: -4px 0 12px;
+            color: var(--nle-ink-soft);
+            font-size: 0.98rem;
+        }
+
+        .nle-readout strong {
+            color: var(--nle-amber);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- DEV-EDIT: SIM AREA — full-page background layer for sky effects -->
+    <svg id="nleSkyFx" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Number Line Explorer</h1>
+                    <p id="brandSubtitle">Reading integer positions on a number line</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- ===== OPTIONAL: AUDIO TOGGLE BUTTON =====
+                     Delete this button (and the DEV-EDIT: AUDIO script section below)
+                     if you do not want sound in your sim. -->
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <!-- ===== END AUDIO TOGGLE BUTTON ===== -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+            <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <h2 id="homeTitle">Number Line Explorer</h2>
+                    <p id="homeDescription">
+                        Guide Lumi the firefly along the number line. Remember: zero is the starting point —
+                        negative integers live to its LEFT, positive integers to its RIGHT. Land on every
+                        target to light up the night sky.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Number Line Explorer play area. All content below is
+                         rebuilt by JS per round; static markup carries the frame.
+                         ============================================================ -->
+                    <div class="nle-head">
+                        <span class="nle-round-label" id="nleRoundLabel">Round 1 of 10</span>
+                        <div class="nle-stars" id="nleStars" aria-hidden="true"></div>
+                        <div class="nle-head-actions">
+                            <button class="nle-btn nle-btn-small" id="nleHintBtn" type="button">💡 Hint</button>
+                            <button class="nle-btn nle-btn-small" id="nleReviewBtn" type="button">📋 Review</button>
+                        </div>
+                    </div>
+
+                    <div class="nle-prompt">
+                        <p class="nle-prompt-task" id="nleTask">Hop Lumi along the line, then press Land Here.</p>
+                        <p class="nle-prompt-target" id="nlePrompt">Hop to <span class="nle-target-number">0</span></p>
+                    </div>
+
+                    <div class="nle-linewrap" id="nleLineWrap" tabindex="0" role="img"
+                        aria-label="Horizontal number line from negative ten to positive ten. Lumi the firefly is on zero.">
+                        <svg id="nleSvg" viewBox="0 0 1000 152" xmlns="http://www.w3.org/2000/svg"></svg>
+                    </div>
+
+                    <p class="nle-readout" id="nleReadout"></p>
+
+                    <div class="nle-controls" id="nleHopControls">
+                        <button class="nle-btn" id="nleLeftBtn" type="button" aria-label="Hop one step left">◀ Hop Left</button>
+                        <button class="nle-btn nle-btn-primary" id="nleLandBtn" type="button">Land Here</button>
+                        <button class="nle-btn" id="nleRightBtn" type="button" aria-label="Hop one step right">Hop Right ▶</button>
+                    </div>
+
+                    <div class="nle-choices hidden" id="nleChoices"></div>
+
+                    <div class="nle-feedback" id="nleFeedback" aria-live="polite"></div>
+
+                    <div class="nle-after" id="nleAfter"></div>
+                    <span class="nle-visually-hidden" id="nleAnnouncer" aria-live="polite"></span>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             ============================================================ -->
+        <div class="footer-note">
+            Mathematics · Form 2 · Term 1 · Integers 2.1.1.1
+        </div>
+        <div class="made-by">Made by Abhishek Dan</div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- DEV-EDIT: SIM AREA — sim-owned modals (review + play again confirm) -->
+    <div class="modal" id="nleReviewModal" role="dialog" aria-modal="true" aria-labelledby="nleReviewHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="nleCloseReviewBtn" aria-label="Close review">×</button>
+            <h3 id="nleReviewHeading">Your Rounds So Far</h3>
+            <div id="nleReviewBody"><p class="muted">No rounds finished yet.</p></div>
+        </section>
+    </div>
+
+    <div class="modal" id="nleAgainConfirmModal" role="dialog" aria-modal="true" aria-labelledby="nleAgainHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="nleCloseAgainBtn" aria-label="Close play again confirmation">×</button>
+            <h3 id="nleAgainHeading">Play again?</h3>
+            <p>This will clear your stars and start a fresh set of ten rounds with new targets.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="nleCancelAgainBtn">Cancel</button>
+                <button class="primary-btn" id="nleConfirmAgainBtn">Play Again</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "MATH-F2-T1-2.1.1.1-SIM1",
+            title: "Number Line Explorer",
+            subtitle: "Reading integer positions on a number line",
+            badgeText: "±10",
+            homeDescription:
+                "Guide Lumi the firefly along the number line. Remember: zero is the starting point — negative integers live to its LEFT, positive integers to its RIGHT. Land on every target to light up the night sky.",
+            instructions: [
+                "🎯|A target appears|Each round calls a target integer, like −4.",
+                "🐛|Hop Lumi|Press ◀ or ▶ (or the arrow keys) to hop one step at a time.",
+                "🛬|Land!|On the target? Press Land Here.",
+                "❓|Dot rounds|See a dot on the line? Tap the integer that names it.",
+                "⭐|Earn stars|First try = gold star. You get two tries each round.",
+                "💡|Stuck?|Press Hint — it tells you which side of zero to look."
+            ]
+        };
+
+        /* ============================================================
+           DEV-EDIT: AUDIO (OPTIONAL)
+           Synthesized sounds only — no audio files needed, fully offline.
+           ============================================================ */
+        const SOUND_FILES = {
+            click: "",     // played on general button/option clicks
+            correct: "",   // played when the learner answers correctly
+            wrong: "",     // played when the learner answers incorrectly
+            typing: "",    // played per-keystroke or per-character reveal
+            complete: ""   // played when the simulation/activity finishes
+        };
+
+        /* Each sound belongs to a category. The "effects" category always gets a
+           volume slider in the Help window. */
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects"
+        };
+        /* Optional nicer slider labels. Category name used if missing. */
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
+        /* ---- Audio engine below. Safe to leave untouched. ---- */
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};   // category -> 0..1
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        const SYNTH_SOUNDS = {
+            click:    (v) => playTone(600, 60, "square", 0.06 * v),
+            typing:   (v) => playTone(420, 30, "square", 0.04 * v),
+            correct:  (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(784, 180, "sine", 0.15 * v, 110); },
+            wrong:    (v) => playTone(180, 250, "sawtooth", 0.12 * v),
+            complete: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(659, 120, "sine", 0.15 * v, 120); playTone(784, 250, "sine", 0.15 * v, 240); },
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1");
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), input.value);
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            if (dom.homeEyebrow) dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow || "";
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            if (dom.openInstructionsBtn) dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        /* Edited for this sim: instructions render as playful step cards
+           ("emoji|title|text" entries) that deal onto the table one by one. */
+        function renderInstructions() {
+            const deck = document.createElement("div");
+            deck.className = "help-deck";
+            SIM_CONFIG.instructions.forEach((item, i) => {
+                const parts = item.split("|");
+                const card = document.createElement("div");
+                card.className = "help-card";
+                card.style.animationDelay = (i * 0.14) + "s";
+
+                const icon = document.createElement("span");
+                icon.className = "help-card-icon";
+                icon.textContent = parts[0];
+
+                const copy = document.createElement("div");
+                const title = document.createElement("strong");
+                title.textContent = parts[1];
+                const text = document.createElement("p");
+                text.textContent = parts[2];
+                copy.appendChild(title);
+                copy.appendChild(text);
+
+                card.appendChild(icon);
+                card.appendChild(copy);
+                deck.appendChild(card);
+            });
+            dom.instructionsBody.replaceChildren(deck);
+        }
+
+        /* Edited for this sim: every modal opens scrolled to the top —
+           never at the scroll position it was closed at. */
+        function resetModalScroll(modal) {
+            const card = modal.querySelector(".modal-card");
+            if (card) card.scrollTop = 0;
+        }
+
+        function openInstructionsModal() {
+            renderInstructions(); // re-render so the card deal-in animation replays
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+            resetModalScroll(dom.instructionsModal);
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+            resetModalScroll(dom.resetConfirmModal);
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        /* Edited for this sim: theme control is a compact sliding switch.
+           The knob shows the mode that will be selected next (checklist 3.3). */
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.classList.add("theme-switch");
+            dom.themeToggleBtn.replaceChildren();
+            const knob = document.createElement("span");
+            knob.className = "theme-switch-knob";
+            knob.textContent = switchToLight ? "☀️" : "🌙";
+            dom.themeToggleBtn.appendChild(knob);
+            dom.themeToggleBtn.setAttribute("data-mode", state.theme);
+            dom.themeToggleBtn.setAttribute("title", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC — Number Line Explorer
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset.
+           ============================================================ */
+
+        function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        const NLE_MIN = -10;
+        const NLE_MAX = 10;
+        const NLE_TOTAL_ROUNDS = 8;
+        const NLE_STATE_KEY = `sim:${SIM_CONFIG.simId}:state`;
+
+        // Display helper: use the true minus sign for negatives, no plus sign
+        // for positives (matches the reference document's convention).
+        function fmtInt(n) {
+            return n < 0 ? "−" + Math.abs(n) : String(n);
+        }
+
+        function directionWord(fromPos, toPos) {
+            return toPos < fromPos ? "LEFT" : "RIGHT";
+        }
+
+        function positionPhrase(n) {
+            if (n === 0) return "0 is the reference point — it is neither positive nor negative.";
+            const steps = Math.abs(n);
+            const side = n < 0 ? "LEFT" : "RIGHT";
+            const stepWord = steps === 1 ? "step" : "steps";
+            return `${fmtInt(n)} is ${steps} ${stepWord} to the ${side} of zero.`;
+        }
+
+        const nle = {
+            rounds: [],        // [{type:"hop"|"choice", target, start, options?}]
+            idx: 0,
+            pos: 0,            // Lumi's current position (hop rounds)
+            attempts: 0,       // wrong attempts this round
+            results: [],       // [{target, firstAnswer, star:"gold"|"silver"|"miss", type}]
+            phase: "idle",     // idle | playing | between | done
+            landed: false,     // guard against double Land clicks
+            started: false
+        };
+
+        const nleDom = {};
+
+        function nleCacheDom() {
+            nleDom.roundLabel = document.getElementById("nleRoundLabel");
+            nleDom.stars = document.getElementById("nleStars");
+            nleDom.task = document.getElementById("nleTask");
+            nleDom.prompt = document.getElementById("nlePrompt");
+            nleDom.lineWrap = document.getElementById("nleLineWrap");
+            nleDom.svg = document.getElementById("nleSvg");
+            nleDom.hopControls = document.getElementById("nleHopControls");
+            nleDom.leftBtn = document.getElementById("nleLeftBtn");
+            nleDom.rightBtn = document.getElementById("nleRightBtn");
+            nleDom.landBtn = document.getElementById("nleLandBtn");
+            nleDom.choices = document.getElementById("nleChoices");
+            nleDom.feedback = document.getElementById("nleFeedback");
+            nleDom.readout = document.getElementById("nleReadout");
+            nleDom.after = document.getElementById("nleAfter");
+            nleDom.announcer = document.getElementById("nleAnnouncer");
+            nleDom.hintBtn = document.getElementById("nleHintBtn");
+            nleDom.reviewBtn = document.getElementById("nleReviewBtn");
+            nleDom.reviewModal = document.getElementById("nleReviewModal");
+            nleDom.reviewBody = document.getElementById("nleReviewBody");
+            nleDom.closeReviewBtn = document.getElementById("nleCloseReviewBtn");
+            nleDom.againModal = document.getElementById("nleAgainConfirmModal");
+            nleDom.closeAgainBtn = document.getElementById("nleCloseAgainBtn");
+            nleDom.cancelAgainBtn = document.getElementById("nleCancelAgainBtn");
+            nleDom.confirmAgainBtn = document.getElementById("nleConfirmAgainBtn");
+        }
+
+        /* ---------- round generation ---------- */
+
+        function nlePickDistinct(pool, count, exclude) {
+            const avoid = new Set(exclude || []);
+            const cleaned = pool.filter((n) => !avoid.has(n));
+            return shuffle(cleaned).slice(0, count);
+        }
+
+        function nleChoiceOptions(target) {
+            // Distractors aimed at the classic mistakes: sign flip, off-by-one.
+            const wanted = [-target, target - 1, target + 1, -(target) + 1, -(target) - 1];
+            const opts = [target];
+            for (const w of wanted) {
+                if (opts.length >= 4) break;
+                if (w >= NLE_MIN && w <= NLE_MAX && !opts.includes(w)) opts.push(w);
+            }
+            let filler = target;
+            while (opts.length < 4) {
+                filler = randInt(NLE_MIN, NLE_MAX);
+                if (!opts.includes(filler)) opts.push(filler);
+            }
+            return shuffle(opts);
+        }
+
+        /* Question bank: 16 hop targets + 16 choice targets (±2…±9) — four
+           times the 8 rounds used per run. Each run draws fresh targets AND
+           shuffles the round order inside the difficulty tiers, so two plays
+           rarely look the same. Choice option order is shuffled separately. */
+        function nleGenerateRounds() {
+            const posPool = [2, 3, 4, 5, 6, 7, 8, 9];
+            const negPool = [-2, -3, -4, -5, -6, -7, -8, -9];
+            const used = new Set();
+            const draw = (pool) => {
+                const t = pick(pool.filter((n) => !used.has(n)));
+                used.add(t);
+                return t;
+            };
+
+            // Tier 1 (fixed openers): one hop each side of zero, easy entry.
+            const opener = shuffle([
+                { type: "hop", target: draw(posPool), start: 0 },
+                { type: "hop", target: draw(negPool), start: 0 }
+            ]);
+
+            // Tier 2 (shuffled): two hops of random sign + one choice round.
+            const signPool = () => (Math.random() < 0.5 ? posPool : negPool);
+            const c1 = draw(signPool());
+            const mid = shuffle([
+                { type: "hop", target: draw(signPool()), start: 0 },
+                { type: "hop", target: draw(signPool()), start: 0 },
+                { type: "choice", target: c1, start: 0, options: nleChoiceOptions(c1) }
+            ]);
+
+            // Tier 3 (shuffled): one more choice (opposite sign) + one hop.
+            const c2 = draw(c1 < 0 ? posPool : negPool);
+            const late = shuffle([
+                { type: "choice", target: c2, start: 0, options: nleChoiceOptions(c2) },
+                { type: "hop", target: draw(signPool()), start: 0 }
+            ]);
+
+            const rounds = opener.concat(mid, late);
+
+            // Final round: a chained hop — Lumi starts where she last landed
+            // (choice rounds do not move her), forcing relative reading.
+            let lastLanding = 0;
+            rounds.forEach((r) => { if (r.type === "hop") lastLanding = r.target; });
+            let t = randInt(NLE_MIN + 1, NLE_MAX - 1);
+            while (t === lastLanding || t === 0 || used.has(t)) t = randInt(NLE_MIN + 1, NLE_MAX - 1);
+            rounds.push({ type: "hop", target: t, start: lastLanding });
+
+            return rounds;
+        }
+
+        /* ---------- persistence ---------- */
+
+        function nleSave() {
+            storageSet(NLE_STATE_KEY, JSON.stringify({
+                rounds: nle.rounds,
+                idx: nle.idx,
+                pos: nle.pos,
+                attempts: nle.attempts,
+                firstAnswer: nle.firstAnswer,
+                results: nle.results,
+                phase: nle.phase,
+                started: nle.started
+            }));
+        }
+
+        function nleLoad() {
+            const raw = storageGet(NLE_STATE_KEY);
+            if (!raw) return false;
+            try {
+                const s = JSON.parse(raw);
+                if (!s || !Array.isArray(s.rounds) || s.rounds.length !== NLE_TOTAL_ROUNDS) return false;
+                nle.rounds = s.rounds;
+                nle.idx = s.idx;
+                nle.pos = s.pos;
+                nle.attempts = s.attempts;
+                nle.firstAnswer = s.firstAnswer;
+                nle.results = Array.isArray(s.results) ? s.results : [];
+                nle.phase = s.phase === "done" ? "done" : "playing";
+                nle.started = true;
+                return true;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        function nleClearSaved() {
+            try { sessionStorage.removeItem(NLE_STATE_KEY); } catch (err) { /* ignore */ }
+        }
+
+        /* ---------- number line drawing ---------- */
+
+        const NLE_SVG_NS = "http://www.w3.org/2000/svg";
+        const NLE_X0 = 45;          // x of −10
+        const NLE_STEP = (1000 - 2 * 45) / (NLE_MAX - NLE_MIN);
+        const NLE_LINE_Y = 78;
+
+        function nleX(n) { return NLE_X0 + (n - NLE_MIN) * NLE_STEP; }
+
+        function nleEl(tag, attrs) {
+            const el = document.createElementNS(NLE_SVG_NS, tag);
+            for (const k in attrs) el.setAttribute(k, attrs[k]);
+            return el;
+        }
+
+        function nleDrawLine(markedPoint) {
+            const svg = nleDom.svg;
+            svg.replaceChildren();
+
+            const inkSoft = "var(--nle-ink-soft)";
+
+            // Meadow floor: SVG grass along the BOTTOM of the box, in its
+            // own strip well below the tick labels (labels end at y≈116,
+            // grass occupies y 130–150) so numbers are never obscured.
+            svg.appendChild(nleEl("rect", { x: 0, y: 146, width: 1000, height: 6, fill: "var(--nle-grass)", opacity: "0.6" }));
+            for (let gx = 10; gx <= 992; gx += 11) {
+                const h = 8 + ((gx * 7) % 11); // blade tops between y=138 and y=128
+                svg.appendChild(nleEl("polygon", {
+                    points: `${gx - 3.5},148 ${gx + ((gx % 3) - 1) * 2},${148 - h} ${gx + 3.5},148`,
+                    fill: "var(--nle-grass)",
+                    opacity: gx % 2 ? "0.9" : "0.65"
+                }));
+            }
+
+            // Main line with straight arrowheads at both ends.
+            svg.appendChild(nleEl("line", { x1: 14, y1: NLE_LINE_Y, x2: 986, y2: NLE_LINE_Y, stroke: inkSoft, "stroke-width": 2 }));
+            svg.appendChild(nleEl("polyline", { points: `24,${NLE_LINE_Y - 7} 12,${NLE_LINE_Y} 24,${NLE_LINE_Y + 7}`, fill: "none", stroke: inkSoft, "stroke-width": 2 }));
+            svg.appendChild(nleEl("polyline", { points: `976,${NLE_LINE_Y - 7} 988,${NLE_LINE_Y} 976,${NLE_LINE_Y + 7}`, fill: "none", stroke: inkSoft, "stroke-width": 2 }));
+
+            for (let n = NLE_MIN; n <= NLE_MAX; n++) {
+                const x = nleX(n);
+                const isZero = n === 0;
+                const tickColor = isZero ? "var(--nle-amber)" : (n < 0 ? "var(--nle-coral)" : "var(--nle-teal)");
+                svg.appendChild(nleEl("line", {
+                    x1: x, y1: NLE_LINE_Y - (isZero ? 14 : 9),
+                    x2: x, y2: NLE_LINE_Y + (isZero ? 14 : 9),
+                    stroke: tickColor, "stroke-width": isZero ? 3 : 2
+                }));
+                const label = nleEl("text", {
+                    x: x, y: NLE_LINE_Y + 32, "text-anchor": "middle",
+                    "font-size": "15", "font-weight": isZero ? "800" : "600",
+                    fill: isZero ? "var(--nle-amber)" : "var(--nle-ink-soft)",
+                    "font-family": "Arial, Helvetica, sans-serif"
+                });
+                label.textContent = fmtInt(n);
+                svg.appendChild(label);
+            }
+
+            // Marked point for choice rounds (solid dot above the line).
+            if (markedPoint !== null && markedPoint !== undefined) {
+                const mx = nleX(markedPoint);
+                svg.appendChild(nleEl("circle", { cx: mx, cy: NLE_LINE_Y, r: 8, fill: "var(--nle-amber)", stroke: "var(--nle-amber-deep)", "stroke-width": 2 }));
+                svg.appendChild(nleEl("line", { x1: mx, y1: NLE_LINE_Y - 34, x2: mx, y2: NLE_LINE_Y - 12, stroke: "var(--nle-amber)", "stroke-width": 2 }));
+                const q = nleEl("text", { x: mx, y: NLE_LINE_Y - 40, "text-anchor": "middle", "font-size": "18", "font-weight": "800", fill: "var(--nle-amber)", "font-family": "Arial, Helvetica, sans-serif" });
+                q.textContent = "?";
+                svg.appendChild(q);
+            }
+
+            // Lumi the firefly — a small glowing explorer, moved by transform.
+            const lumi = nleEl("g", { id: "nleExplorer" });
+            lumi.appendChild(nleEl("circle", { cx: 0, cy: NLE_LINE_Y - 26, r: 13, fill: "none", stroke: "var(--nle-amber)", "stroke-width": 1.5, opacity: "0.4" }));
+            lumi.appendChild(nleEl("circle", { cx: 0, cy: NLE_LINE_Y - 26, r: 8, fill: "var(--nle-amber)", stroke: "var(--nle-amber-deep)", "stroke-width": 2 }));
+            lumi.appendChild(nleEl("circle", { cx: -3, cy: NLE_LINE_Y - 28, r: 1.6, fill: "#241a03" }));
+            lumi.appendChild(nleEl("circle", { cx: 3, cy: NLE_LINE_Y - 28, r: 1.6, fill: "#241a03" }));
+            lumi.appendChild(nleEl("line", { x1: 0, y1: NLE_LINE_Y - 17, x2: 0, y2: NLE_LINE_Y - 4, stroke: "var(--nle-amber-deep)", "stroke-width": 2 }));
+            lumi.appendChild(nleEl("polygon", { points: `-6,${NLE_LINE_Y - 2} 6,${NLE_LINE_Y - 2} 0,${NLE_LINE_Y + 4}`, fill: "var(--nle-amber)" }));
+            svg.appendChild(lumi);
+            nleDom.explorer = lumi;
+            nleMoveExplorer(false);
+        }
+
+        function nleMoveExplorer(animate) {
+            if (!nleDom.explorer) return;
+            const x = nleX(nle.pos);
+            if (!animate) nleDom.explorer.style.transition = "none";
+            nleDom.explorer.style.transform = `translateX(${x}px)`;
+            if (!animate) {
+                // Restore the CSS transition after the instant placement.
+                void nleDom.explorer.getBoundingClientRect();
+                nleDom.explorer.style.transition = "";
+            }
+            nleDom.lineWrap.setAttribute("aria-label",
+                `Horizontal number line from negative ten to positive ten. Lumi the firefly is on ${fmtInt(nle.pos)}.`);
+            nleUpdateReadout();
+        }
+
+        // The teaching line: constantly narrates position the way the lesson
+        // does — count steps from zero, name the side of zero.
+        function nleUpdateReadout() {
+            const el = nleDom.readout;
+            if (!el) return;
+            const r = nleCurrentRound();
+            if (!r || r.type !== "hop") {
+                el.replaceChildren();
+                return;
+            }
+            el.replaceChildren();
+            el.append("Lumi is on ");
+            const s = document.createElement("strong");
+            s.textContent = fmtInt(nle.pos);
+            el.appendChild(s);
+            if (nle.pos === 0) {
+                el.append(" — zero, the reference point. It is neither positive nor negative.");
+            } else {
+                const steps = Math.abs(nle.pos);
+                el.append(` — ${steps} ${steps === 1 ? "step" : "steps"} to the ${nle.pos < 0 ? "LEFT" : "RIGHT"} of zero.`);
+            }
+        }
+
+        /* ---------- sky effects ---------- */
+
+        function nleMotionOk() {
+            return !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+        }
+
+        // Effects play on the full-page background overlay (#nleSkyFx),
+        // behind the cards — never over the working area.
+        function nleSky() {
+            const sky = document.getElementById("nleSkyFx");
+            if (!sky) return null;
+            sky.setAttribute("viewBox", `0 0 ${window.innerWidth} ${window.innerHeight}`);
+            return sky;
+        }
+
+        // Correct answer: 4 big shooting stars streak diagonally across the
+        // WHOLE page — long glowing tails, viewport-scaled travel distance.
+        function nleShootingStars() {
+            if (!nleMotionOk()) return;
+            const sky = nleSky();
+            if (!sky) return;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            for (let i = 0; i < 4; i++) {
+                // Start FULLY outside the left page boundary (head at
+                // -220…-100, tail a further 170 behind it), fly in, and
+                // exit past the right boundary before fading.
+                const x = -220 + Math.random() * 120;
+                const y = h * (0.02 + Math.random() * 0.3);
+                const g = nleEl("g", { class: "nle-shoot" });
+                g.style.animationDelay = (i * 0.15) + "s";
+                g.style.setProperty("--shoot-dx", (w - x + 300) + "px");
+                g.style.setProperty("--shoot-dy", (h * 0.45) + "px");
+                // Long two-tone tail + bright head with a soft glow ring.
+                g.appendChild(nleEl("line", {
+                    x1: x, y1: y, x2: x - 170, y2: y - 48,
+                    stroke: "var(--accent)", "stroke-width": 3,
+                    "stroke-linecap": "round", opacity: "0.45"
+                }));
+                g.appendChild(nleEl("line", {
+                    x1: x, y1: y, x2: x - 95, y2: y - 27,
+                    stroke: "var(--accent)", "stroke-width": 4.5,
+                    "stroke-linecap": "round", opacity: "0.9"
+                }));
+                g.appendChild(nleEl("circle", { cx: x, cy: y, r: 11, fill: "var(--accent)", opacity: "0.25" }));
+                g.appendChild(nleEl("circle", { cx: x, cy: y, r: 5, fill: "var(--text)" }));
+                sky.appendChild(g);
+                setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 1900);
+            }
+        }
+
+        // Wrong answer: a full-height forked lightning bolt plus a brief
+        // whole-page sky flash (straight segments only).
+        function nleLightning() {
+            if (!nleMotionOk()) return;
+            const sky = nleSky();
+            if (!sky) return;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            const x = w * (0.12 + Math.random() * 0.76);
+
+            const flash = nleEl("rect", {
+                x: 0, y: 0, width: w, height: h,
+                fill: "var(--bolt)", class: "nle-flash"
+            });
+            sky.appendChild(flash);
+
+            const main = nleEl("polyline", {
+                points: [
+                    `${x},0`,
+                    `${x - w * 0.03},${h * 0.14}`,
+                    `${x + w * 0.015},${h * 0.16}`,
+                    `${x - w * 0.035},${h * 0.34}`,
+                    `${x + w * 0.02},${h * 0.32}`,
+                    `${x - w * 0.02},${h * 0.55}`,
+                    `${x + w * 0.005},${h * 0.57}`,
+                    `${x - w * 0.03},${h * 0.85}`
+                ].join(" "),
+                fill: "none", stroke: "var(--bolt)",
+                "stroke-width": 6, "stroke-linejoin": "miter",
+                class: "nle-bolt"
+            });
+            sky.appendChild(main);
+
+            // Fork branching off the mid-point of the main bolt.
+            const fork = nleEl("polyline", {
+                points: [
+                    `${x - w * 0.035},${h * 0.34}`,
+                    `${x - w * 0.09},${h * 0.48}`,
+                    `${x - w * 0.075},${h * 0.5}`,
+                    `${x - w * 0.13},${h * 0.66}`
+                ].join(" "),
+                fill: "none", stroke: "var(--bolt)",
+                "stroke-width": 3.5, "stroke-linejoin": "miter",
+                class: "nle-bolt"
+            });
+            sky.appendChild(fork);
+
+            setTimeout(() => {
+                [flash, main, fork].forEach((el) => { if (el.parentNode) el.parentNode.removeChild(el); });
+            }, 1000);
+        }
+
+        /* ---------- stars / progress ---------- */
+
+        const NLE_STAR_PATH = "M10 1.5 12.6 7 18.6 7.6 14.1 11.6 15.4 17.5 10 14.4 4.6 17.5 5.9 11.6 1.4 7.6 7.4 7z";
+
+        function nleRenderStars(container) {
+            container.replaceChildren();
+            for (let i = 0; i < NLE_TOTAL_ROUNDS; i++) {
+                const wrap = document.createElementNS(NLE_SVG_NS, "svg");
+                wrap.setAttribute("viewBox", "0 0 20 19");
+                wrap.setAttribute("class", "nle-star" + (nle.results[i] ? " " + nle.results[i].star : ""));
+                const p = document.createElementNS(NLE_SVG_NS, "path");
+                p.setAttribute("d", NLE_STAR_PATH);
+                p.setAttribute("class", "star-shape");
+                wrap.appendChild(p);
+                container.appendChild(wrap);
+            }
+        }
+
+        /* ---------- round flow ---------- */
+
+        function nleCurrentRound() { return nle.rounds[nle.idx]; }
+
+        function nleStartRound(restoring) {
+            const r = nleCurrentRound();
+            nle.phase = "playing";
+            nle.landed = false;
+            if (!restoring) {
+                nle.pos = r.start;
+                nle.attempts = 0;
+            }
+            nleDom.roundLabel.textContent = `Round ${nle.idx + 1} of ${NLE_TOTAL_ROUNDS}`;
+            nleRenderStars(nleDom.stars);
+            nleDom.after.replaceChildren();
+            nleSetFeedback("", "");
+
+            if (r.type === "hop") {
+                nleDom.hopControls.classList.remove("hidden");
+                nleDom.choices.classList.add("hidden");
+                nleDom.choices.replaceChildren();
+                nleDom.task.textContent = r.start === 0
+                    ? "Hop Lumi along the line, then press Land Here."
+                    : `Lumi stays where she landed — she is starting from ${fmtInt(r.start)} this time.`;
+                nleDom.prompt.replaceChildren();
+                nleDom.prompt.append("Hop to ");
+                const strong = document.createElement("span");
+                strong.className = "nle-target-number";
+                strong.textContent = fmtInt(r.target);
+                nleDom.prompt.appendChild(strong);
+                nleDrawLine(null);
+                nleSetHopButtons(true);
+            } else {
+                nleDom.hopControls.classList.add("hidden");
+                nleDom.task.textContent = "A point is marked on the number line with a dot and a question mark.";
+                nleDom.prompt.replaceChildren();
+                nleDom.prompt.append("Which integer is at the marked point?");
+                nleDrawLine(r.target);
+                nleRenderChoices(r);
+            }
+            nleAnnounce(`Round ${nle.idx + 1}. ` + (r.type === "hop"
+                ? `Hop to ${fmtInt(r.target)}. Lumi starts on ${fmtInt(nle.pos)}.`
+                : "Which integer is at the marked point?"));
+            nleSave();
+        }
+
+        function nleRenderChoices(r) {
+            nleDom.choices.classList.remove("hidden");
+            nleDom.choices.replaceChildren();
+            r.options.forEach((opt) => {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.className = "nle-choice";
+                b.textContent = fmtInt(opt);
+                b.addEventListener("click", () => nleAnswerChoice(opt, b));
+                nleDom.choices.appendChild(b);
+            });
+        }
+
+        function nleSetHopButtons(enabled) {
+            nleDom.leftBtn.disabled = !enabled;
+            nleDom.rightBtn.disabled = !enabled;
+            nleDom.landBtn.disabled = !enabled;
+        }
+
+        function nleSetChoiceButtons(enabled) {
+            nleDom.choices.querySelectorAll("button").forEach((b) => { b.disabled = !enabled; });
+        }
+
+        function nleHop(delta) {
+            if (nle.phase !== "playing" || nle.landed) return;
+            const r = nleCurrentRound();
+            if (r.type !== "hop") return;
+            const next = nle.pos + delta;
+            if (next < NLE_MIN || next > NLE_MAX) {
+                nleDom.lineWrap.classList.remove("nle-shake");
+                void nleDom.lineWrap.offsetWidth;
+                nleDom.lineWrap.classList.add("nle-shake");
+                nleSetFeedback("", `The line ends at ${fmtInt(next < 0 ? NLE_MIN : NLE_MAX)} — Lumi cannot hop past it.`);
+                return;
+            }
+            nle.pos = next;
+            playSound("click");
+            nleMoveExplorer(true);
+            nleSave();
+        }
+
+        function nleSetFeedback(kind, text) {
+            const f = nleDom.feedback;
+            f.classList.remove("good", "bad");
+            f.replaceChildren();
+            if (!text) return;
+            if (kind) {
+                f.classList.add(kind);
+                const tag = document.createElement("span");
+                tag.className = "nle-feedback-tag";
+                tag.textContent = kind === "good" ? "✓ Correct!" : "✗ Not yet.";
+                f.appendChild(tag);
+            }
+            f.append(text);
+        }
+
+        function nleAnnounce(text) {
+            nleDom.announcer.textContent = text;
+        }
+
+        function nleLand() {
+            if (nle.phase !== "playing" || nle.landed) return;
+            const r = nleCurrentRound();
+            if (r.type !== "hop") return;
+            nle.landed = true;
+            nleSetHopButtons(false);
+            nleJudge(nle.pos, r);
+        }
+
+        function nleAnswerChoice(value, btn) {
+            if (nle.phase !== "playing" || nle.landed) return;
+            nle.landed = true;
+            btn.setAttribute("data-picked", "true");
+            nleSetChoiceButtons(false);
+            nleJudge(value, nleCurrentRound());
+        }
+
+        function nleJudge(answer, r) {
+            const correct = answer === r.target;
+            if (nle.attempts === 0) {
+                // Remember the first attempt for the review table.
+                nle.firstAnswer = answer;
+            }
+            if (correct) {
+                playSound("correct");
+                nleShootingStars();
+                const star = nle.attempts === 0 ? "gold" : "silver";
+                nle.results[nle.idx] = { target: r.target, firstAnswer: nle.attempts === 0 ? answer : nle.firstAnswer, star: star, type: r.type };
+                nleSetFeedback("good", `${positionPhrase(r.target)}${star === "gold" ? " Gold star — first try!" : " Silver star — well recovered."}`);
+                nleAnnounce(`Correct. ${positionPhrase(r.target)}`);
+                nleAdvanceControls();
+            } else {
+                nle.attempts += 1;
+                playSound("wrong");
+                nleLightning();
+                if (nle.attempts < 2) {
+                    nleSetFeedback("bad", nleWrongHint(answer, r) + " Try again!");
+                    nleAnnounce("Not yet. " + nleWrongHint(answer, r));
+                    nle.landed = false;
+                    if (r.type === "hop") {
+                        nleSetHopButtons(true);
+                    } else {
+                        nleSetChoiceButtons(true);
+                    }
+                } else {
+                    nle.results[nle.idx] = { target: r.target, firstAnswer: nle.firstAnswer, star: "miss", type: r.type };
+                    nleSetFeedback("bad", `The answer was ${fmtInt(r.target)}. ${positionPhrase(r.target)}`);
+                    nleAnnounce(`The answer was ${fmtInt(r.target)}. ${positionPhrase(r.target)}`);
+                    if (r.type === "hop") {
+                        // Show the correct spot so the round still teaches.
+                        nle.pos = r.target;
+                        nleMoveExplorer(true);
+                    }
+                    nleAdvanceControls();
+                }
+            }
+            nleRenderStars(nleDom.stars);
+            nleSave();
+        }
+
+        function nleWrongHint(answer, r) {
+            if (r.type === "hop") {
+                const diff = Math.abs(r.target - answer);
+                const stepWord = diff === 1 ? "step" : "steps";
+                return `You landed on ${fmtInt(answer)}. The target ${fmtInt(r.target)} is ${diff} more ${stepWord} to the ${directionWord(answer, r.target)}.`;
+            }
+            if (answer === -r.target) {
+                const side = r.target < 0 ? "LEFT" : "RIGHT";
+                return `${fmtInt(answer)} and ${fmtInt(r.target)} are on opposite sides of zero. The marked point is on the ${side} side of zero, so its sign matters.`;
+            }
+            return `You chose ${fmtInt(answer)}. Count the steps from zero to the dot, and check which side of zero it is on.`;
+        }
+
+        function nleAdvanceControls() {
+            nle.phase = "between";
+            nleDom.after.replaceChildren();
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "nle-btn nle-btn-primary";
+            btn.textContent = nle.idx + 1 < NLE_TOTAL_ROUNDS ? "Next Round ▶" : "See Results ▶";
+            btn.addEventListener("click", nleNext);
+            nleDom.after.appendChild(btn);
+            btn.focus();
+        }
+
+        function nleNext() {
+            if (nle.phase !== "between") return;
+            if (nle.idx + 1 < NLE_TOTAL_ROUNDS) {
+                nle.idx += 1;
+                nleStartRound(false);
+            } else {
+                nleFinish();
+            }
+        }
+
+        /* ---------- summary ---------- */
+
+        function nleFinish() {
+            nle.phase = "done";
+            playSound("complete");
+            nleSave();
+            nleRenderSummary();
+        }
+
+        function nleRenderSummary() {
+            const gold = nle.results.filter((x) => x && x.star === "gold").length;
+            const silver = nle.results.filter((x) => x && x.star === "silver").length;
+            const done = nle.results.filter(Boolean).length;
+
+            const c = dom.simContainer;
+            c.replaceChildren();
+
+            const wrap = document.createElement("div");
+            wrap.className = "nle-summary";
+
+            const h = document.createElement("h3");
+            h.textContent = "Night Sky Complete!";
+            wrap.appendChild(h);
+
+            const starsRow = document.createElement("div");
+            starsRow.className = "nle-stars";
+            nleRenderStars(starsRow);
+            wrap.appendChild(starsRow);
+
+            const p1 = document.createElement("p");
+            p1.textContent = `You finished all ${done} rounds. You landed ${gold} of ${NLE_TOTAL_ROUNDS} on the first try` +
+                (silver ? `, and recovered ${silver} more on a second try.` : ".");
+            wrap.appendChild(p1);
+
+            const p2 = document.createElement("p");
+            p2.textContent = gold === NLE_TOTAL_ROUNDS
+                ? "A perfect flight — you can read any position on the number line."
+                : "Remember: negative integers live to the LEFT of zero, positive integers to the RIGHT.";
+            wrap.appendChild(p2);
+
+            const row = document.createElement("div");
+            row.className = "nle-after";
+
+            const reviewBtn = document.createElement("button");
+            reviewBtn.type = "button";
+            reviewBtn.className = "nle-btn";
+            reviewBtn.textContent = "📋 Review My Rounds";
+            reviewBtn.addEventListener("click", nleOpenReview);
+            row.appendChild(reviewBtn);
+
+            const againBtn = document.createElement("button");
+            againBtn.type = "button";
+            againBtn.className = "nle-btn nle-btn-primary";
+            againBtn.textContent = "Play Again";
+            againBtn.addEventListener("click", () => {
+                nleDom.againModal.classList.add("show");
+                resetModalScroll(nleDom.againModal);
+            });
+            row.appendChild(againBtn);
+
+            wrap.appendChild(row);
+            c.appendChild(wrap);
+        }
+
+        /* ---------- review ---------- */
+
+        function nleOpenReview() {
+            const body = nleDom.reviewBody;
+            body.replaceChildren();
+            const finished = nle.results.filter(Boolean);
+            if (!finished.length) {
+                const p = document.createElement("p");
+                p.className = "muted";
+                p.textContent = "No rounds finished yet.";
+                body.appendChild(p);
+            } else {
+                const table = document.createElement("table");
+                table.className = "nle-review-table";
+                const thead = document.createElement("thead");
+                const hr = document.createElement("tr");
+                ["Round", "Task", "Target", "Your first answer", "Result"].forEach((t) => {
+                    const th = document.createElement("th");
+                    th.textContent = t;
+                    hr.appendChild(th);
+                });
+                thead.appendChild(hr);
+                table.appendChild(thead);
+                const tbody = document.createElement("tbody");
+                nle.results.forEach((res, i) => {
+                    if (!res) return;
+                    const tr = document.createElement("tr");
+                    const cells = [
+                        String(i + 1),
+                        res.type === "hop" ? "Hop to the target" : "Name the marked point",
+                        fmtInt(res.target),
+                        fmtInt(res.firstAnswer),
+                        res.star === "gold" ? "★ First try" : res.star === "silver" ? "☆ Second try" : "✗ Shown answer"
+                    ];
+                    cells.forEach((txt, ci) => {
+                        const td = document.createElement("td");
+                        td.textContent = txt;
+                        if (ci === 4) td.className = res.star === "miss" ? "nle-review-bad" : "nle-review-good";
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+                body.appendChild(table);
+            }
+            nleDom.reviewModal.classList.add("show");
+            resetModalScroll(nleDom.reviewModal);
+        }
+
+        /* ---------- hints ---------- */
+
+        function nleHint() {
+            if (nle.phase === "done") return;
+            const r = nleCurrentRound();
+            if (!r) return;
+            playSound("click");
+            let hint;
+            if (r.type === "hop") {
+                if (nle.pos === r.target) {
+                    hint = "Lumi is on the target right now — press Land Here!";
+                } else {
+                    const side = r.target < 0 ? "LEFT of zero (it is negative)" : "RIGHT of zero (it is positive)";
+                    hint = `${fmtInt(r.target)} lives to the ${side}. Lumi is on ${fmtInt(nle.pos)}, so hop ${directionWord(nle.pos, r.target)}.`;
+                }
+            } else {
+                hint = r.target < 0
+                    ? "The dot is on the LEFT side of zero, so the integer is negative. Count the steps from zero."
+                    : "The dot is on the RIGHT side of zero, so the integer is positive. Count the steps from zero.";
+            }
+            nleSetFeedback("", "Hint: " + hint);
+            nleAnnounce("Hint: " + hint);
+        }
+
+        /* ---------- keyboard ---------- */
+
+        function nleKeydown(event) {
+            if (state.currentScreen !== "sim" || nle.phase !== "playing") return;
+            if (document.querySelector(".modal.show")) return;
+            const r = nleCurrentRound();
+            if (!r || r.type !== "hop") return;
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                nleHop(-1);
+            } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                nleHop(1);
+            } else if (event.key === "Enter" && !event.target.closest("button")) {
+                event.preventDefault();
+                nleLand();
+            }
+        }
+
+        /* ---------- template hooks ---------- */
+
+        // The static sim-area frame is rebuilt on Play Again / Reset, so keep a
+        // pristine copy of its markup from first load.
+        const NLE_FRAME_HTML = document.getElementById("simContainer").innerHTML;
+
+        function nleBindSimEvents() {
+            nleDom.leftBtn.addEventListener("click", () => nleHop(-1));
+            nleDom.rightBtn.addEventListener("click", () => nleHop(1));
+            nleDom.landBtn.addEventListener("click", nleLand);
+            nleDom.hintBtn.addEventListener("click", nleHint);
+            nleDom.reviewBtn.addEventListener("click", nleOpenReview);
+        }
+
+        function nleBindGlobalEvents() {
+            nleDom.closeReviewBtn.addEventListener("click", () => nleDom.reviewModal.classList.remove("show"));
+            nleDom.reviewModal.addEventListener("click", (e) => { if (e.target === nleDom.reviewModal) nleDom.reviewModal.classList.remove("show"); });
+            nleDom.closeAgainBtn.addEventListener("click", () => nleDom.againModal.classList.remove("show"));
+            nleDom.cancelAgainBtn.addEventListener("click", () => nleDom.againModal.classList.remove("show"));
+            nleDom.confirmAgainBtn.addEventListener("click", () => {
+                nleDom.againModal.classList.remove("show");
+                nleFreshGame();
+            });
+            nleDom.againModal.addEventListener("click", (e) => { if (e.target === nleDom.againModal) nleDom.againModal.classList.remove("show"); });
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    nleDom.reviewModal.classList.remove("show");
+                    nleDom.againModal.classList.remove("show");
+                }
+                nleKeydown(e);
+            });
+        }
+
+        function nleFreshGame() {
+            nleClearSaved();
+            dom.simContainer.innerHTML = NLE_FRAME_HTML;
+            nleCacheDom();
+            nleBindSimEvents();
+            nle.rounds = nleGenerateRounds();
+            nle.idx = 0;
+            nle.pos = nle.rounds[0].start;
+            nle.attempts = 0;
+            nle.results = [];
+            nle.firstAnswer = null;
+            nle.started = true;
+            nleStartRound(false);
+        }
+
+        function devInit() {
+            if (nle.started && nle.phase !== "idle") return; // Start clicked after resume — already running
+            nleFreshGame();
+            // Instructions open automatically when the student presses Start
+            // on the home screen (user decision; QA checklist 2.6). Resumed
+            // sessions after a reload never pass through here, and Play Again
+            // regenerates via nleFreshGame() directly, so neither re-triggers.
+            openInstructionsModal();
+        }
+
+        function devReset() {
+            nleClearSaved();
+            nle.started = false;
+            nle.phase = "idle";
+            nle.results = [];
+            dom.simContainer.innerHTML = NLE_FRAME_HTML;
+        }
+
+        // Modal DOM exists at parse time; bind once.
+        nleCacheDom();
+        nleBindGlobalEvents();
+
+        // Resume a session in progress after a reload (same tab only —
+        // sessionStorage clears when the tab closes, per data-handling rules).
+        (function nleResume() {
+            if (!nleLoad()) return;
+            showScreen("sim");
+            nleCacheDom();
+            nleBindSimEvents();
+            if (nle.phase === "done") {
+                nleRenderSummary();
+                return;
+            }
+            // If the current round was already judged before the reload,
+            // move past it so a shown answer cannot be replayed for gold.
+            let advanced = false;
+            while (nle.idx < NLE_TOTAL_ROUNDS && nle.results[nle.idx]) {
+                nle.idx += 1;
+                advanced = true;
+            }
+            if (nle.idx >= NLE_TOTAL_ROUNDS) {
+                nleFinish();
+                return;
+            }
+            if (advanced) {
+                // Landed on a fresh round boundary — start it cleanly.
+                nleStartRound(false);
+            } else {
+                nleStartRound(true);
+                // Restore Lumi to the saved spot, not the round's start.
+                nleMoveExplorer(false);
+            }
+        })();
+    </script>
+</body>
+
+</html>
