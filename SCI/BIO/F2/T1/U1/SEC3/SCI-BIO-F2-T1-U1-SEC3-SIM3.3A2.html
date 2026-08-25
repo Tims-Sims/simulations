@@ -126,12 +126,12 @@
         .panel { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; position: relative; overflow: hidden; }
         .panel-label { position: absolute; top: 10px; left: 14px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--surface); padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); z-index: 2; }
 
-        .person-panel { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-height: 340px; }
+        .person-panel { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-height: 300px; padding-top: 28px; }
 
-        .person-svg-wrap { width: 160px; height: 260px; margin-bottom: 10px; }
+        .person-svg-wrap { width: 130px; height: 210px; margin-bottom: 12px; }
         .person-svg-wrap svg { width: 100%; height: 100%; }
 
-        .activity-state { font-size: 1rem; font-weight: 700; color: var(--accent); margin-bottom: 8px; min-height: 1.4em; }
+        .activity-state { font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-bottom: 10px; min-height: 1.4em; text-align: center; padding: 0 8px; }
 
         .alveolus-panel { min-height: 340px; }
         .alveolus-canvas-wrap { width: 100%; height: 300px; position: relative; }
@@ -545,9 +545,9 @@
             simState.lastTime = timestamp;
 
             const v = simState.energyDemand;
-            const speed = 0.3 + (v / 100) * 2.5;
-            const spawnRate = 1 + (v / 100) * 8;
-            const breathSpeed = 1 + (v / 100) * 3;
+            const speed = 0.3 + (v / 100) * 4;
+            const spawnRate = 1 + (v / 100) * 10;
+            const breathSpeed = speed;
 
             updateBreathing(dt, breathSpeed);
             updatePersonSVG(dt, speed);
@@ -635,8 +635,8 @@
                 simState.particles.push({
                     x: w * 0.15 + Math.random() * w * 0.35,
                     y: h * 0.12 + Math.random() * h * 0.2,
-                    vx: speed * (0.2 + Math.random() * 0.4),
-                    vy: speed * (0.3 + Math.random() * 0.5),
+                    vx: speed * (0.35 + Math.random() * 0.15),
+                    vy: speed * (0.45 + Math.random() * 0.15),
                     size: 5 + Math.random() * 3,
                     crossed: false,
                     absorbed: false,
@@ -645,15 +645,20 @@
             }
 
             const memY = h * 0.52;
+            const targetMag = speed * 0.5;
 
             for (let i = simState.particles.length - 1; i >= 0; i--) {
                 const p = simState.particles[i];
+                const curMag = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1;
+                const scale = targetMag / curMag;
+                p.vx *= scale;
+                p.vy *= scale;
                 p.x += p.vx * dt * 60;
                 p.y += p.vy * dt * 60;
 
                 if (!p.crossed && p.y >= memY) {
                     p.crossed = true;
-                    p.vy *= 0.5;
+                    p.vy *= 0.85;
                 }
 
                 if (p.x > w + 20 || p.y > h + 20) {
@@ -664,7 +669,7 @@
 
         /* ---- Blood cells drift ---- */
         function updateBloodCells(dt, speed) {
-            const drift = speed * 0.008 * dt * 60;
+            const drift = speed * 0.012 * dt * 60;
             for (const cell of simState.bloodCells) {
                 cell.x += drift;
                 if (cell.x > 1.08) cell.x = -0.08;
