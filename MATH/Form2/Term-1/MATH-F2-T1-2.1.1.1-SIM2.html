@@ -1267,33 +1267,74 @@
             z-index: 100;
         }
 
+        /* Confetti flutters: falls while swaying side to side — no
+           straight-line travel (user decision, 26 Aug 2026). */
         .as-confetti {
-            animation: asConfetti 1.2s cubic-bezier(0.15, 0.6, 0.6, 1) forwards;
+            animation: asConfetti 1.6s cubic-bezier(0.2, 0.5, 0.6, 1) forwards;
         }
 
         @keyframes asConfetti {
             0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-            80% { opacity: 1; }
-            100% { transform: translate(var(--cf-dx, 0px), var(--cf-dy, 700px)) rotate(var(--cf-rot, 540deg)); opacity: 0; }
+            25% { transform: translate(var(--cf-sway, 40px), calc(var(--cf-dy, 700px) * 0.25)) rotate(calc(var(--cf-rot, 540deg) * 0.25)); }
+            50% { transform: translate(calc(var(--cf-sway, 40px) * -0.8), calc(var(--cf-dy, 700px) * 0.5)) rotate(calc(var(--cf-rot, 540deg) * 0.5)); }
+            75% { transform: translate(var(--cf-sway, 40px), calc(var(--cf-dy, 700px) * 0.75)) rotate(calc(var(--cf-rot, 540deg) * 0.75)); opacity: 1; }
+            100% { transform: translate(calc(var(--cf-sway, 40px) * -0.5), var(--cf-dy, 700px)) rotate(var(--cf-rot, 540deg)); opacity: 0; }
         }
 
-        .as-ibis {
-            animation: asFly 1.15s linear forwards;
+        /* Firework rocket: climbs with a little wiggle, then the JS swaps
+           it for a radial burst at the apex. */
+        .as-rocket {
+            animation: asRocket 0.55s cubic-bezier(0.3, 0, 0.6, 1) forwards;
         }
 
-        @keyframes asFly {
+        @keyframes asRocket {
             0% { transform: translate(0, 0); opacity: 1; }
-            100% { transform: translate(var(--fly-dx, 2200px), var(--fly-dy, -60px)); opacity: 1; }
+            30% { transform: translate(var(--rk-sway, 10px), calc(var(--rk-dy, -400px) * 0.35)); }
+            65% { transform: translate(calc(var(--rk-sway, 10px) * -0.7), calc(var(--rk-dy, -400px) * 0.72)); }
+            100% { transform: translate(0, var(--rk-dy, -400px)); opacity: 1; }
         }
 
-        .as-edge-pulse {
-            animation: asEdgePulse 0.45s ease-out forwards;
+        /* Burst spark: shoots outward, then gravity drags it down. */
+        .as-spark {
+            animation: asSpark 0.9s cubic-bezier(0.1, 0.6, 0.5, 1) forwards;
         }
 
-        @keyframes asEdgePulse {
-            0% { opacity: 0; }
-            25% { opacity: 0.8; }
-            100% { opacity: 0; }
+        @keyframes asSpark {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            55% { transform: translate(var(--sk-dx, 60px), var(--sk-dy, -40px)) scale(1); opacity: 1; }
+            100% { transform: translate(calc(var(--sk-dx, 60px) * 1.25), calc(var(--sk-dy, -40px) + 90px)) scale(0.5); opacity: 0; }
+        }
+
+        .as-burst-ring {
+            animation: asBurstRing 0.5s ease-out forwards;
+            transform-origin: center;
+            transform-box: fill-box;
+        }
+
+        @keyframes asBurstRing {
+            0% { transform: scale(0.2); opacity: 0.9; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        /* Wrong drop: dust puff at the stone + a quick card shake. */
+        .as-dust {
+            animation: asDust 0.5s ease-out forwards;
+        }
+
+        @keyframes asDust {
+            0% { transform: translate(0, 0) scale(0.5); opacity: 0.9; }
+            100% { transform: translate(var(--du-dx, 20px), var(--du-dy, -14px)) scale(1.4); opacity: 0; }
+        }
+
+        .as-card-shake {
+            animation: asCardShake 0.35s linear;
+        }
+
+        @keyframes asCardShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-3px); }
         }
 
         .as-sparkle {
@@ -1307,11 +1348,17 @@
 
         @media (prefers-reduced-motion: reduce) {
             .as-confetti,
-            .as-ibis,
-            .as-edge-pulse,
+            .as-rocket,
+            .as-spark,
+            .as-burst-ring,
+            .as-dust,
             .as-sparkle {
                 animation: none;
                 display: none;
+            }
+
+            .as-card-shake {
+                animation: none;
             }
         }
 
@@ -2429,7 +2476,7 @@
             void stoneEl.offsetWidth;
             stoneEl.classList.add("as-bounce");
             playSound("wrong");
-            spawnEdgePulse();
+            spawnDust(stoneEl);
             const bigger = v > want;
             asDom.coach.className = "as-coach bad";
             asDom.coach.textContent = fmtVal(v, round.ctx) + " is " +
@@ -2470,7 +2517,7 @@
             if (star === "gold") {
                 playSound("complete");
                 spawnConfetti(90);
-                spawnIbis();
+                spawnFireworks(4);
             } else if (star === "silver") {
                 playSound("correct");
                 spawnConfetti(40);
@@ -2755,7 +2802,7 @@
                 const g = document.createElementNS(ns, "g");
                 g.appendChild(piece);
                 g.classList.add("as-confetti");
-                g.style.setProperty("--cf-dx", Math.round((Math.random() - 0.5) * 260) + "px");
+                g.style.setProperty("--cf-sway", Math.round((Math.random() - 0.5) * 160) + "px");
                 g.style.setProperty("--cf-dy", (h + 140) + "px");
                 g.style.setProperty("--cf-rot", Math.round(360 + Math.random() * 540) + "deg");
                 g.style.animationDelay = (Math.random() * 0.35) + "s";
@@ -2766,57 +2813,116 @@
             window.setTimeout(() => { cleanupFx(); }, 2400);
         }
 
-        // Gold-round bonus: scarlet ibis flock crossing the page.
-        function spawnIbis() {
-            if (prefersReducedMotion()) return;
-            const { w, h } = fxSetup();
-            const ns = "http://www.w3.org/2000/svg";
-            for (let i = 0; i < 5; i++) {
-                const anchor = document.createElementNS(ns, "g");
-                const y0 = h * 0.18 + i * 34 + Math.random() * 20;
-                const x0 = -160 - i * 70;
-                anchor.setAttribute("transform", "translate(" + x0 + " " + y0 + ")");
-                const bird = document.createElementNS(ns, "g");
-                const wings = document.createElementNS(ns, "polyline");
-                wings.setAttribute("points", "0,2 24,-14 48,2");
-                wings.setAttribute("fill", "none");
-                wings.setAttribute("stroke", "#e0492f");
-                wings.setAttribute("stroke-width", "6");
-                wings.setAttribute("stroke-linecap", "round");
-                const body = document.createElementNS(ns, "polygon");
-                body.setAttribute("points", "16,-4 36,-4 46,-8");
-                body.setAttribute("fill", "#e0492f");
-                bird.appendChild(wings);
-                bird.appendChild(body);
-                bird.classList.add("as-ibis");
-                bird.style.setProperty("--fly-dx", (w + 400 + i * 70) + "px");
-                bird.style.setProperty("--fly-dy", (-h * 0.06 - i * 8) + "px");
-                bird.addEventListener("animationend", () => anchor.remove());
-                anchor.appendChild(bird);
-                asDom.fx.appendChild(anchor);
-            }
-            window.setTimeout(() => { cleanupFx(); }, 2000);
-        }
+        // Gold-round showpiece: fireworks. Each rocket climbs with a
+        // wiggle, then bursts into a ring flash and radial sparks that
+        // arc outward and fall — multi-stage motion, no straight-line
+        // fly-throughs (user decision, 26 Aug 2026).
+        const FX_COLORS = ["#2563eb", "#f59e0b", "#ec4899", "#34d399", "#ffffff"];
 
-        // Wrong drop: fast red pulse around the page edges — reads "no"
-        // instantly without blocking the flow.
-        function spawnEdgePulse() {
-            if (prefersReducedMotion()) return;
-            const { w, h } = fxSetup();
+        function spawnBurst(x, y, color) {
             const ns = "http://www.w3.org/2000/svg";
-            const ring = document.createElementNS(ns, "rect");
-            ring.setAttribute("x", "6");
-            ring.setAttribute("y", "6");
-            ring.setAttribute("width", String(w - 12));
-            ring.setAttribute("height", String(h - 12));
-            ring.setAttribute("rx", "16");
+            // Viewport-scaled burst — big and proud, never timid.
+            const reach = Math.max(120, window.innerHeight * 0.16);
+            const ring = document.createElementNS(ns, "circle");
+            ring.setAttribute("cx", String(x));
+            ring.setAttribute("cy", String(y));
+            ring.setAttribute("r", String(Math.round(reach * 0.45)));
             ring.setAttribute("fill", "none");
-            ring.setAttribute("stroke", "#dc2626");
-            ring.setAttribute("stroke-width", "12");
-            ring.classList.add("as-edge-pulse");
+            ring.setAttribute("stroke", color);
+            ring.setAttribute("stroke-width", "6");
+            ring.classList.add("as-burst-ring");
             ring.addEventListener("animationend", () => ring.remove());
             asDom.fx.appendChild(ring);
-            window.setTimeout(() => { cleanupFx(); }, 800);
+            const sparks = 16;
+            for (let i = 0; i < sparks; i++) {
+                const anchor = document.createElementNS(ns, "g");
+                anchor.setAttribute("transform", "translate(" + x + " " + y + ")");
+                const s = document.createElementNS(ns, "circle");
+                s.setAttribute("r", String(5 + Math.random() * 4));
+                s.setAttribute("fill", i % 3 === 0 ? "#ffffff" : color);
+                const g = document.createElementNS(ns, "g");
+                g.appendChild(s);
+                g.classList.add("as-spark");
+                const ang = (Math.PI * 2 * i) / sparks + Math.random() * 0.4;
+                const dist = reach * (0.7 + Math.random() * 0.6);
+                g.style.setProperty("--sk-dx", Math.round(Math.cos(ang) * dist) + "px");
+                g.style.setProperty("--sk-dy", Math.round(Math.sin(ang) * dist * 0.8 - 20) + "px");
+                g.addEventListener("animationend", () => anchor.remove());
+                anchor.appendChild(g);
+                asDom.fx.appendChild(anchor);
+            }
+        }
+
+        function spawnFireworks(count) {
+            if (prefersReducedMotion()) return;
+            const { w, h } = fxSetup();
+            const ns = "http://www.w3.org/2000/svg";
+            for (let i = 0; i < count; i++) {
+                const color = FX_COLORS[i % FX_COLORS.length];
+                const x0 = w * (0.15 + Math.random() * 0.7);
+                const rise = -(h * (0.35 + Math.random() * 0.3));
+                const delay = i * 260 + Math.random() * 120;
+                window.setTimeout(() => {
+                    const anchor = document.createElementNS(ns, "g");
+                    anchor.setAttribute("transform", "translate(" + x0 + " " + (h + 20) + ")");
+                    const rocket = document.createElementNS(ns, "g");
+                    const flame = document.createElementNS(ns, "circle");
+                    flame.setAttribute("r", "5");
+                    flame.setAttribute("fill", color);
+                    const tail = document.createElementNS(ns, "line");
+                    tail.setAttribute("x1", "0"); tail.setAttribute("y1", "4");
+                    tail.setAttribute("x2", "0"); tail.setAttribute("y2", "22");
+                    tail.setAttribute("stroke", color);
+                    tail.setAttribute("stroke-width", "3");
+                    tail.setAttribute("stroke-linecap", "round");
+                    tail.setAttribute("opacity", "0.6");
+                    rocket.appendChild(tail);
+                    rocket.appendChild(flame);
+                    rocket.classList.add("as-rocket");
+                    rocket.style.setProperty("--rk-dy", Math.round(rise) + "px");
+                    rocket.style.setProperty("--rk-sway", Math.round((Math.random() - 0.5) * 60) + "px");
+                    rocket.addEventListener("animationend", () => {
+                        anchor.remove();
+                        spawnBurst(x0, h + 20 + rise, color);
+                    });
+                    anchor.appendChild(rocket);
+                    asDom.fx.appendChild(anchor);
+                }, delay);
+            }
+            window.setTimeout(() => { cleanupFx(); }, count * 300 + 2200);
+        }
+
+        // Wrong drop: dust puff where the stone landed + a quick shake of
+        // the play card — reads "thud, nope" instantly, stays fast.
+        function spawnDust(stoneEl) {
+            if (prefersReducedMotion()) return;
+            fxSetup();
+            const ns = "http://www.w3.org/2000/svg";
+            const r = stoneEl.getBoundingClientRect();
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height;
+            for (let i = 0; i < 7; i++) {
+                const anchor = document.createElementNS(ns, "g");
+                anchor.setAttribute("transform", "translate(" + cx + " " + cy + ")");
+                const p = document.createElementNS(ns, "circle");
+                p.setAttribute("r", String(4 + Math.random() * 4));
+                p.setAttribute("fill", "#b6a48e");
+                p.setAttribute("opacity", "0.85");
+                const g = document.createElementNS(ns, "g");
+                g.appendChild(p);
+                g.classList.add("as-dust");
+                const ang = Math.PI + (Math.PI * i) / 6; // fan upward-outward
+                g.style.setProperty("--du-dx", Math.round(Math.cos(ang) * (18 + Math.random() * 26)) + "px");
+                g.style.setProperty("--du-dy", Math.round(-8 - Math.random() * 22) + "px");
+                g.addEventListener("animationend", () => anchor.remove());
+                anchor.appendChild(g);
+                asDom.fx.appendChild(anchor);
+            }
+            const card = dom.simContainer;
+            card.classList.remove("as-card-shake");
+            void card.offsetWidth;
+            card.classList.add("as-card-shake");
+            window.setTimeout(() => { card.classList.remove("as-card-shake"); cleanupFx(); }, 600);
         }
 
         // Remove only finished effect nodes (those whose animation ended
