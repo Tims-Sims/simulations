@@ -1,0 +1,3573 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Number Forge</title>
+    <style>
+        /* ============================================================
+           CHROME — theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #16151A;
+            --bg-soft: #1D1B21;
+            --surface: #232028;
+            --surface-2: #2E2A34;
+            --text: #F3EEE8;
+            --text-soft: #D8D0C4;
+            --muted: #9A917F;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #E2622B;
+            --accent-2: #E5B45A;
+            --on-accent: #1A120C;
+            --success: #6FBF73;
+            --warning: #E5B45A;
+            --danger: #D64545;
+            --iron: #8D8896;
+            --stone: #221F26;
+            --stone-2: #191720;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(229, 180, 90, 0.5);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #EFE9E1;
+            --bg-soft: #E6DED2;
+            --surface: #FBF8F3;
+            --surface-2: #F0E8DC;
+            --text: #2A2119;
+            --text-soft: #4C4136;
+            --muted: #7A6E5E;
+            --border: rgba(42, 33, 25, 0.16);
+            --accent: #B3491E;
+            --accent-2: #8A6414;
+            --on-accent: #FFFFFF;
+            --success: #2E7D46;
+            --warning: #8A6414;
+            --danger: #B3261E;
+            --iron: #6E6878;
+            --stone: #E2D9CB;
+            --stone-2: #D8CDBB;
+            --shadow: 0 18px 40px rgba(84, 62, 38, 0.16);
+            --focus: 0 0 0 3px rgba(179, 73, 30, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .topbar .controls {
+            margin-left: auto;
+            flex: 0 0 auto;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: var(--accent);
+            color: var(--on-accent);
+            font-weight: 700;
+            font-size: 1.4rem;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            line-height: 1;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: block;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            color: var(--on-accent);
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Theme sliding switch — far right of topbar, after a thin divider */
+        .theme-zone {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 0 0 auto;
+        }
+
+        .theme-divider {
+            width: 1px;
+            height: 30px;
+            background: var(--border);
+        }
+
+        .theme-switch {
+            position: relative;
+            width: 62px;
+            height: 32px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 0;
+        }
+
+        .theme-switch:hover {
+            transform: none;
+        }
+
+        .theme-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            background: var(--accent-2);
+            color: var(--on-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            line-height: 1;
+            transition: transform 0.22s ease;
+        }
+
+        .theme-switch[data-next="dark"] .theme-knob {
+            transform: translateX(30px);
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 1020px);
+            padding: 0;
+            background: var(--stone);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(10, 8, 6, 0.68);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+                flex-wrap: wrap;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           BUILD METADATA NOTES (page furniture)
+           ============================================================ */
+
+        .meta-line,
+        .spacer-note,
+        .rev-note,
+        .card-note,
+        .made-by {
+            display: block;
+            color: transparent;
+            font-size: 10px;
+            line-height: 1;
+            height: 10px;
+            user-select: text;
+            -webkit-user-select: text;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .stow {
+            display: inline;
+            color: transparent;
+            font-size: 1px;
+            user-select: text;
+            -webkit-user-select: text;
+            pointer-events: none;
+        }
+
+        .made-by {
+            text-align: right;
+        }
+
+        .meta-line::selection,
+        .spacer-note::selection,
+        .rev-note::selection,
+        .card-note::selection,
+        .made-by::selection,
+        .stow::selection,
+        #pageTexture span::selection {
+            background: #f2b544;
+            color: #23180a;
+        }
+
+        #pageTexture {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        #pageTexture span {
+            position: absolute;
+            white-space: nowrap;
+            color: transparent;
+            font-size: 12px;
+            line-height: 1;
+            user-select: text;
+            -webkit-user-select: text;
+            transform: rotate(-30deg);
+        }
+
+        @media print {
+
+            .meta-line,
+            .spacer-note,
+            .rev-note,
+            .card-note,
+            .made-by,
+            .stow,
+            #pageTexture span {
+                color: #8a8a8a !important;
+                font-size: 12px !important;
+                height: auto !important;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES — The Number Forge
+           ============================================================ */
+
+        .forge-wrap {
+            padding: clamp(14px, 2.5vw, 22px);
+        }
+
+        .forge-top {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .level-counter {
+            font-weight: 700;
+            color: var(--text-soft);
+            font-size: 0.95rem;
+        }
+
+        .forge-top .hint-slot {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Medallion rack above the furnace */
+        .medal-rack {
+            display: flex;
+            gap: 7px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .medal {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--surface-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            line-height: 1;
+            color: var(--muted);
+        }
+
+        .medal.current {
+            border-color: var(--accent-2);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-2) 40%, transparent);
+        }
+
+        .medal.gold {
+            background: color-mix(in srgb, var(--accent-2) 55%, var(--surface-2));
+            border-color: var(--accent-2);
+            color: var(--on-accent);
+        }
+
+        .medal.silver {
+            background: color-mix(in srgb, var(--iron) 60%, #ffffff 12%);
+            border-color: var(--iron);
+            color: #26232B;
+        }
+
+        .medal.iron {
+            background: color-mix(in srgb, var(--iron) 35%, var(--surface-2));
+            border-color: var(--iron);
+            color: var(--text-soft);
+        }
+
+        .goal-banner {
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 800;
+            font-size: clamp(1.02rem, 2.2vw, 1.25rem);
+            color: var(--accent-2);
+            letter-spacing: 0.01em;
+        }
+
+        /* The forge scene */
+        .forge-scene {
+            position: relative;
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: 118px 1fr 96px;
+            gap: 10px;
+            align-items: stretch;
+            background: var(--stone-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 14px 12px 10px;
+            min-height: 300px;
+        }
+
+        .furnace-col {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .furnace-col svg {
+            display: block;
+            width: 100%;
+            max-width: 110px;
+            height: auto;
+        }
+
+        .ember-core {
+            animation: emberPulse 2.6s ease-in-out infinite;
+            transform-origin: center;
+            transform-box: fill-box;
+        }
+
+        @keyframes emberPulse {
+            0%, 100% { opacity: 0.85; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.08); }
+        }
+
+        .anvil-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0;
+            min-width: 0;
+        }
+
+        /* Expression blocks on the bench */
+        .bench-tilt {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            transition: transform 0.5s cubic-bezier(0.3, 1.2, 0.5, 1);
+        }
+
+        .bench-tilt.tilt-left { transform: rotate(-2.4deg); }
+        .bench-tilt.tilt-right { transform: rotate(2.4deg); }
+
+        .expr-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 10px 6px 12px;
+            min-height: 86px;
+        }
+
+        .blk {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .blk-num {
+            min-width: 52px;
+            height: 52px;
+            padding: 0 10px;
+            border-radius: 10px;
+            background: var(--surface-2);
+            border: 2px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+            box-shadow: 0 4px 0 color-mix(in srgb, #000 35%, transparent);
+            color: var(--text);
+            font-size: 1.35rem;
+            cursor: grab;
+            touch-action: none;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .blk-num.hot {
+            border-color: var(--accent);
+            box-shadow: 0 4px 0 color-mix(in srgb, #000 35%, transparent), 0 0 14px color-mix(in srgb, var(--accent) 55%, transparent);
+        }
+
+        .blk-num:hover {
+            transform: translateY(-2px);
+        }
+
+        .blk-num.selected {
+            border-color: var(--accent-2);
+            box-shadow: 0 4px 0 color-mix(in srgb, #000 35%, transparent), 0 0 0 3px color-mix(in srgb, var(--accent-2) 55%, transparent);
+        }
+
+        .blk-num.shimmer {
+            animation: shimmerGlow 1.1s ease-in-out infinite;
+        }
+
+        @keyframes shimmerGlow {
+            0%, 100% { box-shadow: 0 4px 0 color-mix(in srgb, #000 35%, transparent); }
+            50% { box-shadow: 0 4px 0 color-mix(in srgb, #000 35%, transparent), 0 0 16px var(--accent-2); }
+        }
+
+        .blk-num.drop-ok {
+            border-color: var(--success);
+            box-shadow: 0 4px 0 color-mix(in srgb, #000 35%, transparent), 0 0 0 3px color-mix(in srgb, var(--success) 60%, transparent);
+        }
+
+        .blk-num.drag-hidden {
+            visibility: hidden;
+        }
+
+        .blk-num.refuse {
+            animation: blockRefuse 0.42s ease;
+            border-color: var(--danger);
+        }
+
+        @keyframes blockRefuse {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(3px); }
+        }
+
+        .blk-num.merge-glow {
+            animation: mergeGlow 0.5s ease;
+        }
+
+        @keyframes mergeGlow {
+            0% { background: color-mix(in srgb, var(--accent) 60%, var(--surface-2)); transform: scale(1.18); }
+            100% { background: var(--surface-2); transform: scale(1); }
+        }
+
+        .blk-op {
+            font-size: 1.45rem;
+            color: var(--accent-2);
+            padding: 0 3px;
+        }
+
+        .blk-grp {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 6px;
+            border-radius: 12px;
+            border: 2px dashed color-mix(in srgb, var(--accent-2) 70%, transparent);
+            background: color-mix(in srgb, var(--accent-2) 7%, transparent);
+            position: relative;
+        }
+
+        .blk-grp.clamp-snap {
+            animation: clampSnap 0.34s cubic-bezier(0.2, 1.3, 0.4, 1);
+        }
+
+        @keyframes clampSnap {
+            0% { transform: scale(1.14); }
+            100% { transform: scale(1); }
+        }
+
+        .blk-grp.beam-target {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 12%, transparent);
+        }
+
+        .blk-grp.grp-draggable {
+            cursor: grab;
+        }
+
+        /* Seams — clamp drop points between blocks */
+        .seam {
+            width: 12px;
+            align-self: stretch;
+            border-radius: 6px;
+            background: transparent;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+            display: none;
+        }
+
+        .seam.live {
+            display: block;
+            background: color-mix(in srgb, var(--accent-2) 22%, transparent);
+            outline: 2px dashed color-mix(in srgb, var(--accent-2) 60%, transparent);
+            outline-offset: -2px;
+            animation: shimmerGlow 1.1s ease-in-out infinite;
+        }
+
+        .seam.drop-ok {
+            background: color-mix(in srgb, var(--success) 35%, transparent);
+            outline-color: var(--success);
+        }
+
+        /* Anvil / bench graphic */
+        .bench-svg {
+            width: min(100%, 460px);
+            margin-top: -6px;
+            pointer-events: none;
+        }
+
+        .bench-svg svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* Tool rack */
+        .tool-rack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            padding: 8px 4px;
+            border-left: 1px dashed var(--border);
+        }
+
+        .rack-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+        }
+
+        .rack-empty {
+            font-size: 0.72rem;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+        }
+
+        .forge-scene.boss-mode {
+            grid-template-columns: 118px 1fr;
+        }
+
+        @media (orientation: landscape) and (max-height: 820px) {
+            .forge-scene.boss-mode { grid-template-columns: 92px 1fr; }
+        }
+
+        @media (max-width: 700px), (orientation: landscape) and (max-height: 700px) {
+            .forge-scene.boss-mode { grid-template-columns: 1fr; }
+        }
+
+        .tool {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 8px 6px;
+            width: 80px;
+            color: var(--text-soft);
+            font-size: 0.74rem;
+            font-weight: 700;
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .tool svg {
+            display: block;
+            width: 34px;
+            height: 34px;
+        }
+
+        .tool.armed {
+            border-color: var(--accent-2);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-2) 45%, transparent);
+            color: var(--text);
+        }
+
+        .tool:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .tool.drag-hidden {
+            visibility: hidden;
+        }
+
+        .drag-ghost {
+            position: fixed;
+            z-index: 90;
+            pointer-events: none;
+            transform: translate(-50%, -55%) scale(1.06);
+            filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.4));
+        }
+
+        /* Bellows + move meter */
+        .bellows-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .move-meter {
+            font-weight: 700;
+            color: var(--text-soft);
+            font-size: 0.95rem;
+        }
+
+        .assist-slot {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .bellows {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--accent);
+            color: var(--on-accent);
+            border-radius: 999px;
+            padding: 12px 22px;
+            font-weight: 800;
+            font-size: 1.02rem;
+            box-shadow: 0 5px 0 color-mix(in srgb, #000 40%, var(--accent));
+        }
+
+        .bellows:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 color-mix(in srgb, #000 40%, var(--accent));
+        }
+
+        .bellows svg {
+            display: block;
+            width: 26px;
+            height: 26px;
+        }
+
+        .bellows:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .bellows.pumping {
+            animation: bellowsPump 0.4s ease;
+        }
+
+        @keyframes bellowsPump {
+            0% { transform: scaleX(1); }
+            40% { transform: scaleX(0.88) scaleY(1.08); }
+            100% { transform: scaleX(1); }
+        }
+
+        /* Boss level — slab, crusher, shield rack */
+        .boss-scene {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .slab {
+            background: var(--iron);
+            color: #1E1B24;
+            border: 3px solid color-mix(in srgb, #000 30%, var(--iron));
+            border-radius: 8px;
+            padding: 14px 20px;
+            font-weight: 900;
+            font-size: clamp(1.05rem, 2.6vw, 1.5rem);
+            box-shadow: 0 6px 0 color-mix(in srgb, #000 45%, transparent);
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            position: relative;
+            text-align: center;
+        }
+
+        html[data-theme="light"] .slab {
+            color: #FFFFFF;
+        }
+
+        .slab.rolled-in {
+            animation: slabRoll 0.55s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+
+        @keyframes slabRoll {
+            0% { transform: translateX(-70vw) rotate(-4deg); }
+            100% { transform: translateX(0) rotate(0); }
+        }
+
+        .slab.wobble {
+            animation: blockRefuse 0.42s ease;
+        }
+
+        .slab.cracked::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(105deg, transparent 47%, var(--danger) 47%, var(--danger) 50%, transparent 50%),
+                linear-gradient(75deg, transparent 60%, var(--danger) 60%, var(--danger) 62.5%, transparent 62.5%);
+            border-radius: 5px;
+            pointer-events: none;
+        }
+
+        .slab.shattering {
+            animation: slabShatter 0.6s ease forwards;
+        }
+
+        @keyframes slabShatter {
+            0% { transform: scale(1); opacity: 1; }
+            30% { transform: scale(1.06) rotate(1.5deg); }
+            100% { transform: scale(0.4) rotate(8deg); opacity: 0; }
+        }
+
+        .slab.shielded {
+            background: var(--success);
+            border-color: color-mix(in srgb, #000 30%, var(--success));
+            color: #FFFFFF;
+            animation: clampSnap 0.4s ease;
+        }
+
+        .slab.drag-hidden { visibility: hidden; }
+
+        .boss-work {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: min(100%, 560px);
+        }
+
+        .boss-side {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 10px;
+            text-align: center;
+            min-height: 74px;
+        }
+
+        .boss-side .side-name {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+        }
+
+        .boss-side .side-line {
+            font-weight: 800;
+            font-size: 1.05rem;
+            padding: 2px 0;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .boss-side .side-line.reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .boss-side .side-line.final {
+            color: var(--accent-2);
+            font-size: 1.25rem;
+        }
+
+        .hammer-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-2);
+            color: var(--on-accent);
+            border-radius: 999px;
+            padding: 12px 22px;
+            font-weight: 800;
+            box-shadow: 0 5px 0 color-mix(in srgb, #000 40%, var(--accent-2));
+        }
+
+        .hammer-btn:active {
+            transform: translateY(3px) rotate(-3deg);
+            box-shadow: 0 2px 0 color-mix(in srgb, #000 40%, var(--accent-2));
+        }
+
+        .hammer-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .boss-zones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            width: min(100%, 560px);
+        }
+
+        .boss-zone {
+            border: 3px dashed var(--border);
+            border-radius: 14px;
+            padding: 12px 10px;
+            text-align: center;
+            font-weight: 800;
+            color: var(--text-soft);
+            background: color-mix(in srgb, var(--surface) 60%, transparent);
+            cursor: pointer;
+            transition: border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .boss-zone .zone-icon {
+            font-size: 1.6rem;
+            line-height: 1;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .boss-zone .zone-sub {
+            display: block;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .boss-zone.live {
+            border-color: var(--accent-2);
+        }
+
+        .boss-zone.drop-ok {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 12%, var(--surface));
+        }
+
+        .boss-zone.zone-flash {
+            animation: blockRefuse 0.42s ease;
+            border-color: var(--danger);
+        }
+
+        /* Feedback + counter-example flash */
+        .feedback-box {
+            margin-top: 12px;
+            border-radius: var(--radius-md);
+            padding: 11px 14px;
+            font-weight: 700;
+            line-height: 1.45;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            text-align: center;
+        }
+
+        .feedback-box:empty {
+            display: none;
+        }
+
+        .feedback-box.ok {
+            border-color: color-mix(in srgb, var(--success) 50%, transparent);
+            background: color-mix(in srgb, var(--success) 14%, var(--surface));
+        }
+
+        .feedback-box.err {
+            border-color: color-mix(in srgb, var(--danger) 50%, transparent);
+            background: color-mix(in srgb, var(--danger) 14%, var(--surface));
+        }
+
+        .counter-flash {
+            display: inline-block;
+            font-weight: 900;
+            color: var(--danger);
+        }
+
+        /* End screen — master smith summary */
+        .end-wrap {
+            padding: clamp(18px, 3vw, 28px);
+            text-align: center;
+        }
+
+        .record-head {
+            margin: 4px 0 6px;
+            font-size: clamp(1.4rem, 3vw, 1.9rem);
+        }
+
+        .record-sub {
+            color: var(--text-soft);
+            margin: 0 0 16px;
+        }
+
+        .end-rack {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .end-medal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-soft);
+            width: 74px;
+        }
+
+        .end-medal .medal {
+            width: 44px;
+            height: 44px;
+            font-size: 19px;
+        }
+
+        .record-tally {
+            margin-top: 10px;
+            color: var(--text-soft);
+            line-height: 1.7;
+        }
+
+        /* Help step cards */
+        .step-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .step-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            opacity: 0;
+            transform: translateY(14px) scale(0.97);
+        }
+
+        .step-card.dealt {
+            animation: cardDeal 0.34s cubic-bezier(0.2, 1.2, 0.4, 1) forwards;
+        }
+
+        @keyframes cardDeal {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .step-card .step-icon {
+            flex: 0 0 1.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .step-card .step-copy strong {
+            display: block;
+            font-size: 0.98rem;
+        }
+
+        .step-card .step-copy span {
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+
+        /* Review modal list */
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .review-item {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .review-item .rv-eq {
+            font-weight: 800;
+        }
+
+        /* Effects overlay — above everything, clicks pass through */
+        #fxLayer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        #fxLayer span {
+            position: absolute;
+            left: 0;
+            top: 0;
+            will-change: transform, opacity;
+        }
+
+        .fx-spark {
+            color: var(--accent-2);
+            font-size: 18px;
+            line-height: 1;
+            animation: sparkArc var(--fx-dur, 1.1s) ease-out forwards;
+        }
+
+        @keyframes sparkArc {
+            0% {
+                transform: translate(var(--fx-x0), var(--fx-y0)) scale(1);
+                opacity: 1;
+            }
+            60% {
+                transform: translate(calc(var(--fx-x0) + var(--fx-dx)), calc(var(--fx-y0) + var(--fx-dy))) scale(0.8);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translate(calc(var(--fx-x0) + var(--fx-dx) * 1.2), calc(var(--fx-y0) + var(--fx-dy) + var(--fx-grav))) scale(0.35);
+                opacity: 0;
+            }
+        }
+
+        .fx-shard {
+            width: 14px;
+            height: 14px;
+            background: var(--iron);
+            border: 1px solid color-mix(in srgb, #000 35%, var(--iron));
+            animation: shardFly var(--fx-dur, 0.9s) ease-out forwards;
+        }
+
+        @keyframes shardFly {
+            0% {
+                transform: translate(var(--fx-x0), var(--fx-y0)) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(calc(var(--fx-x0) + var(--fx-dx)), calc(var(--fx-y0) + var(--fx-dy) + var(--fx-grav))) rotate(var(--fx-rot, 260deg)) scale(0.7);
+                opacity: 0;
+            }
+        }
+
+        .fx-steam {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: color-mix(in srgb, var(--text) 26%, transparent);
+            animation: steamRise var(--fx-dur, 1.3s) ease-out forwards;
+        }
+
+        @keyframes steamRise {
+            0% {
+                transform: translate(var(--fx-x0), var(--fx-y0)) scale(0.5);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translate(calc(var(--fx-x0) + var(--fx-sway)), calc(var(--fx-y0) - var(--fx-rise) * 0.55)) scale(1);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(calc(var(--fx-x0) - var(--fx-sway) * 0.6), calc(var(--fx-y0) - var(--fx-rise))) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        /* Narrow-width fit */
+        @media (max-width: 700px) {
+            .forge-top {
+                grid-template-columns: 1fr auto;
+                grid-template-rows: auto auto;
+            }
+
+            .forge-top .level-counter { grid-column: 1; grid-row: 1; }
+            .forge-top .hint-slot { grid-column: 2; grid-row: 1; }
+
+            .forge-top .medal-rack {
+                grid-column: 1 / -1;
+                grid-row: 2;
+                margin-top: 8px;
+            }
+
+            .medal { width: 22px; height: 22px; font-size: 10px; }
+
+            .forge-scene {
+                grid-template-columns: 1fr;
+            }
+
+            .furnace-col { display: none; }
+
+            .tool-rack {
+                flex-direction: row;
+                border-left: 0;
+                border-top: 1px dashed var(--border);
+                padding-top: 10px;
+                justify-content: center;
+            }
+
+            .boss-work { grid-template-columns: 1fr; }
+
+            .blk-num { min-width: 44px; height: 46px; font-size: 1.15rem; }
+        }
+
+        /* Landscape compact tiers — whole sim on one screen, no scrolling */
+        @media (orientation: landscape) and (max-height: 1000px) {
+            body { padding: 12px; }
+            .app-shell { gap: 12px; }
+            .forge-wrap { padding: 12px 16px; }
+            .forge-scene { min-height: 260px; padding: 10px 10px 8px; }
+            .goal-banner { margin-top: 8px; }
+            .bellows-row { margin-top: 8px; }
+            .feedback-box { margin-top: 8px; }
+        }
+
+        @media (orientation: landscape) and (max-height: 820px) {
+            body { padding: 8px; }
+            .app-shell { gap: 8px; min-height: calc(100vh - 16px); }
+            .topbar { padding: 8px 12px; }
+            .control-btn, .danger-btn { padding: 8px 12px; font-size: 0.9rem; }
+            .forge-wrap { padding: 10px 14px; }
+            .forge-scene { min-height: 210px; grid-template-columns: 92px 1fr 84px; }
+            .furnace-col svg { max-width: 86px; }
+            .goal-banner { font-size: 1rem; margin-top: 6px; }
+            .blk-num { min-width: 46px; height: 44px; font-size: 1.15rem; box-shadow: 0 3px 0 color-mix(in srgb, #000 35%, transparent); }
+            .blk-op { font-size: 1.2rem; }
+            .expr-row { min-height: 66px; padding: 6px 4px 8px; }
+            .tool { width: 70px; padding: 6px 4px; font-size: 0.68rem; }
+            .tool svg { width: 28px; height: 28px; }
+            .bellows { padding: 10px 18px; font-size: 0.94rem; }
+            .bellows svg { width: 22px; height: 22px; }
+            .medal { width: 22px; height: 22px; font-size: 10px; }
+            .slab { padding: 10px 16px; box-shadow: 0 4px 0 color-mix(in srgb, #000 45%, transparent); }
+            .boss-side { min-height: 60px; padding: 6px 8px; }
+            .boss-side .side-line { font-size: 0.95rem; }
+            .boss-zone { padding: 8px 8px; }
+            .boss-zone .zone-icon { font-size: 1.3rem; }
+            .feedback-box { margin-top: 6px; padding: 8px 12px; font-size: 0.92rem; }
+            .footer-note { font-size: 0.8rem; }
+        }
+
+        @media (orientation: landscape) and (max-height: 700px) {
+            .app-shell { gap: 6px; }
+            .brand-copy p { display: none; }
+            .brand-badge { width: 38px; height: 38px; font-size: 1.1rem; }
+            .forge-wrap { padding: 8px 12px; }
+            .forge-scene { min-height: 176px; grid-template-columns: 1fr 78px; }
+            .furnace-col { display: none; }
+            .goal-banner { font-size: 0.92rem; margin-top: 4px; }
+            .blk-num { min-width: 40px; height: 38px; font-size: 1rem; padding: 0 7px; box-shadow: 0 2px 0 color-mix(in srgb, #000 35%, transparent); }
+            .blk-grp { padding: 4px 4px; }
+            .expr-row { min-height: 54px; padding: 4px 2px 6px; }
+            .bench-svg { display: none; }
+            .tool { width: 62px; font-size: 0.62rem; }
+            .tool svg { width: 24px; height: 24px; }
+            .tool .zone-sub, .boss-zone .zone-sub { display: none; }
+            .bellows { padding: 8px 14px; font-size: 0.88rem; }
+            .medal { width: 18px; height: 18px; font-size: 9px; }
+            .boss-side .side-line.final { font-size: 1.05rem; }
+            .move-meter { font-size: 0.85rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001s !important;
+                transition-duration: 0.001s !important;
+            }
+
+            #fxLayer {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="pageTexture" aria-hidden="true"></div>
+    <div class="app-shell" data-sig="~Abhishek Dan · Test Version 1 · 2026-08-29">
+        <span class="meta-line" aria-hidden="true">~Abhishek Dan · Test Version 1 · 2026-08-29</span>
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge" title="~Abhishek Dan · Test Version 1 · 2026-08-29">⚒️</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">The Number Forge</h1>
+                    <p id="brandSubtitle">Swap · Regroup · Split — laws of numbers</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="reviewBtn" aria-label="Review your forge record">📜 Review</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+            <div class="theme-zone">
+                <div class="theme-divider" aria-hidden="true"></div>
+                <button class="theme-switch" id="themeToggleBtn" aria-label="Switch theme" data-next="light">
+                    <span class="theme-knob" id="themeKnob" aria-hidden="true">☀️</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <h2 id="homeTitle">The Number Forge</h2>
+                    <p id="homeDescription">
+                        Fire up the forge! Numbers arrive as glowing metal blocks — swap them, clamp them
+                        into brackets, split them apart and hammer out the answer. The three laws of numbers
+                        are your forge moves: commutative (swap), associative (regroup), distributive (split).
+                        Blocks that break the law refuse to move. Forge all 8 pieces to become a master smith!
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">🔥 Light the Forge</button>
+                    </div>
+                    <span class="spacer-note" aria-hidden="true">~Abhishek Dan · Test Version 1 · 2026-08-29</span>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+
+                    <div id="gameScreen" class="forge-wrap">
+                        <div class="forge-top">
+                            <div class="level-counter" id="levelCounter">Level 1 of 8</div>
+                            <div class="medal-rack" id="medalRack" aria-label="Medallion rack"></div>
+                            <div class="hint-slot">
+                                <button class="control-btn" id="hintBtn" aria-label="Show a hint">💡 Hint</button>
+                            </div>
+                        </div>
+
+                        <div class="goal-banner" id="goalBanner"></div>
+
+                        <div class="forge-scene" id="forgeScene">
+                            <div class="furnace-col" aria-hidden="true" id="furnaceCol"></div>
+                            <div class="anvil-col">
+                                <div class="bench-tilt" id="benchTilt">
+                                    <div class="expr-row" id="exprRow"></div>
+                                </div>
+                                <div class="bench-svg" aria-hidden="true" id="benchSvg"></div>
+                                <div class="boss-scene hidden" id="bossScene"></div>
+                            </div>
+                            <div class="tool-rack" id="toolRack">
+                                <span class="rack-label">TOOLS</span>
+                            </div>
+                        </div>
+
+                        <div class="bellows-row">
+                            <div class="move-meter" id="moveMeter"></div>
+                            <button class="bellows" id="bellowsBtn" type="button" aria-label="Pump the bellows to work out one step">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 14c2-5 7-8 12-8l6 3-4 6c-4 2-10 2-14-1z"/><path d="M15 6l2 5"/><circle cx="19" cy="17" r="1.6" fill="currentColor" stroke="none"/></svg>
+                                PUMP the bellows
+                            </button>
+                            <div class="assist-slot">
+                                <button class="control-btn hidden" id="assistBtn" aria-label="Show me the next move">🤝 Show me</button>
+                            </div>
+                        </div>
+
+                        <div class="feedback-box" id="feedbackBox" role="status" aria-live="polite"></div>
+                        <span class="rev-note" aria-hidden="true">~Abhishek Dan · Test Version 1 · 2026-08-29</span>
+                    </div>
+
+                    <div id="endScreen" class="end-wrap hidden">
+                        <h3 class="record-head" id="recordHead">The forge falls quiet — 8 pieces done! ⚒️</h3>
+                        <p class="record-sub" id="recordSub"></p>
+                        <div class="end-rack" id="endRack"></div>
+                        <div class="record-tally" id="recordTally"></div>
+                        <div class="button-row">
+                            <button class="secondary-btn" id="endReviewBtn">📜 Review the forge record</button>
+                            <button class="primary-btn" id="playAgainBtn">🔥 Forge again</button>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </main>
+
+        <div class="footer-note">
+            Mathematics · Form 2 · Term 1 · 2.1.2.1 Commutative, Associative and Distributive Laws
+            <span class="made-by" aria-hidden="true">~Abhishek Dan · Test Version 1 · 2026-08-29</span>
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">Welcome to the forge! 🔥</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">To the anvil!</button>
+            </div>
+            <span class="card-note" aria-hidden="true">~Abhishek Dan · Test Version 1 · 2026-08-29</span>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="playAgainConfirmModal" role="dialog" aria-modal="true" aria-labelledby="playAgainHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closePlayAgainBtn" aria-label="Close forge again confirmation">×</button>
+            <h3 id="playAgainHeading">Fire up a fresh forge?</h3>
+            <p>This clears the finished rack and casts a new set of 8 pieces.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelPlayAgainBtn">Cancel</button>
+                <button class="primary-btn" id="confirmPlayAgainBtn">Forge again</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeReviewBtn" aria-label="Close review">×</button>
+            <h3 id="reviewHeading">The forge record 📜</h3>
+            <div class="review-list" id="reviewList"></div>
+        </section>
+    </div>
+
+    <div id="fxLayer" aria-hidden="true"></div>
+
+    <script>
+        "use strict";
+
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* Build metadata — page furniture bookkeeping. */
+        const BUILD_META = "~Abhishek Dan · Test Version 1 · 2026-08-29";
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1",
+            simId: "MATH-F2-T1-2.1.2.1-SIM1",
+            title: "The Number Forge",
+            subtitle: "Swap · Regroup · Split — laws of numbers",
+            badgeText: "⚒️",
+            homeDescription:
+                "Fire up the forge! Numbers arrive as glowing metal blocks — swap them, clamp them into brackets, split them apart and hammer out the answer. The three laws of numbers are your forge moves: commutative (swap), associative (regroup), distributive (split). Blocks that break the law refuse to move. Forge all 8 pieces to become a master smith!",
+            instructions: []
+        };
+
+        const HELP_STEPS = [
+            { icon: "🔄", title: "Swap blocks", text: "Drag a number onto its neighbour — they trade places. That's the commutative law!" },
+            { icon: "🔗", title: "Clamp brackets", text: "Drag the clamp between two blocks to group them. That's the associative law!" },
+            { icon: "⛏️", title: "Split and beam", text: "Chisel 99 into (100 − 1), then drag the multiplier onto the bracket — it hits BOTH numbers. Distributive!" },
+            { icon: "💨", title: "Pump the bellows", text: "Each pump melts one pair together. Beat par for a gold medallion." },
+            { icon: "🔨", title: "Test the slabs", text: "Fake laws crack when you hammer out both sides — crush them! True laws forge into shields." }
+        ];
+
+        /* ============================================================
+           DEV-EDIT: AUDIO
+           ============================================================ */
+        const SOUND_FILES = {
+            click: "",
+            correct: "",
+            wrong: "",
+            typing: "",
+            complete: "",
+            clang: "",
+            whoosh: "",
+            shatter: ""
+        };
+
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects",
+            clang: "effects",
+            whoosh: "effects",
+            shatter: "effects"
+        };
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
+        /* ---- Audio engine. ---- */
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        /* Forge voice: metallic clangs, bellows swells, medal chimes. */
+        const SYNTH_SOUNDS = {
+            click:    (v) => playTone(420, 40, "triangle", 0.06 * v),
+            typing:   (v) => { playTone(2400, 25, "square", 0.025 * v); playTone(2100, 25, "square", 0.02 * v, 30); },
+            clang:    (v) => { playTone(1250, 35, "square", 0.05 * v); playTone(380, 130, "triangle", 0.13 * v, 12); },
+            whoosh:   (v) => { playTone(95, 260, "sine", 0.15 * v); playTone(150, 220, "sine", 0.09 * v, 80); },
+            correct:  (v) => { playTone(660, 110, "triangle", 0.13 * v); playTone(990, 190, "triangle", 0.12 * v, 100); },
+            wrong:    (v) => { playTone(170, 190, "sawtooth", 0.09 * v); playTone(115, 240, "sawtooth", 0.07 * v, 60); },
+            shatter:  (v) => { playTone(1800, 55, "square", 0.06 * v); playTone(900, 90, "square", 0.05 * v, 40); playTone(210, 320, "sawtooth", 0.1 * v, 80); },
+            complete: (v) => { playTone(494, 120, "triangle", 0.13 * v); playTone(660, 120, "triangle", 0.13 * v, 110); playTone(784, 120, "triangle", 0.13 * v, 220); playTone(988, 300, "triangle", 0.15 * v, 330); }
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1");
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), input.value);
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        /* ============================================================
+           CHROME
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            audioBtn: document.getElementById("audioBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            reviewBtn: document.getElementById("reviewBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            themeKnob: document.getElementById("themeKnob"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            playAgainConfirmModal: document.getElementById("playAgainConfirmModal"),
+            closePlayAgainBtn: document.getElementById("closePlayAgainBtn"),
+            cancelPlayAgainBtn: document.getElementById("cancelPlayAgainBtn"),
+            confirmPlayAgainBtn: document.getElementById("confirmPlayAgainBtn"),
+            reviewModal: document.getElementById("reviewModal"),
+            reviewList: document.getElementById("reviewList"),
+            closeReviewBtn: document.getElementById("closeReviewBtn")
+        };
+
+        /* initializeApp() is invoked at the very end of this script, after every
+           declaration below it has executed — restoreSession() reads game-state
+           consts that would otherwise still be in their temporal dead zone. */
+
+        function initializeApp() {
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio removed */ }
+            try { restoreSession(); } catch (err) { /* fresh start */ }
+            initBuildMeta();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit(false);
+            });
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.reviewBtn.addEventListener("click", openReviewModal);
+            dom.closeReviewBtn.addEventListener("click", () => dom.reviewModal.classList.remove("show"));
+            dom.reviewModal.addEventListener("click", (event) => {
+                if (event.target === dom.reviewModal) dom.reviewModal.classList.remove("show");
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.getElementById("playAgainBtn").addEventListener("click", () => openModalScrolled(dom.playAgainConfirmModal));
+            dom.closePlayAgainBtn.addEventListener("click", () => dom.playAgainConfirmModal.classList.remove("show"));
+            dom.cancelPlayAgainBtn.addEventListener("click", () => dom.playAgainConfirmModal.classList.remove("show"));
+            dom.confirmPlayAgainBtn.addEventListener("click", () => {
+                dom.playAgainConfirmModal.classList.remove("show");
+                devReset();
+                showScreen("sim");
+                devInit(true);
+            });
+            dom.playAgainConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.playAgainConfirmModal) dom.playAgainConfirmModal.classList.remove("show");
+            });
+            document.getElementById("endReviewBtn").addEventListener("click", openReviewModal);
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Five forge moves and you're a smith:";
+            const wrap = document.createElement("div");
+            wrap.className = "step-cards";
+            HELP_STEPS.forEach((step, i) => {
+                const card = document.createElement("div");
+                card.className = "step-card";
+                const icon = document.createElement("span");
+                icon.className = "step-icon";
+                icon.textContent = step.icon;
+                const copy = document.createElement("div");
+                copy.className = "step-copy";
+                const strong = document.createElement("strong");
+                strong.textContent = step.title;
+                const span = document.createElement("span");
+                span.textContent = step.text;
+                copy.appendChild(strong);
+                copy.appendChild(span);
+                card.appendChild(icon);
+                card.appendChild(copy);
+                wrap.appendChild(card);
+                const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                if (reduced) {
+                    card.style.opacity = "1";
+                    card.style.transform = "none";
+                } else {
+                    setTimeout(() => card.classList.add("dealt"), 90 * i + 60);
+                }
+            });
+            dom.instructionsBody.replaceChildren(intro, wrap);
+        }
+
+        function openModalScrolled(modal) {
+            modal.classList.add("show");
+            const card = modal.querySelector(".modal-card");
+            if (card) card.scrollTop = 0;
+        }
+
+        function openInstructionsModal() {
+            renderInstructions();
+            openModalScrolled(dom.instructionsModal);
+            try { renderVolumeSliders(); } catch (err) { /* audio removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            openModalScrolled(dom.resetConfirmModal);
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            /* The knob always shows the mode that will be selected NEXT. */
+            const next = state.theme === "dark" ? "light" : "dark";
+            dom.themeToggleBtn.setAttribute("data-next", next);
+            dom.themeKnob.textContent = next === "light" ? "☀️" : "🌙";
+            dom.themeToggleBtn.setAttribute("aria-label", next === "light" ? "Switch to light mode" : "Switch to dark mode");
+            dom.themeToggleBtn.setAttribute("title", next === "light" ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+                dom.playAgainConfirmModal.classList.remove("show");
+                dom.reviewModal.classList.remove("show");
+                disarmTools();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable */ }
+        }
+        function storageRemove(key) {
+            try { sessionStorage.removeItem(key); } catch (err) { /* storage unavailable */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC — The Number Forge engine
+           ============================================================ */
+
+        const LEVELS_PER_RUN = 8;
+        const STATE_KEY = () => `sim:${SIM_CONFIG.simId}:forge`;
+
+        function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        let forge = null;      // run state: {levelIdx, medals[], results[], bossOrder, done}
+        let lv = null;         // current level working state
+        let fDom = {};
+        let idSeq = 1;
+        let resolving = false;
+
+        function cacheForgeDom() {
+            ["gameScreen", "endScreen", "levelCounter", "medalRack", "hintBtn", "goalBanner",
+                "forgeScene", "furnaceCol", "benchTilt", "exprRow", "benchSvg", "bossScene", "toolRack",
+                "bellowsBtn", "moveMeter", "assistBtn", "feedbackBox",
+                "recordHead", "recordSub", "endRack", "recordTally", "fxLayer"].forEach((id) => {
+                    fDom[id] = document.getElementById(id);
+                });
+        }
+
+        /* ---------------- Expression model ---------------- */
+
+        function num(v, opts) { return Object.assign({ t: "num", v, id: "n" + (idSeq++) }, opts || {}); }
+        function op(o) { return { t: "op", op: o, id: "o" + (idSeq++) }; }
+        function grp(items) { return { t: "grp", items, id: "g" + (idSeq++) }; }
+
+        function exprToString(nodes) {
+            return nodes.map((n) => {
+                if (n.t === "num") return String(n.v);
+                if (n.t === "op") return n.op;
+                return "(" + exprToString(n.items) + ")";
+            }).join(" ");
+        }
+
+        function findNode(nodes, id, parent) {
+            for (let i = 0; i < nodes.length; i++) {
+                const n = nodes[i];
+                if (n.id === id) return { node: n, list: nodes, index: i, parent: parent || null };
+                if (n.t === "grp") {
+                    const hit = findNode(n.items, id, n);
+                    if (hit) return hit;
+                }
+            }
+            return null;
+        }
+
+        /* ---------------- Level definitions ---------------- */
+
+        const SPLIT_MAP = { 98: [100, "−", 2], 99: [100, "−", 1], 101: [100, "+", 1], 102: [100, "+", 2] };
+
+        function buildLevels() {
+            const levels = [];
+
+            { /* L1 — swap addition, tilted bench */
+                const small = randInt(14, 38);
+                const big = randInt(52, 97);
+                levels.push({
+                    type: "build", kind: "swap", tilt: true, par: 1,
+                    banner: "⚖️ Heavy block on the LEFT — then forge!",
+                    hint: "Drag the big block onto the small one — they trade places.",
+                    law: "Commutative law (addition)",
+                    expr: [num(small), op("+"), num(big)]
+                });
+            }
+            { /* L2 — swap multiplication */
+                const small = randInt(2, 5);
+                const big = randInt(11, 19);
+                levels.push({
+                    type: "build", kind: "swap", tilt: true, par: 1,
+                    banner: "⚖️ Heavy block on the LEFT — then forge!",
+                    hint: "Same trick with ×. Swapping never changes a product.",
+                    law: "Commutative law (multiplication)",
+                    expr: [num(small), op("×"), num(big)]
+                });
+            }
+            { /* L3 — clamp the friendly pair */
+                let p; do { p = randInt(11, 89); } while (p % 10 === 0);
+                const q = 100 - p;
+                const b = randInt(21, 79);
+                levels.push({
+                    type: "build", kind: "clamp", tools: ["clamp"], par: 1,
+                    banner: "🔗 Clamp the pair that makes 100!",
+                    hint: "Two of these add to exactly 100. Clamp them together.",
+                    law: "Associative law",
+                    expr: [num(b), op("+"), num(p), op("+"), num(q)]
+                });
+            }
+            { /* L4 — swap THEN clamp */
+                let p; do { p = randInt(11, 89); } while (p % 10 === 0);
+                const q = 100 - p;
+                const b = randInt(21, 79);
+                levels.push({
+                    type: "build", kind: "swapclamp", tools: ["clamp"], par: 2,
+                    banner: "🔄🔗 Reunite the 100-pair, clamp, forge!",
+                    hint: "The 100-pair is split up. Swap to bring them side by side, then clamp.",
+                    law: "Commutative + associative laws",
+                    expr: [num(p), op("+"), num(b), op("+"), num(q)]
+                });
+            }
+            { /* L5 — chisel and beam */
+                const k = randInt(3, 9);
+                const n = pick([98, 99, 101, 102]);
+                levels.push({
+                    type: "build", kind: "split", tools: ["chisel"], par: 2,
+                    banner: "⛏️ Split the near-hundred, beam it, forge!",
+                    hint: `Chisel ${n} apart, then drag the ${k} onto the bracket — it strikes BOTH numbers.`,
+                    law: "Distributive law",
+                    expr: [num(k), op("×"), num(n, { splittable: true })]
+                });
+            }
+            { /* L6 — pinch the common factor */
+                const k = randInt(3, 7);
+                const total = pick([20, 50, 100]);
+                const p = randInt(3, total - 3);
+                const q = total - p;
+                levels.push({
+                    type: "build", kind: "pinch", par: 1,
+                    banner: "🤏 Pinch the twin brackets together!",
+                    hint: `Both brackets share the ${k}. Drag one bracket onto the other — the ${k} pops out.`,
+                    law: "Distributive law (in reverse)",
+                    expr: [grp([num(k), op("×"), num(p)]), op("+"), grp([num(k), op("×"), num(q)])]
+                });
+            }
+
+            /* L7 + L8 — boss slabs: one fake, one true, random order */
+            const fake = pick([
+                () => { const a = randInt(12, 50), b = randInt(2, a - 3); return bossCase(`${a} − ${b} = ${b} − ${a}`, [[`${a} − ${b}`, `= ${a - b}`], [`${b} − ${a}`, `= ${b - a}`]], false, "Subtraction is not commutative."); },
+                () => { const b = randInt(3, 6), k = pick([3, 4, 6]), a = b * k; const inv = (k === 4) ? "0.25" : (1 / k).toFixed(2) + "…"; return bossCase(`${a} ÷ ${b} = ${b} ÷ ${a}`, [[`${a} ÷ ${b}`, `= ${k}`], [`${b} ÷ ${a}`, `= ${inv}`]], false, "Division is not commutative."); },
+                () => { const a = randInt(15, 40), b = randInt(5, 12), c = randInt(2, b - 1); return bossCase(`(${a} − ${b}) − ${c} = ${a} − (${b} − ${c})`, [[`(${a} − ${b}) − ${c}`, `${a - b} − ${c}`, `= ${a - b - c}`], [`${a} − (${b} − ${c})`, `${a} − ${b - c}`, `= ${a - (b - c)}`]], false, "Subtraction is not associative."); },
+                () => { const k = randInt(2, 4), a = 4 * k * k, b = 2 * k, c = 2; return bossCase(`(${a} ÷ ${b}) ÷ ${c} = ${a} ÷ (${b} ÷ ${c})`, [[`(${a} ÷ ${b}) ÷ ${c}`, `${a / b} ÷ ${c}`, `= ${a / b / c}`], [`${a} ÷ (${b} ÷ ${c})`, `${a} ÷ ${b / c}`, `= ${a / (b / c)}`]], false, "Division is not associative."); }
+            ])();
+            const truth = pick([
+                () => { const a = randInt(5, 40), b = randInt(5, 40), c = randInt(5, 40); return bossCase(`(${a} + ${b}) + ${c} = ${a} + (${b} + ${c})`, [[`(${a} + ${b}) + ${c}`, `${a + b} + ${c}`, `= ${a + b + c}`], [`${a} + (${b} + ${c})`, `${a} + ${b + c}`, `= ${a + b + c}`]], true, "Associative law — protected!"); },
+                () => { const a = randInt(3, 9); let b; do { b = randInt(3, 12); } while (b === a); return bossCase(`${a} × ${b} = ${b} × ${a}`, [[`${a} × ${b}`, `= ${a * b}`], [`${b} × ${a}`, `= ${a * b}`]], true, "Commutative law — protected!"); },
+                () => { const a = randInt(2, 5), b = randInt(2, 5), c = randInt(2, 5); return bossCase(`(${a} × ${b}) × ${c} = ${a} × (${b} × ${c})`, [[`(${a} × ${b}) × ${c}`, `${a * b} × ${c}`, `= ${a * b * c}`], [`${a} × (${b} × ${c})`, `${a} × ${b * c}`, `= ${a * b * c}`]], true, "Associative law — protected!"); }
+            ])();
+            shuffle([fake, truth]).forEach((b) => levels.push(b));
+
+            return levels;
+        }
+
+        function bossCase(claim, sides, isLaw, lawLine) {
+            return {
+                type: "boss", par: 0, claim, sides, isLaw, lawLine,
+                banner: "🔨 Hammer out BOTH sides — crush or shield?",
+                hint: "A law must work every time. Hammer until both totals show, then decide.",
+                law: isLaw ? lawLine : "Counter-example: " + lawLine
+            };
+        }
+
+        /* ---------------- Run state ---------------- */
+
+        function freshForge() {
+            idSeq = 1;
+            return {
+                levels: buildLevels(),
+                levelIdx: 0,
+                results: [],   // {banner, law, medal, moves, par, exprStr}
+                done: false
+            };
+        }
+
+        function saveForge() {
+            /* Expression trees hold live ids only — persist the docket summary +
+               level index; a reloaded mid-level restarts that level fresh. */
+            try {
+                storageSet(STATE_KEY(), JSON.stringify({
+                    levelIdx: forge.levelIdx,
+                    results: forge.results,
+                    done: forge.done
+                }));
+            } catch (err) { /* ignore */ }
+        }
+
+        function loadForge() {
+            try {
+                const raw = storageGet(STATE_KEY());
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (!parsed || !Array.isArray(parsed.results)) return null;
+                return parsed;
+            } catch (err) { return null; }
+        }
+
+        function restoreSession() {
+            const saved = loadForge();
+            if (saved) {
+                showScreen("sim");
+                devInit(false);
+            }
+        }
+
+        /* ---------------- devInit / devReset ---------------- */
+
+        let forgeBound = false;
+
+        function devInit(isReplay) {
+            cacheForgeDom();
+            if (!forgeBound) { bindForgeEvents(); forgeBound = true; }
+            drawScenery();
+            const saved = loadForge();
+            if (saved && saved.done) {
+                forge = freshForge();
+                forge.results = saved.results;
+                forge.levelIdx = LEVELS_PER_RUN;
+                forge.done = true;
+                showMastery(false);
+            } else if (saved && saved.levelIdx > 0) {
+                forge = freshForge();
+                forge.results = saved.results;
+                forge.levelIdx = Math.min(saved.levelIdx, LEVELS_PER_RUN - 1);
+                startLevel();
+            } else {
+                forge = freshForge();
+                saveForge();
+                startLevel();
+                if (!devInit._helped && !isReplay) {
+                    devInit._helped = true;
+                    dom.helpBtn.classList.remove("pulse-help");
+                    storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                    openInstructionsModal();
+                }
+            }
+        }
+
+        function devReset() {
+            storageRemove(STATE_KEY());
+            forge = null;
+            lv = null;
+            resolving = false;
+            devInit._helped = true;
+            disarmTools();
+            if (fDom.feedbackBox) { fDom.feedbackBox.textContent = ""; fDom.feedbackBox.className = "feedback-box"; }
+            if (fDom.fxLayer) fDom.fxLayer.replaceChildren();
+        }
+
+        function bindForgeEvents() {
+            fDom.hintBtn.addEventListener("click", () => {
+                if (!lv) return;
+                lv.hintUsed = true;
+                setFeedback("💡 " + currentLevel().hint, "");
+                playSound("click");
+            });
+            fDom.bellowsBtn.addEventListener("click", pumpBellows);
+            fDom.assistBtn.addEventListener("click", runAssist);
+        }
+
+        function currentLevel() { return forge.levels[forge.levelIdx]; }
+
+        /* ---------------- Scenery ---------------- */
+
+        function drawScenery() {
+            fDom.furnaceCol.innerHTML =
+                '<svg viewBox="0 0 110 150" role="img" aria-label="Forge furnace">' +
+                '<desc>' + BUILD_META + '</desc>' +
+                '<rect x="8" y="30" width="94" height="120" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>' +
+                '<rect x="20" y="8" width="18" height="34" fill="var(--surface-2)" stroke="var(--border)"/>' +
+                '<path d="M 22 96 A 33 34 0 0 1 88 96 L 88 138 L 22 138 Z" fill="var(--stone-2)"/>' +
+                '<circle cx="55" cy="108" r="21" fill="var(--accent)" class="ember-core"/>' +
+                '<circle cx="55" cy="112" r="12" fill="var(--accent-2)" class="ember-core"/>' +
+                "</svg>";
+            fDom.benchSvg.innerHTML =
+                '<svg viewBox="0 0 460 46" role="img" aria-label="Anvil bench">' +
+                '<rect x="10" y="4" width="440" height="14" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>' +
+                '<rect x="70" y="18" width="26" height="26" fill="var(--surface-2)"/>' +
+                '<rect x="364" y="18" width="26" height="26" fill="var(--surface-2)"/>' +
+                "</svg>";
+        }
+
+        /* ---------------- Level lifecycle ---------------- */
+
+        function startLevel() {
+            const L = currentLevel();
+            resolving = false;
+            lv = {
+                moves: 0, refusals: 0, hintUsed: false, assisted: false,
+                swapDone: false, selectedId: null, armedTool: null,
+                bossStep: 0, bossWrong: 0, bossDecided: false
+            };
+            fDom.gameScreen.classList.remove("hidden");
+            fDom.endScreen.classList.add("hidden");
+            fDom.levelCounter.textContent = `Level ${forge.levelIdx + 1} of ${LEVELS_PER_RUN}`;
+            fDom.goalBanner.textContent = L.banner;
+            setFeedback("", "");
+            renderMedalRack();
+            disarmTools();
+
+            const isBoss = L.type === "boss";
+            fDom.benchTilt.classList.toggle("hidden", isBoss);
+            fDom.benchSvg.classList.toggle("hidden", isBoss);
+            fDom.bossScene.classList.toggle("hidden", !isBoss);
+            fDom.bellowsBtn.classList.toggle("hidden", isBoss);
+            fDom.moveMeter.classList.toggle("hidden", isBoss);
+
+            fDom.toolRack.classList.toggle("hidden", isBoss);
+            fDom.forgeScene.classList.toggle("boss-mode", isBoss);
+            if (isBoss) {
+                renderBoss();
+            } else {
+                lv.exprStart = exprToString(L.expr);
+                renderTools(L.tools || []);
+                renderExpr();
+                updateMeter();
+            }
+            saveForge();
+        }
+
+        function renderMedalRack() {
+            fDom.medalRack.replaceChildren();
+            for (let i = 0; i < LEVELS_PER_RUN; i++) {
+                const m = document.createElement("div");
+                m.className = "medal";
+                const r = forge.results[i];
+                if (r) {
+                    m.classList.add(r.medal);
+                    m.textContent = r.medal === "gold" ? "✪" : r.medal === "silver" ? "✓" : "•";
+                    m.setAttribute("title", `Level ${i + 1}: ${r.medal}`);
+                } else {
+                    m.textContent = "";
+                    if (i === forge.levelIdx) m.classList.add("current");
+                }
+                fDom.medalRack.appendChild(m);
+            }
+        }
+
+        function updateMeter() {
+            const L = currentLevel();
+            fDom.moveMeter.textContent = `Law moves: ${lv.moves} · Par ${L.par}`;
+        }
+
+        function setFeedback(text, tone) {
+            fDom.feedbackBox.className = "feedback-box" + (tone ? " " + tone : "");
+            fDom.feedbackBox.textContent = text;
+        }
+
+        function counterFlash(a, o, b) {
+            const l = calc(a, o, b);
+            const r = calc(b, o, a);
+            return `${a} ${o} ${b} = ${l}  but  ${b} ${o} ${a} = ${r}!`;
+        }
+
+        function calc(a, o, b) {
+            if (o === "+") return a + b;
+            if (o === "−") return a - b;
+            if (o === "×") return a * b;
+            const v = a / b;
+            return Number.isInteger(v) ? v : (Math.round(v * 100) / 100 + "…");
+        }
+
+        /* ---------------- Rendering (build levels) ---------------- */
+
+        function renderExpr() {
+            const L = currentLevel();
+            fDom.exprRow.replaceChildren();
+            renderNodes(L.expr, fDom.exprRow, true);
+            applyTilt();
+            refreshAffordances();
+        }
+
+        function renderNodes(nodes, host, topLevel) {
+            nodes.forEach((n, i) => {
+                if (n.t === "op") {
+                    const s = document.createElement("span");
+                    s.className = "blk blk-op";
+                    s.textContent = n.op;
+                    s.dataset.id = n.id;
+                    host.appendChild(s);
+                    if (topLevel) {
+                        const seam = document.createElement("button");
+                        seam.type = "button";
+                        seam.className = "seam";
+                        seam.dataset.pair = String(i);
+                        seam.setAttribute("aria-label", "Clamp point");
+                        seam.addEventListener("click", () => { if (lv.armedTool === "clamp") applyClamp(i); });
+                        host.appendChild(seam);
+                    }
+                } else if (n.t === "num") {
+                    const b = document.createElement("button");
+                    b.type = "button";
+                    b.className = "blk blk-num hot";
+                    b.textContent = String(n.v);
+                    b.dataset.id = n.id;
+                    b.setAttribute("aria-label", `Number block ${n.v}`);
+                    if (n.splittable) b.dataset.splittable = "1";
+                    b.addEventListener("pointerdown", (e) => startBlockDrag(e, b, n.id));
+                    b.addEventListener("click", () => {
+                        if (b.dataset.dragged === "1") { b.dataset.dragged = ""; return; }
+                        onBlockTap(n.id, b);
+                    });
+                    host.appendChild(b);
+                } else {
+                    const g = document.createElement("div");
+                    g.className = "blk blk-grp";
+                    g.dataset.id = n.id;
+                    g.setAttribute("role", "button");
+                    g.setAttribute("tabindex", "0");
+                    g.setAttribute("aria-label", "Bracket group " + exprToString([n]));
+                    renderNodes(n.items, g, false);
+                    if (currentLevel().kind === "pinch") {
+                        g.classList.add("grp-draggable");
+                        g.addEventListener("pointerdown", (e) => startBlockDrag(e, g, n.id));
+                    }
+                    g.addEventListener("click", (ev) => {
+                        if (g.dataset.dragged === "1") { g.dataset.dragged = ""; return; }
+                        if (ev.target && ev.target.closest && ev.target.closest(".blk-num")) return;
+                        onGrpTap(n.id, g);
+                    });
+                    g.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onGrpTap(n.id, g); }
+                    });
+                    host.appendChild(g);
+                }
+            });
+        }
+
+        function applyTilt() {
+            const L = currentLevel();
+            fDom.benchTilt.classList.remove("tilt-left", "tilt-right");
+            if (!L.tilt) return;
+            const nums = L.expr.filter((n) => n.t === "num");
+            if (nums.length === 2 && nums[1].v > nums[0].v) {
+                fDom.benchTilt.classList.add("tilt-right");
+            }
+        }
+
+        function tiltLevelled() {
+            const L = currentLevel();
+            if (!L.tilt) return true;
+            const nums = L.expr.filter((n) => n.t === "num");
+            return nums.length < 2 || nums[0].v >= nums[1].v;
+        }
+
+        function refreshAffordances() {
+            if (!lv || !fDom.exprRow) return;
+            /* shimmer splittables when chisel armed; light seams when clamp armed */
+            fDom.exprRow.querySelectorAll(".blk-num").forEach((b) => {
+                b.classList.toggle("shimmer", lv.armedTool === "chisel" && b.dataset.splittable === "1");
+            });
+            fDom.exprRow.querySelectorAll(".seam").forEach((s) => {
+                s.classList.toggle("live", lv.armedTool === "clamp");
+            });
+        }
+
+        /* ---------------- Tools ---------------- */
+
+        const TOOL_DEFS = {
+            clamp: {
+                label: "Clamp",
+                svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 4 C 3 8 3 16 7 20"/><path d="M17 4 C 21 8 21 16 17 20"/><path d="M7 4 h4 M7 20 h4 M17 4 h-4 M17 20 h-4"/></svg>'
+            },
+            chisel: {
+                label: "Chisel",
+                svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20 L 12 12"/><path d="M12 12 L 19 5 l 1.5 1.5 L 13.5 13.5 Z" fill="currentColor"/></svg>'
+            }
+        };
+
+        function renderTools(names) {
+            fDom.toolRack.replaceChildren();
+            const label = document.createElement("span");
+            label.className = "rack-label";
+            label.textContent = "TOOLS";
+            fDom.toolRack.appendChild(label);
+            if (!names.length) {
+                const none = document.createElement("span");
+                none.className = "muted rack-empty";
+                none.textContent = "hands only";
+                fDom.toolRack.appendChild(none);
+                return;
+            }
+            names.forEach((name) => {
+                const d = TOOL_DEFS[name];
+                const t = document.createElement("button");
+                t.type = "button";
+                t.className = "tool";
+                t.dataset.tool = name;
+                t.setAttribute("aria-label", d.label + " tool");
+                t.innerHTML = d.svg + "<span>" + d.label + "</span>";
+                t.addEventListener("pointerdown", (e) => startToolDrag(e, t, name));
+                t.addEventListener("click", () => {
+                    if (t.dataset.dragged === "1") { t.dataset.dragged = ""; return; }
+                    lv.armedTool = lv.armedTool === name ? null : name;
+                    fDom.toolRack.querySelectorAll(".tool").forEach((x) => x.classList.toggle("armed", x.dataset.tool === lv.armedTool));
+                    refreshAffordances();
+                    playSound("click");
+                });
+                fDom.toolRack.appendChild(t);
+            });
+        }
+
+        function disarmTools() {
+            if (lv) lv.armedTool = null;
+            if (fDom.toolRack) fDom.toolRack.querySelectorAll(".tool").forEach((x) => x.classList.remove("armed"));
+            if (fDom.exprRow) refreshAffordances();
+        }
+
+        /* ---------------- Tap interactions (click/keyboard path) ---------------- */
+
+        function onBlockTap(idA, el) {
+            if (resolving) return;
+            if (lv.armedTool === "chisel") { applyChisel(idA); return; }
+            if (lv.armedTool === "clamp") return; /* clamp targets seams */
+            const hit = findNode(currentLevel().expr, idA);
+            if (!hit) return;
+            if (lv.selectedId === idA) {
+                lv.selectedId = null;
+                el.classList.remove("selected");
+                return;
+            }
+            if (lv.selectedId) {
+                const ok = tryPairMove(lv.selectedId, idA);
+                clearSelection();
+                if (!ok) playSound("click");
+            } else {
+                lv.selectedId = idA;
+                el.classList.add("selected");
+                playSound("click");
+            }
+        }
+
+        function onGrpTap(idG, el) {
+            if (resolving) return;
+            if (lv.selectedId) {
+                tryPairMove(lv.selectedId, idG);
+                clearSelection();
+            }
+        }
+
+        function clearSelection() {
+            lv.selectedId = null;
+            fDom.exprRow.querySelectorAll(".selected").forEach((x) => x.classList.remove("selected"));
+        }
+
+        /* tryPairMove: source id dropped/tapped onto target id — swap, beam, or pinch */
+        function tryPairMove(srcId, tgtId) {
+            const L = currentLevel();
+            const src = findNode(L.expr, srcId);
+            const tgt = findNode(L.expr, tgtId);
+            if (!src || !tgt || srcId === tgtId) return false;
+
+            /* pinch: grp onto grp at top level */
+            if (src.node.t === "grp" && tgt.node.t === "grp") return applyPinch(src, tgt);
+
+            /* beam: num onto grp with × between (distributive strike) */
+            if (src.node.t === "num" && tgt.node.t === "grp") return applyBeam(src, tgt);
+            if (src.node.t === "grp" && tgt.node.t === "num") return false;
+
+            /* swap: two nums that are adjacent operands in the same list */
+            if (src.list !== tgt.list) { refuseBlocks(srcId, tgtId, "Different levels — can't swap those."); return false; }
+            const lo = Math.min(src.index, tgt.index);
+            const hi = Math.max(src.index, tgt.index);
+            if (hi - lo !== 2) { refuseBlocks(srcId, tgtId, "Only neighbouring blocks can swap."); return false; }
+            const between = src.list[lo + 1];
+            if (between.t !== "op") return false;
+            if (between.op === "−" || between.op === "÷") {
+                lv.refusals++;
+                maybeOfferAssist();
+                refuseBlocks(srcId, tgtId, "Blocks REFUSE! " + counterFlash(src.list[lo].v, between.op, src.list[hi].v));
+                return false;
+            }
+            /* legal swap */
+            const tmp = src.list[lo];
+            src.list[lo] = src.list[hi];
+            src.list[hi] = tmp;
+            lv.moves++;
+            lv.swapDone = true;
+            renderExpr();
+            updateMeter();
+            playSound("clang");
+            sparkAt(fDom.exprRow, 5);
+            setFeedback("Clang! Swapped — order never matters for " + (between.op === "+" ? "addition." : "multiplication."), "ok");
+            checkForged();
+            return true;
+        }
+
+        function refuseBlocks(idA, idB, msg) {
+            [idA, idB].forEach((id) => {
+                const el = fDom.exprRow.querySelector(`[data-id="${id}"]`);
+                if (el) {
+                    el.classList.remove("refuse");
+                    void el.offsetWidth;
+                    el.classList.add("refuse");
+                }
+            });
+            playSound("wrong");
+            setFeedback(msg, "err");
+        }
+
+        /* ---------------- Law moves ---------------- */
+
+        function applyClamp(opIndex) {
+            const L = currentLevel();
+            const list = L.expr;
+            const between = list[opIndex];
+            if (!between || between.t !== "op") return;
+            const a = list[opIndex - 1];
+            const b = list[opIndex + 1];
+            if (!a || !b) return;
+            if (between.op === "−" || between.op === "÷") {
+                lv.refusals++;
+                maybeOfferAssist();
+                refuseBlocks(a.id, b.id, "Brackets can't save " + (between.op === "−" ? "subtraction!" : "division!"));
+                return;
+            }
+            const g = grp([a, between, b]);
+            list.splice(opIndex - 1, 3, g);
+            lv.moves++;
+            disarmTools();
+            renderExpr();
+            const gEl = fDom.exprRow.querySelector(`[data-id="${g.id}"]`);
+            if (gEl) gEl.classList.add("clamp-snap");
+            updateMeter();
+            playSound("clang");
+            const sum = (a.t === "num" && b.t === "num") ? calc(a.v, between.op, b.v) : null;
+            setFeedback(sum === 100 ? "CLUNK! A perfect 100 — easy melt!" : "CLUNK! Pair clamped — grouping is free.", "ok");
+        }
+
+        function applyChisel(numId) {
+            const L = currentLevel();
+            const hit = findNode(L.expr, numId);
+            if (!hit || hit.node.t !== "num") return;
+            const parts = SPLIT_MAP[hit.node.v];
+            if (!hit.node.splittable || !parts) {
+                lv.refusals++;
+                refuseBlocks(numId, numId, "That block won't split — find the near-hundred.");
+                return;
+            }
+            const g = grp([num(parts[0]), op(parts[1]), num(parts[2])]);
+            hit.list.splice(hit.index, 1, g);
+            lv.moves++;
+            disarmTools();
+            renderExpr();
+            updateMeter();
+            playSound("shatter");
+            sparkAt(fDom.exprRow, 6);
+            setFeedback(`CRACK! ${hit.node.v} splits into (${parts[0]} ${parts[1]} ${parts[2]}).`, "ok");
+        }
+
+        function applyBeam(src, tgt) {
+            const L = currentLevel();
+            /* pattern: k × (a ± b) at the same level — src num, tgt grp, × between */
+            if (src.list !== tgt.list) { refuseBlocks(src.node.id, tgt.node.id, "Bring the multiplier next to the bracket."); return false; }
+            const lo = Math.min(src.index, tgt.index);
+            const hi = Math.max(src.index, tgt.index);
+            if (hi - lo !== 2 || src.list[lo + 1].op !== "×") {
+                refuseBlocks(src.node.id, tgt.node.id, "The beam needs a × between block and bracket.");
+                return false;
+            }
+            const inner = tgt.node.items;
+            if (inner.length !== 3 || inner[0].t !== "num" || inner[2].t !== "num") {
+                refuseBlocks(src.node.id, tgt.node.id, "Melt the bracket down first.");
+                return false;
+            }
+            const k = src.node.v;
+            const innerOp = inner[1].op;
+            if (innerOp === "×" || innerOp === "÷") {
+                lv.refusals++;
+                refuseBlocks(src.node.id, tgt.node.id, "The beam only strikes + or − brackets.");
+                return false;
+            }
+            const gA = grp([num(k), op("×"), num(inner[0].v)]);
+            const gB = grp([num(k), op("×"), num(inner[2].v)]);
+            src.list.splice(lo, 3, gA, op(innerOp), gB);
+            lv.moves++;
+            renderExpr();
+            updateMeter();
+            playSound("clang");
+            sparkAt(fDom.exprRow, 9);
+            setFeedback(`ZAP! The ${k} strikes BOTH numbers — that's the distributive law!`, "ok");
+            return true;
+        }
+
+        function applyPinch(src, tgt) {
+            const L = currentLevel();
+            if (src.list !== tgt.list || src.list !== L.expr) return false;
+            const lo = Math.min(src.index, tgt.index);
+            const hi = Math.max(src.index, tgt.index);
+            if (hi - lo !== 2) return false;
+            const between = src.list[lo + 1];
+            const A = src.list[lo], B = src.list[hi];
+            const simple = (g) => g.t === "grp" && g.items.length === 3 && g.items[0].t === "num" && g.items[1].op === "×" && g.items[2].t === "num";
+            if (between.op !== "+" || !simple(A) || !simple(B)) {
+                refuseBlocks(A.id, B.id, "Pinch needs two × brackets around a +.");
+                return false;
+            }
+            const k1 = A.items[0].v, p = A.items[2].v;
+            const k2 = B.items[0].v, q = B.items[2].v;
+            if (k1 !== k2) {
+                lv.refusals++;
+                refuseBlocks(A.id, B.id, "No shared number — nothing pops out.");
+                return false;
+            }
+            const g = grp([num(p), op("+"), num(q)]);
+            src.list.splice(lo, 3, num(k1), op("×"), g);
+            lv.moves++;
+            renderExpr();
+            updateMeter();
+            playSound("clang");
+            sparkAt(fDom.exprRow, 8);
+            setFeedback(`POP! The shared ${k1} jumps out front — distributive in reverse!`, "ok");
+            return true;
+        }
+
+        /* ---------------- Bellows (compute) ---------------- */
+
+        function pumpBellows() {
+            if (resolving || !lv || currentLevel().type === "boss") return;
+            const L = currentLevel();
+            if (L.tilt && !tiltLevelled()) {
+                playSound("wrong");
+                setFeedback("The bench is tilted! Heavy block left first.", "err");
+                return;
+            }
+            fDom.bellowsBtn.classList.remove("pumping");
+            void fDom.bellowsBtn.offsetWidth;
+            fDom.bellowsBtn.classList.add("pumping");
+            const reduced = reduceOnce(L.expr);
+            if (!reduced) {
+                playSound("wrong");
+                setFeedback("Too many loose blocks — clamp a pair first!", "err");
+                return;
+            }
+            playSound("whoosh");
+            playSound("typing");
+            normalize(L.expr);
+            renderExpr();
+            checkForged();
+        }
+
+        /* reduce innermost bracket one step, else a bare two-operand row */
+        function reduceOnce(nodes) {
+            /* find deepest grp containing a computable [num op num] */
+            for (const n of nodes) {
+                if (n.t === "grp") {
+                    if (reduceOnce(n.items)) return true;
+                }
+            }
+            /* this list itself: exactly num op num → merge (top level requires it be the whole list) */
+            if (nodes.length === 3 && nodes[0].t === "num" && nodes[1].t === "op" && nodes[2].t === "num") {
+                const v = calc(nodes[0].v, nodes[1].op, nodes[2].v);
+                const merged = num(v);
+                nodes.splice(0, 3, merged);
+                setTimeout(() => {
+                    const el = fDom.exprRow.querySelector(`[data-id="${merged.id}"]`);
+                    if (el) el.classList.add("merge-glow");
+                }, 0);
+                return true;
+            }
+            return false;
+        }
+
+        function normalize(nodes) {
+            for (let i = 0; i < nodes.length; i++) {
+                const n = nodes[i];
+                if (n.t === "grp") {
+                    normalize(n.items);
+                    if (n.items.length === 1) nodes.splice(i, 1, n.items[0]);
+                }
+            }
+        }
+
+        function checkForged() {
+            const L = currentLevel();
+            if (L.expr.length === 1 && L.expr[0].t === "num") {
+                completeLevel(L.expr[0].v);
+            }
+        }
+
+        /* ---------------- Assist ---------------- */
+
+        function maybeOfferAssist() {
+            if (lv.refusals >= 3 || lv.bossWrong >= 2) fDom.assistBtn.classList.remove("hidden");
+        }
+
+        function runAssist() {
+            if (!lv || resolving) return;
+            lv.assisted = true;
+            fDom.assistBtn.classList.add("hidden");
+            const L = currentLevel();
+            if (L.type === "boss") { resolveBoss(!L.isLaw ? "crush" : "shield", true); return; }
+            /* perform the correct next law move for the student */
+            if (L.kind === "swap" || L.kind === "swapclamp") {
+                if (!tiltLevelled() || (L.kind === "swapclamp" && !lv.swapDone)) {
+                    const nums = L.expr.filter((n) => n.t === "num");
+                    if (L.kind === "swapclamp") {
+                        /* swap the middle pair to reunite the 100-pair */
+                        tryPairMove(L.expr[2].id, L.expr[4].id);
+                    } else {
+                        tryPairMove(nums[0].id, nums[1].id);
+                    }
+                    setFeedback("🤝 Watch: swapped for you. Now pump!", "");
+                    return;
+                }
+            }
+            if ((L.kind === "clamp" || L.kind === "swapclamp") && L.expr.length >= 5) {
+                /* clamp the friendly pair (the two that sum to 100), else last pair */
+                let idx = 3;
+                if (L.expr[2].t === "num" && L.expr[4].t === "num" && L.expr[2].v + L.expr[4].v === 100) idx = 3;
+                else if (L.expr[0].t === "num" && L.expr[2].t === "num" && L.expr[0].v + L.expr[2].v === 100) idx = 1;
+                applyClamp(idx);
+                setFeedback("🤝 Watch: clamped for you. Now pump!", "");
+                return;
+            }
+            if (L.kind === "split") {
+                const splitBlock = L.expr.find((n) => n.t === "num" && n.splittable);
+                if (splitBlock) { applyChisel(splitBlock.id); setFeedback("🤝 Watch: chiselled. Now drag the multiplier onto the bracket!", ""); return; }
+                const kNode = L.expr[0], gNode = L.expr[2];
+                if (kNode && gNode && gNode.t === "grp") { tryPairMove(kNode.id, gNode.id); setFeedback("🤝 Watch: beamed. Now pump!", ""); return; }
+            }
+            if (L.kind === "pinch" && L.expr.length >= 3) {
+                tryPairMove(L.expr[0].id, L.expr[2].id);
+                setFeedback("🤝 Watch: pinched. Now pump!", "");
+                return;
+            }
+            /* nothing left but pumping */
+            pumpBellows();
+        }
+
+        /* ---------------- Level completion ---------------- */
+
+        function completeLevel(value) {
+            const L = currentLevel();
+            resolving = true;
+            const medal = lv.assisted ? "iron" : (lv.moves <= L.par ? "gold" : "silver");
+            forge.results[forge.levelIdx] = {
+                banner: L.banner,
+                law: L.law,
+                medal,
+                moves: lv.moves,
+                par: L.par,
+                exprStr: (lv.exprStart || L.claim || "") + "  =  " + value,
+                hintUsed: lv.hintUsed
+            };
+            renderMedalRack();
+            playSound("correct");
+            quenchFx();
+            setFeedback(
+                medal === "gold" ? `🏅 INGOT FORGED: ${value}! Gold medallion — right on par.` :
+                medal === "silver" ? `INGOT FORGED: ${value}! Silver — over par, still smith work.` :
+                `INGOT FORGED: ${value} — with a helping hand. Iron medallion.`,
+                "ok");
+            saveForge();
+            const delay = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 700 : 1900;
+            setTimeout(nextLevel, delay);
+        }
+
+        function nextLevel() {
+            forge.levelIdx++;
+            fDom.assistBtn.classList.add("hidden");
+            if (forge.levelIdx >= LEVELS_PER_RUN) {
+                forge.done = true;
+                saveForge();
+                showMastery(true);
+            } else {
+                saveForge();
+                startLevel();
+            }
+        }
+
+        /* ---------------- Boss levels ---------------- */
+
+        function renderBoss() {
+            const L = currentLevel();
+            const scene = fDom.bossScene;
+            scene.replaceChildren();
+
+            const slab = document.createElement("div");
+            slab.className = "slab rolled-in";
+            slab.id = "bossSlab";
+            slab.textContent = L.claim;
+            slab.setAttribute("role", "button");
+            slab.setAttribute("tabindex", "0");
+            slab.setAttribute("aria-label", "Claim slab: " + L.claim);
+
+            const work = document.createElement("div");
+            work.className = "boss-work";
+            const sides = [];
+            L.sides.forEach((lines, si) => {
+                const col = document.createElement("div");
+                col.className = "boss-side";
+                const name = document.createElement("div");
+                name.className = "side-name";
+                name.textContent = si === 0 ? "LEFT SIDE" : "RIGHT SIDE";
+                col.appendChild(name);
+                lines.forEach((txt, li) => {
+                    const line = document.createElement("div");
+                    line.className = "side-line" + (li === lines.length - 1 ? " final" : "");
+                    line.textContent = txt;
+                    col.appendChild(line);
+                });
+                work.appendChild(col);
+                sides.push(col);
+            });
+
+            const hammer = document.createElement("button");
+            hammer.type = "button";
+            hammer.className = "hammer-btn";
+            hammer.id = "bossHammer";
+            hammer.innerHTML = "🔨 HAMMER a step";
+            hammer.addEventListener("click", () => bossHammer(sides));
+
+            const zones = document.createElement("div");
+            zones.className = "boss-zones";
+            zones.id = "bossZones";
+            [["crush", "🧨", "CRUSH IT", "not a law"], ["shield", "🛡️", "SHIELD IT", "true law"]].forEach(([act, icon, label, sub]) => {
+                const z = document.createElement("button");
+                z.type = "button";
+                z.className = "boss-zone";
+                z.dataset.act = act;
+                z.innerHTML = `<span class="zone-icon" aria-hidden="true">${icon}</span>${label}<span class="zone-sub">${sub}</span>`;
+                z.disabled = true;
+                z.addEventListener("click", () => { if (!z.disabled) resolveBoss(act, false); });
+                zones.appendChild(z);
+            });
+
+            scene.appendChild(slab);
+            scene.appendChild(work);
+            scene.appendChild(hammer);
+            scene.appendChild(zones);
+
+            slab.addEventListener("pointerdown", (e) => startSlabDrag(e, slab));
+            playSound("clang");
+        }
+
+        function bossTotalSteps() {
+            const L = currentLevel();
+            return L.sides[0].length + L.sides[1].length;
+        }
+
+        function bossHammer(sides) {
+            const L = currentLevel();
+            if (lv.bossStep >= bossTotalSteps()) return;
+            /* alternate sides: L,R,L,R... clamped to remaining lines */
+            const revealedL = sides[0].querySelectorAll(".side-line.reveal").length;
+            const revealedR = sides[1].querySelectorAll(".side-line.reveal").length;
+            const sideIdx = (revealedL <= revealedR && revealedL < L.sides[0].length) ? 0 : (revealedR < L.sides[1].length ? 1 : 0);
+            const col = sides[sideIdx];
+            const nextLine = col.querySelectorAll(".side-line")[sideIdx === 0 ? revealedL : revealedR];
+            if (!nextLine) return;
+            nextLine.classList.add("reveal");
+            lv.bossStep++;
+            playSound("clang");
+            sparkAt(col, 3);
+            if (lv.bossStep >= bossTotalSteps()) {
+                document.getElementById("bossHammer").disabled = true;
+                document.querySelectorAll("#bossZones .boss-zone").forEach((z) => { z.disabled = false; z.classList.add("live"); });
+                const slab = document.getElementById("bossSlab");
+                if (!L.isLaw) slab.classList.add("cracked");
+                setFeedback(L.isLaw ? "Both totals MATCH. Your call, smith…" : "The totals DIFFER — a crack appears! Your call…", "");
+            }
+        }
+
+        function resolveBoss(act, viaAssist) {
+            const L = currentLevel();
+            if (lv.bossDecided) return;
+            const correct = (act === "crush") === !L.isLaw;
+            const slab = document.getElementById("bossSlab");
+            if (!correct && !viaAssist) {
+                lv.bossWrong++;
+                maybeOfferAssist();
+                slab.classList.remove("wobble");
+                void slab.offsetWidth;
+                slab.classList.add("wobble");
+                document.querySelectorAll("#bossZones .boss-zone").forEach((z) => {
+                    if (z.dataset.act === act) { z.classList.remove("zone-flash"); void z.offsetWidth; z.classList.add("zone-flash"); }
+                });
+                playSound("wrong");
+                setFeedback(L.isLaw ? "Look again — BOTH totals are the same!" : "Look again — the totals are different!", "err");
+                if (lv.bossWrong >= 2) {
+                    setTimeout(() => resolveBoss(!L.isLaw ? "crush" : "shield", true), 900);
+                }
+                return;
+            }
+            lv.bossDecided = true;
+            resolving = true;
+            if (viaAssist) lv.assisted = true;
+            const medal = lv.assisted ? "iron" : (lv.bossWrong === 0 ? "gold" : "silver");
+            if (!L.isLaw) {
+                slab.classList.add("shattering");
+                playSound("shatter");
+                shatterFx(slab);
+                setFeedback(`💥 CRUSHED! ${L.lawLine} One counter-example kills a law.`, "ok");
+            } else {
+                slab.classList.add("shielded");
+                slab.textContent = "🛡️ " + L.claim;
+                playSound("correct");
+                sparkAt(slab, 10);
+                setFeedback(`🛡️ SHIELDED! ${L.lawLine} True for every number.`, "ok");
+            }
+            forge.results[forge.levelIdx] = {
+                banner: "Boss slab: " + L.claim,
+                law: L.law,
+                medal,
+                moves: lv.bossWrong,
+                par: 0,
+                exprStr: L.claim + (L.isLaw ? "  ✔ true law" : "  ✘ not a law"),
+                hintUsed: lv.hintUsed
+            };
+            renderMedalRack();
+            saveForge();
+            const delay = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 800 : 2000;
+            setTimeout(nextLevel, delay);
+        }
+
+        /* ---------------- Drag plumbing (blocks, tools, slab) ---------------- */
+
+        let dragCtx = null;
+
+        function makeGhost(el) {
+            const ghost = el.cloneNode(true);
+            ghost.classList.add("drag-ghost");
+            ghost.classList.remove("selected", "shimmer");
+            document.body.appendChild(ghost);
+            return ghost;
+        }
+
+        function startPointerDrag(e, el, onMove, onDrop) {
+            if (resolving || dragCtx) return;
+            if (e.button !== undefined && e.button !== 0) return;
+            const ghost = makeGhost(el);
+            ghost.style.left = e.clientX + "px";
+            ghost.style.top = e.clientY + "px";
+            dragCtx = { el, ghost, startX: e.clientX, startY: e.clientY, moved: false, onMove, onDrop };
+            try { el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+            el.addEventListener("pointermove", pointerDragMove);
+            el.addEventListener("pointerup", pointerDragEnd);
+            el.addEventListener("pointercancel", pointerDragEnd);
+        }
+
+        function pointerDragMove(e) {
+            if (!dragCtx) return;
+            const dx = e.clientX - dragCtx.startX;
+            const dy = e.clientY - dragCtx.startY;
+            if (!dragCtx.moved && Math.hypot(dx, dy) > 6) {
+                dragCtx.moved = true;
+                dragCtx.el.classList.add("drag-hidden");
+            }
+            if (!dragCtx.moved) return;
+            dragCtx.ghost.style.left = e.clientX + "px";
+            dragCtx.ghost.style.top = e.clientY + "px";
+            if (dragCtx.onMove) dragCtx.onMove(e);
+        }
+
+        function pointerDragEnd(e) {
+            if (!dragCtx) return;
+            const ctx = dragCtx;
+            dragCtx = null;
+            ctx.el.removeEventListener("pointermove", pointerDragMove);
+            ctx.el.removeEventListener("pointerup", pointerDragEnd);
+            ctx.el.removeEventListener("pointercancel", pointerDragEnd);
+            ctx.ghost.remove();
+            ctx.el.classList.remove("drag-hidden");
+            clearDropHighlights();
+            if (ctx.moved) {
+                ctx.el.dataset.dragged = "1";
+                if (ctx.onDrop) ctx.onDrop(e);
+            }
+        }
+
+        function clearDropHighlights() {
+            document.querySelectorAll(".drop-ok").forEach((x) => x.classList.remove("drop-ok"));
+        }
+
+        function elementAt(e, selector) {
+            const els = document.elementsFromPoint(e.clientX, e.clientY);
+            for (const el of els) {
+                const hit = el.closest && el.closest(selector);
+                if (hit) return hit;
+            }
+            return null;
+        }
+
+        function startBlockDrag(e, el, nodeId) {
+            startPointerDrag(e, el,
+                (ev) => {
+                    clearDropHighlights();
+                    const over = elementAt(ev, ".blk-num, .blk-grp");
+                    if (over && over.dataset.id !== nodeId) over.classList.add("drop-ok");
+                },
+                (ev) => {
+                    const over = elementAt(ev, ".blk-num, .blk-grp");
+                    if (over && over.dataset.id && over.dataset.id !== nodeId) {
+                        tryPairMove(nodeId, over.dataset.id);
+                    }
+                });
+        }
+
+        function startToolDrag(e, el, toolName) {
+            startPointerDrag(e, el,
+                (ev) => {
+                    if (lv.armedTool !== toolName) { lv.armedTool = toolName; refreshAffordances(); }
+                    clearDropHighlights();
+                    const target = toolName === "clamp" ? elementAt(ev, ".seam") : elementAt(ev, ".blk-num");
+                    if (target) target.classList.add("drop-ok");
+                },
+                (ev) => {
+                    if (toolName === "clamp") {
+                        const seam = elementAt(ev, ".seam");
+                        if (seam) applyClamp(Number(seam.dataset.pair));
+                    } else {
+                        const blk = elementAt(ev, ".blk-num");
+                        if (blk) applyChisel(blk.dataset.id);
+                    }
+                    lv.armedTool = null;
+                    disarmTools();
+                });
+        }
+
+        function startSlabDrag(e, el) {
+            const L = currentLevel();
+            if (lv.bossStep < bossTotalSteps() || lv.bossDecided) return;
+            startPointerDrag(e, el,
+                (ev) => {
+                    clearDropHighlights();
+                    const z = elementAt(ev, ".boss-zone");
+                    if (z && !z.disabled) z.classList.add("drop-ok");
+                },
+                (ev) => {
+                    const z = elementAt(ev, ".boss-zone");
+                    if (z && !z.disabled) resolveBoss(z.dataset.act, false);
+                });
+        }
+
+        /* ---------------- Mastery / end screen ---------------- */
+
+        const MEDAL_WORDS = { gold: "✪ Gold — on par", silver: "✓ Silver — forged over par", iron: "• Iron — with a helping hand" };
+
+        function showMastery(withFanfare) {
+            fDom.gameScreen.classList.add("hidden");
+            fDom.endScreen.classList.remove("hidden");
+            const golds = forge.results.filter((r) => r && r.medal === "gold").length;
+            const silvers = forge.results.filter((r) => r && r.medal === "silver").length;
+            const irons = forge.results.filter((r) => r && r.medal === "iron").length;
+            fDom.recordSub.textContent =
+                golds === LEVELS_PER_RUN
+                    ? "Eight gold medallions — a MASTER SMITH runs this forge!"
+                    : `You forged all 8 pieces: ${golds} gold, ${silvers} silver, ${irons} iron. The record shows every law you used.`;
+            fDom.endRack.replaceChildren();
+            forge.results.forEach((r, i) => {
+                if (!r) return;
+                const wrap = document.createElement("div");
+                wrap.className = "end-medal";
+                const m = document.createElement("div");
+                m.className = "medal " + r.medal;
+                m.textContent = r.medal === "gold" ? "✪" : r.medal === "silver" ? "✓" : "•";
+                const lbl = document.createElement("span");
+                lbl.textContent = "L" + (i + 1);
+                wrap.appendChild(m);
+                wrap.appendChild(lbl);
+                fDom.endRack.appendChild(wrap);
+            });
+            fDom.recordTally.innerHTML =
+                "Swap = <strong>commutative</strong> · clamp = <strong>associative</strong> · split &amp; beam = <strong>distributive</strong>.<br>" +
+                "They work for + and × only — the slabs that cracked proved why. Forge closed!";
+            if (withFanfare) {
+                playSound("complete");
+                fxMastery();
+            }
+        }
+
+        /* ---------------- Review modal ---------------- */
+
+        function openReviewModal() {
+            dom.reviewList.replaceChildren();
+            const results = forge ? forge.results.filter(Boolean) : [];
+            if (!results.length) {
+                const p = document.createElement("p");
+                p.className = "muted";
+                p.textContent = "Nothing on the forge record yet — finish your first piece and it lands here.";
+                dom.reviewList.appendChild(p);
+            } else {
+                forge.results.forEach((r, i) => {
+                    if (!r) return;
+                    const item = document.createElement("div");
+                    item.className = "review-item";
+                    const head = document.createElement("div");
+                    head.className = "rv-eq";
+                    head.textContent = `Level ${i + 1} · ${r.law}`;
+                    const eq = document.createElement("div");
+                    eq.textContent = r.exprStr;
+                    const tier = document.createElement("div");
+                    tier.textContent = MEDAL_WORDS[r.medal] + (r.par ? ` · ${r.moves}/${r.par} law moves` : "") + (r.hintUsed ? " · hint used" : "");
+                    item.appendChild(head);
+                    item.appendChild(eq);
+                    item.appendChild(tier);
+                    dom.reviewList.appendChild(item);
+                });
+            }
+            openModalScrolled(dom.reviewModal);
+        }
+
+        /* ---------------- Full-page effects ---------------- */
+
+        function reducedMotion() {
+            return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        }
+
+        function sparkAt(anchorEl, count) {
+            if (reducedMotion() || !fDom.fxLayer || !anchorEl) return;
+            const r = anchorEl.getBoundingClientRect();
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+            for (let i = 0; i < count; i++) {
+                const s = document.createElement("span");
+                s.className = "fx-spark";
+                s.textContent = "✦";
+                const ang = Math.random() * Math.PI * 2;
+                s.style.setProperty("--fx-x0", cx + "px");
+                s.style.setProperty("--fx-y0", cy + "px");
+                s.style.setProperty("--fx-dx", (Math.cos(ang) * (40 + Math.random() * 70)) + "px");
+                s.style.setProperty("--fx-dy", (Math.sin(ang) * (30 + Math.random() * 50) - 30) + "px");
+                s.style.setProperty("--fx-grav", (35 + Math.random() * 45) + "px");
+                s.style.setProperty("--fx-dur", (0.8 + Math.random() * 0.4) + "s");
+                fDom.fxLayer.appendChild(s);
+                setTimeout(() => s.remove(), 1400);
+            }
+        }
+
+        function quenchFx() {
+            if (reducedMotion() || !fDom.fxLayer) return;
+            const anchor = fDom.exprRow;
+            sparkAt(anchor, 10);
+            const r = anchor.getBoundingClientRect();
+            for (let i = 0; i < 5; i++) {
+                const st = document.createElement("span");
+                st.className = "fx-steam";
+                st.style.setProperty("--fx-x0", (r.left + r.width * (0.3 + Math.random() * 0.4)) + "px");
+                st.style.setProperty("--fx-y0", (r.top + r.height * 0.6) + "px");
+                st.style.setProperty("--fx-rise", (60 + Math.random() * 60) + "px");
+                st.style.setProperty("--fx-sway", ((Math.random() > 0.5 ? 1 : -1) * (12 + Math.random() * 18)) + "px");
+                st.style.setProperty("--fx-dur", (1.1 + Math.random() * 0.5) + "s");
+                fDom.fxLayer.appendChild(st);
+                setTimeout(() => st.remove(), 1800);
+            }
+        }
+
+        function shatterFx(anchorEl) {
+            if (reducedMotion() || !fDom.fxLayer || !anchorEl) return;
+            const r = anchorEl.getBoundingClientRect();
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+            for (let i = 0; i < 12; i++) {
+                const sh = document.createElement("span");
+                sh.className = "fx-shard";
+                const ang = Math.random() * Math.PI * 2;
+                sh.style.setProperty("--fx-x0", cx + "px");
+                sh.style.setProperty("--fx-y0", cy + "px");
+                sh.style.setProperty("--fx-dx", (Math.cos(ang) * (60 + Math.random() * 120)) + "px");
+                sh.style.setProperty("--fx-dy", (Math.sin(ang) * (35 + Math.random() * 60) - 40) + "px");
+                sh.style.setProperty("--fx-grav", (70 + Math.random() * 80) + "px");
+                sh.style.setProperty("--fx-rot", (140 + Math.random() * 300) + "deg");
+                sh.style.setProperty("--fx-dur", (0.7 + Math.random() * 0.5) + "s");
+                fDom.fxLayer.appendChild(sh);
+                setTimeout(() => sh.remove(), 1400);
+            }
+            sparkAt(anchorEl, 8);
+        }
+
+        function fxMastery() {
+            if (reducedMotion() || !fDom.fxLayer) return;
+            const w = window.innerWidth, h = window.innerHeight;
+            for (let i = 0; i < 26; i++) {
+                const s = document.createElement("span");
+                s.className = "fx-spark";
+                s.textContent = "✦";
+                s.style.setProperty("--fx-x0", (Math.random() * w) + "px");
+                s.style.setProperty("--fx-y0", (h * 0.85) + "px");
+                const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.2;
+                s.style.setProperty("--fx-dx", (Math.cos(ang) * (h * 0.25 + Math.random() * 100)) + "px");
+                s.style.setProperty("--fx-dy", (Math.sin(ang) * (h * 0.45 + Math.random() * 120)) + "px");
+                s.style.setProperty("--fx-grav", (90 + Math.random() * 90) + "px");
+                s.style.setProperty("--fx-dur", (1.2 + Math.random() * 0.7) + "s");
+                fDom.fxLayer.appendChild(s);
+                setTimeout(() => s.remove(), 2200);
+            }
+        }
+
+        /* ---------------- Build metadata bookkeeping ---------------- */
+
+        function initBuildMeta() {
+            try {
+                console.log("%c" + BUILD_META, "font-size:10px;color:#8a8f98;");
+            } catch (err) { /* console unavailable */ }
+            try {
+                localStorage.setItem("sim:" + SIM_CONFIG.simId + ":build", BUILD_META);
+            } catch (err) { /* storage unavailable */ }
+            buildPageTexture();
+            appendStow(dom.homeDescription);
+            document.addEventListener("copy", (e) => {
+                try {
+                    const sel = String(document.getSelection());
+                    if (sel.length >= 30 && sel.indexOf(BUILD_META) === -1) {
+                        e.clipboardData.setData("text/plain", sel + "\n" + BUILD_META);
+                        e.preventDefault();
+                    }
+                } catch (err) { /* clipboard unavailable */ }
+            });
+            let textureResizeT = null;
+            window.addEventListener("resize", () => {
+                clearTimeout(textureResizeT);
+                textureResizeT = setTimeout(buildPageTexture, 250);
+            });
+            let seqBuf = [];
+            let seqLast = 0;
+            const SEQ = ["~", "a", "d"];
+            document.addEventListener("keydown", (e) => {
+                if (e.target && e.target.matches && e.target.matches("input, textarea, [contenteditable]")) return;
+                const now = Date.now();
+                if (now - seqLast > 2000) seqBuf = [];
+                seqLast = now;
+                seqBuf.push((e.key || "").toLowerCase());
+                if (seqBuf.length > SEQ.length) seqBuf.shift();
+                if (SEQ.every((k, i) => seqBuf[i] === k)) {
+                    seqBuf = [];
+                    showBuildNotice();
+                }
+            });
+        }
+
+        function buildPageTexture() {
+            const layer = document.getElementById("pageTexture");
+            if (!layer) return;
+            layer.textContent = "";
+            const stepX = 480;
+            const stepY = 180;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            for (let y = -stepY, row = 0; y < h + stepY; y += stepY, row++) {
+                const offset = (row % 2) * (stepX / 2);
+                for (let x = -stepX + offset; x < w + stepX; x += stepX) {
+                    const s = document.createElement("span");
+                    s.textContent = BUILD_META;
+                    s.style.left = x + "px";
+                    s.style.top = y + "px";
+                    layer.appendChild(s);
+                }
+            }
+        }
+
+        function appendStow(el) {
+            if (!el || el.querySelector(".stow")) return;
+            const s = document.createElement("span");
+            s.className = "stow";
+            s.setAttribute("aria-hidden", "true");
+            s.textContent = " " + BUILD_META;
+            el.appendChild(s);
+        }
+
+        function showBuildNotice() {
+            if (document.getElementById("buildNotice")) return;
+            const el = document.createElement("div");
+            el.id = "buildNotice";
+            el.textContent = BUILD_META;
+            el.setAttribute("aria-hidden", "true");
+            el.style.cssText = "position:fixed;left:50%;bottom:28px;transform:translateX(-50%);" +
+                "background:var(--surface);color:var(--text);border:1px solid var(--border, rgba(128,128,128,.35));" +
+                "border-radius:999px;padding:8px 16px;font-size:13px;z-index:300;pointer-events:none;" +
+                "opacity:0;transition:opacity .25s ease;box-shadow:0 4px 18px rgba(0,0,0,.25);";
+            document.body.appendChild(el);
+            requestAnimationFrame(() => { el.style.opacity = "1"; });
+            setTimeout(() => {
+                el.style.opacity = "0";
+                setTimeout(() => el.remove(), 300);
+            }, 1500);
+        }
+
+        initializeApp();
+    </script>
+    <!-- build: ~Abhishek Dan · Test Version 1 · 2026-08-29 -->
+</body>
+
+</html>
