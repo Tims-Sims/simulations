@@ -1,0 +1,2909 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>The Cocoa Sorting House</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ---- Cocoa Sorting House palette: same estate, night shift vs day ---- */
+        :root {
+            color-scheme: dark;
+            --bg: #1e1712;
+            --bg-soft: #261d15;
+            --surface: #2a211a;
+            --surface-2: #33281f;
+            --text: #f5e7d0;
+            --text-soft: #dcc9a8;
+            --muted: #ab9678;
+            --border: rgba(245, 231, 208, 0.14);
+            --accent: #e8a64c;
+            --accent-2: #c97b2d;
+            --success: #7fb069;
+            --warning: #e8a64c;
+            --danger: #d96c4f;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
+            --focus: 0 0 0 3px rgba(232, 166, 76, 0.4);
+            /* machine geometry (tier-overridable) */
+            --cs-level-h: 92px;
+            --cs-bag-size: 58px;
+            --cs-bin-w: 132px;
+            --cs-machine-w: 200px;
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #fef3c7;
+            --bg-soft: #fdeab0;
+            --surface: #fffdf6;
+            --surface-2: #f8e8c9;
+            --text: #3b2308;
+            --text-soft: #5f4013;
+            --muted: #8a6a3a;
+            --border: rgba(120, 53, 15, 0.16);
+            --accent: #92400e;
+            --accent-2: #b45309;
+            --success: #3f6f2e;
+            --warning: #b45309;
+            --danger: #b3401f;
+            --shadow: 0 18px 40px rgba(120, 53, 15, 0.12);
+            --focus: 0 0 0 3px rgba(146, 64, 14, 0.28);
+        }
+
+        /* flatten template gradients to solid flats */
+        html, body { background: var(--bg); }
+        .brand-badge { background: var(--accent); color: var(--bg); }
+        .primary-btn { background: var(--accent); color: var(--bg); }
+        html[data-theme="light"] .brand-badge,
+        html[data-theme="light"] .primary-btn { color: #fffdf6; }
+
+        /* topbar packing: buttons tight, theme switch far right after divider */
+        .topbar .controls { margin-left: auto; flex: 0 0 auto; }
+        .topbar .control-btn, .topbar .danger-btn { line-height: 1; }
+
+        /* theme sliding switch */
+        #themeToggleBtn.theme-switch {
+            position: relative;
+            width: 58px;
+            height: 30px;
+            padding: 0;
+            margin-left: 14px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            flex: 0 0 auto;
+        }
+        #themeToggleBtn.theme-switch::before {
+            content: "";
+            position: absolute;
+            left: -8px;
+            top: -4px;
+            bottom: -4px;
+            width: 1px;
+            background: var(--border);
+        }
+        .theme-switch-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            border-radius: 999px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            line-height: 1;
+            transition: left 0.18s ease;
+        }
+        #themeToggleBtn.theme-switch[data-mode="dark"] .theme-switch-knob { left: 2px; }
+        #themeToggleBtn.theme-switch[data-mode="light"] .theme-switch-knob { left: 30px; }
+
+        /* help step cards */
+        .help-deck { display: grid; gap: 10px; margin-top: 12px; }
+        .help-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            opacity: 0;
+            animation: helpDeal 0.4s ease forwards;
+        }
+        .help-card-icon {
+            font-size: 1.5rem;
+            flex: 0 0 1.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .help-card { align-items: center; }
+        .help-card strong { display: block; margin-bottom: 2px; }
+        .help-card p { margin: 0; font-size: 0.95rem; }
+        @keyframes helpDeal {
+            from { opacity: 0; transform: translateY(14px) scale(0.96) rotate(-1.2deg); }
+            to { opacity: 1; transform: none; }
+        }
+
+        /* ---- watermark plumbing (boring names) ---- */
+        .meta-line, .spacer-note, .rev-note, .card-note, .stow {
+            display: block;
+            height: 10px;
+            line-height: 1;
+            font-size: 9px;
+            color: transparent;
+            user-select: text;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .stow { display: inline-block; width: 1px; vertical-align: baseline; }
+        .made-by {
+            display: block;
+            text-align: right;
+            height: 10px;
+            line-height: 1;
+            font-size: 9px;
+            color: transparent;
+            user-select: text;
+            pointer-events: none;
+        }
+        .meta-line::selection, .spacer-note::selection, .rev-note::selection,
+        .card-note::selection, .made-by::selection, .stow::selection,
+        #pageTexture span::selection {
+            background: #f2b544;
+            color: #23180a;
+        }
+        #pageTexture {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        #pageTexture span {
+            position: absolute;
+            white-space: nowrap;
+            font-size: 11px;
+            color: transparent;
+            transform: rotate(-30deg);
+            user-select: text;
+        }
+        .app-shell { position: relative; z-index: 1; }
+        @media print {
+            .meta-line, .spacer-note, .rev-note, .card-note, .made-by, .stow,
+            #pageTexture span { color: #888 !important; font-size: 12px !important; height: auto; }
+        }
+
+        /* ---- game layout ---- */
+        .cs-top {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .cs-round-label { font-weight: 700; color: var(--text-soft); }
+        .cs-truck-wrap { display: flex; justify-content: center; }
+        .cs-top-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .cs-truck { display: flex; align-items: flex-end; gap: 2px; }
+        .cs-truck svg { display: block; }
+
+        .cs-stage {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 14px;
+            align-items: start;
+        }
+
+        /* machine tower */
+        .cs-machine-col { display: flex; flex-direction: column; align-items: center; }
+        .cs-machine {
+            position: relative;
+            width: min(100%, 560px);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--bg-soft);
+            padding: 10px 10px 14px 18px; /* left padding clears the frame pipe */
+            overflow: hidden;
+        }
+        .cs-hopper {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) var(--cs-machine-w) var(--cs-bin-w);
+            gap: 10px;
+            align-items: end;
+            height: calc(var(--cs-bag-size) + 26px);
+            margin-bottom: 4px;
+        }
+        .cs-funnel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            width: 100%;
+        }
+        .cs-belt { width: calc(100% + 36px); height: 8px; }
+        .cs-funnel-shape {
+            width: 74%;
+            height: 16px;
+            background: var(--surface-2);
+            border-top: 2px solid var(--border);
+            clip-path: polygon(0 0, 100% 0, 62% 100%, 38% 100%);
+        }
+        .cs-level, .cs-waste-row {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) var(--cs-machine-w) var(--cs-bin-w);
+            gap: 10px;
+            height: var(--cs-level-h);
+            align-items: center;
+        }
+        .cs-level.cs-level-bottom { grid-template-columns: 1fr; height: auto; padding-top: 6px; }
+        .cs-gate { display: contents; }
+        .cs-gate-q {
+            justify-self: start;
+            max-width: 100%;
+            font-size: 0.74rem;
+            color: var(--text-soft);
+            text-align: left;
+            padding: 4px 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        .cs-grate {
+            justify-self: center;
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 5px 8px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        .cs-grate i {
+            display: block;
+            width: 20px;
+            height: 7px;
+            border-radius: 3px;
+            background: var(--accent-2);
+            transition: transform 0.16s ease;
+        }
+        .cs-grate.cs-grate-open i:nth-child(odd) { transform: translateY(4px) rotate(18deg); }
+        .cs-grate.cs-grate-open i:nth-child(even) { transform: translateY(-2px) rotate(-14deg); }
+        .cs-grate.cs-grate-rattle { animation: csRattle 0.28s ease; }
+        @keyframes csRattle {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            60% { transform: translateX(3px); }
+        }
+
+        /* bins are the answer buttons */
+        .cs-bin {
+            width: 100%;
+            min-height: 64px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 8px 6px;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+        .cs-bin small { font-weight: 400; font-size: 0.72rem; color: var(--muted); }
+        .cs-bin:hover { transform: translateY(-2px); }
+        .cs-bin.cs-picked {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 20%, var(--surface-2));
+        }
+        .cs-bin.cs-bin-hit {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 22%, var(--surface-2));
+        }
+        .cs-bin.cs-bin-jam {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 20%, var(--surface-2));
+        }
+        .cs-bin:disabled { cursor: default; opacity: 0.85; }
+        .cs-bin-natural { width: min(100%, 300px); margin: 0 auto; }
+        /* duct stubs connect each side bin to its gate lane */
+        .cs-bin { position: relative; }
+        .cs-level .cs-bin::before, .cs-waste-row .cs-bin::before {
+            content: "";
+            position: absolute;
+            left: -14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-right: 0;
+            border-radius: 3px 0 0 3px;
+        }
+        .cs-bin-natural::before { display: none; }
+        /* open-top box look: lip line + solid depth shadow */
+        .cs-level .cs-bin, .cs-waste-row .cs-bin, .cs-bin-natural {
+            border-top-width: 4px;
+            box-shadow: 0 4px 0 color-mix(in srgb, var(--border) 60%, transparent);
+        }
+        #csBinWaste { border-style: dashed; border-top-style: solid; }
+
+        /* the travelling bag */
+        .cs-bag {
+            position: absolute;
+            width: var(--cs-bag-size);
+            height: var(--cs-bag-size);
+            border-radius: 10px 10px 12px 12px;
+            background: var(--accent);
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.05rem;
+            z-index: 5;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+            transition: top 0.42s cubic-bezier(0.5, 0, 0.9, 0.6), left 0.42s ease;
+        }
+        html[data-theme="light"] .cs-bag { color: #fffdf6; }
+        .cs-bag::before {
+            content: "";
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 8px;
+            border-radius: 4px 4px 0 0;
+            background: var(--accent-2);
+        }
+        .cs-bag.cs-bag-bounce { animation: csBounce 0.3s ease; }
+        @keyframes csBounce {
+            0% { transform: scaleY(1); }
+            35% { transform: scaleY(0.78) scaleX(1.14); }
+            70% { transform: scaleY(1.06) scaleX(0.96); }
+            100% { transform: scaleY(1); }
+        }
+        .cs-bag.cs-bag-enter { animation: csEnter 0.5s ease; }
+        .cs-bag.cs-bag-sink { animation: csSink 0.45s ease forwards; }
+        @keyframes csSink {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.55) translateY(8px); }
+        }
+        @keyframes csEnter {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        /* factory dressing */
+        .cs-sign {
+            justify-self: center;
+            padding: 4px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface-2);
+            color: var(--muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            white-space: nowrap;
+        }
+        .cs-plate {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            color: var(--muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+        }
+        .cs-lamp {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--warning);
+            animation: csLampBlink 2.2s ease-in-out infinite;
+        }
+        .cs-lamp.cs-lamp-armed { background: var(--success); animation: none; }
+        @keyframes csLampBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+        .cs-gauge { width: 24px; height: 16px; display: block; }
+        .cs-needle {
+            transform-origin: 12px 14px;
+            animation: csNeedle 3.4s ease-in-out infinite;
+        }
+        @keyframes csNeedle {
+            0%, 100% { transform: rotate(-28deg); }
+            50% { transform: rotate(24deg); }
+        }
+        /* one frame pipe on the left only — the right edge belongs to the bins/chutes */
+        .cs-machine::before {
+            content: "";
+            position: absolute;
+            top: 38px;
+            bottom: 14px;
+            left: 5px;
+            width: 6px;
+            border-radius: 3px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+        .cs-belt {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(var(--cs-machine-w) + 40px);
+            height: 8px;
+        }
+        .cs-belt-line { animation: csBeltRoll 1.6s linear infinite; }
+        @keyframes csBeltRoll { to { stroke-dashoffset: -36; } }
+
+        /* lever + prompt column */
+        .cs-side {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 200px;
+        }
+        .cs-lever {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 8px 8px 10px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .cs-lever svg { width: 76px; height: var(--cs-lever-h, 106px); display: block; }
+        .cs-lever .lv-arm {
+            transform: rotate(var(--lv-ang, -34deg));
+            transform-origin: 40px 80px;
+            transition: transform 0.26s cubic-bezier(0.3, 1.4, 0.5, 1);
+        }
+        .cs-lever.cs-lever-dragging .lv-arm { transition: none; animation: none; }
+        .cs-lever.cs-lever-dragging { cursor: grabbing; }
+        /* armed lever teases: a gentle "pull me" nudge */
+        .cs-lever:not(.cs-lever-disabled):not(.cs-lever-dragging) .lv-arm {
+            animation: lvTease 3.2s ease-in-out infinite;
+        }
+        @keyframes lvTease {
+            0%, 82%, 100% { transform: rotate(var(--lv-ang, -34deg)); }
+            88% { transform: rotate(calc(var(--lv-ang, -34deg) + 8deg)); }
+            94% { transform: rotate(calc(var(--lv-ang, -34deg) - 2deg)); }
+        }
+        .cs-lever-label {
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+        }
+        .cs-lever.cs-lever-disabled {
+            opacity: 0.45;
+            cursor: default;
+        }
+        .cs-lever:focus-visible { box-shadow: var(--focus); outline: none; }
+        .cs-dock {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 6px 6px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+        }
+        .cs-dock-label {
+            color: var(--muted);
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+        }
+        .cs-crate-fly {
+            position: fixed;
+            width: 22px;
+            height: 17px;
+            border-radius: 3px;
+            background: var(--accent);
+            z-index: 100;
+            pointer-events: none;
+            transition: left 0.5s cubic-bezier(0.4, 0, 0.6, 1), top 0.5s cubic-bezier(0.3, 0.7, 0.4, 1), transform 0.5s ease;
+        }
+        .cs-number-card {
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            padding: 12px;
+            text-align: center;
+        }
+        .cs-number-card .cs-big {
+            font-size: 2rem;
+            font-weight: 800;
+            display: block;
+        }
+        .cs-number-card small { color: var(--muted); }
+        .cs-badges { display: flex; flex-direction: column; gap: 6px; }
+        .cs-badges-label {
+            color: var(--muted);
+            font-size: 0.72rem;
+            line-height: 1.3;
+        }
+        .cs-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--muted);
+            background: var(--surface-2);
+            opacity: 0.65;
+            transition: opacity 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        .cs-badge.cs-badge-on {
+            opacity: 1;
+            color: var(--text);
+            border-color: var(--success);
+            animation: csBadgePop 0.32s ease;
+        }
+        .cs-badge.cs-badge-off { opacity: 0.5; text-decoration: line-through; }
+        @keyframes csBadgePop {
+            0% { transform: scale(0.9); }
+            60% { transform: scale(1.07); }
+            100% { transform: scale(1); }
+        }
+
+        .cs-hint-list { display: grid; gap: 4px; }
+        .cs-hint-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        .cs-hint-icon { flex: 0 0 auto; font-size: 1.05rem; }
+        .cs-hint-bin {
+            margin-left: auto;
+            flex: 0 0 auto;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 2px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+        }
+        .cs-coach {
+            margin-top: 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            padding: 10px 14px;
+            line-height: 1.5;
+        }
+        .cs-coach:empty { display: none; }
+        .cs-after { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .cs-after:empty { display: none; }
+
+        /* machine shake on jam */
+        .cs-machine.cs-jam-shake { animation: csJamShake 0.4s ease; }
+        @keyframes csJamShake {
+            0%, 100% { transform: none; }
+            20% { transform: translate(-4px, 1px) rotate(-0.4deg); }
+            45% { transform: translate(4px, -1px) rotate(0.4deg); }
+            70% { transform: translate(-3px, 0); }
+        }
+        .cs-steam {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--muted);
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 6;
+            animation: csSteam 0.6s ease forwards;
+        }
+        @keyframes csSteam {
+            from { opacity: 0.8; transform: none; }
+            to { opacity: 0; transform: translate(var(--st-dx, 0px), -34px) scale(2.2); }
+        }
+
+        /* idle machine breathing */
+        .cs-piston {
+            position: absolute;
+            top: 10px;
+            width: 10px;
+            height: 22px;
+            border-radius: 4px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            animation: csPiston 2.6s ease-in-out infinite;
+        }
+        .cs-piston-l { left: 10px; }
+        .cs-piston-r { right: 10px; animation-delay: 1.3s; }
+        @keyframes csPiston {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(6px); }
+        }
+
+        /* summary */
+        .cs-summary { text-align: center; padding: 8px 0; }
+        .cs-summary h3 { margin: 0 0 8px; font-size: 1.5rem; }
+        .cs-sum-crates { display: flex; justify-content: center; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+        .cs-sum-line { color: var(--text-soft); margin: 4px 0; }
+
+        /* review table */
+        .cs-review-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .cs-review-table th, .cs-review-table td {
+            border: 1px solid var(--border);
+            padding: 7px 9px;
+            text-align: left;
+            font-size: 0.92rem;
+        }
+        .cs-review-table th { background: var(--surface-2); }
+
+        /* FX overlay lives outside app-shell */
+        #csFx {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .cs-fx-bean {
+            position: fixed;
+            width: 12px;
+            height: 16px;
+            border-radius: 50% 50% 46% 46%;
+            background: var(--accent);
+            pointer-events: none;
+            z-index: 100;
+            animation: csBeanFly var(--bn-t, 1.4s) cubic-bezier(0.2, 0.7, 0.4, 1) forwards;
+        }
+        @keyframes csBeanFly {
+            0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+            45% { opacity: 1; transform: translate(var(--bn-mx), var(--bn-my)) rotate(var(--bn-r1)); }
+            100% { opacity: 0; transform: translate(var(--bn-x), var(--bn-y)) rotate(var(--bn-r2)); }
+        }
+        .cs-fx-spark {
+            position: fixed;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #f2d27c;
+            pointer-events: none;
+            z-index: 100;
+            animation: csSparkTwinkle var(--sp-t, 1.1s) ease-out forwards;
+        }
+        @keyframes csSparkTwinkle {
+            0% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+            30% { opacity: 1; transform: translate(var(--sp-mx), var(--sp-my)) scale(1.25); }
+            100% { opacity: 0; transform: translate(var(--sp-x), var(--sp-y)) scale(0.3); }
+        }
+        .cs-fx-smoke {
+            position: fixed;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #4a4038;
+            pointer-events: none;
+            z-index: 100;
+            animation: csSmoke 0.5s ease-out forwards;
+        }
+        @keyframes csSmoke {
+            0% { opacity: 0.7; transform: scale(0.6); }
+            100% { opacity: 0; transform: translate(var(--sm-dx, 0px), -46px) scale(2.4); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cs-bag { transition: none; }
+            .cs-bag.cs-bag-bounce, .cs-bag.cs-bag-enter,
+            .cs-grate.cs-grate-rattle, .cs-machine.cs-jam-shake,
+            .cs-badge.cs-badge-on, .cs-lamp, .cs-needle, .cs-belt-line,
+            .cs-piston, .help-card,
+            .cs-lever:not(.cs-lever-disabled):not(.cs-lever-dragging) .lv-arm { animation: none; }
+            .cs-lever .lv-arm { transition: none; }
+            .cs-crate-fly { transition: none; display: none; }
+            .help-card { opacity: 1; }
+            .cs-fx-bean, .cs-fx-spark, .cs-fx-smoke, .cs-steam { display: none; }
+            .theme-switch-knob { transition: none; }
+        }
+
+        .cs-gate-q { line-height: 1.3; }
+        @media (max-width: 620px) {
+            .cs-gate-q { font-size: 0.62rem; padding: 3px 6px; }
+            :root { --cs-machine-w: 132px; --cs-bin-w: 112px; }
+        }
+        @media (max-width: 720px) {
+            .cs-stage { grid-template-columns: 1fr; }
+            .cs-side { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: stretch; }
+            .cs-number-card { flex: 1 1 140px; }
+            .cs-badges { flex-direction: row; flex-wrap: wrap; }
+        }
+
+        /* ---- landscape compact tiers ---- */
+        @media (orientation: landscape) and (max-height: 1000px) {
+            :root { --cs-level-h: 78px; --cs-bag-size: 50px; --cs-bin-w: 122px; --cs-machine-w: 180px; }
+            body { padding: 8px 12px; }
+            .app-shell { gap: 8px; }
+            .topbar { padding: 6px 14px; }
+            .sim-card { padding: 10px 20px 8px; }
+            .cs-top { margin-bottom: 6px; }
+            .cs-hopper { height: calc(var(--cs-bag-size) + 18px); }
+            .cs-bin { min-height: 54px; padding: 6px 6px; }
+            .cs-number-card .cs-big { font-size: 1.6rem; }
+            :root { --cs-lever-h: 88px; }
+            .cs-lever { padding: 6px 6px 8px; }
+            .cs-side { gap: 8px; }
+            .footer-note { font-size: 0.8rem; }
+        }
+        @media (orientation: landscape) and (max-height: 820px) {
+            :root { --cs-level-h: 64px; --cs-bag-size: 42px; --cs-bin-w: 112px; --cs-machine-w: 164px; }
+            .cs-machine { padding: 6px 8px 10px 16px; }
+            .cs-hopper { height: calc(var(--cs-bag-size) + 12px); margin-bottom: 2px; }
+            .cs-gate-q { font-size: 0.7rem; margin-bottom: 2px; }
+            .cs-bin { min-height: 46px; font-size: 0.9rem; }
+            .cs-bin small { font-size: 0.66rem; }
+            .cs-bag { font-size: 0.9rem; }
+            .cs-coach { margin-top: 8px; padding: 8px 12px; font-size: 0.92rem; }
+            :root { --cs-lever-h: 70px; }
+            .cs-lever-label { font-size: 0.8rem; }
+            .cs-dock { padding: 5px 4px 4px; }
+            .cs-badge { padding: 4px 10px; font-size: 0.78rem; }
+            .cs-number-card { padding: 8px; }
+        }
+        @media (orientation: landscape) and (max-height: 700px) {
+            :root { --cs-level-h: 46px; --cs-bag-size: 34px; --cs-bin-w: 104px; --cs-machine-w: 148px; }
+            .cs-machine { padding: 4px 8px 8px 14px; }
+            .cs-bin { min-height: 36px; }
+            .cs-bin small { display: none; } /* captions clip at this height */
+            .cs-gate-q { font-size: 0.64rem; margin-bottom: 1px; }
+            .app-shell { gap: 4px; }
+            .cs-top { margin-bottom: 2px; }
+            .cs-hopper { margin-bottom: 0; }
+            .topbar { padding: 4px 12px; }
+            .sim-card { padding: 6px 18px 4px; }
+            .cs-grate i { width: 16px; height: 6px; }
+            .cs-bin { min-height: 40px; font-size: 0.84rem; }
+            .cs-bag { font-size: 0.8rem; }
+            .cs-number-card .cs-big { font-size: 1.3rem; }
+            .cs-coach { margin-top: 6px; padding: 6px 10px; font-size: 0.86rem; }
+            :root { --cs-lever-h: 46px; }
+            .cs-plate { margin-bottom: 2px; font-size: 0.62rem; }
+            .cs-sign { display: none; }
+            .cs-dock-label { display: none; }
+            .cs-piston { display: none; }
+            .cs-side { gap: 5px; }
+            .cs-lever { padding: 3px 4px 4px; }
+            .cs-lever-label { font-size: 0.7rem; }
+            .cs-badges { flex-direction: row; flex-wrap: wrap; gap: 4px; justify-content: center; }
+            .cs-badges-label { display: none; }
+            .cs-badge { padding: 3px 8px; font-size: 0.7rem; }
+            .cs-number-card { padding: 5px; }
+            .cs-number-card small { font-size: 0.7rem; }
+            .cs-dock { padding: 3px 3px 2px; }
+            .cs-dock svg { height: 38px; width: auto; }
+            .footer-note { font-size: 0.72rem; padding-bottom: 0; }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="pageTexture" aria-hidden="true"></div>
+    <div class="app-shell">
+        <span class="meta-line" aria-hidden="true"></span>
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- ===== OPTIONAL: AUDIO TOGGLE BUTTON =====
+                     Delete this button (and the DEV-EDIT: AUDIO script section below)
+                     if you do not want sound in your sim. -->
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <!-- ===== END AUDIO TOGGLE BUTTON ===== -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+            <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <h2 id="homeTitle">The Cocoa Sorting House</h2>
+                    <p id="homeDescription"></p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                    </div>
+                    <span class="spacer-note" aria-hidden="true"></span>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         ============================================================ -->
+                    <div class="cs-top">
+                        <div class="cs-round-label" id="csRoundLabel">Bag 1 of 7</div>
+                        <div class="cs-sign" aria-hidden="true">★ GRAN COUVA SORTING CO. ★</div>
+                        <div class="cs-top-actions">
+                            <button class="control-btn" id="csHintBtn" type="button">💡 Hint</button>
+                            <button class="control-btn" id="csReviewBtn" type="button">📋 Review</button>
+                        </div>
+                    </div>
+
+                    <div class="cs-stage" id="csStage">
+                        <div class="cs-machine-col">
+                            <div class="cs-machine" id="csMachine">
+                                <span class="cs-piston cs-piston-l" aria-hidden="true"></span>
+                                <span class="cs-piston cs-piston-r" aria-hidden="true"></span>
+                                <div class="cs-plate" aria-hidden="true">
+                                    <span class="cs-lamp" id="csLamp"></span>
+                                    <span>SORTING UNIT 7</span>
+                                    <svg class="cs-gauge" viewBox="0 0 24 16" aria-hidden="true"><path d="M3 14 A 9 9 0 0 1 21 14" fill="none" stroke="var(--border)" stroke-width="2"/><line class="cs-needle" x1="12" y1="14" x2="12" y2="6" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round"/></svg>
+                                </div>
+                                <div class="cs-hopper" id="csHopper">
+                                    <span aria-hidden="true"></span>
+                                    <div class="cs-funnel" id="csFunnel" aria-hidden="true">
+                                        <svg class="cs-belt" viewBox="0 0 200 8" preserveAspectRatio="none"><line class="cs-belt-line" x1="0" y1="4" x2="200" y2="4" stroke="var(--accent-2)" stroke-width="4" stroke-dasharray="10 8"/></svg>
+                                        <div class="cs-funnel-shape"></div>
+                                    </div>
+                                    <span aria-hidden="true"></span>
+                                </div>
+                                <div class="cs-waste-row">
+                                    <div class="cs-gate">
+                                        <div class="cs-gate-q">Gate 1 — Any fraction or decimal part?<span class="stow" aria-hidden="true"></span></div>
+                                        <div class="cs-grate" id="csGrate1" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                                    </div>
+                                    <button class="cs-bin" id="csBinWaste" type="button" data-bin="waste">🗑 Waste Chute<small>not an integer at all</small></button>
+                                </div>
+                                <div class="cs-level">
+                                    <div class="cs-gate">
+                                        <div class="cs-gate-q">Gate 2 — Is it negative?</div>
+                                        <div class="cs-grate" id="csGrate2" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                                    </div>
+                                    <button class="cs-bin" id="csBinInteger" type="button" data-bin="integer">ℤ Integer Bin<small>integers only</small></button>
+                                </div>
+                                <div class="cs-level">
+                                    <div class="cs-gate">
+                                        <div class="cs-gate-q">Gate 3 — Is it zero?</div>
+                                        <div class="cs-grate" id="csGrate3" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                                    </div>
+                                    <button class="cs-bin" id="csBinWhole" type="button" data-bin="whole">⓪ Whole Bin<small>whole numbers</small></button>
+                                </div>
+                                <div class="cs-level cs-level-bottom">
+                                    <button class="cs-bin cs-bin-natural" id="csBinNatural" type="button" data-bin="natural">🌱 Natural Bin<small>counting numbers</small></button>
+                                </div>
+                                <span class="card-note" aria-hidden="true"></span>
+                            </div>
+                        </div>
+
+                        <div class="cs-side">
+                            <div class="cs-number-card">
+                                <small>This bag is stamped</small>
+                                <span class="cs-big" id="csNumber">–</span>
+                                <small id="csPickLine">Pick the bin where it will stop</small>
+                            </div>
+                            <div class="cs-lever cs-lever-disabled" id="csLeverBtn" role="button" tabindex="0" aria-label="Pull the lever" aria-disabled="true">
+                                <svg viewBox="0 0 80 112" aria-hidden="true">
+                                    <path class="lv-slot" d="M 14 30 A 34 34 0 0 1 66 30" fill="none" stroke="var(--border)" stroke-width="5" stroke-linecap="round" />
+                                    <line x1="17" y1="24" x2="21" y2="29" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" />
+                                    <line x1="40" y1="13" x2="40" y2="19" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" />
+                                    <line x1="63" y1="24" x2="59" y2="29" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" />
+                                    <g class="lv-arm">
+                                        <line x1="40" y1="80" x2="40" y2="24" stroke="var(--accent-2)" stroke-width="7" stroke-linecap="round" />
+                                        <circle cx="40" cy="20" r="10" fill="var(--accent)" stroke="var(--accent-2)" stroke-width="2" />
+                                        <circle cx="40" cy="20" r="3.5" fill="var(--surface)" />
+                                    </g>
+                                    <rect x="18" y="80" width="44" height="20" rx="5" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2" />
+                                    <line x1="26" y1="86" x2="54" y2="86" stroke="var(--border)" stroke-width="1.5" />
+                                    <circle cx="26" cy="93" r="2" fill="var(--muted)" /><circle cx="54" cy="93" r="2" fill="var(--muted)" />
+                                </svg>
+                                <span class="cs-lever-label">PULL!</span>
+                            </div>
+                            <div class="cs-badges" id="csBadges" aria-hidden="false">
+                                <small class="cs-badges-label" id="csBadgesLabel">The bag's number sets light up here:</small>
+                                <span class="cs-badge" id="csBadgeNat">🌱 Natural</span>
+                                <span class="cs-badge" id="csBadgeWhole">⓪ Whole</span>
+                                <span class="cs-badge" id="csBadgeInt">ℤ Integer</span>
+                            </div>
+                            <div class="cs-dock">
+                                <small class="cs-dock-label">LOADING BAY</small>
+                                <div id="csTruck" aria-label="Crates loaded so far"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cs-coach" id="csCoach" aria-live="polite"></div>
+                    <div class="cs-after" id="csAfter"></div>
+                    <div class="cs-summary hidden" id="csSummary"></div>
+                    <div id="csAnnouncer" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);" aria-live="polite"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Mathematics · Form 2 · Term 1 · Integers 2.1.1.2
+            <span class="made-by" aria-hidden="true"></span>
+        </div>
+    </div>
+
+    <div id="csFx" aria-hidden="true"></div>
+
+    <div class="modal" id="csReviewModal" role="dialog" aria-modal="true" aria-labelledby="csReviewHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="csCloseReviewBtn" aria-label="Close review">×</button>
+            <h3 id="csReviewHeading">Your sorting record</h3>
+            <div id="csReviewBody"><p class="muted">No bags sorted yet.</p></div>
+        </section>
+    </div>
+
+    <div class="modal" id="csAgainConfirmModal" role="dialog" aria-modal="true" aria-labelledby="csAgainHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="csCloseAgainBtn" aria-label="Close play again confirmation">×</button>
+            <h3 id="csAgainHeading">Start a new delivery?</h3>
+            <p>This clears the crates you loaded this run and hands you 7 fresh bags.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="csCancelAgainBtn">Cancel</button>
+                <button class="primary-btn" id="csConfirmAgainBtn">Play Again</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Let's go!</button>
+            </div>
+            <span class="rev-note" aria-hidden="true"></span>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const BUILD_META = "~Abhishek Dan · Test Version 1 · 2026-08-28";
+
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "MATH-F2-T1-2.1.1.2-SIM1",
+            title: "The Cocoa Sorting House",
+            subtitle: "Natural, whole or integer? Let the machine prove it",
+            badgeText: "🍫",
+            homeDescription:
+                "The Gran Couva estate machine sorts number-stamped cocoa bags with three gates. Natural numbers fall deepest, because every natural number is also whole AND integer. Zero stops at the Whole Bin, negatives stop at the Integer Bin, and numbers with a fraction or decimal part slide out the Waste Chute. Predict the right bin, pull the lever, and load all 7 crates onto the truck.",
+            instructions: [
+                "🏷|Read the bag|Every cocoa bag is stamped with a number. Look at it carefully.",
+                "🎯|Pick a bin|Click the bin where you think the bag will stop: Natural, Whole, Integer, or the Waste Chute.",
+                "🕹|Pull the lever|Watch the bag tumble through the gates. The deeper it falls, the more number sets it belongs to.",
+                "🔁|Missed it?|You get one more try per bag. The gate questions are your clues.",
+                "🚚|Load the truck|Sort all 7 bags to fill the delivery truck. Sealed crates mean first-try wins!"
+            ]
+        };
+
+        /* ============================================================
+           DEV-EDIT: AUDIO (OPTIONAL)
+           Audio is completely optional. If you don't want sound in your
+           sim, delete this whole section AND the #audioBtn button in the
+           header above (search "OPTIONAL: AUDIO TOGGLE BUTTON").
+
+           All sounds here work fully offline - no internet connection
+           is ever needed. There are two ways to give a sound to a slot
+           in SOUND_FILES below:
+
+             1. Leave it as "" (empty string) to use a built-in
+                synthesized "beep" tone instead of a real audio file.
+                This needs no file at all and always works offline.
+
+             2. Paste a base64 "data URI" string, like:
+                "data:audio/mp3;base64,AAAA..."
+                To make one: convert your .mp3 or .wav file to base64
+                text (many free online converters do this, or your
+                own audio editor), then paste that text after the
+                "data:audio/mp3;base64," prefix shown above. This keeps
+                the sound baked directly into this one HTML file, so
+                there is nothing else to ship and nothing to break if
+                the file is moved. Note it makes the file bigger
+                (roughly 1.37x the size of the original audio), so this
+                is best for short sound effects, not music or narration.
+
+             3. Alternatively, point to a separate audio file next to
+                this HTML file, e.g. "sounds/correct.mp3" - but then you
+                must remember to ship that file alongside this one.
+
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+        const SOUND_FILES = {
+            click: "",     // played on general button/option clicks
+            correct: "",   // played when the learner answers correctly
+            wrong: "",     // played when the learner answers incorrectly
+            typing: "",    // played per-keystroke or per-character reveal
+            complete: "",  // played when the simulation/activity finishes
+            lever: "",     // lever ratchet
+            clank: "",     // bag bouncing on a grate
+            land: "",      // bag landing in a bin
+            jam: "",       // machine jam on a wrong prediction
+            cascade: ""    // membership badges lighting up
+        };
+
+        /* Each sound belongs to a category. The "effects" category always gets a
+           volume slider in the Help window. Any OTHER category name you use here
+           (for example "voice" for narration you add yourself) automatically gets
+           its own labelled slider in the Help window — and if no sound uses it,
+           no slider appears. */
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects",
+            lever: "effects",
+            clank: "effects",
+            land: "effects",
+            jam: "effects",
+            cascade: "effects"
+        };
+        /* Optional nicer slider labels. Category name used if missing. */
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
+        /* ---- Audio engine below. Safe to leave untouched. ---- */
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};   // category -> 0..1
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        const SYNTH_SOUNDS = {
+            /* woody marimba voice — this sim's sound identity */
+            click:    (v) => playTone(440, 50, "triangle", 0.07 * v),
+            typing:   (v) => playTone(420, 30, "square", 0.04 * v),
+            correct:  (v) => { playTone(392, 90, "triangle", 0.16 * v); playTone(587, 140, "triangle", 0.16 * v, 90); },
+            wrong:    (v) => playTone(150, 260, "sawtooth", 0.1 * v),
+            complete: (v) => { playTone(392, 100, "triangle", 0.16 * v); playTone(494, 100, "triangle", 0.16 * v, 110); playTone(587, 110, "triangle", 0.16 * v, 220); playTone(784, 240, "triangle", 0.16 * v, 330); },
+            lever:    (v) => { playTone(220, 40, "square", 0.07 * v); playTone(260, 40, "square", 0.07 * v, 60); playTone(300, 50, "square", 0.08 * v, 120); },
+            clank:    (v) => playTone(196, 70, "square", 0.09 * v),
+            land:     (v) => { playTone(147, 90, "triangle", 0.16 * v); playTone(98, 130, "triangle", 0.13 * v, 60); },
+            jam:      (v) => { playTone(120, 300, "sawtooth", 0.11 * v); playTone(90, 260, "sawtooth", 0.09 * v, 120); },
+            cascade:  (v) => { playTone(523, 80, "triangle", 0.13 * v); playTone(659, 80, "triangle", 0.13 * v, 100); playTone(784, 110, "triangle", 0.13 * v, 200); },
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+        // Example usage from your own sim logic:
+        // playSound("correct"); // call anywhere in your DEV-EDIT: SIM LOGIC code
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1");
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), input.value);
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+            initBuildMeta();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            if (dom.homeEyebrow) dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow || "";
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            if (dom.openInstructionsBtn) dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const deck = document.createElement("div");
+            deck.className = "help-deck";
+            SIM_CONFIG.instructions.forEach((item, i) => {
+                const parts = item.split("|");
+                const card = document.createElement("div");
+                card.className = "help-card";
+                card.style.animationDelay = (i * 0.14) + "s";
+                const icon = document.createElement("span");
+                icon.className = "help-card-icon";
+                icon.textContent = parts[0];
+                const copy = document.createElement("div");
+                const strong = document.createElement("strong");
+                strong.textContent = parts[1];
+                const p = document.createElement("p");
+                p.textContent = parts[2];
+                copy.appendChild(strong);
+                copy.appendChild(p);
+                card.appendChild(icon);
+                card.appendChild(copy);
+                deck.appendChild(card);
+            });
+            dom.instructionsBody.replaceChildren(deck);
+        }
+
+        function resetModalScroll(modal) {
+            const card = modal.querySelector(".modal-card");
+            if (card) card.scrollTop = 0;
+        }
+
+        function openInstructionsModal() {
+            renderInstructions(); // replay the card deal-in each open
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+            resetModalScroll(dom.instructionsModal);
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+            resetModalScroll(dom.resetConfirmModal);
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.classList.add("theme-switch");
+            dom.themeToggleBtn.setAttribute("data-mode", state.theme);
+            dom.themeToggleBtn.replaceChildren();
+            const knob = document.createElement("span");
+            knob.className = "theme-switch-knob";
+            knob.textContent = switchToLight ? "☀️" : "🌙"; // shows the mode selected NEXT
+            dom.themeToggleBtn.appendChild(knob);
+            dom.themeToggleBtn.setAttribute("title", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+                csCloseSimModals();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        const CS_TOTAL = 7;
+        const CS_KEY = `sim:${SIM_CONFIG.simId}:state`;
+        const MINUS = "−";
+
+        const csDom = {
+            roundLabel: document.getElementById("csRoundLabel"),
+            truck: document.getElementById("csTruck"),
+            hintBtn: document.getElementById("csHintBtn"),
+            reviewBtn: document.getElementById("csReviewBtn"),
+            stage: document.getElementById("csStage"),
+            machine: document.getElementById("csMachine"),
+            hopper: document.getElementById("csHopper"),
+            funnel: document.getElementById("csFunnel"),
+            grates: [document.getElementById("csGrate1"), document.getElementById("csGrate2"), document.getElementById("csGrate3")],
+            bins: {
+                waste: document.getElementById("csBinWaste"),
+                integer: document.getElementById("csBinInteger"),
+                whole: document.getElementById("csBinWhole"),
+                natural: document.getElementById("csBinNatural")
+            },
+            number: document.getElementById("csNumber"),
+            pickLine: document.getElementById("csPickLine"),
+            leverBtn: document.getElementById("csLeverBtn"),
+            lamp: document.getElementById("csLamp"),
+            badges: {
+                natural: document.getElementById("csBadgeNat"),
+                whole: document.getElementById("csBadgeWhole"),
+                integer: document.getElementById("csBadgeInt")
+            },
+            coach: document.getElementById("csCoach"),
+            after: document.getElementById("csAfter"),
+            summary: document.getElementById("csSummary"),
+            announcer: document.getElementById("csAnnouncer"),
+            fx: document.getElementById("csFx"),
+            reviewModal: document.getElementById("csReviewModal"),
+            reviewBody: document.getElementById("csReviewBody"),
+            closeReviewBtn: document.getElementById("csCloseReviewBtn"),
+            againModal: document.getElementById("csAgainConfirmModal"),
+            closeAgainBtn: document.getElementById("csCloseAgainBtn"),
+            cancelAgainBtn: document.getElementById("csCancelAgainBtn"),
+            confirmAgainBtn: document.getElementById("csConfirmAgainBtn")
+        };
+
+        const csState = {
+            rounds: [],
+            idx: 0,
+            attempt: 1,
+            picked: null,
+            crates: [],      // "sealed" | "plain" | "patched"
+            review: [],
+            locked: false,
+            done: false
+        };
+        let csEventsBound = false;
+        let csBag = null;
+
+        /* ---------- round generation ---------- */
+
+        const BIN_LABELS = { natural: "Natural Bin", whole: "Whole Bin", integer: "Integer Bin", waste: "Waste Chute" };
+
+        function makeNatural() {
+            const v = pick([randInt(2, 12), randInt(13, 99)]);
+            return { display: String(v), kind: "natural", bin: "natural" };
+        }
+        function makeZero() {
+            return { display: "0", kind: "zero", bin: "whole" };
+        }
+        function makeNegative() {
+            const v = randInt(1, 40);
+            return { display: MINUS + String(v), kind: "negative", bin: "integer" };
+        }
+        function makeNonInteger() {
+            const style = randInt(1, 3);
+            let display;
+            if (style === 1) display = String(randInt(1, 9)) + "." + String(randInt(1, 9));
+            else if (style === 2) display = pick(["½", "¼", "1½", "3¼"]);
+            else display = MINUS + String(randInt(1, 9)) + ".5";
+            return { display: display, kind: "noninteger", bin: "waste" };
+        }
+        function makeAny() {
+            return pick([makeNatural, makeZero, makeNegative, makeNonInteger])();
+        }
+
+        function buildRun() {
+            const t1 = shuffle([makeNatural(), makeZero()]);
+            const t2 = shuffle([makeNegative(), pick([makeNegative, makeNatural])()]);
+            const t3 = shuffle([makeNonInteger(), makeAny(), makeNonInteger()]);
+            const rounds = t1.concat(t2, t3);
+            // no duplicate displays in one run
+            const seen = new Set();
+            for (let i = 0; i < rounds.length; i++) {
+                let guard = 0;
+                while (seen.has(rounds[i].display) && guard < 30) {
+                    const maker = { natural: makeNatural, zero: makeZero, negative: makeNegative, noninteger: makeNonInteger }[rounds[i].kind];
+                    rounds[i] = maker();
+                    guard++;
+                }
+                seen.add(rounds[i].display);
+            }
+            return rounds;
+        }
+
+        function membership(kind) {
+            if (kind === "natural") return { natural: true, whole: true, integer: true };
+            if (kind === "zero") return { natural: false, whole: true, integer: true };
+            if (kind === "negative") return { natural: false, whole: false, integer: true };
+            return { natural: false, whole: false, integer: false };
+        }
+
+        /* ---------- persistence ---------- */
+
+        function csSave() {
+            try {
+                storageSet(CS_KEY, JSON.stringify({
+                    rounds: csState.rounds, idx: csState.idx, attempt: csState.attempt,
+                    crates: csState.crates, review: csState.review, done: csState.done
+                }));
+            } catch (err) { /* ignore */ }
+        }
+        function csLoad() {
+            try {
+                const raw = storageGet(CS_KEY);
+                if (!raw) return false;
+                const data = JSON.parse(raw);
+                if (!data || !Array.isArray(data.rounds) || data.rounds.length !== CS_TOTAL) return false;
+                csState.rounds = data.rounds;
+                csState.idx = Math.min(Math.max(0, data.idx | 0), CS_TOTAL);
+                csState.attempt = data.attempt === 2 ? 2 : 1;
+                csState.crates = Array.isArray(data.crates) ? data.crates : [];
+                csState.review = Array.isArray(data.review) ? data.review : [];
+                csState.done = !!data.done;
+                // a crated-but-not-advanced round advances, so crates cannot be refarmed
+                if (csState.crates.length > csState.idx) csState.idx = csState.crates.length;
+                return true;
+            } catch (err) { return false; }
+        }
+        function csClear() {
+            try { sessionStorage.removeItem(CS_KEY); } catch (err) { /* ignore */ }
+        }
+
+        /* ---------- rendering ---------- */
+
+        function csAnnounce(text) {
+            if (csDom.announcer) csDom.announcer.textContent = text;
+        }
+
+        function renderTruck() {
+            const w = 24 + CS_TOTAL * 20;
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", `0 0 ${w + 34} 48`);
+            svg.setAttribute("width", w + 34);
+            svg.setAttribute("height", 48);
+            svg.setAttribute("role", "img");
+            svg.setAttribute("aria-label", `${csState.crates.length} of ${CS_TOTAL} crates loaded`);
+            const desc = document.createElementNS("http://www.w3.org/2000/svg", "desc");
+            desc.textContent = BUILD_META;
+            svg.appendChild(desc);
+            const accent = "var(--accent-2)";
+            let parts = `<rect x="2" y="14" width="${w}" height="20" rx="3" fill="none" stroke="${accent}" stroke-width="2"/>`;
+            parts += `<line x1="2" y1="34" x2="${w + 2}" y2="34" stroke="${accent}" stroke-width="4"/>`;
+            parts += `<path d="M ${w + 4} 34 v -12 q 0 -3 3 -3 h 9 q 3 0 4 3 l 2 6 v 6 z" fill="${accent}"/>`;
+            parts += `<rect x="${w + 7}" y="21.5" width="7" height="5.5" rx="1.5" fill="var(--surface)"/>`;
+            parts += `<circle cx="${w + 20.5}" cy="31" r="1.6" fill="var(--warning)"/>`;
+            parts += `<circle cx="16" cy="38" r="5" fill="var(--text-soft)"/><circle cx="${w - 10}" cy="38" r="5" fill="var(--text-soft)"/><circle cx="${w + 13}" cy="38" r="5" fill="var(--text-soft)"/>`;
+            parts += `<circle cx="16" cy="38" r="1.8" fill="var(--surface)"/><circle cx="${w - 10}" cy="38" r="1.8" fill="var(--surface)"/><circle cx="${w + 13}" cy="38" r="1.8" fill="var(--surface)"/>`;
+            parts += `<line x1="0" y1="46" x2="${w + 34}" y2="46" stroke="var(--muted)" stroke-width="2" stroke-dasharray="8 6"/>`;
+            for (let i = 0; i < CS_TOTAL; i++) {
+                const x = 6 + i * 20;
+                const kind = csState.crates[i];
+                if (!kind) {
+                    parts += `<rect x="${x}" y="18" width="16" height="13" rx="2" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="3 2"/>`;
+                } else {
+                    const fill = kind === "sealed" ? "var(--accent)" : kind === "plain" ? "var(--muted)" : "var(--danger)";
+                    parts += `<rect x="${x}" y="18" width="16" height="13" rx="2" fill="${fill}"/>`;
+                    parts += `<line x1="${x + 1}" y1="21.5" x2="${x + 15}" y2="21.5" stroke="var(--bg)" stroke-width="1"/>`;
+                    if (kind === "sealed") parts += `<path d="M ${x + 4} 25 l 3 3 l 6 -6" stroke="var(--bg)" stroke-width="2" fill="none"/>`;
+                    if (kind === "patched") parts += `<path d="M ${x + 4} 23 l 8 6 M ${x + 12} 23 l -8 6" stroke="var(--bg)" stroke-width="1.6"/>`;
+                }
+            }
+            svg.innerHTML += parts;
+            csDom.truck.replaceChildren(svg);
+        }
+
+        function resetBadges() {
+            Object.values(csDom.badges).forEach((b) => {
+                b.classList.remove("cs-badge-on", "cs-badge-off");
+            });
+        }
+
+        function clearBag() {
+            if (csBag) { csBag.remove(); csBag = null; }
+        }
+
+        function spawnBag(display) {
+            clearBag();
+            csBag = document.createElement("div");
+            csBag.className = "cs-bag cs-bag-enter";
+            csBag.textContent = display;
+            csDom.machine.appendChild(csBag);
+            positionBagAt(csDom.funnel, -8);
+        }
+
+        function machineRect() { return csDom.machine.getBoundingClientRect(); }
+
+        function positionBagAt(el, dy) {
+            if (!csBag) return;
+            const m = machineRect();
+            const r = el.getBoundingClientRect();
+            const size = csBag.offsetWidth || 58;
+            csBag.style.left = (r.left - m.left + r.width / 2 - size / 2) + "px";
+            csBag.style.top = (r.top - m.top + r.height / 2 - size / 2 + (dy || 0)) + "px";
+        }
+
+        function renderRound() {
+            const round = csState.rounds[csState.idx];
+            csDom.summary.classList.add("hidden");
+            csDom.stage.classList.remove("hidden");
+            csDom.roundLabel.textContent = `Bag ${csState.idx + 1} of ${CS_TOTAL}`;
+            csDom.number.textContent = round.display;
+            csDom.pickLine.textContent = "Pick the bin where it will stop";
+            csDom.coach.textContent = "";
+            csDom.after.replaceChildren();
+            csDom.hintBtn.classList.remove("hidden");
+            csDom.reviewBtn.classList.remove("hidden");
+            csState.picked = null;
+            csState.locked = false;
+            resetBadges();
+            Object.values(csDom.bins).forEach((b) => {
+                b.disabled = false;
+                b.classList.remove("cs-picked", "cs-bin-hit", "cs-bin-jam");
+            });
+            setLeverEnabled(false);
+            renderTruck();
+            spawnBag(round.display);
+            csAnnounce(`Bag ${csState.idx + 1} of ${CS_TOTAL}. The bag is stamped ${round.display}. Pick a bin, then pull the lever.`);
+        }
+
+        /* ---------- interaction ---------- */
+
+        function onBinClick(binKey) {
+            if (csState.locked || csState.done) return;
+            csState.picked = binKey;
+            Object.entries(csDom.bins).forEach(([k, b]) => b.classList.toggle("cs-picked", k === binKey));
+            setLeverEnabled(true);
+            csDom.pickLine.textContent = `You picked the ${BIN_LABELS[binKey]}`;
+            playSound("click");
+        }
+
+        function setLeverEnabled(on) {
+            csDom.leverBtn.classList.toggle("cs-lever-disabled", !on);
+            csDom.leverBtn.setAttribute("aria-disabled", on ? "false" : "true");
+            if (csDom.lamp) csDom.lamp.classList.toggle("cs-lamp-armed", on);
+        }
+        function leverEnabled() {
+            return !csDom.leverBtn.classList.contains("cs-lever-disabled");
+        }
+        function setLeverAngle(deg) {
+            csDom.leverBtn.style.setProperty("--lv-ang", deg + "deg");
+        }
+
+        function wait(ms) { return new Promise((res) => setTimeout(res, ms)); }
+        function reducedMotion() {
+            return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        }
+
+        function rattleGrate(i, open) {
+            const g = csDom.grates[i];
+            if (!g) return;
+            g.classList.add("cs-grate-rattle");
+            if (open) g.classList.add("cs-grate-open");
+            setTimeout(() => {
+                g.classList.remove("cs-grate-rattle");
+                g.classList.remove("cs-grate-open");
+            }, 340);
+        }
+
+        function bounceBag() {
+            if (!csBag) return;
+            csBag.classList.remove("cs-bag-bounce");
+            void csBag.offsetWidth;
+            csBag.classList.add("cs-bag-bounce");
+        }
+
+        async function travelTruePath(round) {
+            /* animate the bag along its true path; returns when it lands */
+            const stepMs = reducedMotion() ? 0 : 440;
+            const settle = reducedMotion() ? 0 : 220;
+            // drop to gate 1
+            positionBagAt(csDom.grates[0], -6);
+            await wait(stepMs);
+            bounceBag(); playSound("clank");
+            if (round.bin === "waste") {
+                await wait(settle);
+                positionBagAt(csDom.bins.waste, 0);
+                await wait(stepMs);
+                playSound("land");
+                return;
+            }
+            rattleGrate(0, true);
+            await wait(settle);
+            // through to gate 2
+            positionBagAt(csDom.grates[1], -6);
+            await wait(stepMs);
+            bounceBag(); playSound("clank");
+            if (round.bin === "integer") {
+                await wait(settle);
+                positionBagAt(csDom.bins.integer, 0);
+                await wait(stepMs);
+                playSound("land");
+                return;
+            }
+            rattleGrate(1, true);
+            await wait(settle);
+            // through to gate 3
+            positionBagAt(csDom.grates[2], -6);
+            await wait(stepMs);
+            bounceBag(); playSound("clank");
+            if (round.bin === "whole") {
+                await wait(settle);
+                positionBagAt(csDom.bins.whole, 0);
+                await wait(stepMs);
+                playSound("land");
+                return;
+            }
+            rattleGrate(2, true);
+            await wait(settle);
+            positionBagAt(csDom.bins.natural, 0);
+            await wait(stepMs);
+            playSound("land");
+        }
+
+        async function jamSequence(predictedBin) {
+            playSound("jam");
+            csDom.machine.classList.add("cs-jam-shake");
+            csDom.bins[predictedBin].classList.add("cs-bin-jam");
+            if (!reducedMotion()) {
+                spawnSteam();
+                spawnSmoke();
+            }
+            await wait(reducedMotion() ? 0 : 480);
+            csDom.machine.classList.remove("cs-jam-shake");
+            positionBagAt(csDom.funnel, -8);
+            await wait(reducedMotion() ? 0 : 460);
+            csDom.bins[predictedBin].classList.remove("cs-bin-jam");
+        }
+
+        function gateNudge(round) {
+            if (round.kind === "noninteger") return `Look at Gate 1 again: does ${round.display} have a fraction or decimal part? A number like that cannot pass a single gate.`;
+            if (round.kind === "negative") return `Look at Gate 2 again: is ${round.display} negative? Negative numbers with no fraction part stop right there — whole numbers never go below zero.`;
+            if (round.kind === "zero") return "Look at Gate 3 again: the number is zero. Zero is a whole number, but it is not a counting number.";
+            return `Look again: ${round.display} is a positive counting number with no fraction part. Numbers like that fall all the way down.`;
+        }
+
+        function teachLine(round) {
+            if (round.kind === "natural") return `${round.display} landed in the Natural Bin — the deepest level! A positive counting number with no fraction part is a natural number, AND a whole number, AND an integer. It belongs to all three sets.`;
+            if (round.kind === "zero") return "0 stopped at the Whole Bin. Zero is not a counting number, so it is not natural — but it is a whole number and an integer.";
+            if (round.kind === "negative") return `${round.display} stopped at the Integer Bin. A negative number with no fraction part is an integer only — the whole numbers and natural numbers never include negatives.`;
+            return `${round.display} slid out the Waste Chute. It has a fraction or decimal part, so it is not a natural number, not a whole number, and not an integer.`;
+        }
+
+        async function cascadeBadges(round) {
+            const m = membership(round.kind);
+            const order = ["natural", "whole", "integer"];
+            const gap = reducedMotion() ? 0 : 260;
+            let anyOn = false;
+            for (const key of order) {
+                const badge = csDom.badges[key];
+                if (m[key]) {
+                    badge.classList.add("cs-badge-on");
+                    anyOn = true;
+                    playSound("cascade");
+                } else {
+                    badge.classList.add("cs-badge-off");
+                }
+                await wait(gap);
+            }
+            if (!anyOn) playSound("wrong");
+        }
+
+        async function onLeverPull() {
+            if (csState.locked || csState.picked === null || csState.done) return;
+            csState.locked = true;
+            setLeverEnabled(false);
+            Object.values(csDom.bins).forEach((b) => { b.disabled = true; });
+            playSound("lever");
+            await wait(reducedMotion() ? 0 : 300);
+            setLeverAngle(-34); // spring back up
+
+            const round = csState.rounds[csState.idx];
+            const correct = csState.picked === round.bin;
+
+            if (!correct && csState.attempt === 1) {
+                // first miss: jam, no reveal, retry
+                await travelPartial();
+                await jamSequence(csState.picked);
+                csState.attempt = 2;
+                csSave();
+                csDom.coach.textContent = "The machine jammed — that is not where this bag stops. " + gateNudge(round);
+                csDom.pickLine.textContent = "Try once more: pick a bin";
+                csAnnounce("Not quite. " + gateNudge(round) + " Pick a bin and pull the lever again.");
+                Object.values(csDom.bins).forEach((b) => {
+                    b.disabled = false;
+                    b.classList.remove("cs-picked");
+                });
+                csState.picked = null;
+                csState.locked = false;
+                playSound("wrong");
+                return;
+            }
+
+            // correct, or second attempt (reveal either way)
+            await travelTruePath(round);
+            if (csBag && !reducedMotion()) {
+                csBag.classList.add("cs-bag-sink"); // bag drops into the bin, label stays readable
+                setTimeout(clearBag, 500);
+            } else {
+                clearBag();
+            }
+            const landedBin = csDom.bins[round.bin];
+            landedBin.classList.add(correct ? "cs-bin-hit" : "cs-bin-jam");
+            const grade = correct ? (csState.attempt === 1 ? "sealed" : "plain") : "patched";
+            csState.crates.push(grade);
+            csState.review.push({
+                display: round.display,
+                kind: round.kind,
+                bin: round.bin,
+                picked: csState.picked,
+                grade: grade
+            });
+            csState.idx += 1;
+            csState.attempt = 1;
+            csState.done = csState.idx >= CS_TOTAL;
+            csSave();
+            spawnCrateFly(landedBin);
+
+            csDom.coach.textContent = (correct ? "" : `Watch the true path: the bag stops at the ${BIN_LABELS[round.bin]}. `) + teachLine(round);
+            csAnnounce((correct ? "Correct! " : `The bag actually stops at the ${BIN_LABELS[round.bin]}. `) + teachLine(round));
+            await cascadeBadges(round);
+
+            if (correct) {
+                playSound("correct");
+                if (grade === "sealed") spawnBeanBurst(landedBin);
+                else spawnSparkles(landedBin, 8);
+            }
+
+            const nextBtn = document.createElement("button");
+            nextBtn.className = "primary-btn";
+            nextBtn.id = "csNextBtn";
+            nextBtn.textContent = csState.done ? "🚚 See the delivery" : "Next bag ➜";
+            nextBtn.addEventListener("click", () => {
+                if (csState.done) renderSummary();
+                else renderRound();
+            });
+            csDom.after.replaceChildren(nextBtn);
+            nextBtn.focus();
+        }
+
+        async function travelPartial() {
+            /* wrong prediction: bag drops to the first gate then the jam hits */
+            positionBagAt(csDom.grates[0], -6);
+            await wait(reducedMotion() ? 0 : 440);
+            bounceBag();
+            playSound("clank");
+            await wait(reducedMotion() ? 0 : 160);
+        }
+
+        function spawnCrateFly(fromEl) {
+            /* a crate hops from the landed bin to the loading bay, then the truck updates */
+            if (reducedMotion()) { renderTruck(); return; }
+            try {
+                const from = fromEl.getBoundingClientRect();
+                const to = csDom.truck.getBoundingClientRect();
+                const crate = document.createElement("span");
+                crate.className = "cs-crate-fly";
+                crate.style.left = (from.left + from.width / 2 - 11) + "px";
+                crate.style.top = (from.top + from.height / 2 - 8) + "px";
+                csDom.fx.appendChild(crate);
+                requestAnimationFrame(() => {
+                    crate.style.left = (to.left + to.width / 2 - 11) + "px";
+                    crate.style.top = (to.top + to.height / 2 - 8) + "px";
+                    crate.style.transform = "rotate(24deg)";
+                });
+                setTimeout(() => { crate.remove(); renderTruck(); }, 520);
+            } catch (err) { renderTruck(); }
+        }
+
+        /* ---------- FX ---------- */
+
+        function cleanupFx() {
+            while (csDom.fx.childNodes.length > 160) csDom.fx.removeChild(csDom.fx.firstChild);
+        }
+
+        function spawnSteam() {
+            const m = machineRect();
+            for (let i = 0; i < 5; i++) {
+                const s = document.createElement("span");
+                s.className = "cs-steam";
+                s.style.left = (20 + Math.random() * (m.width - 40)) + "px";
+                s.style.top = "6px";
+                s.style.setProperty("--st-dx", (Math.random() * 40 - 20) + "px");
+                csDom.machine.appendChild(s);
+                setTimeout(() => s.remove(), 700);
+            }
+        }
+
+        function spawnSmoke() {
+            const m = machineRect();
+            for (let i = 0; i < 6; i++) {
+                const s = document.createElement("span");
+                s.className = "cs-fx-smoke";
+                s.style.left = (m.left + Math.random() * m.width) + "px";
+                s.style.top = (m.top + 20 + Math.random() * 30) + "px";
+                s.style.setProperty("--sm-dx", (Math.random() * 60 - 30) + "px");
+                csDom.fx.appendChild(s);
+                setTimeout(() => s.remove(), 600);
+            }
+            cleanupFx();
+        }
+
+        function spawnBeanBurst(fromEl) {
+            if (reducedMotion()) return;
+            const r = fromEl.getBoundingClientRect();
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            for (let i = 0; i < 22; i++) {
+                const b = document.createElement("span");
+                b.className = "cs-fx-bean";
+                b.style.left = cx + "px";
+                b.style.top = cy + "px";
+                const ang = (Math.PI * (0.15 + 0.7 * Math.random())) * (Math.random() < 0.5 ? 1 : -1);
+                const dist = vw * (0.08 + Math.random() * 0.22);
+                const mx = Math.sin(ang) * dist;
+                const my = -Math.abs(Math.cos(ang)) * vh * (0.12 + Math.random() * 0.2);
+                b.style.setProperty("--bn-mx", mx + "px");
+                b.style.setProperty("--bn-my", my + "px");
+                b.style.setProperty("--bn-x", (mx * 1.4) + "px");
+                b.style.setProperty("--bn-y", (vh * (0.2 + Math.random() * 0.25)) + "px");
+                b.style.setProperty("--bn-r1", (Math.random() * 300 - 150) + "deg");
+                b.style.setProperty("--bn-r2", (Math.random() * 720 - 360) + "deg");
+                b.style.setProperty("--bn-t", (1.2 + Math.random() * 0.6) + "s");
+                csDom.fx.appendChild(b);
+                setTimeout(() => b.remove(), 2000);
+            }
+            spawnSparkles(fromEl, 14);
+            cleanupFx();
+        }
+
+        function spawnSparkles(fromEl, count) {
+            if (reducedMotion()) return;
+            const r = fromEl.getBoundingClientRect();
+            const vw = window.innerWidth;
+            for (let i = 0; i < count; i++) {
+                const s = document.createElement("span");
+                s.className = "cs-fx-spark";
+                s.style.left = (r.left + Math.random() * r.width) + "px";
+                s.style.top = (r.top + Math.random() * r.height) + "px";
+                const mx = (Math.random() * 0.12 - 0.06) * vw;
+                const my = -(30 + Math.random() * 70);
+                s.style.setProperty("--sp-mx", mx + "px");
+                s.style.setProperty("--sp-my", my + "px");
+                s.style.setProperty("--sp-x", (mx * 1.8) + "px");
+                s.style.setProperty("--sp-y", (my - 40 - Math.random() * 40) + "px");
+                s.style.setProperty("--sp-t", (0.8 + Math.random() * 0.5) + "s");
+                csDom.fx.appendChild(s);
+                setTimeout(() => s.remove(), 1500);
+            }
+            cleanupFx();
+        }
+
+        /* ---------- summary / review ---------- */
+
+        function renderSummary() {
+            clearBag();
+            csDom.stage.classList.add("hidden");
+            csDom.coach.textContent = "";
+            csDom.after.replaceChildren();
+            csDom.hintBtn.classList.add("hidden");
+            csDom.reviewBtn.classList.add("hidden"); // bottom Review beside Play Again is the only one
+            csDom.roundLabel.textContent = "Delivery complete";
+            renderTruck();
+
+            const sealed = csState.crates.filter((c) => c === "sealed").length;
+            const plain = csState.crates.filter((c) => c === "plain").length;
+            const patched = csState.crates.filter((c) => c === "patched").length;
+
+            const wrap = csDom.summary;
+            wrap.classList.remove("hidden");
+            wrap.replaceChildren();
+
+            const h = document.createElement("h3");
+            h.textContent = sealed === CS_TOTAL ? "A perfect delivery!" : "The truck is loaded!";
+            const crateRow = document.createElement("div");
+            crateRow.className = "cs-sum-crates";
+            csState.crates.forEach((c) => {
+                const s = document.createElement("span");
+                const fill = c === "sealed" ? "var(--accent)" : c === "plain" ? "var(--muted)" : "var(--danger)";
+                const stamp = c === "sealed"
+                    ? '<path d="M 10 17 l 5 5 l 9 -10" stroke="var(--bg)" stroke-width="3" fill="none"/>'
+                    : c === "patched"
+                        ? '<path d="M 10 12 l 13 11 M 23 12 l -13 11" stroke="var(--bg)" stroke-width="2.4"/>'
+                        : "";
+                s.innerHTML = `<svg width="34" height="30" viewBox="0 0 34 30" role="img"><rect x="2" y="4" width="30" height="24" rx="4" fill="${fill}"/><line x1="4" y1="10" x2="30" y2="10" stroke="var(--bg)" stroke-width="1.6"/>${stamp}</svg>`;
+                s.setAttribute("title", c === "sealed" ? "Sealed crate — right on the first pull" : c === "plain" ? "Crate — right on the second pull" : "Patched crate — the machine had to show you");
+                s.setAttribute("aria-label", c === "sealed" ? "sealed crate" : c === "plain" ? "second-try crate" : "patched crate");
+                crateRow.appendChild(s);
+            });
+            const l1 = document.createElement("p");
+            l1.className = "cs-sum-line";
+            l1.textContent = `Sealed crates (first try): ${sealed} · Crates (second try): ${plain} · Patched crates: ${patched}`;
+            const l2 = document.createElement("p");
+            l2.className = "cs-sum-line";
+            l2.textContent = "Remember: every natural number is whole, every whole number is an integer — and numbers with fraction or decimal parts are none of these.";
+
+            const row = document.createElement("div");
+            row.className = "button-row";
+            const reviewBtn = document.createElement("button");
+            reviewBtn.className = "secondary-btn";
+            reviewBtn.textContent = "📋 Review";
+            reviewBtn.addEventListener("click", openReviewModal);
+            const againBtn = document.createElement("button");
+            againBtn.className = "primary-btn";
+            againBtn.textContent = "Play Again";
+            againBtn.addEventListener("click", openAgainModal);
+            row.appendChild(reviewBtn);
+            row.appendChild(againBtn);
+
+            wrap.appendChild(h);
+            wrap.appendChild(crateRow);
+            wrap.appendChild(l1);
+            wrap.appendChild(l2);
+            wrap.appendChild(row);
+
+            playSound("complete");
+            if (sealed === CS_TOTAL) spawnBeanBurst(crateRow);
+            csAnnounce(`Delivery complete. ${sealed} sealed crates, ${plain} second-try crates, ${patched} patched crates.`);
+        }
+
+        function openReviewModal() {
+            const body = csDom.reviewBody;
+            if (!csState.review.length) {
+                body.replaceChildren();
+                const p = document.createElement("p");
+                p.className = "muted";
+                p.textContent = "No bags sorted yet.";
+                body.appendChild(p);
+            } else {
+                const table = document.createElement("table");
+                table.className = "cs-review-table";
+                table.innerHTML = "<thead><tr><th>Bag</th><th>Your pick</th><th>It stops at</th><th>Sets it belongs to</th><th>Crate</th></tr></thead>";
+                const tbody = document.createElement("tbody");
+                csState.review.forEach((r) => {
+                    const m = membership(r.kind);
+                    const sets = [m.natural && "Natural", m.whole && "Whole", m.integer && "Integer"].filter(Boolean).join(", ") || "None of the three";
+                    const tr = document.createElement("tr");
+                    [r.display, BIN_LABELS[r.picked] || "–", BIN_LABELS[r.bin], sets,
+                     r.grade === "sealed" ? "Sealed ✅" : r.grade === "plain" ? "Second try" : "Patched"].forEach((txt) => {
+                        const td = document.createElement("td");
+                        td.textContent = txt;
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+                body.replaceChildren(table);
+            }
+            csDom.reviewModal.classList.add("show");
+            resetModalScroll(csDom.reviewModal);
+        }
+
+        function openAgainModal() {
+            csDom.againModal.classList.add("show");
+            resetModalScroll(csDom.againModal);
+        }
+
+        function csCloseSimModals() {
+            csDom.reviewModal.classList.remove("show");
+            csDom.againModal.classList.remove("show");
+        }
+
+        function onHint() {
+            const round = csState.rounds[csState.idx];
+            if (!round || csState.done) return;
+            const list = document.createElement("div");
+            list.className = "cs-hint-list";
+            [
+                ["🍰", "Has a fraction or decimal part?", "Waste Chute"],
+                ["➖", "Negative?", "Integer Bin"],
+                ["0️⃣", "Exactly zero?", "Whole Bin"],
+                ["🌱", "Counting number (1, 2, 3…)?", "Natural Bin"]
+            ].forEach(([icon, q, bin]) => {
+                const row = document.createElement("div");
+                row.className = "cs-hint-row";
+                const ic = document.createElement("span");
+                ic.className = "cs-hint-icon";
+                ic.textContent = icon;
+                const txt = document.createElement("span");
+                txt.textContent = q;
+                const chip = document.createElement("span");
+                chip.className = "cs-hint-bin";
+                chip.textContent = bin;
+                row.append(ic, txt, chip);
+                list.appendChild(row);
+            });
+            csDom.coach.replaceChildren(list);
+            csAnnounce("Hint: fraction or decimal goes to the Waste Chute. Negative stops at the Integer Bin. Zero stops at the Whole Bin. Counting numbers fall to the Natural Bin.");
+            playSound("click");
+        }
+
+        function startFreshRun() {
+            csCloseSimModals();
+            csState.rounds = buildRun();
+            csState.idx = 0;
+            csState.attempt = 1;
+            csState.picked = null;
+            csState.crates = [];
+            csState.review = [];
+            csState.locked = false;
+            csState.done = false;
+            csSave();
+            renderRound();
+        }
+
+        function bindSimEvents() {
+            if (csEventsBound) return;
+            csEventsBound = true;
+            Object.entries(csDom.bins).forEach(([key, btn]) => {
+                btn.addEventListener("click", () => onBinClick(key));
+            });
+            /* real lever: drag the knob down past the notch, or click/keyboard for an auto-pull */
+            let lvDrag = null;
+            let lvSuppressClick = 0;
+            const LV_REST = -34;
+            const LV_FIRE = 30;
+            function autoPull() {
+                setLeverAngle(38);
+                setTimeout(() => onLeverPull(), 180);
+            }
+            csDom.leverBtn.addEventListener("pointerdown", (e) => {
+                if (!leverEnabled() || csState.locked) return;
+                lvDrag = { startY: e.clientY, fired: false };
+                csDom.leverBtn.classList.add("cs-lever-dragging");
+                try { csDom.leverBtn.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+            });
+            csDom.leverBtn.addEventListener("pointermove", (e) => {
+                if (!lvDrag || lvDrag.fired) return;
+                const ang = LV_REST + Math.max(0, Math.min(74, (e.clientY - lvDrag.startY) * 0.6));
+                setLeverAngle(ang);
+                if (ang >= LV_FIRE) {
+                    lvDrag.fired = true;
+                    lvSuppressClick = Date.now();
+                    csDom.leverBtn.classList.remove("cs-lever-dragging");
+                    setLeverAngle(38);
+                    onLeverPull();
+                }
+            });
+            const lvRelease = () => {
+                if (!lvDrag) return;
+                if (!lvDrag.fired) setLeverAngle(LV_REST); // spring back
+                csDom.leverBtn.classList.remove("cs-lever-dragging");
+                lvDrag = null;
+            };
+            csDom.leverBtn.addEventListener("pointerup", lvRelease);
+            csDom.leverBtn.addEventListener("pointercancel", lvRelease);
+            csDom.leverBtn.addEventListener("click", () => {
+                if (Date.now() - lvSuppressClick < 400) return;
+                if (!leverEnabled() || csState.locked) return;
+                autoPull();
+            });
+            csDom.leverBtn.addEventListener("keydown", (e) => {
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                if (!leverEnabled() || csState.locked) return;
+                autoPull();
+            });
+            csDom.hintBtn.addEventListener("click", onHint);
+            csDom.reviewBtn.addEventListener("click", openReviewModal);
+            csDom.closeReviewBtn.addEventListener("click", csCloseSimModals);
+            csDom.closeAgainBtn.addEventListener("click", csCloseSimModals);
+            csDom.cancelAgainBtn.addEventListener("click", csCloseSimModals);
+            csDom.confirmAgainBtn.addEventListener("click", startFreshRun);
+            csDom.reviewModal.addEventListener("click", (e) => { if (e.target === csDom.reviewModal) csCloseSimModals(); });
+            csDom.againModal.addEventListener("click", (e) => { if (e.target === csDom.againModal) csCloseSimModals(); });
+            window.addEventListener("resize", () => {
+                if (csBag && !csState.locked && !csState.done) positionBagAt(csDom.funnel, -8);
+            });
+        }
+
+        function devInit() {
+            bindSimEvents();
+            if (csLoad()) {
+                if (csState.done) renderSummary();
+                else renderRound();
+                return;
+            }
+            startFreshRun();
+            openInstructionsModal(); // fresh home-screen Start only (QA 2.6)
+        }
+
+        function devReset() {
+            csClear();
+            csCloseSimModals();
+            clearBag();
+            csState.rounds = [];
+            csState.idx = 0;
+            csState.attempt = 1;
+            csState.picked = null;
+            csState.crates = [];
+            csState.review = [];
+            csState.locked = false;
+            csState.done = false;
+            csDom.coach.textContent = "";
+            csDom.after.replaceChildren();
+            csDom.summary.classList.add("hidden");
+            csDom.summary.replaceChildren();
+            csDom.stage.classList.remove("hidden");
+            csDom.fx.replaceChildren();
+        }
+
+        /* ---------- build metadata plumbing ---------- */
+
+        function initBuildMeta() {
+            try {
+                document.querySelectorAll(".meta-line, .spacer-note, .rev-note, .card-note, .made-by").forEach((el) => {
+                    el.textContent = BUILD_META;
+                });
+                document.querySelector(".app-shell").setAttribute("data-sig", BUILD_META);
+                const brand = document.getElementById("brandBadge");
+                if (brand) brand.setAttribute("title", BUILD_META);
+            } catch (err) { /* ignore */ }
+            try { console.log("%c" + BUILD_META, "color:#8a7a60;font-size:10px"); } catch (err) { /* ignore */ }
+            try { localStorage.setItem(`sim:${SIM_CONFIG.simId}:build`, BUILD_META); } catch (err) { /* ignore */ }
+            try { buildPageTexture(); } catch (err) { /* ignore */ }
+            try { bindCopyTrailer(); } catch (err) { /* ignore */ }
+            try { bindSecretToast(); } catch (err) { /* ignore */ }
+        }
+
+        function buildPageTexture() {
+            const host = document.getElementById("pageTexture");
+            if (!host) return;
+            const build = () => {
+                host.replaceChildren();
+                const stepX = 480, stepY = 180;
+                for (let y = -stepY; y < window.innerHeight + stepY; y += stepY) {
+                    for (let x = -stepX; x < window.innerWidth + stepX; x += stepX) {
+                        const s = document.createElement("span");
+                        s.textContent = BUILD_META;
+                        s.style.left = (x + ((y / stepY) % 2 ? stepX / 2 : 0)) + "px";
+                        s.style.top = y + "px";
+                        host.appendChild(s);
+                    }
+                }
+            };
+            build();
+            let tHandle = null;
+            window.addEventListener("resize", () => {
+                clearTimeout(tHandle);
+                tHandle = setTimeout(build, 250);
+            });
+        }
+
+        function bindCopyTrailer() {
+            document.addEventListener("copy", (e) => {
+                try {
+                    const sel = String(document.getSelection());
+                    if (sel.length >= 30 && sel.indexOf(BUILD_META) === -1) {
+                        e.clipboardData.setData("text/plain", sel + "\n" + BUILD_META);
+                        e.preventDefault();
+                    }
+                } catch (err) { /* ignore */ }
+            });
+        }
+
+        function bindSecretToast() {
+            let buf = [];
+            let last = 0;
+            document.addEventListener("keydown", (e) => {
+                const t = e.target;
+                if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+                const now = Date.now();
+                if (now - last > 2000) buf = [];
+                last = now;
+                buf.push(e.key);
+                if (buf.length > 3) buf = buf.slice(-3);
+                if (buf.join("") === "~ad") {
+                    buf = [];
+                    const pill = document.createElement("div");
+                    pill.textContent = BUILD_META;
+                    pill.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 18px;z-index:200;font-size:0.9rem;";
+                    document.body.appendChild(pill);
+                    setTimeout(() => pill.remove(), 1500);
+                }
+            });
+        }
+    </script>
+    <!-- build: ~Abhishek Dan · Test Version 1 · 2026-08-28 -->
+</body>
+
+</html>
