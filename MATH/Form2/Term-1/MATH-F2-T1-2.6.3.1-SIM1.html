@@ -1,0 +1,3444 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>Pelican's Wharf</title>
+    <style>
+        /* ============================================================
+           CHROME — theme variables, base layout, topbar, modal, footer
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            /* night: lantern-lit wharf, same scene as day */
+            --bg: #171b21;
+            --bg-soft: #1e242c;
+            --surface: #252c36;
+            --surface-2: #2c3541;
+            --text: #edf2f7;
+            --text-soft: #c6d2dd;
+            --muted: #8da0b0;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #f07a63;
+            --accent-2: #8fb4cc;
+            --success: #4cc38a;
+            --warning: #e0a458;
+            --danger: #f2766b;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(143, 180, 204, 0.4);
+            /* wharf scene */
+            --sky: #1b2735;
+            --sun: #d8dee8;
+            --sea: #14202c;
+            --sea-2: #0f1822;
+            --plank: #4a3b2b;
+            --plank-2: #382c20;
+            --hull: #b23327;
+            --hull-2: #33566b;
+            --prop-line: #46586b;
+            --buoy: #b23327;
+            --gull: #5e7386;
+            --rope: #a98a5b;
+            --crate-wood: #8a6f4d;
+            --pelican-body: #e8e3da;
+            --pelican-wing: #c8c0b2;
+            --pelican-beak: #d9903f;
+            --pelican-pouch: #c97b33;
+            --paper: #e8e2d2;
+            --paper-ink: #2a2519;
+            --gold: #e5b45a;
+            /* sizes */
+            --stage-h: 350px;
+            --beam-w: 520px;
+            --pan-w: 148px;
+            --slip-w: 190px;
+            --crate: 40px;
+            --fish-tok: 26px;
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            /* day: dawn over the same wharf */
+            --bg: #edf1f5;
+            --bg-soft: #dfe6ed;
+            --surface: #ffffff;
+            --surface-2: #f1f5f8;
+            --text: #1b2733;
+            --text-soft: #3e5568;
+            --muted: #5d7286;
+            --border: rgba(27, 39, 51, 0.14);
+            --accent: #b23327;
+            --accent-2: #33566b;
+            --success: #1f7a45;
+            --warning: #b87a1f;
+            --danger: #c23a2e;
+            --shadow: 0 18px 40px rgba(46, 64, 84, 0.14);
+            --focus: 0 0 0 3px rgba(51, 86, 107, 0.28);
+            --sky: #dce6ed;
+            --sun: #e8b15c;
+            --sea: #6e93a8;
+            --sea-2: #5c8098;
+            --plank: #b39267;
+            --plank-2: #8a6f4d;
+            --prop-line: #33566b;
+            --gull: #5e7386;
+            --paper: #f7f3e8;
+            --paper-ink: #2a2519;
+        }
+
+        * { box-sizing: border-box; }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body { min-height: 100vh; padding: 16px; }
+
+        button, input, textarea, select { font: inherit; }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover { transform: translateY(-1px); }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 33px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: var(--accent);
+            color: #22110c;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        html[data-theme="light"] .brand-badge { color: #ffffff; }
+
+        .brand-copy { min-width: 0; }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 { font-size: 1.08rem; }
+        .brand-copy p { color: var(--muted); margin-top: 2px; font-size: 0.92rem; }
+
+        .topbar .controls {
+            margin-left: auto;
+            flex: 0 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .topbar .control-btn,
+        .topbar .danger-btn { line-height: 1; }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            color: #22110c;
+            box-shadow: var(--shadow);
+        }
+
+        html[data-theme="light"] .primary-btn { color: #ffffff; }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .theme-divider {
+            width: 1px;
+            align-self: stretch;
+            background: var(--border);
+            margin: 4px 2px;
+        }
+
+        .theme-switch {
+            position: relative;
+            width: 62px;
+            height: 32px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 0;
+        }
+
+        .theme-switch:hover { transform: none; }
+
+        .theme-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            line-height: 1;
+            transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .theme-switch[data-next="dark"] .theme-knob { transform: translateX(30px); }
+
+        .pulse-help { position: relative; }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        .screen { display: none; flex: 1; }
+        .screen.active { display: flex; }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 1040px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show { display: flex; }
+        .modal.show .modal-card { animation: modalIn 0.22s cubic-bezier(0.23, 1, 0.32, 1); }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.97); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .modal.show .modal-card { animation: none; }
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .volume-sliders { margin-top: 18px; }
+        .volume-sliders h3 { margin: 0 0 10px; font-size: 1.05rem; }
+
+        .volume-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+        .volume-row label { flex: 0 0 150px; color: var(--text-soft); font-size: 0.92rem; }
+        .volume-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+
+        .muted { color: var(--muted); }
+        .hidden { display: none !important; }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body { padding: 12px; }
+            .topbar { padding: 12px; flex-wrap: wrap; }
+            .topbar .controls { width: 100%; justify-content: flex-start; }
+        }
+
+        /* ============================================================
+           SIM STYLES
+           ============================================================ */
+
+        /* build/meta text marks — boring names, transparent ink */
+        .meta-line, .spacer-note, .rev-note, .card-note, .made-by, .stow {
+            display: block;
+            color: transparent;
+            font-size: 10px;
+            line-height: 1;
+            height: 10px;
+            overflow: hidden;
+            user-select: text;
+            pointer-events: none;
+        }
+        .stow { display: inline; font-size: 1px; height: auto; }
+        .made-by { text-align: right; }
+        .meta-line::selection, .spacer-note::selection, .rev-note::selection,
+        .card-note::selection, .made-by::selection, .stow::selection,
+        #pageTexture span::selection {
+            background: #f2b544;
+            color: #23180a;
+        }
+        #pageTexture {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        #pageTexture span {
+            position: absolute;
+            color: transparent;
+            font-size: 11px;
+            line-height: 1;
+            white-space: nowrap;
+            transform: rotate(-30deg);
+            user-select: text;
+        }
+        @media print {
+            .meta-line, .spacer-note, .rev-note, .card-note, .made-by,
+            #pageTexture span {
+                color: #8a8a8a !important;
+                font-size: 12px;
+            }
+            .stow { color: #8a8a8a !important; font-size: 10px; }
+        }
+        .build-toast {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            z-index: 200;
+            box-shadow: var(--shadow);
+        }
+
+        /* ---------- home hero scene ---------- */
+        .hero-scene {
+            width: 100%;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-bottom: 18px;
+            background: var(--sky);
+        }
+        .hero-scene svg { display: block; width: 100%; height: auto; max-height: 240px; }
+
+        /* ---------- round header ---------- */
+        .round-head {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .round-count { font-weight: 700; color: var(--text-soft); white-space: nowrap; }
+        .round-tools { display: flex; justify-content: flex-end; gap: 8px; }
+        .round-tools .control-btn { padding: 8px 14px; line-height: 1; }
+
+        .catch-rail {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: flex-end;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 14px;
+        }
+        .rail-hook {
+            width: var(--fish-tok);
+            height: calc(var(--fish-tok) + 8px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .rail-hook::before {
+            content: "";
+            width: 2px;
+            height: 7px;
+            background: var(--muted);
+            border-radius: 1px;
+        }
+        .rail-hook svg { display: block; width: var(--fish-tok); height: var(--fish-tok); opacity: 0.28; }
+        .rail-hook.gold svg, .rail-hook.silver svg, .rail-hook.grey svg { opacity: 1; }
+        .rail-hook.gold svg .fish-body { fill: var(--gold); }
+        .rail-hook.silver svg .fish-body { fill: var(--accent-2); }
+        .rail-hook.grey svg .fish-body { fill: var(--muted); }
+        .rail-hook.pop svg { animation: fishPop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1); }
+        @keyframes fishPop {
+            0% { transform: scale(0.2) rotate(-20deg); }
+            70% { transform: scale(1.2) rotate(6deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        @media (max-width: 560px) {
+            .round-head { grid-template-columns: 1fr 1fr; }
+            .catch-rail { grid-column: 1 / -1; order: 3; justify-self: center; }
+        }
+
+        /* ---------- coach ---------- */
+        .coach-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 0 10px;
+        }
+        .coach-pelican { flex: 0 0 auto; }
+        .coach-pelican svg { display: block; width: 52px; height: 52px; }
+        .coach-pelican.flap svg { animation: pelicanBob 0.5s ease; }
+        @keyframes pelicanBob {
+            0%, 100% { transform: none; }
+            30% { transform: translateY(-5px) rotate(-5deg); }
+            60% { transform: translateY(-1px) rotate(3deg); }
+        }
+        .coach-bubble {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 4px 14px 14px 14px;
+            padding: 8px 14px;
+            color: var(--text-soft);
+            font-size: 1rem;
+            max-width: 660px;
+        }
+        .coach-bubble strong { color: var(--text); }
+
+        .hint-strip {
+            text-align: center;
+            font-size: 0.92rem;
+            color: var(--text-soft);
+            background: color-mix(in srgb, var(--warning) 14%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent);
+            border-radius: 999px;
+            padding: 5px 14px;
+            margin: 0 auto 10px;
+            width: fit-content;
+            max-width: 100%;
+        }
+        .hint-strip:empty { display: none; }
+
+        .sky-gull {
+            animation: gullGlide var(--gg-dur, 13s) ease-in-out infinite alternate;
+            opacity: 0.55;
+        }
+        @keyframes gullGlide {
+            from { transform: translate(0, 0); }
+            to { transform: translate(var(--gg-dx, 60px), var(--gg-dy, -6px)); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .sky-gull { animation: none; }
+        }
+
+        .rule-strip {
+            text-align: center;
+            font-size: 0.88rem;
+            color: var(--muted);
+            margin: 0 0 10px;
+        }
+        .rule-strip b { color: var(--text-soft); }
+
+        /* ---------- wharf stage ---------- */
+        .wharf-stage {
+            position: relative;
+            height: var(--stage-h);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--sky);
+            overflow: hidden;
+        }
+        .scene-band {
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 54%;
+            pointer-events: none;
+        }
+        .scene-band svg { display: block; width: 100%; height: 100%; }
+
+        /* --- beam scale rig --- */
+        .scale-rig {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 26px;
+            width: var(--beam-w);
+            height: calc(var(--stage-h) - 64px);
+        }
+        .rig-post {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 26px;
+            bottom: 0;
+            width: 14px;
+            border-radius: 6px 6px 0 0;
+            background: var(--plank-2);
+        }
+        .rig-base {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0;
+            width: 120px;
+            height: 12px;
+            border-radius: 6px;
+            background: var(--plank-2);
+        }
+        .beam-wrap {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 30px;
+            height: 0;
+        }
+        .beam {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -5px;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--plank);
+            border: 1px solid var(--plank-2);
+            transform: rotate(var(--tilt, 0deg));
+            transition: transform 0.7s cubic-bezier(0.3, 1.2, 0.4, 1);
+        }
+        .beam.settle { animation: beamSettle 0.9s cubic-bezier(0.34, 1.3, 0.5, 1); }
+        .pan-arm.settle { animation: panSettle 0.9s cubic-bezier(0.34, 1.3, 0.5, 1); }
+        @keyframes beamSettle {
+            0% { transform: rotate(-2deg); }
+            40% { transform: rotate(1.4deg); }
+            75% { transform: rotate(-0.5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes panSettle {
+            0% { transform: rotate(2deg); }
+            40% { transform: rotate(-1.4deg); }
+            75% { transform: rotate(0.5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .beam.settle, .pan-arm.settle { animation: none; }
+        }
+
+        .pivot-ring {
+            position: absolute;
+            left: 50%;
+            top: -13px;
+            transform: translateX(-50%);
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            border: 4px solid var(--plank-2);
+            background: var(--surface-2);
+        }
+        .pan-arm {
+            position: absolute;
+            top: 9px;
+            width: var(--pan-w);
+            transform: rotate(calc(var(--tilt, 0deg) * -1));
+            transform-origin: top center;
+            transition: transform 0.7s cubic-bezier(0.3, 1.2, 0.4, 1);
+        }
+        .pan-arm.left { left: -10px; }
+        .pan-arm.right { right: -10px; }
+        .pan-strings {
+            position: relative;
+            height: 34px;
+        }
+        .pan-strings::before,
+        .pan-strings::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            margin-left: -1px;
+            width: 2px;
+            height: 50px;
+            background: var(--prop-line);
+            transform-origin: top center;
+        }
+        .pan-strings::before { transform: rotate(44deg); }
+        .pan-strings::after { transform: rotate(-44deg); }
+        .pan-dish {
+            position: relative;
+            min-height: 64px;
+            border: 2px solid color-mix(in srgb, var(--plank-2) 55%, var(--muted));
+            border-radius: 8px 8px 16px 16px;
+            background: color-mix(in srgb, var(--surface) 82%, transparent);
+            padding: 6px 6px 4px;
+        }
+        .pan-dish.drop-ready { border-color: var(--accent-2); box-shadow: var(--focus); }
+        .pan-load > *, .under-hook > *, .board-pins > * { animation: landPop 0.18s cubic-bezier(0.23, 1, 0.32, 1); }
+        @keyframes landPop {
+            from { transform: scale(0.85); opacity: 0.6; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .pan-load > *, .under-hook > *, .board-pins > * { animation: none; }
+        }
+
+        .pan-load {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+        }
+        .pan-sum {
+            margin-top: 2px;
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-soft);
+            min-height: 1em;
+        }
+        .under-hook {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 100%;
+            display: flex;
+            gap: 3px;
+            padding-top: 8px;
+        }
+        .under-hook:empty { display: none; }
+        .under-hook::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 8px;
+            background: var(--prop-line);
+        }
+
+        /* crates & weights */
+        .crate {
+            width: var(--crate);
+            height: var(--crate);
+            border-radius: 8px;
+            border: 2px solid color-mix(in srgb, var(--prop-line) 45%, var(--crate-wood));
+            background: var(--crate-wood);
+            color: #241a0e;
+            font-weight: 800;
+            font-size: calc(var(--crate) * 0.44);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            position: relative;
+        }
+        .crate.stamped { background: var(--gold); }
+        .crate.flip { animation: crateFlip 0.4s ease; }
+        @keyframes crateFlip {
+            0% { transform: perspective(320px) rotateY(0); }
+            50% { transform: perspective(320px) rotateY(90deg); }
+            100% { transform: perspective(320px) rotateY(0); }
+        }
+        .weight {
+            width: calc(var(--crate) * 0.55);
+            height: calc(var(--crate) * 0.55);
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--prop-line) 55%, var(--surface-2));
+            background: var(--surface-2);
+            color: var(--text);
+            font-weight: 800;
+            font-size: calc(var(--crate) * 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .weight.take {
+            background: color-mix(in srgb, var(--danger) 26%, var(--surface));
+            border-color: var(--danger);
+        }
+        .num-block {
+            min-width: var(--crate);
+            height: var(--crate);
+            padding: 0 8px;
+            border-radius: 8px;
+            border: 2px solid var(--accent-2);
+            background: color-mix(in srgb, var(--accent-2) 22%, var(--surface));
+            color: var(--text);
+            font-weight: 800;
+            font-size: calc(var(--crate) * 0.42);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        /* --- price board --- */
+        .price-board {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 172px;
+            border-radius: 10px;
+            border: 3px solid #382c20;
+            background: #4a3b2b;
+            padding: 8px;
+            min-height: 120px;
+        }
+        .price-board.drop-ready { border-color: var(--accent-2); box-shadow: var(--focus); }
+        .board-title {
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            color: #f3ead8;
+            background: var(--plank-2);
+            border-radius: 6px;
+            padding: 3px 6px;
+            margin-bottom: 6px;
+        }
+        .board-sub {
+            text-align: center;
+            font-size: 0.78rem;
+            color: #e4d9c2;
+            margin-bottom: 6px;
+        }
+        .board-pins { display: flex; flex-direction: column; gap: 5px; }
+        .board-pins .slip { width: 100%; font-size: 0.86rem; padding: 5px 8px; }
+        .board-pins .slip::before {
+            content: "";
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--accent);
+        }
+
+        /* --- slips --- */
+        .slip {
+            position: relative;
+            background: var(--paper);
+            color: var(--paper-ink);
+            border: 1px solid color-mix(in srgb, var(--paper-ink) 25%, var(--paper));
+            border-radius: 6px;
+            padding: 9px 14px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            text-align: center;
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+            user-select: none;
+        }
+        button.slip { cursor: grab; touch-action: none; }
+        button.slip:active { cursor: grabbing; }
+        .slip.selected { outline: 3px solid var(--accent-2); }
+        .slip.wobble { animation: slipWobble 0.55s ease; }
+        @keyframes slipWobble {
+            0% { transform: rotate(0); }
+            25% { transform: rotate(-7deg) translateY(4px); }
+            55% { transform: rotate(6deg) translateY(10px); }
+            100% { transform: rotate(0) translateY(0); }
+        }
+        .slip-half {
+            background: var(--paper);
+            color: var(--paper-ink);
+            border: 1px solid color-mix(in srgb, var(--paper-ink) 25%, var(--paper));
+            border-radius: 6px;
+            padding: 5px 9px;
+            font-weight: 800;
+            font-size: 0.95rem;
+        }
+        .drag-ghost {
+            position: fixed !important;
+            margin: 0 !important;
+            z-index: 150;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(1.06);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+        }
+
+        /* ---------- work row (tray + shelf) ---------- */
+        .work-row {
+            display: grid;
+            grid-template-columns: minmax(200px, 1fr) auto;
+            gap: 12px;
+            align-items: stretch;
+            margin-top: 12px;
+        }
+        .slip-tray {
+            position: relative;
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 64px;
+        }
+        .slip-tray .rev-note {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: 0;
+        }
+        .tray-label {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .tray-slot { flex: 1; display: flex; justify-content: center; }
+        .tray-slot .slip { width: min(100%, var(--slip-w)); }
+
+        .supply-shelf {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            padding: 8px 12px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+        .supply-shelf.hidden { display: none !important; }
+        .shelf-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .shelf-group .shelf-cap {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .shelf-stack { display: flex; gap: 5px; }
+        .shelf-stack button { padding: 0; }
+        .shelf-stack button:disabled { opacity: 0.45; cursor: default; }
+
+        /* ---------- readout ---------- */
+        .readout-strip {
+            margin-top: 12px;
+            border-radius: var(--radius-md);
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: center;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.14);
+        }
+        .readout-expr {
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: var(--text);
+            min-height: 1.3em;
+        }
+        .readout-words {
+            font-size: 0.9rem;
+            color: var(--muted);
+            font-style: italic;
+            min-height: 1.2em;
+            text-align: center;
+        }
+        .readout-strip.working .readout-words {
+            font-size: 1.05rem;
+            font-style: normal;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .verdict-line {
+            margin-top: 10px;
+            border-radius: var(--radius-md);
+            padding: 9px 14px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .verdict-line:empty { display: none; }
+        .verdict-line.good, .verdict-line.bad { animation: verdictIn 0.18s cubic-bezier(0.23, 1, 0.32, 1); }
+        @keyframes verdictIn {
+            from { opacity: 0; transform: translateY(4px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .verdict-line.good, .verdict-line.bad { animation: none; }
+        }
+        .verdict-line.good {
+            background: color-mix(in srgb, var(--success) 18%, var(--surface));
+            border: 1px solid var(--success);
+            color: var(--text);
+        }
+        .verdict-line.bad {
+            background: color-mix(in srgb, var(--danger) 16%, var(--surface));
+            border: 1px solid var(--danger);
+            color: var(--text);
+        }
+
+        .round-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ---------- cue ring ---------- */
+        .cue { position: relative; }
+        .cue::after {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: inherit;
+            border: 2.5px solid color-mix(in srgb, var(--gold) 85%, transparent);
+            animation: pulseRing 1.5s infinite;
+            pointer-events: none;
+        }
+
+        /* ---------- fx overlay ---------- */
+        #fxLayer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .ffish {
+            position: absolute;
+            bottom: -40px;
+            animation: fishLeap var(--dur) linear forwards;
+        }
+        .ffish svg { display: block; }
+        @keyframes fishLeap {
+            0% { transform: translate(0, 0) rotate(calc(var(--dir) * -38deg)); opacity: 1;
+                 animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+            45% { transform: translate(calc(var(--fx) * 0.5), var(--fy)) rotate(0deg); opacity: 1;
+                 animation-timing-function: cubic-bezier(0.55, 0, 0.8, 0.5); }
+            80% { opacity: 1; }
+            100% { transform: translate(var(--fx), 60px) rotate(calc(var(--dir) * 42deg)); opacity: 0; }
+        }
+        .droplet {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--droplet, #9fc4d8);
+            animation: dropletArc var(--dur) ease-out forwards;
+        }
+        @keyframes dropletArc {
+            0% { transform: translate(0, 0) scale(0.6); opacity: 0.95; }
+            55% { transform: translate(calc(var(--dx) * 0.7), calc(var(--dy) * 1.15)) scale(1); opacity: 0.8; }
+            100% { transform: translate(var(--dx), 30px) scale(0.8); opacity: 0; }
+        }
+        .murk-puff {
+            position: absolute;
+            bottom: 0;
+            border-radius: 50%;
+            background: var(--murk, #5e6b5a);
+            animation: murkPuff var(--dur) ease-out forwards;
+            opacity: 0.85;
+        }
+        @keyframes murkPuff {
+            from { transform: translate(0, 0) scale(0.3); opacity: 0.9; }
+            to { transform: translate(var(--dx), var(--dy)) scale(1.7); opacity: 0; }
+        }
+        .scare-gull {
+            position: absolute;
+            bottom: 10vh;
+            animation: gullScatter var(--dur) cubic-bezier(0.2, 0.7, 0.4, 1) forwards;
+        }
+        .scare-gull svg { display: block; animation: gullFlap 0.22s linear infinite alternate; }
+        @keyframes gullScatter {
+            0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+            40% { transform: translate(calc(var(--gx) * 0.35), calc(var(--gy) * 0.6)) rotate(calc(var(--gdir) * 9deg)); opacity: 1; }
+            100% { transform: translate(var(--gx), var(--gy)) rotate(calc(var(--gdir) * -7deg)); opacity: 0; }
+        }
+        @keyframes gullFlap {
+            from { transform: scaleY(1); }
+            to { transform: scaleY(0.72); }
+        }
+        .page-rumble { animation: pageRumble 0.4s ease; }
+        @keyframes pageRumble {
+            0%, 100% { transform: none; }
+            25% { transform: translate(3px, -2px); }
+            50% { transform: translate(-3px, 2px); }
+            75% { transform: translate(2px, 1px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .ffish, .droplet, .murk-puff, .scare-gull { display: none; }
+            .page-rumble { animation: none; }
+        }
+
+        /* ---------- help step cards ---------- */
+        .step-cards { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+        .step-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            opacity: 0;
+            transform: translateY(14px) scale(0.97);
+        }
+        .step-card.dealt { animation: cardDeal 0.34s cubic-bezier(0.2, 1.2, 0.4, 1) forwards; }
+        @keyframes cardDeal { to { opacity: 1; transform: none; } }
+        .step-icon {
+            flex: 0 0 1.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        .step-copy strong { display: block; }
+        .step-copy span { color: var(--text-soft); font-size: 0.95rem; }
+
+        /* ---------- end screen ---------- */
+        .end-wrap { text-align: center; }
+        .end-wrap h2 { margin: 4px 0 6px; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+        .end-sub { color: var(--text-soft); margin: 0 0 14px; }
+        .end-rail {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .end-rail .rail-hook { width: 40px; height: 48px; }
+        .end-rail .rail-hook svg { width: 40px; height: 40px; }
+        .end-tally {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            color: var(--text-soft);
+            margin-bottom: 6px;
+        }
+        .end-rule { color: var(--muted); font-size: 0.92rem; margin: 4px 0 0; }
+        .review-list { text-align: left; margin: 0; padding: 0; list-style: none; }
+        .review-list li {
+            border-bottom: 1px solid var(--border);
+            padding: 10px 4px;
+            line-height: 1.5;
+        }
+        .review-list li:last-child { border-bottom: 0; }
+        .review-list .rv-st { font-weight: 700; color: var(--text); }
+        .review-list .rv-why { color: var(--muted); font-size: 0.92rem; }
+
+        /* ---------- landscape fit tiers ---------- */
+        @media (orientation: landscape) and (max-height: 1000px) {
+            body { padding: 12px; }
+            .app-shell { gap: 12px; min-height: calc(100vh - 25px); }
+            :root { --stage-h: 258px; --beam-w: 470px; --pan-w: 132px; --crate: 35px; --fish-tok: 23px; --slip-w: 180px; }
+            .sim-card { padding: 14px; }
+            .round-head { margin-bottom: 8px; }
+            .coach-row { margin-bottom: 7px; }
+            .rule-strip { margin-bottom: 7px; }
+            .work-row { margin-top: 8px; }
+            .readout-strip { margin-top: 8px; padding: 5px 12px; }
+            .verdict-line { margin-top: 8px; padding: 7px 12px; }
+            .round-actions { margin-top: 8px; }
+            .slip-tray { min-height: 52px; padding: 7px 10px; }
+            .scale-rig { bottom: 22px; }
+            .price-board { width: 158px; }
+            .hero-scene svg { max-height: 185px; }
+            .hero-card { padding: 22px; }
+        }
+        @media (orientation: landscape) and (max-height: 820px) {
+            body { padding: 8px; }
+            .app-shell { gap: 8px; min-height: calc(100vh - 17px); }
+            .topbar { padding: 8px 12px; }
+            .control-btn, .danger-btn { padding: 8px 12px; font-size: 0.92rem; }
+            .sim-card { padding: 14px; }
+            :root { --stage-h: 235px; --beam-w: 420px; --pan-w: 118px; --crate: 30px; --fish-tok: 20px; --slip-w: 165px; }
+            .scale-rig { bottom: 20px; }
+            .pan-strings { height: 26px; }
+            .pan-strings::before, .pan-strings::after { height: 38px; }
+            .pan-dish { min-height: 52px; padding: 4px 4px 3px; }
+            .pan-load { min-height: 32px; }
+            .pan-sum { font-size: 0.72rem; }
+            .price-board { width: 146px; padding: 6px; min-height: 100px; }
+            .board-sub { display: none; }
+            .slip { padding: 7px 11px; font-size: 0.95rem; }
+            .slip-half { padding: 4px 7px; font-size: 0.85rem; }
+            .coach-bubble { font-size: 0.92rem; padding: 6px 10px; }
+            .coach-pelican svg { width: 38px; height: 38px; }
+            .slip-tray { min-height: 50px; padding: 6px 10px; }
+            .supply-shelf { padding: 6px 10px; gap: 10px; }
+            .readout-strip { margin-top: 8px; padding: 5px 10px; }
+            .readout-expr { font-size: 1.02rem; }
+            .readout-words { font-size: 0.82rem; }
+            .verdict-line { padding: 7px 12px; margin-top: 8px; }
+            .round-actions { margin-top: 8px; }
+            .footer-note { font-size: 0.8rem; }
+            .hero-scene { margin-bottom: 12px; }
+            .hero-scene svg { max-height: 145px; }
+            .hero-card { padding: 18px; }
+            .hero-card h2 { font-size: 1.7rem; margin-bottom: 8px; }
+            .hero-card p { font-size: 0.96rem; line-height: 1.5; }
+            .hero-actions { margin-top: 16px; }
+        }
+        @media (orientation: landscape) and (max-height: 700px) {
+            body { padding: 6px; }
+            .app-shell { gap: 6px; min-height: calc(100vh - 13px); }
+            .topbar { padding: 6px 10px; }
+            .sim-card { padding: 10px; }
+            .brand-copy p { display: none; }
+            :root { --stage-h: 186px; --beam-w: 380px; --pan-w: 104px; --crate: 26px; --fish-tok: 17px; --slip-w: 150px; }
+            .rule-strip { display: none; }
+            .scale-rig { bottom: 16px; }
+            .rig-post { top: 20px; }
+            .beam-wrap { top: 24px; }
+            .pivot-ring { width: 20px; height: 20px; top: -10px; border-width: 3px; }
+            .pan-strings { height: 20px; }
+            .pan-strings::before, .pan-strings::after { height: 29px; }
+            .pan-dish { min-height: 44px; padding: 3px 3px 2px; }
+            .pan-load { min-height: 27px; }
+            .pan-sum { font-size: 0.64rem; }
+            .under-hook { padding-top: 5px; }
+            .price-board { width: 132px; padding: 5px; min-height: 84px; top: 8px; right: 8px; }
+            .board-title { font-size: 0.62rem; padding: 2px 4px; margin-bottom: 4px; }
+            .board-pins .slip { font-size: 0.74rem; padding: 4px 6px; }
+            .slip { padding: 6px 9px; font-size: 0.88rem; }
+            .slip-half { padding: 3px 6px; font-size: 0.78rem; }
+            .coach-row { margin-bottom: 5px; }
+            .coach-bubble { font-size: 0.88rem; padding: 5px 9px; }
+            .coach-pelican svg { width: 31px; height: 31px; }
+            .work-row { margin-top: 8px; gap: 8px; }
+            .slip-tray { min-height: 44px; padding: 5px 8px; }
+            .tray-label { font-size: 0.7rem; }
+            .supply-shelf { padding: 5px 8px; gap: 8px; }
+            .shelf-group .shelf-cap { font-size: 0.6rem; }
+            .readout-strip { margin-top: 7px; padding: 4px 9px; }
+            .readout-expr { font-size: 0.94rem; }
+            .readout-words { font-size: 0.76rem; }
+            .verdict-line { padding: 5px 10px; margin-top: 6px; font-size: 0.9rem; }
+            .round-actions { margin-top: 6px; }
+            .round-actions .primary-btn, .round-actions .secondary-btn { padding: 8px 14px; font-size: 0.92rem; }
+            .round-tools .control-btn { padding: 6px 10px; font-size: 0.85rem; }
+            .footer-note { font-size: 0.74rem; padding-bottom: 0; }
+            .hero-scene { margin-bottom: 10px; }
+            .hero-scene svg { max-height: 100px; }
+            .hero-card { padding: 14px; }
+            .hero-card h2 { font-size: 1.45rem; margin-bottom: 6px; }
+            .hero-card p { font-size: 0.9rem; line-height: 1.45; }
+            .hero-actions { margin-top: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="pageTexture" aria-hidden="true"></div>
+    <div class="app-shell" id="appShell">
+        <span class="meta-line" aria-hidden="true"></span>
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">PW</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Pelican's Wharf</h1>
+                    <p id="brandSubtitle">Weigh-Master of the Morning Catch</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+            <div class="theme-divider" aria-hidden="true"></div>
+            <button class="theme-switch" id="themeToggleBtn" aria-label="Switch theme">
+                <span class="theme-knob" id="themeKnob" aria-hidden="true">☀️</span>
+            </button>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="hero-scene" id="heroScene" aria-hidden="true"></div>
+                    <h2 id="homeTitle">Pelican's Wharf</h2>
+                    <p id="homeDescription">
+                        Dawn at the wharf, Weigh-Master! Slips are piling up in your tray. Some just
+                        list amounts — those are expressions, and they go on the price board. Some
+                        claim two sides match — those are equations, and the equals sign is the hook
+                        that hangs them on the big scale. Only a claim can be solved, so read each
+                        slip carefully and put it where it belongs.<span class="stow" aria-hidden="true"></span>
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start the shift</button>
+                    </div>
+                    <span class="spacer-note" aria-hidden="true"></span>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer"></section>
+            </div>
+        </main>
+
+        <div class="footer-note">
+            Mathematics · Form 2 · Term 1 · 2.6.3.1 Expressions and Equations<span class="made-by" aria-hidden="true"></span>
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to play</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Let's go!</button>
+            </div>
+            <span class="card-note" aria-hidden="true"></span>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeReviewBtn" aria-label="Close review">×</button>
+            <h3 id="reviewHeading">Your shift log</h3>
+            <ul class="review-list" id="reviewList"></ul>
+        </section>
+    </div>
+
+    <div id="fxLayer" aria-hidden="true"></div>
+
+    <script>
+        "use strict";
+
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        const BUILD_META = "~Abhishek Dan · Test Version 1 · 2026-08-29";
+        const SVG_DESC = `<desc>${BUILD_META}</desc>`;
+
+        /* ============================================================
+           SIM CONFIG
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1",
+            simId: "MATH-F2-T1-2.6.3.1-SIM1",
+            title: "Pelican's Wharf",
+            subtitle: "Weigh-Master of the Morning Catch",
+            badgeText: "PW",
+            homeDescription: "", // home copy lives in static markup
+            instructions: [] // rendered as step cards below
+        };
+
+        const HELP_STEPS = [
+            { icon: "🔍", title: "Read the slip", text: "Hunt for an equals sign. Letters don't decide anything!" },
+            { icon: "⚖️", title: "Hang the claims", text: "A slip with = splits at the sign — one half on each pan." },
+            { icon: "🪧", title: "Pin the lists", text: "No equals sign? It only lists amounts. Pin it to the price board." },
+            { icon: "📦", title: "Load the crates", text: "The number in front of a letter counts crates. Loose weights are constants." },
+            { icon: "🐟", title: "Test the catch", text: "Drop a value chip into the crates. A level beam means it's the solution!" }
+        ];
+
+        const SOUND_FILES = {
+            click: "",
+            correct: "",
+            wrong: "",
+            typing: "",
+            complete: "",
+            hang: "",
+            pin: "",
+            splash: ""
+        };
+
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects",
+            hang: "effects",
+            pin: "effects",
+            splash: "effects"
+        };
+        const CATEGORY_LABELS = { effects: "Sound effects" };
+
+        /* ---- Audio engine ---- */
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        /* Harbour-bell-and-wood voice — this sim's sound identity:
+           low wood thunks for handling, a clear two-note bell for correct,
+           a slack rope groan for wrong, and a rising bell peal at the end. */
+        const SYNTH_SOUNDS = {
+            click:    (v) => playTone(300, 55, "triangle", 0.07 * v),
+            typing:   (v) => playTone(360, 30, "triangle", 0.04 * v),
+            hang:     (v) => { playTone(220, 90, "triangle", 0.1 * v); playTone(170, 130, "triangle", 0.07 * v, 70); },
+            pin:      (v) => playTone(470, 70, "square", 0.05 * v),
+            correct:  (v) => { playTone(784, 140, "sine", 0.14 * v); playTone(1047, 220, "sine", 0.13 * v, 120); },
+            wrong:    (v) => { playTone(150, 260, "sawtooth", 0.1 * v); playTone(120, 200, "sawtooth", 0.07 * v, 130); },
+            splash:   (v) => playTone(520, 100, "triangle", 0.06 * v),
+            complete: (v) => { playTone(523, 130, "sine", 0.14 * v); playTone(659, 130, "sine", 0.14 * v, 130); playTone(784, 130, "sine", 0.14 * v, 260); playTone(1047, 300, "sine", 0.14 * v, 390); }
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            try { localStorage.setItem(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1"); } catch (err) { /* ignore */ }
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            let muted = null;
+            try { muted = localStorage.getItem(AUDIO_STORAGE_KEY()); } catch (err) { /* ignore */ }
+            audioEnabled = muted !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    try { localStorage.setItem(VOL_STORAGE_KEY(cat), input.value); } catch (err) { /* ignore */ }
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        /* ============================================================
+           CHROME
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            audioBtn: document.getElementById("audioBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            themeKnob: document.getElementById("themeKnob"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            reviewModal: document.getElementById("reviewModal"),
+            reviewList: document.getElementById("reviewList"),
+            closeReviewBtn: document.getElementById("closeReviewBtn"),
+            heroScene: document.getElementById("heroScene"),
+            fxLayer: document.getElementById("fxLayer"),
+            appShell: document.getElementById("appShell")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio removed */ }
+            renderHeroScene();
+            initBuildMeta();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title + " — " + SIM_CONFIG.subtitle;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit(false);
+            });
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) closeInstructionsModal();
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) closeResetConfirmModal();
+            });
+            dom.closeReviewBtn.addEventListener("click", () => dom.reviewModal.classList.remove("show"));
+            dom.reviewModal.addEventListener("click", (event) => {
+                if (event.target === dom.reviewModal) dom.reviewModal.classList.remove("show");
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function reducedMotion() {
+            return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        }
+
+        function renderInstructions() {
+            const wrap = document.createElement("div");
+            wrap.className = "step-cards";
+            const reduced = reducedMotion();
+            HELP_STEPS.forEach((step, i) => {
+                const card = document.createElement("div");
+                card.className = "step-card";
+                const icon = document.createElement("span");
+                icon.className = "step-icon";
+                icon.textContent = step.icon;
+                icon.setAttribute("aria-hidden", "true");
+                const copy = document.createElement("div");
+                copy.className = "step-copy";
+                const strong = document.createElement("strong");
+                strong.textContent = step.title;
+                const span = document.createElement("span");
+                span.textContent = step.text;
+                copy.appendChild(strong);
+                copy.appendChild(span);
+                card.appendChild(icon);
+                card.appendChild(copy);
+                wrap.appendChild(card);
+                if (reduced) {
+                    card.style.opacity = "1";
+                    card.style.transform = "none";
+                } else {
+                    setTimeout(() => card.classList.add("dealt"), 90 * i + 60);
+                }
+            });
+            const slidersHolder = document.getElementById("volumeSliders");
+            dom.instructionsBody.replaceChildren(wrap);
+            if (slidersHolder) dom.instructionsBody.appendChild(slidersHolder);
+        }
+
+        function resetModalScroll(modal) {
+            const card = modal.querySelector(".modal-card");
+            if (card) card.scrollTop = 0;
+        }
+
+        function openInstructionsModal() {
+            renderInstructions();
+            dom.instructionsModal.classList.add("show");
+            resetModalScroll(dom.instructionsModal);
+            try { renderVolumeSliders(); } catch (err) { /* audio removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+            resetModalScroll(dom.resetConfirmModal);
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            /* knob shows the mode selected NEXT */
+            const next = state.theme === "dark" ? "light" : "dark";
+            dom.themeToggleBtn.setAttribute("data-next", next);
+            dom.themeKnob.textContent = next === "light" ? "☀️" : "🌙";
+            const label = next === "light" ? "Switch to light mode" : "Switch to dark mode";
+            dom.themeToggleBtn.setAttribute("aria-label", label);
+            dom.themeToggleBtn.setAttribute("title", label);
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+                dom.reviewModal.classList.remove("show");
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* unavailable */ }
+        }
+
+        /* ============================================================
+           BUILD META LAYERS
+           ============================================================ */
+        function buildPageTexture() {
+            const holder = document.getElementById("pageTexture");
+            if (!holder) return;
+            holder.replaceChildren();
+            const stepX = 480, stepY = 180;
+            const w = window.innerWidth + stepX, h = window.innerHeight + stepY;
+            for (let y = 0; y < h; y += stepY) {
+                for (let x = -stepX / 2; x < w; x += stepX) {
+                    const s = document.createElement("span");
+                    s.textContent = BUILD_META;
+                    s.style.left = x + "px";
+                    s.style.top = y + "px";
+                    holder.appendChild(s);
+                }
+            }
+        }
+
+        function appendStow(el) {
+            if (!el) return;
+            const s = document.createElement("span");
+            s.className = "stow";
+            s.setAttribute("aria-hidden", "true");
+            s.textContent = " " + BUILD_META;
+            el.appendChild(s);
+        }
+
+        function showBuildNotice() {
+            const t = document.createElement("div");
+            t.className = "build-toast";
+            t.textContent = BUILD_META;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 1500);
+        }
+
+        function initBuildMeta() {
+            try {
+                document.querySelectorAll(".meta-line, .spacer-note, .rev-note, .card-note, .made-by, .stow")
+                    .forEach((el) => { if (!el.textContent) el.textContent = BUILD_META; });
+                const shell = dom.appShell;
+                if (shell) shell.setAttribute("data-sig", BUILD_META);
+                const badge = dom.brandBadge;
+                if (badge) badge.setAttribute("title", BUILD_META);
+                try { localStorage.setItem(`sim:${SIM_CONFIG.simId}:build`, BUILD_META); } catch (err) { /* ignore */ }
+                try { console.log("%c" + BUILD_META, "color:#777;font-size:10px"); } catch (err) { /* ignore */ }
+                buildPageTexture();
+                let textureTimer = null;
+                window.addEventListener("resize", () => {
+                    clearTimeout(textureTimer);
+                    textureTimer = setTimeout(buildPageTexture, 350);
+                });
+                document.addEventListener("copy", (e) => {
+                    try {
+                        const sel = window.getSelection ? String(window.getSelection()) : "";
+                        if (sel.length >= 30 && sel.indexOf(BUILD_META) === -1 && e.clipboardData) {
+                            e.clipboardData.setData("text/plain", sel + "\n" + BUILD_META);
+                            e.preventDefault();
+                        }
+                    } catch (err) { /* ignore */ }
+                });
+                let seq = [];
+                let seqTime = 0;
+                document.addEventListener("keydown", (e) => {
+                    const t = e.target;
+                    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+                    const now = Date.now();
+                    if (now - seqTime > 2000) seq = [];
+                    seqTime = now;
+                    seq.push(e.key);
+                    if (seq.length > 3) seq = seq.slice(-3);
+                    if (seq.join("") === "~ad") {
+                        seq = [];
+                        showBuildNotice();
+                    }
+                });
+            } catch (err) { /* never break the sim */ }
+        }
+
+        /* ============================================================
+           WHARF SCENE SVG BUILDERS
+           ============================================================ */
+/* wharf-svgs.js — Trinidad fishing wharf at dawn, flat-colour SVG art.
+   Three plain functions: sceneBandSvg(), heroSceneSvg(), pelicanSvg(size).
+   Each returned string starts with <svg ...>${SVG_DESC} — SVG_DESC is a
+   global constant provided by the caller at runtime (NOT defined here).
+   Flat fills only, no gradients, no text. Caller adds aria attributes. */
+
+/* ---- private helper: pelican art, centred on origin, facing RIGHT ----
+   Whole bird is <g class="pel-body">; beak is nested <g class="pel-beak">
+   whose local origin sits where the beak meets the head (for CSS pivots,
+   use transform-box: fill-box on .pel-beak). Extents: x -45..48, y -46..46. */
+function pelicanArt() {
+  return '<g class="pel-body">'
+    /* tail feathers (back-left) */
+    + '<path d="M -30,4 L -45,-4 L -31,16 Z" fill="var(--pelican-wing, #C8C0B2)"/>'
+    /* legs (drawn first so the body overlaps their tops) */
+    + '<rect x="-16" y="34" width="4" height="9" fill="var(--pelican-beak, #D9903F)"/>'
+    + '<rect x="-4" y="35" width="4" height="8" fill="var(--pelican-beak, #D9903F)"/>'
+    /* webbed feet pointing forward (right) */
+    + '<rect x="-17" y="42" width="12" height="4" rx="2" fill="var(--pelican-beak, #D9903F)"/>'
+    + '<rect x="-5" y="42" width="12" height="4" rx="2" fill="var(--pelican-beak, #D9903F)"/>'
+    /* plump body */
+    + '<ellipse cx="-6" cy="14" rx="27" ry="23" fill="var(--pelican-body, #E8E3DA)"/>'
+    /* folded wing */
+    + '<ellipse cx="-10" cy="12" rx="17" ry="12" transform="rotate(-12 -10 12)" fill="var(--pelican-wing, #C8C0B2)"/>'
+    /* neck bridging body to head */
+    + '<path d="M 3,-28 Q 18,-12 10,4 L -12,10 Q 0,-10 3,-28 Z" fill="var(--pelican-body, #E8E3DA)"/>'
+    /* head */
+    + '<circle cx="16" cy="-24" r="13" fill="var(--pelican-body, #E8E3DA)"/>'
+    /* tiny feather tuft on the crown */
+    + '<path d="M 8,-36 Q 6,-45 12,-40 Q 13,-46 17,-40 Q 21,-44 19,-35 Z" fill="var(--pelican-wing, #C8C0B2)"/>'
+    /* round eye: white ring + dark dot */
+    + '<circle cx="19" cy="-28" r="4" fill="#FFFFFF"/>'
+    + '<circle cx="20" cy="-28" r="2" fill="var(--prop-line, #1B2733)"/>'
+    /* beak, pivot where it meets the head (bird-local 24,-24) */
+    + '<g transform="translate(24,-24)"><g class="pel-beak">'
+    +   '<path d="M 0,2 C 6,16 17,14 22,5 L 23,2 L 1,-1 Z" fill="var(--pelican-pouch, #C97B33)"/>'
+    +   '<path d="M -2,-4 L 22,1 Q 24,3 21,4 L -2,0 Z" fill="var(--pelican-beak, #D9903F)"/>'
+    + '</g></g>'
+    + '</g>';
+}
+
+/* ---- Function 1: background scenery band (1800x260, props in x 40..980) ---- */
+function sceneBandSvg() {
+  return `<svg viewBox="0 0 1800 260" preserveAspectRatio="xMinYMax slice" xmlns="http://www.w3.org/2000/svg">${SVG_DESC}`
+    /* sky */
+    + '<rect x="0" y="0" width="1800" height="260" fill="var(--sky, #cfdce8)"/>'
+    /* distant low hills along the horizon */
+    + '<path d="M 0,110 L 0,104 Q 60,86 130,102 Q 210,88 300,104 Q 400,90 520,103 Q 640,88 780,102 Q 900,90 1040,103 Q 1180,88 1330,102 Q 1470,90 1620,103 Q 1720,92 1800,102 L 1800,110 Z" fill="var(--gull, #5E7386)"/>'
+    /* sea */
+    + '<rect x="0" y="110" width="1800" height="150" fill="var(--sea, #6E93A8)"/>'
+    /* long low wave strips (continue past x=1000 as simple repeats) */
+    + '<rect x="60" y="134" width="520" height="6" rx="3" fill="var(--sea-2, #55788C)"/>'
+    + '<rect x="700" y="152" width="600" height="6" rx="3" fill="var(--sea-2, #55788C)"/>'
+    + '<rect x="1160" y="130" width="560" height="6" rx="3" fill="var(--sea-2, #55788C)"/>'
+    + '<rect x="300" y="176" width="720" height="6" rx="3" fill="var(--sea-2, #55788C)"/>'
+    + '<rect x="1240" y="172" width="500" height="6" rx="3" fill="var(--sea-2, #55788C)"/>'
+    + '<rect x="1080" y="196" width="640" height="6" rx="3" fill="var(--sea-2, #55788C)"/>'
+    /* moored pirogue, crimson hull, x 302..558 */
+    + '<g transform="translate(430,178)">'
+    +   '<rect x="-3" y="-76" width="6" height="60" fill="var(--plank-2, #6E543A)"/>'
+    +   '<path d="M 3,-76 L 26,-69 L 3,-62 Z" fill="var(--buoy, #B23327)"/>'
+    +   '<path d="M -128,-16 L 128,-16 L 106,14 Q 0,28 -106,14 Z" fill="var(--hull, #B23327)"/>'
+    +   '<rect x="-128" y="-16" width="256" height="6" fill="var(--prop-line, #1B2733)"/>'
+    +   '<circle cx="48" cy="-2" r="10" fill="none" stroke="var(--rope, #A98A5B)" stroke-width="3.5"/>'
+    +   '<circle cx="48" cy="-2" r="4" fill="none" stroke="var(--rope, #A98A5B)" stroke-width="3"/>'
+    + '</g>'
+    /* second smaller boat, slate hull, x 715..915 */
+    + '<g transform="translate(815,188)">'
+    +   '<path d="M -100,-12 L 100,-12 L 82,10 Q 0,20 -82,10 Z" fill="var(--hull-2, #33566B)"/>'
+    +   '<rect x="-100" y="-12" width="200" height="5" fill="var(--prop-line, #1B2733)"/>'
+    +   '<circle cx="-40" cy="-2" r="7" fill="none" stroke="var(--rope, #A98A5B)" stroke-width="3"/>'
+    + '</g>'
+    /* two round buoys bobbing on the sea */
+    + '<g transform="translate(268,156)"><circle r="11" fill="var(--buoy, #B23327)"/><rect x="-11" y="-3" width="22" height="5" rx="2" fill="var(--prop-line, #1B2733)"/></g>'
+    + '<g transform="translate(955,172)"><circle r="9" fill="var(--buoy, #B23327)"/><rect x="-9" y="-2" width="18" height="4" rx="2" fill="var(--prop-line, #1B2733)"/></g>'
+    /* jetty boardwalk deck, full width, ~56px tall */
+    + '<rect x="0" y="204" width="1800" height="56" fill="var(--plank, #9C7A52)"/>'
+    + '<rect x="0" y="204" width="1800" height="4" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="0" y="220" width="1800" height="3" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="0" y="234" width="1800" height="3" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="0" y="248" width="1800" height="3" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="140" y="222" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="380" y="222" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="620" y="222" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="860" y="222" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="1100" y="222" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="1340" y="222" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="1580" y="222" width="3" height="12" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="260" y="236" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="500" y="236" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="740" y="236" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="980" y="236" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="1220" y="236" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="1460" y="236" width="3" height="12" fill="var(--plank-2, #6E543A)"/><rect x="1700" y="236" width="3" height="12" fill="var(--plank-2, #6E543A)"/>'
+    /* two mooring bollards with a sagging rope, x 86..223 */
+    + '<g transform="translate(95,204)"><rect x="-9" y="-44" width="18" height="46" fill="var(--plank-2, #6E543A)"/><ellipse cx="0" cy="-44" rx="11" ry="5" fill="var(--plank-2, #6E543A)"/><rect x="-9" y="-30" width="18" height="4" fill="var(--prop-line, #1B2733)"/></g>'
+    + '<g transform="translate(212,204)"><rect x="-9" y="-44" width="18" height="46" fill="var(--plank-2, #6E543A)"/><ellipse cx="0" cy="-44" rx="11" ry="5" fill="var(--plank-2, #6E543A)"/><rect x="-9" y="-30" width="18" height="4" fill="var(--prop-line, #1B2733)"/></g>'
+    + '<path d="M 95,162 Q 153,194 212,162" fill="none" stroke="var(--rope, #A98A5B)" stroke-width="5"/>'
+    /* stack of two fish crates on the jetty, x 620..700 */
+    + '<g transform="translate(660,204)">'
+    +   '<rect x="-40" y="-30" width="80" height="30" fill="var(--crate-wood, #8A6F4D)"/>'
+    +   '<rect x="-40" y="-30" width="80" height="3" fill="var(--plank-2, #6E543A)"/><rect x="-40" y="-17" width="80" height="3" fill="var(--plank-2, #6E543A)"/>'
+    +   '<rect x="-16" y="-30" width="3" height="30" fill="var(--plank-2, #6E543A)"/><rect x="10" y="-30" width="3" height="30" fill="var(--plank-2, #6E543A)"/>'
+    +   '<rect x="-32" y="-58" width="64" height="28" fill="var(--crate-wood, #8A6F4D)"/>'
+    +   '<rect x="-32" y="-58" width="64" height="3" fill="var(--plank-2, #6E543A)"/><rect x="-32" y="-46" width="64" height="3" fill="var(--plank-2, #6E543A)"/>'
+    +   '<rect x="-12" y="-58" width="3" height="28" fill="var(--plank-2, #6E543A)"/><rect x="8" y="-58" width="3" height="28" fill="var(--plank-2, #6E543A)"/>'
+    + '</g>'
+    /* three gulls in the sky band */
+    + '<g transform="translate(180,58)"><g class="sky-gull" style="--gg-dur:13s; --gg-dx:70px; --gg-dy:-6px"><path d="M -14,4 Q -7,-7 0,0 Q 7,-7 14,4" fill="none" stroke="var(--gull, #5E7386)" stroke-width="3.5"/></g></g>'
+    + '<g transform="translate(520,50)"><g class="sky-gull" style="--gg-dur:17s; --gg-dx:-90px; --gg-dy:5px"><path d="M -14,4 Q -7,-7 0,0 Q 7,-7 14,4" fill="none" stroke="var(--gull, #5E7386)" stroke-width="3.5"/></g></g>'
+    + '<g transform="translate(860,70)"><g class="sky-gull" style="--gg-dur:11s; --gg-dx:55px; --gg-dy:-8px"><path d="M -14,4 Q -7,-7 0,0 Q 7,-7 14,4" fill="none" stroke="var(--gull, #5E7386)" stroke-width="3.5"/></g></g>'
+    + '</svg>';
+}
+
+/* ---- Function 2: home-screen hero banner (900x300) ---- */
+function heroSceneSvg() {
+  return `<svg viewBox="0 0 900 300" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">${SVG_DESC}`
+    /* sky and low dawn sun (lower half hidden by hills + sea) */
+    + '<rect x="0" y="0" width="900" height="300" fill="var(--sky, #cfdce8)"/>'
+    + '<circle cx="170" cy="132" r="30" fill="var(--sun, #E8B15C)"/>'
+    + '<path d="M 0,150 L 0,144 Q 70,124 150,142 Q 240,126 340,142 Q 450,128 560,142 Q 670,126 780,142 Q 850,130 900,142 L 900,150 Z" fill="var(--gull, #5E7386)"/>'
+    /* sea and wave strips */
+    + '<rect x="0" y="150" width="900" height="150" fill="var(--sea, #6E93A8)"/>'
+    + '<rect x="40" y="168" width="300" height="5" rx="2.5" fill="var(--sea-2, #55788C)"/>'
+    + '<rect x="420" y="184" width="330" height="5" rx="2.5" fill="var(--sea-2, #55788C)"/>'
+    + '<rect x="120" y="204" width="280" height="5" rx="2.5" fill="var(--sea-2, #55788C)"/>'
+    + '<rect x="590" y="166" width="270" height="5" rx="2.5" fill="var(--sea-2, #55788C)"/>'
+    /* crimson pirogue, x 205..395 */
+    + '<g transform="translate(300,208)">'
+    +   '<rect x="-3" y="-58" width="5" height="46" fill="var(--plank-2, #6E543A)"/>'
+    +   '<path d="M 2,-58 L 20,-52 L 2,-46 Z" fill="var(--buoy, #B23327)"/>'
+    +   '<path d="M -95,-12 L 95,-12 L 78,11 Q 0,21 -78,11 Z" fill="var(--hull, #B23327)"/>'
+    +   '<rect x="-95" y="-12" width="190" height="5" fill="var(--prop-line, #1B2733)"/>'
+    +   '<circle cx="36" cy="-2" r="7" fill="none" stroke="var(--rope, #A98A5B)" stroke-width="3"/>'
+    + '</g>'
+    /* small slate boat, x 768..892 */
+    + '<g transform="translate(830,212)">'
+    +   '<path d="M -62,-9 L 62,-9 L 50,8 Q 0,16 -50,8 Z" fill="var(--hull-2, #33566B)"/>'
+    +   '<rect x="-62" y="-9" width="124" height="4" fill="var(--prop-line, #1B2733)"/>'
+    + '</g>'
+    /* buoys */
+    + '<g transform="translate(215,226)"><circle r="8" fill="var(--buoy, #B23327)"/><rect x="-8" y="-2" width="16" height="4" rx="2" fill="var(--prop-line, #1B2733)"/></g>'
+    + '<g transform="translate(430,220)"><circle r="9" fill="var(--buoy, #B23327)"/><rect x="-9" y="-2" width="18" height="4" rx="2" fill="var(--prop-line, #1B2733)"/></g>'
+    /* jetty deck */
+    + '<rect x="0" y="246" width="900" height="54" fill="var(--plank, #9C7A52)"/>'
+    + '<rect x="0" y="246" width="900" height="4" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="0" y="260" width="900" height="3" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="0" y="274" width="900" height="3" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="0" y="288" width="900" height="3" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="120" y="262" width="3" height="10" fill="var(--plank-2, #6E543A)"/><rect x="320" y="262" width="3" height="10" fill="var(--plank-2, #6E543A)"/><rect x="520" y="262" width="3" height="10" fill="var(--plank-2, #6E543A)"/><rect x="720" y="262" width="3" height="10" fill="var(--plank-2, #6E543A)"/>'
+    + '<rect x="220" y="276" width="3" height="10" fill="var(--plank-2, #6E543A)"/><rect x="420" y="276" width="3" height="10" fill="var(--plank-2, #6E543A)"/><rect x="620" y="276" width="3" height="10" fill="var(--plank-2, #6E543A)"/><rect x="820" y="276" width="3" height="10" fill="var(--plank-2, #6E543A)"/>'
+    /* mooring posts + sagging rope, left */
+    + '<g transform="translate(70,246)"><rect x="-7" y="-40" width="14" height="42" fill="var(--plank-2, #6E543A)"/><ellipse cx="0" cy="-40" rx="9" ry="4" fill="var(--plank-2, #6E543A)"/></g>'
+    + '<g transform="translate(170,246)"><rect x="-7" y="-40" width="14" height="42" fill="var(--plank-2, #6E543A)"/><ellipse cx="0" cy="-40" rx="9" ry="4" fill="var(--plank-2, #6E543A)"/></g>'
+    + '<path d="M 70,208 Q 120,232 170,208" fill="none" stroke="var(--rope, #A98A5B)" stroke-width="4"/>'
+    /* mooring post carrying the pelican, left of the scale */
+    + '<g transform="translate(470,246)"><rect x="-7" y="-40" width="14" height="42" fill="var(--plank-2, #6E543A)"/><ellipse cx="0" cy="-40" rx="9" ry="4" fill="var(--plank-2, #6E543A)"/></g>'
+    + `<g transform="translate(470,180) scale(0.55)">${pelicanArt()}</g>`
+    /* crate stack on the deck, x 498..558 */
+    + '<g transform="translate(528,246)">'
+    +   '<rect x="-30" y="-26" width="60" height="26" fill="var(--crate-wood, #8A6F4D)"/>'
+    +   '<rect x="-30" y="-26" width="60" height="3" fill="var(--plank-2, #6E543A)"/><rect x="-30" y="-15" width="60" height="3" fill="var(--plank-2, #6E543A)"/>'
+    +   '<rect x="-11" y="-26" width="3" height="26" fill="var(--plank-2, #6E543A)"/><rect x="6" y="-26" width="3" height="26" fill="var(--plank-2, #6E543A)"/>'
+    +   '<rect x="-24" y="-50" width="48" height="24" fill="var(--crate-wood, #8A6F4D)"/>'
+    +   '<rect x="-24" y="-50" width="48" height="3" fill="var(--plank-2, #6E543A)"/><rect x="-24" y="-40" width="48" height="3" fill="var(--plank-2, #6E543A)"/>'
+    +   '<rect x="-4" y="-50" width="3" height="24" fill="var(--plank-2, #6E543A)"/>'
+    + '</g>'
+    /* the star: two-pan beam balance on the jetty, centre-right (x 575..765) */
+    + '<g transform="translate(670,246)">'
+    +   '<rect x="-46" y="-10" width="92" height="10" fill="var(--plank-2, #6E543A)"/>'
+    +   '<rect x="-28" y="-18" width="56" height="8" fill="var(--plank-2, #6E543A)"/>'
+    +   '<rect x="-6" y="-122" width="12" height="104" fill="var(--plank-2, #6E543A)"/>'
+    +   '<rect x="-95" y="-126" width="190" height="8" rx="4" fill="var(--plank-2, #6E543A)"/>'
+    +   '<circle cx="0" cy="-126" r="6" fill="var(--plank-2, #6E543A)"/>'
+    +   '<g transform="translate(-88,-118)">'
+    +     '<path d="M 0,0 L -17,50 M 0,0 L 0,54 M 0,0 L 17,50" fill="none" stroke="var(--prop-line, #1B2733)" stroke-width="1.5"/>'
+    +     '<path d="M -26,50 Q 0,66 26,50 Q 0,57 -26,50 Z" fill="var(--plank, #9C7A52)"/>'
+    +     '<ellipse cx="0" cy="50" rx="26" ry="3.5" fill="var(--plank-2, #6E543A)"/>'
+    +   '</g>'
+    +   '<g transform="translate(88,-118)">'
+    +     '<path d="M 0,0 L -17,50 M 0,0 L 0,54 M 0,0 L 17,50" fill="none" stroke="var(--prop-line, #1B2733)" stroke-width="1.5"/>'
+    +     '<path d="M -26,50 Q 0,66 26,50 Q 0,57 -26,50 Z" fill="var(--plank, #9C7A52)"/>'
+    +     '<ellipse cx="0" cy="50" rx="26" ry="3.5" fill="var(--plank-2, #6E543A)"/>'
+    +   '</g>'
+    + '</g>'
+    /* gulls */
+    + '<g transform="translate(250,62)"><g class="sky-gull" style="--gg-dur:14s; --gg-dx:80px; --gg-dy:-7px"><path d="M -14,4 Q -7,-7 0,0 Q 7,-7 14,4" fill="none" stroke="var(--gull, #5E7386)" stroke-width="3"/></g></g>'
+    + '<g transform="translate(600,48)"><g class="sky-gull" style="--gg-dur:18s; --gg-dx:-70px; --gg-dy:6px"><path d="M -14,4 Q -7,-7 0,0 Q 7,-7 14,4" fill="none" stroke="var(--gull, #5E7386)" stroke-width="3"/></g></g>'
+    + '<g transform="translate(790,84)"><g class="sky-gull" style="--gg-dur:12s; --gg-dx:60px; --gg-dy:-9px"><path d="M -14,4 Q -7,-7 0,0 Q 7,-7 14,4" fill="none" stroke="var(--gull, #5E7386)" stroke-width="3"/></g></g>'
+    + '</svg>';
+}
+
+/* ---- Function 3: pelican mascot, facing right (square, 100x100 viewBox) ---- */
+function pelicanSvg(size) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${SVG_DESC}`
+    + `<g transform="translate(50,52)">${pelicanArt()}</g>`
+    + '</svg>';
+}
+
+        /* ============================================================
+           SIM LOGIC — Pelican's Wharf
+           ============================================================ */
+
+        function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        const ROUNDS_PER_RUN = 8;
+        const SAVE_KEY = `sim:${SIM_CONFIG.simId}:save`;
+        const MINUS = "−"; /* proper minus sign in all student-visible maths */
+
+        /* ---------- number words (Caribbean "and") ---------- */
+        const ONES_W = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+            "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+        const TENS_W = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+
+        function numWords(n) {
+            n = Math.abs(Math.round(n));
+            if (n < 20) return ONES_W[n];
+            if (n < 100) {
+                const t = Math.floor(n / 10), o = n % 10;
+                return o ? TENS_W[t] + "-" + ONES_W[o] : TENS_W[t];
+            }
+            const h = Math.floor(n / 100), rem = n % 100;
+            return ONES_W[h] + " hundred" + (rem ? " and " + numWords(rem) : "");
+        }
+
+        /* ---------- statement helpers ----------
+           parts: { a: coefficient (0 = none), L: letter ("" = none), b: constant (0 = none),
+                    sign: "+"|"-" joining the two, flip: constant comes first (b - aL / b + aL) } */
+        function termText(a, L) { return a === 1 ? L : a + L; }
+
+        function exprText(p) {
+            if (!p.L) return p.n1 + " " + (p.sign === "-" ? MINUS : "+") + " " + p.n2; /* numeric-only */
+            if (p.L2) return p.L + " + " + p.L2 + (p.b ? " + " + p.b : ""); /* two-letter */
+            if (!p.b) return termText(p.a, p.L);
+            const t = termText(p.a, p.L), s = p.sign === "-" ? MINUS : "+";
+            return p.flip ? p.b + " " + s + " " + t : t + " " + s + " " + p.b;
+        }
+
+        function termWords(a, L) { return a === 1 ? L : numWords(a) + " multiplied by " + L; }
+
+        function exprWordsOf(p) {
+            if (!p.L) return numWords(p.n1) + (p.sign === "-" ? ", minus " : ", plus ") + numWords(p.n2);
+            if (p.L2) return p.L + ", plus " + p.L2 + (p.b ? ", plus " + numWords(p.b) : "");
+            if (!p.b) return termWords(p.a, p.L);
+            const t = termWords(p.a, p.L), joiner = p.sign === "-" ? ", minus " : ", plus ";
+            return p.flip ? numWords(p.b) + joiner + t : t + joiner + numWords(p.b);
+        }
+
+        function lhsValue(p, val) {
+            if (!p.L) return p.sign === "-" ? p.n1 - p.n2 : p.n1 + p.n2;
+            const t = p.a * val;
+            if (!p.b) return t;
+            return p.flip ? (p.sign === "-" ? p.b - t : p.b + t) : (p.sign === "-" ? t - p.b : t + p.b);
+        }
+
+        function eqTextOf(p, T) { return exprText(p) + " = " + T; }
+        function eqWordsOf(p, T) { return exprWordsOf(p) + ", is equal to " + numWords(T); }
+
+        const WHY_EQ = "It has an equals sign — it claims two sides match.";
+        const WHY_EXPR = "No equals sign — it only lists amounts.";
+
+        /* ---------- round banks ---------- */
+        const LETTERS = ["k", "m", "p", "w", "y", "n", "b", "t", "h"];
+
+        function newLetterPool() { return shuffle(LETTERS.slice()); }
+
+        function makeHookEq(letterPool) {
+            const L = letterPool.pop() || pick(LETTERS);
+            const form = randInt(0, 3);
+            let p, T;
+            const s = randInt(2, 9);
+            if (form === 0) { p = { a: randInt(2, 9), L, b: randInt(1, 9), sign: "+", flip: false }; }
+            else if (form === 1) { p = { a: randInt(2, 9), L, b: 0, sign: "+", flip: false }; }
+            else if (form === 2) { p = { a: randInt(2, 6), L, b: randInt(1, 9), sign: "-", flip: false }; }
+            else { p = { a: 1, L, b: randInt(2, 9), sign: "+", flip: false }; }
+            T = lhsValue(p, s);
+            return { type: "hook", isEq: true, text: eqTextOf(p, T), words: eqWordsOf(p, T), why: WHY_EQ };
+        }
+
+        function makeHookExpr(letterPool) {
+            const L = letterPool.pop() || pick(LETTERS);
+            const form = randInt(0, 4);
+            let p;
+            if (form === 0) p = { a: randInt(2, 9), L, b: randInt(1, 9), sign: "+", flip: false };
+            else if (form === 1) p = { a: randInt(2, 9), L, b: randInt(1, 9), sign: "-", flip: false };
+            else if (form === 2) p = { a: randInt(2, 5), L, b: randInt(9, 19), sign: "-", flip: true };
+            else if (form === 3) p = { a: randInt(2, 9), L, b: 0, sign: "+", flip: false };
+            else p = { a: 1, L, b: randInt(2, 9), sign: "+", flip: false };
+            return { type: "hook", isEq: false, text: exprText(p), words: exprWordsOf(p), why: WHY_EXPR };
+        }
+
+        function makeHookTrap(letterPool) {
+            const L = letterPool.pop() || pick(LETTERS);
+            const which = randInt(0, 3);
+            if (which === 0) {
+                /* letters trap — an equation that LOOKS like "just letters" (Anya's mistake) */
+                const p = { a: randInt(2, 4), L, b: randInt(1, 9), sign: "+", flip: false };
+                const T = lhsValue(p, randInt(2, 6));
+                return { type: "hook", isEq: true, text: eqTextOf(p, T), words: eqWordsOf(p, T),
+                    why: "Letters don't make it an expression — the equals sign makes it an equation.",
+                    coach: "Careful — some weigh-masters think letters decide. Only the <strong>=</strong> decides!" };
+            }
+            if (which === 1) {
+                /* numeric equation — an equation with NO letters at all */
+                const n1 = randInt(5, 12), n2 = randInt(3, 9);
+                const p = { n1, n2, sign: "+" };
+                return { type: "hook", isEq: true, text: n1 + " + " + n2 + " = " + (n1 + n2),
+                    words: exprWordsOf(p) + ", is equal to " + numWords(n1 + n2),
+                    why: "No letters anywhere — but the equals sign still makes it an equation.",
+                    coach: "No letters on this slip at all. Does that matter? Look for the <strong>=</strong>." };
+            }
+            if (which === 2) {
+                /* x + y + 10 — two letters, still an expression */
+                const b = randInt(6, 12);
+                const p = { L: "x", L2: "y", b };
+                return { type: "hook", isEq: false, text: "x + y + " + b, words: exprWordsOf(p),
+                    why: "Two letters, three amounts — but nothing says what they come to.",
+                    coach: "Two letters this time! Does that change the rule? Hunt for the <strong>=</strong>." };
+            }
+            /* x + y = 10 — the paired equation */
+            const b = randInt(6, 12);
+            const p = { L: "x", L2: "y", b: 0 };
+            return { type: "hook", isEq: true, text: "x + y = " + b, words: "x, plus y, is equal to " + numWords(b),
+                why: "The equals sign claims x + y has the value " + numWords(b) + ".",
+                coach: "Two letters again — but check the middle of the slip. Hunt for the <strong>=</strong>." };
+        }
+
+        function makeBuild(letterPool, minus) {
+            const L = letterPool.pop() || pick(LETTERS);
+            const a = randInt(2, 6);
+            const b = randInt(1, Math.min(7, minus ? a * 2 : 9));
+            const s = randInt(2, 8);
+            const p = { a, L, b, sign: minus ? "-" : "+", flip: false };
+            const T = lhsValue(p, s);
+            return { type: "build", a, L, b, minus: !!minus, T,
+                text: eqTextOf(p, T), words: eqWordsOf(p, T), p };
+        }
+
+        const TOTAL_BANK = [
+            { a: 50, L: "x", b: 100, total: 600, blocks: [600, 500, 160, 60],
+              story: "Form 2's fundraiser collection is 50x + 100. The principal announces: exactly 600 dollars!" },
+            { a: 20, L: "h", b: 100, total: 260, blocks: [260, 206, 120, 26],
+              story: "The steelpan tuner's cost for h hours is 20h + 100. The customer pays 260 dollars in total." },
+            { a: 5, L: "p", b: 0, total: 80, blocks: [80, 85, 40, 8],
+              story: "The maxi taxi collects 5p dollars from p passengers. The driver counts 80 dollars in total." },
+            { a: 6, L: "m", b: 3, total: 63, blocks: [63, 36, 66, 60],
+              story: "The farmer's mangoes come to 6m + 3. He counts 63 mangoes altogether." },
+            { a: 10, L: "c", b: 20, total: 80, blocks: [80, 100, 60, 18],
+              story: "Ice for the coolers costs 10c + 20 dollars for c bags. The bill comes to 80 dollars." },
+            { a: 8, L: "f", b: 4, total: 60, blocks: [60, 50, 64, 16],
+              story: "The morning catch fills 8f + 4 crates from f boats. The tally board shows 60 crates." }
+        ];
+
+        function makeTotal() {
+            const t = pick(TOTAL_BANK);
+            const p = { a: t.a, L: t.L, b: t.b, sign: "+", flip: false };
+            return { type: "total", a: t.a, L: t.L, b: t.b, total: t.total,
+                blocks: shuffle(t.blocks.slice()), story: t.story,
+                exprTxt: exprText(p), text: eqTextOf(p, t.total), words: eqWordsOf(p, t.total), p };
+        }
+
+        const TEST_BANK = [
+            { a: 3, L: "y", b: 7, sign: "+", T: 19, sol: 4, chips: [4, 5, 3] },
+            { a: 2, L: "a", b: 5, sign: "-", T: 11, sol: 8, chips: [8, 3, 6] },
+            { a: 1, L: "x", b: 8, sign: "+", T: 15, sol: 7, chips: [7, 23, 8] },
+            { a: 5, L: "p", b: 0, sign: "+", T: 80, sol: 16, chips: [16, 75, 85] }
+        ];
+        const CLAIM_BANK = [
+            { a: 4, L: "k", b: 2, sign: "-", T: 22, sol: 6, claim: 5, chips: [5, 6, 7],
+              story: "A Chaguanas vendor's sales balance as 4k " + MINUS + " 2 = 22. A customer swears k = 5. Test the claim!" },
+            { a: 6, L: "m", b: 3, sign: "+", T: 63, sol: 10, claim: 10, chips: [10, 9, 11],
+              story: "The farmer's equation is 6m + 3 = 63. He claims every box holds m = 10 mangoes. Test the claim!" }
+        ];
+
+        function makeTest(claimRound) {
+            if (claimRound) {
+                const t = JSON.parse(JSON.stringify(pick(CLAIM_BANK)));
+                return buildTestRound(t, true);
+            }
+            let t;
+            if (Math.random() < 0.6) {
+                t = JSON.parse(JSON.stringify(pick(TEST_BANK)));
+            } else {
+                const a = randInt(2, 5), b = randInt(1, 9), sol = randInt(2, 9);
+                const sign = Math.random() < 0.4 && a * sol > b ? "-" : "+";
+                const T = sign === "-" ? a * sol - b : a * sol + b;
+                const wrong1 = sol + pick([1, -1]);
+                const wrong2 = sol + pick([2, -2, 3]);
+                t = { a, L: pick(LETTERS), b, sign, T, sol, chips: [sol, wrong1, wrong2] };
+            }
+            return buildTestRound(t, false);
+        }
+
+        function buildTestRound(t, isClaim) {
+            const p = { a: t.a, L: t.L, b: t.b, sign: t.sign === "-" ? "-" : "+", flip: false };
+            return { type: "test", a: t.a, L: t.L, b: t.b, minus: t.sign === "-", T: t.T,
+                sol: t.sol, claim: isClaim ? t.claim : null, story: t.story || null,
+                chips: shuffle(t.chips.slice()),
+                text: eqTextOf(p, t.T), words: eqWordsOf(p, t.T), p };
+        }
+
+        function newRun() {
+            const pool = newLetterPool();
+            const total = makeTotal();
+            let claim = makeTest(true);
+            let guard = 0;
+            while (claim.text === total.text && guard++ < 6) claim = makeTest(true);
+            let test = makeTest(false);
+            guard = 0;
+            while ((test.text === claim.text || test.text === total.text) && guard++ < 6) test = makeTest(false);
+            const drawn = [
+                makeHookEq(pool),
+                makeHookExpr(pool),
+                makeBuild(pool, false),
+                makeHookTrap(pool),
+                makeBuild(pool, true),
+                total,
+                test,
+                claim
+            ];
+            return { v: 1, drawn, idx: 0, records: [], done: false };
+        }
+
+        /* ---------- run state ---------- */
+        let run = null;
+        let roundState = null; /* per-round scratch: attempts, phase, tickers */
+        let fDom = {};
+        let stepTimer = null;
+
+        function saveRun() {
+            try { storageSet(SAVE_KEY, JSON.stringify(run)); } catch (err) { /* ignore */ }
+        }
+        function loadRun() {
+            try {
+                const raw = storageGet(SAVE_KEY);
+                if (!raw) return null;
+                const r = JSON.parse(raw);
+                if (!r || r.v !== 1 || !Array.isArray(r.drawn) || r.drawn.length !== ROUNDS_PER_RUN || r.done) return null;
+                return r;
+            } catch (err) { return null; }
+        }
+        function clearRun() {
+            try { sessionStorage.removeItem(SAVE_KEY); } catch (err) { /* ignore */ }
+        }
+
+        /* ---------- small SVG builders ---------- */
+        function fishTokenSvg() {
+            return `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">${SVG_DESC}` +
+                `<path class="fish-body" fill="var(--muted)" d="M4 16c5-7 13-9 19-5l5-4v18l-5-4c-6 4-14 2-19-5z"/>` +
+                `<circle cx="10" cy="14.6" r="1.6" fill="#1b2733"/></svg>`;
+        }
+        function fxFishSvg(w) {
+            return `<svg width="${w}" height="${Math.round(w * 0.6)}" viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg">${SVG_DESC}` +
+                `<path fill="var(--accent-2, #8fb4cc)" d="M3 12c6-8 17-10 25-5l9-6v22l-9-6c-8 5-19 3-25-5z"/>` +
+                `<circle cx="11" cy="10" r="1.8" fill="#1b2733"/></svg>`;
+        }
+        function fxGullSvg(w) {
+            return `<svg width="${w}" height="${Math.round(w * 0.45)}" viewBox="0 0 40 18" xmlns="http://www.w3.org/2000/svg">${SVG_DESC}` +
+                `<path fill="none" stroke="var(--gull, #5e7386)" stroke-width="3" stroke-linecap="round" d="M2 14 Q11 2 20 12 Q29 2 38 14"/></svg>`;
+        }
+
+        function renderHeroScene() {
+            if (dom.heroScene) dom.heroScene.innerHTML = heroSceneSvg();
+        }
+
+        /* ---------- shell ---------- */
+        function renderSimShell() {
+            dom.simContainer.innerHTML = `
+                <div id="playWrap">
+                    <div class="round-head">
+                        <div class="round-count" id="roundCount">Slip 1 of ${ROUNDS_PER_RUN}</div>
+                        <div class="catch-rail" id="catchRail" role="img" aria-label="Catch rail: 0 of 8 slips done"></div>
+                        <div class="round-tools">
+                            <button class="control-btn hidden" id="midReviewBtn" aria-label="Review your answers so far">📖 Review</button>
+                            <button class="control-btn" id="hintBtn" aria-label="Show a hint">💡 Hint</button>
+                        </div>
+                    </div>
+                    <div class="coach-row">
+                        <span class="coach-pelican" id="coachPelican" aria-hidden="true">${pelicanSvg(52)}</span>
+                        <div class="coach-bubble" id="coachLine" role="status" aria-live="polite"></div>
+                    </div>
+                    <div class="hint-strip" id="hintStrip" role="status" aria-live="polite"></div>
+                    <p class="rule-strip" id="ruleStrip">An expression <b>lists</b> · an equation <b>balances</b> · the <b>=</b> sign decides.</p>
+                    <div class="wharf-stage" id="wharfStage">
+                        <div class="scene-band" id="sceneBand" aria-hidden="true">${sceneBandSvg()}</div>
+                        <div class="scale-rig" id="scaleRig" tabindex="0" role="button" aria-label="Beam scale — hang an equation slip here">
+                            <div class="rig-post" aria-hidden="true"></div>
+                            <div class="rig-base" aria-hidden="true"></div>
+                            <div class="beam-wrap" id="beamWrap">
+                                <div class="beam" id="beam">
+                                <div class="pan-arm left" id="panArmL">
+                                    <div class="pan-strings" aria-hidden="true"></div>
+                                    <div class="pan-dish" id="panL" role="group" aria-label="Left pan">
+                                        <div class="pan-load" id="panLoadL"></div>
+                                        <div class="pan-sum" id="panSumL"></div>
+                                        <div class="under-hook" id="underHookL"></div>
+                                    </div>
+                                </div>
+                                <div class="pan-arm right" id="panArmR">
+                                    <div class="pan-strings" aria-hidden="true"></div>
+                                    <div class="pan-dish" id="panR" role="group" aria-label="Right pan">
+                                        <div class="pan-load" id="panLoadR"></div>
+                                        <div class="pan-sum" id="panSumR"></div>
+                                    </div>
+                                </div>
+                                </div>
+                                <div class="pivot-ring" id="pivotRing" aria-hidden="true"></div>
+                            </div>
+                        </div>
+                        <div class="price-board" id="priceBoard" tabindex="0" role="button" aria-label="Price board — pin an expression slip here">
+                            <div class="board-title">PRICE BOARD</div>
+                            <div class="board-sub">amounts only — no claims</div>
+                            <div class="board-pins" id="boardPins"></div>
+                        </div>
+                    </div>
+                    <div class="work-row">
+                        <div class="slip-tray" id="slipTray">
+                            <span class="tray-label" id="trayLabel">In-tray</span>
+                            <span class="rev-note" aria-hidden="true"></span>
+                            <div class="tray-slot" id="traySlot"></div>
+                        </div>
+                        <div class="supply-shelf hidden" id="supplyShelf"></div>
+                    </div>
+                    <div class="readout-strip" id="readoutStrip">
+                        <div class="readout-expr" id="readoutExpr"></div>
+                        <div class="readout-words" id="readoutWords"></div>
+                    </div>
+                    <div class="verdict-line" id="verdictLine" role="status" aria-live="polite"></div>
+                    <div class="round-actions" id="roundActions">
+                        <button class="primary-btn hidden" id="weighBtn">⚖️ Weigh it</button>
+                        <button class="primary-btn hidden" id="nextBtn">Next slip</button>
+                    </div>
+                </div>
+                <div class="end-wrap hidden" id="endWrap">
+                    <h2 id="endHeadline"></h2>
+                    <p class="end-sub" id="endSub"></p>
+                    <div class="end-rail" id="endRail"></div>
+                    <div class="end-tally" id="endTally"></div>
+                    <p class="end-rule">Only a statement with an equals sign can be solved — an expression can only be simplified.</p>
+                    <div class="button-row">
+                        <button class="secondary-btn" id="reviewBtn">📖 Review my shift</button>
+                        <button class="primary-btn" id="playAgainBtn">Play again</button>
+                    </div>
+                    <span class="rev-note" aria-hidden="true"></span>
+                </div>`;
+
+            const ids = ["playWrap", "roundCount", "catchRail", "hintBtn", "coachPelican", "coachLine", "ruleStrip",
+                "midReviewBtn", "hintStrip", "wharfStage", "sceneBand", "scaleRig", "beamWrap", "beam", "pivotRing", "panArmL", "panArmR",
+                "panL", "panR", "panLoadL", "panLoadR", "panSumL", "panSumR", "underHookL",
+                "priceBoard", "boardPins", "slipTray", "trayLabel", "traySlot", "supplyShelf",
+                "readoutStrip", "readoutExpr", "readoutWords", "verdictLine", "roundActions",
+                "weighBtn", "nextBtn",
+                "endWrap", "endHeadline", "endSub", "endRail", "endTally", "reviewBtn", "playAgainBtn"];
+            fDom = {};
+            ids.forEach((id) => { fDom[id] = document.getElementById(id); });
+
+            fDom.hintBtn.addEventListener("click", showHint);
+            fDom.midReviewBtn.addEventListener("click", openReview);
+            fDom.weighBtn.addEventListener("click", weighBuild);
+            fDom.nextBtn.addEventListener("click", nextRound);
+            fDom.reviewBtn.addEventListener("click", openReview);
+            fDom.playAgainBtn.addEventListener("click", playAgain);
+            fDom.panL.addEventListener("click", () => tryTapDrop("panL"));
+            fDom.panR.addEventListener("click", () => tryTapDrop("panR"));
+            fDom.scaleRig.addEventListener("click", () => tryTapDrop("scale"));
+            fDom.priceBoard.addEventListener("click", () => tryTapDrop("board"));
+            fDom.scaleRig.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tryTapDrop("scale"); } });
+            fDom.priceBoard.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tryTapDrop("board"); } });
+
+            document.querySelectorAll("#simContainer .rev-note").forEach((el) => { if (!el.textContent) el.textContent = BUILD_META; });
+            renderRail();
+        }
+
+        function renderRail() {
+            fDom.catchRail.replaceChildren();
+            const done = run.records.filter(Boolean).length;
+            fDom.catchRail.setAttribute("aria-label", "Catch rail: " + done + " of " + ROUNDS_PER_RUN + " slips done");
+            for (let i = 0; i < ROUNDS_PER_RUN; i++) {
+                const hook = document.createElement("span");
+                hook.className = "rail-hook";
+                const rec = run.records[i];
+                if (rec) hook.classList.add(rec.res);
+                hook.innerHTML = fishTokenSvg();
+                fDom.catchRail.appendChild(hook);
+            }
+        }
+
+        function setCoach(html, flap) {
+            fDom.coachLine.innerHTML = html;
+            if (!reducedMotion() && flap !== false) {
+                fDom.coachPelican.classList.remove("flap");
+                void fDom.coachPelican.offsetWidth;
+                fDom.coachPelican.classList.add("flap");
+            }
+        }
+
+        function setCue(el) {
+            document.querySelectorAll(".cue").forEach((n) => n.classList.remove("cue"));
+            if (el) el.classList.add("cue");
+        }
+
+        function setReadout(expr, words) {
+            fDom.readoutExpr.textContent = expr || "";
+            fDom.readoutWords.textContent = words || "";
+        }
+
+        function setVerdict(kind, text) {
+            fDom.verdictLine.className = "verdict-line" + (kind ? " " + kind : "");
+            fDom.verdictLine.textContent = text || "";
+        }
+
+        function tiltFor(leftVal, rightVal) {
+            const diff = leftVal - rightVal;
+            if (diff === 0) return 0;
+            const ref = Math.max(Math.abs(rightVal), Math.abs(leftVal), 1);
+            const mag = Math.min(9, 2.5 + (Math.abs(diff) / ref) * 14);
+            return diff > 0 ? -mag : mag;
+        }
+
+        function setTilt(deg) {
+            fDom.beamWrap.style.setProperty("--tilt", deg + "deg");
+            fDom.beam.style.setProperty("--tilt", deg + "deg");
+            fDom.panArmL.style.setProperty("--tilt", deg + "deg");
+            fDom.panArmR.style.setProperty("--tilt", deg + "deg");
+        }
+
+        function clearScale() {
+            fDom.panLoadL.replaceChildren();
+            fDom.panLoadR.replaceChildren();
+            fDom.underHookL.replaceChildren();
+            fDom.panSumL.textContent = "";
+            fDom.panSumR.textContent = "";
+            setTilt(0);
+        }
+
+        /* ---------- rounds ---------- */
+        function currentRound() { return run.drawn[run.idx]; }
+
+        function startRound() {
+            if (stepTimer) { clearInterval(stepTimer); stepTimer = null; }
+            const r = currentRound();
+            roundState = { attempts: 0, phase: "play", selected: null, crates: 0, weights: 0, takes: 0, usedChips: [], lastWeighSig: null };
+            fDom.roundCount.textContent = "Slip " + (run.idx + 1) + " of " + ROUNDS_PER_RUN;
+            fDom.midReviewBtn.classList.toggle("hidden", run.records.filter(Boolean).length === 0);
+            setVerdict("", "");
+            setReadout("", "");
+            fDom.hintStrip.textContent = "";
+            fDom.nextBtn.classList.add("hidden");
+            fDom.weighBtn.classList.add("hidden");
+            fDom.supplyShelf.classList.add("hidden");
+            fDom.supplyShelf.replaceChildren();
+            fDom.traySlot.replaceChildren();
+            fDom.boardPins.replaceChildren();
+            clearScale();
+            renderRail();
+
+            setDropTargetsActive(r.type === "hook");
+            if (r.type === "hook") startHook(r);
+            else if (r.type === "build") startBuild(r);
+            else if (r.type === "total") startTotal(r);
+            else startTest(r);
+        }
+
+        function setDropTargetsActive(on) {
+            [[fDom.scaleRig, "Beam scale — hang an equation slip here"],
+             [fDom.priceBoard, "Price board — pin an expression slip here"]].forEach(([el, label]) => {
+                if (on) {
+                    el.setAttribute("tabindex", "0");
+                    el.setAttribute("role", "button");
+                    el.setAttribute("aria-label", label);
+                    el.removeAttribute("aria-disabled");
+                } else {
+                    el.removeAttribute("tabindex");
+                    el.removeAttribute("role");
+                    el.removeAttribute("aria-label");
+                }
+            });
+        }
+
+        function makeTraySlip(text, draggable) {
+            if (!draggable) {
+                /* build/total/test rounds: the slip is a reference card, not a drag piece */
+                const card = document.createElement("span");
+                card.className = "slip";
+                card.id = "activeSlip";
+                card.textContent = text;
+                fDom.traySlot.appendChild(card);
+                return card;
+            }
+            const slip = document.createElement("button");
+            slip.type = "button";
+            slip.className = "slip";
+            slip.id = "activeSlip";
+            slip.textContent = text;
+            slip.setAttribute("aria-label", "Slip: " + text + ". Choose where to place it.");
+            slip.addEventListener("keydown", (e) => {
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                if (roundState.phase !== "play") return;
+                slip.classList.toggle("selected");
+                roundState.selected = slip.classList.contains("selected") ? slip : null;
+                highlightTargets(!!roundState.selected);
+                if (roundState.selected) setCoach("Now choose the <strong>scale</strong> or the <strong>price board</strong>.", false);
+            });
+            fDom.traySlot.appendChild(slip);
+            makeDraggable(slip);
+            return slip;
+        }
+
+        function startHook(r) {
+            fDom.trayLabel.textContent = "In-tray";
+            const slip = makeTraySlip(r.text, true);
+            setCue(slip);
+            setCoach(r.coach || "Read the slip. Hang a <strong>claim</strong> on the scale — pin a <strong>list</strong> to the price board.");
+            setReadout("", r.words);
+        }
+
+        function startBuild(r) {
+            fDom.trayLabel.textContent = "Order slip";
+            /* each crate secretly weighs the equation's true solution, so the beam can react honestly */
+            roundState.crateWorth = r.minus ? (r.T + r.b) / r.a : (r.T - r.b) / r.a;
+            makeTraySlip(r.text, false);
+            /* right pan pre-hung with the total */
+            const blk = document.createElement("span");
+            blk.className = "num-block";
+            blk.textContent = r.T;
+            fDom.panLoadR.appendChild(blk);
+            fDom.panSumR.textContent = "right side: " + r.T;
+            setTilt(tiltFor(0, r.T)); /* empty left pan — the loaded right side sinks */
+            setReadout(r.text, r.words);
+            renderBuildShelf(r);
+            setCoach("Load the left pan to match <strong>" + escapeHtml(exprText(r.p)) + "</strong>. Crates for the letter, loose weights for the number" + (r.minus ? " — take-backs hang below!" : "!"));
+            setCue(fDom.supplyShelf.querySelector(".crate"));
+            fDom.weighBtn.classList.remove("hidden");
+        }
+
+        function renderBuildShelf(r) {
+            fDom.supplyShelf.classList.remove("hidden");
+            fDom.supplyShelf.innerHTML = `
+                <div class="shelf-group">
+                    <span class="shelf-cap">${escapeHtml(r.L)}-crates</span>
+                    <div class="shelf-stack">
+                        <button type="button" class="crate" id="crateSrc" aria-label="Add one ${escapeHtml(r.L)} crate to the left pan">${escapeHtml(r.L)}</button>
+                    </div>
+                </div>
+                <div class="shelf-group">
+                    <span class="shelf-cap">weights</span>
+                    <div class="shelf-stack">
+                        <button type="button" class="weight" id="weightSrc" aria-label="Add one unit weight to the left pan">1</button>
+                    </div>
+                </div>` + (r.minus ? `
+                <div class="shelf-group">
+                    <span class="shelf-cap">take-backs</span>
+                    <div class="shelf-stack">
+                        <button type="button" class="weight take" id="takeSrc" aria-label="Hang one take-back weight under the pan">1</button>
+                    </div>
+                </div>` : "");
+            document.getElementById("crateSrc").addEventListener("click", () => addBuildPiece(r, "crate"));
+            document.getElementById("weightSrc").addEventListener("click", () => addBuildPiece(r, "weight"));
+            if (r.minus) document.getElementById("takeSrc").addEventListener("click", () => addBuildPiece(r, "take"));
+        }
+
+        function addBuildPiece(r, kind) {
+            if (roundState.phase !== "play") return;
+            setVerdict("", "");
+            roundState.lastWeighSig = null;
+            playSound("click");
+            if (kind === "crate") {
+                if (roundState.crates >= 9) return;
+                const c = document.createElement("button");
+                c.type = "button";
+                c.className = "crate";
+                c.textContent = r.L;
+                c.setAttribute("aria-label", "Remove this crate");
+                c.addEventListener("click", (e) => { e.stopPropagation(); if (roundState.phase !== "play") return; setVerdict("", ""); roundState.lastWeighSig = null; c.remove(); roundState.crates--; updateBuildReadout(r); });
+                fDom.panLoadL.appendChild(c);
+                roundState.crates++;
+            } else {
+                const key = kind === "take" ? "takes" : "weights";
+                if (roundState[key] >= 12) return;
+                const w = document.createElement("button");
+                w.type = "button";
+                w.className = "weight" + (kind === "take" ? " take" : "");
+                w.textContent = "1";
+                w.setAttribute("aria-label", kind === "take" ? "Remove this take-back weight" : "Remove this weight");
+                w.addEventListener("click", (e) => { e.stopPropagation(); if (roundState.phase !== "play") return; setVerdict("", ""); roundState.lastWeighSig = null; w.remove(); roundState[key]--; updateBuildReadout(r); });
+                (kind === "take" ? fDom.underHookL : fDom.panLoadL).appendChild(w);
+                roundState[key]++;
+            }
+            updateBuildReadout(r);
+            if (roundState.crates > 0) setCue(fDom.weighBtn);
+        }
+
+        function buildLeftValue() {
+            return roundState.crates * roundState.crateWorth + roundState.weights - roundState.takes;
+        }
+
+        function updateBuildReadout(r) {
+            setTilt(tiltFor(buildLeftValue(), r.T));
+            const a = roundState.crates;
+            const b = r.minus ? roundState.takes : roundState.weights;
+            let txt = "";
+            if (a > 0) txt = a === 1 ? r.L : a + r.L;
+            if (b > 0) txt += (txt ? (r.minus ? " " + MINUS + " " : " + ") : "") + b;
+            if (r.minus && roundState.weights > 0) txt += (txt ? " " : "") + "(+" + roundState.weights + " on the pan?)";
+            fDom.panSumL.textContent = txt ? "loaded: " + txt : "";
+        }
+
+        function weighBuild() {
+            if (roundState.phase !== "play") return;
+            const r = currentRound();
+            /* re-weighing an unchanged load is a no-op — change something first */
+            const sig = roundState.crates + "|" + roundState.weights + "|" + roundState.takes;
+            if (sig === roundState.lastWeighSig) return;
+            roundState.lastWeighSig = sig;
+            const okCrates = roundState.crates === r.a;
+            const okWeights = r.minus
+                ? (roundState.takes === r.b && roundState.weights === 0)
+                : (roundState.weights === r.b && roundState.takes === 0);
+            if (okCrates && okWeights) {
+                playSound("correct");
+                fDom.weighBtn.classList.add("hidden");
+                setReadout(r.text, "coefficient " + r.a + " · variable " + r.L + " · constant " + (r.minus ? "negative " : "") + r.b);
+                succeed("Loaded! " + r.a + " crates of " + r.L + (r.b ? (r.minus ? " with " + r.b + " taken back" : " and " + r.b + " loose") : "") + " — that side reads " + exprText(r.p) + ".");
+            } else {
+                let msg;
+                const balancedAnyway = buildLeftValue() === r.T;
+                if (!okCrates) msg = roundState.crates > r.a ? "Too many crates — the coefficient says exactly " + r.a + "." : "Not enough crates — the coefficient says " + r.a + ".";
+                else if (r.minus) msg = roundState.weights > 0
+                    ? "Those weights are on the pan — the constant is negative " + r.b + ", so hang " + r.b + " take-backs below."
+                    : "The constant is negative " + r.b + " — hang exactly " + r.b + " take-backs under the pan.";
+                else msg = roundState.weights > r.b ? "Too many weights — the constant is " + r.b + "." : "Not enough weights — the constant is " + r.b + ".";
+                if (balancedAnyway) msg = "The pans balance, but the load doesn't match the slip! " + msg;
+                fail(msg);
+            }
+        }
+
+        function startTotal(r) {
+            fDom.trayLabel.textContent = "Announcement";
+            /* left pan pre-hung with the expression half */
+            const half = document.createElement("span");
+            half.className = "slip-half";
+            half.textContent = r.exprTxt;
+            fDom.panLoadL.appendChild(half);
+            fDom.panSumL.textContent = "an expression — no balance point yet";
+            setTilt(tiltFor(r.total, 0)); /* loaded expression side sinks — nothing on the other pan yet */
+            setReadout(r.exprTxt, exprWordsOf(r.p));
+            setCoach(escapeHtml(r.story) + " Hang the <strong>total</strong> on the empty pan to turn it into an equation.");
+            /* rack of number blocks */
+            fDom.supplyShelf.classList.remove("hidden");
+            const group = document.createElement("div");
+            group.className = "shelf-group";
+            group.innerHTML = `<span class="shelf-cap">totals rack</span>`;
+            const stack = document.createElement("div");
+            stack.className = "shelf-stack";
+            r.blocks.forEach((n) => {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.className = "num-block";
+                b.textContent = n;
+                b.setAttribute("aria-label", "Hang " + n + " on the right pan");
+                b.addEventListener("click", (e) => { e.stopPropagation(); dropTotal(r, n, b); });
+                stack.appendChild(b);
+            });
+            group.appendChild(stack);
+            fDom.supplyShelf.appendChild(group);
+            setCue(stack.firstChild);
+        }
+
+        function dropTotal(r, n, btn) {
+            if (roundState.phase !== "play") return;
+            if (n === r.total) {
+                playSound("hang");
+                btn.remove();
+                const blk = document.createElement("span");
+                blk.className = "num-block";
+                blk.textContent = n;
+                fDom.panLoadR.appendChild(blk);
+                fDom.panSumR.textContent = "the balance point";
+                fDom.panSumL.textContent = "left side";
+                setTilt(0);
+                setReadout(r.text, r.words);
+                seesawSettle();
+                succeed("The announcement supplied the balance point — now it's an equation!");
+            } else {
+                playSound("wrong");
+                /* the wrong total hangs for a moment — the beam shows the disagreement — then hops off */
+                btn.disabled = true;
+                const tryBlk = document.createElement("span");
+                tryBlk.className = "num-block";
+                tryBlk.textContent = n;
+                fDom.panLoadR.appendChild(tryBlk);
+                setTilt(tiltFor(r.total, n));
+                setTimeout(() => {
+                    tryBlk.remove();
+                    setTilt(tiltFor(r.total, 0));
+                    btn.classList.remove("wobble");
+                    void btn.offsetWidth;
+                    btn.classList.add("wobble");
+                    setTimeout(() => btn.classList.remove("wobble"), 600);
+                }, 1000);
+                fail("Listen again — the announced total was " + r.total + ", not " + n + ".");
+            }
+        }
+
+        function startTest(r) {
+            fDom.trayLabel.textContent = r.claim !== null ? "The claim" : "Value chips";
+            /* hang the equation: crates + weights left, total right */
+            for (let i = 0; i < Math.min(r.a, 6); i++) {
+                const c = document.createElement("span");
+                c.className = "crate";
+                c.textContent = r.L;
+                fDom.panLoadL.appendChild(c);
+            }
+            if (r.a > 6) {
+                const half = document.createElement("span");
+                half.className = "slip-half";
+                half.textContent = termText(r.a, r.L);
+                fDom.panLoadL.replaceChildren(half);
+            }
+            if (r.b > 0) {
+                const w = document.createElement("span");
+                w.className = "weight" + (r.minus ? " take" : "");
+                w.textContent = r.b;
+                (r.minus ? fDom.underHookL : fDom.panLoadL).appendChild(w);
+            }
+            const blk = document.createElement("span");
+            blk.className = "num-block";
+            blk.textContent = r.T;
+            fDom.panLoadR.appendChild(blk);
+            fDom.panSumR.textContent = "right side: " + r.T;
+            setReadout(r.text, r.words);
+
+            fDom.supplyShelf.classList.remove("hidden");
+            const group = document.createElement("div");
+            group.className = "shelf-group";
+            group.innerHTML = `<span class="shelf-cap">${escapeHtml(r.L)} = ?</span>`;
+            const stack = document.createElement("div");
+            stack.className = "shelf-stack";
+            r.chips.forEach((n) => {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.className = "num-block";
+                b.id = "chip-" + n;
+                b.textContent = r.L + " = " + n;
+                b.setAttribute("aria-label", "Test " + r.L + " equals " + n);
+                b.addEventListener("click", (e) => { e.stopPropagation(); dropChip(r, n, b); });
+                stack.appendChild(b);
+            });
+            group.appendChild(stack);
+            fDom.supplyShelf.appendChild(group);
+
+            if (r.claim !== null) {
+                setCoach(escapeHtml(r.story) + "");
+                setCue(document.getElementById("chip-" + r.claim));
+                roundState.phase = "claim";
+            } else {
+                setCoach("Which value of <strong>" + escapeHtml(r.L) + "</strong> balances the scale? Think it through, then drop the chip into the crates.");
+                setCue(stack.firstChild);
+            }
+        }
+
+        function dropChip(r, n, btn) {
+            if (roundState.phase === "compute" || roundState.phase === "done") return;
+            if (roundState.usedChips.indexOf(n) !== -1) return;
+            roundState.usedChips.push(n);
+            btn.disabled = true;
+            playSound("hang");
+            setCue(null);
+
+            /* stamp the crates with the value */
+            const crates = fDom.panLoadL.querySelectorAll(".crate");
+            crates.forEach((c) => {
+                c.classList.add("stamped");
+                if (reducedMotion()) {
+                    c.textContent = n;
+                } else {
+                    c.classList.add("flip");
+                    setTimeout(() => { c.textContent = n; }, 200);
+                }
+            });
+
+            /* compute both sides step by step — setInterval, never rAF */
+            const stepsList = [];
+            const product = r.a * n;
+            if (r.a > 1) stepsList.push(numWords(r.a) + " crates of " + n + ": " + r.a + " × " + n + " = " + product);
+            if (r.b > 0) stepsList.push(r.minus
+                ? product + " " + MINUS + " " + r.b + " = " + (product - r.b)
+                : product + " + " + r.b + " = " + (product + r.b));
+            const left = lhsValue(r.p, n);
+            stepsList.push("Left side: " + left + " · Right side: " + r.T);
+
+            roundState.phase = "compute";
+            fDom.readoutStrip.classList.add("working");
+            let i = 0;
+            fDom.readoutWords.textContent = "";
+            stepTimer = setInterval(() => {
+                if (i < stepsList.length) {
+                    fDom.readoutWords.textContent = stepsList[i];
+                    playSound("typing");
+                    i++;
+                    return;
+                }
+                clearInterval(stepTimer);
+                stepTimer = null;
+                fDom.readoutStrip.classList.remove("working");
+                resolveChip(r, n, left);
+            }, 750);
+        }
+
+        function resolveChip(r, n, left) {
+            const balanced = left === r.T;
+            setTilt(balanced ? 0 : tiltFor(left, r.T));
+            const wasClaim = roundState.phase === "compute" && r.claim !== null && n === r.claim && roundState.usedChips.length === 1;
+
+            if (balanced) {
+                roundState.phase = "done";
+                if (r.claim !== null && r.claim === r.sol && n === r.claim) {
+                    /* true claim tested — correct outcome, no attempts penalty */
+                    succeed("Level beam! " + left + " = " + r.T + " — the claim was right: " + r.L + " = " + n + " is the solution.");
+                } else {
+                    succeed("Level beam! Both sides read " + r.T + " — " + r.L + " = " + n + " is the solution.");
+                }
+                return;
+            }
+
+            /* beam tipped */
+            playSound("wrong");
+            if (wasClaim && r.claim !== r.sol) {
+                /* testing a false claim is the TASK, not a mistake */
+                roundState.phase = "play";
+                setVerdict("bad", left + " ≠ " + r.T + " — the claim is false. " + r.L + " = " + n + " is not a solution.");
+                setCoach("See how the " + (left > r.T ? "left" : "right") + " side sank? The sides don't match. Now find the <strong>real</strong> solution — try another chip!");
+                unstampCrates(r);
+                setTimeout(() => setTilt(0), 1400);
+                return;
+            }
+            roundState.phase = "play";
+            unstampCrates(r);
+            setTimeout(() => setTilt(0), 1400);
+            fail(left + " ≠ " + r.T + " — the " + (left > r.T ? "left" : "right") + " side is heavier. Try another value.");
+        }
+
+        function unstampCrates(r) {
+            fDom.panLoadL.querySelectorAll(".crate").forEach((c) => {
+                c.classList.remove("stamped", "flip");
+                c.textContent = r.L;
+            });
+        }
+
+        function seesawSettle() {
+            if (reducedMotion()) return;
+            [fDom.beam, fDom.panArmL, fDom.panArmR].forEach((el) => {
+                el.classList.remove("settle");
+                void el.offsetWidth;
+                el.classList.add("settle");
+            });
+            setTimeout(() => {
+                [fDom.beam, fDom.panArmL, fDom.panArmR].forEach((el) => el.classList.remove("settle"));
+            }, 950);
+        }
+
+        /* ---------- drag & tap placement (HOOK slips) ---------- */
+        let dragCtx = null;
+
+        function makeDraggable(slip) {
+            slip.addEventListener("contextmenu", (e) => e.preventDefault());
+            slip.addEventListener("pointerdown", (e) => {
+                const r = currentRound();
+                if (r.type !== "hook" || roundState.phase !== "play") return;
+                e.preventDefault();
+                try { slip.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+                /* slip stays visible until real movement — a plain hold changes nothing */
+                dragCtx = { slip, ghost: null, moved: false, startX: e.clientX, startY: e.clientY };
+                slip.addEventListener("pointermove", onDragMove);
+                slip.addEventListener("pointerup", onDragUp, { once: true });
+                slip.addEventListener("pointercancel", onDragCancel, { once: true });
+            });
+        }
+
+        function onDragMove(e) {
+            if (!dragCtx) return;
+            if (!dragCtx.moved) {
+                if (Math.abs(e.clientX - dragCtx.startX) + Math.abs(e.clientY - dragCtx.startY) <= 6) return;
+                dragCtx.moved = true;
+                const ghost = dragCtx.slip.cloneNode(true);
+                ghost.classList.remove("cue", "selected");
+                ghost.classList.add("drag-ghost");
+                ghost.style.left = e.clientX + "px";
+                ghost.style.top = e.clientY + "px";
+                ghost.style.width = dragCtx.slip.getBoundingClientRect().width + "px";
+                document.body.appendChild(ghost);
+                dragCtx.ghost = ghost;
+                dragCtx.slip.style.visibility = "hidden";
+                highlightTargets(true);
+            }
+            dragCtx.ghost.style.left = e.clientX + "px";
+            dragCtx.ghost.style.top = e.clientY + "px";
+        }
+
+        function onDragCancel() {
+            if (!dragCtx) return;
+            const { slip, ghost } = dragCtx;
+            slip.removeEventListener("pointermove", onDragMove);
+            slip.removeEventListener("pointerup", onDragUp);
+            if (ghost) ghost.remove();
+            slip.style.visibility = "";
+            highlightTargets(false);
+            dragCtx = null;
+        }
+
+        function hitTarget(x, y) {
+            const rig = fDom.scaleRig.getBoundingClientRect();
+            const board = fDom.priceBoard.getBoundingClientRect();
+            const pad = 14;
+            if (x > board.left - pad && x < board.right + pad && y > board.top - pad && y < board.bottom + pad) return "board";
+            if (x > rig.left - pad && x < rig.right + pad && y > rig.top - pad && y < rig.bottom + pad) return "scale";
+            return null;
+        }
+
+        function onDragUp(e) {
+            if (!dragCtx) return;
+            const { slip, ghost, moved } = dragCtx;
+            slip.removeEventListener("pointermove", onDragMove);
+            slip.removeEventListener("pointercancel", onDragCancel);
+            if (ghost) ghost.remove();
+            highlightTargets(false);
+            dragCtx = null;
+            if (!moved) {
+                /* treat as tap: toggle selection */
+                slip.style.visibility = "";
+                slip.classList.toggle("selected");
+                roundState.selected = slip.classList.contains("selected") ? slip : null;
+                if (roundState.selected) {
+                    highlightTargets(true);
+                    setCoach("Now tap the <strong>scale</strong> or the <strong>price board</strong>.", false);
+                }
+                return;
+            }
+            const target = hitTarget(e.clientX, e.clientY);
+            slip.style.visibility = "";
+            if (target) placeSlip(target);
+        }
+
+        function highlightTargets(on) {
+            fDom.priceBoard.classList.toggle("drop-ready", on);
+            [fDom.panL, fDom.panR].forEach((p) => p.classList.toggle("drop-ready", on));
+        }
+
+        function tryTapDrop(where) {
+            const r = currentRound();
+            if (r.type !== "hook" || roundState.phase !== "play" || !roundState.selected) return;
+            roundState.selected.classList.remove("selected");
+            roundState.selected = null;
+            highlightTargets(false);
+            placeSlip(where === "panL" || where === "panR" ? "scale" : where);
+        }
+
+        function placeSlip(target) {
+            const r = currentRound();
+            const slip = document.getElementById("activeSlip");
+            if (!slip || roundState.phase !== "play") return;
+
+            if (target === "scale" && r.isEq) {
+                /* split at the = and hang the halves */
+                playSound("hang");
+                const parts = r.text.split("=");
+                slip.remove();
+                const lh = document.createElement("span");
+                lh.className = "slip-half";
+                lh.textContent = parts[0].trim();
+                const rh = document.createElement("span");
+                rh.className = "slip-half";
+                rh.textContent = parts[1].trim();
+                fDom.panLoadL.appendChild(lh);
+                fDom.panLoadR.appendChild(rh);
+                fDom.panSumL.textContent = "left side";
+                fDom.panSumR.textContent = "right side";
+                setReadout(r.text, r.words);
+                seesawSettle();
+                succeed("Hung! The equals sign split it into two sides that must match.");
+            } else if (target === "board" && !r.isEq) {
+                playSound("pin");
+                slip.remove();
+                const pin = document.createElement("span");
+                pin.className = "slip";
+                pin.textContent = r.text;
+                fDom.boardPins.appendChild(pin);
+                setReadout(r.text, r.words);
+                succeed("Pinned! It only lists amounts, so the board is its home.");
+            } else if (target === "scale" && !r.isEq) {
+                /* physics refusal: nothing to hook */
+                playSound("wrong");
+                slip.classList.remove("wobble");
+                void slip.offsetWidth;
+                slip.classList.add("wobble");
+                setTimeout(() => slip.classList.remove("wobble"), 600);
+                fail("It slides right off — no equals sign, nothing to balance!");
+            } else {
+                /* equation to board: the clip snaps */
+                playSound("wrong");
+                slip.classList.remove("wobble");
+                void slip.offsetWidth;
+                slip.classList.add("wobble");
+                setTimeout(() => slip.classList.remove("wobble"), 600);
+                fail("The clip snaps — this slip makes a claim. The board only lists amounts.");
+            }
+        }
+
+        /* ---------- verdicts, scoring, flow ---------- */
+        function succeed(msg) {
+            roundState.phase = "done";
+            fDom.hintStrip.textContent = "";
+            setCue(null);
+            setVerdict("good", msg);
+            const r = currentRound();
+            const res = roundState.attempts === 0 ? "gold" : (roundState.attempts === 1 ? "silver" : "grey");
+            run.records[run.idx] = { txt: r.text, kind: kindLabel(r), why: whyOf(r), res };
+            saveRun();
+            playSound("correct");
+            fishLeapFx(false);
+            const hook = fDom.catchRail.children[run.idx];
+            if (hook) {
+                hook.classList.add(res);
+                if (!reducedMotion()) hook.classList.add("pop");
+            }
+            fDom.nextBtn.classList.remove("hidden");
+            fDom.nextBtn.textContent = run.idx === ROUNDS_PER_RUN - 1 ? "Finish the shift" : "Next slip";
+            setCue(fDom.nextBtn);
+        }
+
+        function fail(msg) {
+            if (roundState.phase === "done") return;
+            fDom.hintStrip.textContent = "";
+            roundState.attempts++;
+            setVerdict("bad", msg);
+            murkSplashFx();
+            const r = currentRound();
+            if (roundState.attempts >= 2) {
+                /* show the working and close the round as grey */
+                roundState.phase = "done";
+                setCue(null);
+                run.records[run.idx] = { txt: r.text, kind: kindLabel(r), why: whyOf(r), res: "grey" };
+                saveRun();
+                revealAnswer(r);
+                const hook = fDom.catchRail.children[run.idx];
+                if (hook) hook.classList.add("grey");
+                fDom.nextBtn.classList.remove("hidden");
+                fDom.nextBtn.textContent = run.idx === ROUNDS_PER_RUN - 1 ? "Finish the shift" : "Next slip";
+                setCue(fDom.nextBtn);
+                return;
+            }
+            /* everything stays where it is — adjust and go again directly */
+            if (r.type === "hook") {
+                setCue(document.getElementById("activeSlip"));
+            } else if (r.type === "build") {
+                setCue(fDom.weighBtn);
+            } else {
+                const live = fDom.supplyShelf.querySelector("button:not(:disabled)");
+                setCue(live);
+            }
+        }
+
+        function revealAnswer(r) {
+            if (r.type === "hook") {
+                setCoach("Here's the trick: " + escapeHtml(r.why), true);
+                setVerdict("bad", (r.isEq ? "It's an equation — it belongs on the scale. " : "It's an expression — it belongs on the board. ") + r.why);
+            } else if (r.type === "build") {
+                setVerdict("bad", "The left side needs exactly " + r.a + " crates of " + r.L + " and " + r.b + (r.minus ? " take-back" : "") + " weight" + (r.b === 1 ? "" : "s") + " — " + exprText(r.p) + ".");
+            } else if (r.type === "total") {
+                setVerdict("bad", "The announced total was " + r.total + ", so the equation is " + r.text + ".");
+            } else {
+                setVerdict("bad", "Replacing " + r.L + " with " + r.sol + " makes both sides " + r.T + " — so " + r.L + " = " + r.sol + " is the solution.");
+            }
+        }
+
+        function kindLabel(r) {
+            if (r.type === "hook") return r.isEq ? "Equation" : "Expression";
+            if (r.type === "build") return "Build the side";
+            if (r.type === "total") return "Make it an equation";
+            return "Solution check";
+        }
+
+        function whyOf(r) {
+            if (r.type === "hook") return r.why;
+            if (r.type === "build") return "coefficient " + r.a + " · variable " + r.L + " · constant " + (r.minus ? "negative " : "") + r.b;
+            if (r.type === "total") return "The total " + r.total + " gave the expression its balance point.";
+            return r.L + " = " + r.sol + " makes both sides " + r.T + ".";
+        }
+
+        function showHint() {
+            playSound("click");
+            const r = currentRound();
+            let hint;
+            if (r.type === "hook") hint = "Cover the letters with your thumb. Is there an = left on the slip?";
+            else if (r.type === "build") hint = termText(r.a, r.L) + " means " + r.a + " crates of " + r.L + ". The loose number is the constant" + (r.minus ? ", taken away below the pan" : "") + ".";
+            else if (r.type === "total") hint = "The expression is one side. The announced total is the other side of the equals sign.";
+            else hint = "Replace " + r.L + " with the chip's number and work out the left side. It must land exactly on " + r.T + ".";
+            fDom.hintStrip.textContent = "💡 " + hint;
+        }
+
+        function nextRound() {
+            playSound("click");
+            run.idx++;
+            saveRun();
+            if (run.idx >= ROUNDS_PER_RUN) {
+                endGame();
+            } else {
+                startRound();
+            }
+        }
+
+        /* ---------- end screen ---------- */
+        function endGame() {
+            run.done = true;
+            saveRun();
+            if (stepTimer) { clearInterval(stepTimer); stepTimer = null; }
+            setCue(null);
+            fDom.playWrap.classList.add("hidden");
+            fDom.endWrap.classList.remove("hidden");
+            const gold = run.records.filter((x) => x && x.res === "gold").length;
+            const silver = run.records.filter((x) => x && x.res === "silver").length;
+            const grey = run.records.filter((x) => x && x.res === "grey").length;
+            fDom.endHeadline.textContent = gold === ROUNDS_PER_RUN ? "Perfect shift, Weigh-Master!" :
+                gold >= 6 ? "Fine morning's work!" :
+                gold + silver >= 5 ? "The wharf is learning your name!" : "Every shift makes you sharper!";
+            fDom.endSub.textContent = "Your catch rail from this shift:";
+            fDom.endRail.replaceChildren();
+            run.records.forEach((rec) => {
+                const hook = document.createElement("span");
+                hook.className = "rail-hook " + (rec ? rec.res : "");
+                hook.innerHTML = fishTokenSvg();
+                fDom.endRail.appendChild(hook);
+            });
+            fDom.endTally.innerHTML =
+                "<span>🥇 First-try: <strong>" + gold + "</strong></span>" +
+                "<span>🥈 Second-try: <strong>" + silver + "</strong></span>" +
+                "<span>⚪ Shown the working: <strong>" + grey + "</strong></span>";
+            playSound("complete");
+            fishLeapFx(true);
+        }
+
+        function openReview() {
+            dom.reviewList.replaceChildren();
+            run.records.forEach((rec, i) => {
+                if (!rec) return;
+                const li = document.createElement("li");
+                const st = document.createElement("div");
+                st.className = "rv-st";
+                st.textContent = (i + 1) + ". " + rec.txt + " — " + rec.kind + " " + (rec.res === "gold" ? "🥇" : rec.res === "silver" ? "🥈" : "⚪");
+                const why = document.createElement("div");
+                why.className = "rv-why";
+                why.textContent = rec.why;
+                li.appendChild(st);
+                li.appendChild(why);
+                dom.reviewList.appendChild(li);
+            });
+            dom.reviewModal.classList.add("show");
+            resetModalScroll(dom.reviewModal);
+        }
+
+        function playAgain() {
+            playSound("click");
+            clearRun();
+            run = newRun();
+            saveRun();
+            renderSimShell();
+            fDom.playWrap.classList.remove("hidden");
+            fDom.endWrap.classList.add("hidden");
+            startRound();
+        }
+
+        /* ---------- fx ---------- */
+        function fishLeapFx(big) {
+            if (reducedMotion()) return;
+            const layer = dom.fxLayer;
+            const n = big ? 9 : 3;
+            const w = window.innerWidth;
+            for (let i = 0; i < n; i++) {
+                const fish = document.createElement("div");
+                fish.className = "ffish";
+                const fromLeft = i % 2 === 0;
+                const startX = fromLeft ? randInt(4, 30) : randInt(70, 96);
+                const dir = fromLeft ? 1 : -1;
+                fish.style.left = startX + "vw";
+                fish.style.setProperty("--dir", dir);
+                fish.style.setProperty("--fx", (dir * randInt(Math.round(w * 0.12), Math.round(w * 0.24))) + "px");
+                fish.style.setProperty("--fy", "-" + randInt(30, big ? 62 : 44) + "vh");
+                fish.style.setProperty("--dur", (big ? randInt(1100, 1600) : randInt(750, 1000)) + "ms");
+                fish.innerHTML = fxFishSvg(big ? randInt(30, 46) : randInt(24, 34));
+                if (dir === -1) { const fsvg = fish.querySelector("svg"); if (fsvg) fsvg.style.transform = "scaleX(-1)"; }
+                layer.appendChild(fish);
+                setTimeout(() => fish.remove(), 1800);
+                /* spray droplets at the leap point */
+                for (let d = 0; d < 3; d++) {
+                    const drop = document.createElement("div");
+                    drop.className = "droplet";
+                    drop.style.left = "calc(" + startX + "vw + " + randInt(-8, 16) + "px)";
+                    drop.style.bottom = "0px";
+                    const size = randInt(4, 8);
+                    drop.style.width = size + "px";
+                    drop.style.height = size + "px";
+                    drop.style.setProperty("--dx", (dir * randInt(10, 50)) + "px");
+                    drop.style.setProperty("--dy", "-" + randInt(40, 110) + "px");
+                    drop.style.setProperty("--dur", randInt(380, 520) + "ms");
+                    layer.appendChild(drop);
+                    setTimeout(() => drop.remove(), 600);
+                }
+            }
+        }
+
+        function murkSplashFx() {
+            if (reducedMotion()) {
+                return;
+            }
+            const layer = dom.fxLayer;
+            for (let i = 0; i < 8; i++) {
+                const puff = document.createElement("div");
+                puff.className = "murk-puff";
+                puff.style.left = randInt(30, 66) + "vw";
+                const size = randInt(16, 42);
+                puff.style.width = size + "px";
+                puff.style.height = size + "px";
+                puff.style.setProperty("--dx", randInt(-90, 90) + "px");
+                puff.style.setProperty("--dy", "-" + randInt(40, 130) + "px");
+                puff.style.setProperty("--dur", randInt(550, 850) + "ms");
+                layer.appendChild(puff);
+                setTimeout(() => puff.remove(), 900);
+            }
+            for (let g = 0; g < 2; g++) {
+                const gull = document.createElement("div");
+                gull.className = "scare-gull";
+                gull.style.left = (g === 0 ? randInt(20, 35) : randInt(60, 75)) + "vw";
+                gull.style.setProperty("--gx", (g === 0 ? -1 : 1) * randInt(120, 260) + "px");
+                gull.style.setProperty("--gy", "-" + randInt(180, 320) + "px");
+                gull.style.setProperty("--gdir", g === 0 ? -1 : 1);
+                gull.style.setProperty("--dur", randInt(750, 950) + "ms");
+                gull.innerHTML = fxGullSvg(randInt(26, 36));
+                layer.appendChild(gull);
+                setTimeout(() => gull.remove(), 1000);
+            }
+            const shell = dom.appShell;
+            /* rumble the shell, never body — a transformed body breaks fixed layers */
+            shell.classList.remove("page-rumble");
+            void shell.offsetWidth;
+            shell.classList.add("page-rumble");
+        }
+
+        /* ---------- lifecycle ---------- */
+        function devInit(resume) {
+            const saved = resume ? loadRun() : null;
+            if (saved) {
+                run = saved;
+            } else {
+                run = newRun();
+                saveRun();
+            }
+            renderSimShell();
+            startRound();
+            if (!resume) {
+                const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+                if (seen !== "true") {
+                    storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                    dom.helpBtn.classList.remove("pulse-help");
+                    openInstructionsModal();
+                }
+            }
+        }
+
+        function devReset() {
+            if (stepTimer) { clearInterval(stepTimer); stepTimer = null; }
+            clearRun();
+            run = null;
+            roundState = null;
+        }
+
+        /* resume a saved shift on reload */
+        (function resumeIfSaved() {
+            const saved = loadRun();
+            if (saved && saved.idx < ROUNDS_PER_RUN) {
+                showScreen("sim");
+                devInit(true);
+            }
+        })();
+    </script>
+</body>
+
+</html>
