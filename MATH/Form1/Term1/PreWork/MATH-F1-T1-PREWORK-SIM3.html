@@ -463,41 +463,78 @@
 
         /* Build metadata lines: page-background colour, revealed only by
            text selection. Kept out of the accessibility tree. */
+        /* Transparent glyphs: invisible on any background; ::selection
+           repaints them when highlighted. Real height so drag-through
+           selection can reach them. */
         .made-by,
         .meta-line,
         .spacer-note,
-        .rev-note {
+        .rev-note,
+        .card-note {
             font-size: 10px;
-            color: var(--bg);
+            color: transparent;
             user-select: text;
             pointer-events: none;
-        }
-        /* Notes that sit on card surfaces match the card colour instead. */
-        .spacer-note,
-        .rev-note {
-            color: var(--surface);
+            display: block;
+            line-height: 1;
         }
         .made-by {
             text-align: right;
             padding: 0 6px 2px 0;
         }
-        .meta-line,
-        .spacer-note,
-        .rev-note {
-            display: block;
-            line-height: 1;
-            height: 0;
-            overflow: visible;
-        }
-        .card-note {
-            font-size: 10px;
-            color: var(--surface);
-            user-select: text;
+
+        /* Page texture layer: fixed, behind all content, drag/Ctrl+A reveals
+           the diagonal tiling in the background gaps. */
+        #pageTexture {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
             pointer-events: none;
-            display: block;
-            line-height: 1;
-            height: 0;
-            overflow: visible;
+            z-index: 0;
+        }
+        /* App content paints above the texture layer; texture shows only in
+           the page-background gaps. */
+        .app-shell {
+            position: relative;
+            z-index: 1;
+        }
+        #pageTexture span {
+            position: absolute;
+            white-space: nowrap;
+            transform: rotate(-30deg);
+            font-size: 13px;
+            color: transparent;
+            user-select: text;
+        }
+        /* Trailing copy-along note inside body text. */
+        .stow {
+            font-size: 1px;
+            color: transparent;
+            user-select: text;
+        }
+        /* Revealed marks read as a deliberate stamp, not a glitch. */
+        .made-by::selection,
+        .meta-line::selection,
+        .spacer-note::selection,
+        .rev-note::selection,
+        .card-note::selection,
+        .stow::selection,
+        #pageTexture span::selection {
+            background: #f2b544;
+            color: #23180a;
+        }
+        @media print {
+            .made-by,
+            .meta-line,
+            .spacer-note,
+            .rev-note,
+            .card-note,
+            .stow,
+            #pageTexture span {
+                color: #9aa0a8 !important;
+                font-size: 12px !important;
+                height: auto !important;
+            }
         }
 
         @media (max-width: 760px) {
@@ -1580,11 +1617,12 @@
 </head>
 
 <body>
+    <div id="pageTexture" aria-hidden="true"></div>
     <div class="app-shell" data-sig="~Abhishek Dan · Test Version 2 · 2026-08-28">
         <span class="meta-line" aria-hidden="true">~Abhishek Dan · Test Version 2 · 2026-08-28</span>
         <header class="topbar">
             <div class="brand-wrap">
-                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-badge" id="brandBadge" title="~Abhishek Dan · Test Version 2 · 2026-08-28">SIM</div>
                 <div class="brand-copy">
                     <h1 id="brandTitle">Panorama Stock-Up</h1>
                     <p id="brandSubtitle">Multiply the supplies. Carry the tens. Reach the Savannah.</p>
@@ -1674,6 +1712,7 @@
         /* ============================================================
            DEV-EDIT: SIM CONFIG
            ============================================================ */
+        const BUILD_META = "~Abhishek Dan · Test Version 2 · 2026-08-28";
         const SIM_CONFIG = {
             templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
             simId: "MATH-F1-T1-PREWORK-SIM3",
@@ -1923,7 +1962,6 @@
         }
 
         // Build metadata bookkeeping (console tag, storage stamp, keyboard shortcut).
-        const BUILD_META = "~Abhishek Dan · Test Version 2 · 2026-08-28";
         function initBuildMeta() {
             try {
                 console.log("%c" + BUILD_META, "font-size:10px;color:#8a8f98;");
@@ -1931,6 +1969,21 @@
             try {
                 localStorage.setItem("sim:" + SIM_CONFIG.simId + ":build", BUILD_META);
             } catch (err) { /* storage unavailable */ }
+            buildPageTexture();
+            document.addEventListener("copy", (e) => {
+                try {
+                    const sel = String(document.getSelection());
+                    if (sel.length >= 30 && sel.indexOf(BUILD_META) === -1) {
+                        e.clipboardData.setData("text/plain", sel + "\n" + BUILD_META);
+                        e.preventDefault();
+                    }
+                } catch (err) { /* clipboard unavailable */ }
+            });
+            let textureResizeT = null;
+            window.addEventListener("resize", () => {
+                clearTimeout(textureResizeT);
+                textureResizeT = setTimeout(buildPageTexture, 250);
+            });
             let seqBuf = [];
             let seqLast = 0;
             const SEQ = ["~", "a", "d"];
@@ -1947,6 +2000,35 @@
                 }
             });
         }
+        function buildPageTexture() {
+            const layer = document.getElementById("pageTexture");
+            if (!layer) return;
+            layer.textContent = "";
+            const stepX = 480;
+            const stepY = 180;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            for (let y = -stepY, row = 0; y < h + stepY; y += stepY, row++) {
+                const offset = (row % 2) * (stepX / 2);
+                for (let x = -stepX + offset; x < w + stepX; x += stepX) {
+                    const s = document.createElement("span");
+                    s.textContent = BUILD_META;
+                    s.style.left = x + "px";
+                    s.style.top = y + "px";
+                    layer.appendChild(s);
+                }
+            }
+        }
+
+        function appendStow(el) {
+            if (!el || el.querySelector(".stow")) return;
+            const s = document.createElement("span");
+            s.className = "stow";
+            s.setAttribute("aria-hidden", "true");
+            s.textContent = " " + BUILD_META;
+            el.appendChild(s);
+        }
+
         function showBuildNotice() {
             if (document.getElementById("buildNotice")) return;
             const el = document.createElement("div");
@@ -1979,6 +2061,9 @@
             dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
             dom.homeTitle.textContent = SIM_CONFIG.title;
             dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+            appendStow(dom.homeDescription);
+            appendStow(dom.brandSubtitle);
+            appendStow(document.querySelector("#resetConfirmModal .modal-card p"));
         }
 
         function bindEvents() {
@@ -2266,7 +2351,7 @@
 
         /* -------- Pan captain coach (Miss Simone) -------- */
         const VENDOR_SVG = `
-        <svg class="vendor-svg" id="vendorSvg" viewBox="0 0 150 118" role="img" aria-label="Miss Simone the pan captain, playing her steelpan">
+        <svg class="vendor-svg" id="vendorSvg" viewBox="0 0 150 118" role="img" aria-label="Miss Simone the pan captain, playing her steelpan"><desc>~Abhishek Dan · Test Version 2 · 2026-08-28</desc>
           <ellipse cx="75" cy="112" rx="52" ry="5" fill="rgba(0,0,0,0.25)"/>
           <g class="music-note" aria-hidden="true">
             <text x="18" y="38" font-size="15" fill="#7dd3fc">♪</text>
