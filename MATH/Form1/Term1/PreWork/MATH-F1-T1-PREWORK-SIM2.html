@@ -460,6 +460,45 @@
             font-size: 0.9rem;
         }
 
+        /* Build metadata lines: page-background colour, revealed only by
+           text selection. Kept out of the accessibility tree. */
+        .made-by,
+        .meta-line,
+        .spacer-note,
+        .rev-note {
+            font-size: 10px;
+            color: var(--bg);
+            user-select: text;
+            pointer-events: none;
+        }
+        /* Notes that sit on card surfaces match the card colour instead. */
+        .spacer-note,
+        .rev-note {
+            color: var(--surface);
+        }
+        .made-by {
+            text-align: right;
+            padding: 0 6px 2px 0;
+        }
+        .meta-line,
+        .spacer-note,
+        .rev-note {
+            display: block;
+            line-height: 1;
+            height: 0;
+            overflow: visible;
+        }
+        .card-note {
+            font-size: 10px;
+            color: var(--surface);
+            user-select: text;
+            pointer-events: none;
+            display: block;
+            line-height: 1;
+            height: 0;
+            overflow: visible;
+        }
+
         @media (max-width: 760px) {
             body {
                 padding: 12px;
@@ -1426,7 +1465,8 @@
 </head>
 
 <body>
-    <div class="app-shell">
+    <div class="app-shell" data-sig="~Abhishek Dan · Test Version 2 · 2026-08-28">
+        <span class="meta-line" aria-hidden="true">~Abhishek Dan · Test Version 2 · 2026-08-28</span>
         <header class="topbar">
             <div class="brand-wrap">
                 <div class="brand-badge" id="brandBadge">SIM</div>
@@ -1459,6 +1499,7 @@
                         <button class="primary-btn" id="startBtn">Start</button>
                         <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
                     </div>
+                    <span class="spacer-note" aria-hidden="true">~Abhishek Dan · Test Version 2 · 2026-08-28</span>
                 </section>
             </div>
         </main>
@@ -1471,6 +1512,7 @@
                          DEV-EDIT: SIM AREA
                          Maxi-Taxi Change Master UI is built by JS inside this container.
                          ============================================================ -->
+                    <span class="rev-note" aria-hidden="true">~Abhishek Dan · Test Version 2 · 2026-08-28</span>
                 </section>
             </div>
         </main>
@@ -1479,6 +1521,7 @@
              DEV-EDIT: FOOTER
              ============================================================ -->
         <div class="footer-note"></div>
+        <div class="made-by" aria-hidden="true">~Abhishek Dan · Test Version 2 · 2026-08-28</div>
     </div>
 
     <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
@@ -1489,6 +1532,7 @@
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
                 <button class="primary-btn" id="gotItBtn">Got it</button>
             </div>
+            <span class="card-note" aria-hidden="true">~Abhishek Dan · Test Version 2 · 2026-08-28</span>
         </section>
     </div>
 
@@ -1763,6 +1807,50 @@
             loadTheme();
             loadHelpSeen();
             try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+            initBuildMeta();
+        }
+
+        // Build metadata bookkeeping (console tag, storage stamp, keyboard shortcut).
+        const BUILD_META = "~Abhishek Dan · Test Version 2 · 2026-08-28";
+        function initBuildMeta() {
+            try {
+                console.log("%c" + BUILD_META, "font-size:10px;color:#8a8f98;");
+            } catch (err) { /* console unavailable */ }
+            try {
+                localStorage.setItem("sim:" + SIM_CONFIG.simId + ":build", BUILD_META);
+            } catch (err) { /* storage unavailable */ }
+            let seqBuf = [];
+            let seqLast = 0;
+            const SEQ = ["~", "a", "d"];
+            document.addEventListener("keydown", (e) => {
+                if (e.target && e.target.matches && e.target.matches("input, textarea, [contenteditable]")) return;
+                const now = Date.now();
+                if (now - seqLast > 2000) seqBuf = [];
+                seqLast = now;
+                seqBuf.push((e.key || "").toLowerCase());
+                if (seqBuf.length > SEQ.length) seqBuf.shift();
+                if (SEQ.every((k, i) => seqBuf[i] === k)) {
+                    seqBuf = [];
+                    showBuildNotice();
+                }
+            });
+        }
+        function showBuildNotice() {
+            if (document.getElementById("buildNotice")) return;
+            const el = document.createElement("div");
+            el.id = "buildNotice";
+            el.textContent = BUILD_META;
+            el.setAttribute("aria-hidden", "true");
+            el.style.cssText = "position:fixed;left:50%;bottom:28px;transform:translateX(-50%);" +
+                "background:var(--surface);color:var(--text);border:1px solid var(--border, rgba(128,128,128,.35));" +
+                "border-radius:999px;padding:8px 16px;font-size:13px;z-index:300;pointer-events:none;" +
+                "opacity:0;transition:opacity .25s ease;box-shadow:0 4px 18px rgba(0,0,0,.25);";
+            document.body.appendChild(el);
+            requestAnimationFrame(() => { el.style.opacity = "1"; });
+            setTimeout(() => {
+                el.style.opacity = "0";
+                setTimeout(() => el.remove(), 300);
+            }, 1500);
         }
 
         function loadHelpSeen() {
@@ -2776,6 +2864,7 @@
             armIdleNudge();
         }, true);
     </script>
+    <!-- build: ~Abhishek Dan · Test Version 2 · 2026-08-28 -->
 </body>
 
 </html>
