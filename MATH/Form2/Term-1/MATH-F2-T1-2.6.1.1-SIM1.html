@@ -572,14 +572,63 @@
         }
         .coach-bubble {
             background: var(--surface-2);
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             border-radius: 4px 14px 14px 14px;
             padding: 8px 14px;
-            color: var(--text-soft);
-            font-size: 1rem;
+            color: var(--text);
+            font-size: 1.02rem;
             max-width: 660px;
+            transform-origin: 8% 100%;
         }
         .coach-bubble strong { color: var(--text); }
+        /* the bubble must visibly SPEAK — pop + amber flash on every new line,
+           so eyes land on the text (kids skip a silently-updated bubble) */
+        .coach-bubble.speak {
+            animation: bubbleSpeak 0.55s cubic-bezier(0.25, 1.35, 0.45, 1);
+        }
+        @keyframes bubbleSpeak {
+            0% { transform: scale(0.82) rotate(-1.5deg); border-color: var(--accent-2); box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent-2) 55%, transparent); }
+            55% { transform: scale(1.05); }
+            100% { transform: scale(1); border-color: var(--border); box-shadow: 0 0 0 14px transparent; }
+        }
+        .coach-bubble.tone-warn {
+            border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface-2));
+        }
+        .coach-bubble.tone-good {
+            border-color: color-mix(in srgb, var(--success) 55%, var(--border));
+            background: color-mix(in srgb, var(--success) 12%, var(--surface-2));
+        }
+        /* unread message = bubble stays LIT (amber fill + pulsing ring) until the
+           child next touches the game — a one-off flash was not enough of a draw */
+        .coach-bubble.fresh {
+            border-color: var(--accent-2);
+            background: color-mix(in srgb, var(--accent-2) 18%, var(--surface-2));
+            animation: freshPulse 1.15s ease-in-out infinite;
+        }
+        .coach-bubble.fresh.tone-warn {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 16%, var(--surface-2));
+        }
+        .coach-bubble.fresh.tone-good {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 16%, var(--surface-2));
+        }
+        @keyframes freshPulse {
+            0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-2) 55%, transparent); }
+            50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent-2) 30%, transparent); }
+        }
+        /* both classes land together — chain the animations or the later .fresh
+           rule silently replaces the entrance pop (animation is ONE property) */
+        .coach-bubble.speak.fresh {
+            animation: bubbleSpeak 0.55s cubic-bezier(0.25, 1.35, 0.45, 1),
+                       freshPulse 1.15s ease-in-out 0.6s infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .coach-bubble.speak { animation: none; }
+            .coach-bubble.fresh { animation: none; }
+            .coach-bubble.speak.fresh { animation: none; }
+        }
 
         .rule-strip {
             text-align: center;
@@ -1256,7 +1305,7 @@
             event.preventDefault();
         }, true);
 
-        const BUILD_META = "~Abhishek Dan · Test Version 1 · 2026-08-29";
+        const BUILD_META = "~Abhishek Dan · Test Version 2 · 2026-08-29";
         const SVG_DESC = `<desc>${BUILD_META}</desc>`;
 
         /* ============================================================
@@ -2364,13 +2413,42 @@
             document.querySelectorAll("#simContainer .stow").forEach((el) => { if (!el.textContent) el.textContent = " " + BUILD_META; });
         }
 
-        function setCoach(html, flap) {
-            fDom.coachLine.innerHTML = html;
-            if (flap && !reducedMotion()) {
+        let freshClearHandle = null;
+
+        function setCoach(html, flap, tone) {
+            const bubble = fDom.coachLine;
+            bubble.innerHTML = html;
+            bubble.classList.remove("tone-warn", "tone-good");
+            if (tone) bubble.classList.add("tone-" + tone);
+            if (!reducedMotion()) {
+                /* every new line pops + flashes so the change itself is seen */
+                bubble.classList.remove("speak");
+                void bubble.offsetWidth;
+                bubble.classList.add("speak");
+                /* ibis hops on EVERY message — the mascot is the pointer to its own words */
                 fDom.coachIbis.classList.remove("flap");
                 void fDom.coachIbis.offsetWidth;
                 fDom.coachIbis.classList.add("flap");
             }
+            /* stay LIT until the child's next interaction — unread messages keep glowing
+               (armed on the next tick so the click that produced this line doesn't clear it) */
+            bubble.classList.add("fresh");
+            if (freshClearHandle) {
+                document.removeEventListener("pointerdown", freshClearHandle, true);
+                document.removeEventListener("keydown", freshClearHandle, true);
+            }
+            const clearFresh = () => {
+                bubble.classList.remove("fresh");
+                document.removeEventListener("pointerdown", clearFresh, true);
+                document.removeEventListener("keydown", clearFresh, true);
+                if (freshClearHandle === clearFresh) freshClearHandle = null;
+            };
+            freshClearHandle = clearFresh;
+            setTimeout(() => {
+                if (freshClearHandle !== clearFresh) return;
+                document.addEventListener("pointerdown", clearFresh, true);
+                document.addEventListener("keydown", clearFresh, true);
+            }, 50);
         }
 
         function setCue(el) {
@@ -2731,7 +2809,7 @@
                 clip.innerHTML = tagSvg(scene.variable.letter, true);
                 board.appendChild(clip);
                 fDom.dragTag.classList.add("gone");
-                setCoach(`<strong>Clipped on!</strong> "${escapeHtml(scene.variable.label)}" ${scene.kind === "mystery" ? "is unknown" : "keeps changing"} — a <strong>variable</strong>.`, true);
+                setCoach(`<strong>Clipped on!</strong> "${escapeHtml(scene.variable.label)}" ${scene.kind === "mystery" ? "is unknown" : "keeps changing"} — a <strong>variable</strong>.`, true, "good");
                 if (!hasStage2(scene)) featherBurst(false); // big celebration waits for the full tag
                 if (hasStage2(scene)) {
                     setTimeout(openStage2, 700);
@@ -2760,7 +2838,7 @@
                     setCue(fDom.dragTag);
                 }, 900);
                 playSound("wrong");
-                setCoach(`It slid right off! <strong>${escapeHtml(round.drawnEntry.constText)}</strong> is fixed — a <strong>constant</strong>. Tag the one that ${scene.kind === "mystery" ? "is unknown" : "changes"}.`, false);
+                setCoach(`It slid right off! <strong>${escapeHtml(round.drawnEntry.constText)}</strong> is fixed — a <strong>constant</strong>. Tag the one that ${scene.kind === "mystery" ? "is unknown" : "changes"}.`, false, "warn");
             }
         }
 
@@ -2815,7 +2893,7 @@
                 const q2 = round.attempts2 === 0;
                 const quality = round.revealed ? "grey" : (q1 && q2 ? "gold" : "green");
                 setVerdict(true, `Let ${scene.variable.letter} represent ${scene.variable.statement}.`);
-                setCoach(`<strong>Perfect tag!</strong> ${escapeHtml(scene.variable.letter)} stands for a <strong>number</strong> we can track.`, true);
+                setCoach(`<strong>Perfect tag!</strong> ${escapeHtml(scene.variable.letter)} stands for a <strong>number</strong> we can track.`, true, "good");
                 finishRound(quality);
             } else {
                 round.attempts2 += 1;
@@ -2828,9 +2906,9 @@
                 btn.classList.add("chip-out");
                 mudSplash();
                 if (chip.id === "trap") {
-                    setCoach(`<strong>${escapeHtml(scene.variable.letter)} can't be ${escapeHtml(chip.text)}!</strong> A letter stands for a <strong>number or amount</strong>, never the thing itself.`, false);
+                    setCoach(`<strong>${escapeHtml(scene.variable.letter)} can't be ${escapeHtml(chip.text)}!</strong> A letter stands for a <strong>number or amount</strong>, never the thing itself.`, false, "warn");
                 } else {
-                    setCoach(`Not that measure. Check the live board — what is it counting?`, false);
+                    setCoach(`Not that measure. Check the live board — what is it counting?`, false, "warn");
                 }
                 if (round.attempts2 >= 2 && !round.revealed) {
                     round.revealed = true;
@@ -2838,7 +2916,7 @@
                     if (correctBtn) {
                         correctBtn.classList.add("reveal-correct");
                         setCue(correctBtn);
-                        setCoach(`Here's the one — tap it. The board tracks <strong>${escapeHtml(scene.variable.label.toLowerCase())}</strong>.`, false);
+                        setCoach(`Here's the one — tap it. The board tracks <strong>${escapeHtml(scene.variable.label.toLowerCase())}</strong>.`, false, "warn");
                     }
                 }
             }
@@ -2924,7 +3002,7 @@
                     <button class="secondary-btn" id="reviewBtn">📖 Review</button>
                     <button class="primary-btn" id="playAgainBtn">Play Again</button>
                 </div>`;
-            setCoach(`<strong>Great round, Ranger!</strong> ${gold} first-try tags out of ${ROUNDS_PER_RUN}.`, true);
+            setCoach(`<strong>Great round, Ranger!</strong> ${gold} first-try tags out of ${ROUNDS_PER_RUN}.`, true, "good");
             if (gold + green > 0) featherBurst(true);
             document.getElementById("playAgainBtn").addEventListener("click", () => {
                 playSound("click");
@@ -3036,7 +3114,7 @@
             }
         })();
     </script>
-    <!-- build: ~Abhishek Dan · Test Version 1 · 2026-08-29 -->
+    <!-- build: ~Abhishek Dan · Test Version 2 · 2026-08-29 -->
 </body>
 
 </html>
