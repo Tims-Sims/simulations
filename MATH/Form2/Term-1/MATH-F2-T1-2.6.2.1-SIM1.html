@@ -714,17 +714,48 @@
 
         .coach-bubble {
             background: var(--surface-2);
-            border: 1px solid var(--border);
+            border: 1.5px solid color-mix(in srgb, var(--accent-2) 55%, var(--border));
+            border-left: 5px solid var(--accent-2);
             border-radius: 4px 14px 14px 14px;
             padding: 9px 14px;
-            color: var(--text-soft);
+            color: var(--text);
             font-size: 1.08rem;
             line-height: 1.45;
             max-width: 720px;
         }
 
         .coach-bubble strong {
-            color: var(--text);
+            color: var(--accent);
+        }
+
+        /* every new coach line pops so eyes land on it */
+        .coach-bubble.speak {
+            animation: coachSpeak 0.85s ease;
+        }
+
+        @keyframes coachSpeak {
+            0% {
+                transform: scale(0.94);
+                background: color-mix(in srgb, var(--accent-2) 32%, var(--surface-2));
+            }
+
+            35% {
+                transform: scale(1.045);
+            }
+
+            60% {
+                transform: scale(1);
+            }
+
+            100% {
+                background: var(--surface-2);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .coach-bubble.speak {
+                animation: none;
+            }
         }
 
         /* ---------- progress header: receipt spike ---------- */
@@ -1821,7 +1852,7 @@
             event.preventDefault();
         }, true);
 
-        const BUILD_META = "~Abhishek Dan · Test Version 1 · 2026-08-29";
+        const BUILD_META = "~Abhishek Dan · Test Version 2 · 2026-08-29";
         const SVG_DESC = `<desc>${BUILD_META}</desc>`;
 
         /* ============================================================
@@ -2876,7 +2907,14 @@
         }
 
         function setCoach(html, ding) {
+            const changed = fDom.coachLine.innerHTML !== html;
             fDom.coachLine.innerHTML = html;
+            if (changed && !reducedMotion()) {
+                const bubble = fDom.coachLine;
+                bubble.classList.remove("speak");
+                void bubble.offsetWidth;
+                bubble.classList.add("speak");
+            }
             if (ding && !reducedMotion()) {
                 fDom.coachTill.classList.remove("ding");
                 void fDom.coachTill.offsetWidth;
@@ -3626,7 +3664,7 @@
             }
         })();
     </script>
-    <!-- build: ~Abhishek Dan · Test Version 1 · 2026-08-29 -->
+    <!-- build: ~Abhishek Dan · Test Version 2 · 2026-08-29 -->
 </body>
 
 </html>
