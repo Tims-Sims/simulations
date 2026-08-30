@@ -593,6 +593,18 @@
             max-width: 660px;
         }
         .coach-bubble strong { color: var(--text); }
+        .coach-bubble .cw { opacity: 0; animation: cwIn 0.16s ease forwards; }
+        @keyframes cwIn { to { opacity: 1; } }
+        .coach-bubble.pop { animation: coachPop 0.45s cubic-bezier(0.2, 1.2, 0.4, 1); }
+        @keyframes coachPop {
+            0% { transform: scale(0.94); background: color-mix(in srgb, var(--warning) 32%, var(--surface-2)); border-color: var(--warning); }
+            60% { transform: scale(1.02); }
+            100% { transform: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .coach-bubble .cw { animation: none; opacity: 1; }
+            .coach-bubble.pop { animation: none; }
+        }
 
         .hint-strip {
             text-align: center;
@@ -2541,18 +2553,64 @@ function pelicanSvg(size) {
             }
         }
 
+        let coachRevealUntil = 0;
+        let cueToken = 0;
+
         function setCoach(html, flap) {
             fDom.coachLine.innerHTML = html;
-            if (!reducedMotion() && flap !== false) {
+            if (reducedMotion()) {
+                coachRevealUntil = 0;
+                return;
+            }
+            /* word-by-word reveal — the moving text is what pulls young eyes to the bubble */
+            const walker = document.createTreeWalker(fDom.coachLine, NodeFilter.SHOW_TEXT);
+            const nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+            let i = 0;
+            nodes.forEach((tn) => {
+                const frag = document.createDocumentFragment();
+                tn.textContent.split(/(\s+)/).forEach((piece) => {
+                    if (!piece) return;
+                    if (/^\s+$/.test(piece)) { frag.appendChild(document.createTextNode(piece)); return; }
+                    const sp = document.createElement("span");
+                    sp.className = "cw";
+                    sp.style.animationDelay = (i * 45) + "ms";
+                    sp.textContent = piece;
+                    frag.appendChild(sp);
+                    i++;
+                });
+                tn.parentNode.replaceChild(frag, tn);
+            });
+            coachRevealUntil = Date.now() + i * 45 + 180;
+            fDom.coachLine.classList.remove("pop");
+            void fDom.coachLine.offsetWidth;
+            fDom.coachLine.classList.add("pop");
+            if (flap !== false) {
                 fDom.coachPelican.classList.remove("flap");
                 void fDom.coachPelican.offsetWidth;
                 fDom.coachPelican.classList.add("flap");
             }
+            /* re-sequence any live cue ring: speech first, THEN the ring lights the target */
+            const cued = document.querySelector(".cue");
+            if (cued) {
+                cued.classList.remove("cue");
+                cueToken++;
+                const t = cueToken;
+                setTimeout(() => { if (t === cueToken) cued.classList.add("cue"); }, coachRevealUntil - Date.now());
+            }
         }
 
         function setCue(el) {
+            cueToken++;
+            const t = cueToken;
             document.querySelectorAll(".cue").forEach((n) => n.classList.remove("cue"));
-            if (el) el.classList.add("cue");
+            if (!el) return;
+            const delay = Math.max(0, coachRevealUntil - Date.now());
+            if (delay <= 0) {
+                el.classList.add("cue");
+            } else {
+                setTimeout(() => { if (t === cueToken) el.classList.add("cue"); }, delay);
+            }
         }
 
         function setReadout(expr, words) {
