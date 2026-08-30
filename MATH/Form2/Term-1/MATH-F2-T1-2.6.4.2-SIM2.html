@@ -1,0 +1,3259 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>The Nectar Bar</title>
+    <style>
+        /* ============================================================
+           CHROME — theme variables, base layout, topbar, modal, footer
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            /* dusk garden — same scene at twilight (ui-ux-pro-max "Vibrant rose + engagement blue", garden-adapted) */
+            --bg: #1c1224;
+            --bg-soft: #241831;
+            --surface: #2a1b33;
+            --surface-2: #34223f;
+            --text: #f7e9f0;
+            --text-soft: #dcc5d4;
+            --muted: #a98ba0;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #fb7185;
+            --accent-2: #60a5fa;
+            --success: #4cc38a;
+            --warning: #e0a458;
+            --danger: #f2766b;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(96, 165, 250, 0.4);
+            /* stage scene */
+            --sky: #2b1840;
+            --paper: #fff7ed;
+            --paper-ink: #4c0d26;
+            --gold: #fbbf24;
+            --nectar: #fbbf24;
+            /* sizes */
+            --stage-h: 350px;
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            /* blossom garden morning */
+            --bg: #fff1f2;
+            --bg-soft: #ffe4e6;
+            --surface: #ffffff;
+            --surface-2: #fff5f6;
+            --text: #4c0d26;
+            --text-soft: #7a2a48;
+            --muted: #7d4a5e;
+            --border: rgba(76, 13, 38, 0.16);
+            --accent: #e11d48;
+            --accent-2: #2563eb;
+            --success: #1f7a45;
+            --warning: #b87a1f;
+            --danger: #c23a2e;
+            --shadow: 0 18px 40px rgba(136, 19, 55, 0.12);
+            --focus: 0 0 0 3px rgba(37, 99, 235, 0.28);
+            --sky: #ffe4e6;
+            --paper: #fffdf5;
+            --paper-ink: #4c0d26;
+            --gold: #d97706;
+            --nectar: #f59e0b;
+        }
+
+        * { box-sizing: border-box; }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body { min-height: 100vh; padding: 16px; }
+
+        button, input, textarea, select { font: inherit; }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover { transform: translateY(-1px); }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 33px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: var(--accent);
+            color: #22110c;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        html[data-theme="light"] .brand-badge { color: #ffffff; }
+
+        .brand-copy { min-width: 0; }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 { font-size: 1.08rem; }
+        .brand-copy p { color: var(--muted); margin-top: 2px; font-size: 0.92rem; }
+
+        .topbar .controls {
+            margin-left: auto;
+            flex: 0 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .topbar .control-btn,
+        .topbar .danger-btn { line-height: 1; }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            color: #22110c;
+            box-shadow: var(--shadow);
+        }
+
+        html[data-theme="light"] .primary-btn { color: #ffffff; }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .theme-divider {
+            width: 1px;
+            align-self: stretch;
+            background: var(--border);
+            margin: 4px 2px;
+        }
+
+        .theme-switch {
+            position: relative;
+            width: 62px;
+            height: 32px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 0;
+        }
+        /* invisible hit-area extender — keeps the 44px touch gate without growing the pill */
+        .theme-switch::before { content: ""; position: absolute; inset: -7px; border-radius: 999px; }
+
+        .theme-switch:hover { transform: none; }
+
+        .theme-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            line-height: 1;
+            transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .theme-switch[data-next="dark"] .theme-knob { transform: translateX(30px); }
+
+        .pulse-help { position: relative; }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        .screen { display: none; flex: 1; }
+        .screen.active { display: flex; }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 1040px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show { display: flex; }
+        .modal.show .modal-card { animation: modalIn 0.22s cubic-bezier(0.23, 1, 0.32, 1); }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.97); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .modal.show .modal-card { animation: none; }
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .volume-sliders { margin-top: 18px; }
+        .volume-sliders h3 { margin: 0 0 10px; font-size: 1.05rem; }
+
+        .volume-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+        .volume-row label { flex: 0 0 150px; color: var(--text-soft); font-size: 0.92rem; }
+        .volume-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+
+        .muted { color: var(--muted); }
+        .hidden { display: none !important; }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body { padding: 12px; }
+            .topbar { padding: 12px; flex-wrap: wrap; }
+            .topbar .controls { width: 100%; justify-content: flex-start; }
+        }
+
+        /* build/meta text marks — boring names, transparent ink */
+        .meta-line, .spacer-note, .rev-note, .card-note, .made-by, .stow {
+            display: block;
+            color: transparent;
+            font-size: 10px;
+            line-height: 1;
+            height: 10px;
+            overflow: hidden;
+            user-select: text;
+            pointer-events: none;
+        }
+        .stow { display: inline; font-size: 1px; height: auto; }
+        .made-by { text-align: right; }
+        .meta-line::selection, .spacer-note::selection, .rev-note::selection,
+        .card-note::selection, .made-by::selection, .stow::selection,
+        #pageTexture span::selection {
+            background: #f2b544;
+            color: #23180a;
+        }
+        #pageTexture {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        #pageTexture span {
+            position: absolute;
+            color: transparent;
+            font-size: 11px;
+            line-height: 1;
+            white-space: nowrap;
+            transform: rotate(-30deg);
+            user-select: text;
+        }
+        @media print {
+            .meta-line, .spacer-note, .rev-note, .card-note, .made-by,
+            #pageTexture span {
+                color: #8a8a8a !important;
+                font-size: 12px;
+            }
+            .stow { color: #8a8a8a !important; font-size: 10px; }
+        }
+        .build-toast {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            z-index: 200;
+            box-shadow: var(--shadow);
+        }
+
+        /* ---------- home hero scene (game fills #heroScene with an SVG) ---------- */
+        .hero-scene {
+            width: 100%;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-bottom: 18px;
+            background: var(--sky);
+            min-height: 120px;
+        }
+        .hero-scene svg { display: block; width: 100%; height: auto; max-height: 240px; }
+        .hero-scene:empty { min-height: 120px; }
+
+        /* ---------- round header ---------- */
+        .round-head {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .round-count { font-weight: 700; color: var(--text-soft); white-space: nowrap; }
+        .round-tools { display: flex; justify-content: flex-end; gap: 8px; }
+        .round-tools .control-btn { padding: 8px 14px; line-height: 1; }
+
+        /* progress token strip — game fills #tokenStrip with per-round tokens */
+        .token-strip {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 14px;
+            min-height: 34px;
+        }
+        @media (max-width: 560px) {
+            .round-head { grid-template-columns: 1fr 1fr; }
+            .token-strip { grid-column: 1 / -1; order: 3; justify-self: center; }
+        }
+
+        /* ---------- coach ---------- */
+        .coach-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 0 10px;
+        }
+        .coach-art { flex: 0 0 auto; }
+        .coach-art svg { display: block; width: 52px; height: 52px; }
+        .coach-art.flap svg { animation: coachBob 0.5s ease; }
+        @keyframes coachBob {
+            0%, 100% { transform: none; }
+            30% { transform: translateY(-5px) rotate(-5deg); }
+            60% { transform: translateY(-1px) rotate(3deg); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .coach-art.flap svg { animation: none; }
+        }
+        .coach-bubble {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 4px 14px 14px 14px;
+            padding: 8px 14px;
+            color: var(--text-soft);
+            font-size: 1rem;
+            max-width: 660px;
+        }
+        .coach-bubble strong { color: var(--text); }
+        /* every new coach line pings gold — same colour as the cue ring, so the
+           eye reads the bubble first, then follows the ring to the control */
+        .coach-bubble.ping { animation: coachPing 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+        @keyframes coachPing {
+            0% {
+                transform: scale(0.94);
+                border-color: var(--gold);
+                box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 55%, transparent);
+            }
+            45% {
+                transform: scale(1.03);
+                border-color: var(--gold);
+                box-shadow: 0 0 0 5px color-mix(in srgb, var(--gold) 30%, transparent);
+            }
+            100% { transform: none; box-shadow: 0 0 0 8px transparent; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .coach-bubble.ping { animation: none; }
+        }
+
+        .hint-strip {
+            text-align: center;
+            font-size: 0.92rem;
+            color: var(--text-soft);
+            background: color-mix(in srgb, var(--warning) 14%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent);
+            border-radius: 999px;
+            padding: 5px 14px;
+            margin: 0 auto 10px;
+            width: fit-content;
+            max-width: 100%;
+        }
+        .hint-strip:empty { display: none; }
+
+        /* ---------- stage ---------- */
+        .stage-zone {
+            position: relative;
+            height: var(--stage-h);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--sky);
+            overflow: hidden;
+        }
+
+        /* === SIM STYLES ZONE === */
+
+        /* hero container blends into the scene's own sky (kills the centred-image seam);
+           the scene's base layers bleed far past the viewBox, clipped by the card, so the
+           band always fills the full card width at any viewport */
+        .hero-scene { background: #1c1224; overflow: hidden; height: 230px; }
+        html[data-theme="light"] .hero-scene { background: #ffe4e6; }
+        .hero-scene svg { overflow: visible; width: 100%; height: 100%; display: block; }
+
+        /* ---------- stage backdrop band (decoration, z 0) ---------- */
+        .stage-zone { display: flex; }
+        .stage-band {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .stage-band svg { width: 100%; height: 100%; display: block; }
+        .nb-sway { animation: nbSway 5.2s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+        @keyframes nbSway { from { transform: rotate(-2.4deg); } to { transform: rotate(2.6deg); } }
+        .nb-drift { animation: nbDrift 16s ease-in-out infinite alternate; }
+        @keyframes nbDrift {
+            0% { transform: translate(0, 0); }
+            30% { transform: translate(-60px, -14px); }
+            60% { transform: translate(-130px, 6px); }
+            100% { transform: translate(-190px, -10px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .nb-sway, .nb-drift { animation: none; }
+        }
+
+        /* ---------- stage grid: order | feeder | pour ---------- */
+        .stage-inner {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: grid;
+            grid-template-columns: minmax(200px, 1fr) minmax(230px, 300px) minmax(200px, 1fr);
+            gap: 12px;
+            padding: 12px;
+            align-items: stretch;
+        }
+        .zone-caption {
+            align-self: flex-start;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            background: color-mix(in srgb, var(--surface) 78%, transparent);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        .feeder-panel .zone-caption { align-self: center; margin-bottom: 12px; }
+
+        /* order card — paper slip */
+        .order-panel { display: flex; flex-direction: column; min-width: 0; }
+        .order-card {
+            background: var(--paper);
+            color: var(--paper-ink);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(76, 13, 38, 0.22);
+            box-shadow: 0 3px 0 rgba(76, 13, 38, 0.18);
+            padding: 10px 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-height: 0;
+        }
+        .order-bird-row { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+        .order-bird-art { flex: 0 0 58px; height: 44px; }
+        .order-bird-art svg { width: 100%; height: 100%; display: block; }
+        .order-bird-name { font-weight: 700; font-size: 0.88rem; line-height: 1.25; }
+        .order-stmt {
+            font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.04em;
+            margin: 2px 0;
+        }
+        .order-stmt i { font-style: italic; font-family: Georgia, "Times New Roman", serif; }
+        .order-let {
+            font-size: 0.82rem;
+            text-align: center;
+            color: rgba(76, 13, 38, 0.75);
+        }
+        .order-note {
+            font-size: 0.75rem;
+            text-align: center;
+            color: rgba(76, 13, 38, 0.72);
+            min-height: 1em;
+        }
+
+        /* feeder gauge — boxed like the pour panel so scenery never intersects it */
+        .feeder-panel { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+        .feeder-box {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: color-mix(in srgb, var(--surface-2) 94%, transparent);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px;
+            min-height: 0;
+        }
+        .feeder-wrap { position: relative; flex: 1; display: flex; align-items: stretch; justify-content: center; gap: 8px; width: 100%; min-height: 0; }
+        .gauge {
+            position: relative;
+            width: 74px;
+            border-radius: 14px 14px 18px 18px;
+            border: 2px solid color-mix(in srgb, var(--accent-2) 55%, var(--border));
+            background: color-mix(in srgb, var(--surface) 94%, transparent);
+            overflow: hidden;
+        }
+        .gauge-fill {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 0%;
+            background: var(--nectar);
+            transition: height 0.08s linear;
+        }
+        .gauge-glow {
+            position: absolute;
+            left: 0; right: 0;
+            background: color-mix(in srgb, var(--success) 46%, transparent);
+            border-top: 2px dashed var(--success);
+            border-bottom: 2px dashed var(--success);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .gauge-glow.on { opacity: 1; }
+        .gauge-ticks { position: absolute; inset: 0; pointer-events: none; }
+        .gauge-tick { position: absolute; left: 0; width: 10px; height: 1px; background: color-mix(in srgb, var(--text) 40%, transparent); }
+        .gauge-tick.major { width: 16px; height: 2px; }
+        .gauge-labels { position: relative; width: 26px; pointer-events: none; }
+        .gauge-num {
+            position: absolute;
+            left: 0;
+            transform: translateY(50%);
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-soft);
+            line-height: 1;
+            background: color-mix(in srgb, var(--surface) 80%, transparent);
+            padding: 1px 4px;
+            border-radius: 4px;
+        }
+        .stage-bird {
+            align-self: flex-start;
+            margin-top: 2px;
+            width: 86px;
+            height: 66px;
+            pointer-events: none;
+            transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        /* customer faces the feeder (art is drawn facing right; feeder is to its left) */
+        .stage-bird svg { width: 100%; height: 100%; display: block; overflow: visible; transform: scaleX(-1); }
+        .stage-bird.drinking { transform: translate(-36px, 14px) rotate(-6deg); }
+        .stage-bird.flown { visibility: hidden; }
+        .readout {
+            margin-top: 6px;
+            min-width: 96px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.06rem;
+            padding: 6px 12px;
+            border-radius: var(--radius-md);
+            background: color-mix(in srgb, var(--bg-soft) 93%, transparent);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.22);
+            color: var(--text);
+        }
+
+        /* pour controls */
+        .pour-panel { display: flex; flex-direction: column; min-width: 0; }
+        .pour-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 9px;
+            background: color-mix(in srgb, var(--surface-2) 94%, transparent);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px;
+            min-height: 0;
+        }
+        .pump-btn {
+            border-radius: 999px;
+            padding: 14px 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 55%, #000);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            min-height: 48px;
+        }
+        .pump-btn.pumping { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 55%, #000); }
+        .pump-btn:hover { transform: none; }
+        .pump-btn.pumping:hover { transform: translateY(3px); }
+        /* dark theme: dark ink on the bright accent pills (4.5:1 gate) */
+        html:not([data-theme="light"]) .pump-btn { color: #2d0710; }
+        html:not([data-theme="light"]) .serve-btn { color: #0b1e3a; }
+        .serve-btn:active:not(:disabled), .drip-btn:active:not(:disabled) { transform: translateY(2px); transition-duration: 0.06s; }
+        .drip-row { display: flex; gap: 8px; justify-content: center; }
+        .drip-btn {
+            flex: 1;
+            border-radius: 999px;
+            min-height: 44px;
+            min-width: 44px;
+            font-weight: 800;
+            font-size: 1rem;
+            background: color-mix(in srgb, var(--accent-2) 26%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--accent-2) 55%, var(--border));
+            color: var(--text);
+        }
+        .serve-btn {
+            border-radius: 999px;
+            padding: 12px;
+            min-height: 48px;
+            font-weight: 800;
+            font-size: 1.02rem;
+            letter-spacing: 0.06em;
+            background: var(--accent-2);
+            color: #fff;
+        }
+        html[data-theme="light"] .serve-btn { color: #fff; }
+        .serve-btn:disabled, .pump-btn:disabled, .drip-btn:disabled { opacity: 0.45; cursor: default; }
+
+        /* word-check chips swap into the pour panel (same box — height stable) */
+        .wordcheck { display: flex; flex-direction: column; gap: 8px; }
+        .wordcheck-title { font-size: 0.84rem; font-weight: 700; color: var(--text-soft); text-align: center; }
+        .word-chip {
+            border-radius: 999px;
+            padding: 10px 12px;
+            min-height: 44px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+            color: var(--text);
+        }
+        .word-chip:disabled { opacity: 0.4; cursor: default; text-decoration: line-through; }
+        .word-chip.right { background: color-mix(in srgb, var(--success) 30%, var(--surface)); border-color: var(--success); }
+
+        /* token strip — perch wire */
+        /* token strip alignment lives in the chrome block above (align-items: center) */
+        .perch-wire-svg { height: 40px; }
+        .perch-wire-svg svg { height: 100%; display: block; }
+
+        /* precision sparkle */
+        .gauge .sip-spark {
+            position: absolute;
+            left: 50%;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--gold);
+            pointer-events: none;
+            animation: sipSpark 0.9s ease-out forwards;
+        }
+        @keyframes sipSpark {
+            0% { transform: translate(-50%, 0) scale(0.6); opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--sx, 20px)), var(--sy, -30px)) scale(0); opacity: 0; }
+        }
+
+        /* fx: celebration zip-loop bird + petals; fail droplets */
+        .fx-el { position: absolute; will-change: transform, opacity; }
+        .fx-bird { width: 90px; height: 70px; animation: fxZip 1.7s cubic-bezier(0.3, 0.75, 0.4, 1) forwards; }
+        .fx-bird svg { width: 100%; height: 100%; display: block; overflow: visible; }
+        @keyframes fxZip {
+            0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+            30%  { transform: translate(var(--zx1), var(--zy1)) rotate(-24deg); }
+            55%  { transform: translate(var(--zx2), var(--zy2)) rotate(18deg) scale(0.94); }
+            80%  { transform: translate(var(--zx3), var(--zy3)) rotate(-10deg); opacity: 1; }
+            100% { transform: translate(var(--zx4), var(--zy4)) rotate(4deg); opacity: 0; }
+        }
+        .fx-petal {
+            width: 13px; height: 10px;
+            border-radius: 60% 40% 55% 45%;
+            animation: fxPetal var(--pd, 2s) cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+            animation-delay: var(--pdelay, 0s);
+        }
+        @keyframes fxPetal {
+            0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+            25%  { transform: translate(calc(var(--px) * 0.4), calc(var(--py) * 0.25)) rotate(70deg); }
+            50%  { transform: translate(calc(var(--px) * 0.1), calc(var(--py) * 0.5)) rotate(150deg); }
+            75%  { transform: translate(calc(var(--px) * 0.55), calc(var(--py) * 0.75)) rotate(230deg); }
+            100% { transform: translate(var(--px), var(--py)) rotate(320deg); opacity: 0; }
+        }
+        .fx-drop {
+            width: 10px; height: 12px;
+            border-radius: 50% 50% 60% 60%;
+            background: var(--nectar);
+            animation: fxDrop 0.55s cubic-bezier(0.3, 0, 0.7, 1) forwards;
+        }
+        @keyframes fxDrop {
+            0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+            45%  { transform: translate(calc(var(--dx) * 0.6), calc(var(--dy) * 0.35)) scale(1); }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0.55); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .pulse-help::after, .cue::after { animation: none; opacity: 0.9; }
+        }
+        .wordcheck { border-radius: var(--radius-md); padding: 4px; }
+        .word-chip.deal { opacity: 0; transform: translateY(10px); animation: chipDeal 0.3s cubic-bezier(0.2, 1.2, 0.4, 1) forwards; }
+        @keyframes chipDeal { to { opacity: 1; transform: none; } }
+        .order-card.deal { opacity: 0; transform: translateY(10px) scale(0.98); animation: chipDeal 0.26s cubic-bezier(0.2, 1.2, 0.4, 1) forwards; }
+        .nb-land { animation: nbLand 0.45s cubic-bezier(0.34, 1.4, 0.64, 1); transform-box: fill-box; transform-origin: 50% 100%; }
+        @keyframes nbLand { from { translate: 0 -16px; opacity: 0; } }
+        @media (prefers-reduced-motion: reduce) {
+            .word-chip.deal, .order-card.deal { animation: none; opacity: 1; transform: none; }
+            .nb-land { animation: none; }
+        }
+        .stage-bird.refuse { animation: birdRefuse 0.7s ease; }
+        @keyframes birdRefuse {
+            0% { transform: translate(0, 0); }
+            30% { transform: translate(-20px, 12px); }
+            55% { transform: translate(26px, -10px) rotate(6deg); }
+            100% { transform: translate(0, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .fx-bird, .fx-petal, .fx-drop, .sip-spark { display: none; }
+            .stage-bird { transition: none; }
+            .stage-bird.refuse { animation: none; }
+        }
+
+        /* ---------- narrow topbar: divider dies, switch keeps right edge ---------- */
+        @media (max-width: 760px) {
+            .topbar { flex-wrap: wrap; row-gap: 8px; }
+            .theme-divider { display: none; }
+            .theme-switch { margin-left: auto; }
+        }
+
+        /* ---------- narrow portrait: stack the three panels ---------- */
+        @media (max-width: 640px) {
+            .stage-zone { height: auto; min-height: var(--stage-h); }
+            /* pin the band at natural scale — a stretched slice band grows
+               giant props behind the stacked panels */
+            .stage-band { top: auto; bottom: 0; height: 260px; }
+            .stage-inner { grid-template-columns: 1fr; }
+            .feeder-wrap { min-height: 190px; }
+            
+        }
+
+        /* ---------- game landscape tiers (pairs shrink together) ---------- */
+        @media (orientation: landscape) and (max-height: 1000px) {
+            .stage-inner { padding: 10px; gap: 10px; }
+            .order-stmt { font-size: clamp(1.3rem, 2.6vw, 1.7rem); }
+            .stage-bird { width: 72px; height: 55px; }
+            .readout { margin-top: 5px; font-size: 0.98rem; padding: 5px 10px; }
+            .pump-btn { padding: 11px 10px; min-height: 44px; }
+            .serve-btn { padding: 10px; min-height: 44px; }
+        }
+        @media (orientation: landscape) and (max-height: 820px) {
+            .stage-inner { padding: 8px; gap: 8px; }
+            .zone-caption { font-size: 0.62rem; margin-bottom: 4px; }
+            .order-card { padding: 8px 10px; gap: 4px; }
+            .order-bird-row { min-height: 36px; }
+            .order-bird-art { flex-basis: 46px; height: 36px; }
+            .order-bird-name { font-size: 0.8rem; }
+            .order-stmt { font-size: clamp(1.15rem, 2.4vw, 1.5rem); }
+            .order-let { font-size: 0.76rem; }
+            .order-note { font-size: 0.7rem; }
+            .gauge { width: 62px; }
+            .stage-bird { width: 62px; height: 48px; }
+            .readout { min-width: 84px; font-size: 0.92rem; padding: 4px 9px; }
+            .pour-box { gap: 7px; padding: 8px; }
+            .pump-btn { padding: 9px 8px; min-height: 44px; font-size: 0.92rem; }
+            .drip-btn { min-height: 44px; }
+            .serve-btn { padding: 9px; min-height: 44px; font-size: 0.94rem; }
+            .word-chip { padding: 8px 10px; min-height: 44px; font-size: 0.85rem; }
+            .perch-wire-svg { height: 34px; }
+        }
+        @media (orientation: landscape) and (max-height: 700px) {
+            .stage-inner { padding: 6px; gap: 6px; }
+            .zone-caption { font-size: 0.58rem; margin-bottom: 2px; padding: 1px 6px; }
+            .order-card { padding: 6px 8px; gap: 3px; }
+            .order-bird-row { min-height: 30px; }
+            .order-bird-art { flex-basis: 40px; height: 30px; }
+            .order-bird-name { font-size: 0.74rem; }
+            .order-stmt { font-size: clamp(1.05rem, 2.2vw, 1.3rem); margin: 0; }
+            .order-let { font-size: 0.7rem; }
+            .order-note { display: none; }
+            .gauge { width: 52px; }
+            .gauge-num { font-size: 0.62rem; }
+            .stage-bird { width: 52px; height: 40px; }
+            .readout { min-width: 74px; font-size: 0.86rem; padding: 3px 8px; margin-top: 4px; }
+            .pour-box { gap: 5px; padding: 6px; }
+            .pump-btn { padding: 7px 6px; min-height: 44px; font-size: 0.86rem; }
+            .drip-btn { min-height: 44px; min-width: 44px; font-size: 0.9rem; }
+            .serve-btn { padding: 7px; min-height: 44px; font-size: 0.88rem; }
+            .word-chip { padding: 6px 8px; min-height: 44px; font-size: 0.78rem; }
+            .wordcheck-title { font-size: 0.76rem; }
+            .perch-wire-svg { height: 28px; }
+        }
+
+        /* === END SIM STYLES ZONE === */
+
+        /* ---------- verdict well — reserves height, never collapses ---------- */
+        .verdict-line {
+            margin-top: 10px;
+            border-radius: var(--radius-md);
+            padding: 9px 14px;
+            font-weight: 700;
+            text-align: center;
+            min-height: 42px;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+        .verdict-line.good, .verdict-line.bad { animation: verdictIn 0.18s cubic-bezier(0.23, 1, 0.32, 1); }
+        @keyframes verdictIn {
+            from { opacity: 0; transform: translateY(4px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .verdict-line.good, .verdict-line.bad { animation: none; }
+        }
+        .verdict-line.good {
+            background: color-mix(in srgb, var(--success) 18%, var(--surface));
+            border: 1px solid var(--success);
+            color: var(--text);
+        }
+        .verdict-line.bad {
+            background: color-mix(in srgb, var(--danger) 16%, var(--surface));
+            border: 1px solid var(--danger);
+            color: var(--text);
+        }
+
+        .round-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ---------- cue ring ---------- */
+        .cue { position: relative; }
+        .cue::after {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: inherit;
+            border: 2.5px solid color-mix(in srgb, var(--gold) 85%, transparent);
+            animation: pulseRing 1.5s infinite;
+            pointer-events: none;
+        }
+
+        /* ---------- fx overlay ---------- */
+        #fxLayer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .page-rumble { animation: pageRumble 0.4s ease; }
+        @keyframes pageRumble {
+            0%, 100% { transform: none; }
+            25% { transform: translate(3px, -2px); }
+            50% { transform: translate(-3px, 2px); }
+            75% { transform: translate(2px, 1px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .page-rumble { animation: none; }
+        }
+
+        /* ---------- help step cards ---------- */
+        .step-cards { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+        .step-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            opacity: 0;
+            transform: translateY(14px) scale(0.97);
+        }
+        .step-card.dealt { animation: cardDeal 0.34s cubic-bezier(0.2, 1.2, 0.4, 1) forwards; }
+        @keyframes cardDeal { to { opacity: 1; transform: none; } }
+        .step-icon {
+            flex: 0 0 1.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        .step-copy strong { display: block; }
+        .step-copy span { color: var(--text-soft); font-size: 0.95rem; }
+
+        /* ---------- end screen ---------- */
+        .end-wrap { text-align: center; }
+        .end-wrap h2 { margin: 4px 0 6px; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+        .end-sub { color: var(--text-soft); margin: 0 0 14px; }
+        .end-summary {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+            min-height: 40px;
+        }
+        .end-tally {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            color: var(--text-soft);
+            margin-bottom: 6px;
+        }
+        .end-rule { color: var(--muted); font-size: 0.92rem; margin: 4px 0 0; }
+        .review-list { text-align: left; margin: 0; padding: 0; list-style: none; }
+        .review-list li {
+            border-bottom: 1px solid var(--border);
+            padding: 10px 4px;
+            line-height: 1.5;
+        }
+        .review-list li:last-child { border-bottom: 0; }
+        .review-list .rv-st { font-weight: 700; color: var(--text); }
+        .review-list .rv-why { color: var(--muted); font-size: 0.92rem; }
+
+        /* ---------- landscape fit tiers ---------- */
+        @media (orientation: landscape) and (max-height: 1000px) {
+            body { padding: 12px; }
+            .app-shell { gap: 12px; min-height: calc(100vh - 25px); }
+            :root { --stage-h: 258px; }
+            .sim-card { padding: 14px; }
+            .round-head { margin-bottom: 8px; }
+            .coach-row { margin-bottom: 7px; }
+            .verdict-line { margin-top: 8px; padding: 7px 12px; }
+            .round-actions { margin-top: 8px; }
+            .hero-scene { height: 185px; }
+            .hero-card { padding: 22px; }
+        }
+        @media (orientation: landscape) and (max-height: 820px) {
+            body { padding: 8px; }
+            .app-shell { gap: 8px; min-height: calc(100vh - 17px); }
+            .topbar { padding: 8px 12px; }
+            .control-btn, .danger-btn { padding: 8px 12px; font-size: 0.92rem; }
+            .sim-card { padding: 14px; }
+            :root { --stage-h: 235px; }
+            .coach-bubble { font-size: 0.92rem; padding: 6px 10px; }
+            .coach-art svg { width: 38px; height: 38px; }
+            .verdict-line { padding: 7px 12px; margin-top: 8px; min-height: 38px; }
+            .round-actions { margin-top: 8px; }
+            .footer-note { font-size: 0.8rem; }
+            .hero-scene { margin-bottom: 12px; }
+            .hero-scene { height: 150px; }
+            .hero-card { padding: 18px; }
+            .hero-card h2 { font-size: 1.7rem; margin-bottom: 8px; }
+            .hero-card p { font-size: 0.96rem; line-height: 1.5; }
+            .hero-actions { margin-top: 16px; }
+        }
+        @media (orientation: landscape) and (max-height: 700px) {
+            body { padding: 6px; }
+            .app-shell { gap: 6px; min-height: calc(100vh - 13px); }
+            .topbar { padding: 6px 10px; }
+            .sim-card { padding: 10px; }
+            .brand-copy p { display: none; }
+            :root { --stage-h: 186px; }
+            .coach-row { margin-bottom: 5px; }
+            .coach-bubble { font-size: 0.88rem; padding: 5px 9px; }
+            .coach-art svg { width: 31px; height: 31px; }
+            .verdict-line { padding: 5px 10px; margin-top: 6px; font-size: 0.9rem; min-height: 32px; }
+            .round-actions { margin-top: 6px; }
+            .round-actions .primary-btn, .round-actions .secondary-btn { padding: 8px 14px; font-size: 0.92rem; }
+            .round-tools .control-btn { padding: 6px 10px; font-size: 0.85rem; }
+            .footer-note { font-size: 0.74rem; padding-bottom: 0; }
+            .hero-scene { margin-bottom: 10px; }
+            .hero-scene { height: 110px; }
+            .hero-card { padding: 14px; }
+            .hero-card h2 { font-size: 1.45rem; margin-bottom: 6px; }
+            .hero-card p { font-size: 0.9rem; line-height: 1.45; }
+            .hero-actions { margin-top: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="pageTexture" aria-hidden="true"></div>
+    <div class="app-shell" id="appShell">
+        <span class="meta-line" aria-hidden="true"></span>
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">NB</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">The Nectar Bar</h1>
+                    <p id="brandSubtitle">Pour to the rule — reading inequalities</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Help</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+            <div class="theme-divider" aria-hidden="true"></div>
+            <button class="theme-switch" id="themeToggleBtn" aria-label="Switch theme">
+                <span class="theme-knob" id="themeKnob" aria-hidden="true">☀️</span>
+            </button>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="hero-scene" id="heroScene" aria-hidden="true"></div>
+                    <h2 id="homeTitle">The Nectar Bar</h2>
+                    <p id="homeDescription">
+                        Hummingbirds are lining up at the garden nectar bar — and every order is written in maths! Read the maths on each order card, pour an amount it allows, and serve. Remember: ≥ and ≤ include the stated amount; &gt; and &lt; leave it out.<span class="stow" aria-hidden="true"></span>
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                    </div>
+                    <span class="spacer-note" aria-hidden="true"></span>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <div id="playWrap">
+                        <div class="round-head">
+                            <div class="round-count" id="roundCount">Round 1 of ?</div>
+                            <div class="token-strip" id="tokenStrip" role="img" aria-label="Progress: 0 rounds done"></div>
+                            <div class="round-tools">
+                                <button class="control-btn hidden" id="midReviewBtn" aria-label="Review your answers so far">📖 Review</button>
+                            </div>
+                        </div>
+                        <div class="coach-row">
+                            <span class="coach-art" id="coachArt" aria-hidden="true"></span>
+                            <div class="coach-bubble" id="coachLine" role="status" aria-live="polite"></div>
+                        </div>
+                        <div class="hint-strip" id="hintStrip" role="status" aria-live="polite"></div>
+                        <!-- === STAGE ZONE === (game logic renders the playable scene into #stageZone) -->
+                        <div class="stage-zone" id="stageZone"></div>
+                        <!-- === END STAGE ZONE === -->
+                        <div class="verdict-line" id="verdictLine" role="status" aria-live="polite"></div>
+                        <div class="round-actions" id="actionZone">
+                            <button class="control-btn" id="hintBtn" aria-label="Show a hint">💡 Hint</button>
+                        </div>
+                        <span class="rev-note" aria-hidden="true"></span>
+                    </div>
+                    <div class="end-wrap hidden" id="endWrap">
+                        <h2 id="endHeadline"></h2>
+                        <p class="end-sub" id="endSub"></p>
+                        <div class="end-summary" id="endSummary"></div>
+                        <div class="end-tally" id="endTally"></div>
+                        <div class="button-row">
+                            <button class="secondary-btn" id="reviewBtn">📖 Review</button>
+                            <button class="primary-btn" id="playAgainBtn">Play again</button>
+                        </div>
+                        <span class="rev-note" aria-hidden="true"></span>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <div class="footer-note">
+            Mathematics · Form 2 · Term 1 · 2.6.4.2<span class="made-by" aria-hidden="true"></span>
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to play</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Let's go!</button>
+            </div>
+            <span class="card-note" aria-hidden="true"></span>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeReviewBtn" aria-label="Close review">×</button>
+            <h3 id="reviewHeading">Your round log</h3>
+            <ul class="review-list" id="reviewList"></ul>
+        </section>
+    </div>
+
+    <div id="fxLayer" aria-hidden="true"></div>
+
+    <script>
+        "use strict";
+
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        const BUILD_META = "~Abhishek Dan · Test Version 1 · 2026-08-29";
+        const SVG_DESC = `<desc>${BUILD_META}</desc>`;
+
+        /* ============================================================
+           SIM CONFIG
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1",
+            simId: "MATH-F2-T1-2.6.4.2-SIM2",
+            title: "The Nectar Bar",
+            subtitle: "Pour to the rule — reading inequalities",
+            badgeText: "NB",
+            homeDescription: "", // home copy lives in static markup
+            instructions: [] // rendered as step cards below
+        };
+
+        const HELP_STEPS = [
+            { icon: "🐦", title: "Read the order", text: "Each bird's card shows an inequality, like v ≥ 40." },
+            { icon: "🫗", title: "Hold to pour", text: "Hold the pump to pour nectar; tap the drip valves for 1 ml at a time." },
+            { icon: "🍯", title: "Serve it", text: "Press SERVE. If your amount fits the order, the bird drinks!" },
+            { icon: "💡", title: "Watch the edge", text: "v > 40 means MORE than 40 — exactly 40 is not enough. ≥ would allow it." }
+        ];
+
+        const SOUND_FILES = {
+            click: "",
+            correct: "",
+            wrong: "",
+            typing: "",
+            complete: ""
+        };
+
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects"
+        };
+        const CATEGORY_LABELS = { effects: "Sound effects" };
+
+        /* ---- Audio engine ---- */
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        /* Sound identity — kalimba/marimba plinks, pentatonic (D major penta:
+           D E F# A B). Distinct voice from previous sims per audit log. */
+        const SYNTH_SOUNDS = {
+            click:    (v) => playTone(587, 45, "triangle", 0.06 * v),
+            typing:   (v) => playTone(440, 26, "triangle", 0.035 * v),
+            pour:     (v) => playTone(494 + Math.random() * 90, 34, "sine", 0.045 * v),
+            correct:  (v) => { playTone(587, 110, "triangle", 0.13 * v); playTone(880, 150, "triangle", 0.12 * v, 100); playTone(1175, 210, "triangle", 0.1 * v, 200); },
+            wrong:    (v) => { playTone(196, 220, "triangle", 0.12 * v); playTone(165, 260, "triangle", 0.1 * v, 140); },
+            complete: (v) => { playTone(587, 120, "triangle", 0.13 * v); playTone(740, 120, "triangle", 0.13 * v, 110); playTone(880, 120, "triangle", 0.13 * v, 220); playTone(1109, 140, "triangle", 0.12 * v, 330); playTone(1175, 320, "triangle", 0.12 * v, 440); }
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            try { localStorage.setItem(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1"); } catch (err) { /* ignore */ }
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            let muted = null;
+            try { muted = localStorage.getItem(AUDIO_STORAGE_KEY()); } catch (err) { /* ignore */ }
+            audioEnabled = muted !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    try { localStorage.setItem(VOL_STORAGE_KEY(cat), input.value); } catch (err) { /* ignore */ }
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        /* ============================================================
+           CHROME
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            audioBtn: document.getElementById("audioBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            themeKnob: document.getElementById("themeKnob"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            reviewModal: document.getElementById("reviewModal"),
+            reviewList: document.getElementById("reviewList"),
+            closeReviewBtn: document.getElementById("closeReviewBtn"),
+            heroScene: document.getElementById("heroScene"),
+            fxLayer: document.getElementById("fxLayer"),
+            appShell: document.getElementById("appShell"),
+            /* game-screen scaffold */
+            playWrap: document.getElementById("playWrap"),
+            roundCount: document.getElementById("roundCount"),
+            tokenStrip: document.getElementById("tokenStrip"),
+            midReviewBtn: document.getElementById("midReviewBtn"),
+            coachArt: document.getElementById("coachArt"),
+            coachLine: document.getElementById("coachLine"),
+            hintStrip: document.getElementById("hintStrip"),
+            stageZone: document.getElementById("stageZone"),
+            verdictLine: document.getElementById("verdictLine"),
+            actionZone: document.getElementById("actionZone"),
+            hintBtn: document.getElementById("hintBtn"),
+            endWrap: document.getElementById("endWrap"),
+            endHeadline: document.getElementById("endHeadline"),
+            endSub: document.getElementById("endSub"),
+            endSummary: document.getElementById("endSummary"),
+            endTally: document.getElementById("endTally"),
+            reviewBtn: document.getElementById("reviewBtn"),
+            playAgainBtn: document.getElementById("playAgainBtn")
+        };
+
+        /* initializeApp() is invoked at the very end of the script (after the
+           game zone) so every const the init path reads is out of its TDZ. */
+        function initializeApp() {
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio removed */ }
+            renderHeroScene();
+            initBuildMeta();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.subtitle
+                ? SIM_CONFIG.title + " — " + SIM_CONFIG.subtitle
+                : SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit(false);
+                /* Help auto-opens on EVERY home-screen Start (not on
+                   reload-resume, not on Play Again) — no help-seen gate. */
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) closeInstructionsModal();
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) closeResetConfirmModal();
+            });
+            dom.closeReviewBtn.addEventListener("click", () => dom.reviewModal.classList.remove("show"));
+            dom.reviewModal.addEventListener("click", (event) => {
+                if (event.target === dom.reviewModal) dom.reviewModal.classList.remove("show");
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+
+            /* game-screen chrome controls */
+            dom.hintBtn.addEventListener("click", showHint);
+            dom.midReviewBtn.addEventListener("click", openReview);
+            dom.reviewBtn.addEventListener("click", openReview);
+            dom.playAgainBtn.addEventListener("click", playAgain);
+        }
+
+        function reducedMotion() {
+            return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        }
+
+        function renderInstructions() {
+            const wrap = document.createElement("div");
+            wrap.className = "step-cards";
+            const reduced = reducedMotion();
+            HELP_STEPS.forEach((step, i) => {
+                const card = document.createElement("div");
+                card.className = "step-card";
+                const icon = document.createElement("span");
+                icon.className = "step-icon";
+                icon.textContent = step.icon;
+                icon.setAttribute("aria-hidden", "true");
+                const copy = document.createElement("div");
+                copy.className = "step-copy";
+                const strong = document.createElement("strong");
+                strong.textContent = step.title;
+                const span = document.createElement("span");
+                span.textContent = step.text;
+                copy.appendChild(strong);
+                copy.appendChild(span);
+                card.appendChild(icon);
+                card.appendChild(copy);
+                wrap.appendChild(card);
+                if (reduced) {
+                    card.style.opacity = "1";
+                    card.style.transform = "none";
+                } else {
+                    setTimeout(() => card.classList.add("dealt"), 90 * i + 60);
+                }
+            });
+            const slidersHolder = document.getElementById("volumeSliders");
+            dom.instructionsBody.replaceChildren(wrap);
+            if (slidersHolder) dom.instructionsBody.appendChild(slidersHolder);
+        }
+
+        function resetModalScroll(modal) {
+            const card = modal.querySelector(".modal-card");
+            if (card) card.scrollTop = 0;
+        }
+
+        function openInstructionsModal() {
+            renderInstructions();
+            dom.instructionsModal.classList.add("show");
+            resetModalScroll(dom.instructionsModal);
+            try { renderVolumeSliders(); } catch (err) { /* audio removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+            resetModalScroll(dom.resetConfirmModal);
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            /* knob shows the mode selected NEXT */
+            const next = state.theme === "dark" ? "light" : "dark";
+            dom.themeToggleBtn.setAttribute("data-next", next);
+            dom.themeKnob.textContent = next === "light" ? "☀️" : "🌙";
+            const label = next === "light" ? "Switch to light mode" : "Switch to dark mode";
+            dom.themeToggleBtn.setAttribute("aria-label", label);
+            dom.themeToggleBtn.setAttribute("title", label);
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+                dom.reviewModal.classList.remove("show");
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* unavailable */ }
+        }
+
+        /* ---------- generic UI helpers (chrome utilities for the game) ---------- */
+        function pingCoach() {
+            if (reducedMotion()) return;
+            dom.coachLine.classList.remove("ping");
+            void dom.coachLine.offsetWidth;
+            dom.coachLine.classList.add("ping");
+            dom.coachArt.classList.remove("flap");
+            void dom.coachArt.offsetWidth;
+            dom.coachArt.classList.add("flap");
+        }
+
+        function setCoach(html, flap) {
+            dom.coachLine.innerHTML = html;
+            if (!reducedMotion() && flap !== false) {
+                /* gold ping on each new instruction — pairs the bubble with the cue
+                   ring (quiet flap:false updates like the live pour count don't ping,
+                   so the signal stays special) */
+                pingCoach();
+            }
+        }
+
+        function setCue(el) {
+            document.querySelectorAll(".cue").forEach((n) => n.classList.remove("cue"));
+            if (el) el.classList.add("cue");
+        }
+
+        function setVerdict(kind, text) {
+            dom.verdictLine.className = "verdict-line" + (kind ? " " + kind : "");
+            dom.verdictLine.textContent = text || "";
+        }
+
+        function rumbleShell() {
+            /* rumble the shell, never body — a transformed body breaks fixed layers */
+            if (reducedMotion()) return;
+            const shell = dom.appShell;
+            shell.classList.remove("page-rumble");
+            void shell.offsetWidth;
+            shell.classList.add("page-rumble");
+        }
+
+        /* ---------- storage / resume engine ---------- */
+        const SAVE_KEY = `sim:${SIM_CONFIG.simId}:save`;
+
+        function saveRun(runObj) {
+            try { storageSet(SAVE_KEY, JSON.stringify(runObj)); } catch (err) { /* ignore */ }
+        }
+        function loadRun() {
+            try {
+                const raw = storageGet(SAVE_KEY);
+                if (!raw) return null;
+                const r = JSON.parse(raw);
+                /* game validates shape further; v/done checks are the chrome contract */
+                if (!r || r.v !== 1 || r.done) return null;
+                return r;
+            } catch (err) { return null; }
+        }
+        function clearRun() {
+            try { sessionStorage.removeItem(SAVE_KEY); } catch (err) { /* ignore */ }
+        }
+
+        /* ---------- review modal (data supplied by the game) ---------- */
+        function openReview() {
+            dom.reviewList.replaceChildren();
+            getReviewRecords().forEach((rec, i) => {
+                if (!rec) return;
+                const li = document.createElement("li");
+                const st = document.createElement("div");
+                st.className = "rv-st";
+                st.textContent = (i + 1) + ". " + rec.txt + (rec.kind ? " — " + rec.kind : "");
+                const why = document.createElement("div");
+                why.className = "rv-why";
+                why.textContent = rec.why || "";
+                li.appendChild(st);
+                li.appendChild(why);
+                dom.reviewList.appendChild(li);
+            });
+            dom.reviewModal.classList.add("show");
+            resetModalScroll(dom.reviewModal);
+        }
+
+        /* ============================================================
+           BUILD META LAYERS
+           ============================================================ */
+        function buildPageTexture() {
+            const holder = document.getElementById("pageTexture");
+            if (!holder) return;
+            holder.replaceChildren();
+            const stepX = 480, stepY = 180;
+            const w = window.innerWidth + stepX, h = window.innerHeight + stepY;
+            for (let y = 0; y < h; y += stepY) {
+                for (let x = -stepX / 2; x < w; x += stepX) {
+                    const s = document.createElement("span");
+                    s.textContent = BUILD_META;
+                    s.style.left = x + "px";
+                    s.style.top = y + "px";
+                    holder.appendChild(s);
+                }
+            }
+        }
+
+        function appendStow(el) {
+            if (!el) return;
+            const s = document.createElement("span");
+            s.className = "stow";
+            s.setAttribute("aria-hidden", "true");
+            s.textContent = " " + BUILD_META;
+            el.appendChild(s);
+        }
+
+        function showBuildNotice() {
+            const t = document.createElement("div");
+            t.className = "build-toast";
+            t.textContent = BUILD_META;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 1500);
+        }
+
+        function initBuildMeta() {
+            try {
+                document.querySelectorAll(".meta-line, .spacer-note, .rev-note, .card-note, .made-by, .stow")
+                    .forEach((el) => { if (!el.textContent) el.textContent = BUILD_META; });
+                const shell = dom.appShell;
+                if (shell) shell.setAttribute("data-sig", BUILD_META);
+                const badge = dom.brandBadge;
+                if (badge) badge.setAttribute("title", BUILD_META);
+                try { localStorage.setItem(`sim:${SIM_CONFIG.simId}:build`, BUILD_META); } catch (err) { /* ignore */ }
+                try { console.log("%c" + BUILD_META, "color:#777;font-size:10px"); } catch (err) { /* ignore */ }
+                buildPageTexture();
+                let textureTimer = null;
+                window.addEventListener("resize", () => {
+                    clearTimeout(textureTimer);
+                    textureTimer = setTimeout(buildPageTexture, 350);
+                });
+                document.addEventListener("copy", (e) => {
+                    try {
+                        const sel = window.getSelection ? String(window.getSelection()) : "";
+                        if (sel.length >= 30 && sel.indexOf(BUILD_META) === -1 && e.clipboardData) {
+                            e.clipboardData.setData("text/plain", sel + "\n" + BUILD_META);
+                            e.preventDefault();
+                        }
+                    } catch (err) { /* ignore */ }
+                });
+                let seq = [];
+                let seqTime = 0;
+                document.addEventListener("keydown", (e) => {
+                    const t = e.target;
+                    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+                    const now = Date.now();
+                    if (now - seqTime > 2000) seq = [];
+                    seqTime = now;
+                    seq.push(e.key);
+                    if (seq.length > 3) seq = seq.slice(-3);
+                    if (seq.join("") === "~ad") {
+                        seq = [];
+                        showBuildNotice();
+                    }
+                });
+            } catch (err) { /* never break the sim */ }
+        }
+
+        /* ============================================================
+           === GAME LOGIC ZONE ===
+           ============================================================
+           CHROME → GAME CONTRACT — the chrome above expects the game to
+           provide (or extend) the functions stubbed below. How the
+           reference sim wired in:
+
+           devInit(resume)      START-ROUND ENTRY POINT.
+                                Chrome calls devInit(false) when the home
+                                Start button is pressed (then auto-opens
+                                the Help modal itself — do not open it
+                                here), and devInit(true) from the
+                                resumeIfSaved() IIFE at the bottom of this
+                                script on reload. The game should: load or
+                                create the run object ({ v: 1, drawn: [...],
+                                idx: 0, records: [], done: false } in the
+                                reference), saveRun(run), render the round
+                                into #stageZone and #actionZone, update
+                                #roundCount / #tokenStrip, un-hide
+                                #midReviewBtn once >= 1 record exists, and
+                                call setCoach()/setCue()/setVerdict().
+
+           devReset()           RESET HOOK. Chrome calls it when the reset
+                                confirm modal is confirmed, before showing
+                                the home screen. Clear timers, clearRun(),
+                                null out run state.
+
+           getReviewRecords()   REVIEW-LOG DATA SOURCE. Chrome's
+                                openReview() renders whatever array this
+                                returns into the review modal. Each record:
+                                { txt, kind, why } (reference also stored a
+                                result tier "res" and appended a medal).
+                                Return [] when nothing is recorded.
+
+           endGame()            END-SCREEN ENTRY. Game calls this itself
+                                after the last round: set run.done = true,
+                                saveRun(run), hide #playWrap, un-hide
+                                #endWrap, fill #endHeadline / #endSub /
+                                #endSummary / #endTally, playSound("complete").
+
+           playAgain()          Wired by chrome to the end-screen Play
+                                Again button: clearRun(), fresh run,
+                                re-render, restart — WITHOUT opening the
+                                Help modal.
+
+           showHint()           Wired by chrome to the 💡 Hint button in
+                                #actionZone. Write the hint into
+                                dom.hintStrip.
+
+           renderHeroScene()    Fill #heroScene with the home hero SVG
+                                (start every svg string with SVG_DESC).
+
+           Storage: use saveRun()/loadRun()/clearRun() above. loadRun()
+           returns null unless the saved object has v === 1 and !done —
+           add game-shape validation before trusting it.
+           ============================================================ */
+
+        /* ================= scene library ================= */
+        /* =========================================================================
+   The Nectar Bar — scene.js
+   Flat-colour SVG scene builders for a Trinidad & Tobago hummingbird-garden
+   nectar bar (Yerette-inspired, Maracas Valley veranda).
+
+   Contract for every builder:
+   - Pure function, returns an SVG markup STRING. No DOM access, no events.
+   - Flat fills only. NO gradients, NO filters, NO SMIL, NO <text>, NO id=.
+   - Classes only (builders may run twice per page).
+   - Every <svg> root: role="img" aria-hidden="true", no width/height
+     attributes (CSS sizes them).
+   ========================================================================= */
+
+'use strict';
+
+/* ---- Palette: flat hexes, day / night ---------------------------------- */
+var COLORS = {
+  day: {
+    sky: '#FFE4E6', hillFar: '#FBCFE8', hillNear: '#F9A8D4',
+    leaf: '#16A34A', leafDark: '#15803D', leafLight: '#86EFAC',
+    wood: '#A16207', woodDark: '#854D0E',
+    heliconia: '#EA580C', ixora: '#E11D48', vervain: '#7C3AED', fern: '#22C55E',
+    orb: '#FDE047', star: null,
+    soil: '#92400E', can: '#64748B', canDark: '#475569',
+    nectar: '#F59E0B', port: '#DC2626', glass: '#DBEAFE', glassEdge: '#93C5FD',
+    wire: '#6B7280', wingA: '#FBBF24', wingB: '#F97316'
+  },
+  night: {
+    sky: '#1C1224', hillFar: '#312244', hillNear: '#3B2A52',
+    leaf: '#166534', leafDark: '#14532D', leafLight: '#4ADE80',
+    wood: '#713F12', woodDark: '#5B3410',
+    heliconia: '#C2410C', ixora: '#BE123C', vervain: '#8B5CF6', fern: '#15803D',
+    orb: '#FDE68A', star: '#F5D0FE',
+    soil: '#4C2F0B', can: '#475569', canDark: '#334155',
+    nectar: '#D97706', port: '#B91C1C', glass: '#64748B', glassEdge: '#475569',
+    wire: '#475569', wingA: '#B45309', wingB: '#9A3412'
+  }
+};
+
+function pal(night) { return night ? COLORS.night : COLORS.day; }
+
+/* Point on a quadratic bezier (used to place leaflets / buds / bracts). */
+function qPoint(x0, y0, cx, cy, x1, y1, t) {
+  var a = 1 - t;
+  return [
+    a * a * x0 + 2 * a * t * cx + t * t * x1,
+    a * a * y0 + 2 * a * t * cy + t * t * y1
+  ];
+}
+
+/* =========================================================================
+   PROP BUILDERS (internal helpers)
+   Each is drawn with its BASE (stem foot / ground contact) at the origin,
+   growing upward into negative y. Callers position with translate().
+   ========================================================================= */
+
+/* Fern clump: arched fronds with leaflet pairs. ~100 wide x 60 tall. */
+function fernClump(c, s) {
+  s = s || 1;
+  var fronds = [
+    [-34, -46, -22, -30], [-12, -58, -8, -34], [10, -56, 6, -32],
+    [30, -44, 20, -28], [44, -24, 26, -16]
+  ];
+  var out = '';
+  for (var i = 0; i < fronds.length; i++) {
+    var f = fronds[i];
+    var tx = f[0] * s, ty = f[1] * s, cx = f[2] * s, cy = f[3] * s;
+    out += '<path d="M0 0 Q ' + cx + ' ' + cy + ' ' + tx + ' ' + ty +
+      '" fill="none" stroke="' + c.fern + '" stroke-width="' + (3 * s) +
+      '" stroke-linecap="round"/>';
+    for (var t = 0.35; t <= 0.92; t += 0.18) {
+      var p = qPoint(0, 0, cx, cy, tx, ty, t);
+      out += '<ellipse cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) +
+        '" rx="' + (5 * s) + '" ry="' + (2.2 * s) + '" fill="' + c.fern + '"/>';
+    }
+  }
+  return out;
+}
+
+/* Heliconia clump: two big paddle leaves, stem, hanging stalk of
+   alternating orange-red claw bracts with pale tips. ~80 wide x 120 tall. */
+function heliconiaClump(c, s) {
+  s = s || 1;
+  var out = '<g transform="scale(' + s + ')">';
+  out += '<path d="M-2 0 C -34 -40 -38 -86 -16 -116 C -14 -70 -8 -40 -2 0 Z" fill="' + c.leaf + '"/>';
+  out += '<path d="M2 0 C 30 -36 36 -78 18 -108 C 12 -66 6 -36 2 0 Z" fill="' + c.leafDark + '"/>';
+  out += '<path d="M0 0 L2 -112" stroke="' + c.leafDark + '" stroke-width="4" stroke-linecap="round" fill="none"/>';
+  /* hanging bract stalk (rostrata style) */
+  out += '<path d="M2 -112 Q 18 -100 26 -62" stroke="' + c.heliconia + '" stroke-width="3" fill="none"/>';
+  for (var i = 0; i < 5; i++) {
+    var t = 0.16 + i * 0.19;
+    var p = qPoint(2, -112, 18, -100, 26, -62, t);
+    var dir = (i % 2 === 0) ? -1 : 1;
+    var px = p[0].toFixed(1), py = p[1].toFixed(1);
+    var ox = (p[0] + dir * 15).toFixed(1);
+    out += '<path d="M' + px + ' ' + py + ' L' + ox + ' ' + (p[1] + 4).toFixed(1) +
+      ' L' + (p[0] + dir * 5).toFixed(1) + ' ' + (p[1] + 10).toFixed(1) +
+      ' Z" fill="' + c.heliconia + '"/>';
+    out += '<path d="M' + ox + ' ' + (p[1] + 4).toFixed(1) +
+      ' L' + (p[0] + dir * 10).toFixed(1) + ' ' + (p[1] + 7.5).toFixed(1) +
+      ' L' + (p[0] + dir * 9).toFixed(1) + ' ' + (p[1] + 3).toFixed(1) +
+      ' Z" fill="' + c.leafLight + '"/>';
+  }
+  return out + '</g>';
+}
+
+/* Ixora bush: leafy mound studded with rose four-petal flower clusters.
+   ~92 wide x 58 tall. */
+function ixoraBush(c, s) {
+  s = s || 1;
+  var out = '<g transform="scale(' + s + ')">';
+  out += '<ellipse cx="0" cy="-26" rx="44" ry="28" fill="' + c.leaf + '"/>';
+  out += '<ellipse cx="0" cy="-12" rx="40" ry="14" fill="' + c.leafDark + '"/>';
+  var spots = [[-26, -32], [0, -42], [24, -30], [-12, -18], [14, -16], [-32, -14], [32, -16]];
+  for (var i = 0; i < spots.length; i++) {
+    var x = spots[i][0], y = spots[i][1];
+    out += '<circle cx="' + (x - 4) + '" cy="' + y + '" r="4" fill="' + c.ixora + '"/>' +
+      '<circle cx="' + (x + 4) + '" cy="' + y + '" r="4" fill="' + c.ixora + '"/>' +
+      '<circle cx="' + x + '" cy="' + (y - 4) + '" r="4" fill="' + c.ixora + '"/>' +
+      '<circle cx="' + x + '" cy="' + (y + 4) + '" r="4" fill="' + c.ixora + '"/>' +
+      '<circle cx="' + x + '" cy="' + y + '" r="1.6" fill="#FDA4AF"/>';
+  }
+  return out + '</g>';
+}
+
+/* Vervain (porterweed): three arcing stems tipped with purple bud spikes —
+   classic hummingbird forage. ~46 wide x 76 tall. */
+function vervainSpikes(c, s) {
+  s = s || 1;
+  var stems = [
+    [0, 0, -6, -40, -18, -66], [0, 0, 2, -46, 6, -74], [0, 0, 8, -36, 22, -60]
+  ];
+  var out = '<g transform="scale(' + s + ')">';
+  out += '<ellipse cx="-8" cy="-4" rx="10" ry="4" fill="' + c.leaf + '"/>' +
+    '<ellipse cx="8" cy="-3" rx="9" ry="4" fill="' + c.leafDark + '"/>';
+  for (var i = 0; i < stems.length; i++) {
+    var st = stems[i];
+    out += '<path d="M' + st[0] + ' ' + st[1] + ' Q ' + st[2] + ' ' + st[3] +
+      ' ' + st[4] + ' ' + st[5] + '" fill="none" stroke="' + c.leaf +
+      '" stroke-width="2.5" stroke-linecap="round"/>';
+    for (var t = 0.55; t <= 1.001; t += 0.15) {
+      var p = qPoint(st[0], st[1], st[2], st[3], st[4], st[5], t);
+      out += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) +
+        '" r="3" fill="' + c.vervain + '"/>';
+    }
+  }
+  return out + '</g>';
+}
+
+/* Watering can, spout to the right. ~66 wide x 56 tall, base at origin. */
+function wateringCan(c) {
+  return '<g>' +
+    '<path d="M10 -26 L34 -42 L39 -35 L15 -16 Z" fill="' + c.can + '"/>' +
+    '<circle cx="37" cy="-39" r="5.5" fill="' + c.canDark + '"/>' +
+    '<rect x="-26" y="-34" width="37" height="34" rx="5" fill="' + c.can + '"/>' +
+    '<rect x="-27" y="-37" width="39" height="6" rx="3" fill="' + c.canDark + '"/>' +
+    '<path d="M-16 -36 Q -7 -58 6 -36" stroke="' + c.canDark +
+    '" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+    '</g>';
+}
+
+/* Small butterfly, CENTRED ON THE ORIGIN facing RIGHT (head at +x), so a
+   CSS scaleX(-1) on its positioning wrapper flips it in place. ~40 x 30. */
+function butterfly(c) {
+  return '<g>' +
+    '<path d="M-2 -1 Q -16 -17 -22 -7 Q -18 4 -3 3 Z" fill="' + c.wingA + '"/>' +
+    '<path d="M2 -1 Q 10 -18 18 -9 Q 16 1 3 3 Z" fill="' + c.wingB + '"/>' +
+    '<path d="M-2 2 Q -13 13 -17 7 Q -12 2 -2 2 Z" fill="' + c.wingB + '"/>' +
+    '<path d="M2 2 Q 8 13 13 8 Q 10 2 2 2 Z" fill="' + c.wingA + '"/>' +
+    '<ellipse cx="1" cy="1" rx="7" ry="2.6" fill="#374151"/>' +
+    '<circle cx="8" cy="0" r="2" fill="#374151"/>' +
+    '<path d="M9 -1 Q 13 -6 16 -8 M9 -1 Q 11 -8 12 -11" stroke="#374151" stroke-width="1" fill="none" stroke-linecap="round"/>' +
+    '</g>';
+}
+
+/* Hanging nectar feeder, hang-point at the origin: wire down, glass bulb
+   half-full of amber nectar, red dish with flower-shaped ports.
+   ~52 wide x 104 tall (0 .. 104 in y). HERO ONLY — never in the stage band. */
+function nectarFeeder(c) {
+  return '<g>' +
+    '<circle cx="0" cy="2" r="4" fill="none" stroke="' + c.wire + '" stroke-width="2"/>' +
+    '<path d="M0 6 L0 32" stroke="' + c.wire + '" stroke-width="2"/>' +
+    '<circle cx="0" cy="58" r="26" fill="' + c.glass + '" stroke="' + c.glassEdge + '" stroke-width="2"/>' +
+    '<path d="M-26 58 A 26 26 0 0 0 26 58 Z" fill="' + c.nectar + '"/>' +
+    '<ellipse cx="-10" cy="46" rx="6" ry="3" fill="#FFFFFF" opacity="0.55"/>' +
+    '<rect x="-22" y="82" width="44" height="13" rx="5" fill="' + c.port + '"/>' +
+    /* three flower-shaped feeding ports */
+    '<g transform="translate(-15,97)">' +
+    '<circle cx="-3" cy="0" r="3" fill="' + c.port + '"/><circle cx="3" cy="0" r="3" fill="' + c.port + '"/>' +
+    '<circle cx="0" cy="-3" r="3" fill="' + c.port + '"/><circle cx="0" cy="3" r="3" fill="' + c.port + '"/>' +
+    '<circle cx="0" cy="0" r="2" fill="' + c.nectar + '"/></g>' +
+    '<g transform="translate(0,100)">' +
+    '<circle cx="-3" cy="0" r="3" fill="' + c.port + '"/><circle cx="3" cy="0" r="3" fill="' + c.port + '"/>' +
+    '<circle cx="0" cy="-3" r="3" fill="' + c.port + '"/><circle cx="0" cy="3" r="3" fill="' + c.port + '"/>' +
+    '<circle cx="0" cy="0" r="2" fill="' + c.nectar + '"/></g>' +
+    '<g transform="translate(15,97)">' +
+    '<circle cx="-3" cy="0" r="3" fill="' + c.port + '"/><circle cx="3" cy="0" r="3" fill="' + c.port + '"/>' +
+    '<circle cx="0" cy="-3" r="3" fill="' + c.port + '"/><circle cx="0" cy="3" r="3" fill="' + c.port + '"/>' +
+    '<circle cx="0" cy="0" r="2" fill="' + c.nectar + '"/></g>' +
+    '</g>';
+}
+
+/* Sun disc (day) or crescent moon + 6-8 soft stars (night), for a given
+   sky colour. Positioned by the caller's coordinates passed in. */
+function celestial(c, night, mx, my) {
+  if (!night) {
+    return '<circle cx="' + mx + '" cy="' + my + '" r="44" fill="' + c.orb + '"/>';
+  }
+  var out = '<circle cx="' + mx + '" cy="' + my + '" r="36" fill="' + c.orb + '"/>' +
+    '<circle cx="' + (mx + 14) + '" cy="' + (my - 9) + '" r="33" fill="' + c.sky + '"/>';
+  var stars = [[90, 58, 2.5], [205, 38, 2], [330, 92, 2], [468, 52, 2.5],
+    [560, 112, 1.8], [648, 40, 2], [822, 62, 2.5], [148, 132, 1.8]];
+  for (var i = 0; i < stars.length; i++) {
+    out += '<circle cx="' + stars[i][0] + '" cy="' + stars[i][1] + '" r="' +
+      stars[i][2] + '" fill="' + c.star + '" opacity="0.7"/>';
+  }
+  return out;
+}
+
+/* =========================================================================
+   1. buildHeroScene(night)
+   HOME hero card scene.
+   viewBox: 0 0 900 420 | preserveAspectRatio: xMidYMid meet (NEVER slice —
+   hero scenes centre; props spread with equal left/right visual weight).
+   Layers back→front: sky, sun/moon+stars, hills, foliage bushes, garden
+   clumps, veranda rail + deck, bracket + the ONE hanging feeder
+   (centre-right), two hummingbirds in flight approaching from the left.
+   ========================================================================= */
+function buildHeroScene(night) {
+  var c = pal(night);
+  var s = '<svg viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">';
+
+  /* sky + celestial — base layers bleed far past the viewBox (the svg renders
+     with overflow:visible inside the clipped hero card) so wide cards show
+     continuous scenery instead of a seam at the viewBox edge */
+  s += '<rect x="-2400" y="0" width="5700" height="420" fill="' + c.sky + '"/>';
+  s += celestial(c, night, 720, 88);
+
+  /* distant hills (Maracas Valley) */
+  s += '<path d="M-2400 226 L0 232 Q 150 148 300 210 T 620 198 T 900 220 L3300 226 L3300 300 L-2400 300 Z" fill="' + c.hillFar + '"/>';
+  s += '<path d="M-2400 256 L0 262 Q 200 188 430 240 T 900 250 L3300 256 L3300 320 L-2400 320 Z" fill="' + c.hillNear + '"/>';
+
+  /* lush foliage band behind the rail */
+  var i, bx;
+  for (i = -24; i < 34; i++) {
+    bx = -20 + i * 105;
+    s += '<ellipse cx="' + bx + '" cy="286" rx="78" ry="46" fill="' +
+      (((i % 2) + 2) % 2 === 0 ? c.leafDark : c.leaf) + '"/>';
+  }
+  for (i = -30; i < 42; i++) {
+    bx = 15 + i * 82;
+    s += '<ellipse cx="' + bx + '" cy="308" rx="58" ry="34" fill="' +
+      (((i % 2) + 2) % 2 === 0 ? c.leaf : c.leafDark) + '"/>';
+  }
+
+  /* garden clumps rising behind the rail — balanced left/right */
+  s += '<g transform="translate(118,310)">' + heliconiaClump(c, 1) + '</g>';
+  s += '<g transform="translate(228,312)">' + vervainSpikes(c, 1) + '</g>';
+  s += '<g transform="translate(330,312)">' + fernClump(c, 1) + '</g>';
+  s += '<g transform="translate(560,314)">' + fernClump(c, 0.9) + '</g>';
+  s += '<g transform="translate(688,312)">' + vervainSpikes(c, 1) + '</g>';
+  s += '<g transform="translate(788,310)">' + ixoraBush(c, 1) + '</g>';
+
+  /* veranda rail across the lower third + deck */
+  s += '<rect x="-2400" y="296" width="5700" height="10" fill="' + c.wood + '"/>';
+  for (i = -41; i < 57; i++) {
+    s += '<rect x="' + (22 + i * 60) + '" y="306" width="8" height="32" fill="' + c.woodDark + '"/>';
+  }
+  s += '<rect x="-2400" y="336" width="5700" height="9" fill="' + c.wood + '"/>';
+  s += '<rect x="-2400" y="345" width="5700" height="75" fill="' + c.woodDark + '"/>';
+  s += '<path d="M-2400 366 L3300 366 M-2400 388 L3300 388 M-2400 408 L3300 408" stroke="' + c.wood + '" stroke-width="2"/>';
+
+  /* bracket at centre-right + the ONE hanging nectar feeder */
+  s += '<rect x="646" y="148" width="10" height="150" fill="' + c.woodDark + '"/>';
+  s += '<rect x="582" y="148" width="74" height="9" fill="' + c.wood + '"/>';
+  s += '<path d="M646 176 L620 157 L646 157 Z" fill="' + c.wood + '"/>';
+  s += '<g transform="translate(590,157)">' + nectarFeeder(c) + '</g>';
+
+  /* two hummingbirds in flight, approaching the feeder from the left */
+  s += '<g transform="translate(305,198)">' + buildBird('jacobin', 'hover') + '</g>';
+  s += '<g transform="translate(425,256)">' + buildBird('coquette', 'hover') + '</g>';
+
+  return s + '</svg>';
+}
+
+/* =========================================================================
+   2. buildStageBand(night)
+   Play-stage backdrop band — decoration only, sits BEHIND the interactive
+   area. viewBox: 0 0 1800 260 | preserveAspectRatio: xMinYMax slice.
+   Only the left ~2/3 shows at typical aspect ratios, so ALL specific props
+   sit at x 40–1050. Base ground/greenery rows span the FULL 1800 width and
+   fill >=45% of the height (ground band starts at y=140 → 120/260 = 46%).
+   NO feeders here — the interactive feeder must be the only feeder on
+   screen. Ambient hooks (class names only, no <style> emitted):
+     .nb-sway  — on inner motion <g> of plant groups; outer <g> positions,
+                 inner <g class="nb-sway"> pivots at the stem base
+                 (transform-box: fill-box compatible).
+     .nb-drift — on ONE butterfly drawn centred on origin facing right,
+                 inside a positioning wrapper, so scaleX(-1) flips in place.
+   ========================================================================= */
+function buildStageBand(night) {
+  var c = pal(night);
+  var s = '<svg viewBox="0 0 1800 260" preserveAspectRatio="xMinYMax slice" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">';
+
+  /* sky */
+  s += '<rect x="0" y="0" width="1800" height="260" fill="' + c.sky + '"/>';
+
+  /* ground band — full 1800 width, y 140..260 (46% of height) */
+  s += '<rect x="0" y="140" width="1800" height="120" fill="' + c.leafDark + '"/>';
+  var i, bx;
+  for (i = 0; i < 17; i++) {        /* back greenery row */
+    bx = -30 + i * 115;
+    s += '<ellipse cx="' + bx + '" cy="150" rx="86" ry="34" fill="' +
+      (i % 2 === 0 ? c.leafDark : c.leaf) + '"/>';
+  }
+  for (i = 0; i < 19; i++) {        /* middle greenery row */
+    bx = 10 + i * 100;
+    s += '<ellipse cx="' + bx + '" cy="180" rx="72" ry="30" fill="' +
+      (i % 2 === 0 ? c.leaf : c.leafDark) + '"/>';
+  }
+  for (i = 0; i < 21; i++) {        /* front greenery row */
+    bx = -10 + i * 92;
+    s += '<ellipse cx="' + bx + '" cy="210" rx="62" ry="26" fill="' +
+      (i % 2 === 0 ? c.leafDark : c.leaf) + '"/>';
+  }
+  s += '<rect x="0" y="230" width="1800" height="30" fill="' + c.soil + '"/>';
+
+  /* --- specific props, all within x 40..1050, drawn on top --------------- */
+
+  /* low veranda fence at far left — stays inside the ground band so it can
+     never rise behind captions/cards above the scenery */
+  s += '<rect x="46" y="128" width="28" height="10" fill="' + c.woodDark + '"/>';
+  s += '<rect x="52" y="136" width="16" height="100" fill="' + c.wood + '"/>';
+  s += '<rect x="112" y="128" width="28" height="10" fill="' + c.woodDark + '"/>';
+  s += '<rect x="118" y="136" width="16" height="100" fill="' + c.wood + '"/>';
+  s += '<rect x="46" y="168" width="94" height="9" fill="' + c.woodDark + '"/>';
+
+  /* heliconia clump left — AMBIENT: sways (pivot at stem base) */
+  s += '<g transform="translate(200,238)"><g class="nb-sway">' + heliconiaClump(c, 1.1) + '</g></g>';
+
+  /* fern rows (static) */
+  s += '<g transform="translate(320,240)">' + fernClump(c, 1.1) + '</g>';
+  s += '<g transform="translate(430,244)">' + fernClump(c, 0.85) + '</g>';
+  s += '<g transform="translate(640,244)">' + fernClump(c, 0.9) + '</g>';
+  s += '<g transform="translate(985,242)">' + fernClump(c, 1) + '</g>';
+
+  /* ixora bush centre (static) */
+  s += '<g transform="translate(540,240)">' + ixoraBush(c, 1.1) + '</g>';
+
+  /* vervain spikes — AMBIENT: sways (pivot at stem base) */
+  s += '<g transform="translate(735,242)"><g class="nb-sway">' + vervainSpikes(c, 1.15) + '</g></g>';
+
+  /* watering can prop (static) */
+  s += '<g transform="translate(1120,234)">' + wateringCan(c) + '</g>';
+
+  /* ONE butterfly — AMBIENT: drifts; centred on origin so scaleX(-1)
+     on this wrapper (or via CSS) flips it in place */
+  s += '<g transform="translate(940,88)"><g class="nb-drift">' + butterfly(c) + '</g></g>';
+
+  return s + '</svg>';
+}
+
+/* =========================================================================
+   3. buildBird(species, pose)
+   Hummingbird art builder. Returns just an inner <g>...</g> string (no
+   <svg> root) — caller wraps it in <g transform="translate(x,y)"> and may
+   flip with scaleX(-1) safely, because every bird is drawn CENTRED ON THE
+   ORIGIN facing RIGHT, total size ~90 x 70 units.
+   species: 'coquette' | 'jacobin' | 'mango' | 'rubytopaz' | 'sapphire'
+            | 'copper'
+   pose:    'hover' (wings fanned up + blur echo, body tilted ~40 deg up)
+            'perch' (wings folded, legs down, sits on a line)
+            'drink' (body tilted so the beak angles steeply down-forward)
+   ========================================================================= */
+function buildBird(species, pose) {
+  var SPECIES = {
+    coquette:  { body: '#16A34A', belly: '#86EFAC', head: '#16A34A', wing: '#15803D', tail: '#15803D', scale: 0.82 },
+    jacobin:   { body: '#166534', belly: '#FFFFFF', head: '#2563EB', wing: '#14532D', tail: '#166534', scale: 1 },
+    mango:     { body: '#16A34A', belly: '#4ADE80', head: '#16A34A', wing: '#374151', tail: '#7C3AED', scale: 1 },
+    rubytopaz: { body: '#92400E', belly: '#B45309', head: '#92400E', wing: '#78350F', tail: '#B45309', scale: 0.95 },
+    sapphire:  { body: '#16A34A', belly: '#4ADE80', head: '#16A34A', wing: '#15803D', tail: '#166534', scale: 0.92 },
+    copper:    { body: '#16A34A', belly: '#86EFAC', head: '#16A34A', wing: '#166534', tail: '#166534', scale: 0.95 }
+  };
+  var sp = SPECIES[species] || SPECIES.copper;
+  var rot = pose === 'hover' ? -32 : (pose === 'drink' ? 38 : 0);
+
+  /* tail (behind body) */
+  var parts = '<path d="M-18 -6 L-44 -18 L-40 3 L-16 4 Z" fill="' + sp.tail + '"/>';
+
+  /* far-side wing / blur echo behind the body */
+  if (pose === 'hover') {
+    parts += '<path d="M-8 -8 Q -30 -32 -20 -42 Q -4 -30 -2 -9 Z" fill="' + sp.wing + '" opacity="0.45"/>';
+  } else if (pose === 'drink') {
+    parts += '<path d="M-14 -6 Q -36 -22 -38 -8 Q -24 0 -12 -2 Z" fill="' + sp.wing + '" opacity="0.45"/>';
+  }
+
+  /* body + belly + head */
+  parts += '<ellipse cx="-2" cy="0" rx="22" ry="13" fill="' + sp.body + '"/>';
+  parts += '<ellipse cx="-2" cy="5" rx="19" ry="7.5" fill="' + sp.belly + '"/>';
+  parts += '<circle cx="15" cy="-9" r="9.5" fill="' + sp.head + '"/>';
+
+  /* species field marks */
+  if (species === 'coquette') {          /* rufous crest spikes + orange cheek tufts */
+    parts += '<path d="M9 -17 L11 -30 L14 -16 Z" fill="#EA580C"/>' +
+      '<path d="M12 -17 L17 -31 L18 -15 Z" fill="#EA580C"/>' +
+      '<path d="M16 -16 L23 -28 L21 -14 Z" fill="#EA580C"/>' +
+      '<path d="M9 -3 L2 1 L9 2 Z" fill="#FB923C"/>' +
+      '<circle cx="10" cy="-2" r="3" fill="#FB923C"/>' +
+      '<circle cx="12" cy="1" r="2.4" fill="#FB923C"/>';
+  } else if (species === 'jacobin') {    /* white belly + white nape patch */
+    parts += '<ellipse cx="-2" cy="6" rx="18" ry="7" fill="#FFFFFF"/>' +
+      '<circle cx="5" cy="-14" r="3.5" fill="#FFFFFF"/>';
+  } else if (species === 'mango') {      /* dark throat stripe down the centre */
+    parts += '<path d="M21 -5 Q 8 5 -10 8 Q 6 9 22 -1 Z" fill="#111827"/>';
+  } else if (species === 'rubytopaz') {  /* red crown + golden-orange throat */
+    parts += '<path d="M7 -14 Q 15 -22 23 -13 Q 15 -17 7 -14 Z" fill="#DC2626"/>' +
+      '<ellipse cx="18" cy="-2" rx="5.5" ry="3.5" fill="#F59E0B"/>';
+  } else if (species === 'sapphire') {   /* blue chin patch */
+    parts += '<ellipse cx="20" cy="-4.5" rx="3.4" ry="2.6" fill="#2563EB"/>';
+  } else if (species === 'copper') {     /* coppery rump patch near tail base */
+    parts += '<ellipse cx="-16" cy="-3" rx="6.5" ry="4.5" fill="#B45309"/>';
+  }
+
+  /* eye: dark with tiny white dot */
+  parts += '<circle cx="17" cy="-11.5" r="2.1" fill="#0F172A"/>' +
+    '<circle cx="17.8" cy="-12.2" r="0.8" fill="#FFFFFF"/>';
+
+  /* long thin downcurved beak (sapphire gets a coral lower mandible) */
+  parts += '<path d="M23 -11 Q 36 -10 45 -4" stroke="#1F2937" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+  if (species === 'sapphire') {
+    parts += '<path d="M23 -9.4 Q 35 -8.4 43 -3.6" stroke="#FB7185" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
+  }
+
+  /* near-side wing on top */
+  if (pose === 'hover') {
+    parts += '<path d="M-4 -8 Q -18 -38 -4 -44 Q 8 -34 6 -9 Z" fill="' + sp.wing + '"/>';
+  } else if (pose === 'drink') {
+    parts += '<path d="M-8 -7 Q -28 -28 -32 -14 Q -18 -2 -6 -3 Z" fill="' + sp.wing + '"/>';
+  } else {                               /* perch: folded along the body + legs */
+    parts += '<path d="M-18 -5 Q -2 -13 14 -3 Q -2 4 -18 -5 Z" fill="' + sp.wing + '"/>' +
+      '<path d="M-2 12 L-2 19 M7 11 L7 18" stroke="#374151" stroke-width="2" stroke-linecap="round"/>';
+  }
+
+  return '<g class="nb-bird nb-bird-' + species + '">' +
+    '<g transform="rotate(' + rot + ') scale(' + sp.scale + ')">' + parts +
+    '</g></g>';
+}
+
+/* =========================================================================
+   4. buildPerchWire(night, slots)
+   Progress token strip: a sagging veranda wire between two small posts,
+   with `slots` evenly-spaced perch positions marked by tiny wire-wrap
+   ticks. viewBox: 0 0 (260 + slots*70) 90 | preserveAspectRatio:
+   xMidYMid meet. Birds are placed later by the game with
+   buildBird('...', 'perch'); the tick x positions are emitted as a JSON
+   comment at the top of the string: <!--PERCH_XS:[x1,x2,...]-->
+   (wire y at any x follows the quadratic M30 34 Q W/2 62 W-30 34).
+   ========================================================================= */
+function buildPerchWire(night, slots) {
+  var c = pal(night);
+  var W = 260 + slots * 70;
+  var xs = [];
+  var i;
+  for (i = 0; i < slots; i++) {
+    xs.push(Math.round((W / (slots + 1)) * (i + 1)));
+  }
+  /* wire sag: control x is the midpoint, so x(t) is linear in t */
+  function wireY(x) {
+    var t = (x - 30) / (W - 60);
+    return 34 * (1 - t) * (1 - t) + 2 * t * (1 - t) * 62 + 34 * t * t;
+  }
+
+  var s = '<!--PERCH_XS:[' + xs.join(',') + ']-->';
+  s += '<svg viewBox="0 0 ' + W + ' 90" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">';
+
+  /* ground ledge */
+  s += '<rect x="0" y="78" width="' + W + '" height="12" rx="3" fill="' + c.soil + '"/>';
+  s += '<ellipse cx="30" cy="79" rx="20" ry="5" fill="' + c.leafDark + '"/>';
+  s += '<ellipse cx="' + (W - 30) + '" cy="79" rx="20" ry="5" fill="' + c.leafDark + '"/>';
+
+  /* two small veranda posts */
+  s += '<rect x="20" y="14" width="20" height="8" rx="2" fill="' + c.woodDark + '"/>';
+  s += '<rect x="24" y="20" width="12" height="60" fill="' + c.wood + '"/>';
+  s += '<rect x="' + (W - 40) + '" y="14" width="20" height="8" rx="2" fill="' + c.woodDark + '"/>';
+  s += '<rect x="' + (W - 36) + '" y="20" width="12" height="60" fill="' + c.wood + '"/>';
+
+  /* sagging wire */
+  s += '<path d="M30 34 Q ' + (W / 2) + ' 62 ' + (W - 30) + ' 34" fill="none" stroke="' + c.wire + '" stroke-width="3" stroke-linecap="round"/>';
+
+  /* tiny wire-wrap ticks at each perch slot */
+  for (i = 0; i < xs.length; i++) {
+    var y = wireY(xs[i]);
+    s += '<rect x="' + (xs[i] - 3) + '" y="' + (y - 5).toFixed(1) +
+      '" width="6" height="10" rx="2.5" fill="' + c.woodDark + '"/>';
+  }
+
+  return s + '</svg>';
+}
+
+        /* ================= end scene library ================= */
+
+        function $g(id) { return document.getElementById(id); }
+        function nightNow() { return document.documentElement.getAttribute("data-theme") !== "light"; }
+        function withDesc(svg) {
+            const i = svg.indexOf(">");
+            return i === -1 ? svg : svg.slice(0, i + 1) + SVG_DESC + svg.slice(i + 1);
+        }
+        function birdSvg(species, pose) {
+            return withDesc('<svg viewBox="-48 -38 96 76" role="img" aria-hidden="true">' + buildBird(species, pose) + "</svg>");
+        }
+
+        /* ================= engine core ================= */
+        const SYM = { ge: "≥", gt: ">", le: "≤", lt: "<", eq: "=" };
+        const LETTERS = ["v", "n", "m"];
+        const BANK = [
+            { id: "A1", tier: "A", kind: "single", cmp: "ge", pool: [30, 40, 50, 60] },
+            { id: "A2", tier: "A", kind: "single", cmp: "le", pool: [25, 40, 55, 70] },
+            { id: "A3", tier: "A", kind: "single", cmp: "ge", pool: [20, 35, 45] },
+            { id: "A4", tier: "A", kind: "single", cmp: "le", pool: [30, 45, 60] },
+            { id: "B1", tier: "B", kind: "single", cmp: "gt", pool: [35, 45, 60] },
+            { id: "B2", tier: "B", kind: "single", cmp: "lt", pool: [20, 30, 50] },
+            { id: "B3", tier: "B", kind: "single", cmp: "gt", rev: true, pool: [40, 55, 65] },
+            { id: "B4", tier: "B", kind: "single", cmp: "lt", rev: true, pool: [25, 35, 45] },
+            { id: "B5", tier: "B", kind: "single", cmp: "le", rev: true, pool: [30, 50] },
+            { id: "B6", tier: "B", kind: "single", cmp: "gt", pool: [25, 50] },
+            { id: "B7", tier: "B", kind: "single", cmp: "lt", pool: [40, 60] },
+            { id: "C1", tier: "C", kind: "double", lo: true, hi: true, pools: [[30, 34], [40, 60], [55, 65]] },
+            { id: "C2", tier: "C", kind: "double", lo: true, hi: false, pools: [[20, 25], [45, 50], [60, 70]] },
+            { id: "C3", tier: "C", kind: "double", lo: false, hi: true, pools: [[25, 30], [35, 45]] },
+            { id: "C4", tier: "C", kind: "double", lo: false, hi: false, pools: [[50, 60], [30, 40]] },
+            { id: "C5", tier: "C", kind: "single", cmp: "eq", pool: [45, 60] },
+            { id: "C6", tier: "C", kind: "double", lo: true, hi: true, pools: [[35, 50], [60, 68]] },
+            { id: "C7", tier: "C", kind: "double", lo: true, hi: false, pools: [[30, 42]] },
+        ];
+        const CUSTOMERS = [
+            { sp: "coquette", name: "Tufty the Tufted Coquette" },
+            { sp: "jacobin", name: "Jaco the White-necked Jacobin" },
+            { sp: "mango", name: "Mango the Black-throated Mango" },
+            { sp: "rubytopaz", name: "Ruby the Ruby-topaz" },
+            { sp: "sapphire", name: "Indi the Blue-chinned Sapphire" },
+        ];
+        const ROUNDS_PER_RUN = 8;
+
+        function shuffleArr(a) {
+            a = a.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+        function materialize(tpl) {
+            const letter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+            if (tpl.kind === "double") {
+                const p = tpl.pools[Math.floor(Math.random() * tpl.pools.length)];
+                return { id: tpl.id, kind: "double", letter, b: p[0], b2: p[1], lo: tpl.lo, hi: tpl.hi };
+            }
+            const b = tpl.pool[Math.floor(Math.random() * tpl.pool.length)];
+            return { id: tpl.id, kind: "single", letter, cmp: tpl.cmp, rev: !!tpl.rev, b };
+        }
+        function symKey(r) { return r.kind === "double" ? "dbl" : r.cmp; }
+        function drawRun() {
+            const byTier = (t) => shuffleArr(BANK.filter((q) => q.tier === t));
+            let pick = [...byTier("A").slice(0, 2), ...byTier("B").slice(0, 3), ...byTier("C").slice(0, 3)];
+            let eqSeen = 0;
+            pick = pick.map((tpl) => {
+                if (tpl.cmp === "eq" && ++eqSeen > 1) return BANK.find((q) => q.id === "C6");
+                return tpl;
+            });
+            const rounds = pick.map(materialize);
+            for (let i = 1; i < rounds.length; i++) {
+                if (symKey(rounds[i]) === symKey(rounds[i - 1]) && i + 1 < rounds.length &&
+                    symKey(rounds[i + 1]) !== symKey(rounds[i - 1])) {
+                    const t = rounds[i]; rounds[i] = rounds[i + 1]; rounds[i + 1] = t;
+                }
+            }
+            return rounds;
+        }
+        function isLegal(r, n) {
+            if (r.kind === "double") return (r.lo ? n >= r.b : n > r.b) && (r.hi ? n <= r.b2 : n < r.b2);
+            switch (r.cmp) {
+                case "ge": return n >= r.b;
+                case "gt": return n > r.b;
+                case "le": return n <= r.b;
+                case "lt": return n < r.b;
+                case "eq": return n === r.b;
+            }
+            return false;
+        }
+        function legalBand(r) {
+            if (r.kind === "double") return [r.b + (r.lo ? 0 : 1), r.b2 - (r.hi ? 0 : 1)];
+            switch (r.cmp) {
+                case "ge": return [r.b, 100];
+                case "gt": return [r.b + 1, 100];
+                case "le": return [0, r.b];
+                case "lt": return [0, r.b - 1];
+                case "eq": return [r.b, r.b];
+            }
+            return [0, 100];
+        }
+        function stmtHtml(r) {
+            const it = (s) => "<i>" + s + "</i>";
+            if (r.kind === "double") {
+                return r.b + " " + (r.lo ? SYM.le : SYM.lt) + " " + it(r.letter) + " " + (r.hi ? SYM.le : SYM.lt) + " " + r.b2;
+            }
+            if (r.rev) {
+                const mirror = { gt: SYM.lt, lt: SYM.gt, ge: SYM.le, le: SYM.ge };
+                return r.b + " " + mirror[r.cmp] + " " + it(r.letter);
+            }
+            return it(r.letter) + " " + SYM[r.cmp] + " " + r.b;
+        }
+        function stmtPlain(r) { return stmtHtml(r).replace(/<\/?i>/g, ""); }
+        function stmtWords(r) {
+            if (r.kind === "double") {
+                return (r.lo ? "at least " + r.b : "more than " + r.b) + " ml and " + (r.hi ? "at most " + r.b2 : "less than " + r.b2) + " ml";
+            }
+            switch (r.cmp) {
+                case "ge": return "at least " + r.b + " ml";
+                case "gt": return "more than " + r.b + " ml";
+                case "le": return "at most " + r.b + " ml";
+                case "lt": return "less than " + r.b + " ml";
+                case "eq": return "exactly " + r.b + " ml";
+            }
+            return "";
+        }
+        function wordChipSet(r) {
+            let correct, d1, d2;
+            if (r.kind === "double") {
+                const both = r.lo && r.hi, neither = !r.lo && !r.hi;
+                if (both) { correct = "from " + r.b + " to " + r.b2 + ", both included"; d1 = "between " + r.b + " and " + r.b2 + ", neither included"; d2 = "more than " + r.b + " and at most " + r.b2; }
+                else if (neither) { correct = "between " + r.b + " and " + r.b2 + ", neither included"; d1 = "from " + r.b + " to " + r.b2 + ", both included"; d2 = "at least " + r.b + " and at most " + r.b2; }
+                else if (r.lo) { correct = "at least " + r.b + " and under " + r.b2; d1 = "at least " + r.b + " and at most " + r.b2; d2 = "over " + r.b + " and under " + r.b2; }
+                else { correct = "over " + r.b + " and at most " + r.b2; d1 = "at least " + r.b + " and under " + r.b2; d2 = "over " + r.b + " and under " + r.b2; }
+            } else {
+                const m = {
+                    ge: ["at least " + r.b, "more than " + r.b, "at most " + r.b],
+                    gt: ["more than " + r.b, "at least " + r.b, "less than " + r.b],
+                    le: ["at most " + r.b, "less than " + r.b, "at least " + r.b],
+                    lt: ["less than " + r.b, "at most " + r.b, "more than " + r.b],
+                    eq: ["exactly " + r.b, "at least " + r.b, "at most " + r.b],
+                }[r.cmp];
+                correct = m[0]; d1 = m[1]; d2 = m[2];
+            }
+            return shuffleArr([{ t: correct, ok: true }, { t: d1, ok: false }, { t: d2, ok: false }]);
+        }
+
+        /* ================= game state ================= */
+        let run = null;
+        const round = {
+            level: 0, frac: 0, timer: null, lastPourSnd: 0,
+            misses: 0, resolved: false, revealed: false,
+            firstServe: true, lastSig: null, armed: true,
+            wordFirstTry: true, wordPending: false, hintTier: 0,
+        };
+
+        function currentRound() { return run ? run.drawn[run.idx] : null; }
+        function currentBird() { return CUSTOMERS[run.custOrder[run.idx]]; }
+
+        function freshRun() {
+            const order = shuffleArr([0, 1, 2, 3, 4]).concat(shuffleArr([0, 1, 2, 3, 4]).slice(0, ROUNDS_PER_RUN - 5));
+            return { v: 1, drawn: drawRun(), custOrder: order, idx: 0, records: [], done: false };
+        }
+        function validRun(r) {
+            return r && r.v === 1 && Array.isArray(r.drawn) && r.drawn.length === ROUNDS_PER_RUN &&
+                Array.isArray(r.custOrder) && r.custOrder.length === ROUNDS_PER_RUN && Array.isArray(r.records);
+        }
+
+        function devInit(resume) {
+            let restored = null;
+            if (resume) {
+                restored = loadRun();
+                if (!validRun(restored)) restored = null;
+            }
+            run = restored || freshRun();
+            if (restored) {
+                run.idx = Math.min(run.records.length, ROUNDS_PER_RUN);
+                if (run.idx >= ROUNDS_PER_RUN) { endGame(); return; }
+            }
+            saveRun(run);
+            dom.playWrap.classList.remove("hidden");
+            dom.endWrap.classList.add("hidden");
+            renderRound();
+        }
+
+        function devReset() {
+            stopPour();
+            run = null;
+            clearRun();
+        }
+
+        /* ================= round rendering ================= */
+        function renderRound() {
+            const r = currentRound();
+            const bird = currentBird();
+            Object.assign(round, {
+                level: 0, frac: 0, timer: null, lastPourSnd: 0, misses: 0, resolved: false,
+                revealed: false, firstServe: true, lastSig: null, armed: true,
+                wordFirstTry: true, wordPending: false, hintTier: 0,
+            });
+            dom.roundCount.textContent = "Round " + (run.idx + 1) + " of " + ROUNDS_PER_RUN;
+            renderTokens();
+            dom.midReviewBtn.classList.toggle("hidden", run.records.length === 0);
+            dom.hintStrip.textContent = "";
+            const hintBtn = $g("hintBtn");
+            if (hintBtn) hintBtn.disabled = false;
+            setVerdict("", "");
+
+            dom.stageZone.innerHTML =
+                '<div class="stage-band" aria-hidden="true">' + withDesc(buildStageBand(nightNow())) + "</div>" +
+                '<div class="stage-inner">' +
+                '<div class="order-panel"><div class="zone-caption">The order</div>' +
+                '<div class="order-card' + (reducedMotion() ? "" : " deal") + '">' +
+                '<div class="order-bird-row"><span class="order-bird-art">' + birdSvg(bird.sp, "hover") + "</span>" +
+                '<span class="order-bird-name">' + bird.name + "</span></div>" +
+                '<div class="order-stmt" id="orderStmt">' + stmtHtml(r) + "</div>" +
+                '<div class="order-let">Let <i>' + r.letter + "</i> = millilitres of nectar</div>" +
+                '<div class="order-note">' + (r.kind === "single" && r.rev ? "The open (wider) end of the symbol still faces the bigger amount." : "") + "</div>" +
+                "</div></div>" +
+                '<div class="feeder-panel"><div class="zone-caption">The feeder</div>' +
+                '<div class="feeder-box">' +
+                '<div class="feeder-wrap">' +
+                '<div class="gauge-labels">' + gaugeLabels() + "</div>" +
+                '<div class="gauge" id="gauge"><div class="gauge-fill" id="gaugeFill"></div>' +
+                '<div class="gauge-glow" id="gaugeGlow"></div>' +
+                '<div class="gauge-ticks">' + gaugeTicks() + "</div></div>" +
+                '<div class="stage-bird" id="stageBird">' + birdSvg(bird.sp, "hover") + "</div>" +
+                "</div>" +
+                '<div class="readout" id="readout" role="status" aria-live="polite">0 ml</div>' +
+                "</div></div>" +
+                '<div class="pour-panel"><div class="zone-caption">Your pour</div>' +
+                '<div class="pour-box" id="pourBox">' +
+                '<button class="pump-btn" id="pumpBtn" type="button" aria-label="Hold to pour nectar">🫗 HOLD TO POUR</button>' +
+                '<div class="drip-row">' +
+                '<button class="drip-btn" id="dripDown" type="button" aria-label="Remove one millilitre">−1 ml</button>' +
+                '<button class="drip-btn" id="dripUp" type="button" aria-label="Add one millilitre">+1 ml</button>' +
+                "</div>" +
+                '<button class="serve-btn" id="serveBtn" type="button">🍯 SERVE</button>' +
+                "</div></div>" +
+                "</div>";
+
+            wirePourControls();
+            ensureNextBtn().classList.add("hidden");
+            setCoach("Read " + firstName(bird) + "'s card — then hold the pump to pour!");
+            setCue($g("pumpBtn"));
+        }
+
+        function firstName(bird) { return bird.name.split(" ")[0]; }
+
+        function gaugeTicks() {
+            let s = "";
+            for (let i = 1; i < 10; i++) {
+                s += '<div class="gauge-tick' + (i % 2 === 0 ? " major" : "") + '" style="bottom:' + i * 10 + '%"></div>';
+            }
+            return s;
+        }
+        function gaugeLabels() {
+            let s = "";
+            for (let i = 0; i <= 100; i += 20) {
+                s += '<div class="gauge-num" style="bottom:' + i + '%">' + i + "</div>";
+            }
+            return s;
+        }
+
+        function ensureNextBtn() {
+            let btn = $g("nextBtn");
+            if (!btn) {
+                btn = document.createElement("button");
+                btn.id = "nextBtn";
+                btn.className = "primary-btn hidden";
+                btn.type = "button";
+                btn.textContent = "Next bird ➜";
+                btn.addEventListener("click", nextRound);
+                dom.actionZone.appendChild(btn);
+            }
+            return btn;
+        }
+
+        /* ================= pour engine (setInterval — never rAF) ================= */
+        function wirePourControls() {
+            const pump = $g("pumpBtn");
+            pump.addEventListener("pointerdown", (e) => {
+                if (round.resolved || round.wordPending) return;
+                try { pump.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+                startPour();
+            });
+            pump.addEventListener("pointerup", stopPour);
+            pump.addEventListener("pointercancel", stopPour);
+            pump.addEventListener("contextmenu", (e) => e.preventDefault());
+            pump.addEventListener("keydown", (e) => {
+                if ((e.key === " " || e.key === "Enter") && !e.repeat) { e.preventDefault(); startPour(); }
+            });
+            pump.addEventListener("keyup", (e) => {
+                if (e.key === " " || e.key === "Enter") { e.preventDefault(); stopPour(); }
+            });
+            $g("dripUp").addEventListener("click", () => nudge(1));
+            $g("dripDown").addEventListener("click", () => nudge(-1));
+            $g("serveBtn").addEventListener("click", serve);
+        }
+
+        function startPour() {
+            if (round.timer || round.resolved || round.wordPending) return;
+            $g("pumpBtn").classList.add("pumping");
+            rearmAfterEdit();
+            round.timer = setInterval(() => {
+                round.frac += 0.8;
+                if (round.frac >= 1) {
+                    const add = Math.floor(round.frac);
+                    round.frac -= add;
+                    setLevel(round.level + add);
+                    const now = Date.now();
+                    if (now - round.lastPourSnd > 140) { round.lastPourSnd = now; playSound("pour"); }
+                }
+            }, 50);
+            setCoach("Pouring… release when the amount fits the order.", false);
+        }
+        function stopPour() {
+            const pump = $g("pumpBtn");
+            if (pump) pump.classList.remove("pumping");
+            if (round.timer) {
+                clearInterval(round.timer);
+                round.timer = null;
+                if (!round.resolved && !round.wordPending) {
+                    setCoach("Happy with " + round.level + " ml? Press SERVE!", false);
+                    setCue($g("serveBtn"));
+                }
+            }
+        }
+        function nudge(d) {
+            if (round.resolved || round.wordPending) return;
+            playSound("click");
+            rearmAfterEdit();
+            setLevel(round.level + d);
+            setCoach("Happy with " + round.level + " ml? Press SERVE!", false);
+            setCue($g("serveBtn"));
+        }
+        function setLevel(n) {
+            round.level = Math.max(0, Math.min(100, n));
+            $g("gaugeFill").style.height = round.level + "%";
+            $g("readout").textContent = round.level + " ml";
+        }
+        function rearmAfterEdit() {
+            if (round.armed || round.resolved) return;
+            round.armed = true;
+            setVerdict("", "");
+        }
+
+        /* ================= serve / verdict ================= */
+        function serve() {
+            if (round.resolved || round.wordPending || run.done) return;
+            if (round.lastSig === round.level && !round.armed) {
+                /* unchanged re-serve: no new verdict — nudge instead of dead silence */
+                setCoach("Change the amount first — pump, or use the drip valves.", false);
+                return;
+            }
+            stopPour();
+            const r = currentRound();
+            const n = round.level;
+            round.lastSig = n;
+            if (isLegal(r, n)) resolveCorrect(r, n);
+            else resolveWrong(r, n);
+        }
+
+        function edgeNote(r, n) {
+            /* boundary-aware wrong text — always name the symbol AS DISPLAYED on the card */
+            if (r.kind === "double") {
+                if (!r.lo && n === r.b) return n + " ml hits the limit exactly — but " + SYM.lt + " leaves it out.";
+                if (!r.hi && n === r.b2) return n + " ml hits the limit exactly — but " + SYM.lt + " leaves it out.";
+            } else if ((r.cmp === "gt" || r.cmp === "lt") && n === r.b) {
+                const shown = r.rev ? (r.cmp === "gt" ? SYM.lt : SYM.gt) : SYM[r.cmp];
+                return n + " ml hits the limit exactly — but " + shown + " leaves it out.";
+            } else if (r.cmp === "eq") {
+                return stmtPlain(r) + " means exactly " + r.b + " ml — no more, no less.";
+            }
+            return n + " ml is outside " + stmtPlain(r) + ".";
+        }
+
+        function showGlow(r) {
+            const band = legalBand(r);
+            const glow = $g("gaugeGlow");
+            if (band[1] < band[0]) return;
+            glow.style.bottom = band[0] + "%";
+            glow.style.height = Math.max(band[1] - band[0], 1.4) + "%";
+            glow.classList.add("on");
+        }
+
+        function resolveCorrect(r, n) {
+            round.resolved = true;
+            playSound("correct");
+            showGlow(r);
+            const bird = $g("stageBird");
+            bird.classList.add("drinking");
+            bird.innerHTML = birdSvg(currentBird().sp, "drink");
+            const band = legalBand(r);
+            const nearEdge = (Number.isFinite(band[0]) && band[0] > 0 && Math.abs(n - band[0]) <= 2) ||
+                (band[1] < 100 && Math.abs(n - band[1]) <= 2);
+            const onEdge = n === band[0] || n === band[1];
+            if (r.cmp === "eq") {
+                setVerdict("good", n + " ml — the only amount that fits " + stmtPlain(r) + "!");
+                setCoach("Exactly " + r.b + " ml — the ONLY amount that fits. With an inequality, a whole range would glow!");
+            } else if (nearEdge) {
+                setVerdict("good", onEdge
+                    ? n + " ml — right on the edge, and it counts. Precision sip!"
+                    : n + " ml — close to the edge, and it still counts. Precision sip!");
+                setCoach("Perfect pour! See the glow? Every amount in it fits " + stmtPlain(r) + ".");
+                sipSparks();
+            } else {
+                setVerdict("good", n + " ml fits " + stmtPlain(r) + " — " + firstName(currentBird()) + " drinks happily!");
+                setCoach("Perfect pour! See the glow? Every amount in it fits " + stmtPlain(r) + ".");
+            }
+            if (run.idx >= 2) {
+                startWordCheck(r);
+            } else {
+                /* let the drink read before the takeoff celebration */
+                const tier = round.firstServe && !round.revealed ? "gold" : "green";
+                setTimeout(() => {
+                    if (run && !run.done && round.resolved && !round.wordPending) completeRound(tier);
+                }, reducedMotion() ? 0 : 750);
+            }
+        }
+
+        function resolveWrong(r, n) {
+            round.misses += 1;
+            round.firstServe = false;
+            round.armed = false;
+            playSound("wrong");
+            failFx();
+            const bird = $g("stageBird");
+            bird.classList.add("refuse");
+            setTimeout(() => bird && bird.classList.remove("refuse"), 700);
+            if (round.misses >= 2) {
+                round.resolved = true;
+                round.revealed = true;
+                showGlow(r);
+                setVerdict("bad", stmtPlain(r) + ": the glowing band shows every amount that fits.");
+                setCoach("Here's the trick: " + stmtPlain(r) + " means " + stmtWords(r) + ". The glow shows every amount that works.");
+                completeRound("grey");
+            } else {
+                setVerdict("bad", edgeNote(r, n));
+                setCoach(firstName(currentBird()) + " can't drink that. " + n + " ml doesn't fit " + stmtPlain(r) + ". Adjust and serve again!");
+                setCue($g("pumpBtn"));
+            }
+        }
+
+        /* ================= word-check ================= */
+        function startWordCheck(r) {
+            round.wordPending = true;
+            const box = $g("pourBox");
+            const chips = wordChipSet(r);
+            const deal = reducedMotion() ? "" : " deal";
+            box.innerHTML = '<div class="wordcheck" id="wordCheck">' +
+                '<div class="wordcheck-title">Which words say the same as the card?</div>' +
+                chips.map((c, i) =>
+                    '<button class="word-chip' + deal + '" type="button" style="animation-delay:' + (i * 60) + 'ms" data-ok="' + (c.ok ? "1" : "0") + '" id="wordChip' + i + '">' +
+                    escapeHtml(c.t) + "</button>").join("") +
+                "</div>";
+            setCoach("One more thing — which words say the same as the card?");
+            setCue($g("wordCheck"));
+            chips.forEach((c, i) => {
+                $g("wordChip" + i).addEventListener("click", onWordChip);
+            });
+        }
+        function onWordChip(e) {
+            const btn = e.currentTarget;
+            if (btn.disabled || !round.wordPending) return;
+            if (btn.dataset.ok === "1") {
+                round.wordPending = false;
+                btn.classList.add("right");
+                document.querySelectorAll(".word-chip").forEach((b) => { b.disabled = true; });
+                btn.disabled = true;
+                playSound("correct");
+                completeRound(round.firstServe && round.wordFirstTry && !round.revealed ? "gold" : "green");
+            } else {
+                round.wordFirstTry = false;
+                btn.disabled = true;
+                playSound("wrong");
+                setCoach("Not that one — read the whole phrase, not just one word.");
+            }
+        }
+
+        /* ================= round completion / progression ================= */
+        function completeRound(tier) {
+            const r = currentRound();
+            const bird = currentBird();
+            round.resolved = true;
+            round.wordPending = false;
+            const kind = tier === "gold" ? "Gold ★" : tier === "green" ? "Solved" : "Revealed";
+            run.records.push({
+                txt: stmtPlain(r) + " — poured " + round.level + " ml (" + firstName(bird) + ")",
+                kind, tier,
+                why: stmtPlain(r) + " means " + stmtWords(r) + ".",
+            });
+            saveRun(run);
+            renderTokens(true);
+            dom.midReviewBtn.classList.remove("hidden");
+            const hb = $g("hintBtn");
+            if (hb) hb.disabled = true;
+            if (tier !== "grey") celebrationFx();
+            const next = ensureNextBtn();
+            next.textContent = run.idx + 1 >= ROUNDS_PER_RUN ? "Close the bar ➜" : "Next bird ➜";
+            next.classList.remove("hidden");
+            setCue(next);
+        }
+        function nextRound() {
+            playSound("click");
+            run.idx += 1;
+            saveRun(run);
+            if (run.idx >= ROUNDS_PER_RUN) endGame();
+            else renderRound();
+        }
+
+        /* ================= tokens (perch wire) ================= */
+        function tierOpacity(t) { return t === "grey" ? "0.45" : "1"; }
+        function perchComposite(slots, records, scale, landLast) {
+            const raw = buildPerchWire(nightNow(), slots);
+            const m = raw.match(/<!--PERCH_XS:(\[[^\]]*\])-->/);
+            let xs = [];
+            try { xs = m ? JSON.parse(m[1]) : []; } catch (err) { xs = []; }
+            const svgStr = raw.replace(/<!--PERCH_XS:\[[^\]]*\]-->/, "");
+            /* wire y at any x follows the builder's quadratic M30 34 Q W/2 62 W-30 34 */
+            const W = 260 + slots * 70;
+            const wireY = (x) => {
+                const t = (x - 30) / (W - 60);
+                return 34 * (1 - t) * (1 - t) + 2 * t * (1 - t) * 62 + 34 * t * t;
+            };
+            const sc = scale || 0.55;
+            let extra = "";
+            records.forEach((rec, i) => {
+                if (!rec || xs[i] == null) return;
+                const bird = CUSTOMERS[run.custOrder[i]];
+                const halo = rec.tier === "gold"
+                    ? '<circle cx="0" cy="-6" r="30" fill="#fbbf24" opacity="0.35"></circle>' : "";
+                /* feet sit ON the wire: bird art bottom ≈ +33 units below its origin */
+                const y = wireY(xs[i]) - 33 * sc;
+                const landCls = landLast && i === records.length - 1 ? ' class="nb-land"' : "";
+                extra += '<g' + landCls + ' transform="translate(' + xs[i] + "," + y.toFixed(1) + ') scale(' + sc + ')" opacity="' + tierOpacity(rec.tier) + '">' +
+                    halo + buildBird(bird.sp, "perch") + "</g>";
+            });
+            return withDesc(svgStr.replace("</svg>", extra + "</svg>"));
+        }
+        function renderTokens(landLast) {
+            dom.tokenStrip.innerHTML = '<span class="perch-wire-svg">' + perchComposite(ROUNDS_PER_RUN, run.records, 0.5, landLast && !reducedMotion()) + "</span>";
+            dom.tokenStrip.setAttribute("aria-label",
+                "The perch wire — served birds rest here. Progress: " + run.records.length + " of " + ROUNDS_PER_RUN + " rounds done");
+        }
+
+        /* ================= review / hints ================= */
+        function getReviewRecords() {
+            return run ? run.records.map((rec) => ({ txt: rec.txt, kind: rec.kind, why: rec.why })) : [];
+        }
+
+        function showHint() {
+            playSound("click");
+            const r = currentRound();
+            if (!r || round.resolved) return;
+            const band = legalBand(r);
+            if (round.hintTier === 0) {
+                round.hintTier = 1;
+                const tail = r.cmp === "eq" ? "Only one amount works."
+                    : r.kind === "double" ? "Do the stated numbers themselves count?"
+                        : "Does the stated number itself count?";
+                dom.hintStrip.textContent = "💡 Say the card aloud: “" + stmtWords(r) + "”. " + tail;
+            } else {
+                round.hintTier = 2;
+                /* sample near the meaningful edge: upper-bounded rounds hint from the top */
+                let ex1, ex2;
+                if (band[0] === 0 && band[1] < 100) {
+                    ex1 = band[1]; ex2 = Math.max(band[1] - 5, 0);
+                } else {
+                    ex1 = band[0]; ex2 = Math.min(band[0] + 5, band[1]);
+                }
+                const inclNote = (r.kind === "double")
+                    ? (r.lo ? "Exactly " + r.b + " counts too." : "But exactly " + r.b + " does NOT count.")
+                    : (r.cmp === "ge" || r.cmp === "le" || r.cmp === "eq"
+                        ? "Exactly " + r.b + " counts too."
+                        : "But exactly " + r.b + " does NOT count.");
+                dom.hintStrip.textContent = "💡 Legal amounts include " + ex1 + " ml" +
+                    (ex2 !== ex1 ? " and " + ex2 + " ml" : "") + ". " + inclNote;
+                const hb = $g("hintBtn");
+                if (hb) hb.disabled = true;
+            }
+        }
+
+        /* ================= end screen ================= */
+        function endGame() {
+            stopPour();
+            run.done = true;
+            saveRun(run);
+            dom.playWrap.classList.add("hidden");
+            dom.endWrap.classList.remove("hidden");
+            const gold = run.records.filter((x) => x.tier === "gold").length;
+            const green = run.records.filter((x) => x.tier === "green").length;
+            const grey = run.records.filter((x) => x.tier === "grey").length;
+            $g("endHeadline").textContent = "Bar's closed!";
+            $g("endSub").textContent = grey === 0
+                ? "Look at that full perch wire — every bird got a mathematically correct serving."
+                : "Look at that full perch wire — the bar served every bird that came.";
+            $g("endSummary").innerHTML = '<span class="perch-wire-svg" style="height:64px">' +
+                perchComposite(ROUNDS_PER_RUN, run.records, 0.62) + "</span>";
+            $g("endTally").innerHTML =
+                "<span>★ Gold pours: " + gold + "</span><span>✓ Solved: " + green + "</span><span>👁 Revealed: " + grey + "</span>";
+            setCue(null);
+            playSound("complete");
+        }
+
+        function playAgain() {
+            playSound("click");
+            clearRun();
+            run = freshRun();
+            saveRun(run);
+            dom.endWrap.classList.add("hidden");
+            dom.playWrap.classList.remove("hidden");
+            renderRound();
+        }
+
+        /* ================= fx ================= */
+        function spawnFxSvg(html, life) {
+            if (reducedMotion()) return;
+            const el = document.createElement("div");
+            el.className = "fx-el";
+            el.innerHTML = html;
+            dom.fxLayer.appendChild(el);
+            setTimeout(() => el.remove(), life);
+            return el;
+        }
+        function celebrationFx() {
+            if (reducedMotion()) return;
+            const gauge = $g("gauge");
+            const rect = gauge ? gauge.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2 };
+            /* the customer takes off — hide the stage copy so one bird flies, not two */
+            const stageBird = $g("stageBird");
+            if (stageBird) stageBird.classList.add("flown");
+            const bird = document.createElement("div");
+            bird.className = "fx-el fx-bird";
+            bird.style.left = rect.left + "px";
+            bird.style.top = Math.max(rect.top - 40, 20) + "px";
+            /* randomised zig-zag climb — a fresh path every takeoff */
+            const W = innerWidth;
+            const rnd = (a, b) => a + Math.random() * (b - a);
+            const climb = rect.top + 40; /* room above the gauge up to the viewport top */
+            bird.style.setProperty("--zx1", Math.round(W * rnd(0.10, 0.24)) + "px");
+            bird.style.setProperty("--zy1", Math.round(-climb * rnd(0.12, 0.28)) + "px");
+            bird.style.setProperty("--zx2", Math.round(W * rnd(0.02, 0.12)) + "px");
+            bird.style.setProperty("--zy2", Math.round(-climb * rnd(0.35, 0.55)) + "px");
+            bird.style.setProperty("--zx3", Math.round(W * rnd(0.22, 0.42)) + "px");
+            bird.style.setProperty("--zy3", Math.round(-climb * rnd(0.45, 0.65)) + "px");
+            bird.style.setProperty("--zx4", Math.round(W * rnd(0.45, 0.8)) + "px");
+            bird.style.setProperty("--zy4", Math.round(-climb * rnd(0.8, 1.05)) + "px");
+            bird.innerHTML = birdSvg(currentBird().sp, "hover");
+            dom.fxLayer.appendChild(bird);
+            setTimeout(() => bird.remove(), 1900);
+            const petalCols = ["#fb7185", "#f9a8d4", "#fff1f2", "#e11d48", "#fda4af"];
+            for (let i = 0; i < 13; i++) {
+                const p = document.createElement("div");
+                p.className = "fx-el fx-petal";
+                p.style.left = Math.round(Math.random() * innerWidth) + "px";
+                p.style.top = "-16px";
+                p.style.background = petalCols[i % petalCols.length];
+                p.style.setProperty("--px", Math.round(-60 + Math.random() * 120) + "px");
+                p.style.setProperty("--py", Math.round(innerHeight * (0.55 + Math.random() * 0.45)) + "px");
+                p.style.setProperty("--pd", (1.6 + Math.random() * 0.9).toFixed(2) + "s");
+                p.style.setProperty("--pdelay", (Math.random() * 0.35).toFixed(2) + "s");
+                dom.fxLayer.appendChild(p);
+                setTimeout(() => p.remove(), 2600);
+            }
+        }
+        function failFx() {
+            rumbleShell();
+            if (reducedMotion()) return;
+            const gauge = $g("gauge");
+            if (!gauge) return;
+            const rect = gauge.getBoundingClientRect();
+            for (let i = 0; i < 8; i++) {
+                const d = document.createElement("div");
+                d.className = "fx-el fx-drop";
+                d.style.left = (rect.left + rect.width / 2) + "px";
+                d.style.top = rect.top + "px";
+                d.style.setProperty("--dx", Math.round(-70 + Math.random() * 140) + "px");
+                d.style.setProperty("--dy", Math.round(50 + Math.random() * 110) + "px");
+                dom.fxLayer.appendChild(d);
+                setTimeout(() => d.remove(), 650);
+            }
+        }
+        function sipSparks() {
+            if (reducedMotion()) return;
+            const gauge = $g("gauge");
+            if (!gauge) return;
+            for (let i = 0; i < 5; i++) {
+                const s = document.createElement("div");
+                s.className = "sip-spark";
+                s.style.bottom = round.level + "%";
+                s.style.setProperty("--sx", Math.round(-26 + Math.random() * 52) + "px");
+                s.style.setProperty("--sy", Math.round(-40 - Math.random() * 20) + "px");
+                gauge.appendChild(s);
+                setTimeout(() => s.remove(), 950);
+            }
+        }
+
+        /* ================= scenes on theme change / boot ================= */
+        function renderHeroScene() {
+            dom.heroScene.innerHTML = withDesc(buildHeroScene(nightNow()));
+        }
+        function renderCoachArt() {
+            dom.coachArt.innerHTML = birdSvg("copper", "hover");
+        }
+        function refreshSceneTheme() {
+            renderHeroScene();
+            renderCoachArt();
+            const band = dom.stageZone.querySelector(".stage-band");
+            if (band) band.innerHTML = withDesc(buildStageBand(nightNow()));
+            if (run && !run.done && run.records) renderTokens();
+            if (run && run.done) {
+                const es = $g("endSummary");
+                if (es && !dom.endWrap.classList.contains("hidden")) {
+                    es.innerHTML = '<span class="perch-wire-svg" style="height:64px">' +
+                        perchComposite(ROUNDS_PER_RUN, run.records, 0.62) + "</span>";
+                }
+            }
+        }
+        dom.themeToggleBtn.addEventListener("click", () => setTimeout(refreshSceneTheme, 0));
+
+        /* the round's first coach ping fires under the auto-opened Help modal —
+           re-ping when Help closes so the bubble is the first thing that moves */
+        function pingAfterHelpClose() {
+            if (dom.simScreen.classList.contains("active") && run && !run.done) {
+                setTimeout(pingCoach, 180);
+            }
+        }
+        dom.gotItBtn.addEventListener("click", pingAfterHelpClose);
+        dom.closeInstructionsBtn.addEventListener("click", pingAfterHelpClose);
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && dom.instructionsModal.classList.contains("show")) pingAfterHelpClose();
+        });
+
+        /* === END GAME LOGIC ZONE === */
+
+        initializeApp();
+        renderCoachArt();
+
+        /* resume a saved run on reload — no Help modal on this path */
+        (function resumeIfSaved() {
+            const saved = loadRun();
+            if (saved && !saved.done) {
+                showScreen("sim");
+                devInit(true);
+            }
+        })();
+    </script>
+    <!-- ~Abhishek Dan · Test Version 1 · 2026-08-29 -->
+</body>
+
+</html>
