@@ -929,6 +929,54 @@
             color: var(--text);
         }
 
+        /* every new coach line pops, flashes gold, and the crab hops —
+           the eye is pulled to the instruction before anything else */
+        .coach-row.say .coach-bubble {
+            animation: coachSay 0.4s cubic-bezier(0.2, 1.2, 0.4, 1), coachFlash 1.6s ease-out;
+        }
+
+        .coach-row.say .coach-crab {
+            animation: crabHop 0.5s ease;
+        }
+
+        @keyframes coachSay {
+            0% {
+                transform: translateY(6px) scale(0.96);
+            }
+
+            45% {
+                transform: translateY(-2px) scale(1.04);
+            }
+
+            100% {
+                transform: none;
+            }
+        }
+
+        @keyframes coachFlash {
+
+            0%,
+            55% {
+                border-color: var(--gold);
+                box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 40%, transparent);
+            }
+
+            100% {
+                border-color: var(--border);
+                box-shadow: none;
+            }
+        }
+
+        @keyframes crabHop {
+            30% {
+                transform: translateY(-6px) rotate(-10deg);
+            }
+
+            60% {
+                transform: translateY(0) rotate(5deg);
+            }
+        }
+
         /* pulsing "do this next" cue */
         .cue {
             position: relative;
@@ -3357,7 +3405,17 @@
         }
 
         function setGoal(text) { fDom.goalBanner.textContent = text; }
-        function setTask(html) { fDom.taskLine.innerHTML = html; }
+        function setTask(html) {
+            fDom.taskLine.innerHTML = html;
+            /* replay the pop / gold flash / crab hop on every new line so
+               the student's eye goes to the instruction first */
+            const row = fDom.taskLine.parentElement;
+            if (row) {
+                row.classList.remove("say");
+                void row.offsetWidth;
+                row.classList.add("say");
+            }
+        }
 
         function clearFeedback() {
             fDom.feedbackBox.textContent = "";
