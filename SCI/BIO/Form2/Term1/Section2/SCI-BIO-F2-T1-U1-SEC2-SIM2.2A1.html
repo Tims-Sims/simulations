@@ -834,7 +834,7 @@
              Search "DEV-EDIT" to find every place you need to change.
              ============================================================ -->
         <div class="footer-note">
-            Stopwatch and Pulse Counter — practice measuring pulse safely and accurately.
+            
         </div>
     </div>
 
@@ -893,11 +893,11 @@
            ============================================================ */
         const SIM_CONFIG = {
             templateVersion: "2.2.1",
-            simId: "pulse-counter-sim",
+            simId: "SCI-BIO-F2-T1-U1-SEC2-SIM2.2A1",
             title: "Stopwatch and Pulse Counter",
             subtitle: "Measure pulse safely and record data",
-            badgeText: "BPM",
-            homeEyebrow: "Pulse Measurement Tool",
+            badgeText: "BIO",
+            homeEyebrow: "Integrated Science - Biology",
             homeDescription:
                 "Practice counting a pulse for 60 seconds accurately. Watch the animated pulse and tap along with each beat, then compare your count to the actual rate.",
             instructions: [
@@ -1498,6 +1498,7 @@
             if (sel) sel.disabled = false;
 
             renderResults();
+            window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
         function renderResults() {
@@ -1590,20 +1591,23 @@
 
             document.querySelectorAll(".assessment-q .choice-item").forEach((item) => {
                 item.addEventListener("click", () => {
+                    const input = item.querySelector("input");
+                    if (input.disabled) return;
                     const q = item.closest(".assessment-q");
                     q.querySelectorAll(".choice-item").forEach((c) => c.classList.remove("selected"));
                     item.classList.add("selected");
-                    item.querySelector("input").checked = true;
+                    input.checked = true;
                 });
             });
 
             document.getElementById("checkAssessmentBtn").addEventListener("click", checkAssessment);
             document.getElementById("retrySimBtn").addEventListener("click", () => {
-                renderConfigScreen();
+                openResetConfirmModal();
             });
         }
 
         function checkAssessment() {
+            document.querySelectorAll(".assessment-q input[type='radio']").forEach((r) => r.disabled = true);
             const questions = document.querySelectorAll(".assessment-q");
             questions.forEach((q, i) => {
                 const correctIdx = parseInt(q.dataset.correct, 10);
@@ -1632,6 +1636,9 @@
 
             document.getElementById("checkAssessmentBtn").classList.add("hidden");
             document.getElementById("retrySimBtn").classList.remove("hidden");
+
+            const section = document.querySelector(".assessment-section");
+            if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
             playSound("complete");
         }
 
