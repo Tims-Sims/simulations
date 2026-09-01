@@ -1099,6 +1099,21 @@
             text-align: center;
         }
         .readout-words.empty { color: var(--muted); font-weight: 400; }
+        .readout-math {
+            min-height: 30px;
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 16px;
+            border-radius: 999px;
+            border: 2px solid var(--accent);
+            background: var(--surface);
+            font-size: 1.18rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+        .readout-math.empty { border-color: var(--muted); color: var(--muted); font-weight: 600; opacity: 0.7; }
 
         .verdict-line {
             margin-top: 10px;
@@ -1350,7 +1365,7 @@
             .topbar { padding: 6px 10px; }
             .sim-card { padding: 10px; }
             .brand-copy p { display: none; }
-            :root { --stage-h: 168px; --post-h: 58px; --picket-h: 27px; --visitor: 27px; --hop-y: -93px; --plate-pad: 5px; }
+            :root { --stage-h: 156px; --post-h: 58px; --picket-h: 27px; --visitor: 27px; --hop-y: -93px; --plate-pad: 5px; }
             .visitor { bottom: 8px; }
             .hint-strip { min-height: 28px; font-size: 0.8rem; padding: 4px 10px; margin-bottom: 6px; }
             .rule-strip { display: none; }
@@ -1372,7 +1387,8 @@
             .coach-bubble { font-size: 0.88rem; padding: 5px 9px; }
             .coach-agouti svg { width: 31px; height: 31px; }
             .readout-strip { margin-top: 6px; min-height: 38px; padding: 4px 9px; }
-            .readout-title { font-size: 0.6rem; }
+            .readout-title { display: none; }
+            .readout-math { min-height: 24px; font-size: 0.95rem; padding: 1px 10px; }
             .readout-words { font-size: 0.82rem; }
             .verdict-line { margin-top: 6px; min-height: 36px; padding: 5px 10px; font-size: 0.86rem; }
             .round-actions { margin-top: 6px; min-height: 40px; }
@@ -1487,7 +1503,7 @@
             event.preventDefault();
         }, true);
 
-        const BUILD_META = "~Abhishek Dan · Test Version 3 · 2026-09-01";
+        const BUILD_META = "~Abhishek Dan · Test Version 4 · 2026-09-01";
         const SVG_DESC = `<desc>${BUILD_META}</desc>`;
 
         /* ============================================================
@@ -2546,6 +2562,7 @@
                     </div>
                     <div class="readout-strip" id="readoutStrip">
                         <span class="readout-title">YOUR GATE SAYS</span>
+                        <span class="readout-math empty" id="readoutMath" aria-live="polite">n = ?</span>
                         <span class="readout-words empty" id="readoutWords">no gate set yet — drag the post to the boundary number</span>
                     </div>
                     <div class="verdict-line" id="verdictLine" role="status" aria-live="polite"></div>
@@ -2569,7 +2586,7 @@
 
             const ids = ["playWrap", "roundCount", "ticketRail", "hintBtn", "midReviewBtn", "coachAgouti", "coachLine",
                 "hintStrip", "ruleStrip", "rulePlate", "plateChip", "plateRule", "gateStage", "stageBack",
-                "fenceRow", "railLabels", "visitorLane", "readoutStrip", "readoutWords",
+                "fenceRow", "railLabels", "visitorLane", "readoutStrip", "readoutWords", "readoutMath",
                 "verdictLine", "roundActions", "openQueueBtn", "nextBtn",
                 "endWrap", "endHeadline", "endSub", "endRail", "endTally", "reviewBtn", "playAgainBtn"];
             fDom = {};
@@ -2639,16 +2656,43 @@
             fDom.verdictLine.appendChild(document.createTextNode(text || ""));
         }
 
+        /* the student's CURRENT gate as maths — the inequality the fence is drawing right now */
+        function gateMaths(s, g) {
+            const fmt = (v) => moneyFmt(s, v);
+            if (g.posts.length === 1) {
+                const b = fmt(g.posts[0]);
+                const loOpen = g.open[0], hiOpen = g.open[1], w = g.wickets[0];
+                if (loOpen && hiOpen) return w ? "every n" : "n ≠ " + b;
+                if (!loOpen && !hiOpen) return w ? "n = " + b : "no n passes";
+                if (hiOpen) return w ? "n ≥ " + b : "n > " + b;
+                return w ? "n ≤ " + b : "n < " + b;
+            }
+            const [p0, p1] = g.posts;
+            const openSegs = g.open.map((o, i) => (o ? i : -1)).filter((i) => i >= 0);
+            if (openSegs.length === 1 && openSegs[0] === 1) {
+                return fmt(p0) + (g.wickets[0] ? " ≤ " : " < ") + "n" + (g.wickets[1] ? " ≤ " : " < ") + fmt(p1);
+            }
+            if (openSegs.length === 0) {
+                const names = [g.wickets[0] ? fmt(p0) : null, g.wickets[1] ? fmt(p1) : null].filter(Boolean);
+                return names.length ? "n = " + names.join(" or ") : "no n passes";
+            }
+            return "…";
+        }
+
         function updateReadout() {
             const s = currentRound();
             const g = roundState.gate;
             if (!roundState.touched) {
                 fDom.readoutWords.classList.add("empty");
                 fDom.readoutWords.textContent = "no gate set yet — drag the post to the boundary number";
+                fDom.readoutMath.classList.add("empty");
+                fDom.readoutMath.textContent = "n = ?";
                 return;
             }
             fDom.readoutWords.classList.remove("empty");
             fDom.readoutWords.textContent = gateWords(s, g);
+            fDom.readoutMath.classList.remove("empty");
+            fDom.readoutMath.textContent = gateMaths(s, g);
         }
 
         /* ---------- stage rendering ---------- */
