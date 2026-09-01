@@ -21,7 +21,7 @@
          Change the browser tab title here.
          Search "DEV-EDIT" to find every place you need to change.
          ============================================================ -->
-    <title>Simulation Template Shell</title>
+    <title>Stopwatch and Pulse Counter</title>
     <style>
         /* ============================================================
            CHROME — DO NOT EDIT
@@ -468,9 +468,311 @@
 
         /* ============================================================
            DEV-EDIT: SIM STYLES
-           Add your simulation CSS below. Do not modify chrome CSS above.
-           Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
+
+        .pulse-config {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .pulse-config label {
+            font-weight: 700;
+            color: var(--text-soft);
+            margin-right: 10px;
+        }
+
+        .bpm-select {
+            padding: 10px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .pulse-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .timer-display {
+            font-size: clamp(2.8rem, 6vw, 4.5rem);
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            color: var(--text);
+            letter-spacing: 0.02em;
+        }
+
+        .pulse-ring-wrap {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: grid;
+            place-items: center;
+        }
+
+        .pulse-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            transition: none;
+        }
+
+        .pulse-circle.beating {
+            animation: pulseBeat var(--beat-duration, 0.75s) ease-in-out infinite;
+        }
+
+        .pulse-circle.flash {
+            background: var(--success);
+            box-shadow: 0 0 40px color-mix(in srgb, var(--success) 50%, transparent);
+        }
+
+        @keyframes pulseBeat {
+            0%   { transform: scale(1);   opacity: 1; }
+            15%  { transform: scale(1.4); opacity: 1; }
+            40%  { transform: scale(1);   opacity: 0.85; }
+            100% { transform: scale(1);   opacity: 1; }
+        }
+
+        .pulse-outer-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            pointer-events: none;
+        }
+
+        .tap-count-display {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .tap-count-display span {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .tap-btn {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 4px solid color-mix(in srgb, var(--accent) 50%, var(--border));
+            background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+            color: var(--text);
+            font-size: 1.3rem;
+            font-weight: 800;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.08s ease, background 0.12s ease;
+            display: grid;
+            place-items: center;
+            line-height: 1.3;
+        }
+
+        .tap-btn:active:not(:disabled) {
+            transform: scale(0.92);
+            background: color-mix(in srgb, var(--accent) 28%, var(--surface));
+        }
+
+        .tap-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tap-btn .tap-hint {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 400;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .sim-start-row {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .sim-start-row .primary-btn {
+            font-size: 1.15rem;
+            padding: 16px 40px;
+        }
+
+        /* Results */
+        .results-section {
+            text-align: center;
+        }
+
+        .results-section h2 {
+            margin: 0 0 8px;
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+        }
+
+        .results-feedback {
+            margin: 16px 0;
+            padding: 18px 22px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            font-size: 1.05rem;
+            line-height: 1.65;
+            color: var(--text-soft);
+        }
+
+        .results-feedback.correct {
+            background: color-mix(in srgb, var(--success) 14%, var(--surface));
+            border-color: color-mix(in srgb, var(--success) 40%, transparent);
+        }
+
+        .results-feedback.incorrect {
+            background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+            border-color: color-mix(in srgb, var(--danger) 36%, transparent);
+        }
+
+        .results-stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .results-stat {
+            padding: 16px 22px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            min-width: 140px;
+        }
+
+        .results-stat h4 {
+            margin: 0 0 6px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .results-stat p {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        /* Assessment questions */
+        .assessment-section {
+            margin-top: 32px;
+            text-align: left;
+        }
+
+        .assessment-section h3 {
+            text-align: center;
+            font-size: 1.4rem;
+            margin: 0 0 20px;
+        }
+
+        .assessment-q {
+            padding: 18px 22px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            margin-bottom: 16px;
+        }
+
+        .assessment-q h4 {
+            margin: 0 0 12px;
+            font-size: 1.05rem;
+            color: var(--text);
+        }
+
+        .assessment-q .choice-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .assessment-q .choice-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .assessment-q .choice-item:hover {
+            border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+        }
+
+        .assessment-q .choice-item.selected {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+        }
+
+        .assessment-q .choice-item.revealed-correct {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--success) 12%, var(--surface));
+        }
+
+        .assessment-q .choice-item.revealed-wrong {
+            border-color: var(--danger);
+            background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+            opacity: 0.6;
+        }
+
+        .assessment-q .choice-item input {
+            margin-top: 3px;
+            transform: scale(1.15);
+        }
+
+        .assessment-q .choice-item label {
+            color: var(--text-soft);
+            line-height: 1.55;
+            cursor: pointer;
+        }
+
+        .assessment-feedback {
+            margin-top: 10px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .assessment-feedback.show {
+            display: block;
+        }
+
+        .assessment-feedback.correct {
+            background: color-mix(in srgb, var(--success) 14%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
+            color: var(--text-soft);
+        }
+
+        .assessment-feedback.wrong {
+            background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+            border: 1px solid color-mix(in srgb, var(--danger) 36%, transparent);
+            color: var(--text-soft);
+        }
+
+        .assessment-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spacebar-hint {
+            font-size: 0.82rem;
+            color: var(--muted);
+            text-align: center;
+            margin-top: -8px;
+        }
 
     </style>
 </head>
@@ -521,13 +823,7 @@
         <main class="screen" id="simScreen">
             <div class="sim-layout">
                 <section class="sim-card" id="simContainer">
-                    <!-- ============================================================
-                         DEV-EDIT: SIM AREA
-                         Build your simulation markup here. Remove the placeholder
-                         text below once your simulation UI is in place.
-                         Search "DEV-EDIT" to find every place you need to change.
-                         ============================================================ -->
-                    <p class="muted">Simulation content placeholder. Replace this section with your simulation UI.</p>
+                    <div id="simContent"></div>
                 </section>
             </div>
         </main>
@@ -538,7 +834,7 @@
              Search "DEV-EDIT" to find every place you need to change.
              ============================================================ -->
         <div class="footer-note">
-            Built as a local, editable shell. Swap the content, keep the structure, and your developers are good to go.
+            Stopwatch and Pulse Counter — practice measuring pulse safely and accurately.
         </div>
     </div>
 
@@ -596,19 +892,21 @@
                                 in the Help/Instructions modal.
            ============================================================ */
         const SIM_CONFIG = {
-            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
-            simId: "blank-simulation-template",
-            title: "Editable Simulation Template",
-            subtitle: "Single-file shell for local student activities",
-            badgeText: "SIM",
-            homeEyebrow: "Template Shell Ready",
+            templateVersion: "2.2.1",
+            simId: "pulse-counter-sim",
+            title: "Stopwatch and Pulse Counter",
+            subtitle: "Measure pulse safely and record data",
+            badgeText: "BPM",
+            homeEyebrow: "Pulse Measurement Tool",
             homeDescription:
-                "Use this shell to build a child-friendly maths, ELA, or general subject simulation. Replace this description and build your simulation logic in devInit().",
+                "Practice counting a pulse for 60 seconds accurately. Watch the animated pulse and tap along with each beat, then compare your count to the actual rate.",
             instructions: [
-                "Read the instructions before starting.",
-                "Click Start to begin the simulation.",
-                "Use the Reset button any time you want to restart from scratch.",
-                "This file runs completely offline in a browser. No internet is needed."
+                "Choose a BPM (beats per minute) rate and click Start.",
+                "A pulsing circle and audio tone will beat at the chosen rate.",
+                "Click the Tap button (or press the Spacebar) every time you see or hear a beat.",
+                "After 60 seconds your count is compared to the actual number of beats.",
+                "Accuracy within 2 beats is considered correct.",
+                "Use the Reset button at any time to restart."
             ]
         };
 
@@ -1019,6 +1317,10 @@
                 closeInstructionsModal();
                 closeResetConfirmModal();
             }
+            if (event.key === " " && simState.phase === "running" && !event.target.closest("button, input, select, textarea")) {
+                event.preventDefault();
+                handleTap();
+            }
         }
 
         function escapeHtml(value) {
@@ -1039,27 +1341,315 @@
 
         /* ============================================================
            DEV-EDIT: SIM LOGIC
-           devInit() runs when the student clicks Start.
-           devReset() runs when the student confirms Reset — clear your
-           simulation state here.
-           Add your functions below this banner.
-           Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
 
-        /* --- HANDY UTILITIES (examples — uncomment what you need) --- */
-        // function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-        // function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-        // function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-        // Example: const order = shuffle([1, 2, 3, 4]);  const dice = randInt(1, 6);
-        // Sound: playSound("correct"), playSound("levelUp"), etc. are available (see DEV-EDIT: AUDIO).
-        // Storage: storageGet/storageSet are available for saving progress, keyed like `sim:${SIM_CONFIG.simId}:mydata`.
+        let simState = {
+            phase: "config",    // config | running | results
+            bpm: 80,
+            duration: 60,
+            timerId: null,
+            pulseId: null,
+            timeLeft: 60,
+            tapCount: 0,
+            totalBeats: 0,
+            beatTimes: [],
+            tapTimes: [],
+            pulseStartTime: 0,
+            lastTapTime: 0,
+        };
+
+        const simContent = document.getElementById("simContent");
+
+        function renderConfigScreen() {
+            simState.phase = "config";
+            simContent.innerHTML = `
+                <div class="pulse-config">
+                    <label for="bpmSelect">Pulse rate (BPM):</label>
+                    <select id="bpmSelect" class="bpm-select">
+                        <option value="60">60 bpm</option>
+                        <option value="70">70 bpm</option>
+                        <option value="72">72 bpm</option>
+                        <option value="80" selected>80 bpm</option>
+                        <option value="90">90 bpm</option>
+                        <option value="100">100 bpm</option>
+                        <option value="110">110 bpm</option>
+                        <option value="120">120 bpm</option>
+                    </select>
+                </div>
+                <div class="pulse-stage">
+                    <div class="timer-display" id="timerDisplay">1:00</div>
+                    <div class="pulse-ring-wrap">
+                        <div class="pulse-outer-ring"></div>
+                        <div class="pulse-circle" id="pulseCircle"></div>
+                    </div>
+                    <div class="tap-count-display">Your taps: <span id="tapCountDisplay">0</span></div>
+                    <button class="tap-btn" id="tapBtn" disabled>
+                        TAP
+                        <span class="tap-hint">or press Space</span>
+                    </button>
+                    <div class="spacebar-hint">Spacebar shortcut active while timer runs</div>
+                    <div class="sim-start-row">
+                        <button class="primary-btn" id="simStartBtn">Start 60 s Timer</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById("simStartBtn").addEventListener("click", startTimer);
+            document.getElementById("tapBtn").addEventListener("click", handleTap);
+            document.getElementById("bpmSelect").addEventListener("change", (e) => {
+                simState.bpm = parseInt(e.target.value, 10);
+            });
+        }
+
+        function startTimer() {
+            const select = document.getElementById("bpmSelect");
+            simState.bpm = parseInt(select.value, 10);
+            simState.timeLeft = simState.duration;
+            simState.tapCount = 0;
+            simState.totalBeats = 0;
+            simState.beatTimes = [];
+            simState.tapTimes = [];
+            simState.phase = "running";
+
+            document.getElementById("simStartBtn").classList.add("hidden");
+            document.getElementById("bpmSelect").disabled = true;
+            document.getElementById("tapBtn").disabled = false;
+
+            const circle = document.getElementById("pulseCircle");
+            const beatDuration = 60 / simState.bpm;
+            circle.style.setProperty("--beat-duration", beatDuration + "s");
+            circle.classList.add("beating");
+
+            simState.pulseStartTime = performance.now();
+            scheduleBeats();
+            simState.timerId = setInterval(timerTick, 1000);
+        }
+
+        function scheduleBeats() {
+            const interval = 60000 / simState.bpm;
+            simState.pulseId = setInterval(() => {
+                simState.totalBeats++;
+                simState.beatTimes.push(performance.now());
+                playPulseTone();
+            }, interval);
+        }
+
+        function playPulseTone() {
+            if (!audioEnabled) return;
+            const v = volumeFor("click");
+            if (v <= 0) return;
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime;
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(880, t0);
+            gain.gain.setValueAtTime(0.18 * v, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + 0.12);
+        }
+
+        function timerTick() {
+            simState.timeLeft--;
+            updateTimerDisplay();
+            if (simState.timeLeft <= 0) {
+                endTimer();
+            }
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById("timerDisplay");
+            if (!display) return;
+            const mins = Math.floor(simState.timeLeft / 60);
+            const secs = simState.timeLeft % 60;
+            display.textContent = mins + ":" + String(secs).padStart(2, "0");
+        }
+
+        function handleTap() {
+            if (simState.phase !== "running") return;
+            simState.tapCount++;
+            simState.tapTimes.push(performance.now());
+            const countEl = document.getElementById("tapCountDisplay");
+            if (countEl) countEl.textContent = simState.tapCount;
+
+            const circle = document.getElementById("pulseCircle");
+            if (circle) {
+                circle.classList.add("flash");
+                setTimeout(() => circle.classList.remove("flash"), 100);
+            }
+            playSound("click");
+        }
+
+        function endTimer() {
+            clearInterval(simState.timerId);
+            clearInterval(simState.pulseId);
+            simState.timerId = null;
+            simState.pulseId = null;
+            simState.phase = "results";
+
+            const circle = document.getElementById("pulseCircle");
+            if (circle) circle.classList.remove("beating");
+            const tapBtn = document.getElementById("tapBtn");
+            if (tapBtn) tapBtn.disabled = true;
+            const sel = document.getElementById("bpmSelect");
+            if (sel) sel.disabled = false;
+
+            renderResults();
+        }
+
+        function renderResults() {
+            const diff = simState.tapCount - simState.totalBeats;
+            const absDiff = Math.abs(diff);
+            let feedbackClass, feedbackMsg;
+
+            if (absDiff <= 2) {
+                feedbackClass = "correct";
+                feedbackMsg = "Your measurement is highly accurate! You have successfully recorded the pulse rate.";
+            } else if (diff < -2) {
+                feedbackClass = "incorrect";
+                feedbackMsg = "Not quite. Your count was lower than the actual pulse rate. Try again, and make sure you tap exactly on every single visual or audio beat.";
+            } else {
+                feedbackClass = "incorrect";
+                feedbackMsg = "Not quite. Your count was higher than the actual pulse rate. Try again, and be careful to tap only when the beat occurs, without adding extra taps.";
+            }
+
+            simState.phase = "results";
+            simContent.innerHTML = `
+                <div class="results-section">
+                    <h2>Timer Finished!</h2>
+                    <div class="results-stats">
+                        <div class="results-stat">
+                            <h4>Your Taps</h4>
+                            <p>${simState.tapCount}</p>
+                        </div>
+                        <div class="results-stat">
+                            <h4>Actual Beats (${simState.bpm} bpm)</h4>
+                            <p>${simState.totalBeats}</p>
+                        </div>
+                        <div class="results-stat">
+                            <h4>Difference</h4>
+                            <p>${diff > 0 ? "+" : ""}${diff}</p>
+                        </div>
+                    </div>
+                    <div class="results-feedback ${feedbackClass}">${feedbackMsg}</div>
+
+                    <div class="assessment-section">
+                        <h3>Embedded Assessment</h3>
+
+                        <div class="assessment-q" data-correct="0">
+                            <h4>Question 1: If the simulation generates exactly 72 beats in 60 seconds, what is the recorded pulse rate?</h4>
+                            <div class="choice-list">
+                                <div class="choice-item" data-idx="0"><input type="radio" name="q1" id="q1a"><label for="q1a">72 beats per minute (bpm)</label></div>
+                                <div class="choice-item" data-idx="1"><input type="radio" name="q1" id="q1b"><label for="q1b">72 beats per hour</label></div>
+                                <div class="choice-item" data-idx="2"><input type="radio" name="q1" id="q1c"><label for="q1c">36 beats per minute</label></div>
+                                <div class="choice-item" data-idx="3"><input type="radio" name="q1" id="q1d"><label for="q1d">144 beats per minute</label></div>
+                            </div>
+                            <div class="assessment-feedback" id="q1fb"></div>
+                        </div>
+
+                        <div class="assessment-q" data-correct="0">
+                            <h4>Question 2: Why is it important to concentrate carefully and avoid talking while counting a pulse?</h4>
+                            <div class="choice-list">
+                                <div class="choice-item" data-idx="0"><input type="radio" name="q2" id="q2a"><label for="q2a">Talking or losing focus can cause you to miss a beat or add an extra count, making your data inaccurate.</label></div>
+                                <div class="choice-item" data-idx="1"><input type="radio" name="q2" id="q2b"><label for="q2b">It is considered rude to talk during a science experiment.</label></div>
+                                <div class="choice-item" data-idx="2"><input type="radio" name="q2" id="q2c"><label for="q2c">Talking changes your heart rate permanently.</label></div>
+                            </div>
+                            <div class="assessment-feedback" id="q2fb"></div>
+                        </div>
+
+                        <div class="assessment-q" data-correct="0">
+                            <h4>Question 3: When measuring your own pulse after practising with this tool, which safe point on your body should you use?</h4>
+                            <div class="choice-list">
+                                <div class="choice-item" data-idx="0"><input type="radio" name="q3" id="q3a"><label for="q3a">The inside of the wrist</label></div>
+                                <div class="choice-item" data-idx="1"><input type="radio" name="q3" id="q3b"><label for="q3b">The side of the neck</label></div>
+                                <div class="choice-item" data-idx="2"><input type="radio" name="q3" id="q3c"><label for="q3c">The temple</label></div>
+                            </div>
+                            <div class="assessment-feedback" id="q3fb"></div>
+                        </div>
+
+                        <div class="assessment-q" data-correct="0">
+                            <h4>Question 4: What does the abbreviation bpm stand for?</h4>
+                            <div class="choice-list">
+                                <div class="choice-item" data-idx="0"><input type="radio" name="q4" id="q4a"><label for="q4a">Beats per minute</label></div>
+                                <div class="choice-item" data-idx="1"><input type="radio" name="q4" id="q4b"><label for="q4b">Body pulse measurement</label></div>
+                                <div class="choice-item" data-idx="2"><input type="radio" name="q4" id="q4c"><label for="q4c">Basic pulse mode</label></div>
+                            </div>
+                            <div class="assessment-feedback" id="q4fb"></div>
+                        </div>
+
+                        <div class="assessment-actions">
+                            <button class="primary-btn" id="checkAssessmentBtn">Check Answers</button>
+                            <button class="secondary-btn hidden" id="retrySimBtn">Try Pulse Counting Again</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.querySelectorAll(".assessment-q .choice-item").forEach((item) => {
+                item.addEventListener("click", () => {
+                    const q = item.closest(".assessment-q");
+                    q.querySelectorAll(".choice-item").forEach((c) => c.classList.remove("selected"));
+                    item.classList.add("selected");
+                    item.querySelector("input").checked = true;
+                });
+            });
+
+            document.getElementById("checkAssessmentBtn").addEventListener("click", checkAssessment);
+            document.getElementById("retrySimBtn").addEventListener("click", () => {
+                renderConfigScreen();
+            });
+        }
+
+        function checkAssessment() {
+            const questions = document.querySelectorAll(".assessment-q");
+            questions.forEach((q, i) => {
+                const correctIdx = parseInt(q.dataset.correct, 10);
+                const selected = q.querySelector("input:checked");
+                const fb = document.getElementById("q" + (i + 1) + "fb");
+
+                q.querySelectorAll(".choice-item").forEach((item) => {
+                    const idx = parseInt(item.dataset.idx, 10);
+                    if (idx === correctIdx) {
+                        item.classList.add("revealed-correct");
+                    }
+                    if (selected && parseInt(selected.closest(".choice-item").dataset.idx, 10) === idx && idx !== correctIdx) {
+                        item.classList.add("revealed-wrong");
+                    }
+                });
+
+                const selectedIdx = selected ? parseInt(selected.closest(".choice-item").dataset.idx, 10) : -1;
+                if (selectedIdx === correctIdx) {
+                    fb.className = "assessment-feedback show correct";
+                    fb.textContent = "Correct! Well done.";
+                } else {
+                    fb.className = "assessment-feedback show wrong";
+                    fb.textContent = "Not quite. The correct answer is highlighted above.";
+                }
+            });
+
+            document.getElementById("checkAssessmentBtn").classList.add("hidden");
+            document.getElementById("retrySimBtn").classList.remove("hidden");
+            playSound("complete");
+        }
 
         function devInit() {
-            // Build your simulation UI/logic inside dom.simContainer here.
+            renderConfigScreen();
         }
 
         function devReset() {
-            // Clear/reset any simulation-specific state here.
+            clearInterval(simState.timerId);
+            clearInterval(simState.pulseId);
+            simState.timerId = null;
+            simState.pulseId = null;
+            simState.phase = "config";
+            simState.tapCount = 0;
+            simState.totalBeats = 0;
+            simState.beatTimes = [];
+            simState.tapTimes = [];
+            simContent.innerHTML = "";
         }
     </script>
 </body>
