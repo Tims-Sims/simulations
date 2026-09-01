@@ -529,8 +529,8 @@
             border: 1px solid var(--border);
             background: var(--sky);
         }
-        .hero-scene { width: min(100%, 720px); margin: 0 auto 18px; }
-        .hero-scene svg { display: block; width: 100%; height: auto; max-height: 240px; margin: 0 auto; }
+        .hero-scene { width: 100%; margin: 0 0 18px; }
+        .hero-scene svg { display: block; width: 100%; height: auto; max-height: 240px; }
 
         /* ---------- round header ---------- */
         .round-head {
@@ -1307,7 +1307,7 @@
             .readout-strip { margin-top: 8px; min-height: 48px; }
             .verdict-line { margin-top: 8px; min-height: 42px; }
             .round-actions { margin-top: 8px; }
-            .hero-scene svg { max-height: 185px; }
+            .hero-scene svg { max-height: 200px; }
             .hero-card { padding: 22px; }
         }
         @media (orientation: landscape) and (max-height: 820px) {
@@ -1338,7 +1338,7 @@
             .callout { font-size: 0.78rem; max-width: 200px; }
             .footer-note { font-size: 0.8rem; }
             .hero-scene { margin-bottom: 12px; }
-            .hero-scene svg { max-height: 145px; }
+            .hero-scene svg { max-height: 195px; }
             .hero-card { padding: 18px; }
             .hero-card h2 { font-size: 1.7rem; margin-bottom: 8px; }
             .hero-card p { font-size: 0.96rem; line-height: 1.5; }
@@ -1380,7 +1380,7 @@
             .round-tools .control-btn { padding: 6px 10px; font-size: 0.85rem; }
             .footer-note { font-size: 0.74rem; padding-bottom: 0; }
             .hero-scene { margin-bottom: 10px; }
-            .hero-scene svg { max-height: 100px; }
+            .hero-scene svg { max-height: 170px; }
             .hero-card { padding: 14px; }
             .hero-card h2 { font-size: 1.45rem; margin-bottom: 6px; }
             .hero-card p { font-size: 0.9rem; line-height: 1.45; }
@@ -1487,7 +1487,7 @@
             event.preventDefault();
         }, true);
 
-        const BUILD_META = "~Abhishek Dan · Test Version 1 · 2026-08-29";
+        const BUILD_META = "~Abhishek Dan · Test Version 2 · 2026-09-01";
         const SVG_DESC = `<desc>${BUILD_META}</desc>`;
 
         /* ============================================================
@@ -2126,31 +2126,55 @@
         }
 
         function heroSceneSvg() {
-            /* centred hero: viewBox sized to content, xMidYMid meet, props symmetric */
-            return `<svg viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Family Fun Day fairground entrance">${SVG_DESC}` +
-                `<rect x="0" y="0" width="900" height="300" fill="var(--sky)"/>` +
-                `<rect x="0" y="196" width="900" height="104" fill="var(--grass)"/>` +
-                `<rect x="0" y="252" width="900" height="48" fill="var(--grass-2)"/>` +
-                wheelSvg(150, 108, 74) +
-                tentSvg(640, 226, 170, 96) +
-                tentSvg(560, 218, 100, 56) +
-                balloonBunchSvg(90, 236) +
+            /* full-width banner hero: 5.2:1 viewBox, ground pinned (YMax), sides slice on narrow screens */
+            const tree = (x, s) => `<g transform="translate(${x},0) scale(${s})" transform-origin="0 232">` +
+                `<rect x="-5" y="196" width="10" height="36" rx="3" fill="var(--post-wood)"/>` +
+                `<circle cx="0" cy="172" r="30" fill="var(--grass)"/>` +
+                `<circle cx="-18" cy="184" r="20" fill="var(--grass-2)"/>` +
+                `<circle cx="18" cy="184" r="20" fill="var(--grass-2)"/>` +
+                `</g>`;
+            const booth = (x) => `<g transform="translate(${x},0)">` +
+                `<rect x="0" y="150" width="86" height="82" rx="4" fill="var(--tent-b)"/>` +
+                `<rect x="8" y="176" width="70" height="34" rx="3" fill="var(--paper)"/>` +
+                `<rect x="-6" y="134" width="98" height="20" rx="5" fill="var(--tent-a)"/>` +
+                `<text x="43" y="149" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--paper)" font-family="Arial">TICKETS</text>` +
+                `</g>`;
+            return `<svg viewBox="0 0 1560 300" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Family Fun Day fairground entrance">${SVG_DESC}` +
+                `<rect x="0" y="0" width="1560" height="300" fill="var(--sky)"/>` +
+                `<rect x="0" y="196" width="1560" height="104" fill="var(--grass)"/>` +
+                `<rect x="0" y="252" width="1560" height="48" fill="var(--grass-2)"/>` +
+                /* left band scenery */
+                tree(34, 1) +
+                tentSvg(70, 224, 150, 84) +
+                balloonBunchSvg(250, 232) +
+                buntingSvg(0, 330, 26, 11) +
+                /* right band scenery */
+                booth(1258) +
+                tentSvg(1380, 222, 130, 74) +
+                tree(1532, 0.9) +
+                balloonBunchSvg(1330, 236) +
+                bulbsSvg(1240, 1560, 52, 12) +
+                /* focal cluster (original 900-wide composition, centred) */
+                wheelSvg(480, 108, 74) +
+                tentSvg(970, 226, 170, 96) +
+                tentSvg(890, 218, 100, 56) +
+                balloonBunchSvg(420, 236) +
                 /* entrance arch, centre */
-                `<g><rect x="360" y="90" width="16" height="140" rx="5" fill="var(--post-wood)"/>` +
-                `<rect x="524" y="90" width="16" height="140" rx="5" fill="var(--post-wood)"/>` +
-                `<path d="M352 96 Q450 34 548 96" stroke="var(--tent-a)" stroke-width="26" fill="none"/>` +
-                `<text x="450" y="82" text-anchor="middle" font-size="24" font-weight="bold" fill="var(--paper)" font-family="Arial">FUN DAY</text></g>` +
+                `<g><rect x="690" y="90" width="16" height="140" rx="5" fill="var(--post-wood)"/>` +
+                `<rect x="854" y="90" width="16" height="140" rx="5" fill="var(--post-wood)"/>` +
+                `<path d="M682 96 Q780 34 878 96" stroke="var(--tent-a)" stroke-width="26" fill="none"/>` +
+                `<text x="780" y="82" text-anchor="middle" font-size="24" font-weight="bold" fill="var(--paper)" font-family="Arial">FUN DAY</text></g>` +
                 /* picket fence hint each side of the arch */
                 `<g fill="var(--picket)">` +
-                    `<rect x="250" y="196" width="9" height="36"/><rect x="272" y="196" width="9" height="36"/><rect x="294" y="196" width="9" height="36"/><rect x="316" y="196" width="9" height="36"/><rect x="338" y="196" width="9" height="36"/>` +
-                    `<rect x="553" y="196" width="9" height="36"/><rect x="575" y="196" width="9" height="36"/><rect x="597" y="196" width="9" height="36"/><rect x="619" y="196" width="9" height="36"/><rect x="641" y="196" width="9" height="36"/>` +
+                    `<rect x="580" y="196" width="9" height="36"/><rect x="602" y="196" width="9" height="36"/><rect x="624" y="196" width="9" height="36"/><rect x="646" y="196" width="9" height="36"/><rect x="668" y="196" width="9" height="36"/>` +
+                    `<rect x="883" y="196" width="9" height="36"/><rect x="905" y="196" width="9" height="36"/><rect x="927" y="196" width="9" height="36"/><rect x="949" y="196" width="9" height="36"/><rect x="971" y="196" width="9" height="36"/>` +
                 `</g>` +
-                `<rect x="246" y="192" width="100" height="5" fill="var(--picket-2)"/>` +
-                `<rect x="549" y="192" width="100" height="5" fill="var(--picket-2)"/>` +
-                buntingSvg(60, 840, 18, 18) +
-                bulbsSvg(80, 820, 44, 16) +
+                `<rect x="576" y="192" width="100" height="5" fill="var(--picket-2)"/>` +
+                `<rect x="879" y="192" width="100" height="5" fill="var(--picket-2)"/>` +
+                buntingSvg(390, 1170, 18, 24) +
+                bulbsSvg(410, 1150, 44, 22) +
                 /* agouti marshal at the gate */
-                `<g transform="translate(432, 208) scale(0.85)">${agoutiArt()}</g>` +
+                `<g transform="translate(762, 208) scale(0.85)">${agoutiArt()}</g>` +
                 `</svg>`;
         }
 
