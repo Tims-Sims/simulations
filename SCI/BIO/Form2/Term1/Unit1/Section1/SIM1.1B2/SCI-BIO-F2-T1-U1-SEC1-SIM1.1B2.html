@@ -229,7 +229,7 @@
             display: grid;
             place-items: center;
             border-radius: 14px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            background: linear-gradient(135deg, var(--btn-accent), var(--btn-accent-2));
             color: white;
             text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
             border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
@@ -769,6 +769,12 @@
             white-space: nowrap;
         }
 
+        #finishActivityBtn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            filter: grayscale(0.35);
+            box-shadow: none;
+        }
         /* ============================================================ SCANNER HOUSING ============================================================ */
        .scanner-housing {
             flex: 1 1 auto;
@@ -1005,41 +1011,44 @@ border-inline: 1px solid var(--scanner-border-light);
             display: block;
         }
 
-        .empty-food-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
+.empty-food-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 
-            color: rgba(190, 208, 224, .7);
-            text-align: center;
-        }
+    height: 100%;
+    min-height: 120px;
 
-        .empty-food-state .empty-icon {
-            width: 42px;
-            height: 42px;
+    color: var(--muted);
+    text-align: center;
+}
 
-            display: grid;
-            place-items: center;
+.empty-icon {
+    width: 22px;
+    height: 22px;
+    margin: 0;
 
-            border: 1px solid rgba(148, 177, 204, .24);
-            border-radius: 50%;
+    border: 1px dashed var(--muted);
+    border-radius: 50%;
 
-            background: rgba(255, 255, 255, .035);
+    background: transparent;
 
-            font-size: 1.4rem;
-        }
+    box-shadow:
+        inset 0 1px 2px rgba(0, 0, 0, .05);
+}
 
-        .empty-food-state strong {
-            color: var(--text-soft);
-            font-size: .86rem;
-        }
+.empty-food-state strong {
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 800;
+}
 
-        .empty-food-state span:last-child {
-            font-size: .7rem;
-        }
-
+.empty-food-state > span:last-child {
+    color: var(--muted);
+    font-size: .62rem;
+}
 /* ============================================================
    SCAN BEAM
    ============================================================ */
@@ -1524,7 +1533,7 @@ border-inline: 1px solid var(--scanner-border-light);
 }
         /* ================ RESULTS PANEL THIS IS THE PRIMARY SCROLLABLE PANEL ==================== */
         .results-card {
-            overflow: auto;
+            overflow: hidden;
             padding: 0;
             display: flex;
             flex-direction: column;
@@ -1534,6 +1543,7 @@ border-inline: 1px solid var(--scanner-border-light);
                 var(--accent-2) 23%,
                 var(--border)
             );
+            min-height: 0;
         }
 
         .results-card .results-card-header {
@@ -1597,6 +1607,11 @@ border-inline: 1px solid var(--scanner-border-light);
             border: 1px solid color-mix(in srgb, var(--warning) 35%, var(--border));
         }
 
+        .results-content.analyzing .accessible-profile-section,
+        .results-content.analyzing .observation-panel,
+        .results-content.analyzing .compare-panel {
+            display: none;
+        }
 
         /* COMPLETE */
 
@@ -1608,12 +1623,13 @@ border-inline: 1px solid var(--scanner-border-light);
 
         .results-scroll {
             flex: 1 1 auto;
-            min-height: 0;
-            height: 100%;
+            min-height: 0; 
             overflow-y: auto;
             overflow-x: hidden;
             padding: 15px;
             scrollbar-width: thin;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* ============================================================ RESULTS EMPTY STATE ============================================================ */
@@ -1656,6 +1672,11 @@ border-inline: 1px solid var(--scanner-border-light);
         }
 
 .result-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
     margin: 3px 2px 10px;
     padding: 1px 0 9px;
 
@@ -1667,11 +1688,68 @@ border-inline: 1px solid var(--scanner-border-light);
         );
 }
 
+.results-identifying {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 22px;
+}
+
+.identifying-loader {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 14px;
+
+    border: 2px solid
+        color-mix(
+            in srgb,
+            var(--accent-2) 18%,
+            var(--border)
+        );
+
+    border-top-color: var(--accent);
+    border-right-color: var(--accent-2);
+
+    border-radius: 50%;
+
+    animation:
+        analyzerSpin 1s linear infinite;
+}
+
+.identifying-label {
+    color: var(--text);
+    font-family:
+        "Courier New",
+        "Lucida Console",
+        monospace;
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+}
+
+.identifying-subtext {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: .62rem;
+    letter-spacing: .04em;
+}
+
+@keyframes analyzerSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .result-food-identity {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
+   
+   
 
 .result-kicker {
     color: var(--muted);
@@ -1713,8 +1791,68 @@ border-inline: 1px solid var(--scanner-border-light);
     text-transform: uppercase;
 }
 
+.main-nutrient-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    flex: 0 0 auto;
+    padding: 5px 9px;
+
+    border: 1px solid
+        color-mix(
+            in srgb,
+            var(--accent) 25%,
+            var(--border)
+        );
+
+    border-radius: 999px;
+
+    background:
+        color-mix(
+            in srgb,
+            var(--accent) 7%,
+            var(--surface)
+        );
+
+    white-space: nowrap;
+}
+
+.main-nutrient-label {
+    color: var(--accent);
+    font-size: .48rem;
+    font-weight: 900;
+    letter-spacing: .09em;
+    line-height: 1;
+}
+
+#mainNutrientValue {
+    color: var(--text);
+    font-size: .68rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.result-food-identity .result-kicker,
+.result-food-identity h3,
+.main-nutrient-tag {
+    opacity: 0;
+    transform: translateY(5px);
+    transition:
+        opacity .35s ease,
+        transform .35s ease;
+}
+
+.result-food-identity .result-kicker.revealed,
+.result-food-identity h3.revealed,
+.main-nutrient-tag.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
         /* ============================================================ RESULTS CONTENT ============================================================ */
         .results-content {
+            width: 100%;
+            box-sizing: border-box;
             animation: resultReveal .22s ease;
         }
 
@@ -1730,6 +1868,28 @@ border-inline: 1px solid var(--scanner-border-light);
             }
         } 
 
+.results-content.analysis-reveal
+.accessible-profile-section,
+.results-content.analysis-reveal
+.observation-panel,
+.results-content.analysis-reveal
+.compare-panel {
+    display: block;
+    animation: analysisSectionReveal .35s ease both;
+}
+
+@keyframes analysisSectionReveal {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
          /* ============================================================
             NUTRIENT PROFILE SECTION
         ============================================================ */
@@ -1739,8 +1899,17 @@ border-inline: 1px solid var(--scanner-border-light);
     padding: 5px 6px;
  
     border-radius: 10px; 
-}
+    opacity: 0;
+    visibility: hidden;
 
+    transition:
+        opacity .25s ease,
+        visibility .25s ease;
+}
+.nutrient-profile-section.analysis-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
 
 /* Section heading */
 
@@ -1759,7 +1928,7 @@ border-inline: 1px solid var(--scanner-border-light);
 
     color: var(--accent);
 
-    font-size: .55rem;
+    font-size: .68rem;
     font-weight: 900;
     line-height: 1;
 
@@ -1975,6 +2144,27 @@ background: color-mix(in srgb,
     text-align: left;
 }
 
+.nutrient-row.analyzing .segment {
+    transition:
+        background .12s ease,
+        border-color .12s ease,
+        box-shadow .12s ease;
+}
+
+.nutrient-row.analyzing .segment.filled {
+    animation: segmentPulse .32s ease-in-out infinite alternate;
+}
+
+@keyframes segmentPulse {
+    from {
+        opacity: .45;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
         /* ============================================================
    ACCESSIBLE NUTRIENT DATA
 ============================================================ */
@@ -2004,7 +2194,7 @@ background: color-mix(in srgb,
     display: block;
     margin-bottom: 2px;
     color: var(--accent);
-    font-size: .55rem;
+    font-size: .68rem;
     font-weight: 900;
     line-height: 1;
     letter-spacing: .1em;
@@ -2089,11 +2279,7 @@ background: color-mix(in srgb,
     font-weight: 800;
     color: var(--text-soft);
 }
-
-       /* ============================================================
-   OBSERVATION / COMPARISON SECTIONS
-============================================================ */
-
+ 
 /* ============================================================
    OBSERVATION / COMPARISON SECTIONS
 ============================================================ */
@@ -2103,7 +2289,8 @@ background: color-mix(in srgb,
     margin-top: 12px;
     padding: 0 10px;
     background: transparent;
-}
+    
+} 
 
 .observation-heading {
     display: flex;
@@ -2116,7 +2303,7 @@ background: color-mix(in srgb,
     display: block;
     margin-bottom: 3px;
     color: var(--accent);
-    font-size: .55rem;
+    font-size: .68rem;
     font-weight: 900;
     letter-spacing: .1em;
     line-height: 1;
@@ -2135,34 +2322,160 @@ background: color-mix(in srgb,
     color: var(--muted);
     font-size: .75rem;
     line-height: 1.4;
-}
+} 
 
 .observation-grid {
     display: grid;
-    gap: 7px;
-    margin-top: 8px;
-}
+    gap: 10px;
+    margin-top: 10px;
+    padding: 4px 3px 6px;
+    }
 
 .observation-item {
-    padding: 8px 9px;
-    border-left: 3px solid var(--accent);
-    background: color-mix(
+    position: relative;
+    padding: 11px 12px 12px;
+    border: 1px solid color-mix(
         in srgb,
-        var(--surface-2) 45%,
-        transparent
+        var(--btn-accent-2) 28%,
+        var(--border)
     );
-    border-radius: 0 7px 7px 0;
+    border-radius: 10px;
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(
+                in srgb,
+                var(--btn-accent-2) 13%,
+                var(--surface-2)
+            ) 0%,
+            var(--surface) 55%,
+            color-mix(
+                in srgb,
+                var(--btn-accent-2) 6%,
+                var(--surface)
+            ) 100%
+        );
+    box-shadow:
+        0 3px 8px color-mix(
+            in srgb,
+            var(--btn-accent-2) 8%,
+            transparent
+        ),
+        inset 0 1px 0 color-mix(
+            in srgb,
+            white 55%,
+            transparent
+        );
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
 }
 
-.observation-item .notice-item {
-    border-left-color: var(--accent);
+.observation-item:nth-child(1),
+.observation-item:nth-child(2) {
+    width: 70%;
 }
+
+.observation-item:nth-child(1) {
+    justify-self: start;
+    transform: rotate(-0.7deg);
+}
+
+.observation-item:nth-child(2) {
+    justify-self: end;
+    transform: rotate(0.7deg);
+}
+
+.observation-separator {
+    width: 86%;
+    height: 1px;
+    margin: 7px auto 10px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--accent-2) 35%, var(--border)),
+        transparent
+    );
+    margin-top: 10px;
+}
+.notice-section {
+    margin-top: 4px;
+    padding: 12px 13px 13px;
+
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent) 30%,
+        white
+    );
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--btn-accent) 13%, transparent),
+            color-mix(in srgb, var(--btn-accent) 6%, transparent)
+        ),
+        color-mix(in srgb, var(--surface) 82%, transparent);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .55),
+        inset 0 -1px 0 color-mix(
+            in srgb,
+            var(--btn-accent) 12%,
+            transparent
+        ),
+        0 4px 12px color-mix(
+            in srgb,
+            var(--btn-accent) 8%,
+            transparent
+        );
+
+    backdrop-filter: blur(6px);
+}
+
+.notice-section .obs-label {
+    color: var(--accent);
+    margin-bottom: 5px;
+}
+
+.notice-section p {
+    margin: 0;
+    padding-left: 10px;
+    color: var(--text-soft);
+    font-size: .69rem;
+    line-height: 1.5;
+}
+
+#noticeThat {
+    white-space: pre-line;
+}
+
+.observation-item:nth-child(1):hover,
+.observation-item:nth-child(2):hover {
+    transform: rotate(0deg) translateY(-1px);
+    box-shadow:
+        0 5px 12px color-mix(
+            in srgb,
+            var(--accent-2) 12%,
+            transparent
+        ),
+        inset 0 1px 0 color-mix(
+            in srgb,
+            white 60%,
+            transparent
+        );
+}
+
+.observation-item p,
+.observation-answer {
+    padding-left: 10px;
+} 
 
 .obs-label {
     display: block;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
     color: var(--accent-2);
-    font-size: .62rem;
+    font-size: .68rem;
     font-weight: 900;
     letter-spacing: .05em;
     text-transform: uppercase;
@@ -2173,12 +2486,130 @@ background: color-mix(in srgb,
     margin: 0;
     color: var(--text-soft);
     font-size: .69rem;
-    line-height: 1.48;
+    line-height: 1.5;
+}
+
+.observation-item.notice-item .obs-label {
+    color: var(--accent);
 }
 
 .compare-panel {
-    padding-bottom: 11px;
-    border-top: 1px solid var(--border);
+    position: relative;
+    width: 97%;
+    max-width: 97%;
+    justify-self: center;
+    box-sizing: border-box;
+    margin-top: 18px;
+    padding: 15px 14px 14px;
+
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent-2) 30%,
+        var(--border)
+    );
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--accent-2) 7%, var(--surface-2)),
+            color-mix(in srgb, var(--surface) 96%, transparent)
+        );
+
+    box-shadow:
+        0 4px 12px color-mix(
+            in srgb,
+            var(--accent-2) 7%,
+            transparent
+        ),
+        inset 0 1px 0 color-mix(
+            in srgb,
+            white 45%,
+            transparent
+        );
+
+    overflow: hidden;
+}
+
+/* Small accent line across the top */
+.compare-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 14px;
+    right: 14px;
+    height: 2px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--accent-2),
+        transparent
+    );
+
+    opacity: .55;
+}
+
+/* Comparison heading */
+.compare-panel .observation-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0 6px;
+}
+
+.compare-panel .observation-heading .section-label {
+    flex: 0 0 auto;
+    color: var(--accent-2);
+    font-size: .68rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+}
+
+.compare-panel .observation-heading h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: .82rem;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+/* Prompt */
+.compare-panel > p {
+    margin: 3px 0 0;
+    padding-left: 2px;
+
+    color: var(--text-soft);
+    font-size: .69rem;
+    line-height: 1.5;
+}
+
+/* Final comparison notice */
+.compare-notice {
+    position: relative;
+    margin-top: 10px;
+    padding: 9px 11px 10px;
+
+    border-left: 3px solid var(--success);
+    border-radius: 7px;
+
+    background:
+        color-mix(
+            in srgb,
+            var(--success) 7%,
+            var(--surface-2)
+        );
+
+    color: var(--text-soft);
+    font-size: .68rem;
+    line-height: 1.45;
+
+    box-shadow:
+        inset 0 1px 0 color-mix(
+            in srgb,
+            white 35%,
+            transparent
+        );
 }
 
 .compare-notice {
@@ -2265,6 +2696,7 @@ background: color-mix(in srgb,
             border-radius: 18px;
             background: var(--surface-2);
             box-shadow: var(--shadow);
+            overflow-y: scroll;
         }
 
         .completion-badge {
@@ -2484,8 +2916,7 @@ background: color-mix(in srgb,
             }
 
             .results-card {
-                min-height: 0;
-                height: 100%;
+                min-height: 0; 
             }
 
             .results-scroll {
@@ -2801,7 +3232,7 @@ background: color-mix(in srgb,
                                         <div class="chamber-grid"></div>
                                         <div class="food-display" id="foodDisplay">
                                             <div class="empty-food-state">
-                                                <span class="empty-icon">＋</span>
+                                                <span class="empty-icon" aria-hidden="true"></span>
                                                 <strong>Select a food</strong>
                                                 <span>Food will appear here</span>
                                             </div>
@@ -2869,6 +3300,20 @@ background: color-mix(in srgb,
 
                                 </div>
 
+                                <!-- IDENTIFYING FOOD -->
+
+                                <div class="results-identifying hidden" id="resultsIdentifying">
+                                    <div class="identifying-loader" aria-hidden="true"></div>
+
+                                    <span class="identifying-label">
+                                        IDENTIFYING FOOD
+                                    </span>
+
+                                    <span class="identifying-subtext">
+                                        Analyzing sample...
+                                    </span>
+                                </div>
+
 
                                 <!-- SCANNED RESULTS -->
                                 <div class="results-content hidden" id="resultsContent">
@@ -2878,6 +3323,11 @@ background: color-mix(in srgb,
                                             <span class="result-kicker">IDENTIFIED FOOD</span>
                                             <h3 id="resultFoodName">Food</h3>
                                         </div>
+
+                                        <span class="main-nutrient-tag" id="mainNutrientTag">
+                                            <span class="main-nutrient-label">MAIN NUTRIENT: </span>
+                                            <span id="mainNutrientValue">Carbohydrates</span>
+                                        </span>
                                     </div>
 
                                     <div class="nutrient-profile-section">
@@ -2939,9 +3389,7 @@ background: color-mix(in srgb,
 
                                     </div>
 
-                                    <section
-                                        class="observation-panel"
-                                        aria-labelledby="observationHeading">
+                                    <section class="observation-panel" aria-labelledby="observationHeading">
 
                                         <div class="observation-heading">
                                             <div>
@@ -2978,13 +3426,14 @@ background: color-mix(in srgb,
                                                 </div>
                                             </div>
 
-                                            <div class="observation-item notice-item">
-                                                <span class="obs-label">Notice That</span>
-                                                <p id="noticeThat"></p> 
-                                            </div>
-
                                         </div>
 
+                                        <div class="observation-separator"></div>
+
+                                        <div class="notice-section">
+                                            <span class="obs-label">Notice That</span>
+                                            <p id="noticeThat"></p>
+                                        </div>
                                     </section>
                                     <section
                                         class="compare-panel"
@@ -2993,7 +3442,11 @@ background: color-mix(in srgb,
 
                                         <div class="observation-heading">
                                             <span class="section-label">COMPARISON</span>
-                                            <h3 id="compareHeading">🔍 Compare Your Scans</h3>
+
+                                            <h3 id="compareHeading">
+                                                <span aria-hidden="true">🔍</span>
+                                                Compare Your Scans
+                                            </h3>
                                         </div>
 
                                         <p id="comparePrompt"></p>
@@ -3013,8 +3466,8 @@ background: color-mix(in srgb,
 
                     </div>
                 </div>
-
-                <div class="completion-screen hidden" id="completionScreen" aria-live="polite">
+        </main>
+        <main class="completion-screen screen" id="completionScreen">
                     <div class="completion-card">
                         <div class="completion-badge">✓</div>
                         <span class="section-label">ACTIVITY COMPLETE</span>
@@ -3034,16 +3487,13 @@ background: color-mix(in srgb,
                             </div>
                         </div>
 
-                        <div class="completion-actions">
-                            <button class="secondary-btn" id="returnToScannerBtn" type="button">Return to
-                                Scanner</button>
+                        <div class="completion-actions"> 
                             <button class="primary-btn" id="restartActivityBtn" type="button">Restart
                                 Activity</button>
                         </div>
                     </div>
-                </div>
-
-                <div class="finish-modal" id="finishModal" role="dialog" aria-modal="true"
+            </main>
+            <div class="finish-modal" id="finishModal" role="dialog" aria-modal="true"
                     aria-labelledby="finishModalTitle" aria-describedby="finishModalText">
                     <div class="finish-modal-card">
                         <button class="close-btn finish-close" id="closeFinishModalBtn" type="button"
@@ -3059,8 +3509,6 @@ background: color-mix(in srgb,
                         </div>
                     </div>
                 </div>
-                </section>
-        </main>
     </div>
     </div>
 
@@ -3349,7 +3797,8 @@ background: color-mix(in srgb,
            ============================================================ */
         const state = {
             currentScreen: "home",
-            theme: "dark"
+            theme: "dark",
+            analysisRunId: 0,
         };
 
         const dom = {
@@ -3362,8 +3811,10 @@ background: color-mix(in srgb,
             homeDescription: document.getElementById("homeDescription"),
             homeScreen: document.getElementById("homeScreen"),
             simScreen: document.getElementById("simScreen"),
+            completionScreen: document.getElementById("completionScreen"),
             simContainer: document.getElementById("simContainer"),
             startBtn: document.getElementById("startBtn"),
+            scanBtn: document.getElementById("scanBtn"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
             helpBtn: document.getElementById("helpBtn"),
@@ -3377,8 +3828,14 @@ background: color-mix(in srgb,
             resetConfirmModal: document.getElementById("resetConfirmModal"),
             closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
             cancelResetBtn: document.getElementById("cancelResetBtn"),
-            confirmResetBtn: document.getElementById("confirmResetBtn")
-        };
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            finishActivityBtn: document.getElementById("finishActivityBtn"),
+            restartActivityBtn: document.getElementById("restartActivityBtn"),
+            finishModal: document.getElementById("finishModal"),
+            closeFinishModalBtn: document.getElementById("closeFinishModalBtn"),
+            continueActivityBtn: document.getElementById("continueActivityBtn"),
+            confirmFinishBtn: document.getElementById("confirmFinishBtn")
+                    };
 
         initializeApp();
 
@@ -3453,6 +3910,28 @@ background: color-mix(in srgb,
             });
             document.addEventListener("fullscreenchange", updateFullscreenButton);
             document.addEventListener("keydown", handleKeyShortcuts);
+            document.getElementById("scanBtn").addEventListener("click", scanCurrentFood);
+            document.getElementById("finishActivityBtn").addEventListener("click", () => finishActivity(false));
+            document.getElementById("closeFinishModalBtn").addEventListener("click", closeFinishModal);
+
+            document.getElementById("continueActivityBtn").addEventListener("click", closeFinishModal);
+
+            document.getElementById("confirmFinishBtn").addEventListener("click", () => finishActivity(true));
+
+            document.getElementById("finishModal")
+                .addEventListener("click", event => {
+                    if (event.target.id === "finishModal") {
+                        closeFinishModal();
+                    }
+                });
+
+            document.getElementById("restartActivityBtn")
+            .addEventListener("click", () => {
+                resetSimulationState();
+                showScreen("sim");
+                devInit();
+                playSound("click");
+            });
         }
 
         function renderInstructions() {
@@ -3490,6 +3969,7 @@ background: color-mix(in srgb,
             state.currentScreen = screenName;
             dom.homeScreen.classList.toggle("active", screenName === "home");
             dom.simScreen.classList.toggle("active", screenName === "sim");
+            dom.completionScreen.classList.toggle("active", screenName === "completion");
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         }
 
@@ -3591,9 +4071,8 @@ background: color-mix(in srgb,
                 },
                 highestNutrientAnswer: "Carbohydrates",
                 otherNutrientsAnswer: "Yes — protein, fats, vitamins, minerals, fibre, and water.",
-                noticeThat: "Bread has a particularly high level of carbohydrates, but its profile also shows that protein, fats, vitamins, minerals, fibre, and water are present at relatively lower levels. Bread is mainly associated with carbohydrates because many breads are rich in starch, which the body can break down into glucose for energy. However, the profile can change depending on the type of bread and how it is made. Whole-grain breads generally contain more fibre than refined white bread, while ingredients such as seeds, oils, sugar, or milk can also change the overall nutrient profile."
+                noticeThat: "Bread has a particularly high level of carbohydrates, but its profile also shows that protein, fats, vitamins, minerals, fibre, and water are present at relatively lower levels. Bread is mainly associated with carbohydrates because many breads are rich in starch, which the body can break down into glucose for energy.\n\nHowever, the profile can change depending on the type of bread and how it is made. Whole-grain breads generally contain more fibre than refined white bread, while ingredients such as seeds, oils, sugar, or milk can also change the overall nutrient profile."
             },
-
             {
                 id: "chicken",
                 label: "Chicken",
@@ -3611,9 +4090,8 @@ background: color-mix(in srgb,
                 },
                 highestNutrientAnswer: "Protein",
                 otherNutrientsAnswer: "Yes — fats, vitamins and minerals.",
-                noticeThat: "Chicken has a particularly high level of protein, but its profile also shows lower levels of fats, vitamins, and minerals. This helps explain why chicken is mainly associated with protein in this activity. Its composition can vary depending on the cut, whether the skin is included, and how it is prepared. For example, removing the skin can reduce the amount of fat, while cooking can cause some water to be lost, making the remaining nutrients more concentrated relative to the cooked food. Different cooking methods, such as grilling, roasting, frying, or boiling, can therefore result in noticeably different nutrient profiles."
+                noticeThat: "Chicken has a particularly high level of protein, but its profile also shows lower levels of fats, vitamins, and minerals. This helps explain why chicken is mainly associated with protein in this activity.\n\nIts composition can vary depending on the cut, whether the skin is included, and how it is prepared. For example, removing the skin can reduce the amount of fat, while cooking can cause some water to be lost, making the remaining nutrients more concentrated relative to the cooked food. Different cooking methods, such as grilling, roasting, frying, or boiling, can therefore also result in noticeably different nutrient profiles."
             },
-
             {
                 id: "cheese",
                 label: "Cheese",
@@ -3630,8 +4108,8 @@ background: color-mix(in srgb,
                 },
                 highestNutrientAnswer: "Fats",
                 otherNutrientsAnswer: "Yes — carbohydrates, protein, vitamins and minerals.",
-                noticeThat: "Cheese has a particularly high level of fats, but its profile also shows protein, vitamins, minerals, and water. These nutrients are present at lower relative levels, but they are still part of the food's overall nutrient composition. Fats were selected as the main nutrient in this activity because many types contain substantial amounts of fat, while also providing protein and minerals such as calcium. However, its composition can vary considerably between different types because of differences in milk, moisture, processing, and ripening. This means two types of cheese can have noticeably different nutrient profiles while still being classified as cheese."},
-
+                noticeThat: "Cheese has a particularly high level of fats, but its profile also shows protein, vitamins, minerals, and water. These nutrients are present at lower levels, but they are still part of the food's overall nutrient composition.\n\nFats were selected as the main nutrient in this activity because many types contain substantial amounts of fat, while also providing protein and minerals such as calcium. However, its composition can vary considerably between different types because of differences in milk, moisture, processing, and ripening. This means two types of cheese can have noticeably different nutrient profiles while still being classified as cheese."
+            },
             {
                 id: "orange",
                 label: "Orange",
@@ -3648,9 +4126,8 @@ background: color-mix(in srgb,
                 },
                 highestNutrientAnswer: "Vitamins and fibre",
                 otherNutrientsAnswer: "Yes — carbohydrates, protein, minerals, and water.",
-                noticeThat: "Orange has particularly high levels of vitamins and fibre, while its profile also shows carbohydrates, protein, minerals, and water. These nutrients are present at varying relative levels, but they are all part of the orange's overall nutrient composition."
+                noticeThat: "Orange has high levels of vitamins and fibre, with its profile showing carbohydrates, protein, minerals, and water at varying levels. Orange is particularly associated with vitamins due to being a good source of vitamin C, even though fibre is also shown at a similarly high level here.\n\nThese amounts can also change depending on whether the whole fruit, juice, or another orange-based product is considered, since processing the fruit can change the amount of fibre and other nutrients. For example, removing the pulp when making juice greatly reduces the fibre compared with eating the whole fruit, while added sugar or other ingredients in processed orange products can also change their overall nutrient profile."
             },
-
             {
                 id: "milk",
                 label: "Milk",
@@ -3668,9 +4145,8 @@ background: color-mix(in srgb,
                 },
                 highestNutrientAnswer: "Minerals and Water",
                 otherNutrientsAnswer: "Yes — carbohydrates, protein, fats, vitamins, and minerals.",
-                noticeThat: "Milk has a particularly high level of minerals, but its profile also shows carbohydrates, protein, fats, and vitamins. These nutrients are present at lower relative levels, but they are still part of milk's overall nutrient composition."
+                noticeThat: "Minerals and water make up the majority of milk's composition, while carbohydrates, protein, fats, and vitamins are present in moderate amounts. Milk is often associated with being a good source of minerals such as calcium and phosphorus, even though water is also present at a similarly high level.\n\nThis is an example of why the main nutrient does not necessarily have to be the only highest value in a simplified profile. Different types of milk, such as whole-fat, reduced-fat, and skim milk, can have different nutrient profiles because the amount of fat is changed during processing.\n\nMilk can also come from different animals, such as cows, goats, or sheep, which can result in differences in its nutrient composition. Plant-based milk alternatives, such as soy, almond, or oat milk, can have very different nutrient profiles because they are made from different plant sources and may also be fortified with vitamins and minerals."
             },
-
             {
                 id: "oats",
                 label: "Oats",
@@ -3687,9 +4163,8 @@ background: color-mix(in srgb,
                 },
                 highestNutrientAnswer: "Carbohydrates and Fibre",
                 otherNutrientsAnswer: "Yes — protein, fats, vitamins, minerals, and water.",
-                noticeThat: "Oats have particularly high levels of carbohydrates and water in this simplified profile, while also showing protein, fats, vitamins, minerals, and fibre. These nutrients are present at varying relative levels, but they are all part of oats' overall nutrient composition."
+                noticeThat: "Oats are a good source of several nutrients, and the profile shows particularly high levels of carbohydrates and fibre, along with protein, fats, vitamins, minerals, and water. Oats can be associated with different main nutrients depending on what is being considered. Some may focus on their carbohydrates, while others may highlight their dietary fibre, or other nutrients they provide.\n\nIn this activity, fibre is used as the main nutrient to highlight one important nutritional characteristic of oats, even though carbohydrates are shown at the same high level in the simplified profile.\n\nThe water level in the profile also depends greatly on how the oats are prepared. In this activity, the profile represents prepared oats, where water from the added liquid contributes to the higher water level.\n\nThe overall profile can also vary depending on the type of oats used, the liquid added during preparation, and other ingredients such as fruit, nuts, seeds, or sweeteners."
             },
-
             {
                 id: "coconut-water",
                 label: "Coconut water",
@@ -3706,7 +4181,7 @@ background: color-mix(in srgb,
                 },
                 highestNutrientAnswer: "Water",
                 otherNutrientsAnswer: "Yes — carbohydrates, protein, vitamins, and minerals.",
-                noticeThat: "Coconut water has a particularly high level of water, but its profile also shows carbohydrates, protein, vitamins, minerals, and fibre. These nutrients are present at lower relative levels, but they are still part of coconut water's overall nutrient composition."
+                noticeThat: "Coconut water has a particularly high level of water, but its profile also shows minerals, carbohydrates, and vitamins in smaller amounts. Its nutrient composition can vary depending on the maturity of the coconut, since the amounts of water, sugars, and minerals can change as the coconut develops.\n\nFresh coconut water can also differ from commercially packaged coconut water because processing, storage, and added ingredients can affect its overall composition.\n\nCoconut water is also different from coconut milk: coconut water is the liquid naturally found inside a coconut, while coconut milk is made by blending or pressing coconut flesh with water. Because they come from different parts of the coconut and are prepared differently, coconut milk generally has a very different profile, particularly in its levels of fats and water."
             }
         ];
 
@@ -3714,7 +4189,7 @@ background: color-mix(in srgb,
         let scanTimer = null;
         let devEventsBound = false;
 
-        function foodSvg(type) {
+        function foodSvg(type, foodId) {
             const common = 'viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"';
 
             const s = {
@@ -4534,7 +5009,21 @@ background: color-mix(in srgb,
         `
     };
 
-    return s[type] || s.bread;
+    const svg = s[type] || s.bread;
+
+    return svg
+        .replace(
+            /\bid="([^"]+)"/g,
+            `id="${foodId}-$1"`
+        )
+        .replace(
+            /url\(#([^)]+)\)/g,
+            `url(#${foodId}-$1)`
+        )
+        .replace(
+            /(href|xlink:href)="#([^"]+)"/g,
+            `$1="#${foodId}-$2"`
+        );
 }
 
         function levelFromValue(value) {
@@ -4546,6 +5035,15 @@ background: color-mix(in srgb,
             return "Very Low";
         }
 
+        function updateFinishButton() {
+            const count = simState.scannedFoods.size;
+            const finishBtn = document.getElementById("finishActivityBtn");
+
+            if (!finishBtn) return;
+
+            finishBtn.disabled = count < 4;
+        }
+
         function renderFoodOptions() {
             const grid = document.getElementById("foodGrid");
             grid.replaceChildren();
@@ -4555,7 +5053,7 @@ background: color-mix(in srgb,
                 button.className = "food-option";
                 button.dataset.foodId = food.id;
                 button.setAttribute("aria-label", `Select ${food.label}`);
-                button.innerHTML = `<span class="food-icon">${foodSvg(food.icon)}</span><span class="food-name">${escapeHtml(food.label)}</span><span class="food-check" aria-hidden="true">✓ Scanned</span>`;
+                button.innerHTML = `<span class="food-icon">${foodSvg(food.icon, food.id)}</span><span class="food-name">${escapeHtml(food.label)}</span><span class="food-check" aria-hidden="true">✓ Scanned</span>`;
                 button.addEventListener("click", () => selectFood(food.id));
                 grid.appendChild(button);
             });
@@ -4588,6 +5086,8 @@ background: color-mix(in srgb,
         }
 
         function selectFood(foodId) {
+            state.analysisRunId++;
+            
             if (scanTimer) clearTimeout(scanTimer);
 
             const food = FOODS.find(f => f.id === foodId);
@@ -4600,7 +5100,7 @@ background: color-mix(in srgb,
                 simState.scannerState = "complete";
                 simState.lastScanned = foodId;
 
-                document.getElementById("foodDisplay").innerHTML = foodSvg(food.icon);
+                document.getElementById("foodDisplay").innerHTML = foodSvg(food.icon, food.id);
                 document.getElementById("glassChamber").setAttribute(
                     "aria-label",
                     `${food.label} is selected in the scanner chamber.`
@@ -4612,13 +5112,28 @@ background: color-mix(in srgb,
 
                 setScannerStatus("complete", "ALREADY SCANNED ✓");
 
-                // Show this food's existing analysis
                 renderResults(food);
+
+                    /* Restore completed nutrient profile */
+
+                    document.querySelectorAll(".nutrient-row").forEach(row => {
+
+                        const key = row.dataset.nutrient;
+                        const value = food.nutrients[key];
+
+                        row.querySelectorAll(".segment").forEach(
+                            (segment, index) => {
+                                segment.classList.toggle(
+                                    "filled",
+                                    index < value
+                                );
+                            }
+                        );
+                    });
 
                 updateFoodOptionStates();
                 updateComparison();
                 playSound("click");
-
                 return;
             }
 
@@ -4626,7 +5141,7 @@ background: color-mix(in srgb,
             simState.scannerState = "ready";
             simState.lastScanned = null;
 
-            document.getElementById("foodDisplay").innerHTML = foodSvg(food.icon);
+            document.getElementById("foodDisplay").innerHTML = foodSvg(food.icon, food.id);
 
             document.getElementById("glassChamber").setAttribute(
                 "aria-label",
@@ -4640,42 +5155,370 @@ background: color-mix(in srgb,
             setScannerStatus("ready", "READY");
             setResultsStatus("");
 
-            document.getElementById("resultsIntro").classList.remove("hidden");
-            document.getElementById("resultsContent").classList.add("hidden");
+            const resultsIntro =
+                document.getElementById("resultsIntro");
+
+            const resultsIdentifying =
+                document.getElementById("resultsIdentifying");
+
+            const resultsContent =
+                document.getElementById("resultsContent");
+
+            /* Reset previous result state */
+
+            resultsContent.classList.remove(
+                "analyzing",
+                "analysis-reveal"
+            );
+
+            resultsContent.classList.add("hidden");
+            const nutrientProfile =
+                resultsContent.querySelector(".nutrient-profile-section");
+
+            if (nutrientProfile) {
+                nutrientProfile.style.opacity = "0";
+                nutrientProfile.style.visibility = "hidden";
+            }
+
+            /* Reset food identity reveal */
+
+            resultsContent
+                .querySelector(".result-food-identity .result-kicker")
+                ?.classList.remove("revealed");
+
+            resultsContent
+                .querySelector(".result-food-identity h3")
+                ?.classList.remove("revealed");
+
+            resultsContent
+                .querySelector(".main-nutrient-tag")
+                ?.classList.remove("revealed");
+
+            /* Show fresh intro state */
+
+            resultsIdentifying.classList.add("hidden");
+            resultsIntro.classList.remove("hidden");
 
             updateFoodOptionStates();
             playSound("click");
         }
 
-        function scanCurrentFood() {
-            const food = simState.currentFood;
-            if (!food || simState.scannerState !== "ready") return;
-            simState.scannerState = "scanning";
-            document.getElementById("scanBtn").disabled = true;
-            document.getElementById("scanHelper").textContent = `Analyzing ${food.label}...`;
-            setScannerStatus("scanning", "SCANNING...");
-            setResultsStatus("scanning", "SCANNING...");
-            playSound("click");
-            
-            scanTimer = setTimeout(() => {
-                simState.scannerState = "complete";
-                simState.scannedFoods.add(food.id);
-                simState.lastScanned = food.id;
-                setScannerStatus("complete", "SCAN COMPLETE ✓");
-                setResultsStatus("complete", "ANALYSIS COMPLETE ✓");
-                document.getElementById("scanHelper").textContent = "Analysis complete. Select another food to continue.";
-                renderResults(food);
-                updateProgress();
-                updateFoodOptionStates();
-                updateComparison();
-                playSound("correct");
-            }, 900);
+        async function scanCurrentFood() {
+    const food = simState.currentFood;
+
+    if (!food || simState.scannerState !== "ready") return;
+    const thisRunId = state.analysisRunId;
+
+    simState.scannerState = "scanning";
+
+    document.getElementById("scanBtn").disabled = true;
+    document.getElementById("scanHelper").textContent =
+        `Analyzing ${food.label}...`;
+
+    setScannerStatus("scanning", "SCANNING...");
+    setResultsStatus("scanning", "ANALYZING");
+
+    playSound("click");
+
+    scanTimer = setTimeout(async () => {
+
+        if (thisRunId !== state.analysisRunId) return;
+
+        simState.scannerState = "complete";
+        simState.scannedFoods.add(food.id);
+        simState.lastScanned = food.id;
+        updateFinishButton();
+
+        setScannerStatus("complete", "SCAN COMPLETE ✓");
+
+        document.getElementById("scanHelper").textContent =
+            `Analyzing ${food.label}...`;
+
+        /* Show identifying screen */
+        document.getElementById("resultsIntro")
+            .classList.add("hidden");
+
+        document.getElementById("resultsContent")
+            .classList.add("hidden");
+
+        document.getElementById("resultsIdentifying")
+            .classList.remove("hidden");
+
+        /* Let the identifying screen actually be visible */
+        await new Promise(resolve =>
+            setTimeout(resolve, 1200)
+        );
+
+        /* Move to actual results */
+        document.getElementById("resultsIdentifying")
+            .classList.add("hidden");
+
+        await revealScanResults(food, thisRunId);
+
+        document.getElementById("scanHelper").textContent =
+            "Analysis complete. Select another food to continue.";
+
+        updateProgress();
+        updateFoodOptionStates();
+        updateComparison();
+
+        playSound("correct");
+
+    }, 900);
+}
+
+function animateNutrientSegments(food) {
+    const rows = [...document.querySelectorAll(".nutrient-row")];
+
+    rows.forEach(row => {
+        row.classList.add("analyzing");
+    });
+
+    return new Promise(resolve => {
+
+        const fluctuationDuration = 1000;
+        const fluctuationInterval = 140;
+        let elapsed = 0;
+
+        const fluctuationTimer = setInterval(() => {
+
+            elapsed += fluctuationInterval;
+
+            rows.forEach(row => {
+
+                const key = row.dataset.nutrient;
+                const actualValue = food.nutrients[key];
+
+                const segments =
+                    [...row.querySelectorAll(".segment")];
+
+                const variation =
+                    Math.floor(Math.random() * 5) - 2;
+
+                const fluctuatingValue =
+                    Math.max(
+                        0,
+                        Math.min(
+                            10,
+                            actualValue + variation
+                        )
+                    );
+
+                segments.forEach((segment, index) => {
+
+                    segment.classList.toggle(
+                        "filled",
+                        index < fluctuatingValue
+                    );
+
+                });
+            });
+
+            if (elapsed >= fluctuationDuration) {
+
+                clearInterval(fluctuationTimer);
+
+                settleSegments();
+
+            }
+
+        }, fluctuationInterval);
+
+
+        function settleSegments() {
+
+            /* CLEAR EVERYTHING FIRST */
+
+            rows.forEach(row => {
+
+                row.querySelectorAll(".segment")
+                    .forEach(segment => {
+                        segment.classList.remove("filled");
+                    });
+
+            });
+
+            let maxValue = 0;
+
+            rows.forEach(row => {
+
+                const key = row.dataset.nutrient;
+
+                maxValue = Math.max(
+                    maxValue,
+                    food.nutrients[key]
+                );
+
+            });
+
+            let currentSegment = 0;
+
+            const settleTimer = setInterval(() => {
+
+                rows.forEach(row => {
+
+                    const key = row.dataset.nutrient;
+                    const actualValue = food.nutrients[key];
+
+                    const segments =
+                        [...row.querySelectorAll(".segment")];
+
+                    if (currentSegment < actualValue) {
+
+                        segments[currentSegment]
+                            ?.classList.add("filled");
+
+                    }
+
+                });
+
+                currentSegment++;
+
+                if (currentSegment >= maxValue) {
+
+                    clearInterval(settleTimer);
+
+                    rows.forEach(row => {
+                        row.classList.remove("analyzing");
+                    });
+
+                    resolve();
+
+                }
+
+            }, 120);
+
         }
 
-        function renderResults(food) {
+    });
+}
+async function revealScanResults(food, thisRunId) {
+
+    const resultsContent =
+        document.getElementById("resultsContent");
+
+    const status =
+        document.getElementById("resultsStatus");
+
+    const isCurrentRun = () =>
+        thisRunId === state.analysisRunId;
+
+    /* ANALYZING */
+
+    status.textContent = "ANALYZING";
+    status.classList.remove("complete");
+    status.classList.add("scanning");
+
+   /* BUILD RESULTS WHILE HIDDEN */
+
+renderResults(food);
+
+const nutrientProfile =
+    document.querySelector(".nutrient-profile-section");
+
+nutrientProfile.style.opacity = "0";
+nutrientProfile.style.visibility = "hidden";
+
+/* NOW SHOW RESULT STRUCTURE */
+
+resultsContent.classList.remove(
+    "hidden",
+    "analysis-reveal"
+);
+
+resultsContent.classList.add("analyzing");
+    /* --------------------------------
+       STAGE 2: REVEAL FOOD IDENTITY
+       -------------------------------- */
+
+    const kicker =
+        document.querySelector(
+            ".result-food-identity .result-kicker"
+        );
+
+    const foodName =
+        document.querySelector(
+            ".result-food-identity h3"
+        );
+
+    const mainNutrient =
+        document.querySelector(".main-nutrient-tag");
+
+    await new Promise(resolve =>
+        setTimeout(resolve, 150)
+    );
+
+    if (!isCurrentRun()) return;
+
+    kicker.classList.add("revealed");
+
+    await new Promise(resolve =>
+        setTimeout(resolve, 180)
+    );
+
+    if (!isCurrentRun()) return;
+
+    foodName.classList.add("revealed");
+
+    await new Promise(resolve =>
+        setTimeout(resolve, 180)
+    );
+
+    if (!isCurrentRun()) return;
+
+    mainNutrient.classList.add("revealed");
+
+    await new Promise(resolve =>
+        setTimeout(resolve, 300)
+    );
+
+    if (!isCurrentRun()) return;
+
+    nutrientProfile.style.opacity = "1";
+    nutrientProfile.style.visibility = "visible";
+
+    /* --------------------------------
+       STAGE 3 + 4 + 5:
+       NUTRIENT ANALYSIS
+       -------------------------------- */
+
+    await animateNutrientSegments(food, thisRunId);
+
+    if (!isCurrentRun()) return;
+
+    /* --------------------------------
+       STAGE 6:
+       REVEAL REST OF PANEL
+       -------------------------------- */
+
+    status.textContent = "ANALYSIS COMPLETE ✓";
+
+    status.classList.remove("scanning");
+    status.classList.add("complete");
+
+    resultsContent.classList.add("analysis-reveal");
+
+    requestAnimationFrame(() => {
+
+        if (!isCurrentRun()) return;
+
+        resultsContent.classList.remove("analyzing");
+
+    });
+}
+
+        function renderResults(food, options={}) {
+             const {
+                keepTitle = false
+            } = options;
+
             document.getElementById("resultsIntro").classList.add("hidden");
             document.getElementById("resultsContent").classList.remove("hidden");
-            document.getElementById("resultFoodName").textContent = food.label;
+            if (!keepTitle) {
+                document.getElementById("resultFoodName").textContent =
+                    food.label;
+            }
+            document.getElementById("mainNutrientValue").textContent = food.mainNutrient;
             const chart = document.getElementById("nutrientChart");
             const tbody = document.getElementById("nutrientTableBody");
             chart.replaceChildren();
@@ -4686,6 +5529,7 @@ background: color-mix(in srgb,
                 const level = levelFromValue(value);
                 const row = document.createElement("div");
                 row.className = "nutrient-row";
+                row.dataset.nutrient = key;
                 row.setAttribute("role", "img");
                 row.setAttribute("aria-label", `${label}: ${level}`);
                 const name = document.createElement("span");
@@ -4694,11 +5538,13 @@ background: color-mix(in srgb,
                 const segments = document.createElement("div");
                 segments.className = "segments";
                 segments.setAttribute("aria-hidden", "true");
+
                 for (let i = 0; i < 10; i++) {
                     const seg = document.createElement("span");
-                    seg.className = `segment${i < value ? " filled" : ""}`;
+                    seg.className = "segment";
                     segments.appendChild(seg);
                 }
+
                 const levelLabel = document.createElement("span");
                 levelLabel.className = "level-label";
                 levelLabel.textContent = level;
@@ -4722,40 +5568,40 @@ background: color-mix(in srgb,
         }
 
         function renderObservationAnswers(food) {
-    const highestEl = document.getElementById("highestNutrientAnswer");
-    const otherEl = document.getElementById("otherNutrientsAnswer");
+            const highestEl = document.getElementById("highestNutrientAnswer");
+            const otherEl = document.getElementById("otherNutrientsAnswer");
 
-    if (!highestEl || !otherEl) return;
+            if (!highestEl || !otherEl) return;
 
-    const nutrientLabels = Object.entries(food.nutrients)
-        .map(([key, value]) => ({
-            key,
-            label: NUTRIENTS.find(([nutrientKey]) => nutrientKey === key)?.[1] || key,
-            value
-        }));
+            const nutrientLabels = Object.entries(food.nutrients)
+                .map(([key, value]) => ({
+                    key,
+                    label: NUTRIENTS.find(([nutrientKey]) => nutrientKey === key)?.[1] || key,
+                    value
+                }));
 
-    const highestValue = Math.max(
-        ...nutrientLabels.map(nutrient => nutrient.value)
-    );
+            const highestValue = Math.max(
+                ...nutrientLabels.map(nutrient => nutrient.value)
+            );
 
-    const highestNutrients = nutrientLabels.filter(
-        nutrient => nutrient.value === highestValue
-    );
+            const highestNutrients = nutrientLabels.filter(
+                nutrient => nutrient.value === highestValue
+            );
 
-    highestEl.textContent = highestNutrients
-        .map(nutrient => nutrient.label)
-        .join(" and ");
+            highestEl.textContent = highestNutrients
+                .map(nutrient => nutrient.label)
+                .join(" and ");
 
-    const otherNutrients = nutrientLabels
-        .filter(nutrient => nutrient.value > 0 && nutrient.value < highestValue)
-        .map(nutrient => nutrient.label);
+            const otherNutrients = nutrientLabels
+                .filter(nutrient => nutrient.value > 0 && nutrient.value < highestValue)
+                .map(nutrient => nutrient.label);
 
-    if (otherNutrients.length) {
-        otherEl.textContent = `Yes — ${otherNutrients.join(", ")}.`;
-    } else {
-        otherEl.textContent = "No other nutrients are present at a lower level.";
-    }
-}
+            if (otherNutrients.length) {
+                otherEl.textContent = `Yes — ${otherNutrients.join(", ")}.`;
+            } else {
+                otherEl.textContent = "No other nutrients are present at a lower level.";
+            }
+        }
 
         function updateComparison() {
             const count = simState.scannedFoods.size;
@@ -4786,7 +5632,7 @@ background: color-mix(in srgb,
                 const meaningful = food.summaryContains || NUTRIENTS.filter(([key]) => food.nutrients[key] > 0).map(([, label]) => label.toLowerCase()).join(", ");
                 const card = document.createElement("article");
                 card.className = "summary-card";
-                card.innerHTML = `<div class="summary-icon">${foodSvg(food.icon)}</div><div><h4>${escapeHtml(food.label)}</h4><p><strong>Main group:</strong> ${escapeHtml(food.mainNutrient)}<br><strong>Contains:</strong> ${escapeHtml(typeof meaningful === "string" ? meaningful : formatList(meaningful))}</p></div>`;
+                card.innerHTML = `<div class="summary-icon">${foodSvg(food.icon, food.id)}</div><div><h4>${escapeHtml(food.label)}</h4><p><strong>Main group:</strong> ${escapeHtml(food.mainNutrient)}<br><strong>Contains:</strong> ${escapeHtml(typeof meaningful === "string" ? meaningful : formatList(meaningful))}</p></div>`;
                 grid.appendChild(card);
             });
             const count = simState.scannedFoods.size;
@@ -4800,20 +5646,23 @@ background: color-mix(in srgb,
             return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
         }
 
-        function finishActivity(immediate = false) {
-            const count = simState.scannedFoods.size;
-            if (!immediate && count < 7) {
-                document.getElementById("finishModalText").textContent = `You have scanned ${count} of 7 foods. Are you sure you want to end the activity?`;
-                document.getElementById("finishModal").classList.add("show");
-                document.getElementById("continueActivityBtn").focus();
-                return;
-            }
-            closeFinishModal();
-            renderSummary();
-            document.getElementById("scannerApp").classList.add("hidden");
-            document.getElementById("completionScreen").classList.remove("hidden");
-            playSound("complete");
-        }
+function finishActivity(immediate = false) {
+    const count = simState.scannedFoods.size;
+
+    if (!immediate && count < 7) {
+        document.getElementById("finishModalText").textContent =
+            `You have scanned ${count} of 7 foods. Are you sure you want to end the activity?`;
+
+        document.getElementById("finishModal").classList.add("show");
+        document.getElementById("continueActivityBtn").focus();
+        return;
+    }
+
+    closeFinishModal();
+    renderSummary();
+    showScreen("completion");
+    playSound("complete");
+}
 
         function closeFinishModal() {
             document.getElementById("finishModal").classList.remove("show");
@@ -4826,6 +5675,8 @@ background: color-mix(in srgb,
             simState.scannedFoods = new Set();
             simState.scannerState = "required";
             simState.lastScanned = null;
+
+            document.getElementById("finishActivityBtn").disabled = true;
         }
 
         function showScannerFromCompletion() {
@@ -4834,17 +5685,11 @@ background: color-mix(in srgb,
             renderScannerUI();
         }
 
-        function restartActivity() {
-            resetSimulationState();
-            renderScannerUI();
-            playSound("click");
-        }
-
         function renderScannerUI() {
             renderFoodOptions();
             updateProgress();
             updateComparison();
-            document.getElementById("foodDisplay").innerHTML = `<div class="empty-food-state"><span class="empty-icon">＋</span><strong>Select a food</strong><span>Food will appear here</span></div>`;
+            document.getElementById("foodDisplay").innerHTML = `<div class="empty-food-state"><span class="empty-icon" aria-hidden="true"></span><strong>Select a food</strong><span>Food will appear here</span></div>`;
             document.getElementById("glassChamber").setAttribute("aria-label", "Scanner chamber. No food selected.");
             document.getElementById("scanBtn").disabled = true;
             document.getElementById("scanHelper").textContent = "Select a food below to prepare the scanner.";
@@ -4854,23 +5699,10 @@ background: color-mix(in srgb,
             closeFinishModal();
         }
 
-        function bindDevEvents() {
-            if (devEventsBound) return;
-            devEventsBound = true;
-            document.getElementById("scanBtn").addEventListener("click", scanCurrentFood);
-            document.getElementById("finishActivityBtn").addEventListener("click", () => finishActivity(false));
-            document.getElementById("closeFinishModalBtn").addEventListener("click", closeFinishModal);
-            document.getElementById("continueActivityBtn").addEventListener("click", closeFinishModal);
-            document.getElementById("confirmFinishBtn").addEventListener("click", () => finishActivity(true));
-            document.getElementById("finishModal").addEventListener("click", event => { if (event.target.id === "finishModal") closeFinishModal(); });
-            document.getElementById("returnToScannerBtn").addEventListener("click", showScannerFromCompletion);
-            document.getElementById("restartActivityBtn").addEventListener("click", restartActivity);
-        }
-
         function devInit() {
             resetSimulationState();
-            renderScannerUI();
-            bindDevEvents();
+            renderScannerUI(); 
+            bindEvents();
         }
 
         function devReset() {
