@@ -1030,7 +1030,7 @@
             confirmPpConfirmBtn: document.getElementById("confirmPpConfirmBtn")
         };
 
-        initializeApp();
+
 
         function initializeApp() {
             applyConfigToUI();
@@ -1224,6 +1224,7 @@
             firstAnswerRecorded: false,
             finalMastery: false,
             selections: new Set(),
+            answers: {}, feedback: "", failed: false, completed: false,
             history: []
         };
 
@@ -1237,12 +1238,12 @@
 
         const PP_STATE_KEY = SIM_CONFIG.simId + "-peace-path-state";
         let ppConfirmAction = null;
-        function savePPState() { storageSet(PP_STATE_KEY, JSON.stringify({ ...pp, selections:[...pp.selections] })); }
+        function savePPState() { try { sessionStorage.setItem(PP_STATE_KEY, JSON.stringify({ ...pp, selections:[...pp.selections] })); } catch(e) {} }
         function loadPPState() {
-            const raw=storageGet(PP_STATE_KEY); if(!raw) return false;
-            try { const saved=JSON.parse(raw); Object.assign(pp,saved); pp.selections=new Set(saved.selections||[]); return true; } catch(e){ return false; }
+            const raw=sessionStorage.getItem(PP_STATE_KEY); if(!raw) return false;
+            try { const saved=JSON.parse(raw); if (!Number.isInteger(saved.screen) || saved.screen < 1 || saved.screen > 5 || !Array.isArray(saved.history) || !Array.isArray(saved.selections)) return false; Object.assign(pp,saved); pp.selections=new Set(saved.selections||[]); return true; } catch(e){ return false; }
         }
-        function clearPPState(){ try{ localStorage.removeItem(PP_STATE_KEY); }catch(e){} }
+        function clearPPState(){ try{ sessionStorage.removeItem(PP_STATE_KEY); localStorage.removeItem(PP_STATE_KEY); }catch(e){} }
         function ppRecord(label, result){ pp.history.push({screen:pp.screen,label,result,time:new Date().toLocaleTimeString()}); savePPState(); }
         function openReviewModal(){
             const entries=pp.history.length ? pp.history.map(x=>`<li><strong>${escapeHtml(x.label)}</strong> — ${escapeHtml(x.result)} <span class="muted">(${escapeHtml(x.time)})</span></li>`).join("") : "<p>No answers recorded yet.</p>";
@@ -1255,7 +1256,7 @@
         }
         function closePpConfirmModal(){ dom.ppConfirmModal.classList.remove("show"); ppConfirmAction=null; }
         dom && setTimeout(()=>{ if(dom.confirmPpConfirmBtn) dom.confirmPpConfirmBtn.onclick=()=>{ const action=ppConfirmAction; closePpConfirmModal(); if(action) action(); }; },0);
-        function ppGoBack(){ if(pp.screen>1 && !pp.locked){ pp.screen--; pp.selections.clear(); pp.locked=false; ppClearFeedback(); savePPState(); renderPP(); } }
+        function ppGoBack(){ if(pp.screen>1 && !pp.locked){ pp.screen--; pp.selections.clear(); pp.answers={}; pp.feedback=""; pp.failed=false; pp.firstAnswerRecorded=false; pp.locked=false; ppClearFeedback(); savePPState(); renderPP(); } }
         function shuffle(items){ return items.map(v=>({v,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.v); }
 
         function ppResetState() {
@@ -1269,11 +1270,17 @@
             pp.finalMastery = false;
             pp.selections = new Set();
             pp.history = [];
+            pp.answers = {};
+            pp.feedback = "";
+            pp.failed = false;
+            pp.wrongId = null;
+            pp.completed = false;
         }
 
         function devInit() {
-            if (!loadPPState()) ppResetState();
+            ppResetState();
             renderPP();
+            savePPState();
         }
 
         function devReset() {
@@ -1361,12 +1368,13 @@
             const tryBtn = document.getElementById("ppTryBtn");
             const feedback = document.getElementById("ppFeedback");
             if (!scene) return;
+            if (pp.completed) { showCompletion(); return; }
 
             ppRenderStatus();
             back.disabled = pp.screen <= 1 || pp.locked;
             back.onclick = ppGoBack;
             hint.disabled = pp.screen === 1 || pp.locked;
-            tryBtn.disabled = pp.screen === 1 || !pp.locked;
+            tryBtn.disabled = pp.screen === 1 || !pp.failed;
             feedback.classList.add("hidden");
             feedback.innerHTML = "";
 
@@ -1391,8 +1399,35 @@
             if (pp.screen === 4) renderRelationship(scene);
             if (pp.screen === 5) renderResolution(scene);
 
+            Object.entries(pp.answers).forEach(([group, value]) => {
+                document.querySelectorAll(`#${group} .pp-option`).forEach(btn => {
+                    if (value) btn.disabled = true;
+                    if (btn.dataset.id === value) { btn.classList.add("selected", "correct"); btn.setAttribute("aria-pressed", "true"); }
+                });
+            });
+            pp.selections.forEach(id => {
+                const btn = scene.querySelector(`[data-id="${id}"]`);
+                if (btn) { btn.classList.add("selected"); btn.setAttribute("aria-pressed", "true"); }
+            });
+            const count = document.getElementById("selectedCount");
+            if (count) count.textContent = pp.selections.size;
+            if (pp.failed) {
+                scene.querySelectorAll(".pp-option, .pp-chip, #checkResolution").forEach(btn => btn.disabled = true);
+                if (pp.wrongId) scene.querySelector(`[data-id="${pp.wrongId}"]`)?.classList.add("wrong");
+                if (pp.screen === 5) pp.selections.forEach(id => {
+                    scene.querySelector(`[data-id="${id}"]`)?.classList.add(["photos", "captions", "facts", "equal"].includes(id) ? "correct" : "wrong");
+                });
+                feedback.innerHTML = pp.feedback;
+                feedback.classList.remove("hidden");
+            }
+            const requiredGroups = {2:2, 3:3, 4:2};
+            if (!pp.failed && Object.values(pp.answers).filter(Boolean).length === requiredGroups[pp.screen]) {
+                const next = document.createElement("button"); next.className="primary-btn"; next.id="ppNextBtn"; next.textContent="Continue →";
+                next.onclick=()=>{ pp.screen++; pp.answers={}; pp.firstAnswerRecorded=false; pp.selections.clear(); renderPP(); savePPState(); };
+                scene.appendChild(next);
+            }
             hint.onclick = () => ppHint();
-            tryBtn.onclick = () => openPpConfirmModal(()=>{ pp.locked = false; pp.selections.clear(); savePPState(); renderPP(); }, "Your current question attempt will be cleared. Continue?");
+            tryBtn.onclick = () => openPpConfirmModal(()=>{ pp.locked = false; pp.failed = false; pp.answers = {}; pp.feedback = ""; pp.selections.clear(); renderPP(); savePPState(); }, "Your current question attempt will be cleared. Continue?");
         }
 
         function renderQuestionIntro(title, text) {
@@ -1512,10 +1547,11 @@
                     if (pp.selections.has(id)) pp.selections.delete(id); else pp.selections.add(id);
                     btn.classList.toggle("selected", pp.selections.has(id));
                     btn.setAttribute("aria-pressed", pp.selections.has(id));
-                    document.getElementById("selectedCount").textContent = pp.selections.size;
+                    document.getElementById("selectedCount").textContent = pp.selections.size; savePPState();
                 };
             });
             document.getElementById("checkResolution").onclick = () => {
+                if (pp.locked || pp.completed) return;
                 pp.attempts++;
                 const required = new Set(["photos","captions","facts","equal"]);
                 const ok = pp.selections.size === required.size && [...required].every(x=>pp.selections.has(x));
@@ -1528,7 +1564,7 @@
                     playSound("correct");
                     showCompletion();
                 } else {
-                    pp.locked = true;
+                    pp.locked = true; pp.failed = true;
                     pp.selections.forEach(id => document.querySelector(`[data-id="${id}"]`)?.classList.add(required.has(id) ? "correct" : "wrong"));
                     document.getElementById("ppFeedback").innerHTML = `<strong>Resolution plan needs another pass.</strong>
                         <p><b>Why:</b> A fair resolution must address both students' needs and share responsibility.</p>
@@ -1536,12 +1572,16 @@
                         <p class="model"><b>Correct model:</b> Use photographs with short factual captions, check every fact together and divide the remaining work equally.</p>`;
                     document.getElementById("ppFeedback").classList.remove("hidden");
                     document.getElementById("ppTryBtn").disabled = false;
+                    pp.feedback=document.getElementById("ppFeedback").innerHTML; savePPState();
+                    renderPP();
                     playSound("wrong");
                 }
             };
         }
 
         function ppShowFeedback(title, why, fix, model) {
+            document.getElementById("ppBackBtn").disabled = true;
+            document.getElementById("ppHintBtn").disabled = true;
             const fb = document.getElementById("ppFeedback");
             if (!fb) return;
             fb.classList.remove("pp-success"); fb.innerHTML = `<strong>${title}</strong><p><b>Why:</b> ${why}</p><p><b>How to fix:</b> ${fix}</p><p class="model"><b>Correct model:</b> ${model}</p>`;
@@ -1560,7 +1600,7 @@
         }
 
         function bindPair(a,b,correct,judge) {
-            const chosen = {};
+            const chosen = pp.answers;
             const feedback = {
                 conflictType: ["Conflict type incorrect", "The disagreement occurs between two characters, although each may also have private worries.", "Label the main conflict person versus person and the worry as internal.", "External: Asha versus Devin; internal: Asha worries about the display."],
                 internalChoice: ["Internal conflict choice incorrect", "The classroom being locked is not part of the displayed conflict.", "Choose Asha's private worry about the display.", "Asha worries the display will look empty."],
@@ -1576,19 +1616,19 @@
                         if(value !== correct[index]) {
                             pp.attempts++;
                             if(!pp.firstAnswerRecorded){ pp.firstAnswerRecorded=true; pp.firstAttemptMistakes++; }
-                            btn.classList.add("wrong");
+                            btn.classList.add("wrong"); pp.wrongId = value; pp.failed = true;
                             pp.locked = true;
                             document.querySelectorAll(`#${a} .pp-option, #${b} .pp-option`).forEach(x=>{x.disabled=true;});
                             const f=feedback[group];
                             ppShowFeedback(f[0],f[1],f[2],f[3]);
-                            chosen[group]=null;
+                            chosen[group]=null; pp.feedback=document.getElementById("ppFeedback").innerHTML; savePPState();
                             const tryBtn=document.getElementById("ppTryBtn");
                             if(tryBtn) tryBtn.disabled=false;
                             return;
                         }
-                        btn.classList.add("selected"); btn.setAttribute("aria-pressed","true");
+                        btn.classList.add("selected", "correct"); btn.setAttribute("aria-pressed","true");
                         document.querySelectorAll(`#${group} .pp-option`).forEach(x=>{x.disabled=true;});
-                        chosen[group]=value; ppClearFeedback();
+                        chosen[group]=value; ppClearFeedback(); savePPState();
                         if(chosen[a] && chosen[b]) judge(true);
                     };
                 });
@@ -1596,7 +1636,7 @@
         }
 
         function bindTriple(groups,correct,judge) {
-            const chosen={};
+            const chosen=pp.answers;
             const feedback={
                 ashaChoice:["Assumption treated as perspective","Calling someone lazy is not supported by the scene.","Use Asha's stated reason.","Visitors need images to understand quickly."],
                 devinChoice:["Assumption treated as perspective","Saying Devin hates pictures is not supported by the scene.","Use Devin's stated reason.","Visitors need written facts to learn accurately."],
@@ -1611,19 +1651,19 @@
                         if(value !== correct[i]) {
                             pp.attempts++;
                             if(!pp.firstAnswerRecorded){ pp.firstAnswerRecorded=true; pp.firstAttemptMistakes++; }
-                            btn.classList.add("wrong");
+                            btn.classList.add("wrong"); pp.wrongId = value; pp.failed = true;
                             pp.locked = true;
                             groups.forEach(g=>document.querySelectorAll(`#${g} .pp-option`).forEach(x=>{x.disabled=true;}));
                             const f=feedback[group];
                             ppShowFeedback(f[0],f[1],f[2],f[3]);
-                            chosen[group]=null;
+                            chosen[group]=null; pp.feedback=document.getElementById("ppFeedback").innerHTML; savePPState();
                             const tryBtn=document.getElementById("ppTryBtn");
                             if(tryBtn) tryBtn.disabled=false;
                             return;
                         }
-                        btn.classList.add("selected"); btn.setAttribute("aria-pressed","true");
+                        btn.classList.add("selected", "correct"); btn.setAttribute("aria-pressed","true");
                         document.querySelectorAll(`#${group} .pp-option`).forEach(x=>{x.disabled=true;});
-                        chosen[group]=value; ppClearFeedback();
+                        chosen[group]=value; ppClearFeedback(); savePPState();
                         if(groups.every(g=>chosen[g])) judge(true);
                     };
                 });
@@ -1640,8 +1680,18 @@
                 pp.locked=true;
                 ppRecord(PP_SCREENS[pp.screen-1].title, "Correct");
                 playSound("correct");
-                pp.screen++;
-                setTimeout(()=>{ pp.locked=false; renderPP(); }, 280);
+                pp.locked = false;
+                const next = document.createElement("button");
+                next.className = "primary-btn";
+                next.id = "ppNextBtn";
+                next.textContent = "Continue →";
+                next.onclick = () => {
+                    pp.screen++; pp.answers={}; pp.failed=false; pp.feedback="";
+                    pp.firstAnswerRecorded=false; pp.selections.clear();
+                    renderPP(); savePPState();
+                };
+                document.getElementById("ppScene").appendChild(next);
+                savePPState();
             } else {
                 pp.locked=true;
                 ppRecord(PP_SCREENS[pp.screen-1].title, "Incorrect");
@@ -1667,12 +1717,16 @@
         }
 
         function showCompletion() {
+            pp.completed = true; pp.locked = true; savePPState();
+            ppClearFeedback();
+            document.getElementById("ppHintBtn").disabled=true;
             const seconds=Math.max(1,Math.round((Date.now()-pp.startedAt)/1000));
-            const accuracy=Math.max(0,Math.round(((5-pp.firstAttemptMistakes)/5)*100));
+            const accuracy=Math.max(0,Math.round(((4-pp.firstAttemptMistakes)/4)*100));
             document.getElementById("ppScene").innerHTML=`<section class="pp-complete pp-success">
                 <div class="pp-crossing" aria-hidden="true">A ─── 🌉 ─── D</div>
                 <h2>Conflict resolved</h2>
                 <p>Both students cross the bridge with a shared plan.</p>
+                <p style="color:var(--success); font-weight:700">✓ Correct plan: use photographs with short factual captions, check every fact together, and divide the remaining work equally.</p>
                 <div class="pp-report">
                     <div class="pp-metric"><strong>${pp.finalMastery ? "Mastered" : "In progress"}</strong><span>Final mastery</span></div>
                     <div class="pp-metric"><strong>${accuracy}%</strong><span>First-attempt accuracy</span></div>
@@ -1689,9 +1743,14 @@
             document.getElementById("ppBackBtn").disabled=true;
             document.getElementById("ppTryBtn").disabled=true;
             playSound("complete");
-            document.getElementById("ppReplayBtn").onclick=()=>openPpConfirmModal(()=>{ ppResetState(); clearPPState(); renderPP(); }, "Replay Mission will clear this completed mission and start a new run. Continue?");
+            document.getElementById("ppReplayBtn").onclick=()=>openPpConfirmModal(()=>{ ppResetState(); clearPPState(); renderPP(); savePPState(); }, "Replay Mission will clear this completed mission and start a new run. Continue?");
             document.getElementById("ppHomeBtn").onclick=()=>{ devReset(); showScreen("home"); };
         }
+        initializeApp();
+        try {
+            localStorage.removeItem(PP_STATE_KEY);
+            if (loadPPState()) { showScreen("sim"); renderPP(); }
+        } catch (e) { ppResetState(); }
     </script>
 </body>
 
