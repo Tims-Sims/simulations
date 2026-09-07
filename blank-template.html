@@ -604,6 +604,11 @@
             background: color-mix(in srgb, var(--success) 10%, var(--surface-2));
         }
 
+        .feedback-actions {
+            margin-top: 12px;
+            text-align: center;
+        }
+
         .legend {
             display: flex;
             gap: 16px;
@@ -673,7 +678,7 @@
                     </p>
                     <div class="hero-actions">
                         <button class="primary-btn" id="startBtn">Start</button>
-                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                        <button class="secondary-btn hidden" id="openInstructionsBtn">Read Instructions</button>
                     </div>
                 </section>
             </div>
@@ -730,7 +735,10 @@
                                 </div>
                             </div>
                             <div class="feedback-panel" id="feedbackPanel">
-                                Adjust the sliders to explore how wall structure affects nutrient absorption.
+                                <div class="feedback-msg" id="feedbackMsg">Adjust the sliders to explore how wall structure affects nutrient absorption.</div>
+                                <div class="feedback-actions">
+                                    <button type="button" class="primary-btn hidden" id="playAgainFeedbackBtn">🎮 Play Again</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1109,6 +1117,7 @@
                 showScreen("sim");
                 dom.simContainer.scrollIntoView({ behavior: "smooth", block: "start" });
                 devInit();
+                openInstructionsModal();
             });
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
@@ -1270,7 +1279,7 @@
         let simAnimId = null;
         let simCanvas, simCtx, graphCanvas, graphCtx;
         let shapeSlider, thicknessSlider;
-        let rateValueEl, feedbackPanelEl;
+        let rateValueEl, feedbackPanelEl, feedbackMsgEl, playAgainFeedbackBtn;
         let particles = [];
         let absorbedCount = 0;
         let rateHistory = [];
@@ -1567,8 +1576,13 @@
                 msg = 'Adjust both sliders to explore different configurations. Think about what would give the fastest absorption: more surface area and a shorter distance.';
             }
 
-            feedbackPanelEl.innerHTML = msg;
+            if (feedbackMsgEl) feedbackMsgEl.innerHTML = msg;
             feedbackPanelEl.classList.toggle('correct', isOptimal);
+
+            // Show the "Play Again" button only when optimal absorption is reached
+            if (playAgainFeedbackBtn) {
+                playAgainFeedbackBtn.classList.toggle('hidden', !isOptimal);
+            }
         }
 
         /* --- MAIN LOOP --- */
@@ -1617,6 +1631,11 @@
             thicknessSlider = document.getElementById('thicknessSlider');
             rateValueEl = document.getElementById('rateValue');
             feedbackPanelEl = document.getElementById('feedbackPanel');
+            feedbackMsgEl = document.getElementById('feedbackMsg');
+            playAgainFeedbackBtn = document.getElementById('playAgainFeedbackBtn');
+            if (playAgainFeedbackBtn) {
+                playAgainFeedbackBtn.addEventListener('click', () => openResetConfirmModal('playAgain'));
+            }
 
             simCtx = simCanvas.getContext('2d');
             graphCtx = graphCanvas.getContext('2d');
