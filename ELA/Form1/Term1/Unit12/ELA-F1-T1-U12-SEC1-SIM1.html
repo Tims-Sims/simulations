@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Story Style Switch — Prose, Poetry and Drama</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+        /* ---- Story Style Switch ---- */
+        .sss-wrap { display: grid; gap: 14px; }
+        .sss-topline { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+        .sss-progress { font-weight: 800; letter-spacing: .3px; font-size: 15px; }
+        .sss-navbar { display: flex; flex-wrap: wrap; gap: 8px; }
+        .sss-btn { min-height: 44px; min-width: 44px; padding: 10px 16px; border-radius: var(--radius-md);
+            border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+            font-weight: 700; font-size: 14px; cursor: pointer; }
+        .sss-btn:hover { border-color: var(--accent); }
+        .sss-btn:focus-visible { outline: none; box-shadow: var(--focus); }
+        .sss-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #10142c; border: none; }
+        .sss-btn.exit { border-color: var(--danger); color: var(--danger); }
+        .sss-btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+        .sss-meter { position: relative; height: 22px; border-radius: 999px; background: var(--surface-2);
+            border: 1px solid var(--border); overflow: hidden; }
+        .sss-meter-fill { height: 100%; width: 0%; border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .5s ease; }
+        .sss-meter-label { position: absolute; inset: 0; display: grid; place-items: center;
+            font-size: 12px; font-weight: 800; color: var(--text); text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+
+        .sss-studio { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sss-frame { flex: 1 1 150px; border: 2px dashed var(--border); border-radius: var(--radius-lg);
+            padding: 10px 12px; background: var(--bg-soft); text-align: center; }
+        .sss-frame .ic { font-size: 26px; display: block; }
+        .sss-frame .nm { display: block; font-weight: 800; font-size: 13px; margin-top: 2px; }
+        .sss-frame .st { display: block; font-size: 12px; color: var(--muted); }
+        .sss-frame.lit { border-style: solid; border-color: var(--success); background: rgba(52,211,153,.12); }
+        .sss-frame.lit .st { color: var(--success); font-weight: 700; }
+
+        .sss-brief { border-left: 5px solid var(--accent-2); background: var(--bg-soft);
+            border-radius: var(--radius-md); padding: 12px 14px; }
+        .sss-brief h3 { margin: 0 0 4px; font-size: 17px; }
+        .sss-brief p { margin: 0; color: var(--text-soft); font-size: 14px; }
+
+        .sss-cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        .sss-card { text-align: left; padding: 14px; min-height: 120px; border-radius: var(--radius-lg);
+            border: 2px solid var(--border); background: var(--surface-2); color: var(--text); cursor: pointer; font: inherit; }
+        .sss-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .sss-card:focus-visible { outline: none; box-shadow: var(--focus); }
+        .sss-card .tag { display: block; font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+        .sss-card .body { display: block; margin-top: 8px; font-size: 15px; line-height: 1.5; }
+        .sss-card .body.poem { white-space: pre-line; font-style: italic; }
+        .sss-card[aria-pressed="true"] { border-color: var(--accent); background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(125,211,252,.25); }
+        .sss-card[aria-pressed="true"] .tag::after { content: " ✔ selected"; color: var(--accent); }
+        .sss-card.correct { border-color: var(--success); background: rgba(52,211,153,.14); }
+        .sss-card.wrong { border-color: var(--danger); background: rgba(251,113,133,.12); }
+
+        .sss-feedback { border-radius: var(--radius-md); padding: 12px 14px; font-size: 14px; line-height: 1.55; }
+        .sss-feedback.ok { background: rgba(52,211,153,.14); border: 1px solid var(--success); }
+        .sss-feedback.no { background: rgba(251,113,133,.12); border: 1px solid var(--danger); }
+        .sss-feedback.tip { background: rgba(251,191,36,.14); border: 1px solid var(--warning); }
+        .sss-feedback h4 { margin: 0 0 6px; font-size: 15px; }
+        .sss-feedback ul { margin: 6px 0 0; padding-left: 20px; }
+        .sss-feedback .model { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); }
+
+        .sss-chiprow { display: flex; flex-wrap: wrap; gap: 8px; }
+        .sss-chip { min-height: 44px; padding: 8px 14px; border-radius: 999px; border: 2px solid var(--border);
+            background: var(--surface-2); color: var(--text); font-weight: 700; font-size: 14px; cursor: pointer; font-family: inherit; }
+        .sss-chip:focus-visible { outline: none; box-shadow: var(--focus); }
+        .sss-chip[aria-pressed="true"] { border-color: var(--accent); background: var(--surface); }
+        .sss-chip[aria-pressed="true"]::before { content: "✔ "; color: var(--accent); }
+
+        .sss-slots { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+        .sss-slot { min-height: 96px; border-radius: var(--radius-lg); border: 2px dashed var(--border);
+            background: var(--bg-soft); color: var(--text); padding: 10px; font: inherit; cursor: pointer; text-align: center; }
+        .sss-slot:focus-visible { outline: none; box-shadow: var(--focus); }
+        .sss-slot.over { border-color: var(--accent); background: var(--surface-2); }
+        .sss-slot.filled { border-style: solid; border-color: var(--accent); }
+        .sss-slot .slot-name { display: block; font-weight: 800; font-size: 14px; }
+        .sss-slot .slot-hint { display: block; font-size: 12px; color: var(--muted); }
+        .sss-slot .slot-content { display: block; margin-top: 6px; font-size: 13px; line-height: 1.45; }
+
+        .sss-scene { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); background: var(--bg-soft); }
+        .sss-scene svg { display: block; width: 100%; height: auto; }
+
+        .sss-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+        .sss-badge { padding: 6px 12px; border-radius: 999px; background: var(--surface-2);
+            border: 1px solid var(--success); font-size: 13px; font-weight: 700; }
+
+        .sss-final { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .sss-final .sss-card { min-height: 100px; }
+
+        .sss-pop { animation: sssPop .45s ease; }
+        @keyframes sssPop { 0% { transform: scale(.94); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+        .sss-rain line { animation: sssRain 1.1s linear infinite; }
+        @keyframes sssRain { from { transform: translateY(-14px); } to { transform: translateY(14px); } }
+        .sss-spark { animation: sssSpark 1.6s ease-in-out infinite; }
+        @keyframes sssSpark { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sss-meter-fill { transition: none; }
+            .sss-card:hover { transform: none; }
+            .sss-pop, .sss-rain line, .sss-spark { animation: none; }
+        }
+
+        .sss-review-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .sss-review-table th, .sss-review-table td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); }
+        .sss-review-table th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="reviewBtn" aria-label="Open review and history"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h13a2 2 0 0 1 2 2v14"/><path d="M4 4v14a2 2 0 0 0 2 2h13"/><path d="M8 9h7"/><path d="M8 13h7"/></svg> Review</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <!-- Screens are rendered here by sssRender() in DEV-EDIT: SIM LOGIC. -->
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            ELA-F1-T1-U12-SEC1-SIM1 · Story Style Switch · Form 1, Term 1, Unit 12 — Prose, Poetry and Drama. Runs offline in one file, with no sound.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "ELA-F1-T1-U12-SEC1-SIM1",
+            title: "Story Style Switch",
+            subtitle: "Unit 12 — switch one moment into prose, poetry and drama",
+            badgeText: "🎭",
+            homeEyebrow: "Form 1 · Term 1 · Unit 12 · Literary genres",
+            homeDescription:
+                "Rain begins during the Arima Junior School fair. You run the Style Studio, and your job is to switch that one moment into three literary forms — prose, poetry and drama. Power up all three studio frames to complete the mission. This simulation is completely silent: everything you need is on the screen.",
+            instructions: [
+                "Your mission: switch the same real moment into prose, poetry and drama.",
+                "Read the creative brief at the top of each scene, then choose the card that matches it.",
+                "Press Check to mark your choice. There is exactly one correct answer each time.",
+                "Prose usually uses paragraphs and a narrator.",
+                "Poetry uses lines and stanzas, and may use rhythm, repetition or imagery.",
+                "Drama uses character names, dialogue and stage directions in square brackets.",
+                "If a switch is wrong, the feedback says what is wrong, why, how to fix it, and shows a corrected model. Retry as often as you like — there are no timers and no lives.",
+                "In the final scene you may drag a card onto a frame, or tap the card and then tap the frame. The keyboard works too: Tab to move, then Enter or Space to choose.",
+                "Use Hint for a clue, Try Again to clear the current scene, Back to step back, and Exit to leave.",
+                "Review (top right) shows your attempts, hints and first-attempt accuracy at any time.",
+                "This file runs completely offline in a browser. No internet and no sound are needed."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            reviewBtn: document.getElementById("reviewBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.reviewBtn.addEventListener("click", function () { devOpenReview(); });
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ============================================================
+           STORY STYLE SWITCH — game logic
+           Sim: ELA-F1-T1-U12-SEC1-SIM1 (Unit 12, objectives 12.1–12.5)
+           Silent by design: no audio, no microphone, no speech.
+           ============================================================ */
+
+        var GENRE = {
+            prose: {
+                name: "prose",
+                label: "Prose",
+                icon: "📖",
+                frame: "Prose Page",
+                tells: "paragraph form with a narrator telling the events",
+                model: "Maya watched dark clouds gather above the school fair. — narrator + paragraph = prose."
+            },
+            poetry: {
+                name: "poetry",
+                label: "Poetry",
+                icon: "✒️",
+                frame: "Poetry Scroll",
+                tells: "short lines and stanzas, often with imagery or repetition",
+                model: "Rain taps the tents, / rain taps the signs — lines + stanza + imagery = poetry."
+            },
+            drama: {
+                name: "drama",
+                label: "Drama",
+                icon: "🎭",
+                frame: "Drama Stage",
+                tells: "a character name, spoken dialogue and a stage direction in square brackets",
+                model: "MAYA: The rain is starting! [She lifts the box.] — character name + dialogue + stage direction = drama."
+            }
+        };
+
+        var RAIN_CARDS = {
+            prose: "Maya watched dark clouds gather above the school fair. She lifted the craft box and hurried towards the hall.",
+            poetry: "Rain taps the tents,\nrain taps the signs,\nsilver feet racing\nacross painted lines.",
+            drama: "MAYA: The rain is starting! [She lifts the box.]"
+        };
+
+        var PUPPY_CARDS = {
+            prose: "The puppy crept through the open door and hid beneath a desk.",
+            poetry: "Small paws, soft paws,\ncrossing the quiet floor.",
+            drama: "JAYDEN: A puppy! [He kneels beside the desk.]"
+        };
+
+        var POETRY_FEATURES = [
+            { id: "lines", label: "Four short lines", correct: true },
+            { id: "repeat", label: "Repetition of “rain taps”", correct: true },
+            { id: "imagery", label: "Imagery: “silver feet”", correct: true },
+            { id: "narrator", label: "A narrator’s paragraph", correct: false },
+            { id: "stagedir", label: "A stage direction in brackets", correct: false }
+        ];
+
+        var SCREENS = ["brief", "s1", "s2", "s3", "s4", "done"];
+        var SCENE_TITLES = { s1: "Drama Switch", s2: "Prose Switch", s3: "Poetry Switch", s4: "Three-Way Switch" };
+
+        var G = null;
+
+        function sssNewState() {
+            return {
+                screen: "brief",
+                previewGenre: null,
+                pick: null,
+                featurePicks: [],
+                held: null,
+                placed: { prose: null, poetry: null, drama: null },
+                matchLocked: false,
+                sharedPick: null,
+                unlocked: { prose: false, poetry: false, drama: false },
+                badges: [],
+                feedback: null,
+                stats: {
+                    drama: sssBlankStat(), prose: sssBlankStat(), poetry: sssBlankStat(),
+                    features: sssBlankStat(), match: sssBlankStat(), shared: sssBlankStat()
+                },
+                lastScreen: "brief",
+                startedAt: Date.now(),
+                finishedAt: null
+            };
+        }
+
+        function sssBlankStat() {
+            return { attempts: 0, hints: 0, firstOk: null, done: false };
+        }
+
+        var SSS_ACTIONS = [
+            { key: "drama", label: "Scene 1 — choose the drama version", skill: "Recognising drama features (12.4)" },
+            { key: "prose", label: "Scene 2 — choose the prose version", skill: "Recognising prose features (12.2)" },
+            { key: "poetry", label: "Scene 3 — choose the poetry version", skill: "Recognising poetry features (12.3)" },
+            { key: "features", label: "Scene 3 — tick the poem’s features", skill: "Naming poetry features (12.3)" },
+            { key: "match", label: "Scene 4 — match all three genres", skill: "Comparing the three genres (12.1, 12.5)" },
+            { key: "shared", label: "Scene 4 — place the shared feature", skill: "Shared features across genres (12.5)" }
+        ];
+
+        /* ---------- entry points required by the template chrome ---------- */
+
+        function devInit() {
+            G = sssNewState();
+            sssRender();
+        }
+
+        function devReset() {
+            G = sssNewState();
+            dom.simContainer.replaceChildren();
+        }
+
+        function devOpenReview() {
+            sssOpenModal("review", sssReviewHtml());
+        }
+
+        /* ---------- rendering ---------- */
+
+        function sssRender() {
+            if (!G) { return; }
+            G.lastScreen = G.screen;
+            var body = "";
+            if (G.screen === "brief") { body = sssBriefHtml(); }
+            else if (G.screen === "s1") { body = sssPickHtml("drama", "Show the moment as drama.", "Scene 1 of 4 — " + SCENE_TITLES.s1); }
+            else if (G.screen === "s2") { body = sssPickHtml("prose", "Use a narrator and paragraph form.", "Scene 2 of 4 — " + SCENE_TITLES.s2); }
+            else if (G.screen === "s3") { body = sssPoetryHtml(); }
+            else if (G.screen === "s4") { body = sssFinalHtml(); }
+            else { body = sssDoneHtml(); }
+            dom.simContainer.innerHTML = body;
+            sssBindDrag();
+            sssFocusFirst();
+        }
+
+        function sssFocusFirst() {
+            var target = dom.simContainer.querySelector("[data-autofocus]");
+            if (target) { target.focus(); }
+        }
+
+        function sssBar(progressText, opts) {
+            opts = opts || {};
+            var nav = "";
+            nav += '<button class="sss-btn" type="button" data-action="rules">📘 Rules</button>';
+            nav += '<button class="sss-btn" type="button" data-action="back"' + (opts.noBack ? " disabled" : "") + '>↩ Back</button>';
+            if (opts.hint) { nav += '<button class="sss-btn" type="button" data-action="hint">💡 Hint</button>'; }
+            if (opts.tryAgain) { nav += '<button class="sss-btn" type="button" data-action="tryagain">🔁 Try Again</button>'; }
+            nav += '<button class="sss-btn exit" type="button" data-action="exit">✕ Exit</button>';
+            return '<div class="sss-topline"><div class="sss-progress">' + progressText + '</div>' +
+                '<div class="sss-navbar">' + nav + '</div></div>';
+        }
+
+        function sssPower() {
+            var done = 0;
+            ["drama", "prose", "poetry", "features", "match", "shared"].forEach(function (k) {
+                if (G.stats[k].done) { done += 1; }
+            });
+            return Math.round((done / 6) * 100);
+        }
+
+        function sssMeter() {
+            var pct = sssPower();
+            return '<div class="sss-meter" role="img" aria-label="Studio power ' + pct + ' per cent">' +
+                '<div class="sss-meter-fill" style="width:' + pct + '%"></div>' +
+                '<div class="sss-meter-label">⚡ Studio power: ' + pct + '%</div></div>';
+        }
+
+        function sssStudio() {
+            var order = ["prose", "poetry", "drama"];
+            var html = '<div class="sss-studio">';
+            order.forEach(function (k) {
+                var lit = G.unlocked[k];
+                html += '<div class="sss-frame' + (lit ? " lit" : "") + '">' +
+                    '<span class="ic" aria-hidden="true">' + GENRE[k].icon + '</span>' +
+                    '<span class="nm">' + GENRE[k].frame + '</span>' +
+                    '<span class="st">' + (lit ? "✔ Powered up" : "🔒 Locked") + '</span></div>';
+            });
+            html += "</div>";
+            return html;
+        }
+
+        function sssFeedbackHtml() {
+            if (!G.feedback) { return ""; }
+            var f = G.feedback;
+            var html = '<div class="sss-feedback ' + f.kind + '" role="status" aria-live="polite">' +
+                "<h4>" + f.title + "</h4>";
+            if (f.lines && f.lines.length) {
+                html += "<ul>";
+                f.lines.forEach(function (line) { html += "<li>" + line + "</li>"; });
+                html += "</ul>";
+            }
+            if (f.text) { html += "<p style=\"margin:0\">" + f.text + "</p>"; }
+            if (f.model) { html += '<div class="model"><strong>Corrected model:</strong> ' + f.model + "</div>"; }
+            html += "</div>";
+            return html;
+        }
+
+        function sssSceneSvg(kind) {
+            var rain = '<g class="sss-rain" stroke="#7dd3fc" stroke-width="3" stroke-linecap="round" opacity="0.85">' +
+                '<line x1="60" y1="40" x2="54" y2="66"/><line x1="130" y1="26" x2="124" y2="52"/>' +
+                '<line x1="210" y1="44" x2="204" y2="70"/><line x1="290" y1="24" x2="284" y2="50"/>' +
+                '<line x1="360" y1="48" x2="354" y2="74"/><line x1="430" y1="30" x2="424" y2="56"/>' +
+                '<line x1="500" y1="46" x2="494" y2="72"/><line x1="560" y1="28" x2="554" y2="54"/></g>';
+            if (kind === "puppy") {
+                return '<svg viewBox="0 0 600 200" role="img" aria-label="A classroom in Diego Martin. A small stray puppy walks through the open door towards a desk while Jayden kneels beside it.">' +
+                    '<rect width="600" height="200" fill="#20264a"/>' +
+                    '<rect x="0" y="150" width="600" height="50" fill="#2f3766"/>' +
+                    '<rect x="40" y="40" width="90" height="110" rx="6" fill="#3b4478"/>' +
+                    '<rect x="52" y="52" width="66" height="86" rx="4" fill="#7dd3fc" opacity="0.35"/>' +
+                    '<rect x="200" y="96" width="120" height="12" rx="4" fill="#a78bfa"/>' +
+                    '<rect x="208" y="108" width="10" height="44" fill="#a78bfa"/><rect x="302" y="108" width="10" height="44" fill="#a78bfa"/>' +
+                    '<circle cx="255" cy="76" r="16" fill="#fbbf24"/><rect x="243" y="94" width="24" height="6" rx="3" fill="#fbbf24"/>' +
+                    '<ellipse cx="410" cy="140" rx="34" ry="20" fill="#f8fafc"/>' +
+                    '<circle cx="444" cy="128" r="15" fill="#f8fafc"/><ellipse cx="452" cy="120" rx="5" ry="9" fill="#cbd5f5"/>' +
+                    '<circle cx="449" cy="128" r="2.4" fill="#111"/>' +
+                    '<rect x="386" y="154" width="8" height="10" rx="3" fill="#cbd5f5"/><rect x="424" y="154" width="8" height="10" rx="3" fill="#cbd5f5"/>' +
+                    '<text x="300" y="188" text-anchor="middle" fill="#c7d0f0" font-size="14" font-family="inherit">A stray puppy pads into the classroom.</text>' +
+                    "</svg>";
+            }
+            return '<svg viewBox="0 0 600 200" role="img" aria-label="A school fair in Trinidad. Rain begins to fall on the craft tents while Maya lifts a craft box and hurries towards the hall.">' +
+                '<rect width="600" height="200" fill="#20264a"/>' +
+                '<g fill="#3b4478"><ellipse cx="120" cy="34" rx="58" ry="22"/><ellipse cx="300" cy="26" rx="70" ry="24"/><ellipse cx="470" cy="36" rx="60" ry="22"/></g>' +
+                rain +
+                '<rect x="0" y="150" width="600" height="50" fill="#2f3766"/>' +
+                '<polygon points="90,150 150,96 210,150" fill="#fb7185"/>' +
+                '<polygon points="250,150 310,100 370,150" fill="#34d399"/>' +
+                '<polygon points="410,150 470,96 530,150" fill="#fbbf24"/>' +
+                '<rect x="20" y="120" width="46" height="30" rx="4" fill="#a78bfa"/>' +
+                '<text x="43" y="140" text-anchor="middle" font-size="11" fill="#10142c" font-family="inherit">FAIR</text>' +
+                '<circle cx="345" cy="120" r="14" fill="#f8fafc"/><rect x="333" y="136" width="24" height="16" rx="4" fill="#7dd3fc"/>' +
+                '<rect x="356" y="136" width="18" height="14" rx="3" fill="#fbbf24"/>' +
+                '<text x="300" y="188" text-anchor="middle" fill="#c7d0f0" font-size="14" font-family="inherit">Rain begins during the school fair.</text>' +
+                "</svg>";
+        }
+
+        function sssPreviewText(genre) {
+            if (genre === "poetry") { return RAIN_CARDS.poetry.replace(/\n/g, " / "); }
+            return RAIN_CARDS[genre];
+        }
+
+        function sssBriefHtml() {
+            var preview = "";
+            if (G.previewGenre) {
+                var g = GENRE[G.previewGenre];
+                preview = '<div class="sss-feedback tip" role="status" aria-live="polite">' +
+                    "<h4>" + g.icon + " " + g.label + " sample</h4>" +
+                    "<p style=\"margin:0\">" + sssEsc(sssPreviewText(G.previewGenre)) + "</p>" +
+                    '<div class="model"><strong>Watch for:</strong> ' + g.tells + ".</div></div>";
+            } else {
+                preview = '<div class="sss-feedback tip"><h4>Tap a style button to peek at a sample</h4>' +
+                    '<p style="margin:0">Each button shows the same rainy moment written a different way. Peeking here is not marked.</p></div>';
+            }
+            return '<div class="sss-wrap">' +
+                sssBar("Mission Brief — Story Style Switch", { noBack: true }) +
+                '<div class="sss-brief"><h3>🎬 Your mission, content creator</h3>' +
+                "<p>You run the Style Studio for the Arima Junior School fair. One moment — <strong>rain begins during the school fair</strong> — must be switched into three literary forms: prose, poetry and drama. Power up all three studio frames to finish the mission.</p></div>" +
+                '<div class="sss-scene">' + sssSceneSvg("fair") + "</div>" +
+                '<div class="sss-chiprow">' +
+                '<button class="sss-chip" type="button" data-action="preview" data-genre="prose" aria-pressed="' + (G.previewGenre === "prose") + '">📖 PROSE</button>' +
+                '<button class="sss-chip" type="button" data-action="preview" data-genre="poetry" aria-pressed="' + (G.previewGenre === "poetry") + '">✒️ POETRY</button>' +
+                '<button class="sss-chip" type="button" data-action="preview" data-genre="drama" aria-pressed="' + (G.previewGenre === "drama") + '">🎭 DRAMA</button>' +
+                "</div>" +
+                preview +
+                sssStudio() +
+                '<div class="sss-navbar"><button class="sss-btn primary" type="button" data-action="go-s1" data-autofocus>▶ Enter the Style Studio</button></div>' +
+                "</div>";
+        }
+
+        function sssCardHtml(genre, opts) {
+            opts = opts || {};
+            var text = (opts.deck || RAIN_CARDS)[genre];
+            var isPoem = genre === "poetry";
+            var cls = "sss-card";
+            if (opts.state === "correct") { cls += " correct sss-pop"; }
+            if (opts.state === "wrong") { cls += " wrong"; }
+            var tag = opts.tag || "Format card";
+            return '<button class="' + cls + '" type="button" data-action="' + (opts.action || "pick") + '" data-genre="' + genre + '"' +
+                ' aria-pressed="' + (opts.pressed ? "true" : "false") + '"' + (opts.autofocus ? " data-autofocus" : "") +
+                (opts.disabled ? " disabled" : "") + ">" +
+                '<span class="tag">' + tag + "</span>" +
+                '<span class="body' + (isPoem ? " poem" : "") + '">' + sssEsc(text) + "</span></button>";
+        }
+
+        function sssPickHtml(target, briefText, progressText) {
+            var st = G.stats[target];
+            var order = ["prose", "poetry", "drama"];
+            var cards = "";
+            order.forEach(function (genre, i) {
+                var state = "";
+                if (st.done && genre === target) { state = "correct"; }
+                if (!st.done && G.feedback && G.feedback.kind === "no" && G.pick === genre) { state = "wrong"; }
+                cards += sssCardHtml(genre, {
+                    pressed: G.pick === genre,
+                    state: state,
+                    disabled: st.done,
+                    autofocus: i === 0 && !st.done
+                });
+            });
+            var footer = st.done
+                ? '<button class="sss-btn primary" type="button" data-action="next" data-autofocus>▶ Next scene</button>'
+                : '<button class="sss-btn primary" type="button" data-action="check" data-target="' + target + '"' + (G.pick ? "" : " disabled") + ">✅ Check my switch</button>";
+            return '<div class="sss-wrap">' +
+                sssBar(progressText, { hint: !st.done, tryAgain: !st.done }) +
+                sssMeter() +
+                '<div class="sss-brief"><h3>🎬 Creative brief</h3><p>“' + briefText + '” — Source moment kept beside you: <em>rain begins during the school fair</em>.</p></div>' +
+                '<div class="sss-cards">' + cards + "</div>" +
+                sssFeedbackHtml() +
+                sssStudio() +
+                '<div class="sss-navbar">' + footer + "</div>" +
+                "</div>";
+        }
+
+        function sssPoetryHtml() {
+            var st = G.stats.poetry;
+            var fst = G.stats.features;
+            if (!st.done) {
+                return sssPickHtml("poetry", "Use lines, imagery and repetition.", "Scene 3 of 4 — " + SCENE_TITLES.s3);
+            }
+            var chips = "";
+            POETRY_FEATURES.forEach(function (f, i) {
+                var pressed = G.featurePicks.indexOf(f.id) !== -1;
+                chips += '<button class="sss-chip" type="button" data-action="feature" data-feature="' + f.id + '"' +
+                    ' aria-pressed="' + pressed + '"' + (fst.done ? " disabled" : "") + (i === 0 && !fst.done ? " data-autofocus" : "") + ">" +
+                    f.label + "</button>";
+            });
+            var footer = fst.done
+                ? '<button class="sss-btn primary" type="button" data-action="next" data-autofocus>▶ Final scene</button>'
+                : '<button class="sss-btn primary" type="button" data-action="checkfeatures"' + (G.featurePicks.length ? "" : " disabled") + ">✅ Check the features</button>";
+            return '<div class="sss-wrap">' +
+                sssBar("Scene 3 of 4 — Poetry features", { hint: !fst.done, tryAgain: !fst.done }) +
+                sssMeter() +
+                '<div class="sss-brief"><h3>✒️ The Poetry Scroll is powered up</h3><p>Now badge the features you can actually see in this poem. Tick every true feature — and only the true ones.</p></div>' +
+                '<div class="sss-card" style="cursor:default"><span class="tag">Poem on the scroll</span>' +
+                '<span class="body poem">' + sssEsc(RAIN_CARDS.poetry) + "</span></div>" +
+                '<div class="sss-chiprow">' + chips + "</div>" +
+                sssFeedbackHtml() +
+                '<div class="sss-navbar">' + footer + "</div>" +
+                "</div>";
+        }
+
+        function sssFinalHtml() {
+            var mst = G.stats.match;
+            var sst = G.stats.shared;
+            if (!mst.done) { return sssMatchHtml(); }
+            var opts = [
+                { id: "prose", label: "📖 Prose only" },
+                { id: "poetry", label: "✒️ Poetry only" },
+                { id: "drama", label: "🎭 Drama only" },
+                { id: "shared", label: "🤝 Shared" }
+            ];
+            var chips = "";
+            opts.forEach(function (o, i) {
+                chips += '<button class="sss-chip" type="button" data-action="shared" data-shared="' + o.id + '"' +
+                    ' aria-pressed="' + (G.sharedPick === o.id) + '"' + (sst.done ? " disabled" : "") +
+                    (i === 0 && !sst.done ? " data-autofocus" : "") + ">" + o.label + "</button>";
+            });
+            var footer = sst.done
+                ? '<button class="sss-btn primary" type="button" data-action="finish" data-autofocus>🏁 Finish the mission</button>'
+                : '<button class="sss-btn primary" type="button" data-action="checkshared"' + (G.sharedPick ? "" : " disabled") + ">✅ Place the badge</button>";
+            return '<div class="sss-wrap">' +
+                sssBar("Scene 4 of 4 — Shared feature tray", { hint: !sst.done, tryAgain: !sst.done }) +
+                sssMeter() +
+                '<div class="sss-brief"><h3>🤝 One badge left: “character”</h3>' +
+                "<p>All three puppy cards are matched. Now drop the feature badge <strong>“character”</strong> where it belongs. Look back at your matched cards: who appears in them?</p></div>" +
+                '<div class="sss-card" style="cursor:default"><span class="tag">Your matched cards</span><span class="body">' +
+                "📖 " + sssEsc(PUPPY_CARDS.prose) + "<br>✒️ " + sssEsc(PUPPY_CARDS.poetry.replace(/\n/g, " / ")) +
+                "<br>🎭 " + sssEsc(PUPPY_CARDS.drama) + "</span></div>" +
+                '<div class="sss-chiprow">' + chips + "</div>" +
+                sssFeedbackHtml() +
+                '<div class="sss-navbar">' + footer + "</div>" +
+                "</div>";
+        }
+
+        function sssMatchHtml() {
+            var deckOrder = ["poetry", "drama", "prose"];
+            var cards = "";
+            deckOrder.forEach(function (genre, i) {
+                if (sssIsPlaced(genre)) { return; }
+                cards += sssCardHtml(genre, {
+                    deck: PUPPY_CARDS,
+                    action: "hold",
+                    tag: "Card " + (i + 1),
+                    pressed: G.held === genre,
+                    autofocus: i === 0
+                });
+            });
+            if (!cards) { cards = '<p class="muted" style="margin:0">All three cards are placed. Press “Check the stage” to mark them.</p>'; }
+            var slots = "";
+            ["prose", "poetry", "drama"].forEach(function (slot) {
+                var content = G.placed[slot];
+                var wrongMark = "";
+                if (G.feedback && G.feedback.kind === "no" && content && content !== slot) { wrongMark = " ✖"; }
+                slots += '<button class="sss-slot' + (content ? " filled" : "") + '" type="button" data-action="drop" data-slot="' + slot + '">' +
+                    '<span class="slot-name">' + GENRE[slot].icon + " " + GENRE[slot].frame + wrongMark + "</span><br>" +
+                    '<span class="slot-hint">' + (content ? "Tap to take the card back" : "Tap here to place the held card") + "</span>" +
+                    '<span class="slot-content">' + (content ? sssEsc(PUPPY_CARDS[content].replace(/\n/g, " / ")) : "— empty —") + "</span></button>";
+            });
+            var ready = G.placed.prose && G.placed.poetry && G.placed.drama;
+            return '<div class="sss-wrap">' +
+                sssBar("Scene 4 of 4 — " + SCENE_TITLES.s4, { hint: true, tryAgain: true }) +
+                sssMeter() +
+                '<div class="sss-brief"><h3>🐶 New moment: a stray puppy enters the classroom</h3>' +
+                "<p>Send each card to the right studio frame. Drag it, or tap a card then tap a frame — both work, and so does the keyboard (Tab, then Enter).</p></div>" +
+                '<div class="sss-scene">' + sssSceneSvg("puppy") + "</div>" +
+                '<div class="sss-final">' + cards + "</div>" +
+                '<div class="sss-slots">' + slots + "</div>" +
+                sssFeedbackHtml() +
+                '<div class="sss-navbar"><button class="sss-btn primary" type="button" data-action="checkmatch"' + (ready ? "" : " disabled") + ">✅ Check the stage</button></div>" +
+                "</div>";
+        }
+
+        function sssDoneHtml() {
+            var badges = "";
+            G.badges.forEach(function (b) { badges += '<span class="sss-badge">' + b + "</span>"; });
+            var acc = sssFirstAttemptAccuracy();
+            return '<div class="sss-wrap">' +
+                sssBar("Mission complete — 4 of 4 scenes", { noBack: true }) +
+                sssMeter() +
+                '<div class="sss-brief"><h3>🏆 One event, three literary forms</h3>' +
+                "<p>The Style Studio is fully powered. You switched the same moment into prose, poetry and drama — and you sorted a shared feature correctly.</p></div>" +
+                '<div class="sss-cards">' +
+                '<div class="sss-card sss-pop" style="cursor:default"><span class="tag">📖 Prose</span><span class="body">' + sssEsc(PUPPY_CARDS.prose) + "</span></div>" +
+                '<div class="sss-card sss-pop" style="cursor:default"><span class="tag">✒️ Poetry</span><span class="body poem">' + sssEsc(PUPPY_CARDS.poetry) + "</span></div>" +
+                '<div class="sss-card sss-pop" style="cursor:default"><span class="tag">🎭 Drama</span><span class="body">' + sssEsc(PUPPY_CARDS.drama) + "</span></div>" +
+                "</div>" +
+                '<div class="sss-badges">' + badges + '<span class="sss-badge sss-spark">🌟 Style Studio Director</span></div>' +
+                '<div class="sss-feedback ok"><h4>Your studio record</h4><ul>' +
+                "<li>Final mastery: 6 of 6 switches correct.</li>" +
+                "<li>First-attempt accuracy: " + acc.correct + " of " + acc.total + " (" + acc.pct + "%).</li>" +
+                "<li>Time on task: " + sssTimeOnTask() + ".</li>" +
+                "</ul></div>" +
+                '<div class="sss-navbar">' +
+                '<button class="sss-btn primary" type="button" data-action="review" data-autofocus>📋 Open my review</button>' +
+                '<button class="sss-btn" type="button" data-action="playagain">🔁 Play Again</button>' +
+                "</div></div>";
+        }
+
+        /* ---------- marking ---------- */
+
+        function sssRecord(key, correct) {
+            var st = G.stats[key];
+            st.attempts += 1;
+            if (st.firstOk === null) { st.firstOk = correct; }
+            if (correct) { st.done = true; }
+        }
+
+        function sssCheckPick(target) {
+            var st = G.stats[target];
+            if (st.done || !G.pick) { return; }
+            var correct = G.pick === target;
+            sssRecord(target, correct);
+            if (correct) {
+                G.unlocked[target] = true;
+                var badge = GENRE[target].icon + " " + GENRE[target].frame + " unlocked";
+                if (G.badges.indexOf(badge) === -1) { G.badges.push(badge); }
+                G.feedback = {
+                    kind: "ok",
+                    title: "✔ Correct — the " + GENRE[target].frame + " powers up!",
+                    text: "That card uses " + GENRE[target].tells + ", so it is " + GENRE[target].label.toLowerCase() + "."
+                };
+            } else {
+                var chosen = GENRE[G.pick];
+                G.feedback = {
+                    kind: "no",
+                    title: "✖ Not yet — that card is not " + GENRE[target].label.toLowerCase() + ".",
+                    lines: [
+                        "<strong>What is wrong:</strong> you chose the " + chosen.label.toLowerCase() + " version.",
+                        "<strong>Why:</strong> it uses " + chosen.tells + ", which belongs to " + chosen.label.toLowerCase() + ".",
+                        "<strong>How to fix it:</strong> look for " + GENRE[target].tells + ", then choose that card."
+                    ],
+                    model: GENRE[target].model
+                };
+            }
+            sssRender();
+        }
+
+        function sssCheckFeatures() {
+            var st = G.stats.features;
+            if (st.done || !G.featurePicks.length) { return; }
+            var wanted = POETRY_FEATURES.filter(function (f) { return f.correct; }).map(function (f) { return f.id; });
+            var picked = G.featurePicks.slice().sort();
+            var correct = picked.length === wanted.length && wanted.slice().sort().join("|") === picked.join("|");
+            sssRecord("features", correct);
+            if (correct) {
+                if (G.badges.indexOf("✒️ Poetry feature badges earned") === -1) { G.badges.push("✒️ Poetry feature badges earned"); }
+                G.feedback = {
+                    kind: "ok",
+                    title: "✔ Correct — all three poetry badges are pinned!",
+                    text: "Four short lines, the repetition of “rain taps” and the imagery “silver feet” are all visible in the poem."
+                };
+            } else {
+                var missing = wanted.filter(function (id) { return picked.indexOf(id) === -1; });
+                var extra = picked.filter(function (id) { return wanted.indexOf(id) === -1; });
+                var lines = [];
+                if (extra.length) {
+                    lines.push("<strong>What is wrong:</strong> you ticked " + sssFeatureNames(extra) + ", which the poem does not contain.");
+                    lines.push("<strong>Why:</strong> narrators and stage directions belong to prose and drama, not to this poem.");
+                } else {
+                    lines.push("<strong>What is wrong:</strong> your set is incomplete.");
+                    lines.push("<strong>Why:</strong> a poem is identified by several features together, not by rhyme alone.");
+                }
+                if (missing.length) {
+                    lines.push("<strong>How to fix it:</strong> add " + sssFeatureNames(missing) + ", then check again.");
+                } else {
+                    lines.push("<strong>How to fix it:</strong> untick anything you cannot actually see in the four lines.");
+                }
+                G.feedback = {
+                    kind: "no",
+                    title: "✖ Not yet — that badge set does not match the poem.",
+                    lines: lines,
+                    model: "Four short lines + repetition of “rain taps” + imagery “silver feet” = poetry, even without end rhyme."
+                };
+            }
+            sssRender();
+        }
+
+        function sssFeatureNames(ids) {
+            var names = ids.map(function (id) {
+                var found = POETRY_FEATURES.filter(function (f) { return f.id === id; })[0];
+                return "“" + found.label + "”";
+            });
+            if (names.length === 1) { return names[0]; }
+            return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+        }
+
+        function sssCheckMatch() {
+            var st = G.stats.match;
+            if (st.done) { return; }
+            if (!G.placed.prose || !G.placed.poetry || !G.placed.drama) { return; }
+            var wrongSlots = ["prose", "poetry", "drama"].filter(function (slot) { return G.placed[slot] !== slot; });
+            var correct = wrongSlots.length === 0;
+            sssRecord("match", correct);
+            if (correct) {
+                if (G.badges.indexOf("🐶 Three-way switch mastered") === -1) { G.badges.push("🐶 Three-way switch mastered"); }
+                G.feedback = {
+                    kind: "ok",
+                    title: "✔ Correct — all three frames light up!",
+                    text: "Paragraph and narrator went to prose, short lines went to poetry, and the character name with a stage direction went to drama."
+                };
+            } else {
+                var slot = wrongSlots[0];
+                var wrongCard = GENRE[G.placed[slot]];
+                G.feedback = {
+                    kind: "no",
+                    title: "✖ Not yet — " + wrongSlots.length + " card" + (wrongSlots.length > 1 ? "s are" : " is") + " in the wrong frame.",
+                    lines: [
+                        "<strong>What is wrong:</strong> the " + GENRE[slot].frame + " is holding the " + wrongCard.label.toLowerCase() + " card.",
+                        "<strong>Why:</strong> that card uses " + wrongCard.tells + ".",
+                        "<strong>How to fix it:</strong> tap the frame to take the card back, then place the card that uses " + GENRE[slot].tells + "."
+                    ],
+                    model: GENRE[slot].model
+                };
+            }
+            sssRender();
+        }
+
+        function sssCheckShared() {
+            var st = G.stats.shared;
+            if (st.done || !G.sharedPick) { return; }
+            var correct = G.sharedPick === "shared";
+            sssRecord("shared", correct);
+            if (correct) {
+                if (G.badges.indexOf("🤝 Shared-feature tray solved") === -1) { G.badges.push("🤝 Shared-feature tray solved"); }
+                G.feedback = {
+                    kind: "ok",
+                    title: "✔ Correct — “character” goes in the Shared tray.",
+                    text: "The puppy and Jayden appear in the prose, the poetry and the drama cards, so no single genre owns this feature."
+                };
+            } else {
+                G.feedback = {
+                    kind: "no",
+                    title: "✖ Not yet — “character” does not belong to one genre only.",
+                    lines: [
+                        "<strong>What is wrong:</strong> you placed the badge in " + GENRE[G.sharedPick].label + " only.",
+                        "<strong>Why:</strong> some features appear in more than one form, and characters are one of them.",
+                        "<strong>How to fix it:</strong> read all three matched cards again and count how many show a character, then use the Shared tray."
+                    ],
+                    model: "Characters can appear in prose, poetry and drama, so “character” is a shared feature."
+                };
+            }
+            sssRender();
+        }
+
+        /* ---------- hints ---------- */
+
+        function sssHint() {
+            var key = sssActiveKey();
+            if (!key) { return; }
+            G.stats[key].hints += 1;
+            var tips = {
+                drama: "Drama is written like a script. Find the card that starts with a name in capitals, then a colon, then words the character says out loud.",
+                prose: "Prose reads like a story paragraph. Find the card where someone outside the story tells you what Maya did, in full sentences that run on together.",
+                poetry: "Poetry is set out in short lines that stop before the edge of the card. Find the card whose words are broken into four lines.",
+                features: "Count the lines first. Then look for words that repeat, and a phrase that paints a picture without being literally true.",
+                match: "Sort by layout before meaning: paragraph → prose, short lines → poetry, NAME: dialogue [stage direction] → drama.",
+                shared: "Ask yourself: does a person or animal appear in one card only, or in all three? Features found in more than one form belong in the Shared tray."
+            };
+            G.feedback = { kind: "tip", title: "💡 Hint", text: tips[key] };
+            sssRender();
+        }
+
+        function sssActiveKey() {
+            if (G.screen === "s1") { return G.stats.drama.done ? null : "drama"; }
+            if (G.screen === "s2") { return G.stats.prose.done ? null : "prose"; }
+            if (G.screen === "s3") { return G.stats.poetry.done ? "features" : "poetry"; }
+            if (G.screen === "s4") { return G.stats.match.done ? "shared" : "match"; }
+            return null;
+        }
+
+        function sssTryAgain() {
+            var key = sssActiveKey();
+            if (!key) { return; }
+            if (key === "features") { G.featurePicks = []; }
+            else if (key === "match") { G.placed = { prose: null, poetry: null, drama: null }; G.held = null; }
+            else if (key === "shared") { G.sharedPick = null; }
+            else { G.pick = null; }
+            G.feedback = { kind: "tip", title: "🔁 Cleared", text: "Your choices on this scene are cleared. Nothing else is lost — try the switch again." };
+            sssRender();
+        }
+
+        /* ---------- navigation ---------- */
+
+        function sssGo(screen) {
+            G.screen = screen;
+            G.feedback = null;
+            G.pick = null;
+            sssRender();
+        }
+
+        function sssNextScreen() {
+            var i = SCREENS.indexOf(G.screen);
+            if (G.screen === "s3" && !G.stats.features.done) { sssRender(); return; }
+            if (i < SCREENS.length - 1) { sssGo(SCREENS[i + 1]); }
+        }
+
+        function sssBack() {
+            var i = SCREENS.indexOf(G.screen);
+            if (i > 0) { sssGo(SCREENS[i - 1]); }
+        }
+
+        /* ---------- reporting ---------- */
+
+        function sssFirstAttemptAccuracy() {
+            var total = 0;
+            var correct = 0;
+            SSS_ACTIONS.forEach(function (a) {
+                var st = G.stats[a.key];
+                if (st.firstOk !== null) { total += 1; if (st.firstOk) { correct += 1; } }
+            });
+            var pct = total ? Math.round((correct / total) * 100) : 0;
+            return { total: total, correct: correct, pct: pct };
+        }
+
+        function sssTimeOnTask() {
+            var end = G.finishedAt || Date.now();
+            var secs = Math.max(0, Math.round((end - G.startedAt) / 1000));
+            var mins = Math.floor(secs / 60);
+            return mins + " min " + (secs % 60) + " s";
+        }
+
+        function sssReviewHtml() {
+            var rows = "";
+            SSS_ACTIONS.forEach(function (a) {
+                var st = G.stats[a.key];
+                var first = st.firstOk === null ? "—" : (st.firstOk ? "✔ Correct" : "✖ Incorrect");
+                var mastery = st.done ? "✔ Mastered" : "… Not yet";
+                rows += "<tr><td>" + a.label + "</td><td>" + first + "</td><td>" + mastery + "</td><td>" +
+                    st.attempts + "</td><td>" + st.hints + "</td></tr>";
+            });
+            var missed = SSS_ACTIONS.filter(function (a) { return G.stats[a.key].firstOk === false; })
+                .map(function (a) { return a.skill; });
+            var acc = sssFirstAttemptAccuracy();
+            var missedHtml = missed.length
+                ? "<ul><li>" + missed.join("</li><li>") + "</li></ul>"
+                : "<p style=\"margin:0\">None so far — every checked switch was right first time.</p>";
+            return '<h3 id="sssModalHeading">📋 Review — Story Style Switch</h3>' +
+                "<p>Scene reached: <strong>" + sssScreenLabel(G.lastScreen) + "</strong> · Time on task: <strong>" + sssTimeOnTask() + "</strong> · " +
+                "First-attempt accuracy: <strong>" + acc.correct + " / " + acc.total + " (" + acc.pct + "%)</strong></p>" +
+                '<div style="overflow-x:auto"><table class="sss-review-table"><thead><tr>' +
+                "<th>Switch</th><th>First attempt</th><th>Final mastery</th><th>Attempts</th><th>Hints</th>" +
+                "</tr></thead><tbody>" + rows + "</tbody></table></div>" +
+                "<h4 style=\"margin-bottom:4px\">Focus skills missed on the first attempt</h4>" + missedHtml;
+        }
+
+        function sssScreenLabel(screen) {
+            if (screen === "brief") { return "Mission Brief"; }
+            if (screen === "done") { return "Completion"; }
+            var n = { s1: 1, s2: 2, s3: 3, s4: 4 }[screen];
+            return "Scene " + n + " of 4 — " + SCENE_TITLES[screen];
+        }
+
+        /* ---------- generic modal (review, exit, play again) ---------- */
+
+        var sssModal = null;
+
+        function sssEnsureModal() {
+            if (sssModal) { return sssModal; }
+            sssModal = document.createElement("div");
+            sssModal.className = "modal";
+            sssModal.id = "sssModal";
+            sssModal.setAttribute("role", "dialog");
+            sssModal.setAttribute("aria-modal", "true");
+            sssModal.setAttribute("aria-labelledby", "sssModalHeading");
+            sssModal.innerHTML = '<section class="modal-card">' +
+                '<button class="close-btn" type="button" data-modal="close" aria-label="Close dialogue">×</button>' +
+                '<div id="sssModalBody"></div>' +
+                '<div class="button-row" id="sssModalActions" style="margin-top:18px; justify-content:flex-start;"></div>' +
+                "</section>";
+            document.body.appendChild(sssModal);
+            sssModal.addEventListener("click", function (event) {
+                if (event.target === sssModal) { sssCloseModal(); }
+                var btn = event.target.closest("[data-modal]");
+                if (!btn) { return; }
+                var act = btn.getAttribute("data-modal");
+                if (act === "close") { sssCloseModal(); }
+                else if (act === "confirm-exit") { sssCloseModal(); showScreen("home"); }
+                else if (act === "confirm-again") { sssCloseModal(); devInit(); }
+            });
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") { sssCloseModal(); }
+            });
+            return sssModal;
+        }
+
+        function sssOpenModal(kind, bodyHtml) {
+            var modal = sssEnsureModal();
+            modal.querySelector("#sssModalBody").innerHTML = bodyHtml;
+            var actions = modal.querySelector("#sssModalActions");
+            if (kind === "exit") {
+                actions.innerHTML = '<button class="sss-btn" type="button" data-modal="close">Stay in the studio</button>' +
+                    '<button class="sss-btn exit" type="button" data-modal="confirm-exit">Exit to home</button>';
+            } else if (kind === "again") {
+                actions.innerHTML = '<button class="sss-btn" type="button" data-modal="close">Keep my record</button>' +
+                    '<button class="sss-btn exit" type="button" data-modal="confirm-again">Clear and play again</button>';
+            } else {
+                actions.innerHTML = '<button class="sss-btn primary" type="button" data-modal="close">Close review</button>';
+            }
+            modal.classList.add("show");
+            var first = actions.querySelector("button");
+            if (first) { first.focus(); }
+        }
+
+        function sssCloseModal() {
+            if (sssModal) { sssModal.classList.remove("show"); }
+        }
+
+        /* ---------- input handling ---------- */
+
+        function sssEsc(value) {
+            return escapeHtml(value).replace(/\n/g, "\n");
+        }
+
+        function sssIsPlaced(genre) {
+            return G.placed.prose === genre || G.placed.poetry === genre || G.placed.drama === genre;
+        }
+
+        function sssPlace(slot) {
+            if (G.placed[slot]) {
+                G.held = null;
+                G.placed[slot] = null;
+                G.feedback = null;
+                sssRender();
+                return;
+            }
+            if (!G.held) {
+                G.feedback = { kind: "tip", title: "💡 Pick a card first", text: "Tap or drag one of the puppy cards, then tap the frame you want it to go into." };
+                sssRender();
+                return;
+            }
+            G.placed[slot] = G.held;
+            G.held = null;
+            G.feedback = null;
+            sssRender();
+        }
+
+        function sssBindDrag() {
+            var cards = dom.simContainer.querySelectorAll('[data-action="hold"]');
+            Array.prototype.forEach.call(cards, function (card) {
+                card.setAttribute("draggable", "true");
+                card.addEventListener("dragstart", function (event) {
+                    G.held = card.getAttribute("data-genre");
+                    if (event.dataTransfer) { event.dataTransfer.setData("text/plain", G.held); }
+                });
+            });
+            var slots = dom.simContainer.querySelectorAll('[data-action="drop"]');
+            Array.prototype.forEach.call(slots, function (slot) {
+                slot.addEventListener("dragover", function (event) { event.preventDefault(); slot.classList.add("over"); });
+                slot.addEventListener("dragleave", function () { slot.classList.remove("over"); });
+                slot.addEventListener("drop", function (event) {
+                    event.preventDefault();
+                    slot.classList.remove("over");
+                    sssPlace(slot.getAttribute("data-slot"));
+                });
+            });
+        }
+
+        dom.simContainer.addEventListener("click", function (event) {
+            var btn = event.target.closest("[data-action]");
+            if (!btn || btn.disabled || !G) { return; }
+            var action = btn.getAttribute("data-action");
+
+            if (action === "preview") { G.previewGenre = btn.getAttribute("data-genre"); sssRender(); return; }
+            if (action === "go-s1") { sssGo("s1"); return; }
+            if (action === "pick") { G.pick = btn.getAttribute("data-genre"); G.feedback = null; sssRender(); return; }
+            if (action === "check") { sssCheckPick(btn.getAttribute("data-target")); return; }
+            if (action === "feature") {
+                var id = btn.getAttribute("data-feature");
+                var at = G.featurePicks.indexOf(id);
+                if (at === -1) { G.featurePicks.push(id); } else { G.featurePicks.splice(at, 1); }
+                G.feedback = null;
+                sssRender();
+                return;
+            }
+            if (action === "checkfeatures") { sssCheckFeatures(); return; }
+            if (action === "hold") { G.held = btn.getAttribute("data-genre"); G.feedback = null; sssRender(); return; }
+            if (action === "drop") { sssPlace(btn.getAttribute("data-slot")); return; }
+            if (action === "checkmatch") { sssCheckMatch(); return; }
+            if (action === "shared") { G.sharedPick = btn.getAttribute("data-shared"); G.feedback = null; sssRender(); return; }
+            if (action === "checkshared") { sssCheckShared(); return; }
+            if (action === "next") { sssNextScreen(); return; }
+            if (action === "back") { sssBack(); return; }
+            if (action === "rules") { openInstructionsModal(); return; }
+            if (action === "hint") { sssHint(); return; }
+            if (action === "tryagain") { sssTryAgain(); return; }
+            if (action === "review") { devOpenReview(); return; }
+            if (action === "finish") { G.finishedAt = Date.now(); sssGo("done"); return; }
+            if (action === "playagain") {
+                sssOpenModal("again", "<h3 id=\"sssModalHeading\">Play again?</h3><p>This clears your answers, badges and studio record, and starts the mission from the Mission Brief.</p>");
+                return;
+            }
+            if (action === "exit") {
+                sssOpenModal("exit", "<h3 id=\"sssModalHeading\">Exit the simulation?</h3><p>You will return to the home screen. Your current progress in this scene will not be kept.</p>");
+                return;
+            }
+        });
+
+    </script>
+</body>
+
+</html>
