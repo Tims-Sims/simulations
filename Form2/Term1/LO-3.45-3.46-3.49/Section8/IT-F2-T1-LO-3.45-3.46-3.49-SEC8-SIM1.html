@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 Cut! Build the Scene — Video Editing Studio</title>
+    <style>
+        /* ============================================================
+           FORM 2 INFORMATION TECHNOLOGY — CUT! BUILD THE SCENE
+           Trinidad and Tobago Secondary Schools — IT Computer Lab
+           Pixel-Perfect Non-Linear Video Editor with Geometric Playhead
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #090d16;
+            --bg-soft: #101726;
+            --surface: #172136;
+            --surface-2: #1f2d48;
+            --surface-3: #2a3a5c;
+            --text: #f1f5f9;
+            --text-soft: #cbd5e1;
+            --muted: #8ca3ba;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Tracks & Editor Colors */
+            --track-video: #0284c7;
+            --track-video-bg: rgba(2, 132, 199, 0.22);
+            --track-video-border: #38bdf8;
+
+            --track-text: #a855f7;
+            --track-text-bg: rgba(168, 85, 247, 0.22);
+            --track-text-border: #c084fc;
+
+            --playhead-color: #ef4444;
+            --trim-handle: #f59e0b;
+
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.16);
+            --safe-border: rgba(16, 185, 129, 0.45);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.16);
+            --hazard-border: rgba(245, 158, 11, 0.45);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.16);
+            --danger-border: rgba(239, 68, 68, 0.45);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f0f4f8;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --track-video: #0284c7;
+            --track-video-bg: rgba(2, 132, 199, 0.14);
+            --track-video-border: #0284c7;
+
+            --track-text: #9333ea;
+            --track-text-bg: rgba(147, 51, 234, 0.14);
+            --track-text-border: #9333ea;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1360px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Topbar Header (Fixed & Sticky) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            flex-shrink: 0;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.12rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.88rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border-radius: 999px;
+            padding: 9px 18px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Screen Framework */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Landing Page */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .hero-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: clamp(2.1rem, 4vw, 3rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 760px);
+            margin: 0 auto 28px;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.88rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Stage / 25% Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 16px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Interactive Workspace (75%) */
+        .editing-workspace-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+        }
+
+        /* Upper Workspace Grid: Media Pool (Left) + Preview Monitor (Right) */
+        .upper-workspace-grid {
+            flex: 1;
+            min-height: 270px;
+            display: grid;
+            grid-template-columns: 310px 1fr;
+            border-bottom: 2px solid var(--border);
+            background: radial-gradient(circle at top left, color-mix(in srgb, var(--bg-soft) 50%, var(--surface)), var(--bg));
+            overflow: hidden;
+        }
+
+        /* Media Pool Sidebar */
+        .media-pool-card {
+            background: var(--surface-2);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .media-pool-header {
+            padding: 10px 14px;
+            background: var(--surface-3);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .media-pool-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .media-clip-item {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .media-clip-item:hover {
+            border-color: var(--accent);
+            transform: translateX(3px);
+            box-shadow: var(--shadow);
+        }
+
+        .media-clip-item.selected-in-pool {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent);
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+        }
+
+        .media-clip-item.on-timeline {
+            border-color: var(--safe-border);
+            background: color-mix(in srgb, var(--safe-color) 8%, var(--surface));
+        }
+
+        .clip-thumb-box {
+            width: 76px;
+            height: 52px;
+            border-radius: 6px;
+            background: #020617;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .thumb-svg-mini {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Preview Monitor Area */
+        .preview-monitor-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 18px;
+            position: relative;
+            background: #020617;
+        }
+
+        .preview-screen-frame {
+            width: 100%;
+            max-width: 560px;
+            height: 230px;
+            border-radius: var(--radius-md);
+            background: #090d16;
+            border: 2px solid var(--border);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .monitor-svg-stage {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .monitor-text-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 14px;
+            text-align: center;
+            z-index: 20;
+        }
+
+        .monitor-title-text {
+            font-size: 1.45rem;
+            font-weight: 900;
+            color: #38bdf8;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.95);
+            margin-top: 30px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .monitor-subtitle-text {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 4px 14px;
+            border-radius: 999px;
+            align-self: center;
+            margin-bottom: 8px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .monitor-credits-text {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #ec4899;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.95);
+            margin-top: 35px;
+        }
+
+        .monitor-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 560px;
+            margin-top: 8px;
+        }
+
+        .timecode-display {
+            font-family: monospace;
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--accent);
+            background: rgba(0,0,0,0.5);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        /* Lower Timeline Workspace (Left -> Right) */
+        .timeline-workspace-card {
+            height: 240px;
+            background: var(--surface-2);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-header-bar {
+            padding: 8px 16px;
+            background: var(--surface-3);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .timeline-ruler-track {
+            height: 24px;
+            background: color-mix(in srgb, var(--surface-3) 70%, transparent);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding-left: 110px;
+            padding-right: 10px;
+            font-size: 0.7rem;
+            font-family: monospace;
+            color: var(--muted);
+            position: relative;
+        }
+
+        .ruler-tick {
+            position: absolute;
+            transform: translateX(-50%);
+        }
+
+        .tracks-container {
+            flex: 1;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .timeline-track-row {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        .track-header-badge {
+            width: 110px;
+            height: 100%;
+            background: var(--surface);
+            border-right: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .track-slots-rail {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 10px;
+            position: relative;
+        }
+
+        .timeline-slot-box {
+            height: calc(100% - 8px);
+            border-radius: var(--radius-md);
+            border: 2px dashed var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--muted);
+            position: relative;
+            user-select: none;
+            overflow: hidden;
+            transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .timeline-slot-box:hover {
+            border-color: var(--accent);
+        }
+
+        .timeline-slot-box.filled {
+            border-style: solid;
+        }
+
+        .timeline-slot-box.video-clip {
+            border-color: var(--track-video-border);
+            background: var(--track-video-bg);
+            color: var(--text);
+        }
+
+        .timeline-slot-box.text-clip {
+            border-color: var(--track-text-border);
+            background: var(--track-text-bg);
+            color: var(--text);
+        }
+
+        .timeline-slot-box.selected-slot {
+            box-shadow: 0 0 0 3px var(--hazard-color);
+            border-color: var(--hazard-color);
+        }
+
+        /* Intra-clip visual split for raw untrimmed clip 2 */
+        .clip-split-visual-wrap {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.4;
+        }
+
+        .hazard-split-zone {
+            width: 40%;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(245, 158, 11, 0.4),
+                rgba(245, 158, 11, 0.4) 8px,
+                rgba(239, 68, 68, 0.4) 8px,
+                rgba(239, 68, 68, 0.4) 16px
+            );
+            border-right: 2px dashed var(--hazard-color);
+        }
+
+        .rally-split-zone {
+            width: 60%;
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .slot-content-overlay {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Draggable / Clickable Trim Handles on Selected Clip */
+        .trim-handle-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: var(--trim-handle);
+            color: #0f172a;
+            font-size: 0.72rem;
+            font-weight: 900;
+            border-radius: 4px;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        /* Timeline Red Playhead Line (Exact Geometric Needle) */
+        .timeline-playhead-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--playhead-color);
+            z-index: 35;
+            pointer-events: none;
+            left: 120px;
+            transition: none; /* Instant 60fps frame updates with zero lag */
+        }
+
+        .playhead-cap {
+            width: 14px;
+            height: 14px;
+            background: var(--playhead-color);
+            position: absolute;
+            top: 0;
+            left: -6px;
+            clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+            box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+        }
+
+        /* Right Dedicated Action Panel (25% Width) */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stat-box {
+            padding: 8px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Text Tool Cards Dock */
+        .text-tools-dock {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .text-tool-btn {
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            color: var(--text-soft);
+            font-size: 0.82rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .text-tool-btn:hover {
+            border-color: var(--track-text-border);
+            color: var(--text);
+        }
+
+        .text-tool-btn.selected-tool {
+            border-color: var(--track-text-border);
+            box-shadow: 0 0 0 2px var(--track-text-border);
+            background: color-mix(in srgb, var(--track-text-border) 14%, var(--surface-2));
+            color: var(--text);
+        }
+
+        .text-tool-btn.placed {
+            opacity: 0.85;
+        }
+
+        .feedback-card {
+            padding: 12px 14px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.86rem;
+            line-height: 1.5;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 44px);
+            margin: 0 auto;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .badge-container {
+            margin: 16px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 18px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.2rem;
+        }
+
+        .badge-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 12px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.74rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        /* Editing Pipeline Diagram */
+        .pipeline-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin: 18px 0;
+            text-align: left;
+        }
+
+        .pipeline-steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .pipeline-step-box {
+            padding: 12px 10px;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--border);
+            text-align: center;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+            margin-top: 16px;
+        }
+
+        .summary-item-card {
+            padding: 12px 16px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 460px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 660px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        @media (max-width: 960px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+
+            .upper-workspace-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mission-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header (Fixed & Sticky) -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">✂️</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 Cut! Build the Scene — Video Editing Studio</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Information Technology</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Information Technology</div>
+                    <h2>Cut! Build the Scene — Non-Linear Video Editor</h2>
+                    <p>
+                        Welcome to the IT Video Editing Suite! You have been given raw footage of an inter-house table tennis tournament.
+                        Import source files from the Media Pool, place and reorder clips on the Video Track in any sequence you choose,
+                        trim awkward camera wobble, and layer Title, Subtitle, and Credits tracks!
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">📁</div>
+                            <h3>1. Media Pool &amp; Variable Clips</h3>
+                            <p>Place and swap clips on the Video Track. Raw Clip 2 plays its full 5s duration (2s floor + 3s match) unless trimmed!</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🏓</div>
+                            <h3>2. Arrival &amp; Table Tennis</h3>
+                            <p>Experience students arriving at the school gates, followed by a fast-paced table tennis rally.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🏷️</div>
+                            <h3>3. Text Track Layering</h3>
+                            <p>Assign Title, Subtitle, and Credits to any text slot and screen your complete edited cut!</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.1rem; padding: 14px 28px;">🚀 Launch Video Editing Studio</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Stage / 25% Action Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Interactive Workspace (75%) -->
+                <section class="editing-workspace-pane" id="editingWorkspacePane">
+                    <!-- Upper Workspace Grid: Media Pool (Left) + Preview Monitor (Right) -->
+                    <div class="upper-workspace-grid">
+                        <!-- Media Pool Area -->
+                        <div class="media-pool-card">
+                            <div class="media-pool-header">
+                                <span>📁 Media Pool (Raw Clips)</span>
+                                <span style="font-size:0.75rem; color:var(--muted);" id="poolCountText">3 Source Files</span>
+                            </div>
+                            <div class="media-pool-list" id="mediaPoolList">
+                                <!-- Populated dynamically with animated SVG thumbnails -->
+                            </div>
+                        </div>
+
+                        <!-- Preview Monitor Window -->
+                        <div class="preview-monitor-card">
+                            <div class="preview-screen-frame" id="previewScreenFrame">
+                                <!-- SVG Container -->
+                                <div id="svgMonitorHolder" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                                    <svg class="monitor-svg-stage" viewBox="0 0 560 230">
+                                        <rect width="560" height="230" fill="#020617"/>
+                                        <text x="280" y="115" text-anchor="middle" font-size="14" fill="#94a3b8">Press [▶ Play Timeline] to Screen Video</text>
+                                    </svg>
+                                </div>
+
+                                <!-- Dynamic Text Overlay Container -->
+                                <div class="monitor-text-overlay" id="monitorTextOverlay">
+                                    <div class="monitor-title-text" id="overlayTitle" style="display:none;">Our School Activity</div>
+                                    <div class="monitor-credits-text" id="overlayCredits" style="display:none;">Created by Group 3</div>
+                                    <div class="monitor-subtitle-text" id="overlaySubtitle" style="display:none;">Students prepare for the competition</div>
+                                </div>
+                            </div>
+
+                            <div class="monitor-controls-row">
+                                <div class="timecode-display" id="timecodeDisplay">TC: 00:00:00</div>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="primary-btn" id="playTimelineBtn" style="padding:6px 16px; font-size:0.84rem;">
+                                        ▶ Play Timeline
+                                    </button>
+                                    <button class="secondary-btn" id="stopTimelineBtn" style="padding:6px 12px; font-size:0.84rem;">
+                                        ⏹ Stop
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lower Timeline Area -->
+                    <div class="timeline-workspace-card">
+                        <div class="timeline-header-bar">
+                            <span style="color:var(--accent);">🎞️ NON-LINEAR TIMELINE (Click slot to place or swap)</span>
+                            <span style="font-size:0.75rem; color:var(--muted);" id="timelineActiveSelectionNotice">Select an item above, then click a slot</span>
+                        </div>
+
+                        <!-- Time Ruler Track -->
+                        <div class="timeline-ruler-track" id="timelineRulerTrack">
+                            <span class="ruler-tick" id="rulerTick0" style="left:120px;">0:00</span>
+                            <span class="ruler-tick" id="rulerTick1" style="left:280px;">0:03s</span>
+                            <span class="ruler-tick" id="rulerTick2" style="left:520px;">0:08s</span>
+                            <span class="ruler-tick" id="rulerTick3" style="right:20px;">0:11s</span>
+                        </div>
+
+                        <!-- Multi-track container -->
+                        <div class="tracks-container" id="tracksContainer">
+                            <!-- Exact Needle Playhead line -->
+                            <div class="timeline-playhead-line" id="timelinePlayheadLine">
+                                <div class="playhead-cap"></div>
+                            </div>
+
+                            <!-- Track 1: TEXT OVERLAYS TRACK -->
+                            <div class="timeline-track-row">
+                                <div class="track-header-badge" style="color:var(--track-text-border);">T1 Text</div>
+                                <div class="track-slots-rail" id="textTrackRail">
+                                    <!-- 3 text slots -->
+                                    <div class="timeline-slot-box" data-text-slot="0">Slot 1 (Empty)</div>
+                                    <div class="timeline-slot-box" data-text-slot="1">Slot 2 (Empty)</div>
+                                    <div class="timeline-slot-box" data-text-slot="2">Slot 3 (Empty)</div>
+                                </div>
+                            </div>
+
+                            <!-- Track 2: VIDEO TRACK -->
+                            <div class="timeline-track-row">
+                                <div class="track-header-badge" style="color:var(--track-video-border);">V1 Video</div>
+                                <div class="track-slots-rail" id="videoTrackRail">
+                                    <!-- 3 video slots -->
+                                    <div class="timeline-slot-box" data-video-slot="0">Slot 1 (Empty)</div>
+                                    <div class="timeline-slot-box" data-video-slot="1">Slot 2 (Empty)</div>
+                                    <div class="timeline-slot-box" data-video-slot="2">Slot 3 (Empty)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Dedicated Action Panel (25% Width) -->
+                <aside class="mission-panel">
+                    <!-- 1. Progress & Status Card -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Editing Checklist</span>
+                            <span id="goalsCountText" style="color:var(--accent);">0 / 3 Done</span>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Editor Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Clip 2 Duration</div>
+                                <div class="val" id="trimStatusVal">5.0s (Raw)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Text Track Toolbox Card -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span style="color:var(--track-text-border);">🏷️ Text Track Tools</span>
+                        </div>
+                        <div class="text-tools-dock">
+                            <div class="text-tool-btn" id="toolTitleBtn" data-text-type="title">
+                                <span>🏷️ <strong>TITLE:</strong> “Our School Activity”</span>
+                                <span style="font-size:0.72rem; color:var(--muted);">[Select &amp; Place]</span>
+                            </div>
+                            <div class="text-tool-btn" id="toolSubtitleBtn" data-text-type="subtitle">
+                                <span>💬 <strong>SUBTITLE:</strong> “Students prepare...”</span>
+                                <span style="font-size:0.72rem; color:var(--muted);">[Select &amp; Place]</span>
+                            </div>
+                            <div class="text-tool-btn" id="toolCreditsBtn" data-text-type="credits">
+                                <span>🎬 <strong>CREDITS:</strong> “Created by Group 3”</span>
+                                <span style="font-size:0.72rem; color:var(--muted);">[Select &amp; Place]</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Selected Clip Inspector & Trim Tools Card -->
+                    <div class="panel-card" id="inspectorCard">
+                        <div class="panel-title">
+                            <span>✂️ Timeline Inspector</span>
+                        </div>
+                        <div id="inspectorContentBox" style="font-size:0.84rem; color:var(--text-soft); line-height:1.5;">
+                            Click any clip or text card on the timeline to inspect, swap, or trim footage.
+                        </div>
+                    </div>
+
+                    <!-- 4. Primary Actions -->
+                    <div class="panel-card" style="gap:8px;">
+                        <button class="primary-btn" id="previewFinalBtn" style="width:100%; justify-content:center;">
+                            ▶ PREVIEW TIMELINE VIDEO
+                        </button>
+                        <button class="secondary-btn" id="clearTimelineBtn" style="width:100%; justify-content:center;">
+                            ↺ Clear Timeline
+                        </button>
+                        <button class="primary-btn" id="finishStudioBtn" style="width:100%; justify-content:center; display:none; background:linear-gradient(135deg, var(--safe-color), #059669);">
+                            🏆 Finish &amp; View Certification
+                        </button>
+                    </div>
+
+                    <!-- 5. Live Technical Explanation Box -->
+                    <div class="panel-card">
+                        <div class="panel-title">Director Feedback</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Watch the timeline needle: on raw Clip 2, the needle passes through the 2s striped floor section before entering the table tennis match! Click [✂️ Trim 2s] to cut the floor section!
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Video Editing Certified</div>
+                <h2>Form 2 Non-Linear Video Editor Certification</h2>
+                <p>Outstanding work! You imported raw source files, sequenced the table tennis story on the timeline, trimmed awkward camera footage non-destructively, and layered text tracks to produce a broadcast-ready video!</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Video Editor</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You turned raw source files into an edited, polished video!</p>
+                </div>
+
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Sequence Order</div>
+                        <div class="val" id="summarySequenceVal">Perfect</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Trim Precision</div>
+                        <div class="val" id="summaryTrimVal">Non-Destructive</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Text Placement</div>
+                        <div class="val" id="summaryTextVal">3 / 3 Placed</div>
+                    </div>
+                </div>
+
+                <!-- Video Editing Pipeline Summary Card -->
+                <div class="pipeline-card">
+                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--accent); margin-bottom: 4px;">
+                        🎬 The Non-Linear Video Editing Workflow
+                    </div>
+                    <p style="font-size: 0.86rem; color: var(--text-soft); line-height: 1.5; margin: 0 0 10px;">
+                        Key concept mastered: Trimming changes which part of the source file is used on the timeline without destroying the original source file in the Media Pool.
+                    </p>
+
+                    <div class="pipeline-steps-grid">
+                        <div class="pipeline-step-box">
+                            <div style="font-size:1.6rem;">📁</div>
+                            <h4 style="margin:4px 0 2px; font-size:0.85rem;">1. Media Pool</h4>
+                            <p style="margin:0; font-size:0.75rem; color:var(--muted);">Raw source recordings.</p>
+                        </div>
+                        <div class="pipeline-step-box">
+                            <div style="font-size:1.6rem;">🎞️</div>
+                            <h4 style="margin:4px 0 2px; font-size:0.85rem;">2. Timeline</h4>
+                            <p style="margin:0; font-size:0.75rem; color:var(--muted);">Freely ordered clips.</p>
+                        </div>
+                        <div class="pipeline-step-box">
+                            <div style="font-size:1.6rem;">✂️</div>
+                            <h4 style="margin:4px 0 2px; font-size:0.85rem;">3. Trim Handles</h4>
+                            <p style="margin:0; font-size:0.75rem; color:var(--muted);">In/Out points adjusted.</p>
+                        </div>
+                        <div class="pipeline-step-box">
+                            <div style="font-size:1.6rem;">🏷️</div>
+                            <h4 style="margin:4px 0 2px; font-size:0.85rem;">4. Text Track</h4>
+                            <p style="margin:0; font-size:0.75rem; color:var(--muted);">Title, Subtitle, Credits.</p>
+                        </div>
+                        <div class="pipeline-step-box">
+                            <div style="font-size:1.6rem;">🎬</div>
+                            <h4 style="margin:4px 0 2px; font-size:0.85rem;">5. Master Video</h4>
+                            <p style="margin:0; font-size:0.75rem; color:var(--muted);">Exported finished cut.</p>
+                        </div>
+                    </div>
+
+                    <p style="margin: 16px 0 0; font-size: 0.95rem; font-weight: 800; color: var(--safe-color); text-align: center;">
+                        🎉 “Raw Source Files ➔ Timeline Sequence ➔ Non-Destructive Trim ➔ Layered Text ➔ Finished Video”
+                    </p>
+                </div>
+
+                <h3 style="text-align: left; margin: 20px 0 10px; font-size: 1.05rem;">Verified Master Edit Breakdown</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 28px; display: flex; justify-content: center; gap: 14px;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Edit Another Video</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer (Slide-Over, Right Side) -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Video editing operations &amp; timeline logs.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Use the Video Editing Studio</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome! Your task is to turn raw footage of a school table tennis tournament into an edited video:</p>
+                <ul>
+                    <li><strong>Placing &amp; Reordering Clips:</strong> Click a clip in the Media Pool to select it, then click ANY slot on the Video Track. Click two filled slots to <strong>SWAP</strong> their positions freely.</li>
+                    <li><strong>Clip Durations &amp; Trimming:</strong> Raw Clip 2 is 5 seconds long (contains 2s of camera pointed at the floor + 3s of match rally in ANY slot). Click Clip 2 on the timeline and click <strong>[✂️ Trim 2s]</strong> to trim it to 3s! If left untrimmed, the needle visibly sweeps through the 2s floor section before reaching the rally!</li>
+                    <li><strong>Text Track Overlays:</strong> Click a Text Tool (Title, Subtitle, Credits), then click a slot on the Text Track to place it. Text does NOT auto-fill—you control exactly which slot each text item goes into!</li>
+                    <li><strong>Screening Video:</strong> Press <strong>▶ Play Timeline</strong> to preview your cut with geometric needle precision and fluid animated SVGs!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Video Editor?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the editor? All timeline clips, trim adjustments, and text placements will return to raw default.</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Studio</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           DATASET DEFINITIONS FOR RAW FOOTAGE & CLIPS
+           ============================================================ */
+        const MEDIA_CLIPS = {
+            "clip_arrival": {
+                id: "clip_arrival",
+                name: "Clip 1: Arrival",
+                desc: "Students arrive and walk towards the school compound gates.",
+                icon: "🚶",
+                rawDuration: 3,
+                correctSlot: 0,
+                hasAwkwardFootage: false
+            },
+            "clip_activity": {
+                id: "clip_activity",
+                name: "Clip 2: Table Tennis Match",
+                desc: "5s raw footage (2s floor camera wobble + 3s match rally).",
+                icon: "🏓",
+                rawDuration: 5,
+                trimmedDuration: 3,
+                correctSlot: 1,
+                hasAwkwardFootage: true,
+                awkwardSecs: 2
+            },
+            "clip_ending": {
+                id: "clip_ending",
+                name: "Clip 3: Trophy Celebration",
+                desc: "Winners celebrate and present the championship trophy.",
+                icon: "🏆",
+                rawDuration: 3,
+                correctSlot: 2,
+                hasAwkwardFootage: false
+            }
+        };
+
+        const TEXT_TOOLS = {
+            "title": { id: "title", label: "Title: Our School Activity", icon: "🏷️", correctSlot: 0 },
+            "subtitle": { id: "subtitle", label: "Subtitle: Students prepare...", icon: "💬", correctSlot: 1 },
+            "credits": { id: "credits", label: "Credits: Created by Group 3", icon: "🎬", correctSlot: 2 }
+        };
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Watch the timeline needle: on raw Clip 2, the needle passes through the 2s striped floor section before entering the table tennis match! Click [✂️ Trim 2s] to cut the floor section!`;
+
+        /* Application State */
+        const state = {
+            videoTrack: [null, null, null],
+            textTrack: [null, null, null],
+            clipTrimmed: { "clip_activity": false },
+            selectedPoolClipId: null,
+            selectedTextTypeId: null,
+            selectedVideoSlot: null,
+            selectedTextSlot: null,
+            score: 0,
+            theme: "light",
+            isPlaying: false,
+            playbackStartTime: null,
+            animationFrameId: null,
+            playheadSec: 0
+        };
+
+        /* DOM Elements Mapping */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+
+            // Studio UI Elements
+            mediaPoolList: document.getElementById("mediaPoolList"),
+            poolCountText: document.getElementById("poolCountText"),
+            svgMonitorHolder: document.getElementById("svgMonitorHolder"),
+            overlayTitle: document.getElementById("overlayTitle"),
+            overlayCredits: document.getElementById("overlayCredits"),
+            overlaySubtitle: document.getElementById("overlaySubtitle"),
+            timecodeDisplay: document.getElementById("timecodeDisplay"),
+            playTimelineBtn: document.getElementById("playTimelineBtn"),
+            stopTimelineBtn: document.getElementById("stopTimelineBtn"),
+            textTrackRail: document.getElementById("textTrackRail"),
+            videoTrackRail: document.getElementById("videoTrackRail"),
+            tracksContainer: document.getElementById("tracksContainer"),
+            timelinePlayheadLine: document.getElementById("timelinePlayheadLine"),
+            timelineActiveSelectionNotice: document.getElementById("timelineActiveSelectionNotice"),
+            timelineRulerTrack: document.getElementById("timelineRulerTrack"),
+            rulerTick0: document.getElementById("rulerTick0"),
+            rulerTick1: document.getElementById("rulerTick1"),
+            rulerTick2: document.getElementById("rulerTick2"),
+            rulerTick3: document.getElementById("rulerTick3"),
+
+            // Right Panel Elements
+            goalsCountText: document.getElementById("goalsCountText"),
+            scoreVal: document.getElementById("scoreVal"),
+            trimStatusVal: document.getElementById("trimStatusVal"),
+            toolTitleBtn: document.getElementById("toolTitleBtn"),
+            toolSubtitleBtn: document.getElementById("toolSubtitleBtn"),
+            toolCreditsBtn: document.getElementById("toolCreditsBtn"),
+            inspectorCard: document.getElementById("inspectorCard"),
+            inspectorContentBox: document.getElementById("inspectorContentBox"),
+            previewFinalBtn: document.getElementById("previewFinalBtn"),
+            clearTimelineBtn: document.getElementById("clearTimelineBtn"),
+            finishStudioBtn: document.getElementById("finishStudioBtn"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+
+            // Summary Screen Elements
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summarySequenceVal: document.getElementById("summarySequenceVal"),
+            summaryTrimVal: document.getElementById("summaryTrimVal"),
+            summaryTextVal: document.getElementById("summaryTextVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Helper: Calculate dynamic durations for slots */
+        function getSlotDuration(slotIdx) {
+            const clipId = state.videoTrack[slotIdx];
+            if (!clipId) return 3; // Default placeholder width
+            if (clipId === "clip_activity") {
+                return state.clipTrimmed["clip_activity"] ? 3 : 5;
+            }
+            return MEDIA_CLIPS[clipId].rawDuration;
+        }
+
+        function getTotalTimelineDuration() {
+            return getSlotDuration(0) + getSlotDuration(1) + getSlotDuration(2);
+        }
+
+        /* Helper: Reset Explanation Box */
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+        }
+
+        /* Helper: Detect Browser Theme */
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        /* Initialization */
+        init();
+
+        function init() {
+            bindEvents();
+            loadInitialTheme();
+            resetState();
+            renderDashboard();
+
+            // Auto-open instructions modal on launch
+            openModal();
+        }
+
+        function loadInitialTheme() {
+            const savedTheme = sessionStorage.getItem("cut_scene_theme");
+            state.theme = savedTheme || detectSystemTheme();
+            updateThemeUI();
+        }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            sessionStorage.setItem("cut_scene_theme", state.theme);
+            sessionStorage.setItem("user_toggled_theme", "true");
+            updateThemeUI();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+        }
+
+        function openModal() {
+            dom.instructionsModal.classList.add("show");
+        }
+
+        function closeModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetModal() {
+            dom.resetModal.classList.add("show");
+        }
+
+        function closeResetModal() {
+            dom.resetModal.classList.remove("show");
+        }
+
+        function openDrawer() {
+            renderHistoryList();
+            dom.historyDrawer.classList.add("show");
+            dom.historyDrawer.setAttribute("aria-hidden", "false");
+        }
+
+        function closeDrawer() {
+            dom.historyDrawer.classList.remove("show");
+            dom.historyDrawer.setAttribute("aria-hidden", "true");
+        }
+
+        function resetState() {
+            state.videoTrack = [null, null, null];
+            state.textTrack = [null, null, null];
+            state.clipTrimmed = { "clip_activity": false };
+            state.selectedPoolClipId = null;
+            state.selectedTextTypeId = null;
+            state.selectedVideoSlot = null;
+            state.selectedTextSlot = null;
+            state.score = 0;
+            state.playheadSec = 0;
+            stopPlayback();
+            resetExplanationBox();
+        }
+
+        function confirmReset() {
+            closeResetModal();
+            resetState();
+            renderDashboard();
+            showScreen("home");
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", () => {
+                resetState();
+                renderDashboard();
+                showScreen("game");
+            });
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            // Playback controls
+            dom.playTimelineBtn.addEventListener("click", startPlayback);
+            dom.stopTimelineBtn.addEventListener("click", stopPlayback);
+            dom.previewFinalBtn.addEventListener("click", startPlayback);
+            dom.clearTimelineBtn.addEventListener("click", () => {
+                state.videoTrack = [null, null, null];
+                state.textTrack = [null, null, null];
+                state.selectedPoolClipId = null;
+                state.selectedTextTypeId = null;
+                state.selectedVideoSlot = null;
+                state.selectedTextSlot = null;
+                stopPlayback();
+                renderDashboard();
+            });
+
+            dom.finishStudioBtn.addEventListener("click", renderSummaryScreen);
+
+            // Text Tool buttons
+            dom.toolTitleBtn.addEventListener("click", () => selectTextTool("title"));
+            dom.toolSubtitleBtn.addEventListener("click", () => selectTextTool("subtitle"));
+            dom.toolCreditsBtn.addEventListener("click", () => selectTextTool("credits"));
+
+            window.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    closeModal();
+                    closeResetModal();
+                    closeDrawer();
+                }
+            });
+
+            window.addEventListener("resize", () => {
+                updateNeedlePositionToCurrentTime();
+            });
+        }
+
+        /* ============================================================
+           MEDIA POOL, TEXT TOOLS & TIMELINE REORDERING LOGIC
+           ============================================================ */
+        function selectMediaPoolClip(clipId) {
+            playToneSound(520);
+            state.selectedTextTypeId = null;
+            state.selectedTextSlot = null;
+
+            if (state.selectedPoolClipId === clipId) {
+                state.selectedPoolClipId = null;
+            } else {
+                state.selectedPoolClipId = clipId;
+                state.selectedVideoSlot = null;
+            }
+            renderDashboard();
+        }
+
+        function selectTextTool(textType) {
+            playToneSound(660);
+            state.selectedPoolClipId = null;
+            state.selectedVideoSlot = null;
+
+            if (state.selectedTextTypeId === textType) {
+                state.selectedTextTypeId = null;
+            } else {
+                state.selectedTextTypeId = textType;
+                state.selectedTextSlot = null;
+            }
+            renderDashboard();
+        }
+
+        function handleVideoSlotClick(slotIdx) {
+            playToneSound(440);
+
+            // Case 1: A clip from Media Pool is selected -> Place in this specific slot!
+            if (state.selectedPoolClipId) {
+                const clipId = state.selectedPoolClipId;
+                const oldSlot = state.videoTrack.indexOf(clipId);
+                if (oldSlot !== -1) {
+                    state.videoTrack[oldSlot] = null;
+                }
+                state.videoTrack[slotIdx] = clipId;
+                state.selectedPoolClipId = null;
+                state.selectedVideoSlot = slotIdx;
+                checkSequenceProgress();
+                renderDashboard();
+                return;
+            }
+
+            // Case 2: A video slot is already selected -> Click another slot to SWAP them!
+            if (state.selectedVideoSlot !== null && state.selectedVideoSlot !== slotIdx) {
+                const firstSlot = state.selectedVideoSlot;
+                const secondSlot = slotIdx;
+                const temp = state.videoTrack[firstSlot];
+                state.videoTrack[firstSlot] = state.videoTrack[secondSlot];
+                state.videoTrack[secondSlot] = temp;
+                state.selectedVideoSlot = null;
+                checkSequenceProgress();
+                renderDashboard();
+                return;
+            }
+
+            // Case 3: Select or unselect slot
+            if (state.selectedVideoSlot === slotIdx) {
+                state.selectedVideoSlot = null;
+            } else {
+                state.selectedVideoSlot = slotIdx;
+            }
+            state.selectedTextSlot = null;
+            renderDashboard();
+        }
+
+        function handleTextSlotClick(slotIdx) {
+            playToneSound(600);
+
+            // Case 1: Text Tool selected -> Place in this specific slot!
+            if (state.selectedTextTypeId) {
+                const textType = state.selectedTextTypeId;
+                const oldSlot = state.textTrack.indexOf(textType);
+                if (oldSlot !== -1) {
+                    state.textTrack[oldSlot] = null;
+                }
+                state.textTrack[slotIdx] = textType;
+                state.selectedTextTypeId = null;
+                state.selectedTextSlot = slotIdx;
+                renderDashboard();
+                return;
+            }
+
+            // Case 2: A text slot is already selected -> Click another slot to SWAP!
+            if (state.selectedTextSlot !== null && state.selectedTextSlot !== slotIdx) {
+                const firstSlot = state.selectedTextSlot;
+                const secondSlot = slotIdx;
+                const temp = state.textTrack[firstSlot];
+                state.textTrack[firstSlot] = state.textTrack[secondSlot];
+                state.textTrack[secondSlot] = temp;
+                state.selectedTextSlot = null;
+                renderDashboard();
+                return;
+            }
+
+            // Case 3: Select or unselect text slot
+            if (state.selectedTextSlot === slotIdx) {
+                state.selectedTextSlot = null;
+            } else {
+                state.selectedTextSlot = slotIdx;
+            }
+            state.selectedVideoSlot = null;
+            renderDashboard();
+        }
+
+        function removeVideoSlotClip(slotIdx) {
+            state.videoTrack[slotIdx] = null;
+            state.selectedVideoSlot = null;
+            renderDashboard();
+        }
+
+        function removeTextSlot(slotIdx) {
+            state.textTrack[slotIdx] = null;
+            state.selectedTextSlot = null;
+            renderDashboard();
+        }
+
+        function toggleTrimSelectedClip() {
+            playToneSound(800);
+            state.clipTrimmed["clip_activity"] = !state.clipTrimmed["clip_activity"];
+            if (state.clipTrimmed["clip_activity"]) {
+                state.score += 40;
+            }
+            renderDashboard();
+        }
+
+        function checkSequenceProgress() {
+            const v = state.videoTrack;
+            const isCorrect = v[0] === "clip_arrival" && v[1] === "clip_activity" && v[2] === "clip_ending";
+            if (isCorrect) {
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `🎉 <strong>Nice!</strong> Your scenes now tell the story in a clear order (Arrival ➔ Match ➔ Celebration). Raw Clip 2 is 5s long—trim it to 3s!`;
+            }
+        }
+
+        /* ============================================================
+           FLUID VECTOR SVG ANIMATION SYSTEM (TRUE ARRIVAL, MATCH, CELEBRATION)
+           ============================================================ */
+        function generateAnimatedSvgScene(clipId, isAwkwardSection = false, progressInSlot = 0, currentSlotDuration = 3) {
+            if (!clipId) {
+                return `
+                    <svg class="monitor-svg-stage" viewBox="0 0 560 230">
+                        <rect width="560" height="230" fill="#020617"/>
+                        <text x="280" y="115" text-anchor="middle" font-size="14" font-weight="700" fill="#64748b">Empty Timeline Slot</text>
+                        <text x="280" y="135" text-anchor="middle" font-size="11" fill="#475569">(Place a clip in this slot to view footage)</text>
+                    </svg>
+                `;
+            }
+
+            if (clipId === "clip_arrival") {
+                // Scene 1: TRUE ARRIVAL SCENE (Students walking towards school building gates)
+                const walkProgress = progressInSlot; // Smooth full duration walk
+                // Perspective walking: start at foreground and walk towards school doors
+                const studentX1 = 200 + (walkProgress * 75);
+                const studentY1 = 200 - (walkProgress * 85);
+                const studentScale1 = 1.0 - (walkProgress * 0.45);
+
+                const studentX2 = 240 + (walkProgress * 65);
+                const studentY2 = 210 - (walkProgress * 85);
+                const studentScale2 = 1.0 - (walkProgress * 0.45);
+
+                const legSwing = Math.sin(progressInSlot * Math.PI * 10) * 16;
+
+                return `
+                    <svg class="monitor-svg-stage" viewBox="0 0 560 230">
+                        <defs>
+                            <linearGradient id="skyArrGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.75"/>
+                                <stop offset="100%" stop-color="#bae6fd" stop-opacity="0.9"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="560" height="230" fill="url(#skyArrGrad)"/>
+
+                        <!-- Morning Sun with Pulsing Glow -->
+                        <circle cx="490" cy="40" r="24" fill="#fbbf24" style="filter:drop-shadow(0 0 12px #f59e0b);"/>
+
+                        <!-- School Main Building in Background -->
+                        <rect x="180" y="60" width="200" height="70" rx="4" fill="#334155"/>
+                        <polygon points="170,60 280,25 390,60" fill="#0369a1"/>
+                        <text x="280" y="45" text-anchor="middle" font-size="9" font-weight="900" fill="#ffffff" letter-spacing="1">ST. AUGUSTINE SECONDARY</text>
+                        <!-- Windows & Entrance Double Doors -->
+                        <rect x="200" y="75" width="20" height="20" rx="2" fill="#38bdf8" opacity="0.6"/>
+                        <rect x="340" y="75" width="20" height="20" rx="2" fill="#38bdf8" opacity="0.6"/>
+                        <rect x="265" y="90" width="30" height="40" rx="2" fill="#0f172a"/>
+                        <rect x="267" y="92" width="12" height="36" fill="#0284c7"/>
+                        <rect x="281" y="92" width="12" height="36" fill="#0284c7"/>
+
+                        <!-- Perimeter Gate & Fence -->
+                        <line x1="0" y1="130" x2="245" y2="130" stroke="#64748b" stroke-width="4"/>
+                        <line x1="315" y1="130" x2="560" y2="130" stroke="#64748b" stroke-width="4"/>
+                        <path d="M 245 130 L 245 80 Q 280 65 315 80 L 315 130" fill="none" stroke="#0284c7" stroke-width="4"/>
+
+                        <!-- Paved Compound Walkway (Perspective Path) -->
+                        <polygon points="60,230 500,230 305,130 255,130" fill="#475569"/>
+                        <polygon points="275,230 285,230 282,130 278,130" fill="#94a3b8" opacity="0.7"/>
+
+                        <!-- Student 1 Arriving (Perspective Moving Towards School Doors) -->
+                        <g transform="translate(${studentX1}, ${studentY1}) scale(${studentScale1})">
+                            <ellipse cx="15" cy="55" rx="14" ry="4" fill="rgba(0,0,0,0.3)"/>
+                            <!-- Moving Legs -->
+                            <line x1="12" y1="35" x2="${12 - legSwing}" y2="52" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
+                            <line x1="18" y1="35" x2="${18 + legSwing}" y2="52" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
+                            <!-- White School Shirt & Red Tie -->
+                            <rect x="8" y="16" width="15" height="22" rx="2" fill="#f8fafc"/>
+                            <polygon points="14,16 17,16 18,28 15,31 13,28" fill="#dc2626"/>
+                            <!-- Backpack -->
+                            <rect x="4" y="18" width="5" height="15" rx="2" fill="#0284c7"/>
+                            <!-- Head -->
+                            <circle cx="15" cy="8" r="7" fill="#8d5b4c"/>
+                        </g>
+
+                        <!-- Student 2 Arriving -->
+                        <g transform="translate(${studentX2}, ${studentY2}) scale(${studentScale2})">
+                            <ellipse cx="15" cy="50" rx="12" ry="4" fill="rgba(0,0,0,0.3)"/>
+                            <line x1="12" y1="32" x2="${12 + legSwing}" y2="48" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+                            <line x1="18" y1="32" x2="${18 - legSwing}" y2="48" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+                            <rect x="8" y="14" width="14" height="20" rx="2" fill="#f8fafc"/>
+                            <rect x="4" y="16" width="5" height="13" rx="2" fill="#16a34a"/>
+                            <circle cx="15" cy="7" r="6.5" fill="#a16207"/>
+                        </g>
+                    </svg>
+                `;
+            }
+
+            if (clipId === "clip_activity") {
+                if (isAwkwardSection) {
+                    // Awkward shaky handheld camera pointed down at concrete floor!
+                    const wobbleX = Math.sin(progressInSlot * Math.PI * 16) * 12;
+                    const wobbleY = Math.cos(progressInSlot * Math.PI * 14) * 8;
+
+                    return `
+                        <svg class="monitor-svg-stage" viewBox="0 0 560 230">
+                            <rect width="560" height="230" fill="#334155"/>
+                            <g transform="translate(${wobbleX}, ${wobbleY})">
+                                <!-- Concrete Hall Floor with walking sneakers -->
+                                <line x1="0" y1="80" x2="560" y2="80" stroke="#1e293b" stroke-width="2"/>
+                                <line x1="0" y1="160" x2="560" y2="160" stroke="#1e293b" stroke-width="2"/>
+                                <ellipse cx="220" cy="140" rx="36" ry="18" fill="#0f172a" transform="rotate(-20, 220, 140)"/>
+                                <ellipse cx="340" cy="150" rx="36" ry="18" fill="#0f172a" transform="rotate(20, 340, 150)"/>
+                                
+                                <rect x="70" y="30" width="420" height="60" rx="8" fill="rgba(15, 23, 42, 0.92)" stroke="#f59e0b" stroke-width="2"/>
+                                <text x="280" y="55" text-anchor="middle" font-size="13" font-weight="900" fill="#f59e0b">⚠️ UNTRIMMED FOOTAGE: CAMERA POINTED AT FLOOR (2.0s)</text>
+                                <text x="280" y="75" text-anchor="middle" font-size="11" fill="#cbd5e1">(Click Clip 2 on timeline and select [✂️ Trim 2s] to cut this out!)</text>
+                            </g>
+                        </svg>
+                    `;
+                }
+
+                // Table Tennis Match Rally (Fast-paced Ping Pong Action)
+                const rallyCycle = (progressInSlot * 6) % 1; // High speed rally
+                const ballDirection = Math.floor(progressInSlot * 6) % 2 === 0 ? 1 : -1;
+
+                let ballX, ballY, leftSwing, rightSwing;
+                if (ballDirection === 1) {
+                    ballX = 140 + (rallyCycle * 280);
+                    ballY = 160 - Math.sin(rallyCycle * Math.PI) * 60;
+                    leftSwing = rallyCycle < 0.25 ? 32 : 0;
+                    rightSwing = rallyCycle > 0.75 ? -32 : 0;
+                } else {
+                    ballX = 420 - (rallyCycle * 280);
+                    ballY = 160 - Math.sin(rallyCycle * Math.PI) * 60;
+                    leftSwing = rallyCycle > 0.75 ? 32 : 0;
+                    rightSwing = rallyCycle < 0.25 ? -32 : 0;
+                }
+
+                return `
+                    <svg class="monitor-svg-stage" viewBox="0 0 560 230">
+                        <rect width="560" height="230" fill="#0f172a"/>
+                        <!-- Sports Hall Wall & Banner -->
+                        <rect x="0" y="0" width="560" height="80" fill="#1e293b"/>
+                        <text x="280" y="35" text-anchor="middle" font-size="14" font-weight="900" fill="#38bdf8" letter-spacing="1">INTER-HOUSE TABLE TENNIS TOURNAMENT</text>
+
+                        <!-- Green Table Surface & White Lines -->
+                        <polygon points="120,165 440,165 490,210 70,210" fill="#15803d" stroke="#ffffff" stroke-width="2"/>
+                        <line x1="280" y1="165" x2="280" y2="210" stroke="#ffffff" stroke-width="2"/>
+                        <rect x="130" y="165" width="8" height="50" fill="#334155"/>
+                        <rect x="420" y="165" width="8" height="50" fill="#334155"/>
+                        <rect x="278" y="145" width="4" height="25" fill="#ffffff" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="270" y1="145" x2="290" y2="145" stroke="#ffffff" stroke-width="2"/>
+
+                        <!-- Left Player (Red Jersey & Red Paddle) -->
+                        <g transform="translate(60, 110)">
+                            <circle cx="20" cy="18" r="11" fill="#8d5b4c"/>
+                            <rect x="8" y="32" width="24" height="40" rx="3" fill="#dc2626"/>
+                            <!-- Arm & Paddle with animated swing -->
+                            <g transform="rotate(${leftSwing}, 28, 42)">
+                                <path d="M 28 42 L 55 50" stroke="#8d5b4c" stroke-width="5" stroke-linecap="round"/>
+                                <circle cx="58" cy="50" r="9" fill="#ef4444"/>
+                            </g>
+                        </g>
+
+                        <!-- Right Player (Blue Jersey & Blue Paddle) -->
+                        <g transform="translate(450, 110)">
+                            <circle cx="20" cy="18" r="11" fill="#a16207"/>
+                            <rect x="8" y="32" width="24" height="40" rx="3" fill="#0284c7"/>
+                            <!-- Arm & Paddle with animated swing -->
+                            <g transform="rotate(${rightSwing}, 12, 42)">
+                                <path d="M 12 42 L -15 50" stroke="#a16207" stroke-width="5" stroke-linecap="round"/>
+                                <circle cx="-18" cy="50" r="9" fill="#3b82f6"/>
+                            </g>
+                        </g>
+
+                        <!-- Fast Moving Table Tennis Ball with Motion Glow -->
+                        <circle cx="${ballX}" cy="${ballY}" r="5" fill="#ffffff" stroke="#f59e0b" stroke-width="1.5"/>
+                    </svg>
+                `;
+            }
+
+            if (clipId === "clip_ending") {
+                // Scene 3: Celebration & Trophy Presentation with falling confetti & waving paddles
+                const trophyBounce = Math.sin(progressInSlot * Math.PI * 6) * 6;
+                const waveArm = Math.sin(progressInSlot * Math.PI * 6) * 15;
+
+                return `
+                    <svg class="monitor-svg-stage" viewBox="0 0 560 230">
+                        <defs>
+                            <radialGradient id="stageGlowEnd" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.5"/>
+                                <stop offset="100%" stop-color="#020617" stop-opacity="0.95"/>
+                            </radialGradient>
+                        </defs>
+                        <rect width="560" height="230" fill="url(#stageGlowEnd)"/>
+
+                        <!-- Championship Banner -->
+                        <rect x="110" y="16" width="340" height="34" rx="6" fill="#047857"/>
+                        <text x="280" y="39" text-anchor="middle" font-size="13" font-weight="900" fill="#ffffff" letter-spacing="1">TABLE TENNIS CHAMPIONS! 🏆</text>
+
+                        <!-- Animated Confetti Particles -->
+                        <circle cx="${120 + (progressInSlot * 40)%100}" cy="${(progressInSlot * 300)%230}" r="4" fill="#f59e0b"/>
+                        <circle cx="${220 + (progressInSlot * 70)%120}" cy="${(progressInSlot * 260 + 50)%230}" r="4" fill="#ec4899"/>
+                        <circle cx="${380 - (progressInSlot * 60)%100}" cy="${(progressInSlot * 320)%230}" r="4" fill="#38bdf8"/>
+                        <circle cx="${460 + (progressInSlot * 50)%80}" cy="${(progressInSlot * 280 + 30)%230}" r="4" fill="#10b981"/>
+
+                        <!-- Cheering Students with Trophy & Paddles -->
+                        <g transform="translate(250, ${80 + trophyBounce})">
+                            <text x="30" y="45" font-size="46" text-anchor="middle" style="filter:drop-shadow(0 0 10px #f59e0b);">🏆</text>
+                            
+                            <!-- Left Winner -->
+                            <g transform="translate(-45, 15)">
+                                <circle cx="15" cy="14" r="11" fill="#8d5b4c"/>
+                                <rect x="5" y="28" width="20" height="38" rx="3" fill="#dc2626"/>
+                                <g transform="rotate(${waveArm}, 5, 34)">
+                                    <path d="M 5 34 L -8 10" stroke="#8d5b4c" stroke-width="4" stroke-linecap="round"/>
+                                    <circle cx="-10" cy="8" r="6" fill="#ef4444"/>
+                                </g>
+                            </g>
+
+                            <!-- Right Winner -->
+                            <g transform="translate(75, 15)">
+                                <circle cx="15" cy="14" r="11" fill="#a16207"/>
+                                <rect x="5" y="28" width="20" height="38" rx="3" fill="#0284c7"/>
+                                <g transform="rotate(${-waveArm}, 25, 34)">
+                                    <path d="M 25 34 L 38 10" stroke="#a16207" stroke-width="4" stroke-linecap="round"/>
+                                    <circle cx="40" cy="8" r="6" fill="#3b82f6"/>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                `;
+            }
+
+            return ``;
+        }
+
+        /* ============================================================
+           GEOMETRIC NEEDLE CALCULATION (100% ACCURATELY ALIGNED TO SLOTS)
+           ============================================================ */
+        function updateNeedlePositionToCurrentTime() {
+            const dur0 = getSlotDuration(0);
+            const dur1 = getSlotDuration(1);
+            const dur2 = getSlotDuration(2);
+
+            let currentSlotIdx = 0;
+            let timeInSlot = 0;
+            let currentSlotDur = dur0;
+
+            if (state.playheadSec < dur0) {
+                currentSlotIdx = 0;
+                timeInSlot = state.playheadSec;
+                currentSlotDur = dur0;
+            } else if (state.playheadSec < dur0 + dur1) {
+                currentSlotIdx = 1;
+                timeInSlot = state.playheadSec - dur0;
+                currentSlotDur = dur1;
+            } else {
+                currentSlotIdx = 2;
+                timeInSlot = Math.min(state.playheadSec - dur0 - dur1, dur2);
+                currentSlotDur = dur2;
+            }
+
+            const slotRatio = Math.min(Math.max(timeInSlot / currentSlotDur, 0), 1);
+
+            // Read physical DOM geometry of the active video slot box
+            const slotElem = dom.videoTrackRail.querySelector(`[data-v-slot="${currentSlotIdx}"]`);
+            if (slotElem && dom.tracksContainer) {
+                const containerRect = dom.tracksContainer.getBoundingClientRect();
+                const slotRect = slotElem.getBoundingClientRect();
+
+                const slotRelativeLeft = slotRect.left - containerRect.left;
+                const slotWidth = slotRect.width;
+
+                const needleX = slotRelativeLeft + (slotRatio * slotWidth);
+                dom.timelinePlayheadLine.style.left = `${needleX}px`;
+            }
+        }
+
+        /* ============================================================
+           VARIABLE DURATION 60FPS PLAYBACK ANIMATION LOOP
+           ============================================================ */
+        function startPlayback() {
+            const hasClipsOnTimeline = state.videoTrack.some(c => c !== null);
+            if (!hasClipsOnTimeline) {
+                playToneSound(280);
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `⚠️ <strong>Timeline is empty:</strong> Click a clip in the Media Pool above, then click any Video Track slot to place footage before playing!`;
+                return;
+            }
+
+            if (state.isPlaying) return;
+            state.isPlaying = true;
+            state.playbackStartTime = performance.now();
+            playToneSound(500);
+
+            const dur0 = getSlotDuration(0);
+            const dur1 = getSlotDuration(1);
+            const dur2 = getSlotDuration(2);
+            const totalDurationSec = dur0 + dur1 + dur2;
+
+            function animationLoop(timestamp) {
+                if (!state.isPlaying) return;
+
+                const elapsedMs = timestamp - state.playbackStartTime;
+                state.playheadSec = elapsedMs / 1000;
+
+                // Update exact geometric needle position
+                updateNeedlePositionToCurrentTime();
+
+                // Update Timecode
+                const totalS = Math.floor(state.playheadSec);
+                const ms = Math.floor((state.playheadSec % 1) * 30);
+                dom.timecodeDisplay.textContent = `TC: 00:00:${totalS < 10 ? '0' : ''}${totalS}:${ms < 10 ? '0' : ''}${ms}`;
+
+                // Determine active slot based on dynamic clip durations
+                let currentSlotIdx = 0;
+                let slotStartTime = 0;
+                let currentSlotDur = dur0;
+
+                if (state.playheadSec < dur0) {
+                    currentSlotIdx = 0;
+                    slotStartTime = 0;
+                    currentSlotDur = dur0;
+                } else if (state.playheadSec < dur0 + dur1) {
+                    currentSlotIdx = 1;
+                    slotStartTime = dur0;
+                    currentSlotDur = dur1;
+                } else {
+                    currentSlotIdx = 2;
+                    slotStartTime = dur0 + dur1;
+                    currentSlotDur = dur2;
+                }
+
+                const timeInThisSlot = Math.max(state.playheadSec - slotStartTime, 0);
+                const progressInSlot = Math.min(timeInThisSlot / currentSlotDur, 1);
+                const currentClipId = state.videoTrack[currentSlotIdx];
+
+                // UNIVERSAL AWKWARD CHECK FOR CLIP 2 IN ANY POSITION OR IN ISOLATION!
+                let isAwkward = false;
+                let activeProgress = progressInSlot;
+
+                if (currentClipId === "clip_activity") {
+                    if (!state.clipTrimmed["clip_activity"]) {
+                        if (timeInThisSlot < 2.0) {
+                            isAwkward = true;
+                            activeProgress = timeInThisSlot / 2.0;
+                        } else {
+                            isAwkward = false;
+                            activeProgress = (timeInThisSlot - 2.0) / 3.0;
+                        }
+                    } else {
+                        isAwkward = false;
+                        activeProgress = timeInThisSlot / 3.0;
+                    }
+                }
+
+                const currentTextType = state.textTrack[currentSlotIdx];
+
+                // Render Fluid Animated Monitor SVG
+                dom.svgMonitorHolder.innerHTML = generateAnimatedSvgScene(currentClipId, isAwkward, activeProgress, currentSlotDur);
+
+                // Render Text Overlays
+                dom.overlayTitle.style.display = currentTextType === "title" ? "block" : "none";
+                dom.overlaySubtitle.style.display = currentTextType === "subtitle" ? "block" : "none";
+                dom.overlayCredits.style.display = currentTextType === "credits" ? "block" : "none";
+
+                if (state.playheadSec < totalDurationSec) {
+                    state.animationFrameId = requestAnimationFrame(animationLoop);
+                } else {
+                    stopPlayback();
+                    evaluateTimelineCompletion();
+                }
+            }
+
+            state.animationFrameId = requestAnimationFrame(animationLoop);
+        }
+
+        function stopPlayback() {
+            state.isPlaying = false;
+            if (state.animationFrameId) {
+                cancelAnimationFrame(state.animationFrameId);
+            }
+            state.playheadSec = 0;
+            updateNeedlePositionToCurrentTime();
+            dom.timecodeDisplay.textContent = `TC: 00:00:00`;
+            dom.overlayTitle.style.display = "none";
+            dom.overlaySubtitle.style.display = "none";
+            dom.overlayCredits.style.display = "none";
+            dom.svgMonitorHolder.innerHTML = `
+                <svg class="monitor-svg-stage" viewBox="0 0 560 230">
+                    <rect width="560" height="230" fill="#020617"/>
+                    <text x="280" y="115" text-anchor="middle" font-size="14" fill="#94a3b8">Press [▶ Play Timeline] to Screen Video</text>
+                </svg>
+            `;
+        }
+
+        function playToneSound(freq = 440) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.06, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            } catch (e) {}
+        }
+
+        /* ============================================================
+           EVALUATION & CONSEQUENCES
+           ============================================================ */
+        function evaluateTimelineCompletion() {
+            const v = state.videoTrack;
+            const t = state.textTrack;
+            const isActivityTrimmed = state.clipTrimmed["clip_activity"];
+
+            const isSequenceCorrect = v[0] === "clip_arrival" && v[1] === "clip_activity" && v[2] === "clip_ending";
+            const isTitleAtStart = t[0] === "title";
+            const isSubtitleInMiddle = t[1] === "subtitle";
+            const isCreditsAtEnd = t[2] === "credits";
+            const isTextPerfect = isTitleAtStart && isSubtitleInMiddle && isCreditsAtEnd;
+
+            // 1. Clips Missing
+            if (v.includes(null)) {
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `⚠️ <strong>Missing Clips:</strong> Some slots on your Video Track are empty. Place all 3 clips to build the complete story!`;
+                return;
+            }
+
+            // 2. Wrong Video Sequence
+            if (!isSequenceCorrect) {
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `⚠️ <strong>Illogical Sequence:</strong> The scenes played, but did the story happen in the clearest order? Re-arrange the Video Track into: <em>Arrival ➔ Match ➔ Celebration</em>.`;
+                return;
+            }
+
+            // 3. Untrimmed Awkward Footage
+            if (!isActivityTrimmed) {
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `✂️ <strong>Awkward Footage Detected:</strong> Notice how the needle crossed the 2s striped floor section before the table tennis rally! Click Clip 2 on the timeline and trim the beginning!`;
+                return;
+            }
+
+            // 4. Text misplaced
+            if (t.includes("credits") && t[0] === "credits") {
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `🏷️ <strong>Credits Out of Place:</strong> The credits appeared right over the opening scene! Move Credits to the end (Slot 3) on the Text Track.`;
+                return;
+            }
+
+            if (!isTextPerfect) {
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `🏷️ <strong>Text Track Incomplete:</strong> Check your Text Track. Place the <strong>TITLE</strong> in Slot 1, <strong>SUBTITLE</strong> in Slot 2, and <strong>CREDITS</strong> in Slot 3!`;
+                return;
+            }
+
+            // 5. Full Success!
+            state.score = 100;
+            dom.scoreVal.textContent = state.score;
+            dom.inspectorFeedbackBox.className = "feedback-card success";
+            dom.inspectorFeedbackBox.innerHTML = `🎉 <strong>Video Complete!</strong> You turned raw source files into a polished, trimmed, and layered master video! Click <em>[Finish & View Certification]</em> to review your report.`;
+
+            dom.finishStudioBtn.style.display = "inline-flex";
+        }
+
+        /* ============================================================
+           DASHBOARD RENDERING
+           ============================================================ */
+        function renderDashboard() {
+            // Render Media Pool with Micro-Animated SVG Thumbnails
+            let poolHtml = "";
+            let poolCount = 0;
+            Object.values(MEDIA_CLIPS).forEach(clip => {
+                const isOnTimeline = state.videoTrack.includes(clip.id);
+                const isSelected = state.selectedPoolClipId === clip.id;
+                if (!isOnTimeline) poolCount++;
+
+                let miniSvg = "";
+                if (clip.id === "clip_arrival") {
+                    miniSvg = `
+                        <svg class="thumb-svg-mini" viewBox="0 0 76 52">
+                            <rect width="76" height="52" fill="#38bdf8" opacity="0.3"/>
+                            <rect x="25" y="10" width="26" height="35" rx="3" fill="none" stroke="#0284c7" stroke-width="2"/>
+                            <circle cx="38" cy="24" r="6" fill="#8d5b4c"/>
+                            <rect x="32" y="30" width="12" height="15" fill="#f8fafc"/>
+                        </svg>
+                    `;
+                } else if (clip.id === "clip_activity") {
+                    miniSvg = `
+                        <svg class="thumb-svg-mini" viewBox="0 0 76 52">
+                            <rect width="76" height="52" fill="#0f172a"/>
+                            <polygon points="12,35 64,35 70,45 6,45" fill="#15803d"/>
+                            <rect x="37" y="30" width="2" height="8" fill="#ffffff"/>
+                            <circle cx="28" cy="32" r="3" fill="#ffffff"/>
+                            <circle cx="15" cy="26" r="4" fill="#ef4444"/>
+                            <circle cx="61" cy="26" r="4" fill="#3b82f6"/>
+                        </svg>
+                    `;
+                } else {
+                    miniSvg = `
+                        <svg class="thumb-svg-mini" viewBox="0 0 76 52">
+                            <rect width="76" height="52" fill="#020617"/>
+                            <text x="38" y="34" font-size="20" text-anchor="middle">🏆</text>
+                        </svg>
+                    `;
+                }
+
+                poolHtml += `
+                    <div class="media-clip-item ${isOnTimeline ? 'on-timeline' : ''} ${isSelected ? 'selected-in-pool' : ''}" data-pool-clip="${clip.id}" tabindex="0">
+                        <div class="clip-thumb-box">${miniSvg}</div>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:0.84rem; font-weight:800; color:var(--text);">${clip.name}</div>
+                            <div style="font-size:0.72rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${clip.desc}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            dom.mediaPoolList.innerHTML = poolHtml;
+            dom.poolCountText.textContent = `${poolCount} in Pool`;
+
+            // Bind Media Pool clicks
+            dom.mediaPoolList.querySelectorAll("[data-pool-clip]").forEach(item => {
+                item.addEventListener("click", () => {
+                    const cId = item.getAttribute("data-pool-clip");
+                    selectMediaPoolClip(cId);
+                });
+            });
+
+            // Update Total Timeline Duration & Ruler
+            const dur0 = getSlotDuration(0);
+            const dur1 = getSlotDuration(1);
+            const dur2 = getSlotDuration(2);
+            const totalDur = dur0 + dur1 + dur2;
+
+            if (dom.rulerTick1) dom.rulerTick1.textContent = `0:0${dur0}s`;
+            if (dom.rulerTick2) dom.rulerTick2.textContent = `0:${dur0 + dur1 < 10 ? '0' : ''}${dur0 + dur1}s`;
+            if (dom.rulerTick3) dom.rulerTick3.textContent = `0:${totalDur < 10 ? '0' : ''}${totalDur}s`;
+
+            // Render Video Track Slots with Proportional Duration Widths & Visual Splits!
+            let videoSlotsHtml = "";
+            state.videoTrack.forEach((clipId, slotIdx) => {
+                const isSelected = state.selectedVideoSlot === slotIdx;
+                const slotDur = getSlotDuration(slotIdx);
+
+                if (clipId) {
+                    const clip = MEDIA_CLIPS[clipId];
+                    const isTrimmed = state.clipTrimmed[clipId];
+
+                    // Visual split for Clip 2 if raw untrimmed, on ANY slot it occupies!
+                    let splitHtml = "";
+                    if (clip.id === "clip_activity" && !isTrimmed) {
+                        splitHtml = `
+                            <div class="clip-split-visual-wrap">
+                                <div class="hazard-split-zone" title="Floor footage (first 2s)"></div>
+                                <div class="rally-split-zone" title="Table tennis rally (remaining 3s)"></div>
+                            </div>
+                        `;
+                    }
+
+                    videoSlotsHtml += `
+                        <div class="timeline-slot-box filled video-clip ${isSelected ? 'selected-slot' : ''}" data-v-slot="${slotIdx}" style="flex:${slotDur};" tabindex="0">
+                            ${splitHtml}
+                            <div class="slot-content-overlay">
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span style="font-size:1.1rem;">${clip.icon}</span>
+                                    <span>${clip.name.split(':')[1] || clip.name}</span>
+                                    <span style="font-size:0.7rem; opacity:0.85;">(${slotDur}s)</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:4px;">
+                                    ${clip.hasAwkwardFootage ? `
+                                        <span class="trim-handle-pill" data-trim-btn="${slotIdx}" title="Click to Trim Awkward Floor Footage">
+                                            ${isTrimmed ? '✓ Trimmed (3s)' : '✂️ Trim 2s (Raw 5s)'}
+                                        </span>
+                                    ` : ''}
+                                    <span style="font-size:0.8rem; cursor:pointer; color:var(--danger-color); padding:0 4px;" data-remove-v="${slotIdx}" title="Remove Clip">✕</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    videoSlotsHtml += `
+                        <div class="timeline-slot-box ${isSelected ? 'selected-slot' : ''}" data-v-slot="${slotIdx}" style="flex:${slotDur};" tabindex="0">
+                            <div class="slot-content-overlay">
+                                <span>+ Slot ${slotIdx + 1} (${slotDur}s)</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            dom.videoTrackRail.innerHTML = videoSlotsHtml;
+
+            // Bind Video Slot events
+            dom.videoTrackRail.querySelectorAll("[data-v-slot]").forEach(slot => {
+                slot.addEventListener("click", (e) => {
+                    const idx = parseInt(slot.getAttribute("data-v-slot"), 10);
+                    if (e.target.getAttribute("data-trim-btn") !== null) {
+                        toggleTrimSelectedClip();
+                        return;
+                    }
+                    if (e.target.getAttribute("data-remove-v") !== null) {
+                        removeVideoSlotClip(idx);
+                        return;
+                    }
+                    handleVideoSlotClick(idx);
+                });
+            });
+
+            // Render Text Track Slots (matching proportional flex width)
+            let textSlotsHtml = "";
+            state.textTrack.forEach((textType, slotIdx) => {
+                const isSelected = state.selectedTextSlot === slotIdx;
+                const slotDur = getSlotDuration(slotIdx);
+
+                if (textType) {
+                    const tool = TEXT_TOOLS[textType];
+                    textSlotsHtml += `
+                        <div class="timeline-slot-box filled text-clip ${isSelected ? 'selected-slot' : ''}" data-t-slot="${slotIdx}" style="flex:${slotDur};" tabindex="0">
+                            <div class="slot-content-overlay">
+                                <span>${tool.icon} ${tool.label.split(':')[0]}</span>
+                                <span style="font-size:0.8rem; cursor:pointer; color:var(--danger-color); padding:0 4px;" data-remove-t="${slotIdx}" title="Remove Text">✕</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    textSlotsHtml += `
+                        <div class="timeline-slot-box ${isSelected ? 'selected-slot' : ''}" data-t-slot="${slotIdx}" style="flex:${slotDur};" tabindex="0">
+                            <div class="slot-content-overlay">
+                                <span>+ Text Slot ${slotIdx + 1}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            dom.textTrackRail.innerHTML = textSlotsHtml;
+
+            // Bind Text Slot events
+            dom.textTrackRail.querySelectorAll("[data-t-slot]").forEach(slot => {
+                slot.addEventListener("click", (e) => {
+                    const idx = parseInt(slot.getAttribute("data-t-slot"), 10);
+                    if (e.target.getAttribute("data-remove-t") !== null) {
+                        removeTextSlot(idx);
+                        return;
+                    }
+                    handleTextSlotClick(idx);
+                });
+            });
+
+            // Update Text Tool Buttons Active / Placed States
+            dom.toolTitleBtn.classList.toggle("selected-tool", state.selectedTextTypeId === "title");
+            dom.toolSubtitleBtn.classList.toggle("selected-tool", state.selectedTextTypeId === "subtitle");
+            dom.toolCreditsBtn.classList.toggle("selected-tool", state.selectedTextTypeId === "credits");
+
+            dom.toolTitleBtn.classList.toggle("placed", state.textTrack.includes("title"));
+            dom.toolSubtitleBtn.classList.toggle("placed", state.textTrack.includes("subtitle"));
+            dom.toolCreditsBtn.classList.toggle("placed", state.textTrack.includes("credits"));
+
+            // Update Selection Notice
+            if (state.selectedPoolClipId) {
+                dom.timelineActiveSelectionNotice.textContent = `Clip Selected: ${MEDIA_CLIPS[state.selectedPoolClipId].name} ➔ Click any Video Slot to place!`;
+                dom.timelineActiveSelectionNotice.style.color = "var(--accent)";
+            } else if (state.selectedTextTypeId) {
+                dom.timelineActiveSelectionNotice.textContent = `Text Selected: ${TEXT_TOOLS[state.selectedTextTypeId].label.split(':')[0]} ➔ Click any Text Slot to place!`;
+                dom.timelineActiveSelectionNotice.style.color = "var(--track-text-border)";
+            } else if (state.selectedVideoSlot !== null) {
+                dom.timelineActiveSelectionNotice.textContent = `Video Slot ${state.selectedVideoSlot + 1} Selected ➔ Click another slot to SWAP positions!`;
+                dom.timelineActiveSelectionNotice.style.color = "var(--hazard-color)";
+            } else if (state.selectedTextSlot !== null) {
+                dom.timelineActiveSelectionNotice.textContent = `Text Slot ${state.selectedTextSlot + 1} Selected ➔ Click another text slot to SWAP positions!`;
+                dom.timelineActiveSelectionNotice.style.color = "var(--hazard-color)";
+            } else {
+                dom.timelineActiveSelectionNotice.textContent = "Click a clip/tool to place, or click slots to swap positions";
+                dom.timelineActiveSelectionNotice.style.color = "var(--muted)";
+            }
+
+            // Update Trim Status & Inspector Card
+            const isActivityTrimmed = state.clipTrimmed["clip_activity"];
+            dom.trimStatusVal.textContent = isActivityTrimmed ? "3.0s (Trimmed)" : "5.0s (Raw)";
+            dom.trimStatusVal.style.color = isActivityTrimmed ? "var(--safe-color)" : "var(--hazard-color)";
+
+            const selVIdx = state.selectedVideoSlot;
+            if (selVIdx !== null && state.videoTrack[selVIdx]) {
+                const cId = state.videoTrack[selVIdx];
+                const clip = MEDIA_CLIPS[cId];
+                if (clip.hasAwkwardFootage) {
+                    dom.inspectorContentBox.innerHTML = `
+                        <strong>${clip.name}</strong> on Slot ${selVIdx + 1}:<br/>
+                        ${isActivityTrimmed ? 'Trimmed to 3.0s (Floor footage removed).' : 'Raw length: 5.0s (First 2s is floor footage; last 3s is rally).'}<br/>
+                        <button class="primary-btn" id="trimInspectorBtn" style="margin-top:8px; padding:6px 14px; font-size:0.8rem; width:100%; justify-content:center;">
+                            ${isActivityTrimmed ? '↺ Restore Original (5.0s)' : '✂️ Trim Floor Footage (3.0s)'}
+                        </button>
+                    `;
+                    const trimBtn = dom.inspectorContentBox.querySelector("#trimInspectorBtn");
+                    if (trimBtn) trimBtn.addEventListener("click", toggleTrimSelectedClip);
+                } else {
+                    dom.inspectorContentBox.innerHTML = `
+                        <strong>${clip.name}</strong> on Slot ${selVIdx + 1}:<br/>
+                        Footage is clean and ready. Duration: ${clip.rawDuration}s.
+                    `;
+                }
+            } else {
+                dom.inspectorContentBox.innerHTML = `Click any clip or text card on the timeline to inspect, swap, or trim footage.`;
+            }
+
+            // Update Goals Counter
+            let goalsDone = 0;
+            const isSequenceCorrect = state.videoTrack[0] === "clip_arrival" && state.videoTrack[1] === "clip_activity" && state.videoTrack[2] === "clip_ending";
+            if (isSequenceCorrect) goalsDone++;
+            if (isActivityTrimmed) goalsDone++;
+            if (state.textTrack[0] === "title" && state.textTrack[1] === "subtitle" && state.textTrack[2] === "credits") goalsDone++;
+            dom.goalsCountText.textContent = `${goalsDone} / 3 Done`;
+
+            // Reset needle to start of slot 0
+            setTimeout(() => {
+                updateNeedlePositionToCurrentTime();
+            }, 50);
+        }
+
+        /* Render Review Memory History List */
+        function renderHistoryList() {
+            let html = `
+                <div class="summary-item-card">
+                    <div style="font-weight:800; margin-bottom:4px;">1. Video Track Timeline</div>
+                    <div style="font-size:0.84rem; color:var(--text-soft);">
+                        Clips: ${state.videoTrack.map(id => id ? MEDIA_CLIPS[id].name : 'Empty').join(' ➔ ')}
+                    </div>
+                </div>
+                <div class="summary-item-card">
+                    <div style="font-weight:800; margin-bottom:4px;">2. Non-Destructive Trimming</div>
+                    <div style="font-size:0.84rem; color:var(--text-soft);">
+                        Clip 2 Duration: ${state.clipTrimmed["clip_activity"] ? '3.0s (Trimmed rally only)' : '5.0s (Raw with 2s floor wobble)'}<br/>
+                        Concept: Trimming alters in/out points on the timeline without destroying the original source file in the Media Pool.
+                    </div>
+                </div>
+                <div class="summary-item-card">
+                    <div style="font-weight:800; margin-bottom:4px;">3. Text Track Layering</div>
+                    <div style="font-size:0.84rem; color:var(--text-soft);">
+                        Overlays: ${state.textTrack.map(t => t ? TEXT_TOOLS[t].label.split(':')[0] : 'None').join(' | ')}
+                    </div>
+                </div>
+            `;
+            dom.historyList.innerHTML = html;
+        }
+
+        /* Render Summary Screen */
+        function renderSummaryScreen() {
+            dom.summaryScoreVal.textContent = state.score;
+            dom.summarySequenceVal.textContent = "Arrival ➔ Match ➔ Celebration";
+            dom.summaryTrimVal.textContent = "Non-Destructive (3.0s)";
+            dom.summaryTextVal.textContent = "3 / 3 Placed";
+
+            dom.badgeIcon.textContent = "👑";
+            dom.badgeTitle.textContent = "Master Video Editor";
+            dom.badgeDesc.textContent = "You imported raw source files, sequenced the table tennis match, trimmed camera wobble, and layered text overlays!";
+
+            let html = `
+                <div class="summary-item-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <h4 style="margin:0; font-size:0.96rem;">Slot 1 (0:00 - 0:03): Arrival + Title</h4>
+                        <span style="font-weight:800; color:var(--safe-color);">✅ Verified</span>
+                    </div>
+                    <div style="font-size:0.84rem; color:var(--text-soft); line-height:1.5;">
+                        Video: Clip 1 (Students arrive at compound gates) | Text: “Our School Activity” Title overlay.
+                    </div>
+                </div>
+                <div class="summary-item-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <h4 style="margin:0; font-size:0.96rem;">Slot 2 (0:03 - 0:06): Table Tennis Match + Subtitle (Trimmed)</h4>
+                        <span style="font-weight:800; color:var(--safe-color);">✅ Verified</span>
+                    </div>
+                    <div style="font-size:0.84rem; color:var(--text-soft); line-height:1.5;">
+                        Video: Clip 2 (Trimmed from 5s to 3s, removing 2s floor footage) | Text: “Students prepare...” Subtitle overlay.
+                    </div>
+                </div>
+                <div class="summary-item-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <h4 style="margin:0; font-size:0.96rem;">Slot 3 (0:06 - 0:09): Celebration + Credits</h4>
+                        <span style="font-weight:800; color:var(--safe-color);">✅ Verified</span>
+                    </div>
+                    <div style="font-size:0.84rem; color:var(--text-soft); line-height:1.5;">
+                        Video: Clip 3 (Trophy presentation & celebration) | Text: “Created by Group 3” Credits overlay.
+                    </div>
+                </div>
+            `;
+            dom.summaryDetailsList.innerHTML = html;
+
+            showScreen("summary");
+        }
+    </script>
+</body>
+
+</html>
