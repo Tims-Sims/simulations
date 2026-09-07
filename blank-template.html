@@ -21,7 +21,7 @@
          Change the browser tab title here.
          Search "DEV-EDIT" to find every place you need to change.
          ============================================================ -->
-    <title>Simulation Template Shell</title>
+    <title>Nutrient Movement Through a Villus</title>
     <style>
         /* ============================================================
            CHROME — DO NOT EDIT
@@ -472,6 +472,167 @@
            Search "DEV-EDIT" to find every place you need to change.
            ============================================================ */
 
+        .sim-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .sim-top-row {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .sim-canvas-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #0a0e1a;
+        }
+
+        .sim-canvas-wrap canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .sim-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sim-under-canvas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .slider-group {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .slider-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .slider-group input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .rate-display {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .rate-display h3 {
+            margin: 0 0 10px;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .rate-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .rate-unit {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .graph-container {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .graph-container h3 {
+            margin: 0 0 10px;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .graph-container canvas {
+            width: 100%;
+            height: 120px;
+            border-radius: 8px;
+        }
+
+        .feedback-panel {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+        }
+
+        .feedback-panel.correct {
+            border-color: color-mix(in srgb, var(--success) 50%, transparent);
+            background: color-mix(in srgb, var(--success) 10%, var(--surface-2));
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 760px) {
+            .sim-top-row {
+                grid-template-columns: 1fr;
+            }
+            .sim-under-canvas {
+                grid-template-columns: 1fr;
+            }
+        }
+
     </style>
 </head>
 
@@ -527,7 +688,52 @@
                          text below once your simulation UI is in place.
                          Search "DEV-EDIT" to find every place you need to change.
                          ============================================================ -->
-                    <p class="muted">Simulation content placeholder. Replace this section with your simulation UI.</p>
+                    <p style="margin:0 0 12px;color:var(--text-soft);font-size:1rem;line-height:1.6;">Adjust the two sliders to explore different wall configurations.</p>
+                    <div class="sim-inner">
+                        <div class="sim-top-row">
+                            <div class="sim-canvas-wrap">
+                                <canvas id="simCanvas"></canvas>
+                            </div>
+                            <div class="sim-controls">
+                                <div class="slider-group">
+                                    <label for="shapeSlider">Wall Shape</label>
+                                    <input type="range" id="shapeSlider" min="0" max="100" value="0" step="1"
+                                           aria-label="Wall Shape from Flat to Highly Folded Villi">
+                                    <div class="slider-labels">
+                                        <span>Flat</span>
+                                        <span>Highly Folded (Villi)</span>
+                                    </div>
+                                </div>
+                                <div class="slider-group">
+                                    <label for="thicknessSlider">Wall Thickness</label>
+                                    <input type="range" id="thicknessSlider" min="0" max="100" value="0" step="1"
+                                           aria-label="Wall Thickness from Thick to One Cell Thick">
+                                    <div class="slider-labels">
+                                        <span>Thick</span>
+                                        <span>One Cell Thick</span>
+                                    </div>
+                                </div>
+                                <div class="rate-display">
+                                    <h3>Rate of Absorption</h3>
+                                    <div class="rate-value" id="rateValue">0%</div>
+                                    <div class="rate-unit">nutrients crossing per second</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sim-under-canvas">
+                            <div class="graph-container">
+                                <h3>Absorption Over Time</h3>
+                                <canvas id="graphCanvas"></canvas>
+                                <div class="legend">
+                                    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Rate</div>
+                                    <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div> Nutrients absorbed</div>
+                                </div>
+                            </div>
+                            <div class="feedback-panel" id="feedbackPanel">
+                                Adjust the sliders to explore how wall structure affects nutrient absorption.
+                            </div>
+                        </div>
+                    </div>
                 </section>
             </div>
         </main>
@@ -538,7 +744,7 @@
              Search "DEV-EDIT" to find every place you need to change.
              ============================================================ -->
         <div class="footer-note">
-            Built as a local, editable shell. Swap the content, keep the structure, and your developers are good to go.
+            Nutrient Movement Through a Villus &mdash; An interactive biology simulation for exploring small intestine absorption.
         </div>
     </div>
 
@@ -597,16 +803,20 @@
            ============================================================ */
         const SIM_CONFIG = {
             templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
-            simId: "blank-simulation-template",
-            title: "Editable Simulation Template",
-            subtitle: "Single-file shell for local student activities",
-            badgeText: "SIM",
-            homeEyebrow: "Template Shell Ready",
+            simId: "nutrient-villus-sim",
+            title: "Nutrient Movement Through a Villus",
+            subtitle: "Explore how the small intestine absorbs nutrients",
+            badgeText: "BIO",
+            homeEyebrow: "Biology Simulation",
             homeDescription:
-                "Use this shell to build a child-friendly maths, ELA, or general subject simulation. Replace this description and build your simulation logic in devInit().",
+                "Investigate how the structure of the small intestine wall affects nutrient absorption. Adjust the wall shape and thickness to match real anatomy and watch how the rate of absorption changes.",
             instructions: [
-                "Read the instructions before starting.",
-                "Click Start to begin the simulation.",
+                "Adjust the two sliders to explore different wall configurations.",
+                "Move the Wall Shape slider between Flat and Highly Folded (Villi).",
+                "Move the Wall Thickness slider between Thick and One Cell Thick.",
+                "Watch the animated nutrient particles cross the intestinal wall into the bloodstream.",
+                "Observe the Rate of Absorption graph to see how each setting affects absorption speed.",
+                "Try to find the optimal settings — they match the real anatomy of the small intestine!",
                 "Use the Reset button any time you want to restart from scratch.",
                 "This file runs completely offline in a browser. No internet is needed."
             ]
@@ -897,6 +1107,7 @@
             if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
             dom.startBtn.addEventListener("click", () => {
                 showScreen("sim");
+                dom.simContainer.scrollIntoView({ behavior: "smooth", block: "start" });
                 devInit();
             });
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
@@ -1054,12 +1265,408 @@
         // Sound: playSound("correct"), playSound("levelUp"), etc. are available (see DEV-EDIT: AUDIO).
         // Storage: storageGet/storageSet are available for saving progress, keyed like `sim:${SIM_CONFIG.simId}:mydata`.
 
+        /* --- SIMULATION STATE --- */
+        let simRunning = false;
+        let simAnimId = null;
+        let simCanvas, simCtx, graphCanvas, graphCtx;
+        let shapeSlider, thicknessSlider;
+        let rateValueEl, feedbackPanelEl;
+        let particles = [];
+        let absorbedCount = 0;
+        let rateHistory = [];
+        let absorbedHistory = [];
+        let lastTime = 0;
+        let graphTimer = 0;
+        const MAX_GRAPH_POINTS = 60;
+        const PARTICLE_SPAWN_RATE_BASE = 0.8;
+
+        /* --- WALL GEOMETRY --- */
+        function computeVilliParams(foldValue) {
+            // foldValue: 0 (flat) → 100 (max villi)
+            const t = foldValue / 100;
+            const numVilli = Math.round(2 + t * 10);
+            const amplitude = 10 + t * 55;
+            const frequency = 0.015 + t * 0.018;
+            const villiWidth = 12 + t * 8;
+            return { numVilli, amplitude, frequency, villiWidth, t };
+        }
+
+        function getWallX(y, canvasW, canvasH, foldValue) {
+            const p = computeVilliParams(foldValue);
+            const baseX = canvasW * 0.48;
+            const wave = Math.sin(y * p.frequency + 1.5) * p.amplitude * 0.45;
+            const spike = Math.sin(y * p.frequency * 2.3 + 0.7) * p.amplitude * 0.25;
+            return baseX + wave + spike;
+        }
+
+        function getWallThickness(thicknessValue) {
+            // thicknessValue: 0 (thick) → 100 (thin)
+            const t = thicknessValue / 100;
+            return 60 - t * 52; // 60px thick → 8px thick
+        }
+
+        function computeAbsorptionRate(foldValue, thicknessValue) {
+            const foldT = foldValue / 100;
+            const thickT = thicknessValue / 100;
+            const surfaceAreaMultiplier = 1 + foldT * 4;
+            const thicknessMultiplier = 0.25 + thickT * 0.75;
+            const rate = surfaceAreaMultiplier * thicknessMultiplier;
+            return Math.round(rate * 25);
+        }
+
+        /* --- PARTICLE SYSTEM --- */
+        function spawnParticle(canvasW, canvasH, foldValue) {
+            const wallX = getWallX(Math.random() * canvasH, canvasW, canvasH, foldValue);
+            const y = 30 + Math.random() * (canvasH - 60);
+            const startX = 10 + Math.random() * (wallX - 40);
+            const colors = ['#fbbf24', '#fb923c', '#f97316', '#eab308', '#facc15'];
+            return {
+                x: startX,
+                y: y,
+                targetX: canvasW - 20 - Math.random() * 30,
+                speed: 0.3 + Math.random() * 0.4,
+                crossed: false,
+                opacity: 0.8 + Math.random() * 0.2,
+                size: 3 + Math.random() * 2.5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                wobblePhase: Math.random() * Math.PI * 2
+            };
+        }
+
+        function updateParticles(dt, canvasW, canvasH, foldValue, thicknessValue, rate) {
+            const spawnChance = PARTICLE_SPAWN_RATE_BASE * (rate / 25);
+            if (Math.random() < spawnChance * dt * 60) {
+                particles.push(spawnParticle(canvasW, canvasH, foldValue));
+            }
+
+            const speedFactor = 0.3 + (rate / 25) * 2.5;
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.wobblePhase += dt * 3;
+                const wobble = Math.sin(p.wobblePhase) * 0.8;
+
+                if (!p.crossed) {
+                    p.x += p.speed * speedFactor * dt * 60;
+                    p.y += wobble;
+                    const wallX = getWallX(p.y, canvasW, canvasH, foldValue);
+                    const wallThick = getWallThickness(thicknessValue);
+                    if (p.x >= wallX + wallThick / 2) {
+                        p.crossed = true;
+                        absorbedCount++;
+                    }
+                } else {
+                    p.x += p.speed * speedFactor * dt * 60;
+                    p.y += wobble;
+                    p.opacity -= dt * 0.5;
+                }
+
+                if (p.x > canvasW + 10 || p.opacity <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        /* --- DRAWING --- */
+        function drawSim(canvasW, canvasH, foldValue, thicknessValue, rate) {
+            const ctx = simCtx;
+            ctx.clearRect(0, 0, canvasW, canvasH);
+
+            const wallThickness = getWallThickness(thicknessValue);
+
+            // Lumen background (intestine interior)
+            const lumenGrad = ctx.createLinearGradient(0, 0, canvasW * 0.48, 0);
+            lumenGrad.addColorStop(0, '#1a0a0a');
+            lumenGrad.addColorStop(1, '#2d1520');
+            ctx.fillStyle = lumenGrad;
+            ctx.fillRect(0, 0, canvasW * 0.5, canvasH);
+
+            // Bloodstream background
+            const bloodGrad = ctx.createLinearGradient(canvasW * 0.5, 0, canvasW, 0);
+            bloodGrad.addColorStop(0, '#1a0520');
+            bloodGrad.addColorStop(1, '#10022a');
+            ctx.fillStyle = bloodGrad;
+            ctx.fillRect(canvasW * 0.5, 0, canvasW * 0.5, canvasH);
+
+            // Bloodstream vessels
+            ctx.strokeStyle = 'rgba(180, 40, 80, 0.25)';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 4; i++) {
+                const vy = canvasH * (0.15 + i * 0.22);
+                ctx.beginPath();
+                ctx.moveTo(canvasW * 0.65, vy);
+                ctx.bezierCurveTo(canvasW * 0.75, vy - 20, canvasW * 0.85, vy + 20, canvasW * 0.95, vy);
+                ctx.stroke();
+            }
+            ctx.lineWidth = 1;
+
+            // Wall shape
+            ctx.beginPath();
+            for (let y = 0; y <= canvasH; y += 2) {
+                const wx = getWallX(y, canvasW, canvasH, foldValue);
+                if (y === 0) ctx.moveTo(wx, y);
+                else ctx.lineTo(wx, y);
+            }
+            for (let y = canvasH; y >= 0; y -= 2) {
+                const wx = getWallX(y, canvasW, canvasH, foldValue) + wallThickness;
+                ctx.lineTo(wx, y);
+            }
+            ctx.closePath();
+            const wallGrad = ctx.createLinearGradient(0, 0, canvasW, 0);
+            wallGrad.addColorStop(0, '#e8607a');
+            wallGrad.addColorStop(0.5, '#f28fa0');
+            wallGrad.addColorStop(1, '#e8607a');
+            ctx.fillStyle = wallGrad;
+            ctx.fill();
+            ctx.strokeStyle = '#d4405a';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+
+            // Draw villi tips on the lumen side (small bumps)
+            if (foldValue > 5) {
+                const p = computeVilliParams(foldValue);
+                ctx.fillStyle = '#f5a0b0';
+                for (let y = 5; y < canvasH; y += Math.floor(canvasH / p.numVilli)) {
+                    const wx = getWallX(y, canvasW, canvasH, foldValue);
+                    ctx.beginPath();
+                    ctx.arc(wx - 3, y, 3 + p.t * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Lumen label
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.font = 'bold 13px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Intestine Lumen', canvasW * 0.18, 22);
+
+            // Bloodstream label
+            ctx.fillText('Bloodstream', canvasW * 0.82, 22);
+
+            // Nutrients label
+            ctx.font = '11px Arial, sans-serif';
+            ctx.fillStyle = 'rgba(251,191,36,0.5)';
+            ctx.fillText('Nutrients', canvasW * 0.18, canvasH - 12);
+
+            ctx.fillStyle = 'rgba(180,40,80,0.5)';
+            ctx.fillText('Blood vessels', canvasW * 0.82, canvasH - 12);
+
+            // Particles
+            for (const p of particles) {
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Glow
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.opacity * 0.3;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // Arrow showing absorption direction
+            if (rate > 0) {
+                const arrowX = canvasW * 0.48 + wallThickness / 2 + 8;
+                ctx.strokeStyle = 'rgba(251,191,36,0.4)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(arrowX, canvasH * 0.5);
+                ctx.lineTo(arrowX + 18, canvasH * 0.5);
+                ctx.moveTo(arrowX + 14, canvasH * 0.5 - 5);
+                ctx.lineTo(arrowX + 18, canvasH * 0.5);
+                ctx.lineTo(arrowX + 14, canvasH * 0.5 + 5);
+                ctx.stroke();
+                ctx.lineWidth = 1;
+            }
+        }
+
+        /* --- GRAPH --- */
+        function drawGraph() {
+            const c = graphCanvas;
+            const ctx = graphCtx;
+            const w = c.width;
+            const h = c.height;
+            ctx.clearRect(0, 0, w, h);
+
+            // Background
+            ctx.fillStyle = 'rgba(15,18,34,0.8)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 5; i++) {
+                const gy = (h / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(0, gy);
+                ctx.lineTo(w, gy);
+                ctx.stroke();
+            }
+
+            if (rateHistory.length < 2) return;
+
+            const maxRate = Math.max(25, ...rateHistory);
+            const maxAbsorbed = Math.max(1, ...absorbedHistory);
+            const stepX = w / (MAX_GRAPH_POINTS - 1);
+
+            // Rate line
+            ctx.beginPath();
+            ctx.strokeStyle = '#7dd3fc';
+            ctx.lineWidth = 2.5;
+            for (let i = 0; i < rateHistory.length; i++) {
+                const x = (MAX_GRAPH_POINTS - rateHistory.length + i) * stepX;
+                const y = h - (rateHistory[i] / maxRate) * (h - 10) - 5;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.lineWidth = 1;
+
+            // Absorbed line
+            ctx.beginPath();
+            ctx.strokeStyle = '#34d399';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < absorbedHistory.length; i++) {
+                const x = (MAX_GRAPH_POINTS - absorbedHistory.length + i) * stepX;
+                const y = h - (absorbedHistory[i] / maxAbsorbed) * (h - 10) - 5;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.lineWidth = 1;
+        }
+
+        /* --- FEEDBACK --- */
+        function updateFeedback(foldValue, thicknessValue, rate) {
+            const isFolded = foldValue > 65;
+            const isThin = thicknessValue > 65;
+            const isFlat = foldValue < 25;
+            const isThick = thicknessValue < 25;
+
+            let msg = '';
+            let isOptimal = false;
+
+            if (isFolded && isThin) {
+                msg = '<strong style="color:var(--success)">Optimal absorption!</strong> The highly folded wall (villi) creates a large surface area, and the one-cell-thick barrier allows nutrients to pass quickly into the bloodstream. This matches the real anatomy of the small intestine!';
+                isOptimal = true;
+            } else if (isFlat && isThick) {
+                msg = 'A flat wall gives very small surface area, and a thick wall creates a long journey for nutrients. Very few nutrients can cross at the same time. Try folding the wall and making it thinner!';
+            } else if (isFlat) {
+                msg = 'Not quite! A flat wall gives very small surface area. This means fewer nutrients can enter the blood at the same time. Try adding some folds (villi)!';
+            } else if (isThick) {
+                msg = 'Almost! A thick wall creates a very long journey for the nutrients to reach the blood. This slows down absorption. Try making the barrier much thinner!';
+            } else if (isFolded) {
+                msg = 'Good folds! The villi increase surface area. Now try making the wall thinner to reduce the travel distance for nutrients.';
+            } else if (isThin) {
+                msg = 'Good thickness! The thin wall reduces travel distance. Now try folding the wall to increase surface area.';
+            } else {
+                msg = 'Adjust both sliders to explore different configurations. Think about what would give the fastest absorption: more surface area and a shorter distance.';
+            }
+
+            feedbackPanelEl.innerHTML = msg;
+            feedbackPanelEl.classList.toggle('correct', isOptimal);
+        }
+
+        /* --- MAIN LOOP --- */
+        function simLoop(timestamp) {
+            if (!simRunning) return;
+
+            if (lastTime === 0) lastTime = timestamp;
+            const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
+            lastTime = timestamp;
+
+            const foldValue = Number(shapeSlider.value);
+            const thicknessValue = Number(thicknessSlider.value);
+            const rate = computeAbsorptionRate(foldValue, thicknessValue);
+
+            const cw = simCanvas.width;
+            const ch = simCanvas.height;
+
+            updateParticles(dt, cw, ch, foldValue, thicknessValue, rate);
+            drawSim(cw, ch, foldValue, thicknessValue, rate);
+
+            // Update rate display
+            rateValueEl.textContent = rate + '%';
+
+            // Update feedback
+            updateFeedback(foldValue, thicknessValue, rate);
+
+            // Graph sampling (every ~0.5 second)
+            graphTimer += dt;
+            if (graphTimer >= 0.5) {
+                graphTimer -= 0.5;
+                rateHistory.push(rate);
+                absorbedHistory.push(absorbedCount);
+                if (rateHistory.length > MAX_GRAPH_POINTS) rateHistory.shift();
+                if (absorbedHistory.length > MAX_GRAPH_POINTS) absorbedHistory.shift();
+            }
+            drawGraph();
+
+            simAnimId = requestAnimationFrame(simLoop);
+        }
+
+        /* --- INIT & RESET --- */
         function devInit() {
-            // Build your simulation UI/logic inside dom.simContainer here.
+            simCanvas = document.getElementById('simCanvas');
+            graphCanvas = document.getElementById('graphCanvas');
+            shapeSlider = document.getElementById('shapeSlider');
+            thicknessSlider = document.getElementById('thicknessSlider');
+            rateValueEl = document.getElementById('rateValue');
+            feedbackPanelEl = document.getElementById('feedbackPanel');
+
+            simCtx = simCanvas.getContext('2d');
+            graphCtx = graphCanvas.getContext('2d');
+
+            // Size canvases
+            const wrap = simCanvas.parentElement;
+            const rect = wrap.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            simCanvas.width = rect.width * dpr;
+            simCanvas.height = rect.height * dpr;
+            simCtx.scale(dpr, dpr);
+            simCanvas.style.width = rect.width + 'px';
+            simCanvas.style.height = rect.height + 'px';
+
+            const gWrap = graphCanvas.parentElement;
+            const gRect = graphCanvas.getBoundingClientRect();
+            graphCanvas.width = gRect.width * dpr;
+            graphCanvas.height = gRect.height * dpr;
+            graphCtx.scale(dpr, dpr);
+            graphCanvas.style.width = gRect.width + 'px';
+            graphCanvas.style.height = gRect.height + 'px';
+
+            // Reset state
+            particles = [];
+            absorbedCount = 0;
+            rateHistory = [];
+            absorbedHistory = [];
+            lastTime = 0;
+            graphTimer = 0;
+            simRunning = true;
+
+            shapeSlider.value = 0;
+            thicknessSlider.value = 0;
+
+            simAnimId = requestAnimationFrame(simLoop);
         }
 
         function devReset() {
-            // Clear/reset any simulation-specific state here.
+            simRunning = false;
+            if (simAnimId) cancelAnimationFrame(simAnimId);
+            simAnimId = null;
+            particles = [];
+            absorbedCount = 0;
+            rateHistory = [];
+            absorbedHistory = [];
+            lastTime = 0;
+            graphTimer = 0;
+
+            if (shapeSlider) shapeSlider.value = 0;
+            if (thicknessSlider) thicknessSlider.value = 0;
         }
     </script>
 </body>
