@@ -1,0 +1,2610 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 Review Rescue — Document Collaboration Lab</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 2 INFORMATION TECHNOLOGY — REVIEW RESCUE
+           Single-file HTML/CSS/JS - Offline Friendly
+           Trinidad and Tobago Secondary Schools — IT Computer Lab
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Connection / Status Colors */
+            --dot-color: #0ea5e9;
+            --dot-glow: rgba(14, 165, 233, 0.5);
+
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+
+            /* Simulated Word Processor Styles */
+            --paper-bg: #ffffff;
+            --paper-text: #1e293b;
+            --paper-heading: #0f172a;
+            --paper-border: #cbd5e1;
+            --comment-bg: #fef3c7;
+            --comment-border: #f59e0b;
+            --comment-text: #78350f;
+            --track-ins-bg: rgba(16, 185, 129, 0.15);
+            --track-ins-text: #047857;
+            --track-del-bg: rgba(239, 68, 68, 0.15);
+            --track-del-text: #b91c1c;
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+
+            --paper-bg: #ffffff;
+            --paper-text: #1e293b;
+            --paper-heading: #0f172a;
+            --paper-border: #cbd5e1;
+            --comment-bg: #fffbeb;
+            --comment-border: #d97706;
+            --comment-text: #92400e;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* Lock outer window when in game mode so ONLY internal containers scroll */
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1360px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+        }
+
+        .hero-card {
+            width: min(100%, 880px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: clamp(2.1rem, 4vw, 3.2rem);
+            line-height: 1.1;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 740px);
+            margin: 0 auto 28px;
+            color: var(--text-soft);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Interactive Stage / 25% Right Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Pane (75%): Interactive Word Processor Stage */
+        .canvas-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        /* Word Processor Window Chrome */
+        .word-window-header {
+            padding: 10px 18px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .doc-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+
+        .doc-tag {
+            padding: 3px 8px;
+            background: color-mix(in srgb, var(--accent) 18%, transparent);
+            color: var(--accent);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        /* Word Review Toolbar Ribbon */
+        .review-ribbon {
+            background: var(--surface-3);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .ribbon-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-right: 10px;
+            border-right: 1px solid var(--border);
+        }
+
+        .ribbon-group:last-child {
+            border-right: none;
+        }
+
+        .ribbon-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            font-weight: 800;
+            margin-right: 4px;
+        }
+
+        .ribbon-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-size: 0.82rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .ribbon-btn:hover:not(:disabled) {
+            background: color-mix(in srgb, var(--accent) 20%, var(--surface-2));
+            border-color: var(--accent);
+        }
+
+        .ribbon-btn.active-toggle {
+            background: var(--safe-color) !important;
+            color: #ffffff !important;
+            border-color: #059669 !important;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+        }
+
+        .ribbon-btn.highlight-tool {
+            background: color-mix(in srgb, var(--accent) 30%, var(--surface-2));
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+
+        /* Track Changes Active Banner */
+        .track-changes-banner {
+            display: none;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.2), rgba(56, 189, 248, 0.2));
+            border-bottom: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 6px 16px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--safe-color);
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .track-changes-banner.show {
+            display: flex;
+        }
+
+        /* Document Workspace Stage */
+        .doc-workspace {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 24px;
+            background: color-mix(in srgb, var(--bg-soft) 60%, var(--surface));
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Realistic Word Page Canvas Layout with Margins */
+        .word-page-container {
+            width: 100%;
+            max-width: 860px;
+            display: grid;
+            grid-template-columns: 1fr 220px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .word-page {
+            background: var(--paper-bg);
+            color: var(--paper-text);
+            border: 1px solid var(--paper-border);
+            border-radius: 12px;
+            padding: clamp(24px, 4vw, 36px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            line-height: 1.8;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .word-page h3 {
+            margin: 0 0 6px;
+            color: var(--paper-heading);
+            font-size: 1.35rem;
+            font-weight: 800;
+        }
+
+        .word-page .doc-authors {
+            font-size: 0.84rem;
+            color: #64748b;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .word-page p {
+            margin: 0 0 18px;
+        }
+
+        /* Interactive Review Issue Hotspots in Document */
+        .issue-target {
+            position: relative;
+            cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            user-select: none;
+            display: inline-block;
+            margin: 2px 0;
+            outline: 2px dashed transparent;
+        }
+
+        .issue-target:hover {
+            outline: 2px solid var(--accent);
+            background: rgba(56, 189, 248, 0.15);
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+        }
+
+        .issue-target.active-selected {
+            outline: 3px solid var(--accent) !important;
+            background: rgba(56, 189, 248, 0.25) !important;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
+            transform: scale(1.02);
+            z-index: 5;
+        }
+
+        .issue-tag-badge {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 6px;
+            vertical-align: middle;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+
+        /* Specific Visual Styling for Issue Types */
+        .spell-error {
+            background: #fee2e2;
+            color: #991b1b;
+            text-decoration: underline wavy #ef4444 2.5px;
+            text-decoration-skip-ink: none;
+            font-weight: 700;
+        }
+        .spell-error .issue-tag-badge { background: #ef4444; color: #ffffff; }
+
+        .grammar-error {
+            background: #e0f2fe;
+            color: #0369a1;
+            text-decoration: underline wavy #0284c7 2.5px;
+            text-decoration-skip-ink: none;
+            font-weight: 700;
+        }
+        .grammar-error .issue-tag-badge { background: #0284c7; color: #ffffff; }
+
+        .local-term-flag {
+            background: #fef3c7;
+            color: #92400e;
+            text-decoration: underline wavy #d97706 2.5px;
+            font-weight: 700;
+        }
+        .local-term-flag .issue-tag-badge { background: #d97706; color: #ffffff; }
+
+        .unclear-statement {
+            background: #fef08a;
+            color: #713f12;
+            border-bottom: 2px dashed #ca8a04;
+            font-weight: 600;
+        }
+        .unclear-statement .issue-tag-badge { background: #ca8a04; color: #ffffff; }
+
+        .fact-error {
+            background: #ffe4e6;
+            color: #9f1239;
+            border: 1px dashed #e11d48;
+            font-weight: 600;
+        }
+        .fact-error .issue-tag-badge { background: #e11d48; color: #ffffff; }
+
+        .tracked-del-box {
+            background: var(--track-del-bg);
+            color: var(--track-del-text);
+            text-decoration: line-through;
+            border: 1px dashed rgba(239, 68, 68, 0.6);
+            font-weight: 600;
+        }
+        .tracked-del-box .issue-tag-badge { background: #ef4444; color: #ffffff; }
+
+        .tracked-ins-box {
+            background: var(--track-ins-bg);
+            color: var(--track-ins-text);
+            text-decoration: underline;
+            border: 1px dashed rgba(16, 185, 129, 0.6);
+            font-weight: 600;
+        }
+        .tracked-ins-box .issue-tag-badge { background: #10b981; color: #ffffff; }
+
+        /* Resolved Clean Text Styles */
+        .resolved-correct-text {
+            color: var(--safe-color);
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .resolved-local-text {
+            color: var(--paper-heading);
+            font-weight: 800;
+            background: rgba(2, 132, 199, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .resolved-commented-text {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .resolved-tracked-edit {
+            padding: 4px 6px;
+            border-radius: 6px;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            display: inline-block;
+        }
+
+        .author-chip {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 1px 5px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .author-chip.tariq { background: #dbeafe; color: #1e40af; }
+        .author-chip.brandon { background: #fed7aa; color: #9a3412; }
+        .author-chip.aliyah { background: #fce7f3; color: #9d174d; }
+        .author-chip.you { background: #dcfce7; color: #166534; }
+
+        /* Margin Comments Area */
+        .comments-margin {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .comment-card {
+            background: var(--comment-bg);
+            color: var(--comment-text);
+            border: 1px solid var(--comment-border);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            animation: popIn 0.25s ease-out;
+            position: relative;
+        }
+
+        .comment-card::before {
+            content: "💬";
+            margin-right: 4px;
+        }
+
+        .comment-author {
+            font-weight: 800;
+            font-size: 0.82rem;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .comment-text {
+            line-height: 1.45;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: translateX(12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width) */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-title {
+            font-size: 0.98rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 10px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            padding: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Review Action Deck inside Right Panel */
+        .action-deck-card {
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .deck-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .deck-prompt {
+            font-size: 0.88rem;
+            line-height: 1.45;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .deck-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .deck-opt-btn {
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.86rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .deck-opt-btn:hover {
+            background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+            border-color: var(--accent);
+            transform: translateX(3px);
+        }
+
+        /* Active Tool Status Indicator */
+        .tool-indicator {
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.86rem;
+        }
+
+        .tool-badge {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--muted);
+        }
+
+        .tool-badge.on {
+            background: var(--safe-color);
+            box-shadow: 0 0 8px var(--safe-color);
+        }
+
+        /* Feedback Explanation Card */
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        .feedback-card.info {
+            border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+            background: color-mix(in srgb, var(--accent) 15%, var(--surface-2));
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 480px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 640px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 960px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+            .word-page-container {
+                grid-template-columns: 1fr;
+            }
+            .canvas-pane {
+                min-height: auto;
+            }
+            .mission-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">📝</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 Review Rescue</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Information Technology Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Information Technology</div>
+                    <h2>Review Rescue — Document Collaboration Lab</h2>
+                    <p>
+                        Welcome to the Form 2 Document Editing Lab! Step into the role of a lead student editor reviewing group project files.
+                        Master word processing review tools: <strong>Spell Check</strong>, <strong>Grammar Check</strong>, <strong>Margin Comments</strong>, <strong>Track Changes</strong>, and <strong>Accept/Reject Edits</strong>.
+                        Learn when to accept corrections, when to leave notes, and when to ignore false automated flags on Trinidad and Tobago terms!
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">🔤</div>
+                            <h3 style="font-size:0.95rem;">Smart Proofing & Culture</h3>
+                            <p>Correct genuine spelling errors, but recognize local Caribbean terms that spell check falsely flags.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">💬</div>
+                            <h3 style="font-size:0.95rem;">Collaborative Comments</h3>
+                            <p>Add margin notes on vague statements instead of guessing and silently rewriting peer contributions.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">✏️</div>
+                            <h3 style="font-size:0.95rem;">Track Changes & Decisiveness</h3>
+                            <p>Turn on Track Changes for factual edits, and accept or reject peer proposals with sound judgement.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.1rem; padding: 14px 28px;">🚀 Start Review Lab</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Interactive Stage / 25% Right Action Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Word Processor Stage -->
+                <section class="canvas-pane" id="canvasPane">
+                    <!-- Word Chrome Bar -->
+                    <div class="word-window-header">
+                        <div class="doc-meta">
+                            <span style="font-size: 1.1rem;">📄</span>
+                            <span id="docFileName" style="color: var(--text);">Form2_IT_Hardware_Proposal.docx</span>
+                            <span class="doc-tag" id="docRoundTag">Document 1 of 3</span>
+                        </div>
+                        <span style="font-size:0.84rem; color:var(--muted); font-weight:700;">Click any highlighted issue in the document to review</span>
+                    </div>
+
+                    <!-- Review Toolbar / Ribbon -->
+                    <div class="review-ribbon">
+                        <div class="ribbon-group">
+                            <span class="ribbon-label">Tracking</span>
+                            <button class="ribbon-btn" id="toggleTrackChangesBtn" title="Click to toggle Track Changes ON/OFF">
+                                <span id="trackStatusIcon">⚪</span> Track Changes: <strong id="trackStatusText">OFF</strong>
+                            </button>
+                        </div>
+                        <div class="ribbon-group">
+                            <span class="ribbon-label">Changes</span>
+                            <button class="ribbon-btn" id="ribbonAcceptBtn" title="Accept selected change" disabled>
+                                ✅ Accept
+                            </button>
+                            <button class="ribbon-btn" id="ribbonRejectBtn" title="Reject selected change" disabled>
+                                ❌ Reject
+                            </button>
+                        </div>
+                        <div class="ribbon-group">
+                            <span class="ribbon-label">Review Tools</span>
+                            <button class="ribbon-btn" id="ribbonProofingBtn" title="Find next spelling or grammar issue">
+                                🔤 Proofing
+                            </button>
+                            <button class="ribbon-btn" id="ribbonCommentBtn" title="Add a comment to selected text">
+                                💬 New Comment
+                            </button>
+                        </div>
+                        <div class="ribbon-group" style="margin-left: auto; border-right: none;">
+                            <button class="secondary-btn" id="selectNextIssueBtn" style="padding: 6px 12px; font-size: 0.8rem;">
+                                🔍 Next Issue
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Track Changes Active Banner -->
+                    <div class="track-changes-banner" id="trackBanner">
+                        <span>✏️</span>
+                        <span><strong>Track Changes is ACTIVE:</strong> All editorial revisions will record your name [You] with additions and deletions.</span>
+                    </div>
+
+                    <!-- Document Workspace Container -->
+                    <div class="doc-workspace" id="docWorkspace">
+                        <div class="word-page-container">
+                            <!-- Paper Page -->
+                            <article class="word-page" id="wordPageContent">
+                                <!-- Dynamic Document Content Rendered Here -->
+                            </article>
+
+                            <!-- Right Margin for Comments -->
+                            <aside class="comments-margin" id="commentsMargin">
+                                <!-- Dynamic Margin Comment Cards Rendered Here -->
+                            </aside>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Dedicated Action & Status Tray -->
+                <aside class="mission-panel">
+                    <!-- 1. Progress Card (FIRST) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Review Progress</span>
+                            <span id="reviewCount" style="color:var(--accent);">0 / 12 Issues</span>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Active Issue Inspector & Review Action Deck (SECOND) -->
+                    <div class="panel-card" style="gap:12px;">
+                        <div class="panel-title">
+                            <span>Issue Inspector</span>
+                            <span id="selectedIssueStatus" style="font-size:0.78rem; color:var(--muted); font-weight:700;">None Selected</span>
+                        </div>
+                        
+                        <!-- Dynamic Review Deck Container -->
+                        <div id="inspectorActionDeck">
+                            <div style="padding:14px; background:var(--surface-2); border-radius:8px; border:1px dashed var(--border); font-size:0.86rem; color:var(--muted); text-align:center;">
+                                👆 Click any highlighted issue in the document or click <strong>[Next Issue]</strong> on the toolbar to review options!
+                            </div>
+                        </div>
+
+                        <button class="primary-btn" id="nextDocumentBtn" style="width:100%; justify-content:center; display:none;">
+                            Next Document →
+                        </button>
+                    </div>
+
+                    <!-- 3. Inspector Live Explanation Box (THIRD) -->
+                    <div class="panel-card">
+                        <div class="panel-title">Editorial Guidance</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Click on red squiggly spelling errors, blue grammar errors, yellow unclear text, or tracked changes in the document to make your editorial decision!
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Form 2 IT Lab Review Certification</div>
+                <h2>Document Collaboration Complete!</h2>
+                <p>Outstanding editorial work! You have successfully reviewed all 3 group project documents with appropriate tools and discernment.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Editorial Lead</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You demonstrated exceptional judgement across spelling, grammar, local terms, margin comments, and tracked edits!</p>
+                </div>
+
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Correct Items</div>
+                        <div class="val" id="summaryCorrectVal">0 / 12</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Editorial Decision Breakdown (12 Issues)</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Reviewing Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Logged document editing actions and technical feedback.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Play Review Rescue</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome, Form 2 Lead Reviewer! You are reviewing 3 collaborative group project documents (4 issues per document, 12 total).</p>
+                <ul>
+                    <li><strong>Spelling Mistakes (Red Squiggly):</strong> Click the word to replace genuine misspellings with the correct technical term.</li>
+                    <li><strong>Trinidad & Tobago Terms (False Flags):</strong> Automated spell checkers often flag real Caribbean names (e.g. <em>Maracas</em>, <em>Callaloo</em>, <em>Parang</em>, <em>Scarborough</em>). Choose <strong>Ignore Once</strong> so you don't corrupt authentic local words!</li>
+                    <li><strong>Grammar Mistakes (Blue Squiggly):</strong> Click to fix subject-verb agreement or incorrect prepositions.</li>
+                    <li><strong>Unclear / Vague Statements (Yellow Highlight):</strong> Add a <strong>Margin Comment</strong> asking your group member for clarification, instead of guessing and silently rewriting their sentence!</li>
+                    <li><strong>Track Changes Button:</strong> Click the <strong>✏️ Track Changes</strong> button in the ribbon to turn tracking ON/OFF. When correcting factual errors, Track Changes must be ON!</li>
+                    <li><strong>Peer Tracked Changes (Strikethrough / Underline):</strong> Click the tracked edit, then use <strong>✅ Accept</strong> or <strong>❌ Reject</strong> in the toolbar or inspector!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the simulation and restart from Document 1? All current review scores and progress will be cleared.</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Review Progress</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           12 DOCUMENT REVIEW ISSUES DATASET (3 ROUNDS OF 4)
+           Form 2 Information Technology — Trinidad & Tobago Schools
+           ============================================================ */
+        const DOCUMENTS_DATASET = [
+            /* DOCUMENT 1 */
+            {
+                doc_id: "doc_1",
+                doc_title: "Form 2 IT Club: Computer Hardware & Maintenance Proposal",
+                doc_filename: "Form2_IT_Hardware_Proposal.docx",
+                authors: "Shenelle (Lead) & Tariq (Technician)",
+                intro_text: "The Form 2 Information Technology Club has drafted this project proposal to organize the school computer lab upgrade and maintenance schedule.",
+                issues: [
+                    {
+                        id: "d1_issue_1",
+                        type: "spelling",
+                        tag_label: "Spelling Flag",
+                        original_text: "proccesor",
+                        display_text: "proccesor",
+                        prompt: "Spelling Check flagged 'proccesor'. Choose the correct action:",
+                        options: [
+                            { id: "opt_corr", label: "📝 Replace with 'processor'", isCorrect: true, feedback: "Correct! 'Processor' (Central Processing Unit) is the accurate technical spelling." },
+                            { id: "opt_ignore", label: "⏭️ Ignore Once", isCorrect: false, feedback: "Incorrect. 'Proccesor' is a genuine spelling error that should be corrected." },
+                            { id: "opt_wrong", label: "📝 Replace with 'procession'", isCorrect: false, feedback: "Incorrect. 'Procession' means a parade, not a computer processing unit." }
+                        ],
+                        resolved_text: "processor",
+                        explanation: "Replace genuine spelling errors ('proccesor' → 'processor') to maintain professional technical documentation."
+                    },
+                    {
+                        id: "d1_issue_2",
+                        type: "local_term",
+                        tag_label: "Cultural Place",
+                        original_text: "Maracas",
+                        display_text: "Maracas",
+                        prompt: "Spell check flagged 'Maracas' as an unrecognized word. Choose the correct action:",
+                        options: [
+                            { id: "opt_ignore", label: "⏭️ Ignore Once / Keep 'Maracas'", isCorrect: true, feedback: "Spot on! 'Maracas' is a famous beach and landmark in Trinidad. Local Caribbean place names should be ignored, not replaced with irrelevant dictionary suggestions." },
+                            { id: "opt_madagascar", label: "📝 Replace with 'Madagascar'", isCorrect: false, feedback: "Incorrect! Changing 'Maracas' to 'Madagascar' ruins the accuracy of the Trinidad school field trip location." },
+                            { id: "opt_maracas_inst", label: "📝 Replace with 'Maracas instruments'", isCorrect: false, feedback: "Incorrect. The text refers to Maracas Beach Pavilion, not musical instruments." }
+                        ],
+                        resolved_text: "Maracas",
+                        explanation: "Automated spell checkers lack Trinidad & Tobago terms; reviewers must choose 'Ignore Once' to preserve local authenticity."
+                    },
+                    {
+                        id: "d1_issue_3",
+                        type: "unclear",
+                        tag_label: "Vague Text",
+                        original_text: "The club will purchase a whole set of flash drives with the budget.",
+                        display_text: "The club will purchase a whole set of flash drives with the budget.",
+                        prompt: "This statement is vague. How should you address this with your teammate Shenelle?",
+                        options: [
+                            { id: "opt_comment", label: "💬 Add Margin Comment: 'Please specify exact quantity (e.g. 5 drives) and storage capacity needed.'", isCorrect: true, feedback: "Correct! When a teammate writes an ambiguous sentence, leaving a margin comment asking for clarification is proper collaboration etiquette rather than guessing." },
+                            { id: "opt_rewrite", label: "✏️ Silently rewrite it to 'We will buy 100 flash drives'", isCorrect: false, feedback: "Incorrect. Silently rewriting without knowing the true budget can cause group project errors." },
+                            { id: "opt_delete", label: "🗑️ Delete the entire sentence", isCorrect: false, feedback: "Incorrect. Deleting the sentence removes the equipment request entirely." }
+                        ],
+                        resolved_text: "The club will purchase flash drives with the budget [💬 Comment Added].",
+                        comment_text: "Please specify exact quantity (e.g., 5 drives) and USB storage capacity needed.",
+                        comment_author: "You (Editor)",
+                        explanation: "Use Margin Comments for vague statements so the original author can clarify exact project details."
+                    },
+                    {
+                        id: "d1_issue_4",
+                        type: "tracked_peer",
+                        tag_label: "Tariq: -Deleted",
+                        original_text: "All students must shut down computers properly via the OS menu to prevent file corruption.",
+                        display_text: "All students must shut down computers properly via the OS menu to prevent file corruption.",
+                        peer_author: "Tariq",
+                        change_type: "deletion",
+                        prompt: "Tariq suggested deleting this lab shutdown rule with Track Changes. What should you do?",
+                        options: [
+                            { id: "opt_reject", label: "❌ Reject Deletion (Keep shutdown safety rule)", isCorrect: true, feedback: "Excellent judgement! Proper operating system shutdown prevents file corruption. Rejecting Tariq's deletion preserves essential lab safety rules." },
+                            { id: "opt_accept", label: "✅ Accept Deletion (Remove shutdown safety rule)", isCorrect: false, feedback: "Incorrect. Removing essential computer shutdown rules leaves the lab vulnerable to operating system damage." }
+                        ],
+                        resolved_text: "All students must shut down computers properly via the OS menu to prevent file corruption.",
+                        explanation: "Reject peer tracked deletions when they accidentally remove critical safety rules or valuable content."
+                    }
+                ]
+            },
+
+            /* DOCUMENT 2 */
+            {
+                doc_id: "doc_2",
+                doc_title: "Trinidad & Tobago Digital Heritage & Wildlife Sensor Report",
+                doc_filename: "TT_Digital_Heritage_Sensors.docx",
+                authors: "Priya (Research) & Brandon (Data Analyst)",
+                intro_text: "This Form 2 IT report covers digital IoT humidity sensors deployed at the Caroni Bird Sanctuary and Tobago marine stations.",
+                issues: [
+                    {
+                        id: "d2_issue_1",
+                        type: "grammar",
+                        tag_label: "Grammar Flag",
+                        original_text: "is recording",
+                        display_text: "is recording",
+                        prompt: "Grammar check flagged 'is recording'. Choose the correct grammatical fix:",
+                        options: [
+                            { id: "opt_are", label: "📝 Replace with 'are recording'", isCorrect: true, feedback: "Correct! The plural subject 'sensors' requires the plural verb 'are recording' (subject-verb agreement)." },
+                            { id: "opt_was", label: "📝 Replace with 'was recording'", isCorrect: false, feedback: "Incorrect. 'Was recording' is singular past tense and does not match the plural subject 'sensors'." },
+                            { id: "opt_ignore", label: "⏭️ Ignore Grammar Flag", isCorrect: false, feedback: "Incorrect. Subject-verb agreement is a grammatical requirement in formal IT reports." }
+                        ],
+                        resolved_text: "are recording",
+                        explanation: "Use Grammar Check to resolve subject-verb agreement errors ('sensors are recording' rather than 'is recording')."
+                    },
+                    {
+                        id: "d2_issue_2",
+                        type: "local_term",
+                        tag_label: "Local Crop",
+                        original_text: "Callaloo",
+                        display_text: "Callaloo",
+                        prompt: "Spell check flagged 'Callaloo' and suggested 'Callous'. What is the best action?",
+                        options: [
+                            { id: "opt_ignore", label: "⏭️ Ignore Once / Keep 'Callaloo'", isCorrect: true, feedback: "Spot on! 'Callaloo' is a cherished Trinidadian culinary and agricultural term. Replacing it with 'Callous' (hardhearted) would make the report nonsensical." },
+                            { id: "opt_callous", label: "📝 Replace with 'Callous'", isCorrect: false, feedback: "Incorrect! 'Callous' means unsympathetic; changing 'Callaloo' to 'Callous' ruins the botanical accuracy." },
+                            { id: "opt_delete", label: "🗑️ Delete 'Callaloo'", isCorrect: false, feedback: "Incorrect. Deleting the crop name leaves the agricultural survey incomplete." }
+                        ],
+                        resolved_text: "Callaloo",
+                        explanation: "Local Caribbean cultural and culinary terms ('Callaloo') should be ignored or added to the dictionary, never replaced."
+                    },
+                    {
+                        id: "d2_issue_3",
+                        type: "factual_track",
+                        tag_label: "Factual Error",
+                        original_text: "Secondary storage like ROM retains files when power is turned off, while Hard Drives lose all data.",
+                        display_text: "Secondary storage like ROM retains files when power is turned off, while Hard Drives lose all data.",
+                        prompt: "There is a factual IT error: Hard Drives retain files (non-volatile), while RAM loses data (volatile). How should you edit it?",
+                        options: [
+                            { id: "opt_track_edit", label: "✏️ Turn ON Track Changes & Edit: 'Hard Drives retain files, while RAM loses all data'", isCorrect: true, feedback: "Brilliant! Enabling Track Changes before correcting factual errors ensures group members can review and learn from the technical update." },
+                            { id: "opt_silent_edit", label: "⚠️ Edit without Track Changes enabled (silent overwrite)", isCorrect: false, feedback: "Not ideal! In group projects, making substantial factual revisions without Track Changes hides edits from your partners." },
+                            { id: "opt_ignore", label: "⏭️ Leave factual mistake as is", isCorrect: false, feedback: "Incorrect. Hard drives are non-volatile storage, not volatile. Factual errors must be corrected." }
+                        ],
+                        resolved_text: "<span class='resolved-tracked-edit'><span class='author-chip you'>You: -Deleted</span> <span style='text-decoration:line-through; color:var(--track-del-text);'>ROM retains files when power is turned off, while Hard Drives lose all data</span> <span class='author-chip you'>You: +Added</span> <span style='text-decoration:underline; color:var(--track-ins-text); font-weight:700;'>Hard Drives retain files permanently, while RAM loses data when powered off</span></span>",
+                        explanation: "Enable Track Changes when correcting factual concepts (storage vs memory) so teammates can see the revision."
+                    },
+                    {
+                        id: "d2_issue_4",
+                        type: "tracked_peer",
+                        tag_label: "Brandon: +Added",
+                        original_text: "Priya and Brandon will calibrate the USB temperature probes prior to field testing.",
+                        display_text: "Priya and Brandon will calibrate the USB temperature probes prior to field testing.",
+                        peer_author: "Brandon",
+                        change_type: "insertion",
+                        prompt: "Brandon proposed a tracked addition: '+ Priya and Brandon will calibrate the USB temperature probes'. What should you do?",
+                        options: [
+                            { id: "opt_accept", label: "✅ Accept Tracked Addition (Add calibration step)", isCorrect: true, feedback: "Well done! Adding member responsibilities for hardware calibration strengthens project planning and accuracy." },
+                            { id: "opt_reject", label: "❌ Reject Tracked Addition", isCorrect: false, feedback: "Incorrect. Calibration ensures hardware readings are accurate. Accepting this edit improves the plan." }
+                        ],
+                        resolved_text: "Priya and Brandon will calibrate the USB temperature probes prior to field testing.",
+                        explanation: "Accept constructive tracked additions from peers that improve accountability and technical accuracy."
+                    }
+                ]
+            },
+
+            /* DOCUMENT 3 */
+            {
+                doc_id: "doc_3",
+                doc_title: "Oakridge Secondary IT Lab Rules & Digital Etiquette Guide",
+                doc_filename: "Oakridge_IT_Lab_Etiquette.docx",
+                authors: "Keron & Aliyah (Form 2 IT Prefects)",
+                intro_text: "Form 2 IT prefects are compiling official guidelines for safe computer laboratory usage and school digital etiquette.",
+                issues: [
+                    {
+                        id: "d3_issue_1",
+                        type: "spelling",
+                        tag_label: "Spelling Flag",
+                        original_text: "periphiral",
+                        display_text: "periphiral",
+                        prompt: "Spelling check flagged 'periphiral'. Choose the correct action:",
+                        options: [
+                            { id: "opt_corr", label: "📝 Replace with 'peripheral'", isCorrect: true, feedback: "Correct! 'Peripheral' is the accurate technical spelling for external hardware devices (keyboards, mice, scanners)." },
+                            { id: "opt_ignore", label: "⏭️ Ignore Once", isCorrect: false, feedback: "Incorrect. 'Periphiral' is an obvious spelling error that must be fixed in an official school guide." },
+                            { id: "opt_wrong", label: "📝 Replace with 'perimeter'", isCorrect: false, feedback: "Incorrect. 'Perimeter' refers to boundary length, not auxiliary computer devices." }
+                        ],
+                        resolved_text: "peripheral",
+                        explanation: "Correct technical spelling errors ('periphiral' → 'peripheral') to keep IT guidelines authoritative."
+                    },
+                    {
+                        id: "d3_issue_2",
+                        type: "local_term",
+                        tag_label: "Heritage & Place",
+                        original_text: "Parang",
+                        display_text: "Parang",
+                        prompt: "Spell check flagged 'Parang' and 'Scarborough' and suggested 'Prang'. Choose the correct action:",
+                        options: [
+                            { id: "opt_ignore", label: "⏭️ Ignore Once / Keep 'Parang' in Scarborough", isCorrect: true, feedback: "Spot on! 'Parang' is traditional Trinidadian folk music and 'Scarborough' is Tobago's capital. Always ignore automated flags on authentic local heritage terms." },
+                            { id: "opt_prang", label: "📝 Replace with 'Prang'", isCorrect: false, feedback: "Incorrect! 'Prang' means a crash. Replacing 'Parang' with 'Prang' corrupts the cultural context of the school festival." },
+                            { id: "opt_parade", label: "📝 Replace with 'Parade'", isCorrect: false, feedback: "Incorrect. 'Parang' specifically describes the Christmas musical tradition celebrated across Trinidad & Tobago." }
+                        ],
+                        resolved_text: "Parang",
+                        explanation: "Preserve Trinidad & Tobago cultural terms ('Parang') against automated spelling replacement."
+                    },
+                    {
+                        id: "d3_issue_3",
+                        type: "unclear",
+                        tag_label: "Vague Text",
+                        original_text: "Students who finish lab exercises early may browse the Internet for whatever.",
+                        display_text: "Students who finish lab exercises early may browse the Internet for whatever.",
+                        prompt: "The phrase 'for whatever' is vague and could lead to inappropriate web use. How should you address this?",
+                        options: [
+                            { id: "opt_comment", label: "💬 Add Margin Comment: 'Please specify permitted educational sites (e.g. typing games, coding puzzles) rather than 'whatever'.'", isCorrect: true, feedback: "Excellent! Leaving a comment allows the authors to specify approved educational sites, preventing rule ambiguity." },
+                            { id: "opt_gaming", label: "✏️ Silently rewrite to 'may play arcade games'", isCorrect: false, feedback: "Incorrect. Unsanctioned games violate secondary school IT lab acceptable use policies." },
+                            { id: "opt_ignore", label: "⏭️ Leave statement as is", isCorrect: false, feedback: "Incorrect. Ambiguous lab rules cause student misunderstandings and safety violations." }
+                        ],
+                        resolved_text: "Students who finish lab exercises early may browse approved educational sites [💬 Comment Added].",
+                        comment_text: "Please specify permitted educational sites (e.g. typing games, coding puzzles) rather than 'whatever'.",
+                        comment_author: "You (Editor)",
+                        explanation: "Add margin comments to clarify ambiguous school computer lab acceptable use policies."
+                    },
+                    {
+                        id: "d3_issue_4",
+                        type: "tracked_peer",
+                        tag_label: "Aliyah: -Deleted",
+                        original_text: "Never bring water bottles, soft drinks, or snacks near computer keyboards or power cables.",
+                        display_text: "Never bring water bottles, soft drinks, or snacks near computer keyboards or power cables.",
+                        peer_author: "Aliyah",
+                        change_type: "deletion",
+                        prompt: "Aliyah suggested deleting the rule prohibiting drinks near keyboards. What should you do?",
+                        options: [
+                            { id: "opt_reject", label: "❌ Reject Deletion (Keep drink/liquid ban)", isCorrect: true, feedback: "Vital save! Liquids near computer keyboards and electrical strips cause short circuits and component damage. Rejecting this deletion preserves lab safety." },
+                            { id: "opt_accept", label: "✅ Accept Deletion (Allow drinks near equipment)", isCorrect: false, feedback: "Incorrect. Liquids near electrical computer components are serious hazards. This rule must not be removed." }
+                        ],
+                        resolved_text: "Never bring water bottles, soft drinks, or snacks near computer keyboards or power cables.",
+                        explanation: "Reject tracked deletions when peer edits would remove vital computer laboratory electrical safety rules."
+                    }
+                ]
+            }
+        ];
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Click on red squiggly spelling errors, blue grammar errors, yellow unclear text, or tracked changes in the document to make your editorial decision!`;
+
+        /* Application State */
+        const state = {
+            currentDocIndex: 0,
+            trackChangesEnabled: false,
+            selectedIssueId: null,
+            resolvedIssues: {}, // issueId -> { chosenOptionId, isCorrect, userFeedback }
+            evaluations: {},    // permanent record for summary & review memory across all 12 items
+            score: 0,
+            attempts: 0,
+            streak: 0,
+            bestStreak: 0,
+            theme: "light"
+        };
+
+        /* DOM Elements */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            docFileName: document.getElementById("docFileName"),
+            docRoundTag: document.getElementById("docRoundTag"),
+            toggleTrackChangesBtn: document.getElementById("toggleTrackChangesBtn"),
+            trackStatusIcon: document.getElementById("trackStatusIcon"),
+            trackStatusText: document.getElementById("trackStatusText"),
+            trackBanner: document.getElementById("trackBanner"),
+            ribbonAcceptBtn: document.getElementById("ribbonAcceptBtn"),
+            ribbonRejectBtn: document.getElementById("ribbonRejectBtn"),
+            ribbonProofingBtn: document.getElementById("ribbonProofingBtn"),
+            ribbonCommentBtn: document.getElementById("ribbonCommentBtn"),
+            selectNextIssueBtn: document.getElementById("selectNextIssueBtn"),
+            wordPageContent: document.getElementById("wordPageContent"),
+            commentsMargin: document.getElementById("commentsMargin"),
+            inspectorActionDeck: document.getElementById("inspectorActionDeck"),
+            selectedIssueStatus: document.getElementById("selectedIssueStatus"),
+            reviewCount: document.getElementById("reviewCount"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            nextDocumentBtn: document.getElementById("nextDocumentBtn"),
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Reset Explanation Box Helper (RULE 4.4) */
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+        }
+
+        /* Detect Browser Theme */
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        /* Initialization */
+        init();
+
+        function init() {
+            bindEvents();
+            loadState();
+            renderDocumentView();
+
+            // Auto-open instructions modal on launch
+            openModal();
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+                // Select first unresolved issue automatically on launch
+                selectFirstUnresolvedIssue();
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // Modals: NO backdrop click dismissal
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            // Ribbon Toolbar Controls
+            dom.toggleTrackChangesBtn.addEventListener("click", toggleTrackChanges);
+            dom.ribbonAcceptBtn.addEventListener("click", handleRibbonAccept);
+            dom.ribbonRejectBtn.addEventListener("click", handleRibbonReject);
+            dom.ribbonProofingBtn.addEventListener("click", handleRibbonProofing);
+            dom.ribbonCommentBtn.addEventListener("click", handleRibbonComment);
+            dom.selectNextIssueBtn.addEventListener("click", selectNextIssue);
+
+            dom.nextDocumentBtn.addEventListener("click", advanceDocumentOrSummary);
+
+            // Browser color scheme listener
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        function toggleTrackChanges() {
+            state.trackChangesEnabled = !state.trackChangesEnabled;
+            updateTrackChangesUI();
+
+            if (state.trackChangesEnabled) {
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = "🟢 <strong>Track Changes is now ON:</strong> Revisions you make to factual errors will visibly show additions & deletions with your author tag [You]!";
+            } else {
+                dom.inspectorFeedbackBox.className = "feedback-card";
+                dom.inspectorFeedbackBox.innerHTML = "⚪ <strong>Track Changes is now OFF:</strong> Direct edits will apply without tracked markup.";
+            }
+
+            // Refresh deck if current selected issue is factual
+            if (state.selectedIssueId) {
+                renderInspectorDeck(state.selectedIssueId);
+            }
+        }
+
+        function updateTrackChangesUI() {
+            if (state.trackChangesEnabled) {
+                dom.toggleTrackChangesBtn.classList.add("active-toggle");
+                dom.trackStatusIcon.textContent = "🟢";
+                dom.trackStatusText.textContent = "ON";
+                dom.trackBanner.classList.add("show");
+            } else {
+                dom.toggleTrackChangesBtn.classList.remove("active-toggle");
+                dom.trackStatusIcon.textContent = "⚪";
+                dom.trackStatusText.textContent = "OFF";
+                dom.trackBanner.classList.remove("show");
+            }
+        }
+
+        /* Ribbon Change Actions */
+        function handleRibbonAccept() {
+            if (!state.selectedIssueId) return;
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            const issue = currentDoc.issues.find(i => i.id === state.selectedIssueId);
+            if (issue && issue.type === "tracked_peer") {
+                const acceptOpt = issue.options.find(o => o.id === "opt_accept");
+                if (acceptOpt) handleDecision(issue, acceptOpt.id);
+            }
+        }
+
+        function handleRibbonReject() {
+            if (!state.selectedIssueId) return;
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            const issue = currentDoc.issues.find(i => i.id === state.selectedIssueId);
+            if (issue && issue.type === "tracked_peer") {
+                const rejectOpt = issue.options.find(o => o.id === "opt_reject");
+                if (rejectOpt) handleDecision(issue, rejectOpt.id);
+            }
+        }
+
+        function handleRibbonProofing() {
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            const proofingIssue = currentDoc.issues.find(i => (i.type === "spelling" || i.type === "grammar" || i.type === "local_term") && !state.resolvedIssues[i.id]);
+            if (proofingIssue) {
+                selectIssue(proofingIssue.id);
+            } else {
+                dom.inspectorFeedbackBox.className = "feedback-card info";
+                dom.inspectorFeedbackBox.innerHTML = "🔤 All spelling and grammar issues for this document have already been reviewed!";
+            }
+        }
+
+        function handleRibbonComment() {
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            const commentIssue = currentDoc.issues.find(i => i.type === "unclear" && !state.resolvedIssues[i.id]);
+            if (commentIssue) {
+                selectIssue(commentIssue.id);
+            } else {
+                dom.inspectorFeedbackBox.className = "feedback-card info";
+                dom.inspectorFeedbackBox.innerHTML = "💬 <strong>Comments Tool:</strong> Use comments to ask teammates for clarification on vague statements.";
+            }
+        }
+
+        /* Select Issues Navigation */
+        function selectFirstUnresolvedIssue() {
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            if (!currentDoc) return;
+            const firstUnresolved = currentDoc.issues.find(i => !state.resolvedIssues[i.id]);
+            if (firstUnresolved) {
+                selectIssue(firstUnresolved.id);
+            } else if (currentDoc.issues.length > 0) {
+                selectIssue(currentDoc.issues[0].id);
+            }
+        }
+
+        function selectNextIssue() {
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            if (!currentDoc) return;
+            const issues = currentDoc.issues;
+            
+            // Find next unresolved issue after current selection
+            let currentIdx = issues.findIndex(i => i.id === state.selectedIssueId);
+            let nextIssue = null;
+
+            for (let i = 1; i <= issues.length; i++) {
+                const checkIdx = (currentIdx + i) % issues.length;
+                if (!state.resolvedIssues[issues[checkIdx].id]) {
+                    nextIssue = issues[checkIdx];
+                    break;
+                }
+            }
+
+            if (!nextIssue) {
+                nextIssue = issues[(currentIdx + 1) % issues.length];
+            }
+
+            if (nextIssue) {
+                selectIssue(nextIssue.id);
+            }
+        }
+
+        function selectIssue(issueId) {
+            state.selectedIssueId = issueId;
+            renderDocumentView();
+            renderInspectorDeck(issueId);
+
+            // Scroll issue into view gently
+            const el = document.querySelector(`[data-issue-id="${issueId}"]`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        /* Render Current Document & Interactive Issues */
+        function renderDocumentView() {
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            if (!currentDoc) return;
+
+            dom.docFileName.textContent = currentDoc.doc_filename;
+            dom.docRoundTag.textContent = `Document ${state.currentDocIndex + 1} of ${DOCUMENTS_DATASET.length}`;
+
+            const issues = currentDoc.issues;
+            const resolvedInDoc = issues.filter(iss => state.resolvedIssues[iss.id]);
+            const remainingCount = issues.length - resolvedInDoc.length;
+
+            // Document Paragraph Templates
+            let docHtml = `
+                <div class="doc-authors">
+                    <span><strong>Project:</strong> ${escapeHtml(currentDoc.doc_title)}</span>
+                    <span><strong>Authors:</strong> ${escapeHtml(currentDoc.authors)}</span>
+                </div>
+                <h3>${escapeHtml(currentDoc.doc_title)}</h3>
+                <p style="color:#475569; font-style:italic;">${escapeHtml(currentDoc.intro_text)}</p>
+            `;
+
+            if (currentDoc.doc_id === "doc_1") {
+                const iss1 = issues[0];
+                const res1 = state.resolvedIssues[iss1.id];
+                const isSel1 = state.selectedIssueId === iss1.id;
+                let text1 = "";
+                if (res1) {
+                    text1 = res1.isCorrect ? `<span class="resolved-correct-text">✅ processor</span>` : `<span style="color:var(--danger-color); text-decoration:line-through;">proccesor</span>`;
+                } else {
+                    text1 = `<span class="issue-target spell-error ${isSel1 ? 'active-selected' : ''}" data-issue-id="${iss1.id}" tabindex="0" role="button" aria-label="Spelling issue: proccesor"><span class="issue-tag-badge">🔤 Spelling Flag</span>proccesor</span>`;
+                }
+
+                const iss2 = issues[1];
+                const res2 = state.resolvedIssues[iss2.id];
+                const isSel2 = state.selectedIssueId === iss2.id;
+                let text2 = "";
+                if (res2) {
+                    text2 = res2.isCorrect ? `<span class="resolved-local-text">🇹🇹 Maracas</span>` : `<span style="color:var(--danger-color); text-decoration:underline;">Madagascar</span>`;
+                } else {
+                    text2 = `<span class="issue-target local-term-flag ${isSel2 ? 'active-selected' : ''}" data-issue-id="${iss2.id}" tabindex="0" role="button" aria-label="Flagged word: Maracas"><span class="issue-tag-badge">🇹🇹 Cultural Place</span>Maracas</span>`;
+                }
+
+                const iss3 = issues[2];
+                const res3 = state.resolvedIssues[iss3.id];
+                const isSel3 = state.selectedIssueId === iss3.id;
+                let text3 = "";
+                if (res3) {
+                    text3 = res3.isCorrect ? `<span class="resolved-commented-text">The club will purchase flash drives with the budget. [💬 Comment Added in Margin]</span>` : `The club will purchase a whole set of flash drives with the budget.`;
+                } else {
+                    text3 = `<span class="issue-target unclear-statement ${isSel3 ? 'active-selected' : ''}" data-issue-id="${iss3.id}" tabindex="0" role="button" aria-label="Unclear statement"><span class="issue-tag-badge">💬 Vague Text</span>The club will purchase a whole set of flash drives with the budget.</span>`;
+                }
+
+                const iss4 = issues[3];
+                const res4 = state.resolvedIssues[iss4.id];
+                const isSel4 = state.selectedIssueId === iss4.id;
+                let text4 = "";
+                if (res4) {
+                    text4 = res4.isCorrect ? `<span class="resolved-correct-text">✅ All students must shut down computers properly via the OS menu to prevent file corruption. (Deletion Rejected)</span>` : `<span style="color:var(--danger-color); text-decoration:line-through;">[Deleted: All students must shut down computers...]</span>`;
+                } else {
+                    text4 = `<span class="issue-target tracked-del-box ${isSel4 ? 'active-selected' : ''}" data-issue-id="${iss4.id}" tabindex="0" role="button" aria-label="Tariq's tracked deletion"><span class="issue-tag-badge"><span class="author-chip tariq">Tariq</span> -Deleted</span> All students must shut down computers properly via the OS menu to prevent file corruption.</span>`;
+                }
+
+                docHtml += `
+                    <p>
+                        <strong>1. Lab System Upgrades:</strong> To enhance computing speed during Form 2 programming sessions, each system unit requires an upgraded central ${text1} and additional RAM modules.
+                    </p>
+                    <p>
+                        <strong>2. Field Demonstration:</strong> During the upcoming secondary school IT Exhibition at ${text2} Beach Pavilion, our team will showcase energy-efficient desktop workstations to visiting students.
+                    </p>
+                    <p>
+                        <strong>3. Storage Equipment:</strong> ${text3}
+                    </p>
+                    <p>
+                        <strong>4. Maintenance & Safety:</strong> ${text4}
+                    </p>
+                `;
+            } else if (currentDoc.doc_id === "doc_2") {
+                const iss1 = issues[0];
+                const res1 = state.resolvedIssues[iss1.id];
+                const isSel1 = state.selectedIssueId === iss1.id;
+                let text1 = "";
+                if (res1) {
+                    text1 = res1.isCorrect ? `<span class="resolved-correct-text">✅ are recording</span>` : `<span style="color:var(--danger-color); text-decoration:line-through;">is recording</span>`;
+                } else {
+                    text1 = `<span class="issue-target grammar-error ${isSel1 ? 'active-selected' : ''}" data-issue-id="${iss1.id}" tabindex="0" role="button" aria-label="Grammar issue: is recording"><span class="issue-tag-badge">📘 Grammar Flag</span>is recording</span>`;
+                }
+
+                const iss2 = issues[1];
+                const res2 = state.resolvedIssues[iss2.id];
+                const isSel2 = state.selectedIssueId === iss2.id;
+                let text2 = "";
+                if (res2) {
+                    text2 = res2.isCorrect ? `<span class="resolved-local-text">🇹🇹 Callaloo</span>` : `<span style="color:var(--danger-color); text-decoration:underline;">Callous</span>`;
+                } else {
+                    text2 = `<span class="issue-target local-term-flag ${isSel2 ? 'active-selected' : ''}" data-issue-id="${iss2.id}" tabindex="0" role="button" aria-label="Flagged word: Callaloo"><span class="issue-tag-badge">🇹🇹 Local Crop</span>Callaloo</span>`;
+                }
+
+                const iss3 = issues[2];
+                const res3 = state.resolvedIssues[iss3.id];
+                const isSel3 = state.selectedIssueId === iss3.id;
+                let text3 = "";
+                if (res3) {
+                    text3 = res3.isCorrect ? `<span class="resolved-tracked-edit"><span class="author-chip you">You</span> <span style="text-decoration:line-through; color:var(--track-del-text);">ROM retains files when power is turned off, while Hard Drives lose all data</span> <span class="author-chip you">You</span> <span style="text-decoration:underline; color:var(--track-ins-text); font-weight:700;">Hard Drives retain files permanently, while RAM loses data when powered off</span></span>` : `Secondary storage like ROM retains files when power is turned off, while Hard Drives lose all data.`;
+                } else {
+                    text3 = `<span class="issue-target fact-error ${isSel3 ? 'active-selected' : ''}" data-issue-id="${iss3.id}" tabindex="0" role="button" aria-label="Factual mistake: ROM vs Hard Drives"><span class="issue-tag-badge">⚠️ Factual Error</span>Secondary storage like ROM retains files when power is turned off, while Hard Drives lose all data.</span>`;
+                }
+
+                const iss4 = issues[3];
+                const res4 = state.resolvedIssues[iss4.id];
+                const isSel4 = state.selectedIssueId === iss4.id;
+                let text4 = "";
+                if (res4) {
+                    text4 = res4.isCorrect ? `<span class="resolved-correct-text">✅ Priya and Brandon will calibrate the USB temperature probes prior to field testing. (Addition Accepted)</span>` : `[Calibration step rejected]`;
+                } else {
+                    text4 = `<span class="issue-target tracked-ins-box ${isSel4 ? 'active-selected' : ''}" data-issue-id="${iss4.id}" tabindex="0" role="button" aria-label="Brandon's tracked addition"><span class="issue-tag-badge"><span class="author-chip brandon">Brandon</span> +Added</span> Priya and Brandon will calibrate the USB temperature probes prior to field testing.</span>`;
+                }
+
+                docHtml += `
+                    <p>
+                        <strong>1. Environmental Monitoring:</strong> The digital sensors at the Caroni Swamp sanctuary ${text1} humidity data every fifteen minutes to track habitat conditions.
+                    </p>
+                    <p>
+                        <strong>2. Agricultural Test Beds:</strong> In addition, automated soil moisture loggers are testing beds of local crops including ${text2} spinach and sweet peppers.
+                    </p>
+                    <p>
+                        <strong>3. Storage Architecture:</strong> ${text3}
+                    </p>
+                    <p>
+                        <strong>4. Team Deployment:</strong> ${text4}
+                    </p>
+                `;
+            } else if (currentDoc.doc_id === "doc_3") {
+                const iss1 = issues[0];
+                const res1 = state.resolvedIssues[iss1.id];
+                const isSel1 = state.selectedIssueId === iss1.id;
+                let text1 = "";
+                if (res1) {
+                    text1 = res1.isCorrect ? `<span class="resolved-correct-text">✅ peripheral</span>` : `<span style="color:var(--danger-color); text-decoration:line-through;">periphiral</span>`;
+                } else {
+                    text1 = `<span class="issue-target spell-error ${isSel1 ? 'active-selected' : ''}" data-issue-id="${iss1.id}" tabindex="0" role="button" aria-label="Spelling issue: periphiral"><span class="issue-tag-badge">🔤 Spelling Flag</span>periphiral</span>`;
+                }
+
+                const iss2 = issues[1];
+                const res2 = state.resolvedIssues[iss2.id];
+                const isSel2 = state.selectedIssueId === iss2.id;
+                let text2 = "";
+                if (res2) {
+                    text2 = res2.isCorrect ? `<span class="resolved-local-text">🇹🇹 Parang</span>` : `<span style="color:var(--danger-color); text-decoration:underline;">Prang</span>`;
+                } else {
+                    text2 = `<span class="issue-target local-term-flag ${isSel2 ? 'active-selected' : ''}" data-issue-id="${iss2.id}" tabindex="0" role="button" aria-label="Flagged word: Parang"><span class="issue-tag-badge">🇹🇹 Heritage Music</span>Parang</span>`;
+                }
+
+                const iss3 = issues[2];
+                const res3 = state.resolvedIssues[iss3.id];
+                const isSel3 = state.selectedIssueId === iss3.id;
+                let text3 = "";
+                if (res3) {
+                    text3 = res3.isCorrect ? `<span class="resolved-commented-text">Students who finish lab exercises early may browse approved educational resources. [💬 Comment Added in Margin]</span>` : `Students who finish lab exercises early may browse the Internet for whatever.`;
+                } else {
+                    text3 = `<span class="issue-target unclear-statement ${isSel3 ? 'active-selected' : ''}" data-issue-id="${iss3.id}" tabindex="0" role="button" aria-label="Unclear statement"><span class="issue-tag-badge">💬 Vague Text</span>Students who finish lab exercises early may browse the Internet for whatever.</span>`;
+                }
+
+                const iss4 = issues[3];
+                const res4 = state.resolvedIssues[iss4.id];
+                const isSel4 = state.selectedIssueId === iss4.id;
+                let text4 = "";
+                if (res4) {
+                    text4 = res4.isCorrect ? `<span class="resolved-correct-text">✅ Never bring water bottles, soft drinks, or snacks near computer keyboards or power cables. (Deletion Rejected)</span>` : `<span style="color:var(--danger-color); text-decoration:line-through;">[Deleted drink safety rule]</span>`;
+                } else {
+                    text4 = `<span class="issue-target tracked-del-box ${isSel4 ? 'active-selected' : ''}" data-issue-id="${iss4.id}" tabindex="0" role="button" aria-label="Aliyah's tracked deletion"><span class="issue-tag-badge"><span class="author-chip aliyah">Aliyah</span> -Deleted</span> Never bring water bottles, soft drinks, or snacks near computer keyboards or power cables.</span>`;
+                }
+
+                docHtml += `
+                    <p>
+                        <strong>1. Hardware Handling:</strong> Always disconnect ${text1} cables by gently pulling the connector plug, never by yanking the wire.
+                    </p>
+                    <p>
+                        <strong>2. Audio & Multimedia:</strong> During our school ${text2} festival live stream setup in Scarborough, headsets must be used to keep the computer lab quiet.
+                    </p>
+                    <p>
+                        <strong>3. Independent Study:</strong> ${text3}
+                    </p>
+                    <p>
+                        <strong>4. Safety Regulations:</strong> ${text4}
+                    </p>
+                `;
+            }
+
+            dom.wordPageContent.innerHTML = docHtml;
+
+            // Render Margin Comments
+            renderMarginComments();
+
+            // Attach Click and Keyboard listeners to all issue targets
+            const targetEls = dom.wordPageContent.querySelectorAll(".issue-target");
+            targetEls.forEach(el => {
+                const issueId = el.getAttribute("data-issue-id");
+                el.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    selectIssue(issueId);
+                });
+                el.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        selectIssue(issueId);
+                    }
+                });
+            });
+
+            // Update Progress & Action Buttons
+            updateOverallProgress();
+
+            // Ribbon button enablement
+            updateRibbonButtons();
+
+            if (remainingCount === 0) {
+                dom.nextDocumentBtn.style.display = "inline-flex";
+                if (state.currentDocIndex === DOCUMENTS_DATASET.length - 1) {
+                    dom.nextDocumentBtn.textContent = "Finish Review Lab 🎉";
+                } else {
+                    dom.nextDocumentBtn.textContent = `Next Document (${state.currentDocIndex + 2}/${DOCUMENTS_DATASET.length}) →`;
+                }
+            } else {
+                dom.nextDocumentBtn.style.display = "none";
+            }
+        }
+
+        /* Update Ribbon Button States based on Selected Issue */
+        function updateRibbonButtons() {
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            const activeIssue = currentDoc ? currentDoc.issues.find(i => i.id === state.selectedIssueId) : null;
+
+            if (activeIssue && activeIssue.type === "tracked_peer" && !state.resolvedIssues[activeIssue.id]) {
+                dom.ribbonAcceptBtn.disabled = false;
+                dom.ribbonRejectBtn.disabled = false;
+                dom.ribbonAcceptBtn.classList.add("highlight-tool");
+                dom.ribbonRejectBtn.classList.add("highlight-tool");
+            } else {
+                dom.ribbonAcceptBtn.disabled = true;
+                dom.ribbonRejectBtn.disabled = true;
+                dom.ribbonAcceptBtn.classList.remove("highlight-tool");
+                dom.ribbonRejectBtn.classList.remove("highlight-tool");
+            }
+
+            if (activeIssue && (activeIssue.type === "spelling" || activeIssue.type === "grammar" || activeIssue.type === "local_term") && !state.resolvedIssues[activeIssue.id]) {
+                dom.ribbonProofingBtn.classList.add("highlight-tool");
+            } else {
+                dom.ribbonProofingBtn.classList.remove("highlight-tool");
+            }
+
+            if (activeIssue && activeIssue.type === "unclear" && !state.resolvedIssues[activeIssue.id]) {
+                dom.ribbonCommentBtn.classList.add("highlight-tool");
+            } else {
+                dom.ribbonCommentBtn.classList.remove("highlight-tool");
+            }
+        }
+
+        /* Render Active Margin Comments */
+        function renderMarginComments() {
+            dom.commentsMargin.innerHTML = "";
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            if (!currentDoc) return;
+
+            let hasComments = false;
+            currentDoc.issues.forEach(iss => {
+                const res = state.resolvedIssues[iss.id];
+                if (iss.type === "unclear" && res && res.isCorrect && iss.comment_text) {
+                    hasComments = true;
+                    const card = document.createElement("div");
+                    card.className = "comment-card";
+                    card.innerHTML = `
+                        <div class="comment-author">
+                            <span>${escapeHtml(iss.comment_author || 'Editor')}</span>
+                            <span style="font-size:0.75rem; color:#92400e;">Just now</span>
+                        </div>
+                        <div class="comment-text">${escapeHtml(iss.comment_text)}</div>
+                    `;
+                    dom.commentsMargin.appendChild(card);
+                }
+            });
+
+            if (!hasComments) {
+                dom.commentsMargin.innerHTML = `
+                    <div style="padding:14px; border:1px dashed var(--border); border-radius:8px; font-size:0.8rem; color:var(--muted); text-align:center;">
+                        Margin Comments Area<br><span style="font-size:0.72rem;">(Comments appear here)</span>
+                    </div>
+                `;
+            }
+        }
+
+        /* Render Active Inspector Deck in Right Action Panel */
+        function renderInspectorDeck(issueId) {
+            const currentDoc = DOCUMENTS_DATASET[state.currentDocIndex];
+            if (!currentDoc) return;
+
+            const issue = currentDoc.issues.find(i => i.id === issueId);
+            if (!issue) {
+                dom.selectedIssueStatus.textContent = "None Selected";
+                dom.inspectorActionDeck.innerHTML = `
+                    <div style="padding:14px; background:var(--surface-2); border-radius:8px; border:1px dashed var(--border); font-size:0.86rem; color:var(--muted); text-align:center;">
+                        👆 Click any highlighted issue in the document or click <strong>[Next Issue]</strong> on the toolbar!
+                    </div>
+                `;
+                return;
+            }
+
+            const resolvedData = state.resolvedIssues[issue.id];
+            dom.selectedIssueStatus.textContent = issue.tag_label || "Active Issue";
+
+            let headerIcon = "📝";
+            if (issue.type === "spelling") headerIcon = "🔤";
+            else if (issue.type === "grammar") headerIcon = "📘";
+            else if (issue.type === "local_term") headerIcon = "🇹🇹";
+            else if (issue.type === "unclear") headerIcon = "💬";
+            else if (issue.type === "factual_track") headerIcon = "✏️";
+            else if (issue.type === "tracked_peer") headerIcon = "👥";
+
+            if (resolvedData) {
+                dom.inspectorActionDeck.innerHTML = `
+                    <div class="action-deck-card" style="border-color:${resolvedData.isCorrect ? 'var(--safe-border)' : 'var(--danger-border)'}; background:${resolvedData.isCorrect ? 'var(--safe-bg)' : 'var(--danger-bg)'};">
+                        <div class="deck-badge" style="color:${resolvedData.isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'};">
+                            <span>${resolvedData.isCorrect ? '✅ Issue Resolved' : '❌ Suboptimal Choice'}</span>
+                        </div>
+                        <div class="deck-prompt" style="font-size:0.84rem;">
+                            <strong>Applied:</strong> ${escapeHtml(resolvedData.userFeedback)}
+                        </div>
+                        <button class="secondary-btn" id="deckNextIssueBtn" style="width:100%; justify-content:center; padding:8px; font-size:0.84rem;">
+                            Review Next Unresolved Issue →
+                        </button>
+                    </div>
+                `;
+                const deckNextBtn = dom.inspectorActionDeck.querySelector("#deckNextIssueBtn");
+                if (deckNextBtn) {
+                    deckNextBtn.addEventListener("click", selectNextIssue);
+                }
+                return;
+            }
+
+            // Build Options List
+            let optionsHtml = "";
+            issue.options.forEach(opt => {
+                optionsHtml += `
+                    <button class="deck-opt-btn" data-option-id="${opt.id}">
+                        <span>${escapeHtml(opt.label)}</span>
+                        <span>→</span>
+                    </button>
+                `;
+            });
+
+            dom.inspectorActionDeck.innerHTML = `
+                <div class="action-deck-card">
+                    <div class="deck-badge">
+                        <span>${headerIcon} ${escapeHtml(issue.tag_label || 'Issue')}</span>
+                        <span style="color:var(--muted); font-size:0.74rem;">("${escapeHtml(issue.original_text.substring(0, 24))}${issue.original_text.length > 24 ? '...' : ''}")</span>
+                    </div>
+                    <div class="deck-prompt">${escapeHtml(issue.prompt)}</div>
+                    <div class="deck-options">${optionsHtml}</div>
+                </div>
+            `;
+
+            // Attach Option Listeners
+            dom.inspectorActionDeck.querySelectorAll(".deck-opt-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const optId = btn.getAttribute("data-option-id");
+                    handleDecision(issue, optId);
+                });
+            });
+        }
+
+        /* Handle User Editorial Choice */
+        function handleDecision(issue, chosenOptionId) {
+            const chosenOption = issue.options.find(o => o.id === chosenOptionId);
+            if (!chosenOption) return;
+
+            state.attempts += 1;
+            const isCorrect = chosenOption.isCorrect === true;
+
+            // Auto-enable track changes if they correctly chose a track changes edit option
+            if (issue.type === "factual_track" && isCorrect) {
+                state.trackChangesEnabled = true;
+                updateTrackChangesUI();
+            }
+
+            state.resolvedIssues[issue.id] = {
+                chosenOptionId,
+                isCorrect,
+                userFeedback: chosenOption.feedback
+            };
+
+            state.evaluations[issue.id] = {
+                issue_name: `${issue.type.toUpperCase()}: "${issue.original_text}"`,
+                target_action: issue.explanation,
+                chosen_label: chosenOption.label,
+                isCorrect: isCorrect,
+                feedback: chosenOption.feedback
+            };
+
+            if (isCorrect) {
+                state.score += 10;
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+                playAudioFeedback(true);
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `<strong>✅ Decision Applied:</strong> ${escapeHtml(chosenOption.feedback)}`;
+            } else {
+                state.streak = 0;
+                playAudioFeedback(false);
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `<strong>❌ Ineffective Action:</strong> ${escapeHtml(chosenOption.feedback)}`;
+            }
+
+            renderDocumentView();
+            renderInspectorDeck(issue.id);
+            renderHistoryList();
+        }
+
+        /* Advance to Next Document or Finish to Summary */
+        function advanceDocumentOrSummary() {
+            if (state.currentDocIndex < DOCUMENTS_DATASET.length - 1) {
+                state.currentDocIndex += 1;
+                state.trackChangesEnabled = false;
+                state.selectedIssueId = null;
+                updateTrackChangesUI();
+                resetExplanationBox();
+                renderDocumentView();
+                selectFirstUnresolvedIssue();
+                dom.docWorkspace.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showScreen("summary");
+            }
+        }
+
+        function updateOverallProgress() {
+            const totalIssues = 12; // 3 rounds x 4
+            const evaluatedCount = Object.keys(state.evaluations).length;
+            const pct = Math.round((evaluatedCount / totalIssues) * 100);
+
+            dom.reviewCount.textContent = `${evaluatedCount} / ${totalIssues} Evaluated`;
+            dom.progressPercent.textContent = `${pct}% Complete`;
+            dom.progressFillBar.style.width = `${pct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = state.attempts === 0 ? 0 : Math.round((correctCount / state.attempts) * 100);
+            dom.accuracyVal.textContent = `${accuracy}%`;
+        }
+
+        function renderSummaryScreen() {
+            const total = 12;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = Math.round((correctCount / total) * 100);
+
+            dom.summaryScoreVal.textContent = state.score;
+            dom.summaryAccuracyVal.textContent = `${accuracy}%`;
+            dom.summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            dom.summaryCorrectVal.textContent = `${correctCount} / ${total}`;
+
+            if (accuracy >= 90) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "Master Editorial Lead";
+                dom.badgeDesc.textContent = `Flawless document collaboration! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct)! You demonstrated mastery over Spell Check, Grammar, Local Caribbean terms, Margin Comments, and Track Changes.`;
+            } else if (accuracy >= 70) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Document Reviewer";
+                dom.badgeDesc.textContent = `Great job! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Review the missed items below to strengthen your editorial judgement.`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Apprentice Reviewer";
+                dom.badgeDesc.textContent = `You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Practice reviewing the documents again to master the collaboration tools!`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+            DOCUMENTS_DATASET.forEach((doc, dIdx) => {
+                doc.issues.forEach(iss => {
+                    const evalData = state.evaluations[iss.id] || {};
+                    const isCorrect = evalData.isCorrect === true;
+                    const card = document.createElement("div");
+                    card.className = "summary-item-card";
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                            <strong style="color:var(--text);">Doc ${dIdx + 1} (${escapeHtml(doc.doc_filename)}): ${escapeHtml(iss.original_text)}</strong>
+                            <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                                ${isCorrect ? '✅ Correct Action' : '❌ Missed/Suboptimal'}
+                            </span>
+                        </div>
+                        <div style="font-size:0.88rem; color:var(--text-soft); margin:4px 0;">
+                            <strong>Your Decision:</strong> ${escapeHtml(evalData.chosen_label || 'Unanswered')}
+                        </div>
+                        <p style="margin:4px 0 0; color:var(--muted); font-size:0.86rem;">
+                            <strong>Key Principle:</strong> ${escapeHtml(iss.explanation)}
+                        </p>
+                    `;
+                    dom.summaryDetailsList.appendChild(card);
+                });
+            });
+        }
+
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedIds = Object.keys(state.evaluations);
+
+            if (evaluatedIds.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:16px; color:var(--muted); text-align:center;">No reviewed issues yet. Click on highlighted words to begin!</div>`;
+                return;
+            }
+
+            DOCUMENTS_DATASET.forEach((doc, dIdx) => {
+                doc.issues.forEach(iss => {
+                    const evalData = state.evaluations[iss.id];
+                    if (!evalData) return;
+
+                    const isCorrect = evalData.isCorrect === true;
+                    const item = document.createElement("div");
+                    item.className = "summary-item-card";
+                    item.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                            <strong style="color:var(--text);">Doc ${dIdx + 1}: ${escapeHtml(iss.original_text)}</strong>
+                            <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                                ${isCorrect ? '✅ Correct' : '❌ Ineffective'}
+                            </span>
+                        </div>
+                        <div style="font-size:0.86rem; color:var(--text-soft);">${escapeHtml(evalData.feedback)}</div>
+                    `;
+                    dom.historyList.appendChild(item);
+                });
+            });
+        }
+
+        /* Modal & Drawer Controls */
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try {
+                sessionStorage.setItem("user_toggled_theme", state.theme);
+            } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen toggle failed", err);
+            }
+        }
+
+        /* Shuffle utility */
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        /* Shuffle Answer Options for Every Scenario */
+        function shuffleAllScenarioOptions() {
+            DOCUMENTS_DATASET.forEach(doc => {
+                doc.issues.forEach(iss => {
+                    if (iss.options && iss.options.length > 1) {
+                        iss.options = shuffleArray(iss.options);
+                    }
+                });
+            });
+        }
+
+        /* Reset Simulation Progress */
+        function confirmReset() {
+            closeResetModal();
+
+            // Clear progress while preserving theme and fullscreen
+            state.currentDocIndex = 0;
+            state.trackChangesEnabled = false;
+            state.selectedIssueId = null;
+            state.resolvedIssues = {};
+            state.evaluations = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+
+            shuffleAllScenarioOptions();
+            updateTrackChangesUI();
+            resetExplanationBox();
+            renderDocumentView();
+            selectFirstUnresolvedIssue();
+            showScreen("home");
+        }
+
+        function playAudioFeedback(isSuccess) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.value = isSuccess ? 587.33 : 220;
+                gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (isSuccess ? 0.25 : 0.3));
+
+                osc.start();
+                osc.stop(ctx.currentTime + (isSuccess ? 0.26 : 0.31));
+            } catch (e) {}
+        }
+
+        function loadState() {
+            shuffleAllScenarioOptions();
+
+            state.currentDocIndex = 0;
+            state.trackChangesEnabled = false;
+            state.selectedIssueId = null;
+            state.resolvedIssues = {};
+            state.evaluations = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+
+            resetExplanationBox();
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+            updateTrackChangesUI();
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
