@@ -1,0 +1,3018 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 Source Sleuth: Social Feed Investigator</title>
+    <style>
+        /* ============================================================
+           TRINIDAD & TOBAGO SECONDARY SCHOOLS - FORM 2 IT SIMULATION
+           SOURCE SLEUTH: SOCIAL FEED INVESTIGATOR
+           Single-file HTML/CSS/JS - Offline Friendly
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Facebook / Social UI Accents */
+            --fb-blue: #1877f2;
+            --fb-blue-hover: #166fe5;
+            --fb-light-bg: #e7f3ff;
+            --social-blue: #0284c7;
+            --social-pink: #ec4899;
+            --social-green: #10b981;
+            --social-amber: #f59e0b;
+
+            /* Status Colors */
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1300px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .hero-card {
+            width: min(100%, 880px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: clamp(2.1rem, 4vw, 3.2rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 740px);
+            margin: 0 auto 28px;
+            color: var(--text-soft);
+            font-size: 1.08rem;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.88rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Social App / 25% Right Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Pane (75%): Social Media Web App */
+        .canvas-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        /* Facebook-Style Top Linear Loading Progress Bar */
+        .fb-top-progress-bar-wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: transparent;
+            z-index: 30;
+            overflow: hidden;
+        }
+
+        .fb-top-progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #1877f2, #38bdf8, #818cf8);
+            transition: width 0.3s ease, opacity 0.3s ease;
+            box-shadow: 0 0 8px rgba(24, 119, 242, 0.8);
+        }
+
+        /* Social Platform Header Bar */
+        .social-nav-header {
+            padding: 12px 20px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .social-logo-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -0.03em;
+        }
+
+        .social-logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #1877f2, #0284c7);
+            display: grid;
+            place-items: center;
+            font-size: 1rem;
+            color: white;
+            box-shadow: 0 2px 8px rgba(24, 119, 242, 0.4);
+        }
+
+        .social-search-bar {
+            flex: 1;
+            max-width: 300px;
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .feed-filter-tabs {
+            display: flex;
+            gap: 6px;
+        }
+
+        .filter-tab-btn {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: var(--surface-3);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .filter-tab-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+
+        /* Facebook-Style Top Loading Heading & Shimmer Banner */
+        .fb-top-loading-heading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 10px 18px;
+            background: color-mix(in srgb, var(--fb-blue) 14%, var(--surface-2));
+            border-bottom: 1px solid color-mix(in srgb, var(--fb-blue) 35%, transparent);
+            color: var(--text);
+            font-size: 0.88rem;
+            font-weight: 800;
+            animation: slideDownHeading 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 15;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        .fb-top-loading-heading.active {
+            display: flex;
+        }
+
+        @keyframes slideDownHeading {
+            from {
+                opacity: 0;
+                transform: translateY(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fb-spinner-circle {
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid color-mix(in srgb, var(--fb-blue) 30%, transparent);
+            border-top-color: var(--fb-blue);
+            border-radius: 50%;
+            animation: fbSpin 0.7s linear infinite;
+        }
+
+        @keyframes fbSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Social Stream with Infinite Scroll Simulation */
+        .social-feed-stream {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 16px 20px 24px;
+            background: color-mix(in srgb, var(--bg-soft) 40%, var(--surface));
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+            position: relative;
+        }
+
+        /* Stories Bar */
+        .stories-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 4px 2px 10px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .story-bubble {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .story-bubble:hover {
+            transform: translateY(-2px);
+        }
+
+        .story-avatar-ring {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            padding: 2.5px;
+            background: linear-gradient(45deg, #f59e0b, #ec4899, #1877f2);
+            display: grid;
+            place-items: center;
+        }
+
+        .story-avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--surface);
+            display: grid;
+            place-items: center;
+            font-size: 1.35rem;
+        }
+
+        .story-name {
+            font-size: 0.74rem;
+            color: var(--text-soft);
+            font-weight: 700;
+            max-width: 65px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Facebook-Style Shimmering Skeleton Loader Card */
+        .fb-skeleton-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            animation: fbCardPulse 0.3s ease;
+        }
+
+        .fb-skeleton-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .fb-shimmer-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--surface-3);
+            background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
+            background-size: 200% 100%;
+            animation: fbShimmer 1.2s infinite;
+        }
+
+        .fb-shimmer-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .fb-shimmer-line {
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
+            background-size: 200% 100%;
+            animation: fbShimmer 1.2s infinite;
+        }
+
+        .fb-shimmer-media {
+            width: 100%;
+            height: 170px;
+            border-radius: 8px;
+            background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
+            background-size: 200% 100%;
+            animation: fbShimmer 1.2s infinite;
+        }
+
+        @keyframes fbShimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Social Media Post Card (Ultra-Realistic Facebook / Social Feed Card) */
+        .social-post-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fbPostEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fbPostEnter {
+            from {
+                opacity: 0;
+                transform: translateY(22px) scale(0.985);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .social-post-card.active-inspect {
+            border-color: var(--accent);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.25);
+        }
+
+        .social-post-card.resolved-correct {
+            border-color: var(--safe-border);
+            background: color-mix(in srgb, var(--safe-color) 3%, var(--surface));
+        }
+
+        .social-post-card.resolved-incorrect {
+            border-color: var(--danger-border);
+            background: color-mix(in srgb, var(--danger-color) 3%, var(--surface));
+        }
+
+        /* Post Top Header */
+        .post-card-header {
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+        }
+
+        .author-info-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .author-avatar-wrap {
+            position: relative;
+        }
+
+        .author-avatar-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--surface-3);
+            display: grid;
+            place-items: center;
+            font-size: 1.35rem;
+            border: 1.5px solid var(--border);
+        }
+
+        .online-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+            border: 2px solid var(--surface);
+        }
+
+        .author-text-meta h4 {
+            margin: 0;
+            font-size: 0.96rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .verified-badge {
+            color: #38bdf8;
+            font-size: 0.88rem;
+        }
+
+        .author-text-meta span {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .post-top-right-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .inspect-source-pill-btn {
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: color-mix(in srgb, var(--accent) 15%, var(--surface-2));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+            transition: all 0.2s ease;
+        }
+
+        .inspect-source-pill-btn:hover {
+            background: color-mix(in srgb, var(--accent) 25%, var(--surface-2));
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Post Caption / Text */
+        .post-caption-body {
+            padding: 14px 18px 8px;
+            font-size: 0.98rem;
+            line-height: 1.6;
+            color: var(--text);
+        }
+
+        .post-hashtag {
+            color: var(--accent);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Rich Media Container */
+        .post-media-stage {
+            padding: 0 18px 12px;
+        }
+
+        /* Web OpenGraph Link Card */
+        .opengraph-link-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--surface-2);
+            transition: border-color 0.2s ease;
+        }
+
+        .opengraph-link-card:hover {
+            border-color: var(--accent);
+        }
+
+        .og-banner-top {
+            padding: 8px 12px;
+            background: var(--surface-3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-soft);
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .og-content-pad {
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .og-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1.3;
+        }
+
+        .og-snippet {
+            font-size: 0.84rem;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        /* Interactive Photo Card with Uncrop Mechanic */
+        .media-photo-wrapper {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: #060a14;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            padding: 10px;
+        }
+
+        .photo-canvas-frame {
+            width: 100%;
+            height: 190px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--surface-3);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-canvas-frame.expanded {
+            height: 270px;
+        }
+
+        .uncrop-action-btn {
+            margin-top: 10px;
+            border-radius: 999px;
+            padding: 7px 16px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            background: var(--accent);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Embedded 4-Pillars Sleuth Evidence Box */
+        .embedded-sleuth-box {
+            display: none;
+            margin: 0 18px 14px;
+            padding: 14px;
+            background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            border-radius: var(--radius-md);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .embedded-sleuth-box.open {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sleuth-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+
+        .sleuth-mini-item {
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sleuth-mini-item.credible {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .sleuth-mini-item.warning {
+            border-color: var(--hazard-border);
+            background: var(--hazard-bg);
+        }
+
+        .mini-item-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+        }
+
+        .sleuth-mini-item.credible .mini-item-label {
+            color: var(--safe-color);
+        }
+
+        .sleuth-mini-item.warning .mini-item-label {
+            color: var(--hazard-color);
+        }
+
+        .mini-item-val {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        /* Post Social Interaction Engagement Bar */
+        .social-metrics-bar {
+            padding: 8px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+            border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+            font-size: 0.82rem;
+            color: var(--muted);
+            user-select: none;
+        }
+
+        .social-buttons-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .social-icon-btn {
+            background: transparent;
+            color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .social-icon-btn:hover {
+            color: var(--accent);
+            background: var(--surface-2);
+            transform: none;
+        }
+
+        .social-icon-btn.liked {
+            color: #ec4899;
+        }
+
+        /* Expandable Comments Drawer */
+        .comments-thread-box {
+            display: none;
+            padding: 12px 18px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .comments-thread-box.open {
+            display: flex;
+        }
+
+        .comment-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .comment-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--surface-3);
+            display: grid;
+            place-items: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .comment-bubble {
+            background: var(--surface);
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            flex: 1;
+        }
+
+        /* Sleuth Moderation & Sharing Decision Bar */
+        .sleuth-decision-footer {
+            padding: 12px 18px;
+            background: color-mix(in srgb, var(--surface-2) 60%, var(--surface));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .decision-choice-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .moderation-btn {
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-size: 0.86rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .moderation-btn.resp-btn:hover:not(:disabled) {
+            background: var(--safe-bg);
+            border-color: var(--safe-color);
+            color: var(--safe-color);
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
+        }
+
+        .moderation-btn.inapp-btn:hover:not(:disabled) {
+            background: var(--danger-bg);
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
+        }
+
+        /* Community Verified & Flagged Alerts */
+        .community-alert-banner {
+            margin: 0 18px 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.84rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .community-alert-banner.verified {
+            background: var(--safe-bg);
+            color: var(--safe-color);
+            border: 1px solid var(--safe-border);
+        }
+
+        .community-alert-banner.flagged {
+            background: var(--danger-bg);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-border);
+        }
+
+        .community-alert-banner.warning {
+            background: var(--hazard-bg);
+            color: var(--hazard-color);
+            border: 1px solid var(--hazard-border);
+        }
+
+        /* End of Feed Card & Bottom CTA */
+        .end-of-feed-card {
+            padding: 24px 20px;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+        }
+
+        .scroll-more-cta-btn {
+            border-radius: 999px;
+            padding: 10px 22px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            background: var(--surface-2);
+            color: var(--accent);
+            border: 1px solid var(--border);
+            margin: 4px auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scroll-more-cta-btn:hover {
+            background: var(--surface-3);
+            border-color: var(--accent);
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width) */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-title {
+            font-size: 0.98rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 10px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            padding: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.74rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .sleuth-rank-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+
+        .sleuth-rank-icon {
+            font-size: 1.6rem;
+        }
+
+        .sleuth-rank-info h5 {
+            margin: 0;
+            font-size: 0.88rem;
+            font-weight: 800;
+        }
+
+        .sleuth-rank-info p {
+            margin: 2px 0 0;
+            font-size: 0.74rem;
+            color: var(--muted);
+        }
+
+        /* Trending Hashtags Widget */
+        .trending-tags-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .trending-item {
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: background 0.18s ease;
+        }
+
+        .trending-item:hover {
+            background: var(--surface-3);
+        }
+
+        .trending-tag {
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .trending-count {
+            font-size: 0.74rem;
+            color: var(--muted);
+        }
+
+        /* Feedback Explanation Card */
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--hazard-border);
+            background: var(--hazard-bg);
+        }
+
+        .feedback-card.danger {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 480px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 640px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 960px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+
+            body.in-game {
+                height: auto;
+                overflow: auto;
+            }
+
+            .canvas-pane {
+                min-height: 540px;
+            }
+
+            .mission-panel {
+                max-height: none;
+            }
+
+            .social-search-bar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header (Mandatory 5 Buttons in Exact Order) -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">📱</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 Source Sleuth: Social Feed Investigator</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Information Technology Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Information Technology</div>
+                    <h2>Source Sleuth: Social Feed Investigator</h2>
+                    <p>
+                        Welcome, Source Sleuth! In Trinidad &amp; Tobago secondary schools, students encounter posts, memes, and viral news every day on social feeds. But not everything shared online is credible or appropriate to repost. Explore a realistic simulated social feed with <strong>Facebook-style animated loading</strong>, click <strong>Inspect Source</strong> to evaluate <strong>Author, Date, Purpose, and Evidence</strong>, uncrop misleading photos, and decide what is <strong>Responsible Sharing</strong> vs <strong>Inappropriate Use</strong>!
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">📜</div>
+                            <h3>1. Dynamic Feed Scrolling</h3>
+                            <p>Posts load realistically as you scroll down the feed with top animated banners and Facebook-style skeleton shimmer effects.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🔍</div>
+                            <h3>2. Inspect Clues &amp; Uncrop</h3>
+                            <p>Tap "Inspect Source" on any card to evaluate author credentials, dates, ads, and uncrop misleading photos.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚡</div>
+                            <h3>3. Live Community Impact</h3>
+                            <p>See real-time consequences: verified community notes, privacy flags, altered media alerts, and fact-checks.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.1rem; padding: 14px 28px;">🚀 Launch Social Feed</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Social App / 25% Right Action Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Social Feed App -->
+                <section class="canvas-pane" id="canvasPane">
+                    <!-- Facebook-Style Top Linear Progress Bar -->
+                    <div class="fb-top-progress-bar-wrap">
+                        <div class="fb-top-progress-bar-fill" id="fbLinearProgressBar"></div>
+                    </div>
+
+                    <!-- Social App Navigation Header -->
+                    <div class="social-nav-header">
+                        <div class="social-logo-brand">
+                            <div class="social-logo-icon">🇹🇹</div>
+                            <span>TriniConnect</span>
+                        </div>
+
+                        <div class="social-search-bar">
+                            <span>🔍</span>
+                            <span>Search posts, #Steelpan, #SportsDay...</span>
+                        </div>
+
+                        <div class="feed-filter-tabs">
+                            <button class="filter-tab-btn active" id="tabFilterAll">For You</button>
+                            <button class="filter-tab-btn" id="tabFilterPending">Needs Decision</button>
+                            <button class="filter-tab-btn" id="tabFilterResolved">Evaluated</button>
+                        </div>
+                    </div>
+
+                    <!-- Facebook-Style Top Floating Loading Heading Banner -->
+                    <div class="fb-top-loading-heading" id="topFeedLoadingBanner">
+                        <div class="fb-spinner-circle"></div>
+                        <div style="display:flex; flex-direction:column; gap:1px; line-height:1.2;">
+                            <span>Updating TriniConnect Feed • Loading New Posts...</span>
+                            <span style="font-size:0.75rem; color:var(--muted); font-weight:600;">Fetching live community posts from Trinidad &amp; Tobago</span>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Stream of Realistic Social Cards -->
+                    <div class="social-feed-stream" id="socialFeedStream">
+                        <!-- Top Story Avatars Carousel -->
+                        <div class="stories-bar">
+                            <div class="story-bubble">
+                                <div class="story-avatar-ring"><div class="story-avatar-inner">👩🏾‍🎓</div></div>
+                                <span class="story-name">Maya</span>
+                            </div>
+                            <div class="story-bubble">
+                                <div class="story-avatar-ring"><div class="story-avatar-inner">🏃🏾‍♂️</div></div>
+                                <span class="story-name">Devon</span>
+                            </div>
+                            <div class="story-bubble">
+                                <div class="story-avatar-ring"><div class="story-avatar-inner">👀</div></div>
+                                <span class="story-name">GossipTT</span>
+                            </div>
+                            <div class="story-bubble">
+                                <div class="story-avatar-ring"><div class="story-avatar-inner">⛈️</div></div>
+                                <span class="story-name">MetOffice</span>
+                            </div>
+                            <div class="story-bubble">
+                                <div class="story-avatar-ring"><div class="story-avatar-inner">📸</div></div>
+                                <span class="story-name">Jason</span>
+                            </div>
+                            <div class="story-bubble">
+                                <div class="story-avatar-ring"><div class="story-avatar-inner">🚨</div></div>
+                                <span class="story-name">PanicTT</span>
+                            </div>
+                            <div class="story-bubble">
+                                <div class="story-avatar-ring"><div class="story-avatar-inner">📱</div></div>
+                                <span class="story-name">ViralDaily</span>
+                            </div>
+                        </div>
+
+                        <!-- Posts Stream Container (Dynamically Appended on Scroll) -->
+                        <div id="postsListContainer" style="display:flex; flex-direction:column; gap:18px;"></div>
+
+                        <!-- Facebook-Style Skeleton Loading Placeholder Card -->
+                        <div id="fbSkeletonCard" class="fb-skeleton-card" style="display:none;">
+                            <div class="fb-skeleton-header">
+                                <div class="fb-shimmer-avatar"></div>
+                                <div class="fb-shimmer-meta">
+                                    <div class="fb-shimmer-line" style="width: 140px; height: 14px;"></div>
+                                    <div class="fb-shimmer-line" style="width: 80px; height: 10px;"></div>
+                                </div>
+                            </div>
+                            <div class="fb-shimmer-line" style="width: 95%;"></div>
+                            <div class="fb-shimmer-line" style="width: 75%;"></div>
+                            <div class="fb-shimmer-media"></div>
+                        </div>
+
+                        <!-- End-of-Feed or Load More CTA -->
+                        <div id="endOfFeedIndicator" style="display:flex; flex-direction:column; align-items:center;"></div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Dedicated Action & Status Tray -->
+                <aside class="mission-panel">
+                    <!-- 1. Progress Card (FIRST) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Sleuth Mission Progress</span>
+                            <span id="evaluatedCountText" style="color:var(--accent); font-weight:800;">0 / 7 Evaluated</span>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Sleuth Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">100%</div>
+                            </div>
+                        </div>
+
+                        <div class="sleuth-rank-badge">
+                            <div class="sleuth-rank-icon" id="rankBadgeIcon">🕵️‍♂️</div>
+                            <div class="sleuth-rank-info">
+                                <h5 id="rankBadgeTitle">Rookie Sleuth</h5>
+                                <p id="rankBadgeDesc">Scroll feed &amp; inspect sources.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Feed Stream Status Card -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>📱 Feed Stream Status</span>
+                            <span id="feedLoadedBadge" style="font-size:0.8rem; color:var(--accent); font-weight:700;">2 / 7 Loaded</span>
+                        </div>
+                        <div style="font-size:0.84rem; color:var(--text-soft); line-height:1.5;">
+                            Scroll down the stream to trigger live Facebook-style feed updates as new posts load dynamically!
+                        </div>
+                    </div>
+
+                    <!-- 3. Trending in Trinidad & Tobago Widget -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>🔥 Trending in Trinidad &amp; Tobago</span>
+                        </div>
+                        <div class="trending-tags-box">
+                            <div class="trending-item">
+                                <div>
+                                    <span class="trending-tag">#SavannahSportsDay</span>
+                                    <div class="trending-count">Queen's Park Savannah • 5.4K posts</div>
+                                </div>
+                                <span style="font-size:0.8rem; color:var(--muted);">🔥</span>
+                            </div>
+                            <div class="trending-item">
+                                <div>
+                                    <span class="trending-tag">#SteelpanHeritage</span>
+                                    <div class="trending-count">Form 2 History • 2.1K posts</div>
+                                </div>
+                                <span style="font-size:0.8rem; color:var(--muted);">🇹🇹</span>
+                            </div>
+                            <div class="trending-item">
+                                <div>
+                                    <span class="trending-tag">#FactCheckTT</span>
+                                    <div class="trending-count">Digital Ethics • 3.8K posts</div>
+                                </div>
+                                <span style="font-size:0.8rem; color:var(--muted);">🛡️</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Action Buttons Card -->
+                    <div class="panel-card" style="gap:10px;">
+                        <button class="primary-btn" id="finishMissionBtn" style="width:100%; justify-content:center;" disabled>
+                            Complete Feed Audit (0/7)
+                        </button>
+                        <button class="secondary-btn" id="hintInspectBtn" style="width:100%; justify-content:center;">
+                            💡 Sleuth Tip
+                        </button>
+                    </div>
+
+                    <!-- 5. Inspector Live Explanation Card -->
+                    <div class="panel-card">
+                        <div class="panel-title">Moderator Brief</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Scroll down the TriniConnect feed to reveal posts. Tap <strong>Inspect Source</strong> on each post to verify author credentials, dates, ads, and citations before choosing <strong>Responsible Sharing</strong> or <strong>Inappropriate Use</strong>.
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Form 2 Information Technology</div>
+                <h2>Source Sleuth Investigation Report</h2>
+                <p>Feed Audit Complete! You evaluated simulated social media posts using Author, Date, Purpose, and Evidence, and demonstrated responsible digital citizenship.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Source Sleuth</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You verified sources with great accuracy and protected your school community from digital misinformation!</p>
+                </div>
+
+                <!-- MANDATORY SUMMARY SCORECARD GRID (Directly under badge-container) -->
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Correct Decisions</div>
+                        <div class="val" id="summaryCorrectVal">0 / 7</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Post-by-Post Decision Breakdown (7 Cases)</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer (Slide-over on right) -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Evaluated posts &amp; reliability notes log.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Play Social Feed Sleuth</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome, Investigator! You are reviewing the <strong>TriniConnect</strong> school social feed to stop misinformation and promote digital ethics.</p>
+                <div style="display:flex; flex-direction:column; gap:12px; margin:16px 0;">
+                    <div style="background:var(--surface-2); padding:12px 14px; border-radius:var(--radius-md); border-left:4px solid var(--fb-blue);">
+                        <strong>1. Scroll to Discover New Posts (Facebook-Style Loading)</strong><br />
+                        As you scroll down the feed, top animated loading banners and skeleton shimmers will simulate live posts arriving in real time.
+                    </div>
+                    <div style="background:var(--surface-2); padding:12px 14px; border-radius:var(--radius-md); border-left:4px solid var(--accent);">
+                        <strong>2. Click "🔍 Inspect Source"</strong><br />
+                        Examine the embedded 4 clues: <strong>Author</strong> (credentials), <strong>Date</strong> (recency), <strong>Purpose</strong> (educational vs. selling ads), and <strong>Evidence</strong> (citations &amp; uncropped photos).
+                    </div>
+                    <div style="background:var(--surface-2); padding:12px 14px; border-radius:var(--radius-md); border-left:4px solid var(--safe-color);">
+                        <strong>3. Make Your Classification Decision</strong><br />
+                        Choose <strong>🟢 Responsible Sharing</strong> for verified facts, cited archives, ethical consent, and helpful corrections. Choose <strong>🔴 Inappropriate Use</strong> for unverified claims, clickbait ads, unconsented private photos, out-of-context cropped photos, or edited images.
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the simulation and start a fresh social feed evaluation session?</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Progress</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           7 REALISTIC SIMULATED SOCIAL MEDIA POSTS DATASET
+           ============================================================ */
+
+        const SOCIAL_POSTS_DATASET = [
+            {
+                id: "feed_post_1",
+                userName: "Maya Rampersad",
+                userHandle: "@maya_history_form2",
+                userAvatar: "👩🏾‍🎓",
+                timeAgo: "25m ago",
+                badgeVerified: true,
+                likesCount: 142,
+                commentsCount: 18,
+                bodyText: "Did you know? The steelpan developed in Trinidad and Tobago during the twentieth century as an acoustic instrument. Here is the cultural heritage archive source I referenced for my Form 2 History project! 🇹🇹🎶 <span class='post-hashtag'>#TriniHeritage</span> <span class='post-hashtag'>#SteelpanHistory</span>",
+                attachmentType: "link_preview",
+                attachmentTitle: "Trinidad & Tobago Cultural Heritage Archive",
+                attachmentDomain: "culture.gov.tt/heritage/steelpan-history",
+                attachmentSnippet: "Official repository documenting national acoustic percussion developments and archival records from 1940 to present.",
+                clues: {
+                    author: { status: "credible", label: "Author", summary: "Dr. Alicia James (Senior Cultural Officer, National Archives)" },
+                    date: { status: "credible", label: "Date", summary: "Updated & Verified March 2026" },
+                    purpose: { status: "credible", label: "Purpose", summary: "National Cultural Education (Non-profit, No Ads)" },
+                    evidence: { status: "credible", label: "Evidence", summary: "Archival Records #TT-PAN-1945 & UWI Creative Arts Bulletin" }
+                },
+                comments: [
+                    { name: "Devon", handle: "@devon_prefect", avatar: "🏃🏾‍♂️", text: "Great source Maya! Used this for our project bibliography." },
+                    { name: "Mr. Seepersad", handle: "@teacher_history", avatar: "👨🏾‍🏫", text: "Excellent digital scholarship, citing credible national archives!" }
+                ],
+                targetCategory: "responsible",
+                feedbackCorrect: "Excellent call! Maya cited a credible national archive with an identified qualified author, recent verified date, and authentic archival evidence.",
+                feedbackIncorrect: "Look at the evidence! Maya referenced a verified government cultural archive with named experts and educational citations.",
+                communityTag: "✅ Verified Source: Added to Caribbean Heritage Hub"
+            },
+            {
+                id: "feed_post_2",
+                userName: "ViralDaily TT",
+                userHandle: "@viraldailytt",
+                userAvatar: "📱",
+                timeAgo: "45m ago",
+                badgeVerified: false,
+                likesCount: 528,
+                commentsCount: 94,
+                bodyText: "BREAKING NEWS: Mobile phones destroy 90% of teenage memory in only seven days! Share this with all your classmates right now before it gets deleted!! 😱🚨💊 <span class='post-hashtag'>#BrainAlert</span> <span class='post-hashtag'>#PhoneDanger</span>",
+                attachmentType: "link_preview",
+                attachmentTitle: "TechViralDaily: Scientists Reveal Shocking Phone Brain Damage!",
+                attachmentDomain: "techviraldaily-blog.net/shocking/phones-memory-destroy",
+                attachmentSnippet: "💥 SPONSORED: 'Protect your brain cells! Buy Ultra-Brain Memory Gummies today for 50% off! Limited stock available!'",
+                clues: {
+                    author: { status: "warning", label: "Author", summary: "Anonymous Guru (No credentials or institutional affiliation)" },
+                    date: { status: "warning", label: "Date", summary: "No publication timestamp (Circulating repost from 6 years ago)" },
+                    purpose: { status: "warning", label: "Purpose", summary: "Selling 'Ultra-Brain Memory Gummies' with 50% discount ads" },
+                    evidence: { status: "warning", label: "Evidence", summary: "Zero medical citations, clinical trials, or hospital links" }
+                },
+                comments: [
+                    { name: "Dr. Marcus", handle: "@dr_marcus_med", avatar: "👨🏾‍⚕️", text: "This is completely false. There is zero scientific or medical research supporting this claim." },
+                    { name: "Kev", handle: "@kev_official", avatar: "😴", text: "Look at the bottom of the page, they are just trying to sell vitamin gummies lol." }
+                ],
+                targetCategory: "inappropriate",
+                feedbackCorrect: "Spot on! This post spreads an unverified health rumor originating from an undated clickbait blog designed to sell memory supplements.",
+                feedbackIncorrect: "Inspect the source! TechViralDaily is written by an anonymous guru with no medical citations, created purely to sell memory gummies.",
+                communityTag: "⚠ False Claim Flagged: Independent medical fact-checkers refuted this claim"
+            },
+            {
+                id: "feed_post_3",
+                userName: "Trini Gossip Central",
+                userHandle: "@trini_tea_unfiltered",
+                userAvatar: "👀",
+                timeAgo: "1h ago",
+                badgeVerified: false,
+                likesCount: 890,
+                commentsCount: 165,
+                bodyText: "MAJOR CHAOS AT SCHOOL TODAY!! Students caught violently fighting at the event! 😱🔥 Look at the rage on their faces! <span class='post-hashtag'>#DramaTT</span> <span class='post-hashtag'>#SchoolFight</span>",
+                attachmentType: "photo_uncrop",
+                attachmentTitle: "Cropped Photo (Tight Zoom on Straining Faces)",
+                attachmentDomain: "schoolbuzz-forum.tt/photo-chaos",
+                clues: {
+                    author: { status: "warning", label: "Author", summary: "Anonymous Gossip Account (@trini_tea_unfiltered)" },
+                    date: { status: "credible", label: "Date", summary: "Uploaded 1 hour ago during Sports Day" },
+                    purpose: { status: "warning", label: "Purpose", summary: "Viral clout & sensational drama by removing context" },
+                    evidence: { status: "warning", label: "Evidence", summary: "Misleading crop: Wide photo shows Tug-of-War at Queen's Park Savannah" }
+                },
+                comments: [
+                    { name: "Devon", handle: "@devon_prefect", avatar: "🏃🏾‍♂️", text: "Stop lying! We were pulling the tug-of-war rope for Scarlet House!" },
+                    { name: "Maya", handle: "@maya_history_form2", avatar: "👩🏾‍🎓", text: "Why did you crop out the rope and the cheering teachers?" }
+                ],
+                targetCategory: "inappropriate",
+                feedbackCorrect: "Correct! The photo was cropped out of context. Uncropping reveals students happily participating in an Inter-House Tug-of-War event!",
+                feedbackIncorrect: "Remember the uncrop tool! The wide original photograph proved this was a harmless Sports Day Tug-of-War match, not a fight.",
+                communityTag: "🔎 Context Added: Misleading crop identified by school officials"
+            },
+            {
+                id: "feed_post_4",
+                userName: "Jason_Pranks",
+                userHandle: "@jason_pranks_tt",
+                userAvatar: "📸",
+                timeAgo: "2h ago",
+                badgeVerified: false,
+                likesCount: 64,
+                commentsCount: 12,
+                bodyText: "LOL look at Kev fast asleep during lunch break in the library! Mouth wide open catching flies 😂😴 <span class='post-hashtag'>#SleepyKev</span> <span class='post-hashtag'>#Pranked</span>",
+                attachmentType: "private_consent",
+                attachmentTitle: "Private Photo | Comment from @kev_official: 'Please delete, no consent!'",
+                attachmentDomain: "school-canteen-cam.tt/photos",
+                clues: {
+                    author: { status: "warning", label: "Author", summary: "Student peer sharing unconsented private media" },
+                    date: { status: "credible", label: "Date", summary: "Taken today during lunch" },
+                    purpose: { status: "warning", label: "Purpose", summary: "Public embarrassment and peer teasing" },
+                    evidence: { status: "warning", label: "Evidence", summary: "Explicit refusal of consent: Subject asked for removal" }
+                },
+                comments: [
+                    { name: "Kev", handle: "@kev_official", avatar: "😴", text: "Jason, please take this down! I was tired and did NOT give permission to post me!" },
+                    { name: "Devon", handle: "@devon_prefect", avatar: "🏃🏾‍♂️", text: "Not cool bro, respect his privacy and delete the post." }
+                ],
+                targetCategory: "inappropriate",
+                feedbackCorrect: "Well done! Sharing a classmate's private photo without consent—especially after they explicitly asked to remove it—violates digital ethics and privacy.",
+                feedbackIncorrect: "Consider digital ethics and privacy! Kev clearly requested that his photo not be shared publicly without consent.",
+                communityTag: "🛡️ Privacy Violation: Post reported and removed for lack of consent"
+            },
+            {
+                id: "feed_post_5",
+                userName: "Devon - Sports Captain",
+                userHandle: "@devon_prefect",
+                userAvatar: "🏃🏾‍♂️",
+                timeAgo: "30m ago",
+                badgeVerified: true,
+                likesCount: 310,
+                commentsCount: 42,
+                bodyText: "Correction to the rumors spreading on gossip pages: that viral photo isn't a fight. Here is the full uncropped wide photo of Scarlet House vs Bluejay House during our Queen's Park Savannah Tug-of-War match! 🏆🤝 <span class='post-hashtag'>#SavannahSportsDay</span> <span class='post-hashtag'>#FactCheck</span>",
+                attachmentType: "photo_wide",
+                attachmentTitle: "Wide Photo: Inter-House Sports Day Tug-of-War (Savannah)",
+                attachmentDomain: "schoolsports.tt/gallery/savannah-2026",
+                clues: {
+                    author: { status: "credible", label: "Author", summary: "Devon (Verified School Prefect & Sports Day Captain)" },
+                    date: { status: "credible", label: "Date", summary: "Published immediately after rumors emerged" },
+                    purpose: { status: "credible", label: "Purpose", summary: "Fact-checking & debunking misleading rumors with evidence" },
+                    evidence: { status: "credible", label: "Evidence", summary: "Full uncropped image showing rope, referee, and cheering houses" }
+                },
+                comments: [
+                    { name: "Principal Williams", handle: "@principal_williams", avatar: "👔", text: "Thank you for sharing the full truth Devon. Great school spirit!" },
+                    { name: "Maya", handle: "@maya_history_form2", avatar: "👩🏾‍🎓", text: "Always check full context before reposting drama!" }
+                ],
+                targetCategory: "responsible",
+                feedbackCorrect: "Outstanding! Devon responsibly used verified evidence and full context to protect students and resolve harmful viral rumors.",
+                feedbackIncorrect: "Look at the intent! Devon shared the full uncropped photograph to responsibly debunk misinformation with verifiable proof.",
+                communityTag: "🌟 Community Context: Rumor successfully resolved with full evidence"
+            },
+            {
+                id: "feed_post_6",
+                userName: "PanicAlert TT",
+                userHandle: "@scary_news_now",
+                userAvatar: "🚨",
+                timeAgo: "10m ago",
+                badgeVerified: false,
+                likesCount: 412,
+                commentsCount: 88,
+                bodyText: "FIRE IN THE SCIENCE LAB RIGHT NOW!! The entire hallway is engulfed in heavy smoke! Evacuate immediately! 🚨🔥 <span class='post-hashtag'>#EmergencyTT</span> <span class='post-hashtag'>#LabFire</span>",
+                attachmentType: "photo_altered",
+                attachmentTitle: "Digitally Manipulated Hallway Image (Fake Smoke Overlay)",
+                attachmentDomain: "panic-upload.tt/fake-fire",
+                clues: {
+                    author: { status: "warning", label: "Author", summary: "Anonymous sensational panic account" },
+                    date: { status: "warning", label: "Date", summary: "Old empty hallway photo reused with filters" },
+                    purpose: { status: "warning", label: "Purpose", summary: "Fabricating emergency panic and chaos" },
+                    evidence: { status: "warning", label: "Evidence", summary: "Digital manipulation: Stock smoke graphics superimposed on photo" }
+                },
+                comments: [
+                    { name: "Safety Officer Mark", handle: "@school_safety_officer", avatar: "🦺", text: "This is completely fabricated. We are in the lab right now, perfectly safe." },
+                    { name: "Devon", handle: "@devon_prefect", avatar: "🏃🏾‍♂️", text: "You can see the fake smoke clipart layer on the wall edges!" }
+                ],
+                targetCategory: "inappropriate",
+                feedbackCorrect: "Spot on! Fabricating emergency images with digital smoke overlays to trigger panic is a severe misuse of digital tools.",
+                feedbackIncorrect: "Look closely at the image! The smoke overlay was digitally added to an empty hallway to create false emergency panic.",
+                communityTag: "❌ Fabricated Media: Altered image flagged for causing public alarm"
+            },
+            {
+                id: "feed_post_7",
+                userName: "TT Meteorological Service",
+                userHandle: "@ttmetoffice_official",
+                userAvatar: "⛈️",
+                timeAgo: "15m ago",
+                badgeVerified: true,
+                likesCount: 680,
+                commentsCount: 75,
+                bodyText: "Official Advisory: Adverse Weather Alert Yellow Level issued for Trinidad and Tobago from 6:00 AM tomorrow. Schools remain open; monitor official Ministry of Education releases for updates. <span class='post-hashtag'>#TTMetOffice</span> <span class='post-hashtag'>#WeatherAlert</span>",
+                attachmentType: "official_bulletin",
+                attachmentTitle: "Official Public Weather Bulletin #04 — Met Office TT",
+                attachmentDomain: "metoffice.gov.tt/bulletins/alert-yellow",
+                clues: {
+                    author: { status: "credible", label: "Author", summary: "Trinidad and Tobago Meteorological Service (Official Government Agency)" },
+                    date: { status: "credible", label: "Date", summary: "Live bulletin timestamped 15 minutes ago" },
+                    purpose: { status: "credible", label: "Purpose", summary: "Public safety advisories & official disaster preparedness" },
+                    evidence: { status: "credible", label: "Evidence", summary: "Doppler radar scans & official Ministry of Education coordination" }
+                },
+                comments: [
+                    { name: "Ministry of Education TT", handle: "@moe_tt_official", avatar: "🏛️", text: "Confirmed. All secondary and primary schools continue normal timetable tomorrow." },
+                    { name: "Maya", handle: "@maya_history_form2", avatar: "👩🏾‍🎓", text: "Always rely on official Met Office bulletins rather than unverified WhatsApp voice notes!" }
+                ],
+                targetCategory: "responsible",
+                feedbackCorrect: "Correct! The TT Met Service is the official verified authority for weather alerts with institutional scientific data.",
+                feedbackIncorrect: "Check the source! This is an official verified bulletin from the national meteorological office providing safety guidance.",
+                communityTag: "✅ Official Authority: Verified National Weather Advisory"
+            }
+        ];
+
+        /* ============================================================
+           STATE MANAGEMENT & DYNAMIC SCROLL LOADING
+           ============================================================ */
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Scroll down the TriniConnect feed to reveal posts. Tap <strong>Inspect Source</strong> on each post to verify author credentials, dates, ads, and citations before choosing <strong>Responsible Sharing</strong> or <strong>Inappropriate Use</strong>.`;
+
+        const state = {
+            currentScreen: "home",
+            activeFilter: "all", // "all", "pending", "resolved"
+            loadedCount: 2, // Initial state: 2 posts visible
+            isLoadingMore: false,
+            openedDrawers: {}, // postId -> boolean
+            openedComments: {}, // postId -> boolean
+            likedPosts: {}, // postId -> boolean
+            uncroppedMedia: {}, // postId -> boolean
+            evaluations: {}, // postId -> { userChoice, targetCategory, isCorrect, feedback }
+            score: 0,
+            attempts: 0,
+            streak: 0,
+            bestStreak: 0,
+            theme: "light"
+        };
+
+        /* DOM Elements Map */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            historyList: document.getElementById("historyList"),
+            socialFeedStream: document.getElementById("socialFeedStream"),
+            postsListContainer: document.getElementById("postsListContainer"),
+            topFeedLoadingBanner: document.getElementById("topFeedLoadingBanner"),
+            fbLinearProgressBar: document.getElementById("fbLinearProgressBar"),
+            fbSkeletonCard: document.getElementById("fbSkeletonCard"),
+            endOfFeedIndicator: document.getElementById("endOfFeedIndicator"),
+            feedLoadedBadge: document.getElementById("feedLoadedBadge"),
+            tabFilterAll: document.getElementById("tabFilterAll"),
+            tabFilterPending: document.getElementById("tabFilterPending"),
+            tabFilterResolved: document.getElementById("tabFilterResolved"),
+            evaluatedCountText: document.getElementById("evaluatedCountText"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            rankBadgeIcon: document.getElementById("rankBadgeIcon"),
+            rankBadgeTitle: document.getElementById("rankBadgeTitle"),
+            rankBadgeDesc: document.getElementById("rankBadgeDesc"),
+            finishMissionBtn: document.getElementById("finishMissionBtn"),
+            hintInspectBtn: document.getElementById("hintInspectBtn"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn")
+        };
+
+        /* ============================================================
+           INITIALIZATION & HELPERS
+           ============================================================ */
+
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+        }
+
+        init();
+
+        function init() {
+            bindEvents();
+            loadState();
+            renderDashboard();
+
+            // Auto-open instructions modal on launch
+            openModal();
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // Modal explicit dismissal only (Rule 4.3)
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            dom.finishMissionBtn.addEventListener("click", () => showScreen("summary"));
+            dom.hintInspectBtn.addEventListener("click", handleHint);
+
+            // Filter Tabs
+            dom.tabFilterAll.addEventListener("click", () => setFilter("all"));
+            dom.tabFilterPending.addEventListener("click", () => setFilter("pending"));
+            dom.tabFilterResolved.addEventListener("click", () => setFilter("resolved"));
+
+            // Dynamic Infinite Scroll Listener on Feed Stream
+            if (dom.socialFeedStream) {
+                dom.socialFeedStream.addEventListener("scroll", handleFeedScroll);
+            }
+
+            // Real-time system theme change listener
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (e) {}
+        }
+
+        function handleFeedScroll() {
+            if (state.isLoadingMore || state.loadedCount >= SOCIAL_POSTS_DATASET.length) return;
+
+            const stream = dom.socialFeedStream;
+            const scrollBottom = stream.scrollHeight - stream.scrollTop - stream.clientHeight;
+
+            // When user scrolls within 180px of bottom, trigger Facebook-style loading heading & post load
+            if (scrollBottom < 180) {
+                triggerLoadNextPosts();
+            }
+        }
+
+        /* FACEBOOK-STYLE ANIMATED LOADING HEADING & SKELETON SHIMMER */
+        function triggerLoadNextPosts() {
+            if (state.isLoadingMore || state.loadedCount >= SOCIAL_POSTS_DATASET.length) return;
+
+            state.isLoadingMore = true;
+
+            // 1. Activate Top Linear Progress Bar
+            dom.fbLinearProgressBar.style.width = "40%";
+            setTimeout(() => { dom.fbLinearProgressBar.style.width = "75%"; }, 150);
+
+            // 2. Display Facebook-Style Top Loading Heading Banner
+            dom.topFeedLoadingBanner.classList.add("active");
+
+            // 3. Display Shimmering Skeleton Card at Bottom of Stream
+            dom.fbSkeletonCard.style.display = "flex";
+
+            // 4. Realistic Facebook Network Shimmer Delay (550ms)
+            setTimeout(() => {
+                // Complete top progress bar
+                dom.fbLinearProgressBar.style.width = "100%";
+
+                state.loadedCount = Math.min(SOCIAL_POSTS_DATASET.length, state.loadedCount + 2);
+                state.isLoadingMore = false;
+
+                // Hide Loading Shimmer Card & Top Banner
+                dom.fbSkeletonCard.style.display = "none";
+                dom.topFeedLoadingBanner.classList.remove("active");
+
+                // Fade out top progress bar
+                setTimeout(() => {
+                    dom.fbLinearProgressBar.style.width = "0%";
+                }, 300);
+
+                renderFeedPosts();
+                updateProgressStats();
+                playAudioFeedback(true);
+
+                // Update Inspector Briefing
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ✨ <strong>New Stories Added to TriniConnect!</strong> (${state.loadedCount}/7 loaded). Tap <strong>Inspect Source</strong> to evaluate the newly loaded posts.
+                `;
+            }, 550);
+        }
+
+        function setFilter(filter) {
+            state.activeFilter = filter;
+            dom.tabFilterAll.classList.toggle("active", filter === "all");
+            dom.tabFilterPending.classList.toggle("active", filter === "pending");
+            dom.tabFilterResolved.classList.toggle("active", filter === "resolved");
+            renderFeedPosts();
+        }
+
+        function loadState() {
+            state.currentScreen = "home";
+            state.activeFilter = "all";
+            state.loadedCount = 2; // Initial state: 2 posts visible
+            state.isLoadingMore = false;
+            state.openedDrawers = {};
+            state.openedComments = {};
+            state.likedPosts = {};
+            state.uncroppedMedia = {};
+            state.evaluations = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+
+            resetExplanationBox();
+
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "summary") {
+                renderSummaryScreen();
+            } else if (screenName === "game") {
+                renderDashboard();
+            }
+        }
+
+        /* ============================================================
+           DASHBOARD & FEED RENDERING
+           ============================================================ */
+
+        function renderDashboard() {
+            updateProgressStats();
+            updateRankBadge();
+            renderFeedPosts();
+        }
+
+        function updateProgressStats() {
+            const total = SOCIAL_POSTS_DATASET.length;
+            const evaluatedCount = Object.keys(state.evaluations).length;
+            const pct = Math.round((evaluatedCount / total) * 100);
+
+            dom.evaluatedCountText.textContent = `${evaluatedCount} / ${total} Evaluated`;
+            dom.progressPercent.textContent = `${pct}% Complete`;
+            dom.progressFillBar.style.width = `${pct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = state.attempts === 0 ? 100 : Math.round((correctCount / state.attempts) * 100);
+            dom.accuracyVal.textContent = `${accuracy}%`;
+
+            if (dom.feedLoadedBadge) {
+                dom.feedLoadedBadge.textContent = `${state.loadedCount} / ${total} Loaded`;
+            }
+
+            if (evaluatedCount === total) {
+                dom.finishMissionBtn.disabled = false;
+                dom.finishMissionBtn.textContent = `View Summary Report 🎉 (${evaluatedCount}/${total})`;
+            } else {
+                dom.finishMissionBtn.disabled = true;
+                dom.finishMissionBtn.textContent = `Complete Feed Audit (${evaluatedCount}/${total})`;
+            }
+        }
+
+        function updateRankBadge() {
+            const score = state.score;
+            if (score >= 120) {
+                dom.rankBadgeIcon.textContent = "👑";
+                dom.rankBadgeTitle.textContent = "Master Source Sleuth";
+                dom.rankBadgeDesc.textContent = "Elite social media evidence detective.";
+            } else if (score >= 60) {
+                dom.rankBadgeIcon.textContent = "🕵️";
+                dom.rankBadgeTitle.textContent = "Certified Fact-Checker";
+                dom.rankBadgeDesc.textContent = "Spotting misinformation with precision.";
+            } else {
+                dom.rankBadgeIcon.textContent = "📱";
+                dom.rankBadgeTitle.textContent = "Rookie Sleuth";
+                dom.rankBadgeDesc.textContent = "Scroll feed & inspect sources.";
+            }
+        }
+
+        function renderFeedPosts() {
+            dom.postsListContainer.innerHTML = "";
+
+            // Slice only currently loaded posts (simulating infinite scroll)
+            const loadedPosts = SOCIAL_POSTS_DATASET.slice(0, state.loadedCount);
+
+            let postsToRender = loadedPosts;
+            if (state.activeFilter === "pending") {
+                postsToRender = loadedPosts.filter(p => !state.evaluations[p.id]);
+            } else if (state.activeFilter === "resolved") {
+                postsToRender = loadedPosts.filter(p => state.evaluations[p.id]);
+            }
+
+            if (postsToRender.length === 0) {
+                dom.postsListContainer.innerHTML = `
+                    <div style="padding:28px; text-align:center; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);">
+                        No posts matching this filter in currently loaded stream. Scroll down to load more or switch filter tabs above!
+                    </div>
+                `;
+            } else {
+                postsToRender.forEach(post => {
+                    const evalData = state.evaluations[post.id];
+                    const isEvaluated = Boolean(evalData);
+                    const isCorrect = evalData && evalData.isCorrect;
+                    const isDrawerOpen = Boolean(state.openedDrawers[post.id]);
+                    const isCommentsOpen = Boolean(state.openedComments[post.id]);
+                    const isLiked = Boolean(state.likedPosts[post.id]);
+                    const isUncropped = Boolean(state.uncroppedMedia[post.id]);
+
+                    const card = document.createElement("article");
+                    card.className = `social-post-card ${isEvaluated ? (isCorrect ? 'resolved-correct' : 'resolved-incorrect') : ''} ${isDrawerOpen ? 'active-inspect' : ''}`;
+                    card.id = `post_card_${post.id}`;
+
+                    const verifiedIcon = post.badgeVerified ? `<span class="verified-badge" title="Verified Account">✓</span>` : '';
+                    
+                    // Attachment HTML
+                    let mediaHtml = "";
+                    if (post.attachmentType === "link_preview" || post.attachmentType === "official_bulletin") {
+                        mediaHtml = `
+                            <div class="post-media-stage">
+                                <div class="opengraph-link-card">
+                                    <div class="og-banner-top">
+                                        <span>🔗 ${escapeHtml(post.attachmentDomain)}</span>
+                                        <span>${post.attachmentType === 'official_bulletin' ? '🏛️ Official Govt Portal' : '🌐 Web Source'}</span>
+                                    </div>
+                                    <div class="og-content-pad">
+                                        <div class="og-title">${escapeHtml(post.attachmentTitle)}</div>
+                                        <div class="og-snippet">${escapeHtml(post.attachmentSnippet || '')}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (post.attachmentType === "photo_uncrop") {
+                        mediaHtml = `
+                            <div class="post-media-stage">
+                                <div class="media-photo-wrapper">
+                                    <div class="photo-canvas-frame ${isUncropped ? 'expanded' : ''}" id="canvas_frame_${post.id}">
+                                        <svg viewBox="0 0 500 220" style="width:100%; height:100%; object-fit:cover;">
+                                            <rect x="0" y="0" width="500" height="140" fill="#38bdf8" opacity="0.35"/>
+                                            <rect x="0" y="140" width="500" height="80" fill="#10b981" opacity="0.45"/>
+                                            
+                                            <g opacity="${isUncropped ? '1' : '0.1'}">
+                                                <rect x="20" y="20" width="90" height="34" rx="4" fill="#ef4444"/>
+                                                <text x="65" y="42" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle">SCARLET HOUSE</text>
+                                                <rect x="390" y="20" width="90" height="34" rx="4" fill="#0284c7"/>
+                                                <text x="435" y="42" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle">BLUEJAY HOUSE</text>
+                                                <circle cx="50" cy="130" r="12" fill="#f59e0b"/>
+                                                <circle cx="450" cy="130" r="12" fill="#818cf8"/>
+                                            </g>
+
+                                            <!-- Tug of War Rope -->
+                                            <path d="M 20 160 Q 250 165 480 160" stroke="#d97706" stroke-width="10" fill="none" opacity="${isUncropped ? '1' : '0.15'}"/>
+
+                                            <!-- Straining Students -->
+                                            <g>
+                                                <circle cx="210" cy="105" r="20" fill="#8d5b4c"/>
+                                                <path d="M 190 125 L 230 125 L 225 170 L 195 170 Z" fill="#ef4444"/>
+                                                <circle cx="290" cy="105" r="20" fill="#a67c52"/>
+                                                <path d="M 270 125 L 310 125 L 305 170 L 275 170 Z" fill="#0284c7"/>
+                                            </g>
+
+                                            ${!isUncropped ? `<rect x="170" y="70" width="160" height="110" rx="6" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="6,4"/>` : ''}
+                                        </svg>
+                                    </div>
+                                    <button class="uncrop-action-btn" onclick="togglePhotoUncrop('${post.id}')">
+                                        ${isUncropped ? '🔎 Original Tug-of-War Photo Revealed ✓' : '🔍 Uncrop Photo &amp; Check Context'}
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else if (post.attachmentType === "photo_wide") {
+                        mediaHtml = `
+                            <div class="post-media-stage">
+                                <div class="media-photo-wrapper">
+                                    <div class="photo-canvas-frame expanded">
+                                        <svg viewBox="0 0 500 220" style="width:100%; height:100%; object-fit:cover;">
+                                            <rect x="0" y="0" width="500" height="140" fill="#38bdf8" opacity="0.35"/>
+                                            <rect x="0" y="140" width="500" height="80" fill="#10b981" opacity="0.45"/>
+                                            <rect x="20" y="20" width="90" height="34" rx="4" fill="#ef4444"/>
+                                            <text x="65" y="42" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle">SCARLET HOUSE</text>
+                                            <rect x="390" y="20" width="90" height="34" rx="4" fill="#0284c7"/>
+                                            <text x="435" y="42" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle">BLUEJAY HOUSE</text>
+                                            <circle cx="50" cy="130" r="12" fill="#f59e0b"/>
+                                            <circle cx="450" cy="130" r="12" fill="#818cf8"/>
+                                            <path d="M 20 160 Q 250 165 480 160" stroke="#d97706" stroke-width="10" fill="none"/>
+                                            <circle cx="210" cy="105" r="20" fill="#8d5b4c"/>
+                                            <path d="M 190 125 L 230 125 L 225 170 L 195 170 Z" fill="#ef4444"/>
+                                            <circle cx="290" cy="105" r="20" fill="#a67c52"/>
+                                            <path d="M 270 125 L 310 125 L 305 170 L 275 170 Z" fill="#0284c7"/>
+                                        </svg>
+                                    </div>
+                                    <div style="font-size:0.8rem; color:var(--safe-color); font-weight:800; margin-top:8px;">
+                                        🌟 Full Wide Photo: Inter-House Sports Day Tug-of-War (Queen's Park Savannah)
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (post.attachmentType === "photo_altered") {
+                        mediaHtml = `
+                            <div class="post-media-stage">
+                                <div class="media-photo-wrapper">
+                                    <div class="photo-canvas-frame">
+                                        <svg viewBox="0 0 500 180" style="width:100%; height:100%; object-fit:cover;">
+                                            <rect x="0" y="0" width="500" height="180" fill="#1e293b"/>
+                                            <rect x="60" y="30" width="80" height="150" fill="#334155"/>
+                                            <rect x="360" y="30" width="80" height="150" fill="#334155"/>
+                                            <circle cx="250" cy="90" r="70" fill="#64748b" opacity="0.65"/>
+                                            <circle cx="220" cy="80" r="50" fill="#94a3b8" opacity="0.75"/>
+                                            <circle cx="280" cy="95" r="55" fill="#475569" opacity="0.7"/>
+                                            <text x="250" y="160" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">⚠️ DIGITAL SMOKE OVERLAY DETECTED</text>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (post.attachmentType === "private_consent") {
+                        mediaHtml = `
+                            <div class="post-media-stage">
+                                <div style="background:var(--surface-2); border:1.5px dashed var(--hazard-border); border-radius:var(--radius-md); padding:14px;">
+                                    <div style="display:flex; align-items:center; gap:8px; color:var(--hazard-color); font-weight:800; font-size:0.92rem;">
+                                        <span>🔒</span> Private Classmate Photo Flagged
+                                    </div>
+                                    <div style="font-size:0.86rem; color:var(--text-soft); margin-top:6px; line-height:1.5;">
+                                        📌 <strong>Pinned Subject Response:</strong> <em>"Jason, please delete this! I was asleep in the library and did NOT give permission to post me!" — @kev_official</em>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // 4 Clues Drawer HTML
+                    const c = post.clues;
+                    const sleuthDrawerHtml = `
+                        <div class="embedded-sleuth-box ${isDrawerOpen ? 'open' : ''}" id="sleuth_drawer_${post.id}">
+                            <div style="font-size:0.84rem; font-weight:800; color:var(--accent); display:flex; justify-content:space-between;">
+                                <span>🔎 Source Sleuth Evidence Breakdown:</span>
+                                <span style="font-size:0.76rem; color:var(--muted);">4 Reliability Clues</span>
+                            </div>
+                            <div class="sleuth-mini-grid">
+                                <div class="sleuth-mini-item ${c.author.status}">
+                                    <span class="mini-item-label">👤 Author</span>
+                                    <span class="mini-item-val">${escapeHtml(c.author.summary)}</span>
+                                </div>
+                                <div class="sleuth-mini-item ${c.date.status}">
+                                    <span class="mini-item-label">📅 Date</span>
+                                    <span class="mini-item-val">${escapeHtml(c.date.summary)}</span>
+                                </div>
+                                <div class="sleuth-mini-item ${c.purpose.status}">
+                                    <span class="mini-item-label">🎯 Purpose</span>
+                                    <span class="mini-item-val">${escapeHtml(c.purpose.summary)}</span>
+                                </div>
+                                <div class="sleuth-mini-item ${c.evidence.status}">
+                                    <span class="mini-item-label">📑 Evidence</span>
+                                    <span class="mini-item-val">${escapeHtml(c.evidence.summary)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Community Alert Banner
+                    let communityAlertHtml = "";
+                    if (isEvaluated) {
+                        communityAlertHtml = `
+                            <div class="community-alert-banner ${isCorrect ? (post.targetCategory === 'responsible' ? 'verified' : 'flagged') : 'warning'}">
+                                <span>${escapeHtml(post.communityTag)}</span>
+                                ${!isCorrect ? `<button class="action-chip-btn" style="padding:4px 10px; font-size:0.76rem;" onclick="retryDecision('${post.id}')">🔄 Re-examine Clues &amp; Retry</button>` : ''}
+                            </div>
+                        `;
+                    }
+
+                    // Comments Thread HTML
+                    let commentsHtml = "";
+                    if (post.comments && post.comments.length > 0) {
+                        commentsHtml = `
+                            <div class="comments-thread-box ${isCommentsOpen ? 'open' : ''}" id="comments_${post.id}">
+                                <div style="font-size:0.78rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Classmate Comments (${post.comments.length})</div>
+                                ${post.comments.map(cm => `
+                                    <div class="comment-row">
+                                        <div class="comment-avatar">${cm.avatar}</div>
+                                        <div class="comment-bubble">
+                                            <strong style="color:var(--text);">${escapeHtml(cm.name)}</strong> <span style="font-size:0.74rem; color:var(--muted);">${escapeHtml(cm.handle)}</span>
+                                            <div style="margin-top:2px; color:var(--text-soft);">${escapeHtml(cm.text)}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+
+                    const currentLikes = (post.likesCount || 10) + (isLiked ? 1 : 0);
+
+                    card.innerHTML = `
+                        <div class="post-card-header">
+                            <div class="author-info-group">
+                                <div class="author-avatar-wrap">
+                                    <div class="author-avatar-circle">${post.userAvatar}</div>
+                                    <div class="online-dot"></div>
+                                </div>
+                                <div class="author-text-meta">
+                                    <h4>${escapeHtml(post.userName)} ${verifiedIcon}</h4>
+                                    <span>${escapeHtml(post.userHandle)} • ${escapeHtml(post.timeAgo)}</span>
+                                </div>
+                            </div>
+                            <div class="post-top-right-tools">
+                                <button class="inspect-source-pill-btn" onclick="toggleSleuthDrawer('${post.id}')">
+                                    ${isDrawerOpen ? 'Hide Evidence ▴' : '🔍 Inspect Source ▾'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="post-caption-body">
+                            ${post.bodyText}
+                        </div>
+
+                        ${mediaHtml}
+
+                        ${sleuthDrawerHtml}
+
+                        ${communityAlertHtml}
+
+                        <div class="social-metrics-bar">
+                            <div class="social-buttons-row">
+                                <button class="social-icon-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
+                                    <span>${isLiked ? '❤️' : '🤍'}</span>
+                                    <span>${currentLikes}</span>
+                                </button>
+                                <button class="social-icon-btn" onclick="toggleComments('${post.id}')">
+                                    <span>💬</span>
+                                    <span>${post.commentsCount || 0}</span>
+                                </button>
+                                <button class="social-icon-btn">
+                                    <span>🔁</span>
+                                    <span>Share</span>
+                                </button>
+                            </div>
+                            <span>TriniConnect Social</span>
+                        </div>
+
+                        ${commentsHtml}
+
+                        <div class="sleuth-decision-footer">
+                            <span style="font-size:0.84rem; color:var(--text-soft); font-weight:800;">
+                                ${isEvaluated ? `Evaluated: <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">${evalData.userChoice === 'responsible' ? '🟢 Responsible Sharing' : '🔴 Inappropriate Use'}</span>` : 'Classify Post Action:'}
+                            </span>
+                            <div class="decision-choice-btns">
+                                <button class="moderation-btn resp-btn" ${isEvaluated ? 'disabled' : ''} onclick="handlePostDecision('${post.id}', 'responsible')">
+                                    🟢 Responsible Sharing
+                                </button>
+                                <button class="moderation-btn inapp-btn" ${isEvaluated ? 'disabled' : ''} onclick="handlePostDecision('${post.id}', 'inappropriate')">
+                                    🔴 Inappropriate Use
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    dom.postsListContainer.appendChild(card);
+                });
+            }
+
+            // Render Bottom Infinite Scroll / End-of-Feed Status
+            dom.endOfFeedIndicator.innerHTML = "";
+            if (state.loadedCount < SOCIAL_POSTS_DATASET.length) {
+                const scrollBtn = document.createElement("button");
+                scrollBtn.className = "scroll-more-cta-btn";
+                scrollBtn.innerHTML = `📜 Scroll Down to Load More Stories (${state.loadedCount}/${SOCIAL_POSTS_DATASET.length})`;
+                scrollBtn.onclick = triggerLoadNextPosts;
+                dom.endOfFeedIndicator.appendChild(scrollBtn);
+            } else {
+                const endCard = document.createElement("div");
+                endCard.className = "end-of-feed-card";
+                endCard.innerHTML = `
+                    <div style="font-size:1.4rem;">🎉</div>
+                    <strong style="color:var(--text);">You're all caught up!</strong>
+                    <span>You have reached the end of today's TriniConnect feed (all 7 posts loaded).</span>
+                `;
+                dom.endOfFeedIndicator.appendChild(endCard);
+            }
+        }
+
+        /* ============================================================
+           INTERACTION & DECISION LOGIC
+           ============================================================ */
+
+        window.toggleLike = function(postId) {
+            state.likedPosts[postId] = !state.likedPosts[postId];
+            if (state.likedPosts[postId]) {
+                playAudioFeedback(true);
+            }
+            renderFeedPosts();
+        };
+
+        window.toggleComments = function(postId) {
+            state.openedComments[postId] = !state.openedComments[postId];
+            renderFeedPosts();
+        };
+
+        window.toggleSleuthDrawer = function(postId) {
+            state.openedDrawers[postId] = !state.openedDrawers[postId];
+            
+            const post = SOCIAL_POSTS_DATASET.find(p => p.id === postId);
+            if (state.openedDrawers[postId] && post) {
+                state.score += 5; // Bonus for inspecting evidence
+                updateProgressStats();
+                dom.inspectorFeedbackBox.className = "feedback-card";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <strong>🔍 Evidence Inspected for ${escapeHtml(post.userName)}:</strong><br/>
+                    • <strong>Author:</strong> ${escapeHtml(post.clues.author.summary)}<br/>
+                    • <strong>Date:</strong> ${escapeHtml(post.clues.date.summary)}<br/>
+                    • <strong>Purpose:</strong> ${escapeHtml(post.clues.purpose.summary)}<br/>
+                    • <strong>Evidence:</strong> ${escapeHtml(post.clues.evidence.summary)}
+                `;
+            }
+
+            renderFeedPosts();
+        };
+
+        window.togglePhotoUncrop = function(postId) {
+            state.uncroppedMedia[postId] = true;
+            state.score += 10;
+            state.streak += 1;
+            state.bestStreak = Math.max(state.bestStreak, state.streak);
+            playAudioFeedback(true);
+
+            dom.inspectorFeedbackBox.className = "feedback-card success";
+            dom.inspectorFeedbackBox.innerHTML = `
+                🌟 <strong>Visual Context Discovered:</strong> Uncropping revealed the full Inter-House Sports Day Tug-of-War event at Queen's Park Savannah! The cropped image was removed from context to create fake drama.
+            `;
+
+            renderFeedPosts();
+        };
+
+        window.handlePostDecision = function(postId, decision) {
+            const post = SOCIAL_POSTS_DATASET.find(p => p.id === postId);
+            if (!post || state.evaluations[postId]) return;
+
+            state.attempts += 1;
+            const isCorrect = decision === post.targetCategory;
+
+            state.evaluations[postId] = {
+                userChoice: decision,
+                targetCategory: post.targetCategory,
+                isCorrect: isCorrect,
+                feedback: isCorrect ? post.feedbackCorrect : post.feedbackIncorrect
+            };
+
+            if (isCorrect) {
+                state.score += 25;
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+                playAudioFeedback(true);
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <strong>✅ Accurate Assessment:</strong> ${escapeHtml(post.feedbackCorrect)}
+                `;
+            } else {
+                state.streak = 0;
+                playAudioFeedback(false);
+
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <strong>⚠️ Caution:</strong> ${escapeHtml(post.feedbackIncorrect)}
+                    <div style="margin-top:6px;">
+                        <button class="action-chip-btn" style="padding:4px 10px; font-size:0.76rem;" onclick="retryDecision('${postId}')">
+                            🔍 Inspect Clues &amp; Retry
+                        </button>
+                    </div>
+                `;
+            }
+
+            updateProgressStats();
+            updateRankBadge();
+            renderFeedPosts();
+            renderHistoryList();
+        };
+
+        window.retryDecision = function(postId) {
+            const post = SOCIAL_POSTS_DATASET.find(p => p.id === postId);
+            if (!post) return;
+
+            delete state.evaluations[postId];
+            state.openedDrawers[postId] = true;
+
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = `
+                🔍 <strong>Investigation Memory:</strong> Review the 4 clues in the open drawer for <em>${escapeHtml(post.userName)}</em> and classify again without penalty!
+            `;
+
+            updateProgressStats();
+            renderFeedPosts();
+        };
+
+        function handleHint() {
+            let unevaluated = SOCIAL_POSTS_DATASET.find(p => !state.evaluations[p.id]);
+            if (unevaluated) {
+                const postIdx = SOCIAL_POSTS_DATASET.findIndex(p => p.id === unevaluated.id);
+                if (postIdx >= state.loadedCount) {
+                    state.loadedCount = postIdx + 1;
+                }
+                state.openedDrawers[unevaluated.id] = true;
+                renderFeedPosts();
+                
+                const targetCard = document.getElementById(`post_card_${unevaluated.id}`);
+                if (targetCard) {
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                dom.inspectorFeedbackBox.className = "feedback-card";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    💡 <strong>Sleuth Tip:</strong> Look at <strong>${escapeHtml(unevaluated.userName)}'s post</strong>. We opened its Evidence Drawer so you can examine whether the author and citations are credible!
+                `;
+            } else {
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    🌟 <strong>Feed Complete:</strong> All 7 posts have been evaluated! Click <strong>Complete Feed Audit</strong> to view your certification.
+                `;
+            }
+        }
+
+        /* ============================================================
+           SUMMARY SCREEN RENDERING (STRICT SCORING ACCURACY)
+           ============================================================ */
+
+        function renderSummaryScreen() {
+            const total = SOCIAL_POSTS_DATASET.length;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = Math.round((correctCount / total) * 100);
+
+            dom.summaryScoreVal.textContent = state.score;
+            dom.summaryAccuracyVal.textContent = `${accuracy}%`;
+            dom.summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            dom.summaryCorrectVal.textContent = `${correctCount} / ${total}`;
+
+            if (accuracy >= 90) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "Master Source Sleuth";
+                dom.badgeDesc.textContent = `Flawless social media analysis! You achieved ${accuracy}% accuracy (${correctCount}/${total} posts). You understand how to verify sources and protect your community from misinformation.`;
+            } else if (accuracy >= 70) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Fact-Checker";
+                dom.badgeDesc.textContent = `Great job! You achieved ${accuracy}% accuracy (${correctCount}/${total} posts). Review the missed items below to reinforce your digital literacy skills!`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Junior Sleuth Trainee";
+                dom.badgeDesc.textContent = `You achieved ${accuracy}% accuracy (${correctCount}/${total} posts). Review the 4 reliability pillars in the memory drawer to strengthen your evaluation skills.`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+            SOCIAL_POSTS_DATASET.forEach(post => {
+                const evalData = state.evaluations[post.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const userChoice = evalData.userChoice || "Unanswered";
+
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">${post.userAvatar} ${escapeHtml(post.userName)} (${escapeHtml(post.userHandle)})</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'} (Selected: ${userChoice === 'responsible' ? 'Responsible Sharing' : 'Inappropriate Use'} → Target: ${post.targetCategory === 'responsible' ? 'Responsible Sharing' : 'Inappropriate Use'})
+                        </span>
+                    </div>
+                    <div style="font-size:0.9rem; color:var(--text-soft); line-height:1.5;">
+                        <em>"${escapeHtml(post.bodyText.replace(/<[^>]*>?/gm, ''))}"</em>
+                    </div>
+                    <div style="font-size:0.86rem; color:var(--muted); margin-top:6px;">
+                        <strong>Key Principle:</strong> ${escapeHtml(post.feedbackCorrect)}
+                    </div>
+                `;
+                dom.summaryDetailsList.appendChild(card);
+            });
+        }
+
+        /* ============================================================
+           REVIEW MEMORY DRAWER RENDERING
+           ============================================================ */
+
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedList = SOCIAL_POSTS_DATASET.filter(p => state.evaluations[p.id]);
+
+            if (evaluatedList.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:16px; color:var(--muted); text-align:center;">No evaluated posts yet. Scroll the feed and inspect sources to record decisions.</div>`;
+                return;
+            }
+
+            evaluatedList.forEach(post => {
+                const evalData = state.evaluations[post.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const userChoice = evalData.userChoice || "Unanswered";
+
+                const item = document.createElement("div");
+                item.className = "summary-item-card";
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+                        <strong style="color:var(--text); font-size:0.92rem;">${post.userAvatar} ${escapeHtml(post.userName)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800; font-size:0.82rem;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'} (${userChoice === 'responsible' ? 'Responsible' : 'Inappropriate'})
+                        </span>
+                    </div>
+                    <div style="font-size:0.84rem; color:var(--text-soft); margin-top:4px;">${escapeHtml(evalData.feedback)}</div>
+                    <div style="font-size:0.78rem; color:var(--muted); margin-top:6px; border-top:1px dashed var(--border); padding-top:4px;">
+                        • Author: ${escapeHtml(post.clues.author.summary)}<br/>
+                        • Date: ${escapeHtml(post.clues.date.summary)}<br/>
+                        • Purpose: ${escapeHtml(post.clues.purpose.summary)}<br/>
+                        • Evidence: ${escapeHtml(post.clues.evidence.summary)}
+                    </div>
+                `;
+                dom.historyList.appendChild(item);
+            });
+        }
+
+        /* ============================================================
+           MODAL & THEME UTILITIES
+           ============================================================ */
+
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try {
+                sessionStorage.setItem("user_toggled_theme", state.theme);
+            } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen toggle failed", err);
+            }
+        }
+
+        function confirmReset() {
+            closeResetModal();
+            loadState();
+            renderDashboard();
+            showScreen("home");
+        }
+
+        function playAudioFeedback(isSuccess) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.value = isSuccess ? 587.33 : 220;
+                gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (isSuccess ? 0.25 : 0.3));
+
+                osc.start();
+                osc.stop(ctx.currentTime + (isSuccess ? 0.26 : 0.31));
+            } catch (e) {}
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
