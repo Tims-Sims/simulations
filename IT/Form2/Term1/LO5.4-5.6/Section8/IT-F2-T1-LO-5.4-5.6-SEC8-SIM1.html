@@ -1,0 +1,2538 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 Sprite Pen Plotter — Introduction to Scratch</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 2 INFORMATION TECHNOLOGY — SPRITE PEN PLOTTER
+           Lesson: Introduction to Scratch (Sequencing, Pen & Motion Blocks)
+           Single-file HTML/CSS/JS - Offline Friendly
+           Trinidad and Tobago Secondary Schools — IT Computer Lab
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Scratch Category Colors */
+            --scratch-events: #ffbf00;
+            --scratch-events-dark: #d99b00;
+            --scratch-motion: #4c97ff;
+            --scratch-motion-dark: #2975e6;
+            --scratch-pen: #0fbd8c;
+            --scratch-pen-dark: #0a8e69;
+            --scratch-control: #ffab19;
+
+            /* Status Colors */
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+
+            /* Stage Area */
+            --stage-bg: #ffffff;
+            --stage-grid: rgba(15, 23, 42, 0.08);
+            --stage-border: #cbd5e1;
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+
+            --stage-bg: #ffffff;
+            --stage-grid: rgba(15, 23, 42, 0.06);
+            --stage-border: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* Lock outer window when in game mode so ONLY internal containers scroll */
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1380px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--scratch-events), var(--scratch-pen));
+            color: #ffffff;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(255, 191, 0, 0.35);
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn,
+        .green-flag-btn,
+        .stop-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        .green-flag-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            font-size: 0.95rem;
+        }
+
+        .green-flag-btn.running {
+            animation: flagPulse 1.2s infinite;
+        }
+
+        @keyframes flagPulse {
+            0% { transform: scale(0.98); box-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(16, 185, 129, 0.9); }
+            100% { transform: scale(0.98); box-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+        }
+
+        .stop-btn {
+            background: color-mix(in srgb, #ef4444 20%, var(--surface-2));
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+        }
+
+        .hero-card {
+            width: min(100%, 880px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: clamp(2.1rem, 4vw, 3.1rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 740px);
+            margin: 0 auto 28px;
+            color: var(--text-soft);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 20px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 6px;
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Screen 2: Game Dashboard Screen (75% Left Scratch Studio / 25% Right Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Pane (75%): Scratch Coding Studio (Palette + Script Area + Drawing Stage) */
+        .studio-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        .studio-header {
+            padding: 12px 20px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .mission-heading {
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stage-control-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 3-Column Studio Workspace */
+        .studio-workspace {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 200px 1fr 340px;
+            gap: 12px;
+            padding: 14px;
+            overflow: hidden;
+            background: color-mix(in srgb, var(--bg-soft) 50%, var(--surface));
+        }
+
+        /* Column 1: Block Palette */
+        .palette-column {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .column-header {
+            padding: 10px 14px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .palette-blocks-list {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .palette-category-label {
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            margin: 6px 0 2px;
+        }
+
+        /* Scratch-style Puzzle Block */
+        .scratch-block {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #ffffff;
+            user-select: none;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+            position: relative;
+        }
+
+        .scratch-block:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .scratch-block.events {
+            background: var(--scratch-events);
+            border-top-left-radius: 14px;
+            border-top-right-radius: 14px;
+            border-left: 3px solid var(--scratch-events-dark);
+            border-bottom: 2px solid var(--scratch-events-dark);
+        }
+
+        .scratch-block.pen {
+            background: var(--scratch-pen);
+            border-left: 3px solid var(--scratch-pen-dark);
+            border-bottom: 2px solid var(--scratch-pen-dark);
+        }
+
+        .scratch-block.motion {
+            background: var(--scratch-motion);
+            border-left: 3px solid var(--scratch-motion-dark);
+            border-bottom: 2px solid var(--scratch-motion-dark);
+        }
+
+        .scratch-block.executing {
+            box-shadow: 0 0 16px #ffffff, 0 0 24px #fef08a;
+            transform: scale(1.04);
+            z-index: 20;
+            border: 2px solid #ffffff;
+        }
+
+        .block-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Column 2: Script Construction Area */
+        .script-column {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .script-workspace-inner {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            background-color: var(--surface-2);
+            background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        html[data-theme="light"] .script-workspace-inner {
+            background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+        }
+
+        .script-stack {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 320px;
+            position: relative;
+        }
+
+        .script-item-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: -2px;
+            animation: snapDrop 0.2s ease-out;
+        }
+
+        @keyframes snapDrop {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .script-item-wrapper .scratch-block {
+            flex: 1;
+        }
+
+        .block-action-btns {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.7;
+            transition: opacity 0.15s ease;
+        }
+
+        .block-action-btns:hover {
+            opacity: 1;
+        }
+
+        .mini-icon-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+            font-size: 0.72rem;
+            display: grid;
+            place-items: center;
+            padding: 0;
+        }
+
+        .mini-icon-btn:hover {
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .drop-target-indicator {
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--accent);
+            margin: 4px 0;
+            width: 100%;
+            display: none;
+        }
+
+        .script-empty-prompt {
+            padding: 24px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            margin: auto;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            max-width: 280px;
+        }
+
+        /* Column 3: Scratch Drawing Stage */
+        .stage-column {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .stage-canvas-container {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            background: var(--stage-bg);
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* SVG Stage Canvas & Sprite Actor */
+        .drawing-canvas-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            user-select: none;
+        }
+
+        #spriteActorGroup {
+            transform-origin: 0px 0px;
+            transition: transform 0.04s linear;
+        }
+
+        .stage-info-bar {
+            padding: 8px 12px;
+            background: var(--surface-2);
+            font-size: 0.78rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 700;
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width) */
+        .action-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-title {
+            font-size: 0.98rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 10px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            padding: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Mission Target Goal Box */
+        .target-goal-box {
+            padding: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .target-goal-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .target-goal-desc {
+            font-size: 0.82rem;
+            color: var(--text-soft);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Live Feedback Card */
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--hazard-border);
+            background: var(--hazard-bg);
+        }
+
+        .feedback-card.danger {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 480px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 640px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1080px) {
+            .studio-workspace {
+                grid-template-columns: 180px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 960px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+            .studio-workspace {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow: visible;
+            }
+            .stage-canvas-container {
+                height: 320px;
+            }
+            .action-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">🐱</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 Sprite Pen Plotter — Introduction to Scratch</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — IT Computer Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY 5 BUTTONS IN EXACT ORDER -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Information Technology</div>
+                    <h2>Sprite Pen Plotter</h2>
+                    <p>
+                        Welcome to the Scratch Code Lab! Discover how computer programs execute step-by-step.
+                        Arrange <strong>Events</strong>, <strong>Pen</strong>, and <strong>Motion</strong> blocks to control the robotic drawing sprite across 4 drawing challenges!
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">✏️</div>
+                            <h3>Pen Down vs Pen Up</h3>
+                            <p>Discover how lowering the pen draws trails while lifting it lets the sprite travel without leaving a mark.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🧭</div>
+                            <h3>Move &amp; Turn Geometry</h3>
+                            <p>Combine forward steps and 90° rotations to create precise geometric lines, angles, and letters.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🏁</div>
+                            <h3>Sequential Execution</h3>
+                            <p>Watch blocks light up top-to-bottom as the computer carries out your exact instructions in order.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.1rem; padding: 14px 30px;">🚀 Launch Scratch Studio</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Coding Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Studio / 25% Right Action Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Scratch Studio -->
+                <section class="studio-pane" id="studioPane">
+                    <div class="studio-header">
+                        <div class="mission-heading">
+                            <span id="missionHeadingText">🎯 Mission 1 of 4: Draw a Line</span>
+                        </div>
+                        <div class="stage-control-bar">
+                            <button class="green-flag-btn" id="runFlagBtn" title="Execute script (Green Flag)">
+                                🏁 Go
+                            </button>
+                            <button class="stop-btn" id="stopScriptBtn" title="Stop execution">
+                                🛑 Stop
+                            </button>
+                            <button class="secondary-btn" id="resetStageBtn" title="Reset sprite position &amp; clear canvas">
+                                ↺ Reset Stage
+                            </button>
+                            <button class="secondary-btn" id="clearScriptBtn" title="Clear all blocks in workspace">
+                                🗑️ Clear Script
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3-Column Studio Workspace -->
+                    <div class="studio-workspace">
+                        <!-- Column 1: Block Palette -->
+                        <div class="palette-column">
+                            <div class="column-header">
+                                <span>📦 Blocks</span>
+                                <span style="font-size:0.75rem; color:var(--accent);">Click to Add</span>
+                            </div>
+                            <div class="palette-blocks-list" id="paletteList">
+                                <div class="palette-category-label">Events</div>
+                                <div class="scratch-block events" data-type="flag" title="Add Green Flag Trigger">
+                                    <span class="block-icon">🏁</span>
+                                    <span>when ⚑ clicked</span>
+                                </div>
+
+                                <div class="palette-category-label">Pen</div>
+                                <div class="scratch-block pen" data-type="pen_down" title="Lower pen to canvas">
+                                    <span class="block-icon">✏️</span>
+                                    <span>pen down</span>
+                                </div>
+                                <div class="scratch-block pen" data-type="pen_up" title="Lift pen from canvas">
+                                    <span class="block-icon">🖊️</span>
+                                    <span>pen up</span>
+                                </div>
+
+                                <div class="palette-category-label">Motion</div>
+                                <div class="scratch-block motion" data-type="move_50" title="Move forward 50 steps">
+                                    <span class="block-icon">🚶</span>
+                                    <span>move 50 steps</span>
+                                </div>
+                                <div class="scratch-block motion" data-type="move_100" title="Move forward 100 steps">
+                                    <span class="block-icon">🏃</span>
+                                    <span>move 100 steps</span>
+                                </div>
+                                <div class="scratch-block motion" data-type="turn_cw" title="Turn clockwise 90 degrees">
+                                    <span class="block-icon">↷</span>
+                                    <span>turn ↻ 90 deg</span>
+                                </div>
+                                <div class="scratch-block motion" data-type="turn_ccw" title="Turn counter-clockwise 90 degrees">
+                                    <span class="block-icon">↶</span>
+                                    <span>turn ↺ 90 deg</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Script Construction Area -->
+                        <div class="script-column">
+                            <div class="column-header">
+                                <span>📜 Script Workspace</span>
+                                <span id="blockCountLabel" style="font-size:0.75rem; color:var(--muted);">0 Blocks</span>
+                            </div>
+                            <div class="script-workspace-inner" id="scriptWorkspace">
+                                <div class="script-stack" id="scriptStack">
+                                    <!-- Dynamic Block Stack Rendered Here -->
+                                </div>
+                                <div class="script-empty-prompt" id="emptyPrompt">
+                                    👈 Click blocks from the palette on the left to build your Scratch script!
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 3: Scratch Stage & Drawing Canvas -->
+                        <div class="stage-column">
+                            <div class="column-header">
+                                <span>🖥️ Stage</span>
+                                <span id="spriteStatusLabel" style="font-size:0.75rem; color:var(--safe-color);">Pen: UP</span>
+                            </div>
+                            <div class="stage-canvas-container" id="stageContainer">
+                                <!-- SVG Canvas Overlay for Target, Drawing Lines, and Sprite -->
+                                <svg class="drawing-canvas-svg" id="drawingSvg" viewBox="0 0 320 280">
+                                    <!-- Grid Pattern & Sprite Definitions -->
+                                    <defs>
+                                        <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(15, 23, 42, 0.06)" stroke-width="1" />
+                                        </pattern>
+                                        <radialGradient id="catHead" cx="40%" cy="40%" r="60%">
+                                            <stop offset="0%" stop-color="#fbbf24" />
+                                            <stop offset="100%" stop-color="#d97706" />
+                                        </radialGradient>
+                                        <filter id="spriteShadow" x="-30%" y="-30%" width="160%" height="160%">
+                                            <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-opacity="0.3" />
+                                        </filter>
+                                    </defs>
+                                    <rect width="320" height="280" fill="url(#gridPattern)" />
+
+                                    <!-- Faint Target Guidelines Layer -->
+                                    <g id="targetGuidesGroup"></g>
+
+                                    <!-- Student Completed Drawing Trail Layer -->
+                                    <g id="drawingTrailGroup"></g>
+
+                                    <!-- Live Real-Time Active Line (trails behind sprite while moving) -->
+                                    <line id="activeDrawnLine" x1="0" y1="0" x2="0" y2="0" stroke="#0284c7" stroke-width="4.5" stroke-linecap="round" style="display:none;" />
+
+                                    <!-- Integrated SVG Sprite Actor (Always 100% matched to SVG coordinate space) -->
+                                    <g id="spriteActorGroup" transform="translate(60, 140) rotate(0)" filter="url(#spriteShadow)" style="pointer-events:none;">
+                                        <!-- Forward Direction Pointer / Snout Pointer -->
+                                        <polygon points="22,0 13,-6 13,6" fill="#38bdf8" stroke="#0284c7" stroke-width="1.2" />
+
+                                        <!-- Cat Ears -->
+                                        <polygon points="-16,-6 -8,-18 -2,-8" fill="#d97706" />
+                                        <polygon points="-14,-8 -8,-15 -4,-9" fill="#fef08a" />
+                                        <polygon points="16,-6 8,-18 2,-8" fill="#d97706" />
+                                        <polygon points="14,-8 8,-15 4,-9" fill="#fef08a" />
+                                        
+                                        <!-- Cat Head Circle (Centered at 0, 0) -->
+                                        <circle cx="0" cy="0" r="17" fill="url(#catHead)" stroke="#78350f" stroke-width="1.8" />
+                                        
+                                        <!-- Eyes -->
+                                        <ellipse cx="-5" cy="-3" rx="3.2" ry="4" fill="#ffffff" />
+                                        <circle cx="-4" cy="-3" r="2" fill="#0f172a" />
+                                        <ellipse cx="5" cy="-3" rx="3.2" ry="4" fill="#ffffff" />
+                                        <circle cx="6" cy="-3" r="2" fill="#0f172a" />
+                                        
+                                        <!-- Nose & Snout -->
+                                        <ellipse cx="0" cy="4" rx="5" ry="3.5" fill="#fef08a" />
+                                        <polygon points="0,2 -2,0 2,0" fill="#ef4444" />
+                                        <path d="M -2.5 4 Q 0 6.5, 2.5 4" stroke="#78350f" stroke-width="1.5" fill="none" />
+                                        
+                                        <!-- Whiskers -->
+                                        <line x1="-15" y1="0" x2="-8" y2="1" stroke="#78350f" stroke-width="1.2" />
+                                        <line x1="-15" y1="4" x2="-8" y2="3" stroke="#78350f" stroke-width="1.2" />
+                                        <line x1="15" y1="0" x2="8" y2="1" stroke="#78350f" stroke-width="1.2" />
+                                        <line x1="15" y1="4" x2="8" y2="3" stroke="#78350f" stroke-width="1.2" />
+
+                                        <!-- Center Pen Nib Pinpoint at EXACT (0, 0) Coordinates -->
+                                        <circle cx="0" cy="0" r="3" id="penTipCenter" fill="none" stroke="none" stroke-width="1" />
+
+                                        <!-- Pen State Badge on Sprite Corner -->
+                                        <g id="penBadgeGroup" transform="translate(10, 10)">
+                                            <circle cx="0" cy="0" r="7.5" id="svgPenIndicatorBg" fill="#64748b" stroke="#ffffff" stroke-width="1.5" />
+                                            <text x="0" y="3.5" id="svgPenIndicatorText" font-size="8.5" text-anchor="middle">🖊️</text>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="stage-info-bar">
+                                <span id="stageCoords">X: 0 | Y: 0</span>
+                                <span id="stageHeading">Direction: 90° (Right)</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Dedicated Action & Status Tray -->
+                <aside class="action-panel">
+                    <!-- 1. Progress & Score Card (FIRST) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Scratch Progress</span>
+                            <span id="progressCount" style="color:var(--accent);">0 / 4 Missions</span>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">100%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Target Mission Goal Card (SECOND) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Current Objective</span>
+                            <span style="font-size:0.8rem; color:var(--scratch-pen); font-weight:800;" id="missionBadge">Mission 1</span>
+                        </div>
+
+                        <div class="target-goal-box">
+                            <div class="target-goal-title" id="goalTitle">📏 Target: Draw a 100-step Line</div>
+                            <p class="target-goal-desc" id="goalDescription">
+                                Connect blocks to lower the pen and move 100 steps across the stage. Click 🏁 Go to test!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3. Action Buttons Card (THIRD) -->
+                    <div class="panel-card" style="gap:10px;">
+                        <button class="primary-btn" id="nextMissionBtn" style="width:100%; justify-content:center; display:none;">
+                            Next Mission →
+                        </button>
+                    </div>
+
+                    <!-- 4. Inspector Live Feedback Box (FOURTH) -->
+                    <div class="panel-card">
+                        <div class="panel-title">Script Execution Feedback</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Connect <code>when green flag clicked</code>, then add <code>pen down</code> and <code>move</code> blocks. Click <strong>🏁 Go</strong> to run your script!
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Certification Complete</div>
+                <h2>Sprite Programmer Certification</h2>
+                <p>Outstanding computational thinking! You mastered sequential block programming, pen states, and motion geometry in Scratch.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Scratch Programmer</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You successfully built and executed all 4 Scratch pen plotter algorithms!</p>
+                </div>
+
+                <!-- MANDATORY SCORECARD GRID -->
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Missions Solved</div>
+                        <div class="val" id="summaryCorrectVal">0 / 4</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Algorithm Sequence Breakdown (4 Missions)</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer (Slide-Over) -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Scratch block sequences &amp; execution rules.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Play Sprite Pen Plotter</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome to the <strong>Trinidad and Tobago Secondary School</strong> Scratch IT Lab! Your goal is to guide the sprite to draw target patterns across 4 missions.</p>
+                <ul>
+                    <li><strong>📦 Block Palette (Left):</strong> Click any block to add it to your script workspace in the middle.</li>
+                    <li><strong>📜 Script Workspace:</strong> Arrange your blocks top-to-bottom. Use ⬆️ / ⬇️ to reorder, or ✖️ to remove a block.</li>
+                    <li><strong>✏️ Pen Down vs 🖊️ Pen Up:</strong> <code>pen down</code> lowers the pen to draw as the sprite moves. <code>pen up</code> lifts the pen so the sprite can move across gaps without leaving a trail.</li>
+                    <li><strong>🧭 Move &amp; Turn:</strong> <code>move</code> travels forward in the current direction. <code>turn ↻ 90 deg</code> rotates clockwise; <code>turn ↺ 90 deg</code> rotates counter-clockwise.</li>
+                    <li><strong>➕ Block Summing &amp; Alternative Solutions:</strong> Multiple move blocks (like two <code>move 50</code> blocks) sum together to 100 steps! Both clockwise and counter-clockwise squares, as well as alternative valid L-turn orientations, are fully accepted.</li>
+                    <li><strong>🏁 Run (Green Flag):</strong> Click <strong>🏁 Go</strong> to watch your code execute step-by-step!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It! Launch Lab</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the simulation? All completed mission progress and scores will be cleared.</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Scratch Progress</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           4 SCRATCH PEN PLOTTER MISSIONS DATASET
+           ============================================================ */
+        const MASTER_MISSIONS = [
+            {
+                id: "mission_1",
+                title: "Mission 1: Draw a Line",
+                goalHeading: "📏 Target: Draw a 100-step Line",
+                goalDesc: "Construct a script that triggers on Green Flag, lowers the pen, and moves forward 100 steps (using a 'move 100' block or two 'move 50' blocks).",
+                startX: 60,
+                startY: 140,
+                startDir: 90, // Facing right
+                targetType: "line",
+                targetPathD: "M 60 140 L 160 140",
+                feedbackSuccess: "Perfect! You lowered the pen and moved forward 100 steps to draw the line!",
+                feedbackMissPenUp: "The sprite moved 100 steps, but no line was drawn because the pen was lifted! Add a 'pen down' block first.",
+                learningPoint: "Movement while the pen is down creates a line trail. Without 'pen down', the sprite moves silently."
+            },
+            {
+                id: "mission_2",
+                title: "Mission 2: Mind the Gap",
+                goalHeading: "〰️ Target: Two 50-step Lines with a Gap",
+                goalDesc: "Draw 50 steps, lift the pen (pen up) to cross 50 steps without drawing, then lower the pen (pen down) to draw the second 50 steps.",
+                startX: 40,
+                startY: 140,
+                startDir: 90,
+                targetType: "gap_lines",
+                targetPathD: "M 40 140 L 90 140 M 140 140 L 190 140",
+                feedbackSuccess: "Brilliant! You lifted the pen (pen up) to cross the gap without drawing, then lowered it (pen down) for the second segment!",
+                feedbackMissExtraLine: "Oops! An unwanted connecting line appeared across the gap because the pen stayed down. Use 'pen up' before moving across the gap.",
+                learningPoint: "Use 'pen up' whenever you need the sprite to reposition without leaving an ink trail."
+            },
+            {
+                id: "mission_3",
+                title: "Mission 3: Square Builder",
+                goalHeading: "⏹️ Target: Closed 100-step Square",
+                goalDesc: "Lower the pen and draw a 100x100 square. You can turn clockwise (↻ 90) or counter-clockwise (↺ 90), and use 'move 100' or two 'move 50' blocks per side!",
+                startX: 80,
+                startY: 110,
+                startDir: 90,
+                targetType: "square",
+                targetPathD: "M 80 110 L 180 110 L 180 210 L 80 210 Z",
+                feedbackSuccess: "Fantastic geometric programming! You combined 100-step sides with 90° turns to build a complete closed square.",
+                feedbackMissTurn: "The sprite turned at the wrong angle or direction. In a square, all 4 interior turns must be 90°.",
+                learningPoint: "A square requires four 90° turns in the same rotational direction (clockwise or counter-clockwise)."
+            },
+            {
+                id: "mission_4",
+                title: "Mission 4: Draw the Letter 'L'",
+                goalHeading: "🔤 Target: Draw the Letter 'L'",
+                goalDesc: "Guide the sprite to draw an L-shape (100-step stem & 50-step arm). You can use 'move 100' or two 'move 50' blocks, and turn in any correct 90° direction!",
+                startX: 110,
+                startY: 60,
+                startDir: 180, // Facing Down
+                targetType: "letter_l",
+                targetPathD: "M 110 60 L 110 160 L 160 160",
+                feedbackSuccess: "Masterful algorithm design! Your script successfully drew the letter L with a 100-step stem and a 50-step arm!",
+                feedbackMissTurn: "The sprite followed your instructions, but turned at the wrong angle. Make sure the stem and arm connect at a 90° corner.",
+                learningPoint: "Direction is relative to the sprite's current heading. An L-shape requires two connected perpendicular arms (100 and 50 steps)."
+            }
+        ];
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Connect <code>when green flag clicked</code>, then add <code>pen down</code> and <code>move</code> blocks. Click <strong>🏁 Go</strong> to run your script!`;
+
+        /* Simulation State */
+        const state = {
+            currentMissionIdx: 0,
+            activeScript: [],     // array of block objects: { id, type, label, category, param }
+            evaluations: {},      // keyed by mission ID
+            score: 0,
+            attempts: 0,
+            streak: 0,
+            bestStreak: 0,
+            theme: "light",
+            isRunning: false,
+            isCompletedCurrent: false,
+            // Sprite Runtime State
+            spriteX: 60,
+            spriteY: 140,
+            spriteDir: 90, // 0 = Up, 90 = Right, 180 = Down, 270 = Left
+            isPenDown: false,
+            drawnSegments: [] // array of { x1, y1, x2, y2, isDrawn }
+        };
+
+        let executionAbortController = null;
+
+        /* DOM Elements Cache */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+
+            // Studio UI Elements
+            missionHeadingText: document.getElementById("missionHeadingText"),
+            runFlagBtn: document.getElementById("runFlagBtn"),
+            stopScriptBtn: document.getElementById("stopScriptBtn"),
+            resetStageBtn: document.getElementById("resetStageBtn"),
+            clearScriptBtn: document.getElementById("clearScriptBtn"),
+            paletteList: document.getElementById("paletteList"),
+            scriptWorkspace: document.getElementById("scriptWorkspace"),
+            scriptStack: document.getElementById("scriptStack"),
+            emptyPrompt: document.getElementById("emptyPrompt"),
+            blockCountLabel: document.getElementById("blockCountLabel"),
+            spriteStatusLabel: document.getElementById("spriteStatusLabel"),
+            drawingSvg: document.getElementById("drawingSvg"),
+            targetGuidesGroup: document.getElementById("targetGuidesGroup"),
+            drawingTrailGroup: document.getElementById("drawingTrailGroup"),
+            spriteActorGroup: document.getElementById("spriteActorGroup"),
+            activeDrawnLine: document.getElementById("activeDrawnLine"),
+            svgPenIndicatorBg: document.getElementById("svgPenIndicatorBg"),
+            svgPenIndicatorText: document.getElementById("svgPenIndicatorText"),
+            penTipCenter: document.getElementById("penTipCenter"),
+            stageCoords: document.getElementById("stageCoords"),
+            stageHeading: document.getElementById("stageHeading"),
+
+            // Right Panel Elements
+            progressCount: document.getElementById("progressCount"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            missionBadge: document.getElementById("missionBadge"),
+            goalTitle: document.getElementById("goalTitle"),
+            goalDescription: document.getElementById("goalDescription"),
+            nextMissionBtn: document.getElementById("nextMissionBtn"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+
+            // Summary Screen Elements
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Reset Explanation Box Helper (RULE 4.4) */
+        function resetExplanationBox() {
+            if (dom.inspectorFeedbackBox) {
+                dom.inspectorFeedbackBox.className = "feedback-card";
+                dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+            }
+        }
+
+        /* Auto-Detect OS Color Scheme (RULE 2.5) */
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        /* Initialization */
+        init();
+
+        function init() {
+            bindEvents();
+            loadFreshState();
+            openModal(); // Mandatory Auto-Open on Launch
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // Mandatory Modal Dismissal: No backdrop click
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            // Scratch Studio Actions
+            dom.runFlagBtn.addEventListener("click", handleRunScript);
+            dom.stopScriptBtn.addEventListener("click", handleStopScript);
+            dom.resetStageBtn.addEventListener("click", handleResetStageOnly);
+            dom.clearScriptBtn.addEventListener("click", handleClearScript);
+            dom.nextMissionBtn.addEventListener("click", advanceToNextMission);
+
+            // Palette Block Click Listeners
+            const paletteBlocks = dom.paletteList.querySelectorAll(".scratch-block");
+            paletteBlocks.forEach(b => {
+                b.addEventListener("click", () => addBlockToScript(b.dataset.type));
+            });
+
+            // Global Keyboard Shortcuts
+            window.addEventListener("keydown", (e) => {
+                if (e.key === " " || e.key.toLowerCase() === "g") {
+                    if (document.activeElement.tagName !== "BUTTON" && !state.isRunning) {
+                        e.preventDefault();
+                        handleRunScript();
+                    }
+                }
+            });
+
+            // Real-time System Theme Preference Listener
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "game") {
+                renderCurrentMission();
+            } else if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        function loadFreshState() {
+            state.currentMissionIdx = 0;
+            state.activeScript = [];
+            state.evaluations = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.isRunning = false;
+            state.isCompletedCurrent = false;
+
+            resetExplanationBox();
+
+            try {
+                localStorage.removeItem("scratch_plotter_theme");
+            } catch (e) {}
+
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+        }
+
+        /* Render Current Mission Objective & Stage */
+        function renderCurrentMission() {
+            const mission = MASTER_MISSIONS[state.currentMissionIdx];
+            if (!mission) return;
+
+            state.isCompletedCurrent = false;
+            state.drawnSegments = [];
+
+            dom.missionHeadingText.textContent = `🎯 ${mission.title}`;
+            dom.missionBadge.textContent = `Mission ${state.currentMissionIdx + 1} of ${MASTER_MISSIONS.length}`;
+            dom.goalTitle.textContent = mission.goalHeading;
+            dom.goalDescription.textContent = mission.goalDesc;
+            dom.nextMissionBtn.style.display = "none";
+
+            // If script is empty, populate with starting Green Flag block
+            if (state.activeScript.length === 0) {
+                state.activeScript.push(createBlockObject("flag"));
+            }
+
+            renderScriptWorkspace();
+            resetSpriteToStartPosition();
+            drawTargetGuides();
+            updateDrawingCanvas();
+            updateDashboardMetrics();
+        }
+
+        /* Create Block Data Object */
+        let blockIdCounter = 1;
+        function createBlockObject(type) {
+            blockIdCounter++;
+            if (type === "flag") {
+                return { id: `blk_${blockIdCounter}`, type: "flag", label: "when ⚑ clicked", icon: "🏁", category: "events" };
+            } else if (type === "pen_down") {
+                return { id: `blk_${blockIdCounter}`, type: "pen_down", label: "pen down", icon: "✏️", category: "pen" };
+            } else if (type === "pen_up") {
+                return { id: `blk_${blockIdCounter}`, type: "pen_up", label: "pen up", icon: "🖊️", category: "pen" };
+            } else if (type === "move_50") {
+                return { id: `blk_${blockIdCounter}`, type: "move_50", label: "move 50 steps", icon: "🚶", category: "motion", steps: 50 };
+            } else if (type === "move_100") {
+                return { id: `blk_${blockIdCounter}`, type: "move_100", label: "move 100 steps", icon: "🏃", category: "motion", steps: 100 };
+            } else if (type === "turn_cw") {
+                return { id: `blk_${blockIdCounter}`, type: "turn_cw", label: "turn ↻ 90 deg", icon: "↷", category: "motion", deg: 90 };
+            } else if (type === "turn_ccw") {
+                return { id: `blk_${blockIdCounter}`, type: "turn_ccw", label: "turn ↺ 90 deg", icon: "↶", category: "motion", deg: -90 };
+            }
+        }
+
+        function addBlockToScript(type) {
+            if (state.isRunning) return;
+            const newBlock = createBlockObject(type);
+            state.activeScript.push(newBlock);
+            renderScriptWorkspace();
+            playAudioTone(380, 0.06); // Crisp click
+        }
+
+        function removeBlockFromScript(index) {
+            if (state.isRunning) return;
+            state.activeScript.splice(index, 1);
+            renderScriptWorkspace();
+            playAudioTone(240, 0.08);
+        }
+
+        function moveBlock(index, direction) {
+            if (state.isRunning) return;
+            const targetIdx = index + direction;
+            if (targetIdx < 0 || targetIdx >= state.activeScript.length) return;
+            const temp = state.activeScript[index];
+            state.activeScript[index] = state.activeScript[targetIdx];
+            state.activeScript[targetIdx] = temp;
+            renderScriptWorkspace();
+            playAudioTone(320, 0.05);
+        }
+
+        /* Render Block Workspace Stack */
+        function renderScriptWorkspace() {
+            dom.scriptStack.innerHTML = "";
+            const count = state.activeScript.length;
+            dom.blockCountLabel.textContent = `${count} Block${count === 1 ? '' : 's'}`;
+
+            if (count === 0) {
+                dom.emptyPrompt.style.display = "block";
+                return;
+            }
+            dom.emptyPrompt.style.display = "none";
+
+            state.activeScript.forEach((block, idx) => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "script-item-wrapper";
+                wrapper.id = `wrapper_${block.id}`;
+
+                wrapper.innerHTML = `
+                    <div class="scratch-block ${block.category}" id="render_${block.id}" title="${escapeHtml(block.label)}">
+                        <span class="block-icon">${block.icon}</span>
+                        <span>${escapeHtml(block.label)}</span>
+                    </div>
+                    <div class="block-action-btns">
+                        ${idx > 0 ? `<button class="mini-icon-btn" onclick="window.simMoveBlock(${idx}, -1)" title="Move Up" aria-label="Move Up">▲</button>` : ''}
+                        ${idx < count - 1 ? `<button class="mini-icon-btn" onclick="window.simMoveBlock(${idx}, 1)" title="Move Down" aria-label="Move Down">▼</button>` : ''}
+                        <button class="mini-icon-btn" onclick="window.simRemoveBlock(${idx})" title="Delete Block" aria-label="Delete Block" style="color:var(--danger-color);">✖</button>
+                    </div>
+                `;
+                dom.scriptStack.appendChild(wrapper);
+            });
+        }
+
+        // Global bridge for inline onclick handlers
+        window.simRemoveBlock = removeBlockFromScript;
+        window.simMoveBlock = moveBlock;
+
+        function handleClearScript() {
+            if (state.isRunning) return;
+            state.activeScript = [createBlockObject("flag")];
+            renderScriptWorkspace();
+            handleResetStageOnly();
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = `
+                🗑️ Workspace cleared! Ready for a fresh script. Click blocks from the palette to start building.
+            `;
+        }
+
+        /* Stage Position Reset */
+        function resetSpriteToStartPosition() {
+            const mission = MASTER_MISSIONS[state.currentMissionIdx];
+            if (!mission) return;
+
+            state.spriteX = mission.startX;
+            state.spriteY = mission.startY;
+            state.spriteDir = mission.startDir;
+            state.isPenDown = false;
+
+            updateSpriteDOM();
+        }
+
+        function handleResetStageOnly() {
+            if (state.isRunning) handleStopScript();
+            state.drawnSegments = [];
+            if (dom.activeDrawnLine) dom.activeDrawnLine.style.display = "none";
+            resetSpriteToStartPosition();
+            updateDrawingCanvas();
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = `
+                ↺ Stage reset! Sprite returned to starting coordinates. Your script remains intact.
+            `;
+        }
+
+        function updateSpriteDOM() {
+            if (dom.spriteActorGroup) {
+                dom.spriteActorGroup.setAttribute("transform", `translate(${state.spriteX}, ${state.spriteY}) rotate(${state.spriteDir - 90})`);
+            }
+
+            if (dom.svgPenIndicatorBg && dom.svgPenIndicatorText) {
+                dom.svgPenIndicatorBg.setAttribute("fill", state.isPenDown ? "#0fbd8c" : "#64748b");
+                dom.svgPenIndicatorText.textContent = state.isPenDown ? "✏️" : "🖊️";
+            }
+
+            if (dom.penTipCenter) {
+                dom.penTipCenter.setAttribute("fill", state.isPenDown ? "#0fbd8c" : "none");
+                dom.penTipCenter.setAttribute("stroke", state.isPenDown ? "#ffffff" : "none");
+            }
+
+            if (dom.spriteStatusLabel) {
+                dom.spriteStatusLabel.textContent = `Pen: ${state.isPenDown ? 'DOWN ✏️' : 'UP 🖊️'}`;
+                dom.spriteStatusLabel.style.color = state.isPenDown ? 'var(--scratch-pen)' : 'var(--muted)';
+            }
+
+            if (dom.stageCoords) {
+                dom.stageCoords.textContent = `X: ${Math.round(state.spriteX)} | Y: ${Math.round(state.spriteY)}`;
+            }
+            if (dom.stageHeading) {
+                dom.stageHeading.textContent = `Direction: ${state.spriteDir}°`;
+            }
+        }
+
+        /* Draw Faint Target Guide Guidelines */
+        function drawTargetGuides() {
+            const mission = MASTER_MISSIONS[state.currentMissionIdx];
+            if (!mission) return;
+
+            dom.targetGuidesGroup.innerHTML = `
+                <path d="${mission.targetPathD}" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="6,6" stroke-linecap="round" opacity="0.6"/>
+            `;
+        }
+
+        /* Draw Student Real Trail Segments */
+        function updateDrawingCanvas() {
+            let svgPaths = "";
+            state.drawnSegments.forEach(seg => {
+                if (seg.isDrawn) {
+                    svgPaths += `<line x1="${seg.x1}" y1="${seg.y1}" x2="${seg.x2}" y2="${seg.y2}" stroke="#0284c7" stroke-width="4.5" stroke-linecap="round" />`;
+                }
+            });
+            dom.drawingTrailGroup.innerHTML = svgPaths;
+        }
+
+        /* EXECUTE SCRATCH SCRIPT STEP-BY-STEP */
+        async function handleRunScript() {
+            if (state.isRunning) return;
+
+            const mission = MASTER_MISSIONS[state.currentMissionIdx];
+            if (!mission) return;
+
+            // Check if script has blocks
+            if (state.activeScript.length === 0 || state.activeScript[0].type !== "flag") {
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ⚠️ <strong>Missing Trigger:</strong> Your script must start with a <code>when green flag clicked</code> block!
+                `;
+                playAudioTone(220, 0.25);
+                return;
+            }
+
+            state.isRunning = true;
+            dom.runFlagBtn.classList.add("running");
+            dom.runFlagBtn.disabled = true;
+            dom.stopScriptBtn.disabled = false;
+            handleResetStageOnly();
+
+            playAudioTone(523, 0.1, 659, 0.12); // Green Flag chime
+
+            executionAbortController = new AbortController();
+            const signal = executionAbortController.signal;
+
+            let executionError = null;
+
+            try {
+                for (let i = 0; i < state.activeScript.length; i++) {
+                    if (signal.aborted) break;
+
+                    const block = state.activeScript[i];
+                    const blockEl = document.getElementById(`render_${block.id}`);
+                    if (blockEl) blockEl.classList.add("executing");
+
+                    await executeSingleBlock(block, signal);
+
+                    if (blockEl) blockEl.classList.remove("executing");
+                    await sleep(250, signal);
+                }
+            } catch (err) {
+                if (err.name !== "AbortError") {
+                    executionError = err;
+                }
+            }
+
+            dom.runFlagBtn.classList.remove("running");
+            dom.runFlagBtn.disabled = false;
+            dom.stopScriptBtn.disabled = true;
+            state.isRunning = false;
+
+            if (!signal.aborted) {
+                evaluateMissionOutcome();
+            }
+        }
+
+        function handleStopScript() {
+            if (executionAbortController) {
+                executionAbortController.abort();
+            }
+            if (dom.activeDrawnLine) dom.activeDrawnLine.style.display = "none";
+            dom.runFlagBtn.classList.remove("running");
+            dom.runFlagBtn.disabled = false;
+            dom.stopScriptBtn.disabled = true;
+            state.isRunning = false;
+
+            // Remove executing glow from all blocks
+            const blocks = document.querySelectorAll(".scratch-block.executing");
+            blocks.forEach(b => b.classList.remove("executing"));
+
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = `🛑 Script execution stopped.`;
+        }
+
+        async function executeSingleBlock(block, signal) {
+            if (block.type === "flag") {
+                // Trigger event
+                await sleep(150, signal);
+            } else if (block.type === "pen_down") {
+                state.isPenDown = true;
+                updateSpriteDOM();
+                playAudioTone(420, 0.08); // Lower pen
+                await sleep(200, signal);
+            } else if (block.type === "pen_up") {
+                state.isPenDown = false;
+                updateSpriteDOM();
+                playAudioTone(540, 0.08); // Lift pen
+                await sleep(200, signal);
+            } else if (block.type === "move_50" || block.type === "move_100") {
+                const steps = block.steps;
+                const rad = (state.spriteDir * Math.PI) / 180;
+                const startX = state.spriteX;
+                const startY = state.spriteY;
+                const endX = startX + Math.sin(rad) * steps;
+                const endY = startY - Math.cos(rad) * steps;
+
+                // Animate smooth progressive movement
+                const duration = steps === 100 ? 400 : 250;
+                const frames = 12;
+                const frameDelay = duration / frames;
+
+                for (let f = 1; f <= frames; f++) {
+                    if (signal.aborted) {
+                        if (dom.activeDrawnLine) dom.activeDrawnLine.style.display = "none";
+                        return;
+                    }
+                    const progress = f / frames;
+                    state.spriteX = startX + (endX - startX) * progress;
+                    state.spriteY = startY + (endY - startY) * progress;
+                    updateSpriteDOM();
+
+                    // Real-time live line segment directly following the pen
+                    if (state.isPenDown && dom.activeDrawnLine) {
+                        dom.activeDrawnLine.setAttribute("x1", startX);
+                        dom.activeDrawnLine.setAttribute("y1", startY);
+                        dom.activeDrawnLine.setAttribute("x2", state.spriteX);
+                        dom.activeDrawnLine.setAttribute("y2", state.spriteY);
+                        dom.activeDrawnLine.style.display = "block";
+                    }
+
+                    await sleep(frameDelay, signal);
+                }
+
+                state.spriteX = endX;
+                state.spriteY = endY;
+                if (dom.activeDrawnLine) dom.activeDrawnLine.style.display = "none";
+
+                // Record segment
+                state.drawnSegments.push({
+                    x1: startX,
+                    y1: startY,
+                    x2: endX,
+                    y2: endY,
+                    isDrawn: state.isPenDown
+                });
+
+                updateDrawingCanvas();
+                if (state.isPenDown) playAudioTone(300, 0.08);
+            } else if (block.type === "turn_cw" || block.type === "turn_ccw") {
+                const deltaDeg = block.deg;
+                const startDeg = state.spriteDir;
+                const endDeg = (startDeg + deltaDeg + 360) % 360;
+
+                const frames = 8;
+                for (let f = 1; f <= frames; f++) {
+                    if (signal.aborted) return;
+                    state.spriteDir = startDeg + deltaDeg * (f / frames);
+                    updateSpriteDOM();
+                    await sleep(25, signal);
+                }
+                state.spriteDir = endDeg;
+                updateSpriteDOM();
+                playAudioTone(480, 0.06);
+            }
+        }
+
+        /* MERGE CONSECUTIVE COLLINEAR SEGMENTS WITH SAME PEN STATE */
+        function getMergedPathSegments(rawSegments) {
+            if (!rawSegments || rawSegments.length === 0) return [];
+            
+            const merged = [];
+            let current = null;
+
+            for (const seg of rawSegments) {
+                const segLen = Math.hypot(seg.x2 - seg.x1, seg.y2 - seg.y1);
+                if (segLen < 0.5) continue; // Skip zero-length jitter
+
+                // Angle in degrees [0, 360)
+                const angle = (Math.atan2(seg.y2 - seg.y1, seg.x2 - seg.x1) * 180 / Math.PI + 360) % 360;
+
+                if (!current) {
+                    current = {
+                        x1: seg.x1,
+                        y1: seg.y1,
+                        x2: seg.x2,
+                        y2: seg.y2,
+                        isDrawn: seg.isDrawn,
+                        length: segLen,
+                        angle: angle
+                    };
+                } else {
+                    const angleDiff = Math.abs(current.angle - angle);
+                    const isCollinear = (angleDiff < 4 || Math.abs(angleDiff - 360) < 4);
+                    const isContiguous = Math.hypot(current.x2 - seg.x1, current.y2 - seg.y1) < 2;
+
+                    if (isCollinear && isContiguous && current.isDrawn === seg.isDrawn) {
+                        current.x2 = seg.x2;
+                        current.y2 = seg.y2;
+                        current.length += segLen;
+                    } else {
+                        merged.push(current);
+                        current = {
+                            x1: seg.x1,
+                            y1: seg.y1,
+                            x2: seg.x2,
+                            y2: seg.y2,
+                            isDrawn: seg.isDrawn,
+                            length: segLen,
+                            angle: angle
+                        };
+                    }
+                }
+            }
+
+            if (current) merged.push(current);
+            return merged;
+        }
+
+        /* STRICT MULTI-CONDITION EVALUATION: ONLY ACCEPT EXACT TARGET PATTERNS WITH NO EXTRA LINES */
+        function evaluateMissionOutcome() {
+            const mission = MASTER_MISSIONS[state.currentMissionIdx];
+            if (!mission) return;
+
+            state.attempts += 1;
+            const merged = getMergedPathSegments(state.drawnSegments);
+            const drawnMerged = merged.filter(s => s.isDrawn);
+            const totalDrawnLength = drawnMerged.reduce((sum, s) => sum + s.length, 0);
+
+            let isMatch = false;
+            let successMessage = mission.feedbackSuccess;
+            let diagnosticMsg = "";
+
+            if (state.currentMissionIdx === 0) {
+                // ==========================================
+                // MISSION 1: Draw a 100-step Line (EXACTLY 1 drawn line, no extra lines)
+                // ==========================================
+                if (drawnMerged.length === 0) {
+                    diagnosticMsg = mission.feedbackMissPenUp;
+                } else if (drawnMerged.length > 1) {
+                    diagnosticMsg = `Extra lines detected (${drawnMerged.length} separate lines drawn)! You must only draw a single continuous 100-step line without extra lines.`;
+                } else if (totalDrawnLength >= 88 && totalDrawnLength <= 112) {
+                    isMatch = true;
+                    if (state.activeScript.filter(b => b.type.startsWith("move_")).length > 1) {
+                        successMessage = "Perfect! Your move blocks summed to exactly 100 steps with the pen down!";
+                    } else {
+                        successMessage = "Perfect! You lowered the pen and moved forward 100 steps to draw the line!";
+                    }
+                } else if (totalDrawnLength < 88) {
+                    diagnosticMsg = `The line was too short (${Math.round(totalDrawnLength)} steps drawn instead of 100). Add more move steps!`;
+                } else {
+                    diagnosticMsg = `The line was too long (${Math.round(totalDrawnLength)} steps drawn instead of 100). No extra line length is allowed.`;
+                }
+
+            } else if (state.currentMissionIdx === 1) {
+                // ==========================================
+                // MISSION 2: Mind the Gap (EXACTLY 2 drawn lines of 50 steps separated by a 50-step gap)
+                // ==========================================
+                if (drawnMerged.length === 0) {
+                    diagnosticMsg = "The sprite moved, but its pen was lifted. Add 'pen down' to draw the lines.";
+                } else if (merged.length === 1 && merged[0].isDrawn) {
+                    diagnosticMsg = mission.feedbackMissExtraLine; // Pen stayed down continuously across gap
+                } else if (drawnMerged.length > 2) {
+                    diagnosticMsg = `Extra lines drawn (${drawnMerged.length} lines detected)! The pattern only requires two 50-step lines.`;
+                } else if (merged.length > 3) {
+                    diagnosticMsg = "Extra movements were detected after completing the two lines!";
+                } else if (merged.length === 3) {
+                    const seg1 = merged[0];
+                    const seg2 = merged[1];
+                    const seg3 = merged[2];
+
+                    const seg1Ok = seg1.isDrawn && seg1.length >= 40 && seg1.length <= 62;
+                    const seg2Ok = !seg2.isDrawn && seg2.length >= 40 && seg2.length <= 62;
+                    const seg3Ok = seg3.isDrawn && seg3.length >= 40 && seg3.length <= 62;
+
+                    if (seg1Ok && seg2Ok && seg3Ok) {
+                        isMatch = true;
+                        successMessage = "Brilliant! You lifted the pen (pen up) to cross the gap without drawing, then lowered it (pen down) for the second segment!";
+                    } else if (!seg2Ok && seg2.isDrawn) {
+                        diagnosticMsg = "Your pen stayed down across the gap! Use 'pen up' to move without drawing.";
+                    } else if (!seg3Ok) {
+                        diagnosticMsg = "Make sure to lower the pen again with 'pen down' to draw the second 50-step line!";
+                    } else {
+                        diagnosticMsg = "Check the length of each section: exactly 50 steps drawn, 50 steps gap, 50 steps drawn.";
+                    }
+                } else if (drawnMerged.length === 1 && drawnMerged[0].length <= 62) {
+                    diagnosticMsg = "You drew the first 50-step line, but remember to lift the pen across the gap and draw the second 50-step line!";
+                } else {
+                    diagnosticMsg = "Check your sequence: pen down → move 50 → pen up → move 50 → pen down → move 50.";
+                }
+
+            } else if (state.currentMissionIdx === 2) {
+                // ==========================================
+                // MISSION 3: Square Builder (EXACTLY 4 sides forming a closed 100x100 square, no extra lines!)
+                // ==========================================
+                if (drawnMerged.length === 0) {
+                    diagnosticMsg = "The sprite moved, but its pen was lifted. Remember to lower the pen with 'pen down'!";
+                } else if (drawnMerged.length > 4) {
+                    diagnosticMsg = `Extra lines drawn (${drawnMerged.length} sides detected)! A square only has 4 sides; no extra lines allowed afterwards.`;
+                } else if (drawnMerged.length < 4) {
+                    diagnosticMsg = `The square was incomplete (${drawnMerged.length} of 4 sides drawn). Make sure to draw all 4 sides of 100 steps!`;
+                } else {
+                    // Exactly 4 sides drawn
+                    const sides = drawnMerged;
+                    const allSides100 = sides.every(s => s.length >= 85 && s.length <= 118);
+                    
+                    // Check corners between consecutive sides
+                    let isSquareAngles = true;
+                    let firstTurnSign = 0;
+
+                    for (let i = 0; i < 3; i++) {
+                        let diff = (sides[i+1].angle - sides[i].angle + 360) % 360;
+                        let isCW = Math.abs(diff - 90) <= 15;
+                        let isCCW = Math.abs(diff - 270) <= 15;
+
+                        if (!isCW && !isCCW) {
+                            isSquareAngles = false;
+                            break;
+                        }
+
+                        const currentTurnSign = isCW ? 1 : -1;
+                        if (firstTurnSign === 0) firstTurnSign = currentTurnSign;
+                        else if (firstTurnSign !== currentTurnSign) {
+                            isSquareAngles = false; // Mixed turn directions
+                            break;
+                        }
+                    }
+
+                    // Check closure: distance between end of side 4 and start of side 1
+                    const closureDist = Math.hypot(sides[3].x2 - sides[0].x1, sides[3].y2 - sides[0].y1);
+                    const isClosed = closureDist <= 22;
+
+                    if (allSides100 && isSquareAngles && isClosed) {
+                        isMatch = true;
+                        const turnType = firstTurnSign === 1 ? "clockwise (↻)" : "counter-clockwise (↺)";
+                        successMessage = `Fantastic geometric programming! You built a complete 100x100 closed square turning ${turnType}!`;
+                    } else if (!allSides100) {
+                        diagnosticMsg = "Each of the 4 sides must be 100 steps (you can use 'move 100' or two 'move 50' blocks per side).";
+                    } else if (!isSquareAngles) {
+                        diagnosticMsg = "In a square, all turns must be 90° in the same direction (all clockwise ↻ or all counter-clockwise ↺).";
+                    } else {
+                        diagnosticMsg = "The square did not close at the starting corner. Check your move distances and turn angles.";
+                    }
+                }
+
+            } else if (state.currentMissionIdx === 3) {
+                // ==========================================
+                // MISSION 4: Draw the Letter 'L' (EXACTLY 2 arms: Stem 100 & Base 50, no extra lines!)
+                // ==========================================
+                if (drawnMerged.length === 0) {
+                    diagnosticMsg = "The sprite moved, but its pen was lifted. Remember to lower the pen with 'pen down'!";
+                } else if (drawnMerged.length > 2) {
+                    diagnosticMsg = `Extra lines drawn (${drawnMerged.length} arms detected)! The letter L only consists of 2 perpendicular arms.`;
+                } else if (drawnMerged.length === 1) {
+                    diagnosticMsg = "Only one arm was drawn. To complete the letter L, add a 90° turn and move the second arm!";
+                } else {
+                    // Exactly 2 connected drawn segments that form an L
+                    const seg1 = drawnMerged[0];
+                    const seg2 = drawnMerged[1];
+
+                    const isStemFirst = (seg1.length >= 85 && seg1.length <= 118) && (seg2.length >= 40 && seg2.length <= 65);
+                    const isBaseFirst = (seg1.length >= 40 && seg1.length <= 65) && (seg2.length >= 85 && seg2.length <= 118);
+
+                    // Angle difference between the two segments
+                    const angleDiff = (seg2.angle - seg1.angle + 360) % 360;
+                    const isPerpendicular = Math.abs(angleDiff - 90) <= 15 || Math.abs(angleDiff - 270) <= 15;
+                    const isConnected = Math.hypot(seg1.x2 - seg2.x1, seg1.y2 - seg2.y1) <= 15;
+
+                    if ((isStemFirst || isBaseFirst) && isPerpendicular && isConnected) {
+                        isMatch = true;
+                        successMessage = "Masterful algorithm design! Your script successfully drew the letter L with a 100-step stem and 50-step arm!";
+                    } else if (!isPerpendicular) {
+                        diagnosticMsg = "The two arms must meet at a 90° angle (turn 90° between moves).";
+                    } else if (!isStemFirst && !isBaseFirst) {
+                        diagnosticMsg = `Check your arm lengths: one arm must be 100 steps and the other 50 steps without extra length.`;
+                    } else {
+                        diagnosticMsg = "Make sure the two arms connect continuously to form the letter L.";
+                    }
+                }
+            }
+
+            // Save Evaluation
+            state.evaluations[mission.id] = {
+                title: mission.title,
+                isCorrect: isMatch,
+                scriptCount: state.activeScript.length,
+                feedback: isMatch ? successMessage : diagnosticMsg,
+                learningPoint: mission.learningPoint
+            };
+
+            if (isMatch) {
+                state.score += 25;
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+                state.isCompletedCurrent = true;
+
+                playAudioTone(523.25, 0.1, 659.25, 0.15, 783.99, 0.3); // Victory Triad
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    🎉 <strong>Mission Complete!</strong> ${escapeHtml(successMessage)}
+                `;
+
+                dom.nextMissionBtn.style.display = "inline-flex";
+                if (state.currentMissionIdx === MASTER_MISSIONS.length - 1) {
+                    dom.nextMissionBtn.textContent = "Finish Certification 🏆";
+                } else {
+                    dom.nextMissionBtn.textContent = `Next Mission (${state.currentMissionIdx + 2}/4) →`;
+                }
+            } else {
+                state.streak = 0;
+                playAudioTone(220, 0.3); // Mismatch tone
+
+                dom.inspectorFeedbackBox.className = "feedback-card danger";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ❌ <strong>Algorithm Mismatch:</strong> ${escapeHtml(diagnosticMsg)} Click <strong>↺ Reset Stage</strong>, adjust your blocks, and try again!
+                `;
+            }
+
+            updateDashboardMetrics();
+            renderHistoryList();
+        }
+
+        /* ADVANCE TO NEXT MISSION OR SUMMARY */
+        function advanceToNextMission() {
+            if (state.currentMissionIdx < MASTER_MISSIONS.length - 1) {
+                state.currentMissionIdx += 1;
+                state.activeScript = []; // Clear for next challenge
+                resetExplanationBox();
+                renderCurrentMission();
+            } else {
+                showScreen("summary");
+            }
+        }
+
+        function updateDashboardMetrics() {
+            const evaluatedCount = Object.keys(state.evaluations).length;
+            const total = MASTER_MISSIONS.length;
+            const pct = Math.round((evaluatedCount / total) * 100);
+
+            dom.progressCount.textContent = `${evaluatedCount} / ${total} Missions`;
+            dom.progressPercent.textContent = `${pct}% Complete`;
+            dom.progressFillBar.style.width = `${pct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const acc = evaluatedCount === 0 ? 100 : Math.round((correctCount / evaluatedCount) * 100);
+            dom.accuracyVal.textContent = `${acc}%`;
+        }
+
+        /* Render Summary Screen */
+        function renderSummaryScreen() {
+            const total = MASTER_MISSIONS.length;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = Math.round((correctCount / total) * 100);
+
+            dom.summaryScoreVal.textContent = state.score;
+            dom.summaryAccuracyVal.textContent = `${accuracy}%`;
+            dom.summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            dom.summaryCorrectVal.textContent = `${correctCount} / ${total}`;
+
+            if (accuracy >= 90) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "Master Scratch Programmer";
+                dom.badgeDesc.textContent = `Flawless Scratch programming! You achieved ${accuracy}% accuracy (${correctCount}/${total} solved). You understand sequential block logic, pen commands, and motion geometry thoroughly!`;
+            } else if (accuracy >= 70) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Code Apprentice";
+                dom.badgeDesc.textContent = `Great programming! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Review the missed concepts below to strengthen your understanding of pen states!`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Scratch Trainee";
+                dom.badgeDesc.textContent = `You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Remember: 'pen down' draws, 'pen up' lifts, and scripts always execute top-to-bottom!`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+            MASTER_MISSIONS.forEach(mission => {
+                const evalData = state.evaluations[mission.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text); font-size:0.98rem;">🐱 ${escapeHtml(mission.title)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Solved' : '❌ Missed / Incomplete'}
+                        </span>
+                    </div>
+                    <p style="margin:4px 0 0; color:var(--text-soft); font-size:0.88rem; line-height:1.5;">
+                        ${isCorrect ? escapeHtml(mission.feedbackSuccess) : escapeHtml(mission.learningPoint)}
+                    </p>
+                `;
+                dom.summaryDetailsList.appendChild(card);
+            });
+        }
+
+        /* Render Review Memory Drawer */
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedList = MASTER_MISSIONS.filter(m => state.evaluations[m.id]);
+
+            if (evaluatedList.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:16px; color:var(--muted); text-align:center;">No completed mission evaluations yet.</div>`;
+                return;
+            }
+
+            evaluatedList.forEach(mission => {
+                const evalData = state.evaluations[mission.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const item = document.createElement("div");
+                item.className = "summary-item-card";
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text); font-size:0.95rem;">🎯 ${escapeHtml(mission.title)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Needs Review'}
+                        </span>
+                    </div>
+                    <div style="font-size:0.86rem; color:var(--text-soft); margin-top:4px; line-height:1.5;">
+                        ${escapeHtml(evalData.feedback || mission.learningPoint)}
+                    </div>
+                `;
+                dom.historyList.appendChild(item);
+            });
+        }
+
+        /* Modal & Drawer Controls */
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try { sessionStorage.setItem("user_toggled_theme", state.theme); } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {}
+        }
+
+        /* Reset Confirmation (Rule 4.4 & 4.5) */
+        function confirmReset() {
+            closeResetModal();
+
+            state.currentMissionIdx = 0;
+            state.activeScript = [];
+            state.evaluations = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.isRunning = false;
+            state.isCompletedCurrent = false;
+
+            resetExplanationBox();
+            updateDashboardMetrics();
+            showScreen("home");
+        }
+
+        /* Helper: Promise Sleep with AbortSignal support */
+        function sleep(ms, signal) {
+            return new Promise((resolve, reject) => {
+                if (signal && signal.aborted) {
+                    return reject(new DOMException("Aborted", "AbortError"));
+                }
+                const timer = setTimeout(() => resolve(), ms);
+                if (signal) {
+                    signal.addEventListener("abort", () => {
+                        clearTimeout(timer);
+                        reject(new DOMException("Aborted", "AbortError"));
+                    });
+                }
+            });
+        }
+
+        /* Web Audio Synthesis Helper */
+        function playAudioTone(freq1, dur1, freq2, dur2, freq3, dur3) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const now = ctx.currentTime;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.setValueAtTime(freq1, now);
+                if (freq2) osc.frequency.setValueAtTime(freq2, now + (dur1 || 0.1));
+                if (freq3) osc.frequency.setValueAtTime(freq3, now + (dur2 || 0.2));
+
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + (dur3 || dur2 || dur1 || 0.25));
+
+                osc.start(now);
+                osc.stop(now + (dur3 || dur2 || dur1 || 0.26));
+            } catch (e) {}
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
