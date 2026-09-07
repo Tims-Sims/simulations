@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 The Distortion Lab — Manipulate Images</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 2 INFORMATION TECHNOLOGY — THE DISTORTION LAB
+           Lesson: Manipulate Images (Proportional vs Distorted Resizing)
+           Single-file HTML/CSS/JS - Offline Friendly
+           Trinidad and Tobago Secondary Schools — IT Computer Lab
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Status Colors */
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+
+            /* Gallery Gold Theme */
+            --gold-frame: #d97706;
+            --gold-light: #fbbf24;
+            --gold-glow: rgba(245, 158, 11, 0.4);
+            --gold-gradient: linear-gradient(135deg, #b45309 0%, #f59e0b 50%, #fef3c7 70%, #d97706 100%);
+            --wall-color: #161e31;
+            --wall-pattern: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+
+            --wall-color: #e2e8f0;
+            --wall-pattern: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* Lock outer window when in game mode so ONLY internal containers scroll */
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1340px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn,
+        .success-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .success-btn {
+            background: linear-gradient(135deg, var(--safe-color), #059669);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+        }
+
+        .hero-card {
+            width: min(100%, 880px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: clamp(2.1rem, 4vw, 3.1rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 740px);
+            margin: 0 auto 28px;
+            color: var(--text-soft);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 20px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 6px;
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.5;
+            width: 100%;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Screen 2: Game Dashboard Screen (75% Left Interactive Stage / 25% Right Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Interactive Stage (75%) */
+        .stage-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        .stage-header {
+            padding: 12px 20px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .stage-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stage-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-chip {
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: var(--surface-3);
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .tool-chip.active {
+            background: color-mix(in srgb, var(--accent) 20%, var(--surface-3));
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Gallery Wall & Frame Container */
+        .gallery-viewport {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            padding: 24px;
+            background-color: var(--wall-color);
+            background-image: var(--wall-pattern);
+            background-size: 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .gallery-wall-mount {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            max-width: 100%;
+        }
+
+        /* Golden Exhibition Frame */
+        .gold-display-frame {
+            position: relative;
+            padding: 18px;
+            border-radius: 12px;
+            background: var(--gold-gradient);
+            box-shadow:
+                0 14px 28px rgba(0, 0, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.6),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .gold-display-frame.snap-ready {
+            box-shadow:
+                0 0 35px rgba(16, 185, 129, 0.7),
+                0 14px 28px rgba(0, 0, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .gold-display-frame.distorted-alert {
+            animation: frameWobble 0.6s ease;
+            box-shadow:
+                0 0 30px rgba(239, 68, 68, 0.7),
+                0 14px 28px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes frameWobble {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-1.5deg) scale(0.99); }
+            40% { transform: rotate(1.5deg) scale(1.01); }
+            60% { transform: rotate(-1deg); }
+            80% { transform: rotate(1deg); }
+        }
+
+        /* Target Matting Inside Frame */
+        .frame-matting {
+            background: #0f172a;
+            border-radius: 6px;
+            box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.7);
+            border: 2px dashed rgba(245, 158, 11, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: visible;
+        }
+
+        .frame-matting.target-matched {
+            border: 2px solid var(--safe-color);
+            box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Frame Wall Plaque */
+        .gallery-plaque {
+            background: linear-gradient(180deg, #334155, #1e293b);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 8px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            max-width: 480px;
+        }
+
+        .plaque-title {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #fef08a;
+            letter-spacing: 0.04em;
+            margin: 0;
+        }
+
+        .plaque-meta {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        /* Interactive Artwork Container & Transform Box */
+        .artwork-transform-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: grab;
+            transition: filter 0.2s ease;
+        }
+
+        .artwork-transform-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .artwork-transform-wrapper.distorted-effect {
+            animation: rubberyWobble 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes rubberyWobble {
+            0% { filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6)); }
+            100% { filter: drop-shadow(0 0 18px rgba(239, 68, 68, 0.9)) hue-rotate(15deg); }
+        }
+
+        .artwork-image-container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 4px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .artwork-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* Resize Handles Bounding Box */
+        .transform-bounding-box {
+            position: absolute;
+            inset: -4px;
+            border: 2px solid var(--accent);
+            border-radius: 6px;
+            pointer-events: none;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+
+        .transform-bounding-box.distorted {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+        }
+
+        .transform-bounding-box.locked {
+            border-color: var(--safe-color);
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
+        }
+
+        /* 8 Drag Handles */
+        .resize-handle {
+            position: absolute;
+            pointer-events: auto;
+            touch-action: none;
+            z-index: 30;
+            transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        /* 4 Corner Handles: Proportional Scaling (Blue / Cyan Spheres) */
+        .resize-handle.corner {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .resize-handle.corner:hover,
+        .resize-handle.corner.active {
+            transform: scale(1.4);
+            background: #38bdf8;
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.9);
+        }
+
+        .resize-handle.nw { top: -9px; left: -9px; cursor: nwse-resize; }
+        .resize-handle.ne { top: -9px; right: -9px; cursor: nesw-resize; }
+        .resize-handle.se { bottom: -9px; right: -9px; cursor: nwse-resize; }
+        .resize-handle.sw { bottom: -9px; left: -9px; cursor: nesw-resize; }
+
+        /* 4 Edge Handles: Non-Proportional Scaling (Amber / Orange Pills) */
+        .resize-handle.edge {
+            background: var(--hazard-color);
+            border: 2px solid #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .resize-handle.edge:hover,
+        .resize-handle.edge.active {
+            transform: scale(1.35);
+            background: #f59e0b;
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.9);
+        }
+
+        .resize-handle.n { top: -8px; left: calc(50% - 10px); width: 20px; height: 12px; cursor: ns-resize; }
+        .resize-handle.s { bottom: -8px; left: calc(50% - 10px); width: 20px; height: 12px; cursor: ns-resize; }
+        .resize-handle.e { right: -8px; top: calc(50% - 10px); width: 12px; height: 20px; cursor: ew-resize; }
+        .resize-handle.w { left: -8px; top: calc(50% - 10px); width: 12px; height: 20px; cursor: ew-resize; }
+
+        /* Dimension Tag on Top of Image */
+        .dimension-chip {
+            position: absolute;
+            bottom: -32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 25;
+        }
+
+        /* Bottom Stage Controls (Undo, Scale Helpers) */
+        .stage-footer-controls {
+            padding: 12px 20px;
+            background: var(--surface-2);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .stage-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width) */
+        .action-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-title {
+            font-size: 0.98rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 10px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            padding: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Distortion Meter Widget */
+        .distortion-gauge-wrap {
+            padding: 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .gauge-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            font-weight: 800;
+        }
+
+        .distortion-tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .distortion-tag.perfect {
+            background: var(--safe-bg);
+            color: var(--safe-color);
+            border: 1px solid var(--safe-border);
+        }
+
+        .distortion-tag.moderate {
+            background: var(--hazard-bg);
+            color: var(--hazard-color);
+            border: 1px solid var(--hazard-border);
+        }
+
+        .distortion-tag.severe {
+            background: var(--danger-bg);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-border);
+            animation: pulseAlert 0.8s infinite alternate;
+        }
+
+        @keyframes pulseAlert {
+            0% { transform: scale(0.98); }
+            100% { transform: scale(1.04); }
+        }
+
+        .meter-bar-track {
+            height: 14px;
+            width: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #f59e0b 45%, #ef4444 100%);
+            border-radius: 999px;
+            position: relative;
+            border: 1px solid var(--border);
+            overflow: visible;
+        }
+
+        .meter-pointer-needle {
+            position: absolute;
+            top: -5px;
+            width: 8px;
+            height: 24px;
+            background: #ffffff;
+            border: 2px solid #0f172a;
+            border-radius: 4px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+            transform: translateX(-50%);
+            transition: left 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        .aspect-ratio-readout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: var(--text-soft);
+        }
+
+        .ratio-box {
+            background: var(--surface-3);
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .ratio-box strong {
+            display: block;
+            color: var(--text);
+            font-size: 0.95rem;
+            margin-top: 2px;
+        }
+
+        /* Feedback Card */
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--hazard-border);
+            background: var(--hazard-bg);
+        }
+
+        .feedback-card.danger {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 480px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 640px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 960px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+            .stage-pane {
+                min-height: 480px;
+            }
+            .action-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">🖼️</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 The Distortion Lab — Manipulate Images</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — IT Computer Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY 5 BUTTONS IN EXACT ORDER -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Information Technology</div>
+                    <h2>The Distortion Lab</h2>
+                    <p>
+                        Welcome to the Art Gallery Exhibition Challenge! Prepare 5 important Trinidad and Tobago digital photos for display.
+                        Fit each picture perfectly into its gold wall frame without stretching, squashing, or ruining its natural proportions.
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">🔵</div>
+                            <h3>Corner Handle Scaling</h3>
+                            <p>Drag corner handles to resize images proportionally, locking original aspect ratios.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚠️</div>
+                            <h3>Side Handle Distortion</h3>
+                            <p>Dragging edge handles stretches or squashes pictures, triggering gallery disasters!</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">↺</div>
+                            <h3>Dedicated Ctrl+Z Undo</h3>
+                            <p>Instant time-rewind undo button to quickly fix distortion mistakes while editing.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.1rem; padding: 14px 30px;">🚀 Enter Distortion Lab</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Exhibition Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Interactive Stage / 25% Right Action Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Gallery Wall & Frame Stage -->
+                <section class="stage-pane" id="stagePane">
+                    <div class="stage-header">
+                        <div class="stage-title">
+                            <span id="artworkRoundHeading">🎨 Artwork 1 of 5: National Steelpan Melody</span>
+                        </div>
+                        <div class="stage-toolbar">
+                            <span class="tool-chip active" id="modeChip">🔵 Proportional Corner Drag</span>
+                            <span class="tool-chip" id="handleLegendChip">🔵 Corners = Scale | 🟠 Edges = Stretch</span>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Wall Viewport -->
+                    <div class="gallery-viewport" id="galleryViewport">
+                        <div class="gallery-wall-mount" id="galleryWallMount">
+                            <!-- Golden Exhibition Display Frame -->
+                            <div class="gold-display-frame" id="goldFrame">
+                                <!-- Target Matting Guide Area -->
+                                <div class="frame-matting" id="frameMatting">
+                                    <!-- Interactive Artwork Container -->
+                                    <div class="artwork-transform-wrapper" id="artworkWrapper" tabindex="0" role="region" aria-label="Interactive artwork image">
+                                        <!-- Inner Image Viewport -->
+                                        <div class="artwork-image-container" id="artworkImageContainer">
+                                            <div id="artworkSvgHost" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></div>
+                                        </div>
+
+                                        <!-- Transform Bounding Box -->
+                                        <div class="transform-bounding-box" id="transformBox"></div>
+
+                                        <!-- 4 Corner Handles (Proportional) -->
+                                        <div class="resize-handle corner nw" id="handle_nw" data-handle="nw" title="Corner scale (proportional)" aria-label="Resize Northwest (proportional)"></div>
+                                        <div class="resize-handle corner ne" id="handle_ne" data-handle="ne" title="Corner scale (proportional)" aria-label="Resize Northeast (proportional)"></div>
+                                        <div class="resize-handle corner se" id="handle_se" data-handle="se" title="Corner scale (proportional)" aria-label="Resize Southeast (proportional)"></div>
+                                        <div class="resize-handle corner sw" id="handle_sw" data-handle="sw" title="Corner scale (proportional)" aria-label="Resize Southwest (proportional)"></div>
+
+                                        <!-- 4 Edge Handles (Non-Proportional Stretch) -->
+                                        <div class="resize-handle edge n" id="handle_n" data-handle="n" title="Top stretch (non-proportional)" aria-label="Stretch North (non-proportional)"></div>
+                                        <div class="resize-handle edge s" id="handle_s" data-handle="s" title="Bottom stretch (non-proportional)" aria-label="Stretch South (non-proportional)"></div>
+                                        <div class="resize-handle edge e" id="handle_e" data-handle="e" title="Right stretch (non-proportional)" aria-label="Stretch East (non-proportional)"></div>
+                                        <div class="resize-handle edge w" id="handle_w" data-handle="w" title="Left stretch (non-proportional)" aria-label="Stretch West (non-proportional)"></div>
+
+                                        <!-- Live Dimension Tag -->
+                                        <div class="dimension-chip" id="dimensionChip">300 × 300px (1.00:1)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Plaque Below Gold Frame -->
+                            <div class="gallery-plaque" id="galleryPlaque">
+                                <p class="plaque-title" id="plaqueTitle">National Steelpan Melody</p>
+                                <div class="plaque-meta" id="plaqueMeta">Target Frame: 400 × 400px (1.00:1 Square) • Exhibit Room 1</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Stage Controls -->
+                    <div class="stage-footer-controls">
+                        <div class="stage-btn-group">
+                            <button class="secondary-btn" id="undoBtn" title="Undo last resize action (Ctrl+Z)">
+                                ↺ Undo (Ctrl+Z)
+                            </button>
+                            <button class="secondary-btn" id="resetImageBtn" title="Reset image to original dimensions">
+                                🔄 Reset Size
+                            </button>
+                            <button class="secondary-btn" id="hintBtn" title="Get technical guidance">
+                                💡 Tip
+                            </button>
+                        </div>
+
+                        <div class="stage-btn-group">
+                            <button class="primary-btn" id="snapScaleBtn" title="Scale proportionally to target size">
+                                ✨ Snap to Target
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Dedicated Action & Status Tray -->
+                <aside class="action-panel">
+                    <!-- 1. Progress & Score Card (FIRST) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Exhibition Progress</span>
+                            <span id="progressCount" style="color:var(--accent);">0 / 5 Framed</span>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">100%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Real-Time Distortion Meter Card (SECOND) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Distortion Meter</span>
+                            <span class="distortion-tag perfect" id="distortionTag">🟢 PERFECT (1:1)</span>
+                        </div>
+
+                        <div class="distortion-gauge-wrap">
+                            <div class="gauge-header">
+                                <span style="color:var(--muted);">Aspect Ratio Deviation</span>
+                                <span id="distortionVal" style="font-weight:800; color:var(--safe-color);">0%</span>
+                            </div>
+
+                            <div class="meter-bar-track">
+                                <div class="meter-pointer-needle" id="meterNeedle" style="left: 0%;"></div>
+                            </div>
+
+                            <div class="aspect-ratio-readout">
+                                <div class="ratio-box">
+                                    <span style="color:var(--muted); font-size:0.72rem;">ORIGINAL RATIO</span>
+                                    <strong id="origRatioVal">1.00:1</strong>
+                                </div>
+                                <div class="ratio-box">
+                                    <span style="color:var(--muted); font-size:0.72rem;">CURRENT RATIO</span>
+                                    <strong id="currRatioVal" style="color:var(--safe-color);">1.00:1</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Action Buttons Card (THIRD - ABOVE TECHNICAL EXPLANATION) -->
+                    <div class="panel-card" style="gap:10px;">
+                        <button class="success-btn" id="lockMountBtn" style="width:100%; justify-content:center;" disabled>
+                            🔒 Mount in Exhibition
+                        </button>
+                        <button class="primary-btn" id="nextArtworkBtn" style="width:100%; justify-content:center; display:none;">
+                            Next Artwork →
+                        </button>
+                    </div>
+
+                    <!-- 4. Inspector Live Technical Explanation Box (FOURTH) -->
+                    <div class="panel-card">
+                        <div class="panel-title">Inspector Technical Feedback</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Drag the <strong>blue corner handles 🔵</strong> to scale proportionally into the gold frame. Avoid <strong>amber edge handles 🟠</strong> which squash or stretch pictures!
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Exhibition Ready!</div>
+                <h2>Art Gallery Certification</h2>
+                <p>Brilliant digital media editing! You resized each image to fit the gallery exhibition while preserving its natural aspect ratio.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Digital Media Curator</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You successfully framed all 5 exhibition artworks without aspect ratio distortion!</p>
+                </div>
+
+                <!-- MANDATORY SCORECARD GRID -->
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Framed Correctly</div>
+                        <div class="val" id="summaryCorrectVal">0 / 5</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Exhibition Artworks Review (5 Images)</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer (Slide-Over) -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Aspect ratio logs & image manipulation principles.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Play The Distortion Lab</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome to the <strong>Trinidad and Tobago Secondary School</strong> Digital Media Art Gallery! Your mission is to prepare 5 photos for our annual exhibition.</p>
+                <ul>
+                    <li><strong>🔵 Corner Handles (Proportional Scaling):</strong> Drag any of the 4 corner handles to scale the image while locking its original aspect ratio. Pictures stay natural and circular objects stay round.</li>
+                    <li><strong>🟠 Side & Top Handles (Non-Proportional Distortion):</strong> Dragging side or top handles stretches or squashes the image, breaking its aspect ratio and making it look like a funny rubbery disaster!</li>
+                    <li><strong>📈 Distortion Meter:</strong> Watch the live meter. Keep the needle in the 🟢 Green zone (0% distortion). If it enters 🔴 Red, undo and resize using corner handles.</li>
+                    <li><strong>↺ Ctrl+Z Undo:</strong> Press <code>Ctrl+Z</code> or click <strong>Undo</strong> at any time to instantly reverse distortion mistakes.</li>
+                    <li><strong>🔒 Mount in Exhibition:</strong> Once the image fits the golden frame with 0% distortion, click <strong>Mount in Exhibition</strong> to lock in your score!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It! Launch Lab</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the simulation? All current scores and framed artwork progress will be cleared.</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Gallery Progress</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           5 TRINIDAD & TOBAGO ARTWORKS DATASET WITH VECTOR GRAPHICS
+           ============================================================ */
+        const MASTER_ARTWORKS = [
+            {
+                id: "art_01",
+                title: "National Steelpan Melody",
+                subject: "Round Steelpan (Tenor Pan)",
+                naturalWidth: 300,
+                naturalHeight: 300,
+                targetWidth: 400,
+                targetHeight: 400,
+                initialWidth: 240,
+                initialHeight: 240,
+                aspectRatio: 1.0,
+                ratioDesc: "1.00:1 (Square)",
+                location: "Exhibit Room 1 — Musical Heritage",
+                funDistortionDesc: "The steelpan became a warped oval! The note grooves look squished and won't play true pitch.",
+                feedback: "Excellent proportional scaling! Dragging from the corner handles preserved the circular steelpan geometry without squashing the tone rings.",
+                svgContent: `
+                    <svg viewBox="0 0 300 300" preserveAspectRatio="none" style="width:100%; height:100%;">
+                        <defs>
+                            <radialGradient id="panOuter" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#94a3b8"/>
+                                <stop offset="70%" stop-color="#475569"/>
+                                <stop offset="100%" stop-color="#1e293b"/>
+                            </radialGradient>
+                            <radialGradient id="panBowl" cx="50%" cy="50%" r="48%">
+                                <stop offset="0%" stop-color="#334155"/>
+                                <stop offset="85%" stop-color="#1e293b"/>
+                                <stop offset="100%" stop-color="#0f172a"/>
+                            </radialGradient>
+                            <linearGradient id="stickWood" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#d97706"/>
+                                <stop offset="100%" stop-color="#78350f"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Background -->
+                        <rect width="300" height="300" fill="#0f172a"/>
+                        <circle cx="150" cy="150" r="140" fill="url(#panOuter)" stroke="#cbd5e1" stroke-width="4"/>
+                        <circle cx="150" cy="150" r="126" fill="url(#panBowl)" stroke="#64748b" stroke-width="2"/>
+                        <!-- Tone Notes Grooves (Outer Ring) -->
+                        <ellipse cx="150" cy="55" rx="22" ry="16" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2"/>
+                        <text x="150" y="60" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">C</text>
+                        <ellipse cx="218" cy="85" rx="20" ry="16" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2"/>
+                        <text x="218" y="90" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">D</text>
+                        <ellipse cx="245" cy="150" rx="16" ry="22" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2"/>
+                        <text x="245" y="155" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">E</text>
+                        <ellipse cx="218" cy="215" rx="20" ry="16" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2"/>
+                        <text x="218" y="220" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">F</text>
+                        <ellipse cx="150" cy="245" rx="22" ry="16" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2"/>
+                        <text x="150" y="250" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">G</text>
+                        <ellipse cx="82" cy="215" rx="20" ry="16" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2"/>
+                        <text x="82" y="220" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">A</text>
+                        <ellipse cx="55" cy="150" rx="16" ry="22" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2"/>
+                        <text x="55" y="155" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">B</text>
+                        <ellipse cx="82" cy="85" rx="20" ry="16" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2"/>
+                        <text x="82" y="90" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">C#</text>
+                        <!-- Inner Notes Ring -->
+                        <ellipse cx="150" cy="110" rx="16" ry="12" fill="#818cf8" fill-opacity="0.3" stroke="#818cf8" stroke-width="1.5"/>
+                        <ellipse cx="190" cy="150" rx="12" ry="16" fill="#818cf8" fill-opacity="0.3" stroke="#818cf8" stroke-width="1.5"/>
+                        <ellipse cx="150" cy="190" rx="16" ry="12" fill="#818cf8" fill-opacity="0.3" stroke="#818cf8" stroke-width="1.5"/>
+                        <ellipse cx="110" cy="150" rx="12" ry="16" fill="#818cf8" fill-opacity="0.3" stroke="#818cf8" stroke-width="1.5"/>
+                        <!-- Center Dome -->
+                        <circle cx="150" cy="150" r="14" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/>
+                        <!-- Pan Sticks / Mallets -->
+                        <line x1="30" y1="270" x2="120" y2="190" stroke="url(#stickWood)" stroke-width="6" stroke-linecap="round"/>
+                        <ellipse cx="120" cy="190" rx="8" ry="6" fill="#ef4444"/>
+                        <line x1="270" y1="270" x2="180" y2="190" stroke="url(#stickWood)" stroke-width="6" stroke-linecap="round"/>
+                        <ellipse cx="180" cy="190" rx="8" ry="6" fill="#ef4444"/>
+                    </svg>
+                `
+            },
+            {
+                id: "art_02",
+                title: "Buccoo Reef Coral Marine Park",
+                subject: "Tobago Marine Seascape",
+                naturalWidth: 400,
+                naturalHeight: 250,
+                targetWidth: 520,
+                targetHeight: 325,
+                initialWidth: 320,
+                initialHeight: 200,
+                aspectRatio: 1.6,
+                ratioDesc: "1.60:1 (Wide Landscape)",
+                location: "Exhibit Room 2 — Coastal Ecology",
+                funDistortionDesc: "The Buccoo Reef horizon got stretched vertically! The sea turtle and fish look tall and paper-thin like funhouse reflections.",
+                feedback: "Flawless landscape scaling! Corner dragging kept the 1.6:1 wide panorama intact so the Caribbean horizon, corals, and sea life look natural.",
+                svgContent: `
+                    <svg viewBox="0 0 400 250" preserveAspectRatio="none" style="width:100%; height:100%;">
+                        <defs>
+                            <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#38bdf8"/>
+                                <stop offset="60%" stop-color="#bae6fd"/>
+                                <stop offset="100%" stop-color="#fef08a"/>
+                            </linearGradient>
+                            <linearGradient id="seaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#0284c7"/>
+                                <stop offset="40%" stop-color="#0ea5e9"/>
+                                <stop offset="100%" stop-color="#064e3b"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Sky -->
+                        <rect width="400" height="110" fill="url(#skyGrad)"/>
+                        <!-- Sun & Clouds -->
+                        <circle cx="330" cy="45" r="22" fill="#fef08a" opacity="0.9"/>
+                        <path d="M 50 40 Q 65 30, 80 40 Q 95 30, 110 40 Q 120 50, 110 60 L 50 60 Z" fill="#ffffff" opacity="0.85"/>
+                        <path d="M 180 50 Q 195 42, 210 50 Q 225 42, 240 50 Q 250 58, 240 65 L 180 65 Z" fill="#ffffff" opacity="0.8"/>
+                        <!-- Tobago Island Foothills -->
+                        <polygon points="0,110 60,85 140,105 220,80 310,100 400,90 400,110 0,110" fill="#047857"/>
+                        <!-- Sea Water -->
+                        <rect y="110" width="400" height="140" fill="url(#seaGrad)"/>
+                        <!-- Coral Reef Formations -->
+                        <path d="M 20 250 Q 35 190, 50 250 Q 65 200, 80 250 Q 95 185, 110 250" fill="#f43f5e" stroke="#be123c" stroke-width="2"/>
+                        <path d="M 280 250 Q 305 195, 330 250 Q 355 180, 380 250" fill="#fbbf24" stroke="#d97706" stroke-width="2"/>
+                        <!-- Sea Turtle -->
+                        <g transform="translate(190, 150)">
+                            <ellipse cx="0" cy="0" rx="20" ry="14" fill="#10b981" stroke="#065f46" stroke-width="2"/>
+                            <!-- Shell patterns -->
+                            <polygon points="-8,-4 0,-9 8,-4 8,4 0,9 -8,4" fill="#047857"/>
+                            <circle cx="24" cy="0" r="6" fill="#10b981"/>
+                            <circle cx="26" cy="-2" r="1.5" fill="#0f172a"/>
+                            <ellipse cx="10" cy="-14" rx="10" ry="4" transform="rotate(-30, 10, -14)" fill="#10b981"/>
+                            <ellipse cx="10" cy="14" rx="10" ry="4" transform="rotate(30, 10, 14)" fill="#10b981"/>
+                            <ellipse cx="-14" cy="-10" rx="6" ry="3" fill="#10b981"/>
+                            <ellipse cx="-14" cy="10" rx="6" ry="3" fill="#10b981"/>
+                        </g>
+                        <!-- Tropical Reef Fish -->
+                        <g transform="translate(90, 155)">
+                            <polygon points="0,0 -16,-10 -16,10" fill="#38bdf8"/>
+                            <polygon points="-16,0 -26,-8 -26,8" fill="#f59e0b"/>
+                            <circle cx="-4" cy="-3" r="2" fill="#0f172a"/>
+                        </g>
+                    </svg>
+                `
+            },
+            {
+                id: "art_03",
+                title: "Inter-School Football Championship",
+                subject: "Championship Football & Stadium Turf",
+                naturalWidth: 320,
+                naturalHeight: 320,
+                targetWidth: 440,
+                targetHeight: 440,
+                initialWidth: 230,
+                initialHeight: 230,
+                aspectRatio: 1.0,
+                ratioDesc: "1.00:1 (Square)",
+                location: "Exhibit Room 3 — Athletics & School Sports",
+                funDistortionDesc: "The football got squashed horizontally into an egg or rugby ball! The spherical geometry was broken.",
+                feedback: "Superb corner scaling! The football retained its perfect spherical radius and pentagon stitch lines without squashing into an oval.",
+                svgContent: `
+                    <svg viewBox="0 0 320 320" preserveAspectRatio="none" style="width:100%; height:100%;">
+                        <defs>
+                            <radialGradient id="ballShade" cx="35%" cy="35%" r="65%">
+                                <stop offset="0%" stop-color="#ffffff"/>
+                                <stop offset="70%" stop-color="#e2e8f0"/>
+                                <stop offset="100%" stop-color="#64748b"/>
+                            </radialGradient>
+                            <linearGradient id="grassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#15803d"/>
+                                <stop offset="100%" stop-color="#166534"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Stadium Grass -->
+                        <rect width="320" height="320" fill="url(#grassGrad)"/>
+                        <!-- White Pitch Line -->
+                        <path d="M 0 260 Q 160 210, 320 260" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.6"/>
+                        <!-- Ball Shadow -->
+                        <ellipse cx="160" cy="265" rx="90" ry="24" fill="#052e16" opacity="0.7"/>
+                        <!-- Football Main Sphere -->
+                        <circle cx="160" cy="155" r="95" fill="url(#ballShade)" stroke="#334155" stroke-width="3"/>
+                        <!-- Center Pentagon -->
+                        <polygon points="160,115 190,138 178,175 142,175 130,138" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+                        <!-- Surrounding Pentagon Patches -->
+                        <polygon points="160,115 160,70 190,62 208,95 190,138" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                        <polygon points="190,138 208,95 242,110 245,150 178,175" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                        <polygon points="178,175 245,150 230,195 185,225 142,175" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                        <polygon points="142,175 185,225 135,225 90,195 130,138" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                        <polygon points="130,138 90,195 75,150 78,110 112,95" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                        <!-- Black Edge Patches -->
+                        <polygon points="160,70 190,62 175,60 145,60 130,62" fill="#0f172a"/>
+                        <polygon points="242,110 245,150 255,145 255,115" fill="#0f172a"/>
+                        <polygon points="230,195 185,225 210,240 245,220" fill="#0f172a"/>
+                        <polygon points="135,225 90,195 75,220 110,240" fill="#0f172a"/>
+                        <polygon points="75,150 78,110 65,115 65,145" fill="#0f172a"/>
+                    </svg>
+                `
+            },
+            {
+                id: "art_04",
+                title: "Form 2 IT Scholar Portrait",
+                subject: "Student Tech Innovator Profile",
+                naturalWidth: 260,
+                naturalHeight: 390,
+                targetWidth: 340,
+                targetHeight: 510,
+                initialWidth: 200,
+                initialHeight: 300,
+                aspectRatio: 0.667,
+                ratioDesc: "1:1.50 (Tall Portrait)",
+                location: "Exhibit Room 4 — Student Hall of Fame",
+                funDistortionDesc: "The student portrait was stretched sideways! The face and headphones look unnaturally wide and comical.",
+                feedback: "Outstanding portrait scaling! Corner resizing maintained the 1:1.5 portrait proportion, keeping the student's face, smile, and school uniform perfectly natural.",
+                svgContent: `
+                    <svg viewBox="0 0 260 390" preserveAspectRatio="none" style="width:100%; height:100%;">
+                        <defs>
+                            <linearGradient id="bgStudio" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1e293b"/>
+                                <stop offset="100%" stop-color="#0f172a"/>
+                            </linearGradient>
+                            <radialGradient id="skinTone" cx="50%" cy="40%" r="50%">
+                                <stop offset="0%" stop-color="#b45309"/>
+                                <stop offset="100%" stop-color="#78350f"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- Background -->
+                        <rect width="260" height="390" fill="url(#bgStudio)"/>
+                        <circle cx="130" cy="140" r="100" fill="#38bdf8" opacity="0.15"/>
+                        <!-- Headphone Band -->
+                        <path d="M 75 140 A 55 55 0 0 1 185 140" stroke="#94a3b8" stroke-width="8" fill="none"/>
+                        <!-- Hair -->
+                        <ellipse cx="130" cy="115" rx="52" ry="55" fill="#09090b"/>
+                        <!-- Neck -->
+                        <rect x="112" y="190" width="36" height="40" fill="#92400e" rx="4"/>
+                        <!-- Head / Face -->
+                        <ellipse cx="130" cy="140" rx="46" ry="56" fill="url(#skinTone)"/>
+                        <!-- Eyes & Eyebrows -->
+                        <path d="M 100 120 Q 112 114, 118 122" stroke="#0f172a" stroke-width="3" fill="none"/>
+                        <path d="M 160 120 Q 148 114, 142 122" stroke="#0f172a" stroke-width="3" fill="none"/>
+                        <circle cx="110" cy="132" r="5" fill="#0f172a"/>
+                        <circle cx="112" cy="130" r="1.5" fill="#ffffff"/>
+                        <circle cx="150" cy="132" r="5" fill="#0f172a"/>
+                        <circle cx="152" cy="130" r="1.5" fill="#ffffff"/>
+                        <!-- Glasses Frame -->
+                        <rect x="94" y="122" width="32" height="22" rx="6" fill="none" stroke="#0284c7" stroke-width="3"/>
+                        <rect x="134" y="122" width="32" height="22" rx="6" fill="none" stroke="#0284c7" stroke-width="3"/>
+                        <line x1="126" y1="133" x2="134" y2="133" stroke="#0284c7" stroke-width="3"/>
+                        <!-- Nose & Happy Smile -->
+                        <path d="M 130 142 L 126 154 L 134 154" stroke="#78350f" stroke-width="2" fill="none"/>
+                        <path d="M 112 166 Q 130 182, 148 166" stroke="#451a03" stroke-width="3" fill="#ffffff"/>
+                        <!-- Headphone Earcups -->
+                        <rect x="70" y="120" width="14" height="40" rx="6" fill="#38bdf8"/>
+                        <rect x="176" y="120" width="14" height="40" rx="6" fill="#38bdf8"/>
+                        <!-- School Uniform Shirt & Tie -->
+                        <path d="M 50 390 L 80 230 L 180 230 L 210 390 Z" fill="#ffffff"/>
+                        <!-- Collar -->
+                        <polygon points="80,230 130,265 110,230" fill="#e2e8f0"/>
+                        <polygon points="180,230 130,265 150,230" fill="#e2e8f0"/>
+                        <!-- Red/Blue School Tie -->
+                        <polygon points="124,260 136,260 142,350 130,370 118,350" fill="#dc2626"/>
+                        <!-- School Pocket Crest -->
+                        <rect x="65" y="290" width="30" height="35" rx="4" fill="#0369a1"/>
+                        <text x="80" y="312" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">TTSS</text>
+                    </svg>
+                `
+            },
+            {
+                id: "art_05",
+                title: "Annual Science & Tech Expo Banner",
+                subject: "Trinidad and Tobago Secondary School Emblem",
+                naturalWidth: 450,
+                naturalHeight: 300,
+                targetWidth: 570,
+                targetHeight: 380,
+                initialWidth: 300,
+                initialHeight: 200,
+                aspectRatio: 1.5,
+                ratioDesc: "1.50:1 (Exhibition Display)",
+                location: "Exhibit Room 5 — Grand Exhibition Hall",
+                funDistortionDesc: "The Tech Expo banner was squashed vertically! The gears, robotics arm, and school crest text became illegible and distorted.",
+                feedback: "Masterful exhibition scaling! Corner scaling preserved all geometric angles, robotic details, and typography across the official secondary school expo banner.",
+                svgContent: `
+                    <svg viewBox="0 0 450 300" preserveAspectRatio="none" style="width:100%; height:100%;">
+                        <defs>
+                            <linearGradient id="expoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#0284c7"/>
+                                <stop offset="50%" stop-color="#1e1b4b"/>
+                                <stop offset="100%" stop-color="#0f172a"/>
+                            </linearGradient>
+                            <linearGradient id="goldRibbon" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#f59e0b"/>
+                                <stop offset="50%" stop-color="#fef08a"/>
+                                <stop offset="100%" stop-color="#d97706"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Background -->
+                        <rect width="450" height="300" fill="url(#expoBg)"/>
+                        <!-- Circuit grid lines -->
+                        <path d="M 0 50 H 120 L 160 90 V 220 L 190 250 H 450" stroke="#38bdf8" stroke-width="1.5" fill="none" opacity="0.3"/>
+                        <path d="M 450 60 H 330 L 290 100 V 200 L 260 230 H 0" stroke="#818cf8" stroke-width="1.5" fill="none" opacity="0.3"/>
+                        <!-- Center Crest Shield -->
+                        <polygon points="225,40 310,75 310,180 225,230 140,180 140,75" fill="#1e293b" stroke="url(#goldRibbon)" stroke-width="4"/>
+                        <!-- Tech Icons Inside Shield -->
+                        <!-- Gear -->
+                        <circle cx="225" cy="120" r="32" fill="#0284c7" stroke="#38bdf8" stroke-width="3"/>
+                        <circle cx="225" cy="120" r="14" fill="#0f172a"/>
+                        <!-- Atom electrons -->
+                        <ellipse cx="225" cy="120" rx="42" ry="16" fill="none" stroke="#f59e0b" stroke-width="2" transform="rotate(30, 225, 120)"/>
+                        <ellipse cx="225" cy="120" rx="42" ry="16" fill="none" stroke="#f59e0b" stroke-width="2" transform="rotate(-30, 225, 120)"/>
+                        <!-- Hummingbird Icon (Trinidad National Emblem) -->
+                        <path d="M 215 160 Q 235 150, 245 165 Q 235 170, 225 165 Z" fill="#10b981"/>
+                        <line x1="245" y1="165" x2="260" y2="162" stroke="#10b981" stroke-width="2"/>
+                        <!-- Gold Expo Banner Ribbon -->
+                        <rect x="35" y="240" width="380" height="40" rx="8" fill="url(#goldRibbon)" stroke="#78350f" stroke-width="2"/>
+                        <text x="225" y="265" fill="#0f172a" font-size="14" font-weight="900" text-anchor="middle" letter-spacing="1">TRINIDAD AND TOBAGO SECONDARY SCHOOL</text>
+                        <!-- Top Header -->
+                        <text x="225" y="28" fill="#38bdf8" font-size="13" font-weight="800" text-anchor="middle" letter-spacing="2">ANNUAL SCIENCE &amp; TECH EXPO</text>
+                    </svg>
+                `
+            }
+        ];
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Drag the <strong>blue corner handles 🔵</strong> to scale proportionally into the gold frame. Avoid <strong>amber edge handles 🟠</strong> which squash or stretch pictures!`;
+
+        /* Simulation State */
+        const state = {
+            currentRound: 0,
+            currWidth: 240,
+            currHeight: 240,
+            distortionPct: 0,
+            evaluations: {},     // keyed by artwork ID
+            historyStack: [],    // stack of { width, height } snapshots for Ctrl+Z
+            score: 0,
+            attempts: 0,
+            streak: 0,
+            bestStreak: 0,
+            theme: "light",
+            isRoundMounted: false
+        };
+
+        let activeDragState = null;
+
+        /* DOM Elements Cache */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            
+            // Stage elements
+            artworkRoundHeading: document.getElementById("artworkRoundHeading"),
+            galleryViewport: document.getElementById("galleryViewport"),
+            goldFrame: document.getElementById("goldFrame"),
+            frameMatting: document.getElementById("frameMatting"),
+            artworkWrapper: document.getElementById("artworkWrapper"),
+            artworkSvgHost: document.getElementById("artworkSvgHost"),
+            transformBox: document.getElementById("transformBox"),
+            dimensionChip: document.getElementById("dimensionChip"),
+            plaqueTitle: document.getElementById("plaqueTitle"),
+            plaqueMeta: document.getElementById("plaqueMeta"),
+            
+            // Stage buttons
+            undoBtn: document.getElementById("undoBtn"),
+            resetImageBtn: document.getElementById("resetImageBtn"),
+            hintBtn: document.getElementById("hintBtn"),
+            snapScaleBtn: document.getElementById("snapScaleBtn"),
+            
+            // Right Action Panel elements
+            progressCount: document.getElementById("progressCount"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            distortionTag: document.getElementById("distortionTag"),
+            distortionVal: document.getElementById("distortionVal"),
+            meterNeedle: document.getElementById("meterNeedle"),
+            origRatioVal: document.getElementById("origRatioVal"),
+            currRatioVal: document.getElementById("currRatioVal"),
+            lockMountBtn: document.getElementById("lockMountBtn"),
+            nextArtworkBtn: document.getElementById("nextArtworkBtn"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            
+            // Summary elements
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Reset Explanation Box Helper (RULE 4.4) */
+        function resetExplanationBox() {
+            if (dom.inspectorFeedbackBox) {
+                dom.inspectorFeedbackBox.className = "feedback-card";
+                dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+            }
+        }
+
+        /* Auto-Detect OS Color Scheme (RULE 2.5) */
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        /* Initialization */
+        init();
+
+        function init() {
+            bindEvents();
+            loadFreshState();
+            openModal(); // Mandatory Auto-Open on Launch
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // Mandatory Modal Dismissal: No backdrop click
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            // Stage Action Buttons
+            dom.undoBtn.addEventListener("click", handleUndo);
+            dom.resetImageBtn.addEventListener("click", handleResetImageDimensions);
+            dom.hintBtn.addEventListener("click", showInteractiveHint);
+            dom.snapScaleBtn.addEventListener("click", handleSnapToTarget);
+            dom.lockMountBtn.addEventListener("click", handleMountArtwork);
+            dom.nextArtworkBtn.addEventListener("click", advanceToNextArtwork);
+
+            // Global Keyboard Shortcuts (Ctrl+Z Undo, Arrow Nudge)
+            window.addEventListener("keydown", handleGlobalKeyDown);
+
+            // Attach Pointer Events to 8 Resize Handles
+            const handleEls = document.querySelectorAll(".resize-handle");
+            handleEls.forEach(handle => {
+                handle.addEventListener("pointerdown", (e) => startHandleDrag(handle.dataset.handle, e));
+            });
+
+            // Global pointer tracking for smooth responsive handle drag
+            window.addEventListener("pointermove", handlePointerMove);
+            window.addEventListener("pointerup", handlePointerUp);
+            window.addEventListener("pointercancel", handlePointerUp);
+
+            // Real-time System Theme Preference Listener
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "game") {
+                renderRoundArtwork();
+            } else if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        /* Load fresh session data (Rule 4.5) */
+        function loadFreshState() {
+            state.currentRound = 0;
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.evaluations = {};
+            state.historyStack = [];
+            state.isRoundMounted = false;
+
+            resetExplanationBox();
+
+            try {
+                localStorage.removeItem("distortion_lab_theme");
+            } catch (e) {}
+
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+        }
+
+        /* Load & Render the Current Round's Artwork */
+        function renderRoundArtwork() {
+            const art = MASTER_ARTWORKS[state.currentRound];
+            if (!art) return;
+
+            state.isRoundMounted = false;
+            state.currWidth = art.initialWidth;
+            state.currHeight = art.initialHeight;
+            state.historyStack = [{ width: art.initialWidth, height: art.initialHeight }];
+
+            dom.artworkRoundHeading.textContent = `🎨 Artwork ${state.currentRound + 1} of 5: ${art.title}`;
+            dom.plaqueTitle.textContent = art.title;
+            dom.plaqueMeta.textContent = `Target Frame: ${art.targetWidth} × ${art.targetHeight}px (${art.ratioDesc}) • ${art.location}`;
+            dom.origRatioVal.textContent = `${art.aspectRatio.toFixed(2)}:1`;
+
+            // Set Gold Frame and Inner Matting Dimensions
+            dom.frameMatting.style.width = `${art.targetWidth}px`;
+            dom.frameMatting.style.height = `${art.targetHeight}px`;
+
+            // Inject vector SVG graphic
+            dom.artworkSvgHost.innerHTML = art.svgContent;
+
+            // Reset UI feedback & buttons
+            dom.lockMountBtn.style.display = "inline-flex";
+            dom.lockMountBtn.disabled = true;
+            dom.nextArtworkBtn.style.display = "none";
+            dom.goldFrame.className = "gold-display-frame";
+            dom.frameMatting.className = "frame-matting";
+
+            updateArtworkDimensions(state.currWidth, state.currHeight, false);
+            updateDashboardMetrics();
+        }
+
+        /* Real-Time Dimension and Aspect Ratio Update */
+        function updateArtworkDimensions(newWidth, newHeight, pushToHistory = true) {
+            const art = MASTER_ARTWORKS[state.currentRound];
+            if (!art) return;
+
+            // Enforce realistic bounds
+            const minW = 100, maxW = 680;
+            const minH = 100, maxH = 580;
+            newWidth = Math.max(minW, Math.min(maxW, Math.round(newWidth)));
+            newHeight = Math.max(minH, Math.min(maxH, Math.round(newHeight)));
+
+            state.currWidth = newWidth;
+            state.currHeight = newHeight;
+
+            if (pushToHistory) {
+                // Keep history stack up to 20 states
+                state.historyStack.push({ width: newWidth, height: newHeight });
+                if (state.historyStack.length > 20) state.historyStack.shift();
+            }
+
+            // Apply size to artwork DOM
+            dom.artworkWrapper.style.width = `${newWidth}px`;
+            dom.artworkWrapper.style.height = `${newHeight}px`;
+
+            // Calculate live Aspect Ratio & Distortion
+            const currentRatio = newWidth / newHeight;
+            const origRatio = art.aspectRatio;
+            const deviation = Math.abs((currentRatio - origRatio) / origRatio) * 100;
+            state.distortionPct = Math.round(deviation);
+
+            dom.dimensionChip.textContent = `${newWidth} × ${newHeight}px (${currentRatio.toFixed(2)}:1)`;
+            dom.currRatioVal.textContent = `${currentRatio.toFixed(2)}:1`;
+
+            // Update Distortion Meter Needle & Badge
+            const clampedMeterVal = Math.min(100, state.distortionPct);
+            dom.meterNeedle.style.left = `${clampedMeterVal}%`;
+            dom.distortionVal.textContent = `${state.distortionPct}%`;
+
+            // Update Distortion Status Tag & Theme
+            if (state.distortionPct <= 3) {
+                dom.distortionTag.className = "distortion-tag perfect";
+                dom.distortionTag.textContent = "🟢 PERFECT (1:1)";
+                dom.distortionVal.style.color = "var(--safe-color)";
+                dom.currRatioVal.style.color = "var(--safe-color)";
+                dom.transformBox.className = "transform-bounding-box";
+                dom.artworkWrapper.classList.remove("distorted-effect");
+            } else if (state.distortionPct <= 15) {
+                dom.distortionTag.className = "distortion-tag moderate";
+                dom.distortionTag.textContent = "🟡 STRETCHING";
+                dom.distortionVal.style.color = "var(--hazard-color)";
+                dom.currRatioVal.style.color = "var(--hazard-color)";
+                dom.transformBox.className = "transform-bounding-box distorted";
+                dom.artworkWrapper.classList.remove("distorted-effect");
+            } else {
+                dom.distortionTag.className = "distortion-tag severe";
+                dom.distortionTag.textContent = "🔴 DISTORTED!";
+                dom.distortionVal.style.color = "var(--danger-color)";
+                dom.currRatioVal.style.color = "var(--danger-color)";
+                dom.transformBox.className = "transform-bounding-box distorted";
+                dom.artworkWrapper.classList.add("distorted-effect");
+            }
+
+            // Check if image matches the Target Frame (Within ±14px tolerance AND 0-4% distortion)
+            const widthDiff = Math.abs(newWidth - art.targetWidth);
+            const heightDiff = Math.abs(newHeight - art.targetHeight);
+            const isFitReady = widthDiff <= 14 && heightDiff <= 14;
+
+            if (isFitReady && state.distortionPct <= 4) {
+                dom.goldFrame.classList.add("snap-ready");
+                dom.frameMatting.classList.add("target-matched");
+                dom.transformBox.className = "transform-bounding-box locked";
+                dom.lockMountBtn.disabled = false;
+                dom.lockMountBtn.textContent = "🔒 Perfect Aspect Ratio Locked! Mount Artwork";
+            } else {
+                dom.goldFrame.classList.remove("snap-ready");
+                dom.frameMatting.classList.remove("target-matched");
+                dom.lockMountBtn.disabled = !isFitReady;
+                dom.lockMountBtn.textContent = isFitReady ? "⚠️ Distorted! Fix Aspect Ratio to Mount" : "🔒 Mount in Exhibition";
+            }
+        }
+
+        /* START DRAGGING A RESIZE HANDLE */
+        function startHandleDrag(handleType, e) {
+            if (state.isRoundMounted) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (e.target && e.target.setPointerCapture && e.pointerId !== undefined) {
+                try { e.target.setPointerCapture(e.pointerId); } catch (err) {}
+            }
+
+            const art = MASTER_ARTWORKS[state.currentRound];
+            const isCorner = ["nw", "ne", "se", "sw"].includes(handleType);
+
+            activeDragState = {
+                handleType,
+                isCorner,
+                startX: e.clientX,
+                startY: e.clientY,
+                startW: state.currWidth,
+                startH: state.currHeight,
+                pointerId: e.pointerId,
+                targetEl: e.target,
+                origRatio: art.aspectRatio
+            };
+
+            // Highlight Active Handle
+            e.target.classList.add("active");
+        }
+
+        /* DRAGGING POINTER MOVE */
+        function handlePointerMove(e) {
+            if (!activeDragState) return;
+
+            const dx = e.clientX - activeDragState.startX;
+            const dy = e.clientY - activeDragState.startY;
+            const { handleType, isCorner, startW, startH, origRatio } = activeDragState;
+
+            let newW = startW;
+            let newH = startH;
+
+            if (isCorner) {
+                // PROPORTIONAL CORNER SCALING (Aspect Ratio Locked)
+                let deltaSize = 0;
+                if (handleType === "se") deltaSize = (dx + dy * origRatio) / 2;
+                else if (handleType === "nw") deltaSize = (-dx - dy * origRatio) / 2;
+                else if (handleType === "ne") deltaSize = (dx - dy * origRatio) / 2;
+                else if (handleType === "sw") deltaSize = (-dx + dy * origRatio) / 2;
+
+                newW = Math.max(100, startW + deltaSize);
+                newH = newW / origRatio;
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    🔵 <strong>Corner Handle Scaling:</strong> Resizing proportionally (Aspect Ratio locked at <strong>${origRatio.toFixed(2)}:1</strong>). Picture keeps its natural shape!
+                `;
+            } else {
+                // NON-PROPORTIONAL EDGE STRETCHING (Stretches Aspect Ratio)
+                if (handleType === "e") newW = Math.max(100, startW + dx);
+                else if (handleType === "w") newW = Math.max(100, startW - dx);
+                else if (handleType === "s") newH = Math.max(100, startH + dy);
+                else if (handleType === "n") newH = Math.max(100, startH - dy);
+
+                dom.inspectorFeedbackBox.className = "feedback-card danger";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ⚠️ <strong>Non-Proportional Edge Drag:</strong> Stretching or squashing width/height independently alters the aspect ratio! Press <strong>Ctrl+Z</strong> to undo.
+                `;
+            }
+
+            updateArtworkDimensions(newW, newH, false);
+        }
+
+        /* POINTER UP / RELEASE */
+        function handlePointerUp(e) {
+            if (!activeDragState) return;
+
+            if (activeDragState.targetEl) {
+                activeDragState.targetEl.classList.remove("active");
+                if (activeDragState.targetEl.releasePointerCapture && activeDragState.pointerId !== undefined) {
+                    try { activeDragState.targetEl.releasePointerCapture(activeDragState.pointerId); } catch (err) {}
+                }
+            }
+
+            // Save final step to undo history stack
+            state.historyStack.push({ width: state.currWidth, height: state.currHeight });
+
+            activeDragState = null;
+        }
+
+        /* DEDICATED CTRL+Z UNDO ACTION */
+        function handleUndo() {
+            if (state.isRoundMounted) return;
+
+            if (state.historyStack.length > 1) {
+                state.historyStack.pop(); // Remove current
+                const prevState = state.historyStack[state.historyStack.length - 1];
+                updateArtworkDimensions(prevState.width, prevState.height, false);
+
+                playAudioTone(440, 0.15); // Undo chime
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ↺ <strong>Undo Applied:</strong> Rewound to previous scale state (${prevState.width} × ${prevState.height}px). Remember to resize using <strong>blue corner handles 🔵</strong>!
+                `;
+            } else {
+                handleResetImageDimensions();
+            }
+        }
+
+        /* RESET IMAGE TO INITIAL DIMENSIONS */
+        function handleResetImageDimensions() {
+            if (state.isRoundMounted) return;
+            const art = MASTER_ARTWORKS[state.currentRound];
+            if (!art) return;
+
+            updateArtworkDimensions(art.initialWidth, art.initialHeight, true);
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = `
+                🔄 <strong>Image Reset:</strong> Restored to starting size (${art.initialWidth} × ${art.initialHeight}px). Drag from the <strong>blue corners 🔵</strong> to scale into the gold frame!
+            `;
+        }
+
+        /* INTERACTIVE HINT ACTION */
+        function showInteractiveHint() {
+            const art = MASTER_ARTWORKS[state.currentRound];
+            dom.inspectorFeedbackBox.className = "feedback-card warning";
+            dom.inspectorFeedbackBox.innerHTML = `
+                💡 <strong>Curator Pro-Tip:</strong> Target frame is <strong>${art.targetWidth} × ${art.targetHeight}px (${art.ratioDesc})</strong>. Drag the <strong>blue corner handles 🔵</strong> outward until the gold frame pulses green!
+            `;
+        }
+
+        /* SNAP PROPORTIONALLY TO TARGET */
+        function handleSnapToTarget() {
+            if (state.isRoundMounted) return;
+            const art = MASTER_ARTWORKS[state.currentRound];
+            if (!art) return;
+
+            updateArtworkDimensions(art.targetWidth, art.targetHeight, true);
+            playAudioTone(587, 0.2);
+
+            dom.inspectorFeedbackBox.className = "feedback-card success";
+            dom.inspectorFeedbackBox.innerHTML = `
+                ✨ <strong>Proportional Snap:</strong> Automatically scaled to perfect target dimensions (${art.targetWidth} × ${art.targetHeight}px). Aspect ratio locked! Click <strong>[Mount Artwork]</strong> below.
+            `;
+        }
+
+        /* KEYBOARD NAVIGATION (CTRL+Z & ARROW KEYS) */
+        function handleGlobalKeyDown(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                handleUndo();
+                return;
+            }
+
+            // Arrow keys for handle/artwork keyboard accessibility
+            if (document.activeElement === dom.artworkWrapper && !state.isRoundMounted) {
+                const art = MASTER_ARTWORKS[state.currentRound];
+                if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        // Non-proportional width stretch
+                        updateArtworkDimensions(state.currWidth + 10, state.currHeight, true);
+                    } else {
+                        // Proportional corner scale up
+                        updateArtworkDimensions(state.currWidth + 10, (state.currWidth + 10) / art.aspectRatio, true);
+                    }
+                } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        // Non-proportional width squash
+                        updateArtworkDimensions(state.currWidth - 10, state.currHeight, true);
+                    } else {
+                        // Proportional corner scale down
+                        updateArtworkDimensions(state.currWidth - 10, (state.currWidth - 10) / art.aspectRatio, true);
+                    }
+                }
+            }
+        }
+
+        /* MOUNT ARTWORK EVALUATION & SCORING */
+        function handleMountArtwork() {
+            const art = MASTER_ARTWORKS[state.currentRound];
+            if (!art || state.isRoundMounted) return;
+
+            state.attempts += 1;
+            const isCorrect = state.distortionPct <= 4;
+
+            state.evaluations[art.id] = {
+                title: art.title,
+                subject: art.subject,
+                finalWidth: state.currWidth,
+                finalHeight: state.currHeight,
+                targetWidth: art.targetWidth,
+                targetHeight: art.targetHeight,
+                distortionPct: state.distortionPct,
+                isCorrect: isCorrect,
+                feedback: art.feedback,
+                funDistortionDesc: art.funDistortionDesc
+            };
+
+            if (isCorrect) {
+                state.score += 20;
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+                playAudioTone(523.25, 0.1, 659.25, 0.2, 783.99, 0.35); // Success Major Triad
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    🎉 <strong>Exhibition Ready!</strong> ${escapeHtml(art.feedback)}
+                `;
+            } else {
+                state.streak = 0;
+                dom.goldFrame.classList.add("distorted-alert");
+                playAudioTone(220, 0.3); // Disapproval buzzer
+
+                dom.inspectorFeedbackBox.className = "feedback-card danger";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ❌ <strong>Uh-Oh! Distorted Artwork:</strong> ${escapeHtml(art.funDistortionDesc)} Press <strong>Ctrl+Z</strong> to fix before proceeding.
+                `;
+            }
+
+            state.isRoundMounted = true;
+            dom.lockMountBtn.style.display = "none";
+            dom.nextArtworkBtn.style.display = "inline-flex";
+            if (state.currentRound === MASTER_ARTWORKS.length - 1) {
+                dom.nextArtworkBtn.textContent = "Complete Exhibition 🏆";
+            } else {
+                dom.nextArtworkBtn.textContent = `Next Artwork (${state.currentRound + 2}/5) →`;
+            }
+
+            updateDashboardMetrics();
+            renderHistoryList();
+        }
+
+        /* ADVANCE TO NEXT ARTWORK OR SUMMARY */
+        function advanceToNextArtwork() {
+            if (state.currentRound < MASTER_ARTWORKS.length - 1) {
+                state.currentRound += 1;
+                resetExplanationBox();
+                renderRoundArtwork();
+            } else {
+                showScreen("summary");
+            }
+        }
+
+        function updateDashboardMetrics() {
+            const evaluatedCount = Object.keys(state.evaluations).length;
+            const total = MASTER_ARTWORKS.length;
+            const pct = Math.round((evaluatedCount / total) * 100);
+
+            dom.progressCount.textContent = `${evaluatedCount} / ${total} Framed`;
+            dom.progressPercent.textContent = `${pct}% Complete`;
+            dom.progressFillBar.style.width = `${pct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const acc = evaluatedCount === 0 ? 100 : Math.round((correctCount / evaluatedCount) * 100);
+            dom.accuracyVal.textContent = `${acc}%`;
+        }
+
+        /* Render Summary Screen */
+        function renderSummaryScreen() {
+            const total = MASTER_ARTWORKS.length;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = Math.round((correctCount / total) * 100);
+
+            dom.summaryScoreVal.textContent = state.score;
+            dom.summaryAccuracyVal.textContent = `${accuracy}%`;
+            dom.summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            dom.summaryCorrectVal.textContent = `${correctCount} / ${total}`;
+
+            if (accuracy >= 90) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "Master Digital Media Curator";
+                dom.badgeDesc.textContent = `Flawless image manipulation! You achieved ${accuracy}% accuracy (${correctCount}/${total} framed perfectly). You understand proportional scaling completely!`;
+            } else if (accuracy >= 70) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Exhibition Artist";
+                dom.badgeDesc.textContent = `Great effort! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Check the missed items below to reinforce corner handle scaling!`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Media Editing Trainee";
+                dom.badgeDesc.textContent = `You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Remember: corner handles lock aspect ratios, while side handles stretch images!`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+            MASTER_ARTWORKS.forEach(art => {
+                const evalData = state.evaluations[art.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const finalW = evalData.finalWidth || art.initialWidth;
+                const finalH = evalData.finalHeight || art.initialHeight;
+
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text); font-size:0.98rem;">🖼️ ${escapeHtml(art.title)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct Proportions' : '❌ Distorted / Missed'} (Target: ${art.targetWidth}×${art.targetHeight}px | Final: ${finalW}×${finalH}px)
+                        </span>
+                    </div>
+                    <p style="margin:4px 0 0; color:var(--text-soft); font-size:0.88rem; line-height:1.5;">
+                        ${isCorrect ? escapeHtml(art.feedback) : escapeHtml(art.funDistortionDesc)}
+                    </p>
+                `;
+                dom.summaryDetailsList.appendChild(card);
+            });
+        }
+
+        /* Render Review Memory Drawer */
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedList = MASTER_ARTWORKS.filter(art => state.evaluations[art.id]);
+
+            if (evaluatedList.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:16px; color:var(--muted); text-align:center;">No framed artworks evaluated yet.</div>`;
+                return;
+            }
+
+            evaluatedList.forEach(art => {
+                const evalData = state.evaluations[art.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const item = document.createElement("div");
+                item.className = "summary-item-card";
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text); font-size:0.95rem;">🎨 ${escapeHtml(art.title)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Distorted'} (Deviation: ${evalData.distortionPct}%)
+                        </span>
+                    </div>
+                    <div style="font-size:0.86rem; color:var(--text-soft); margin-top:4px; line-height:1.5;">
+                        ${escapeHtml(art.feedback)}
+                    </div>
+                `;
+                dom.historyList.appendChild(item);
+            });
+        }
+
+        /* Modal & Drawer Controls */
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try { sessionStorage.setItem("user_toggled_theme", state.theme); } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {}
+        }
+
+        /* Reset Confirmation (Rule 4.4 & 4.5) */
+        function confirmReset() {
+            closeResetModal();
+
+            state.currentRound = 0;
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.evaluations = {};
+            state.historyStack = [];
+            state.isRoundMounted = false;
+
+            resetExplanationBox();
+            updateDashboardMetrics();
+            showScreen("home");
+        }
+
+        /* Web Audio Synthesis Helper */
+        function playAudioTone(freq1, dur1, freq2, dur2, freq3, dur3) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const now = ctx.currentTime;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.setValueAtTime(freq1, now);
+                if (freq2) osc.frequency.setValueAtTime(freq2, now + (dur1 || 0.1));
+                if (freq3) osc.frequency.setValueAtTime(freq3, now + (dur2 || 0.2));
+
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + (dur3 || dur2 || dur1 || 0.25));
+
+                osc.start(now);
+                osc.stop(now + (dur3 || dur2 || dur1 || 0.26));
+            } catch (e) {}
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
