@@ -1,0 +1,2594 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 TOC X-Ray — Table of Contents Structure Lab</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 2 INFORMATION TECHNOLOGY — TOC X-RAY
+           Single-file HTML/CSS/JS - Offline Friendly
+           Trinidad and Tobago Secondary Schools — IT Computer Lab
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Connection / Status Colors */
+            --dot-color: #0ea5e9;
+            --dot-glow: rgba(14, 165, 233, 0.5);
+
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+
+            /* Simulated Word Processor & X-Ray Styles */
+            --paper-bg: #ffffff;
+            --paper-text: #1e293b;
+            --paper-heading: #0f172a;
+            --paper-border: #cbd5e1;
+
+            --h1-color: #7c3aed;
+            --h1-bg: rgba(124, 58, 237, 0.15);
+            --h1-border: #7c3aed;
+
+            --h2-color: #0284c7;
+            --h2-bg: rgba(2, 132, 199, 0.15);
+            --h2-border: #0284c7;
+
+            --normal-color: #d97706;
+            --normal-bg: rgba(217, 119, 6, 0.15);
+            --normal-border: #d97706;
+
+            --toc-paper-bg: #f8fafc;
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+
+            --paper-bg: #ffffff;
+            --paper-text: #1e293b;
+            --paper-heading: #0f172a;
+            --paper-border: #cbd5e1;
+            --toc-paper-bg: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* Lock outer window when in game mode so ONLY internal containers scroll */
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1360px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+        }
+
+        .hero-card {
+            width: min(100%, 880px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: clamp(2.1rem, 4vw, 3.2rem);
+            line-height: 1.1;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 740px);
+            margin: 0 auto 28px;
+            color: var(--text-soft);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Document Viewport / 25% Right Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Pane (75%): Interactive Word Document Workbench */
+        .canvas-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        /* Word Document Window Chrome */
+        .word-window-header {
+            padding: 10px 18px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .doc-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+
+        .doc-tag {
+            padding: 3px 8px;
+            background: color-mix(in srgb, var(--accent) 18%, transparent);
+            color: var(--accent);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        /* Ribbon Toolbar with X-Ray & Styles Palette */
+        .doc-ribbon {
+            background: var(--surface-3);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .ribbon-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-right: 10px;
+            border-right: 1px solid var(--border);
+        }
+
+        .ribbon-group:last-child {
+            border-right: none;
+        }
+
+        .ribbon-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            font-weight: 800;
+            margin-right: 4px;
+        }
+
+        .ribbon-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-size: 0.82rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .ribbon-btn:hover:not(:disabled) {
+            background: color-mix(in srgb, var(--accent) 20%, var(--surface-2));
+            border-color: var(--accent);
+        }
+
+        .ribbon-btn.active-xray {
+            background: linear-gradient(135deg, #0284c7, #6366f1) !important;
+            color: #ffffff !important;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+            animation: pulseXray 2s infinite;
+        }
+
+        @keyframes pulseXray {
+            0% { box-shadow: 0 0 4px rgba(56, 189, 248, 0.4); }
+            50% { box-shadow: 0 0 16px rgba(56, 189, 248, 0.8); }
+            100% { box-shadow: 0 0 4px rgba(56, 189, 248, 0.4); }
+        }
+
+        .style-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .style-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .style-btn.btn-h1 { color: #7c3aed; border-color: rgba(124, 58, 237, 0.4); }
+        .style-btn.btn-h1:hover { background: rgba(124, 58, 237, 0.2); }
+
+        .style-btn.btn-h2 { color: #0284c7; border-color: rgba(2, 132, 199, 0.4); }
+        .style-btn.btn-h2:hover { background: rgba(2, 132, 199, 0.2); }
+
+        .style-btn.btn-normal { color: #d97706; border-color: rgba(217, 119, 6, 0.4); }
+        .style-btn.btn-normal:hover { background: rgba(217, 119, 6, 0.2); }
+
+        /* Document Pages Viewport */
+        .doc-viewport {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 24px;
+            background: color-mix(in srgb, var(--bg-soft) 70%, var(--surface));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+            position: relative;
+        }
+
+        /* Stacked Word Paper Pages Layout */
+        .word-paper-page {
+            width: 100%;
+            max-width: 760px;
+            background: var(--paper-bg);
+            color: var(--paper-text);
+            border: 1px solid var(--paper-border);
+            border-radius: 8px;
+            padding: 36px 44px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            position: relative;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* PAGE 1: DEDICATED TABLE OF CONTENTS PAGE STYLING */
+        .toc-cover-page {
+            background: var(--toc-paper-bg);
+            border: 2px solid #94a3b8;
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+        }
+
+        .toc-cover-header {
+            font-family: 'Calibri', 'Segoe UI', system-ui, sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            border-bottom: 3px solid #0f172a;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toc-page-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-family: 'Calibri', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .toc-empty-field {
+            padding: 36px 20px;
+            background: rgba(148, 163, 184, 0.08);
+            border: 2px dashed #94a3b8;
+            border-radius: 8px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .toc-document-entry {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #1e293b;
+            padding: 4px 0;
+            animation: entrySlide 0.35s ease-out;
+        }
+
+        .toc-document-entry.level-1 {
+            font-weight: 800;
+            font-size: 1rem;
+            color: #0f172a;
+            margin-top: 6px;
+        }
+
+        .toc-document-entry.level-2 {
+            padding-left: 24px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        .toc-entry-dots {
+            flex: 1;
+            margin: 0 10px;
+            border-bottom: 2px dotted #94a3b8;
+            height: 14px;
+        }
+
+        .toc-entry-page {
+            font-weight: 800;
+            color: #0284c7;
+            font-family: monospace;
+            font-size: 0.98rem;
+        }
+
+        @keyframes entrySlide {
+            from { transform: translateX(18px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Page Headers and Footers */
+        .page-header-stamp {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.76rem;
+            color: #94a3b8;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .page-footer-stamp {
+            text-align: right;
+            font-size: 0.76rem;
+            color: #94a3b8;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 8px;
+            margin-top: 24px;
+            font-weight: 700;
+        }
+
+        /* Document Section Heading Hotspots */
+        .doc-heading-item {
+            position: relative;
+            margin: 18px 0 8px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            user-select: none;
+            border: 2px solid transparent;
+        }
+
+        .doc-heading-item:hover {
+            background: rgba(56, 189, 248, 0.08);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .doc-heading-item.selected {
+            background: rgba(56, 189, 248, 0.16) !important;
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+            transform: scale(1.01);
+        }
+
+        .heading-text-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Heading Appearance Formatting */
+        .doc-title-style {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .visual-h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .visual-h2 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #334155;
+            margin-left: 12px;
+        }
+
+        /* Structural X-Ray Tag Badges (Revealed in X-Ray Mode) */
+        .xray-badge {
+            display: none;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            animation: tagPop 0.2s ease-out;
+        }
+
+        @keyframes tagPop {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .xray-on .xray-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tag-h1 {
+            background: var(--h1-bg);
+            color: var(--h1-color);
+            border: 1px solid var(--h1-border);
+        }
+
+        .tag-h2 {
+            background: var(--h2-bg);
+            color: var(--h2-color);
+            border: 1px solid var(--h2-border);
+        }
+
+        .tag-normal {
+            background: var(--normal-bg);
+            color: var(--normal-color);
+            border: 1px dashed var(--normal-border);
+        }
+
+        /* Scanning Laser Bar Animation */
+        .scan-laser-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent), #ffffff, var(--accent), transparent);
+            box-shadow: 0 0 18px var(--accent);
+            top: 0;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 30;
+        }
+
+        .scan-laser-line.scanning {
+            animation: laserSweep 1.2s ease-in-out;
+        }
+
+        @keyframes laserSweep {
+            0% { top: 0%; opacity: 1; }
+            90% { top: 100%; opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* Right Pane: Table of Contents Preview & Action Panel (25% Width) */
+        .toc-side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-title {
+            font-size: 0.98rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        /* SIDE WIDGET TABLE OF CONTENTS PREVIEW */
+        .side-toc-widget-box {
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-family: 'Calibri', 'Segoe UI', system-ui, sans-serif;
+            position: relative;
+        }
+
+        .side-toc-header-row {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--accent);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 6px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .side-toc-empty-notice {
+            padding: 24px 10px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+
+        .side-toc-entry-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            color: var(--text);
+            padding: 2px 0;
+            animation: entrySlide 0.3s ease-out;
+        }
+
+        .side-toc-entry-row.level-2 {
+            padding-left: 16px;
+            font-size: 0.8rem;
+            color: var(--text-soft);
+        }
+
+        .side-toc-dots {
+            flex: 1;
+            margin: 0 8px;
+            border-bottom: 1px dotted var(--muted);
+            height: 12px;
+        }
+
+        .side-toc-page-num {
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .quick-page-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .page-nav-btn {
+            padding: 5px 10px;
+            border-radius: 6px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text-soft);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .page-nav-btn:hover {
+            border-color: var(--accent);
+            color: var(--text);
+            background: color-mix(in srgb, var(--accent) 15%, var(--surface-2));
+        }
+
+        /* Selected Heading Inspector Card */
+        .inspector-active-box {
+            padding: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        /* Progress Card */
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 10px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            padding: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Feedback Explanation Card */
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        .feedback-card.info {
+            border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+            background: color-mix(in srgb, var(--accent) 15%, var(--surface-2));
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 480px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 640px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 960px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+            .canvas-pane {
+                min-height: auto;
+            }
+            .toc-side-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">🩻</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 TOC X-Ray</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Information Technology Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Information Technology</div>
+                    <h2>TOC X-Ray — Table of Contents Structure Lab</h2>
+                    <p>
+                        Discover how word processors actually build an automatic Table of Contents on <strong>Page 1</strong> of a project document!
+                        Learn the vital difference between <strong>visual formatting</strong> (just making text bold or large) and <strong>structural Heading Styles</strong> (<code>Heading 1</code> and <code>Heading 2</code>).
+                        Activate <strong>X-Ray Mode</strong> to reveal hidden document tags, fix broken section styles, and manually trigger <strong>Generate / Update TOC</strong> to compile your document automatically!
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">📄</div>
+                            <h3 style="font-size:0.95rem;">Page 1 & Side Preview</h3>
+                            <p>Watch Page 1 of the document and the live side widget populate with compiled headings, leader dots, and page numbers.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🩻</div>
+                            <h3 style="font-size:0.95rem;">X-Ray Structure HUD</h3>
+                            <p>Reveal hidden tags behind section titles to detect text disguised with plain bold formatting.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚡</div>
+                            <h3 style="font-size:0.95rem;">Manual TOC Compilation</h3>
+                            <p>Apply real <code>Heading 1</code> & <code>Heading 2</code> styles, then click Update TOC to watch the computer scan the document.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.1rem; padding: 14px 28px;">🚀 Launch TOC X-Ray</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Interactive Stage / 25% Right Action Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Word Document Viewport -->
+                <section class="canvas-pane" id="canvasPane">
+                    <div class="word-window-header">
+                        <div class="doc-meta">
+                            <span style="font-size: 1.1rem;">📄</span>
+                            <span id="docFileName" style="color: var(--text);">Caribbean_Music_Heritage.docx</span>
+                            <span class="doc-tag" id="docRoundTag">Document 1 of 3 (4 Pages)</span>
+                        </div>
+                        <span style="font-size:0.84rem; color:var(--muted); font-weight:700;">Page 1 is the Table of Contents • Scroll to view content pages</span>
+                    </div>
+
+                    <!-- Document Ribbon Toolbar -->
+                    <div class="doc-ribbon">
+                        <div class="ribbon-group">
+                            <span class="ribbon-label">X-Ray HUD</span>
+                            <button class="ribbon-btn" id="toggleXrayBtn" title="Toggle X-Ray structure view">
+                                <span id="xrayIcon">🩻</span> X-Ray Mode: <strong id="xrayStatusText">OFF</strong>
+                            </button>
+                        </div>
+                        <div class="ribbon-group">
+                            <span class="ribbon-label">Styles Palette</span>
+                            <button class="style-btn btn-normal" id="applyNormalBtn" title="Set to Normal Text">Normal</button>
+                            <button class="style-btn btn-h1" id="applyH1Btn" title="Apply Heading 1 (Main Topic)">Heading 1</button>
+                            <button class="style-btn btn-h2" id="applyH2Btn" title="Apply Heading 2 (Subtopic)">Heading 2</button>
+                        </div>
+                        <div class="ribbon-group" style="margin-left: auto; border-right: none;">
+                            <button class="primary-btn" id="ribbonGenerateTocBtn" style="padding: 6px 14px; font-size: 0.82rem;">
+                                ⚡ Generate / Update TOC
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Multi-Page Document Viewport (Page 1 = TOC, Pages 2..4 = Content) -->
+                    <div class="doc-viewport" id="docViewport">
+                        <!-- Scanning Laser Line Overlay -->
+                        <div class="scan-laser-line" id="scanLaser"></div>
+
+                        <!-- 4 Stacked Pages Container -->
+                        <div id="pagesStack" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 28px;">
+                            <!-- Pages dynamically injected here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Scorecard, Table of Contents Preview & Structure Insight -->
+                <aside class="toc-side-panel">
+                    <!-- 1. Structure Progress & Scorecard Card (FIRST) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Structure Progress</span>
+                            <span id="progressCount" style="color:var(--accent);">0 / 9 Headings</span>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">0%</div>
+                            </div>
+                        </div>
+
+                        <button class="primary-btn" id="nextDocumentBtn" style="width:100%; justify-content:center; display:none;">
+                            Next Document →
+                        </button>
+                    </div>
+
+                    <!-- 2. Table of Contents Preview Card (SECOND) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Table of Contents Preview</span>
+                            <span id="tocStatusChip" style="font-size:0.75rem; color:var(--accent); font-weight:800;">Waiting for Update</span>
+                        </div>
+
+                        <!-- Side TOC Preview Box -->
+                        <div class="side-toc-widget-box" id="sideTocPreviewBox">
+                            <div class="side-toc-header-row">
+                                <span>Table of Contents</span>
+                                <span style="font-size:0.75rem; color:var(--muted);">Page</span>
+                            </div>
+                            <div id="sideTocEntriesContainer">
+                                <div class="side-toc-empty-notice">
+                                    Click <strong>[⚡ Generate / Update TOC]</strong> below to scan document headings!
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="primary-btn" id="sideGenerateTocBtn" style="width: 100%; justify-content: center; padding: 11px; font-size:0.92rem;">
+                            ⚡ Generate / Update TOC
+                        </button>
+                    </div>
+
+                    <!-- 3. Structure Insight Box (THIRD) -->
+                    <div class="panel-card">
+                        <div class="panel-title">Structure Insight</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Turn ON <strong>[🩻 X-Ray Mode]</strong> to reveal hidden styles. Click <strong>[⚡ Generate / Update TOC]</strong> to compile headings into Page 1 and the preview widget!
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Form 2 IT Lab TOC Certification</div>
+                <h2>Table of Contents Mastery Achieved!</h2>
+                <p>Outstanding structural work! You understand how Heading 1 and Heading 2 styles empower automated word processors to compile Table of Contents fields.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Document Architect</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You successfully discovered that visual formatting changes appearance, but Heading Styles tell the computer what text represents!</p>
+                </div>
+
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Correct Headings</div>
+                        <div class="val" id="summaryCorrectVal">0 / 9</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Structural Style Breakdown (9 Headings)</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Structuring Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Logged document heading structures & technical insights.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Play TOC X-Ray</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome, Form 2 Document Architect! You are organizing a 4-page group project document where <strong>Page 1</strong> is the Table of Contents.</p>
+                <ul>
+                    <li><strong>Page 1 Table of Contents & Side Widget:</strong> Both the first page and the side widget display the Table of Contents. They wait for your manual refresh to update!</li>
+                    <li><strong>The Problem:</strong> Some section titles on Pages 2, 3, and 4 look bold and large, but have only been given visual formatting instead of a true Heading Style.</li>
+                    <li><strong>X-Ray Mode:</strong> Click <strong>🩻 X-Ray Mode</strong> in the toolbar to see the hidden structural tags (<code>Heading 1</code>, <code>Heading 2</code>, or <code>Normal Text</code>).</li>
+                    <li><strong>Repair Styles:</strong> Click any missing section title in the document, then click <strong>Heading 1</strong> (main topic) or <strong>Heading 2</strong> (subtopic) from the Styles Palette!</li>
+                    <li><strong>Manual TOC Update:</strong> Click <strong>⚡ Generate / Update TOC</strong> to scan the document. Correctly styled headings compile into <strong>Page 1</strong> and the side widget with automatic indentation and page numbers!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the simulation and restart from Document 1? All current scores and table progress will be cleared.</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset TOC Progress</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           TOC X-RAY 3-ROUND DATASET (PAGE 1 = TOC, PAGES 2..4 = CONTENT)
+           Form 2 Information Technology — Trinidad & Tobago Schools
+           ============================================================ */
+        const TOC_DATASET = [
+            /* ROUND 1 */
+            {
+                doc_id: "doc_music",
+                doc_title: "Form 2 Research Project: Caribbean Music & Digital Sound Heritage",
+                doc_filename: "Caribbean_Music_Heritage.docx",
+                authors: "Kevon & Shenelle (Form 2 IT & Music Group)",
+                pages: [
+                    {
+                        page_num: 2,
+                        items: [
+                            {
+                                id: "m_item_0",
+                                text: "Caribbean Music Traditions",
+                                isTitle: true,
+                                style: "title",
+                                targetStyle: "title",
+                                page: 2,
+                                snippet: "A comprehensive investigation into the cultural roots and acoustic technologies of Trinidad and Tobago's indigenous musical forms."
+                            },
+                            {
+                                id: "m_item_1",
+                                text: "Calypso",
+                                initialStyle: "h1",
+                                targetStyle: "h1",
+                                isInitialCorrect: true,
+                                level: 1,
+                                page: 2,
+                                body: "Calypso is a lyrical Afro-Caribbean music style characterized by witty social commentary, syncopated rhythms, and brass instrumentation popularized throughout the West Indies."
+                            },
+                            {
+                                id: "m_item_2",
+                                text: "Extempo",
+                                initialStyle: "h2",
+                                targetStyle: "h2",
+                                isInitialCorrect: true,
+                                level: 2,
+                                page: 2,
+                                body: "Extempo is a freestyle subgenre of calypso where performers improvise humorous and sharp rhyming verses on any given topic without preparation."
+                            }
+                        ]
+                    },
+                    {
+                        page_num: 3,
+                        items: [
+                            {
+                                id: "m_item_3",
+                                text: "Soca",
+                                initialStyle: "normal", // FAULT: Visually bold/large, but Normal Text!
+                                targetStyle: "h1",
+                                isInitialCorrect: false,
+                                level: 1,
+                                page: 3,
+                                body: "Soca (Soul of Calypso), pioneered by Lord Shorty in the 1970s, fuses traditional calypso cadence with Indian rhythms and electronic synthesizers."
+                            },
+                            {
+                                id: "m_item_4",
+                                text: "Chutney Soca",
+                                initialStyle: "normal", // FAULT: Visually bold/large, but Normal Text!
+                                targetStyle: "h2",
+                                isInitialCorrect: false,
+                                level: 2,
+                                page: 3,
+                                body: "Chutney Soca is a vibrant fusion combining Bhojpuri Indian folk melodies with fast-paced soca drum loops, dholak, and harmonium accents."
+                            }
+                        ]
+                    },
+                    {
+                        page_num: 4,
+                        items: [
+                            {
+                                id: "m_item_5",
+                                text: "Steelpan",
+                                initialStyle: "h1",
+                                targetStyle: "h1",
+                                isInitialCorrect: true,
+                                level: 1,
+                                page: 4,
+                                body: "The Steelpan is the only acoustic musical instrument invented in the 20th century, originating in the vibrant communities of Laventille and Port of Spain."
+                            },
+                            {
+                                id: "m_item_6",
+                                text: "History of Steelpan",
+                                initialStyle: "h2",
+                                targetStyle: "h2",
+                                isInitialCorrect: true,
+                                level: 2,
+                                page: 4,
+                                body: "From early bamboo tambour percussion to hammer-tuned 55-gallon steel oil drums, steelband orchestrations evolved into global classical and festival ensembles."
+                            },
+                            {
+                                id: "m_item_7",
+                                text: "Modern Acoustic Innovations",
+                                initialStyle: "normal", // FAULT: Visually bold, but Normal Text!
+                                targetStyle: "h2",
+                                isInitialCorrect: false,
+                                level: 2,
+                                page: 4,
+                                body: "Contemporary acoustic engineers in Trinidad use 3D laser-tuning and digital audio workstations to refine pan harmonics and MIDI electro-pan synthesizers."
+                            }
+                        ]
+                    }
+                ]
+            },
+
+            /* ROUND 2 */
+            {
+                doc_id: "doc_wildlife",
+                doc_title: "Trinidad & Tobago Protected Wildlife & Marine Sanctuaries Report",
+                doc_filename: "TT_Wildlife_Sanctuaries.docx",
+                authors: "Priya & Brandon (Environmental Tech Club)",
+                pages: [
+                    {
+                        page_num: 2,
+                        items: [
+                            {
+                                id: "w_item_0",
+                                text: "Trinidad & Tobago Protected Habitats",
+                                isTitle: true,
+                                style: "title",
+                                targetStyle: "title",
+                                page: 2,
+                                snippet: "A digital IoT sensor survey monitoring temperature, water salinity, and migratory bird populations across national wetland reserves."
+                            },
+                            {
+                                id: "w_item_1",
+                                text: "Caroni Bird Sanctuary",
+                                initialStyle: "h1",
+                                targetStyle: "h1",
+                                isInitialCorrect: true,
+                                level: 1,
+                                page: 2,
+                                body: "The Caroni Swamp is a 12,000-acre mangrove estuary on the west coast of Trinidad that serves as the official roosting refuge for the national Scarlet Ibis."
+                            },
+                            {
+                                id: "w_item_2",
+                                text: "Scarlet Ibis Roosting Grounds",
+                                initialStyle: "h2",
+                                targetStyle: "h2",
+                                isInitialCorrect: true,
+                                level: 2,
+                                page: 2,
+                                body: "Every sunset, thousands of vibrant Scarlet Ibis return from Venezuelan feeding grounds to roost safely in the red mangrove canopies."
+                            },
+                            {
+                                id: "w_item_3",
+                                text: "Mangrove Eco-Systems",
+                                initialStyle: "normal", // FAULT: Should be Heading 2
+                                targetStyle: "h2",
+                                isInitialCorrect: false,
+                                level: 2,
+                                page: 2,
+                                body: "Mangrove root systems trap sediment, prevent coastal erosion, and buffer against tidal storm surges while nurturing juvenile marine fish."
+                            }
+                        ]
+                    },
+                    {
+                        page_num: 3,
+                        items: [
+                            {
+                                id: "w_item_4",
+                                text: "Tobago Marine Protected Reserves",
+                                initialStyle: "normal", // FAULT: Should be Heading 1
+                                targetStyle: "h1",
+                                isInitialCorrect: false,
+                                level: 1,
+                                page: 3,
+                                body: "Tobago's southwest coastline features fragile barrier coral reefs designated as legally protected marine environments."
+                            },
+                            {
+                                id: "w_item_5",
+                                text: "Buccoo Reef Marine Park",
+                                initialStyle: "h2",
+                                targetStyle: "h2",
+                                isInitialCorrect: true,
+                                level: 2,
+                                page: 3,
+                                body: "A world-famous marine ecosystem with brain corals, star corals, and diverse tropical fish monitored by underwater turbidity loggers."
+                            },
+                            {
+                                id: "w_item_6",
+                                text: "Nylon Pool Lagoon",
+                                initialStyle: "normal", // FAULT: Should be Heading 2
+                                targetStyle: "h2",
+                                isInitialCorrect: false,
+                                level: 2,
+                                page: 3,
+                                body: "A natural in-sea sandbar with shallow, crystal-clear waters formed by white coral sand deposits in the middle of Buccoo Bay."
+                            }
+                        ]
+                    },
+                    {
+                        page_num: 4,
+                        items: [
+                            {
+                                id: "w_item_7",
+                                text: "North Coast Sea Turtle Sanctuaries",
+                                initialStyle: "h1",
+                                targetStyle: "h1",
+                                isInitialCorrect: true,
+                                level: 1,
+                                page: 4,
+                                body: "Trinidad's northern and eastern beaches host one of the largest nesting colonies of endangered giant Leatherback sea turtles in the world."
+                            },
+                            {
+                                id: "w_item_8",
+                                text: "Grande Riviere Leatherback Nesting",
+                                initialStyle: "h2",
+                                targetStyle: "h2",
+                                isInitialCorrect: true,
+                                level: 2,
+                                page: 4,
+                                body: "From March to August, local community conservation groups tag nesting female turtles and protect hatchlings using GPS infrared monitors."
+                            }
+                        ]
+                    }
+                ]
+            },
+
+            /* ROUND 3 */
+            {
+                doc_id: "doc_network",
+                doc_title: "Oakridge Secondary School IT Network & Cloud Storage Manual",
+                doc_filename: "Oakridge_IT_Network_Manual.docx",
+                authors: "Tariq & Aliyah (Form 2 IT Lab Administrators)",
+                pages: [
+                    {
+                        page_num: 2,
+                        items: [
+                            {
+                                id: "n_item_0",
+                                text: "School IT Infrastructure Architecture",
+                                isTitle: true,
+                                style: "title",
+                                targetStyle: "title",
+                                page: 2,
+                                snippet: "A technical handbook describing high-speed gigabit Ethernet routing, wireless access coverage, and automated student cloud backups."
+                            },
+                            {
+                                id: "n_item_1",
+                                text: "Local Area Network (LAN)",
+                                initialStyle: "h1",
+                                targetStyle: "h1",
+                                isInitialCorrect: true,
+                                level: 1,
+                                page: 2,
+                                body: "The computer laboratory LAN links 40 student desktop workstations, 2 network laser printers, and the teacher workstation via Cat6 cabling."
+                            },
+                            {
+                                id: "n_item_2",
+                                text: "Ethernet Switch Topology",
+                                initialStyle: "h2",
+                                targetStyle: "h2",
+                                isInitialCorrect: true,
+                                level: 2,
+                                page: 2,
+                                body: "A 48-port managed gigabit switch delivers high-throughput packet switching to prevent bottlenecking during collaborative coding practicals."
+                            },
+                            {
+                                id: "n_item_3",
+                                text: "Wi-Fi Access Points",
+                                initialStyle: "normal", // FAULT: Should be Heading 2
+                                targetStyle: "h2",
+                                isInitialCorrect: false,
+                                level: 2,
+                                page: 2,
+                                body: "Dual-band Wi-Fi 6 access points provide encrypted WPA3 wireless connectivity across the library, auditorium, and science labs."
+                            }
+                        ]
+                    },
+                    {
+                        page_num: 3,
+                        items: [
+                            {
+                                id: "n_item_4",
+                                text: "Cloud Computing & Data Backups",
+                                initialStyle: "normal", // FAULT: Should be Heading 1
+                                targetStyle: "h1",
+                                isInitialCorrect: false,
+                                level: 1,
+                                page: 3,
+                                body: "To protect school records against hardware failure or accidental deletion, student practical files synchronize automatically to secure cloud storage."
+                            },
+                            {
+                                id: "n_item_5",
+                                text: "Automated Server Sync",
+                                initialStyle: "h2",
+                                targetStyle: "h2",
+                                isInitialCorrect: true,
+                                level: 2,
+                                page: 3,
+                                body: "Every afternoon at 4:00 PM, an incremental background backup job archives all lab project workspaces to off-site cloud servers."
+                            },
+                            {
+                                id: "n_item_6",
+                                text: "Student Shared Workspace Drives",
+                                initialStyle: "normal", // FAULT: Should be Heading 2
+                                targetStyle: "h2",
+                                isInitialCorrect: false,
+                                level: 2,
+                                page: 3,
+                                body: "Each Form 2 student receives a protected cloud folder accessible from home or school with strict read/write folder permissions."
+                            }
+                        ]
+                    },
+                    {
+                        page_num: 4,
+                        items: [
+                            {
+                                id: "n_item_7",
+                                text: "Cybersecurity & Digital Safety",
+                                initialStyle: "h1",
+                                targetStyle: "h1",
+                                isInitialCorrect: true,
+                                level: 1,
+                                page: 4,
+                                body: "Strict laboratory protocols ensure student devices and school network gateways remain safe from malware, phishing, and unauthorized access."
+                            },
+                            {
+                                id: "n_item_8",
+                                text: "Multi-Factor Authentication (MFA)",
+                                initialStyle: "h2",
+                                targetStyle: "h2",
+                                isInitialCorrect: true,
+                                level: 2,
+                                page: 4,
+                                body: "Teacher and administrative accounts require biometric or time-based one-time password (TOTP) verification in addition to strong passwords."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Turn ON <strong>[🩻 X-Ray Mode]</strong> to reveal hidden styles. Click <strong>[⚡ Generate / Update TOC]</strong> to compile headings into Page 1 and the preview widget!`;
+
+        /* Application State */
+        const state = {
+            currentDocIndex: 0,
+            xrayEnabled: false,
+            selectedItemId: null,
+            currentStyles: {},  // itemId -> "normal" | "h1" | "h2"
+            evaluations: {},    // permanent record across all 3 rounds (9 target headings)
+            tocGenerated: false,
+            tocOutOfDate: false,
+            lastCompiledPageOneHtml: "",
+            lastCompiledSideWidgetHtml: "",
+            score: 0,
+            attempts: 0,
+            streak: 0,
+            bestStreak: 0,
+            theme: "light"
+        };
+
+        /* DOM Elements */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            docFileName: document.getElementById("docFileName"),
+            docRoundTag: document.getElementById("docRoundTag"),
+            toggleXrayBtn: document.getElementById("toggleXrayBtn"),
+            xrayIcon: document.getElementById("xrayIcon"),
+            xrayStatusText: document.getElementById("xrayStatusText"),
+            applyNormalBtn: document.getElementById("applyNormalBtn"),
+            applyH1Btn: document.getElementById("applyH1Btn"),
+            applyH2Btn: document.getElementById("applyH2Btn"),
+            ribbonGenerateTocBtn: document.getElementById("ribbonGenerateTocBtn"),
+            sideGenerateTocBtn: document.getElementById("sideGenerateTocBtn"),
+            sideTocPreviewBox: document.getElementById("sideTocPreviewBox"),
+            sideTocEntriesContainer: document.getElementById("sideTocEntriesContainer"),
+            tocStatusChip: document.getElementById("tocStatusChip"),
+            docViewport: document.getElementById("docViewport"),
+            pagesStack: document.getElementById("pagesStack"),
+            scanLaser: document.getElementById("scanLaser"),
+            progressCount: document.getElementById("progressCount"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            nextDocumentBtn: document.getElementById("nextDocumentBtn"),
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Reset Explanation Box Helper (RULE 4.4) */
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+        }
+
+        /* Detect Browser Theme */
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        /* Initialization */
+        init();
+
+        function init() {
+            bindEvents();
+            loadState();
+            renderDocumentPages();
+
+            // Auto-open instructions modal on launch
+            openModal();
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // Modals: NO backdrop click dismissal
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            // Ribbon Controls
+            dom.toggleXrayBtn.addEventListener("click", toggleXray);
+            dom.applyNormalBtn.addEventListener("click", () => applyStyleToSelected("normal"));
+            dom.applyH1Btn.addEventListener("click", () => applyStyleToSelected("h1"));
+            dom.applyH2Btn.addEventListener("click", () => applyStyleToSelected("h2"));
+
+            dom.ribbonGenerateTocBtn.addEventListener("click", generateTableOfContents);
+            dom.sideGenerateTocBtn.addEventListener("click", generateTableOfContents);
+            dom.nextDocumentBtn.addEventListener("click", advanceDocumentOrSummary);
+
+            // Browser color scheme listener
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        /* Toggle X-Ray Mode */
+        function toggleXray() {
+            state.xrayEnabled = !state.xrayEnabled;
+            updateXrayUI();
+
+            if (state.xrayEnabled) {
+                playAudioFeedback(true, 659.25);
+                dom.inspectorFeedbackBox.className = "feedback-card info";
+                dom.inspectorFeedbackBox.innerHTML = "🩻 <strong>X-Ray HUD Active:</strong> Notice the hidden tags! Headings with <code>[NORMAL TEXT]</code> look bold, but the computer does not know they are headings!";
+            } else {
+                dom.inspectorFeedbackBox.className = "feedback-card";
+                dom.inspectorFeedbackBox.innerHTML = "🩻 <strong>X-Ray Mode OFF:</strong> You are viewing the visual page layout without structural tags.";
+            }
+        }
+
+        function updateXrayUI() {
+            if (state.xrayEnabled) {
+                dom.toggleXrayBtn.classList.add("active-xray");
+                dom.xrayIcon.textContent = "🩻";
+                dom.xrayStatusText.textContent = "ON";
+                dom.docViewport.classList.add("xray-on");
+            } else {
+                dom.toggleXrayBtn.classList.remove("active-xray");
+                dom.xrayIcon.textContent = "🩻";
+                dom.xrayStatusText.textContent = "OFF";
+                dom.docViewport.classList.remove("xray-on");
+            }
+        }
+
+        /* Select Heading Item */
+        function selectHeadingItem(itemId) {
+            state.selectedItemId = itemId;
+            renderDocumentPages();
+
+            const currentDoc = TOC_DATASET[state.currentDocIndex];
+            let allItems = [];
+            currentDoc.pages.forEach(p => allItems.push(...p.items));
+            const item = allItems.find(i => i.id === itemId);
+
+            if (item) {
+                const curStyle = state.currentStyles[item.id] || item.initialStyle;
+                dom.inspectorFeedbackBox.className = "feedback-card info";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    🎯 <strong>Selected:</strong> "${escapeHtml(item.text)}" on Page ${item.page} (Current: <code>${curStyle.toUpperCase()}</code>).<br>
+                    Choose <strong>[Heading 1]</strong> or <strong>[Heading 2]</strong> from the Styles Palette on the toolbar, then click <strong>[⚡ Generate / Update TOC]</strong>!
+                `;
+            }
+        }
+
+        /* Apply Style to Selected Heading (MANUAL UPDATE ONLY - DOES NOT AUTO REFRESH TOC) */
+        function applyStyleToSelected(newStyle) {
+            if (!state.selectedItemId) {
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = "⚠️ Click a section title in the document first to select it, then choose a style from the palette!";
+                return;
+            }
+
+            const currentDoc = TOC_DATASET[state.currentDocIndex];
+            let allItems = [];
+            currentDoc.pages.forEach(p => allItems.push(...p.items));
+            const item = allItems.find(i => i.id === state.selectedItemId);
+
+            if (!item || item.isTitle) return;
+
+            state.attempts += 1;
+            state.currentStyles[item.id] = newStyle;
+            state.tocOutOfDate = true;
+
+            const isCorrect = newStyle === item.targetStyle;
+
+            state.evaluations[item.id] = {
+                item_text: item.text,
+                chosen_style: newStyle,
+                target_style: item.targetStyle,
+                isCorrect: isCorrect,
+                page: item.page,
+                doc_title: currentDoc.doc_title
+            };
+
+            // Set Out of Date Status
+            dom.tocStatusChip.textContent = "⚠️ Out of Date";
+            dom.tocStatusChip.style.color = "var(--hazard-color)";
+
+            if (isCorrect) {
+                state.score += 10;
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+                playAudioFeedback(true, 523.25);
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ✅ <strong>Style Applied:</strong> "${escapeHtml(item.text)}" is now <code>${newStyle.toUpperCase()}</code>!<br>
+                    <span style="color:var(--hazard-color); font-weight:700;">⚠️ Table of Contents is waiting for manual update.</span> Click <strong>[⚡ Generate / Update TOC]</strong> to compile your changes into Page 1 and the preview widget!
+                `;
+            } else {
+                state.streak = 0;
+                playAudioFeedback(false, 220);
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                if (newStyle === "normal") {
+                    dom.inspectorFeedbackBox.innerHTML = `❌ <strong>Normal Text:</strong> Setting "${escapeHtml(item.text)}" to Normal Text means the computer will exclude it from the Table of Contents when updated!`;
+                } else {
+                    dom.inspectorFeedbackBox.innerHTML = `❌ <strong>Hierarchy Mismatch:</strong> "${escapeHtml(item.text)}" was assigned <code>${newStyle.toUpperCase()}</code>, but its correct document hierarchy is <code>${item.targetStyle.toUpperCase()}</code>. Click Update TOC to inspect.`;
+                }
+            }
+
+            renderDocumentPages();
+            updateOverallProgress();
+            renderHistoryList();
+
+            // Refresh selected heading inspector box
+            selectHeadingItem(item.id);
+        }
+
+        /* Generate / Update Table of Contents on Page 1 AND the Side Widget (MANUAL REFRESH) */
+        function generateTableOfContents() {
+            state.tocGenerated = true;
+            state.tocOutOfDate = false;
+            playAudioFeedback(true, 440);
+
+            // Laser scan animation
+            dom.scanLaser.classList.remove("scanning");
+            void dom.scanLaser.offsetWidth; // Trigger reflow
+            dom.scanLaser.classList.add("scanning");
+
+            setTimeout(() => {
+                updateAllTableOfContentsViews(true);
+            }, 600);
+        }
+
+        /* Update Page 1 Table of Contents AND Side Widget Views */
+        function updateAllTableOfContentsViews(withAudio) {
+            const currentDoc = TOC_DATASET[state.currentDocIndex];
+            if (!currentDoc) return;
+
+            const pageOneTocContainer = document.getElementById("pageOneTocEntries");
+            const sideTocContainer = dom.sideTocEntriesContainer;
+
+            let allItems = [];
+            currentDoc.pages.forEach(p => allItems.push(...p.items));
+
+            // Filter items that have Heading 1 or Heading 2 applied
+            const tocHeadings = allItems.filter(item => {
+                if (item.isTitle) return false;
+                const style = state.currentStyles[item.id] || item.initialStyle;
+                return style === "h1" || style === "h2";
+            });
+
+            if (tocHeadings.length === 0) {
+                const emptyMsg = `
+                    <div class="toc-empty-field" style="border-color:var(--danger-border); background:var(--danger-bg); color:var(--danger-color);">
+                        <strong>⚠️ Table of Contents is Empty!</strong><br>
+                        Every section title in this document is currently tagged as <code>Normal Text</code>. Apply <strong>Heading 1</strong> and <strong>Heading 2</strong> styles to content on Pages 2, 3, and 4!
+                    </div>
+                `;
+                state.lastCompiledPageOneHtml = emptyMsg;
+                state.lastCompiledSideWidgetHtml = `
+                    <div class="side-toc-empty-notice" style="color:var(--danger-color);">
+                        ⚠️ No headings indexed! Every section is currently tagged as Normal Text.
+                    </div>
+                `;
+                if (pageOneTocContainer) pageOneTocContainer.innerHTML = emptyMsg;
+                if (sideTocContainer) sideTocContainer.innerHTML = state.lastCompiledSideWidgetHtml;
+                dom.tocStatusChip.textContent = "0 Headings Found";
+                dom.tocStatusChip.style.color = "var(--danger-color)";
+                return;
+            }
+
+            // Build HTML for Page 1 TOC
+            let pageOneHtml = "";
+            let sideWidgetHtml = "";
+
+            tocHeadings.forEach(item => {
+                const style = state.currentStyles[item.id] || item.initialStyle;
+                const isLevel2 = style === "h2";
+
+                // Page 1 Document Entry
+                pageOneHtml += `
+                    <div class="toc-document-entry ${isLevel2 ? 'level-2' : 'level-1'}">
+                        <span>${isLevel2 ? '↳ ' : ''}${escapeHtml(item.text)}</span>
+                        <span class="toc-entry-dots"></span>
+                        <span class="toc-entry-page">${item.page}</span>
+                    </div>
+                `;
+
+                // Side Widget Entry
+                sideWidgetHtml += `
+                    <div class="side-toc-entry-row ${isLevel2 ? 'level-2' : ''}">
+                        <span>${isLevel2 ? '&nbsp;&nbsp;&nbsp;&nbsp;' : ''}${escapeHtml(item.text)}</span>
+                        <span class="side-toc-dots"></span>
+                        <span class="side-toc-page-num">${item.page}</span>
+                    </div>
+                `;
+            });
+
+            state.lastCompiledPageOneHtml = pageOneHtml;
+            state.lastCompiledSideWidgetHtml = sideWidgetHtml;
+
+            if (pageOneTocContainer) pageOneTocContainer.innerHTML = pageOneHtml;
+            if (sideTocContainer) sideTocContainer.innerHTML = sideWidgetHtml;
+
+            // Check if all items in current document have their target styles correctly assigned
+            const targetItems = allItems.filter(i => !i.isTitle);
+            const allDocCorrect = targetItems.every(item => {
+                const style = state.currentStyles[item.id] || item.initialStyle;
+                return style === item.targetStyle;
+            });
+
+            if (allDocCorrect) {
+                if (withAudio) playAudioFeedback(true, 783.99);
+                dom.tocStatusChip.textContent = "✅ Complete";
+                dom.tocStatusChip.style.color = "var(--safe-color)";
+                dom.nextDocumentBtn.style.display = "inline-flex";
+                if (state.currentDocIndex === TOC_DATASET.length - 1) {
+                    dom.nextDocumentBtn.textContent = "Finish TOC Certification 🎉";
+                } else {
+                    dom.nextDocumentBtn.textContent = `Next Document (${state.currentDocIndex + 2}/${TOC_DATASET.length}) →`;
+                }
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    🎉 <strong>Perfect Table of Contents!</strong> Every section and subtopic from Pages 2, 3, and 4 is compiled into Page 1 and the preview widget with proper indentation and page numbers!
+                `;
+            } else {
+                dom.nextDocumentBtn.style.display = "none";
+                const missingCount = targetItems.filter(item => {
+                    const style = state.currentStyles[item.id] || item.initialStyle;
+                    return style !== item.targetStyle;
+                }).length;
+
+                dom.tocStatusChip.textContent = `⚠️ ${missingCount} Missing`;
+                dom.tocStatusChip.style.color = "var(--hazard-color)";
+
+                dom.inspectorFeedbackBox.className = "feedback-card info";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    ⚡ <strong>Table of Contents updated!</strong> Notice that ${missingCount} section title${missingCount === 1 ? '' : 's'} are still missing or misplaced because they are styled as <code>Normal Text</code>.
+                `;
+            }
+        }
+
+        /* Render Multi-Page Stack (Page 1 = TOC, Pages 2..4 = Content) */
+        function renderDocumentPages() {
+            const currentDoc = TOC_DATASET[state.currentDocIndex];
+            if (!currentDoc) return;
+
+            dom.docFileName.textContent = currentDoc.doc_filename;
+            dom.docRoundTag.textContent = `Document ${state.currentDocIndex + 1} of ${TOC_DATASET.length} (4 Pages)`;
+
+            // PAGE 1: DEDICATED TABLE OF CONTENTS PAGE
+            let pageOneContent = "";
+            if (state.tocGenerated && state.lastCompiledPageOneHtml) {
+                pageOneContent = state.lastCompiledPageOneHtml;
+            } else {
+                pageOneContent = `
+                    <div class="toc-empty-field">
+                        <p style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:0 0 6px;">[ Table of Contents Field ]</p>
+                        <p style="margin:0 0 14px;">No headings compiled yet. Click the button below to scan Document Pages 2, 3, and 4!</p>
+                        <button class="primary-btn" onclick="generateTableOfContents()" style="padding:8px 16px; font-size:0.85rem;">
+                            ⚡ Generate Table of Contents
+                        </button>
+                    </div>
+                `;
+            }
+
+            let pagesHtml = `
+                <div class="word-paper-page toc-cover-page" id="page_1_toc">
+                    <div class="page-header-stamp">
+                        <span>${escapeHtml(currentDoc.doc_title)}</span>
+                        <span>Page 1 of 4 (Table of Contents)</span>
+                    </div>
+
+                    <div class="toc-cover-header">
+                        <span>TABLE OF CONTENTS</span>
+                        <button class="secondary-btn" onclick="generateTableOfContents()" style="font-size:0.75rem; padding:4px 10px;">
+                            🔄 Update TOC Field
+                        </button>
+                    </div>
+
+                    <div class="toc-page-container" id="pageOneTocEntries">
+                        ${pageOneContent}
+                    </div>
+
+                    <div class="page-footer-stamp">
+                        <span>Page 1 • Auto-Generated TOC Field ${state.tocOutOfDate ? '<span style="color:#d97706; font-weight:800;">(⚠️ Out of Date)</span>' : ''}</span>
+                    </div>
+                </div>
+            `;
+
+            // PAGES 2, 3, 4: CONTENT PAGES
+            currentDoc.pages.forEach(page => {
+                pagesHtml += `
+                    <div class="word-paper-page" id="page_${page.page_num}">
+                        <div class="page-header-stamp">
+                            <span>${escapeHtml(currentDoc.doc_title)}</span>
+                            <span>Page ${page.page_num} of 4</span>
+                        </div>
+                `;
+
+                page.items.forEach(item => {
+                    if (item.isTitle) {
+                        pagesHtml += `
+                            <div class="doc-heading-item" style="cursor:default; border:none; margin-bottom:14px;">
+                                <div class="heading-text-wrap">
+                                    <div class="doc-title-style">${escapeHtml(item.text)}</div>
+                                    <div style="font-size:0.84rem; color:#64748b; margin-top:4px;">${escapeHtml(item.snippet)}</div>
+                                </div>
+                                <span class="xray-badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">Title</span>
+                            </div>
+                        `;
+                    } else {
+                        const curStyle = state.currentStyles[item.id] || item.initialStyle;
+                        const isSelected = state.selectedItemId === item.id;
+
+                        let tagClass = "tag-normal";
+                        let tagLabel = "Normal Text";
+                        if (curStyle === "h1") { tagClass = "tag-h1"; tagLabel = "Heading 1"; }
+                        else if (curStyle === "h2") { tagClass = "tag-h2"; tagLabel = "Heading 2"; }
+
+                        let visualClass = "visual-h1";
+                        if (curStyle === "h2" || (curStyle === "normal" && item.targetStyle === "h2")) {
+                            visualClass = "visual-h2";
+                        }
+
+                        pagesHtml += `
+                            <div class="doc-heading-item ${isSelected ? 'selected' : ''}" data-item-id="${item.id}" tabindex="0" role="button" aria-label="Heading: ${escapeHtml(item.text)}">
+                                <div class="heading-text-wrap">
+                                    <div class="${visualClass}">${escapeHtml(item.text)}</div>
+                                </div>
+                                <span class="xray-badge ${tagClass}">
+                                    ${curStyle === 'normal' ? '⚠️' : '🏷️'} ${tagLabel}
+                                </span>
+                            </div>
+                            <p style="margin: 0 0 16px ${curStyle === 'h2' ? '12px' : '0'}; color: #475569; font-size: 0.9rem;">
+                                ${escapeHtml(item.body)}
+                            </p>
+                        `;
+                    }
+                });
+
+                pagesHtml += `
+                        <div class="page-footer-stamp">
+                            <span>Form 2 Computer Studies — Trinidad & Tobago Secondary Schools</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            dom.pagesStack.innerHTML = pagesHtml;
+
+            // Render Side Widget container
+            if (state.tocGenerated && state.lastCompiledSideWidgetHtml) {
+                dom.sideTocEntriesContainer.innerHTML = state.lastCompiledSideWidgetHtml;
+            } else if (!state.tocGenerated) {
+                dom.sideTocEntriesContainer.innerHTML = `
+                    <div class="side-toc-empty-notice">
+                        Click <strong>[⚡ Generate / Update TOC]</strong> below to scan document headings!
+                    </div>
+                `;
+            }
+
+            // Bind click and keyboard listeners to all headings
+            dom.pagesStack.querySelectorAll(".doc-heading-item[data-item-id]").forEach(el => {
+                const itemId = el.getAttribute("data-item-id");
+                el.addEventListener("click", () => selectHeadingItem(itemId));
+                el.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        selectHeadingItem(itemId);
+                    }
+                });
+            });
+
+            updateXrayUI();
+        }
+
+        /* Quick Page Jump Navigation Helper */
+        window.jumpToPage = function(pageElementId) {
+            const el = document.getElementById(pageElementId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+
+        window.applyStyleToSelected = applyStyleToSelected;
+        window.generateTableOfContents = generateTableOfContents;
+
+        /* Advance to Next Document or Finish to Summary */
+        function advanceDocumentOrSummary() {
+            if (state.currentDocIndex < TOC_DATASET.length - 1) {
+                state.currentDocIndex += 1;
+                state.selectedItemId = null;
+                state.tocGenerated = false;
+                state.tocOutOfDate = false;
+                state.lastCompiledPageOneHtml = "";
+                state.lastCompiledSideWidgetHtml = "";
+                resetExplanationBox();
+                renderDocumentPages();
+                dom.sideTocEntriesContainer.innerHTML = `
+                    <div class="side-toc-empty-notice">
+                        Click <strong>[⚡ Generate / Update TOC]</strong> below to scan document headings!
+                    </div>
+                `;
+                dom.tocStatusChip.textContent = "Waiting for Update";
+                dom.tocStatusChip.style.color = "var(--accent)";
+                dom.nextDocumentBtn.style.display = "none";
+                dom.docViewport.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showScreen("summary");
+            }
+        }
+
+        function updateOverallProgress() {
+            const totalHeadings = 9; // 3 target items per doc x 3 docs
+            const evaluatedCount = Object.keys(state.evaluations).length;
+            const pct = Math.round((evaluatedCount / totalHeadings) * 100);
+
+            dom.progressCount.textContent = `${evaluatedCount} / ${totalHeadings} Evaluated`;
+            dom.progressPercent.textContent = `${pct}% Complete`;
+            dom.progressFillBar.style.width = `${pct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = state.attempts === 0 ? 0 : Math.round((correctCount / state.attempts) * 100);
+            dom.accuracyVal.textContent = `${accuracy}%`;
+        }
+
+        function renderSummaryScreen() {
+            const total = 9;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = Math.round((correctCount / total) * 100);
+
+            dom.summaryScoreVal.textContent = state.score;
+            dom.summaryAccuracyVal.textContent = `${accuracy}%`;
+            dom.summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            dom.summaryCorrectVal.textContent = `${correctCount} / ${total}`;
+
+            if (accuracy >= 90) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "Master Document Architect";
+                dom.badgeDesc.textContent = `Flawless structural mastery! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct)! You demonstrated how Heading 1 and Heading 2 styles tell word processors how to build automated Tables of Contents on Page 1 and live widgets.`;
+            } else if (accuracy >= 70) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Document Stylist";
+                dom.badgeDesc.textContent = `Great job! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Review the structural insights below to improve your score!`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Document Apprentice";
+                dom.badgeDesc.textContent = `You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Practice with X-Ray mode again to strengthen your document hierarchy skills!`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+            TOC_DATASET.forEach((doc, dIdx) => {
+                doc.pages.forEach(p => {
+                    p.items.forEach(item => {
+                        if (item.isTitle) return;
+                        const evalData = state.evaluations[item.id] || {};
+                        const isCorrect = evalData.isCorrect === true;
+                        const card = document.createElement("div");
+                        card.className = "summary-item-card";
+                        card.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                                <strong style="color:var(--text);">Doc ${dIdx + 1} (Page ${item.page}): "${escapeHtml(item.text)}"</strong>
+                                <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                                    ${isCorrect ? '✅ Correct Style' : '❌ Missed/Incorrect'}
+                                </span>
+                            </div>
+                            <div style="font-size:0.88rem; color:var(--text-soft); margin:4px 0;">
+                                <strong>Your Assigned Style:</strong> <code>${(evalData.chosen_style || 'Unassigned').toUpperCase()}</code> → <strong>Target Structure:</strong> <code>${item.targetStyle.toUpperCase()}</code>
+                            </div>
+                            <p style="margin:4px 0 0; color:var(--muted); font-size:0.86rem;">
+                                <strong>Why it matters:</strong> ${item.targetStyle === 'h1' ? 'Main topics require Heading 1 to appear unindented in the Table of Contents.' : 'Subtopics require Heading 2 to nest cleanly beneath their parent Heading 1.'}
+                            </p>
+                        `;
+                        dom.summaryDetailsList.appendChild(card);
+                    });
+                });
+            });
+        }
+
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedIds = Object.keys(state.evaluations);
+
+            if (evaluatedIds.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:16px; color:var(--muted); text-align:center;">No evaluated headings yet. Select a heading on Pages 2, 3, or 4 and apply a style to begin!</div>`;
+                return;
+            }
+
+            TOC_DATASET.forEach((doc, dIdx) => {
+                doc.pages.forEach(p => {
+                    p.items.forEach(item => {
+                        if (item.isTitle) return;
+                        const evalData = state.evaluations[item.id];
+                        if (!evalData) return;
+
+                        const isCorrect = evalData.isCorrect === true;
+                        const card = document.createElement("div");
+                        card.className = "summary-item-card";
+                        card.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                                <strong style="color:var(--text);">Doc ${dIdx + 1}: "${escapeHtml(item.text)}"</strong>
+                                <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                                    ${isCorrect ? '✅ Correct' : '❌ Incorrect'}
+                                </span>
+                            </div>
+                            <div style="font-size:0.86rem; color:var(--text-soft);">
+                                Assigned <code>${(evalData.chosen_style || '').toUpperCase()}</code> (Required: <code>${item.targetStyle.toUpperCase()}</code> on Page ${item.page})
+                            </div>
+                        `;
+                        dom.historyList.appendChild(card);
+                    });
+                });
+            });
+        }
+
+        /* Modal & Drawer Controls */
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try {
+                sessionStorage.setItem("user_toggled_theme", state.theme);
+            } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen toggle failed", err);
+            }
+        }
+
+        /* Reset Simulation Progress */
+        function confirmReset() {
+            closeResetModal();
+
+            // Clear progress while preserving theme and fullscreen
+            state.currentDocIndex = 0;
+            state.xrayEnabled = false;
+            state.selectedItemId = null;
+            state.currentStyles = {};
+            state.evaluations = {};
+            state.tocGenerated = false;
+            state.tocOutOfDate = false;
+            state.lastCompiledPageOneHtml = "";
+            state.lastCompiledSideWidgetHtml = "";
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+
+            updateXrayUI();
+            resetExplanationBox();
+            renderDocumentPages();
+            dom.sideTocEntriesContainer.innerHTML = `
+                <div class="side-toc-empty-notice">
+                    Click <strong>[⚡ Generate / Update TOC]</strong> below to scan document headings!
+                </div>
+            `;
+            dom.tocStatusChip.textContent = "Waiting for Update";
+            dom.tocStatusChip.style.color = "var(--accent)";
+            dom.nextDocumentBtn.style.display = "none";
+            showScreen("home");
+        }
+
+        function playAudioFeedback(isSuccess, freq) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.value = freq || (isSuccess ? 587.33 : 220);
+                gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (isSuccess ? 0.25 : 0.3));
+
+                osc.start();
+                osc.stop(ctx.currentTime + (isSuccess ? 0.26 : 0.31));
+            } catch (e) {}
+        }
+
+        function loadState() {
+            state.currentDocIndex = 0;
+            state.xrayEnabled = false;
+            state.selectedItemId = null;
+            state.currentStyles = {};
+            state.evaluations = {};
+            state.tocGenerated = false;
+            state.tocOutOfDate = false;
+            state.lastCompiledPageOneHtml = "";
+            state.lastCompiledSideWidgetHtml = "";
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+
+            resetExplanationBox();
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+            updateXrayUI();
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
