@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Crucigrama: Lugares en la Ciudad</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* ---------- Crucigrama: layout shell ---------- */
+        .cg-root { display: flex; flex-direction: column; gap: 16px; }
+        .cg-screen { display: none; flex-direction: column; gap: 16px; }
+        .cg-screen.is-live { display: flex; }
+
+        .cg-toolbar {
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+            padding: 10px; border: 1px solid var(--border);
+            border-radius: var(--radius-lg); background: var(--surface-2);
+        }
+        .cg-toolbar .cg-spacer { flex: 1 1 auto; }
+        .cg-btn {
+            min-height: 44px; min-width: 44px; padding: 8px 12px;
+            border-radius: var(--radius-md); border: 1px solid var(--border);
+            background: var(--surface); color: var(--text);
+            font-size: 0.9rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .cg-btn:hover { border-color: var(--accent); }
+        .cg-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+        .cg-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+        .cg-btn.is-primary { background: var(--accent); border-color: var(--accent); color: #08131f; }
+        .cg-btn.is-warn { border-color: var(--warning); }
+        .cg-btn.is-danger { border-color: var(--danger); color: var(--danger); }
+
+        /* ---------- HUD ---------- */
+        .cg-hud {
+            display: grid; gap: 12px;
+            grid-template-columns: minmax(150px, 190px) 1fr;
+            align-items: stretch;
+        }
+        .cg-mascot-card {
+            border: 1px solid var(--border); border-radius: var(--radius-lg);
+            background: var(--surface-2); padding: 12px; text-align: center;
+        }
+        .cg-mascot-card svg { width: 100%; max-width: 128px; height: auto; }
+        .cg-mascot-name { font-weight: 800; font-size: 0.95rem; margin-top: 6px; }
+        .cg-mascot-say {
+            font-size: 0.82rem; color: var(--text-soft); margin-top: 4px;
+            min-height: 2.6em; line-height: 1.3;
+        }
+        .cg-stats { display: flex; flex-direction: column; gap: 10px; }
+        .cg-statrow { display: flex; flex-wrap: wrap; gap: 10px; }
+        .cg-stat {
+            flex: 1 1 120px; border: 1px solid var(--border);
+            border-radius: var(--radius-md); background: var(--surface-2);
+            padding: 8px 12px;
+        }
+        .cg-stat-k { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+        .cg-stat-v { font-size: 1.35rem; font-weight: 800; color: var(--text); }
+        .cg-stat-v small { font-size: 0.75rem; font-weight: 700; color: var(--text-soft); }
+
+        .cg-rankbar {
+            border: 1px solid var(--border); border-radius: var(--radius-md);
+            background: var(--surface-2); padding: 10px 12px;
+        }
+        .cg-rank-line { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; font-size: 0.85rem; }
+        .cg-rank-now { font-weight: 800; color: var(--text); }
+        .cg-rank-next { color: var(--text-soft); }
+        .cg-meter { height: 12px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--border); margin-top: 8px; overflow: hidden; }
+        .cg-meter > i { display: block; height: 100%; width: 0%; background: var(--accent); transition: width 320ms ease; }
+
+        /* ---------- Badges ---------- */
+        .cg-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+        .cg-badge {
+            display: flex; align-items: center; gap: 8px;
+            border: 1px solid var(--border); border-radius: 999px;
+            background: var(--bg-soft); padding: 6px 12px; min-height: 44px;
+            font-size: 0.82rem; color: var(--text-soft);
+        }
+        .cg-badge .cg-badge-icon { font-size: 1.1rem; filter: grayscale(1); opacity: 0.55; }
+        .cg-badge .cg-badge-state { font-weight: 800; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.06em; }
+        .cg-badge.is-earned {
+            border-color: var(--success); background: var(--surface-2); color: var(--text);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--success) 25%, transparent);
+        }
+        .cg-badge.is-earned .cg-badge-icon { filter: none; opacity: 1; }
+        .cg-badge.is-earned .cg-badge-state { color: var(--success); }
+
+        /* ---------- Skyline (progressive world state) ---------- */
+        .cg-skyline {
+            border: 1px solid var(--border); border-radius: var(--radius-lg);
+            background: var(--surface-2); padding: 10px; overflow: hidden;
+        }
+        .cg-skyline svg { width: 100%; height: auto; display: block; }
+        .cg-sky-lot { opacity: 1; }
+        .cg-sky-build { opacity: 0.12; transition: opacity 420ms ease; }
+        .cg-sky-build.is-lit { opacity: 1; }
+        .cg-sky-label { font-size: 9px; font-weight: 700; fill: currentColor; }
+        .cg-sky-caption { font-size: 0.8rem; color: var(--text-soft); margin-top: 6px; text-align: center; }
+
+        /* ---------- Crossword grid ---------- */
+        .cg-board-wrap {
+            overflow-x: auto; padding: 8px; border: 1px solid var(--border);
+            border-radius: var(--radius-lg); background: var(--surface-2);
+        }
+        .cg-board { display: flex; flex-direction: column; gap: 3px; min-width: max-content; }
+        .cg-row { display: flex; align-items: center; gap: 3px; }
+        .cg-row.is-active .cg-rownum { background: var(--accent); color: #08131f; border-color: var(--accent); }
+        .cg-rownum {
+            flex: 0 0 auto; width: 36px; height: 44px; border-radius: 12px;
+            border: 2px solid var(--border); background: var(--surface-2);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.9rem; color: var(--text);
+        }
+        .cg-gap { flex: 0 0 auto; width: 44px; height: 44px; }
+        .cg-cell {
+            flex: 0 0 auto; width: 44px; height: 44px; padding: 0;
+            border: 2px solid var(--border); border-radius: 6px;
+            background: var(--surface); color: var(--text);
+            font-size: 1.2rem; font-weight: 800; font-family: inherit;
+            text-transform: uppercase; cursor: pointer; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .cg-cell:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; z-index: 2; }
+        .cg-cell.is-key { background: var(--bg-soft); border-style: dashed; }
+        .cg-cell.is-selected { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent); }
+        .cg-cell.is-right { border-color: var(--success); color: var(--success); background: color-mix(in srgb, var(--success) 14%, var(--surface)); }
+        .cg-cell.is-wrong { border-color: var(--danger); color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, var(--surface)); }
+        .cg-cell.is-locked { cursor: default; }
+        .cg-cell .cg-mark {
+            position: absolute; top: -7px; right: -6px; font-size: 0.62rem;
+            font-weight: 900; line-height: 1; padding: 2px 3px; border-radius: 4px;
+            background: var(--surface); border: 1px solid currentColor;
+        }
+        .cg-row.is-solved .cg-cell { border-color: var(--success); }
+
+        /* ---------- Clue rail ---------- */
+        .cg-play { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) minmax(210px, 260px); align-items: start; }
+        .cg-clues { display: flex; flex-direction: column; gap: 8px; }
+        .cg-clue {
+            display: flex; gap: 10px; align-items: center; width: 100%;
+            min-height: 44px; text-align: left; cursor: pointer;
+            border: 2px solid var(--border); border-radius: var(--radius-md);
+            background: var(--surface-2); color: var(--text); padding: 8px; font-family: inherit;
+        }
+        .cg-clue:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+        .cg-clue.is-active { border-color: var(--accent); }
+        .cg-clue.is-solved { border-color: var(--success); }
+        .cg-clue svg { flex: 0 0 auto; width: 58px; height: 44px; border-radius: 4px; }
+        .cg-clue-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .cg-clue-n { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 800; }
+        .cg-clue-d { font-size: 0.82rem; color: var(--text-soft); line-height: 1.25; }
+        .cg-clue-state { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; }
+        .cg-clue.is-solved .cg-clue-state { color: var(--success); }
+
+        /* ---------- Letter pad ---------- */
+        .cg-pad {
+            border: 1px solid var(--border); border-radius: var(--radius-lg);
+            background: var(--surface-2); padding: 10px;
+        }
+        .cg-pad h3 { margin: 0 0 8px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+        .cg-keys { display: flex; flex-wrap: wrap; gap: 6px; }
+        .cg-key {
+            width: 44px; height: 44px; border-radius: var(--radius-md);
+            border: 1px solid var(--border); background: var(--surface); color: var(--text);
+            font-weight: 800; font-size: 1rem; font-family: inherit; cursor: pointer;
+        }
+        .cg-key:hover { border-color: var(--accent); }
+        .cg-key:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+        .cg-key.is-wide { width: auto; padding: 0 14px; }
+
+        /* ---------- Word bank (hidden until first check) ---------- */
+        .cg-bank {
+            border: 1px dashed var(--border); border-radius: var(--radius-lg);
+            background: var(--bg-soft); padding: 10px 12px;
+        }
+        .cg-bank h3 { margin: 0 0 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+        .cg-bank-list { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+        .cg-bank-list li {
+            border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px;
+            background: var(--surface); font-weight: 700; font-size: 0.88rem;
+        }
+        .cg-bank-list li.is-used { color: var(--muted); text-decoration: line-through; }
+        .cg-bank-locked { font-size: 0.85rem; color: var(--text-soft); margin: 0; }
+
+        /* ---------- Feedback ---------- */
+        .cg-feedback {
+            border: 2px solid var(--border); border-left-width: 6px;
+            border-radius: var(--radius-md); background: var(--surface-2);
+            padding: 10px 12px; font-size: 0.9rem; line-height: 1.45;
+        }
+        .cg-feedback h4 { margin: 0 0 4px; font-size: 0.95rem; }
+        .cg-feedback ul { margin: 6px 0 0; padding-left: 20px; }
+        .cg-feedback.is-good { border-color: var(--success); }
+        .cg-feedback.is-bad { border-color: var(--danger); }
+        .cg-feedback.is-info { border-color: var(--accent); }
+
+        /* ---------- Toasts / reward moments ---------- */
+        .cg-toasts {
+            position: fixed; right: 18px; bottom: 18px; z-index: 60;
+            display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+        }
+        .cg-toast {
+            border: 2px solid var(--success); border-radius: var(--radius-md);
+            background: var(--surface); color: var(--text);
+            padding: 8px 14px; font-weight: 800; box-shadow: var(--shadow);
+            animation: cg-toast-in 260ms ease-out;
+        }
+        @keyframes cg-toast-in { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ---------- Mission + completion ---------- */
+        .cg-panel {
+            border: 1px solid var(--border); border-radius: var(--radius-lg);
+            background: var(--surface-2); padding: 16px;
+        }
+        .cg-panel h2 { margin: 0 0 8px; font-size: 1.35rem; }
+        .cg-panel h3 { margin: 14px 0 6px; font-size: 1rem; }
+        .cg-panel p { margin: 0 0 8px; line-height: 1.5; color: var(--text-soft); }
+        .cg-mission-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+        .cg-objectives { margin: 0; padding-left: 20px; line-height: 1.6; color: var(--text-soft); }
+
+        .cg-cert {
+            border: 3px double var(--accent); border-radius: var(--radius-lg);
+            background: var(--surface); padding: 18px; text-align: center;
+        }
+        .cg-cert-eyebrow { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 800; }
+        .cg-cert h2 { font-size: 1.6rem; margin: 6px 0; }
+        .cg-cert-rank { font-size: 1.05rem; font-weight: 800; color: var(--accent); }
+        .cg-statgrid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 14px; }
+        .cg-statgrid .cg-stat { flex: 0 1 150px; text-align: center; }
+
+        .cg-progress-text { font-size: 0.88rem; font-weight: 700; color: var(--text-soft); }
+        .cg-sr {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+        }
+
+        @media (max-width: 860px) {
+            .cg-play { grid-template-columns: minmax(0, 1fr); }
+            .cg-hud { grid-template-columns: minmax(0, 1fr); }
+            .cg-mission-grid { grid-template-columns: minmax(0, 1fr); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cg-meter > i, .cg-sky-build { transition: none; }
+            .cg-toast { animation: none; }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <div id="simRoot" class="cg-root"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Crucigrama: Lugares en la Ciudad — SPAN-F2-T1-U16-SEC10-SIM1 — offline single-file simulation.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "SPAN-F2-T1-U16-SEC10-SIM1",
+            title: "Crucigrama",
+            subtitle: "Lugares en la ciudad — Spanish Form 2",
+            badgeText: "ES",
+            homeEyebrow: "Guía turístico de Puerto Coral",
+            homeDescription:
+                "Puerto Coral has lost the signs on five of its best-loved places. Look at each picture, build the Spanish word letter by letter in the crossword, and switch the lights back on across the city skyline. Earn XP, climb the guide ranks and collect all five city badges.",
+            instructions: [
+                "Look at the picture clue for each row, then build the Spanish word for that place.",
+                "Click an empty square in the crossword, then tap the letters on the letter pad below to fill it in. There is no typing anywhere in this activity.",
+                "Use Borrar to clear the letter in the selected square, or Borrar palabra to clear the whole row.",
+                "Press Comprobar when a row is full to check it. Correct letters lock in and light up that building on the skyline.",
+                "The word bank stays hidden until you check your first answer. After that it appears to help you.",
+                "Pista gives you one free letter in the row you are working on. You can use it as often as you like.",
+                "Nothing is ever lost: there are no timers and no lives, and you can retry a row as many times as you need.",
+                "Your XP only ever goes up. First-time-correct rows are worth the most and build your racha (streak).",
+                "Use Atras to go back a screen, Salir to return to the start, and Intentar de nuevo to clear everything and play from the beginning."
+            ]
+        };
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+/* ============================================================
+   CRUCIGRAMA — LUGARES EN LA CIUDAD
+   Mechanic: build five Spanish place-words letter by letter from an
+   on-screen letter pad. No typing anywhere. Solving a row lights that
+   building on the Puerto Coral skyline.
+   ============================================================ */
+
+const CG_KEY_COL = 13;
+
+const CG_WORDS = [
+    {
+        n: 1,
+        answer: "CENTROCOMERCIAL",
+        display: "centro comercial",
+        article: "el centro comercial",
+        start: 0,
+        split: 6,
+        english: "shopping mall",
+        clue: "Un lugar grande con muchas tiendas, escaleras mecánicas y luces. (Dos palabras, escritas juntas en el crucigrama.)",
+        hintText: "Empieza con la palabra CENTRO. La segunda palabra significa «commercial».",
+        badge: { id: "b1", icon: "🛍️", name: "Insignia de Compras" },
+        art: "mall"
+    },
+    {
+        n: 2,
+        answer: "BANCO",
+        display: "banco",
+        article: "el banco",
+        start: 12,
+        split: 0,
+        english: "bank",
+        clue: "Un edificio con columnas donde las personas guardan y sacan su dinero.",
+        hintText: "Tiene cinco letras y empieza con B.",
+        badge: { id: "b2", icon: "🏦", name: "Insignia del Banco" },
+        art: "bank"
+    },
+    {
+        n: 3,
+        answer: "RESTAURANTE",
+        display: "restaurante",
+        article: "el restaurante",
+        start: 6,
+        split: 0,
+        english: "restaurant",
+        clue: "Un lugar con mesas y sillas donde las personas van a comer.",
+        hintText: "Se parece mucho al inglés «restaurant», pero termina en -TE.",
+        badge: { id: "b3", icon: "🍽️", name: "Insignia del Sabor" },
+        art: "restaurant"
+    },
+    {
+        n: 4,
+        answer: "SUPERMERCADO",
+        display: "supermercado",
+        article: "el supermercado",
+        start: 4,
+        split: 0,
+        english: "supermarket",
+        clue: "Un lugar con carritos y estantes donde se compran frutas, verduras y comida.",
+        hintText: "SUPER + MERCADO. No olvides la P de SUPER.",
+        badge: { id: "b4", icon: "🛒", name: "Insignia del Mercado" },
+        art: "market"
+    },
+    {
+        n: 5,
+        answer: "PARQUE",
+        display: "parque",
+        article: "el parque",
+        start: 12,
+        split: 0,
+        english: "park",
+        clue: "Un lugar verde al aire libre con árboles, bancos y columpios.",
+        hintText: "Seis letras. Termina con las letras QUE.",
+        badge: { id: "b5", icon: "🌳", name: "Insignia Verde" },
+        art: "park"
+    }
+];
+
+const CG_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").concat(["Ñ"]);
+
+const CG_RANKS = [
+    { min: 0, name: "Visitante" },
+    { min: 180, name: "Explorador Urbano" },
+    { min: 380, name: "Guía de la Ciudad" },
+    { min: 620, name: "Alcalde de Puerto Coral" }
+];
+
+const CG_PTS_FIRST = 120;
+const CG_PTS_RETRY = 70;
+const CG_COMBO_STEP = 15;
+const CG_COMBO_CAP = 60;
+
+const cg = {
+    screen: "mission",
+    grid: [],
+    solved: [],
+    attempted: [],
+    hinted: [],
+    failed: {},
+    activeRow: 0,
+    selected: null,
+    score: 0,
+    combo: 0,
+    bestCombo: 0,
+    firstTry: 0,
+    attempts: 0,
+    hintsUsed: 0,
+    bankRevealed: false,
+    checkedOnce: false,
+    feedback: null,
+    confirmRestart: false,
+    mood: "idle",
+    say: "",
+    toasts: [],
+    toastSeq: 0,
+    liveMsg: ""
+};
+
+function cgReduceMotion() {
+    try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+    catch (err) { return false; }
+}
+
+function cgBlankState() {
+    cg.screen = "mission";
+    cg.grid = CG_WORDS.map((w) => w.answer.split("").map(() => ""));
+    cg.solved = CG_WORDS.map(() => false);
+    cg.attempted = CG_WORDS.map(() => false);
+    cg.hinted = CG_WORDS.map(() => false);
+    cg.failed = {};
+    cg.activeRow = 0;
+    cg.selected = null;
+    cg.score = 0;
+    cg.combo = 0;
+    cg.bestCombo = 0;
+    cg.firstTry = 0;
+    cg.attempts = 0;
+    cg.hintsUsed = 0;
+    cg.bankRevealed = false;
+    cg.checkedOnce = false;
+    cg.feedback = null;
+    cg.confirmRestart = false;
+    cg.mood = "idle";
+    cg.say = "¡Hola! Soy Pico. Vamos a devolverle los letreros a Puerto Coral.";
+    cg.toasts = [];
+    cg.liveMsg = "";
+}
+
+/* ---------- Rank helpers ---------- */
+function cgRankNow() {
+    let r = CG_RANKS[0];
+    CG_RANKS.forEach((rank) => { if (cg.score >= rank.min) { r = rank; } });
+    return r;
+}
+function cgRankNext() {
+    for (let i = 0; i < CG_RANKS.length; i++) {
+        if (cg.score < CG_RANKS[i].min) { return CG_RANKS[i]; }
+    }
+    return null;
+}
+
+/* ---------- Mascot (Pico) — decorative, aria-hidden ---------- */
+function cgMascotSvg(mood) {
+    const eye = mood === "happy"
+        ? '<path d="M40 47 q6 -7 12 0" stroke="#12232e" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M66 47 q6 -7 12 0" stroke="#12232e" stroke-width="3" fill="none" stroke-linecap="round"/>'
+        : mood === "think"
+            ? '<circle cx="46" cy="49" r="5" fill="#12232e"/><circle cx="72" cy="49" r="5" fill="#12232e"/><path d="M38 38 q8 -6 16 -2" stroke="#12232e" stroke-width="3" fill="none" stroke-linecap="round"/>'
+            : '<circle cx="46" cy="48" r="6" fill="#12232e"/><circle cx="72" cy="48" r="6" fill="#12232e"/><circle cx="48" cy="46" r="2" fill="#fff"/><circle cx="74" cy="46" r="2" fill="#fff"/>';
+    const mouth = mood === "happy"
+        ? '<path d="M52 74 q10 10 20 0" stroke="#7a3b12" stroke-width="3" fill="none" stroke-linecap="round"/>'
+        : mood === "think"
+            ? '<path d="M54 76 q10 -5 18 2" stroke="#7a3b12" stroke-width="3" fill="none" stroke-linecap="round"/>'
+            : '';
+    return '<svg viewBox="0 0 124 124" role="img" aria-hidden="true" focusable="false">'
+        + '<circle cx="62" cy="62" r="58" fill="#0f9d58" opacity="0.16"/>'
+        + '<path d="M62 16 c26 0 44 20 44 44 c0 26 -20 44 -44 44 c-24 0 -44 -18 -44 -44 c0 -24 18 -44 44 -44 z" fill="#22b573"/>'
+        + '<path d="M62 16 c-16 0 -30 8 -38 21 c10 -6 24 -9 38 -9 c14 0 28 3 38 9 c-8 -13 -22 -21 -38 -21 z" fill="#f6c445"/>'
+        + '<path d="M56 60 h14 l10 12 l-17 12 l-17 -12 z" fill="#f27935"/>'
+        + eye + mouth
+        + '<path d="M18 62 q-12 8 -6 22 q10 -2 16 -12 z" fill="#2f80ed"/>'
+        + '<path d="M106 62 q12 8 6 22 q-10 -2 -16 -12 z" fill="#2f80ed"/>'
+        + '</svg>';
+}
+
+/* ---------- Clue thumbnails (inline SVG, no external assets) ---------- */
+function cgClueArt(kind) {
+    const open = '<svg viewBox="0 0 80 60" role="img" aria-hidden="true" focusable="false">';
+    const sky = '<rect width="80" height="60" rx="4" fill="#bfe3f5"/>';
+    if (kind === "mall") {
+        return open + sky
+            + '<rect x="8" y="18" width="64" height="34" fill="#e8a33d"/>'
+            + '<rect x="8" y="18" width="64" height="7" fill="#c8792a"/>'
+            + '<rect x="14" y="30" width="12" height="14" fill="#fff6e0"/>'
+            + '<rect x="34" y="30" width="12" height="14" fill="#fff6e0"/>'
+            + '<rect x="54" y="30" width="12" height="14" fill="#fff6e0"/>'
+            + '<path d="M8 18 l8 -8 h48 l8 8 z" fill="#d94f4f"/></svg>';
+    }
+    if (kind === "bank") {
+        return open + sky
+            + '<path d="M10 22 L40 10 L70 22 z" fill="#9aa6b2"/>'
+            + '<rect x="12" y="22" width="56" height="30" fill="#cfd8e3"/>'
+            + '<rect x="18" y="28" width="6" height="20" fill="#8e9aa6"/>'
+            + '<rect x="30" y="28" width="6" height="20" fill="#8e9aa6"/>'
+            + '<rect x="42" y="28" width="6" height="20" fill="#8e9aa6"/>'
+            + '<rect x="54" y="28" width="6" height="20" fill="#8e9aa6"/>'
+            + '<rect x="10" y="50" width="60" height="4" fill="#7d8894"/></svg>';
+    }
+    if (kind === "restaurant") {
+        return open + '<rect width="80" height="60" rx="4" fill="#f3e3cf"/>'
+            + '<rect x="12" y="34" width="56" height="6" rx="2" fill="#a9673a"/>'
+            + '<rect x="20" y="40" width="4" height="12" fill="#a9673a"/>'
+            + '<rect x="56" y="40" width="4" height="12" fill="#a9673a"/>'
+            + '<circle cx="28" cy="26" r="7" fill="#4a90d9"/><circle cx="52" cy="26" r="7" fill="#e2699b"/>'
+            + '<circle cx="40" cy="31" r="5" fill="#fff"/>'
+            + '<rect x="8" y="10" width="10" height="8" fill="#e8b04b"/><rect x="62" y="10" width="10" height="8" fill="#e8b04b"/></svg>';
+    }
+    if (kind === "market") {
+        return open + '<rect width="80" height="60" rx="4" fill="#eef3f7"/>'
+            + '<rect x="8" y="14" width="64" height="6" fill="#c3ced9"/>'
+            + '<rect x="8" y="26" width="64" height="6" fill="#c3ced9"/>'
+            + '<circle cx="16" cy="10" r="4" fill="#e2574c"/><circle cx="28" cy="10" r="4" fill="#f2a341"/>'
+            + '<circle cx="40" cy="10" r="4" fill="#5aa457"/><circle cx="52" cy="22" r="4" fill="#e2574c"/>'
+            + '<circle cx="20" cy="22" r="4" fill="#8e5fbf"/>'
+            + '<path d="M16 40 h8 l6 12 h22 l4 -10 h-30" fill="none" stroke="#4a5a6a" stroke-width="3"/>'
+            + '<circle cx="32" cy="55" r="3" fill="#4a5a6a"/><circle cx="50" cy="55" r="3" fill="#4a5a6a"/></svg>';
+    }
+    return open + '<rect width="80" height="60" rx="4" fill="#bfe3f5"/>'
+        + '<rect x="0" y="40" width="80" height="20" fill="#7cc06a"/>'
+        + '<rect x="18" y="26" width="4" height="16" fill="#8a5a33"/><circle cx="20" cy="22" r="10" fill="#3f9e4d"/>'
+        + '<rect x="56" y="30" width="4" height="12" fill="#8a5a33"/><circle cx="58" cy="26" r="8" fill="#3f9e4d"/>'
+        + '<rect x="34" y="36" width="16" height="3" fill="#a9673a"/><rect x="35" y="39" width="2" height="5" fill="#a9673a"/><rect x="47" y="39" width="2" height="5" fill="#a9673a"/></svg>';
+}
+
+/* ---------- Skyline: the game world that transforms ---------- */
+function cgSkylineSvg() {
+    const lit = (i) => (cg.solved[i] ? " is-lit" : "");
+    return '<svg viewBox="0 0 620 150" role="img" aria-label="Skyline of Puerto Coral. Buildings light up as each place is named correctly.">'
+        + '<rect width="620" height="150" fill="none"/>'
+        + '<rect x="0" y="128" width="620" height="22" fill="#5b6b7a" opacity="0.35"/>'
+        // dim lots
+        + '<g class="cg-sky-lot" opacity="0.30">'
+        + '<rect x="20" y="70" width="100" height="58" fill="#8a97a4"/>'
+        + '<rect x="140" y="66" width="90" height="62" fill="#8a97a4"/>'
+        + '<rect x="250" y="80" width="100" height="48" fill="#8a97a4"/>'
+        + '<rect x="370" y="72" width="100" height="56" fill="#8a97a4"/>'
+        + '<rect x="490" y="96" width="110" height="32" fill="#8a97a4"/>'
+        + '</g>'
+        // 1 mall
+        + '<g class="cg-sky-build' + lit(0) + '">'
+        + '<rect x="20" y="70" width="100" height="58" fill="#e8a33d"/>'
+        + '<path d="M20 70 l14 -14 h72 l14 14 z" fill="#d94f4f"/>'
+        + '<rect x="30" y="86" width="18" height="18" fill="#fff6e0"/><rect x="58" y="86" width="18" height="18" fill="#fff6e0"/><rect x="86" y="86" width="18" height="18" fill="#fff6e0"/>'
+        + '<text class="cg-sky-label" x="70" y="122" text-anchor="middle" fill="#3a2a10">1</text></g>'
+        // 2 bank
+        + '<g class="cg-sky-build' + lit(1) + '">'
+        + '<path d="M138 66 L185 44 L232 66 z" fill="#9aa6b2"/>'
+        + '<rect x="140" y="66" width="90" height="62" fill="#cfd8e3"/>'
+        + '<rect x="150" y="78" width="9" height="42" fill="#8e9aa6"/><rect x="170" y="78" width="9" height="42" fill="#8e9aa6"/>'
+        + '<rect x="190" y="78" width="9" height="42" fill="#8e9aa6"/><rect x="210" y="78" width="9" height="42" fill="#8e9aa6"/>'
+        + '<text class="cg-sky-label" x="185" y="140" text-anchor="middle" fill="#2a3742">2</text></g>'
+        // 3 restaurant
+        + '<g class="cg-sky-build' + lit(2) + '">'
+        + '<rect x="250" y="80" width="100" height="48" fill="#f3e3cf"/>'
+        + '<rect x="250" y="72" width="100" height="10" fill="#c8452f"/>'
+        + '<rect x="262" y="94" width="24" height="24" fill="#4a90d9"/><rect x="314" y="94" width="24" height="24" fill="#e2699b"/>'
+        + '<text class="cg-sky-label" x="300" y="140" text-anchor="middle" fill="#3a2a10">3</text></g>'
+        // 4 supermarket
+        + '<g class="cg-sky-build' + lit(3) + '">'
+        + '<rect x="370" y="72" width="100" height="56" fill="#eef3f7"/>'
+        + '<rect x="370" y="72" width="100" height="12" fill="#3f9e8c"/>'
+        + '<circle cx="390" cy="102" r="8" fill="#e2574c"/><circle cx="412" cy="102" r="8" fill="#f2a341"/><circle cx="434" cy="102" r="8" fill="#5aa457"/><circle cx="456" cy="102" r="8" fill="#8e5fbf"/>'
+        + '<text class="cg-sky-label" x="420" y="140" text-anchor="middle" fill="#2a3742">4</text></g>'
+        // 5 park
+        + '<g class="cg-sky-build' + lit(4) + '">'
+        + '<rect x="490" y="112" width="110" height="16" fill="#7cc06a"/>'
+        + '<rect x="512" y="88" width="7" height="26" fill="#8a5a33"/><circle cx="515" cy="82" r="17" fill="#3f9e4d"/>'
+        + '<rect x="566" y="94" width="6" height="20" fill="#8a5a33"/><circle cx="569" cy="88" r="13" fill="#3f9e4d"/>'
+        + '<text class="cg-sky-label" x="545" y="140" text-anchor="middle" fill="#1f3a24">5</text></g>'
+        + '</svg>';
+}
+
+/* ---------- Small DOM helpers ---------- */
+function cgEl(tag, cls, text) {
+    const el = document.createElement(tag);
+    if (cls) { el.className = cls; }
+    if (text !== undefined && text !== null) { el.textContent = text; }
+    return el;
+}
+function cgBtn(label, cls, onClick, opts) {
+    const b = cgEl("button", "cg-btn " + (cls || ""), label);
+    b.type = "button";
+    if (opts && opts.aria) { b.setAttribute("aria-label", opts.aria); }
+    if (opts && opts.disabled) { b.disabled = true; }
+    b.addEventListener("click", onClick);
+    return b;
+}
+function cgRoot() { return document.getElementById("simRoot"); }
+function cgAnnounce(msg) {
+    // Held on state as well as in the DOM: every render rebuilds the sim
+    // container, so the live region has to be re-filled after it.
+    cg.liveMsg = msg;
+    const live = document.getElementById("cgLive");
+    if (live) { live.textContent = msg; }
+}
+
+/* ---------- Reward moments ---------- */
+function cgToast(text) {
+    cgAnnounce(text);
+    if (cgReduceMotion()) { return; }
+    let host = document.getElementById("cgToasts");
+    if (!host) {
+        host = cgEl("div", "cg-toasts");
+        host.id = "cgToasts";
+        host.setAttribute("aria-hidden", "true");
+        document.body.appendChild(host);
+    }
+    while (host.children.length >= 3) { host.removeChild(host.firstChild); }
+    const t = cgEl("div", "cg-toast", text);
+    host.appendChild(t);
+    window.setTimeout(() => { if (t.parentNode) { t.parentNode.removeChild(t); } }, 1900);
+}
+function cgClearToasts() {
+    const host = document.getElementById("cgToasts");
+    if (host && host.parentNode) { host.parentNode.removeChild(host); }
+}
+
+/* ---------- Shared toolbar (every screen) ---------- */
+function cgToolbar(opts) {
+    const bar = cgEl("div", "cg-toolbar");
+    bar.appendChild(cgBtn("↩ Atras", "", opts.onBack, { aria: "Go back one screen" }));
+    bar.appendChild(cgBtn("📖 Reglas", "", () => {
+        const helpBtn = document.getElementById("helpBtn");
+        if (helpBtn) { helpBtn.click(); }
+    }, { aria: "Open the rules and instructions" }));
+    bar.appendChild(cgBtn("💡 Pista", "is-warn", opts.onHint, { aria: "Get a hint" }));
+    bar.appendChild(cgBtn("🔄 Intentar de nuevo", "is-danger", cgAskRestart, { aria: "Start the whole activity again" }));
+    const spacer = cgEl("div", "cg-spacer");
+    bar.appendChild(spacer);
+    const prog = cgEl("div", "cg-progress-text", opts.progress);
+    bar.appendChild(prog);
+    bar.appendChild(cgBtn("✕ Salir", "", cgExit, { aria: "Exit to the start screen" }));
+    return bar;
+}
+
+function cgExit() {
+    cg.confirmRestart = false;
+    cgClearToasts();
+    showScreen("home");
+}
+
+function cgAskRestart() {
+    cg.confirmRestart = true;
+    cgRender();
+}
+
+function cgDoRestart() {
+    const wasScreen = "mission";
+    cgBlankState();
+    cg.screen = wasScreen;
+    cgClearToasts();
+    cgRender();
+    cgAnnounce("La actividad se reinició. Puntos, racha, rango e insignias vuelven a cero.");
+}
+
+/* ---------- Mascot / stats / badges ---------- */
+function cgSetMood(mood, say) {
+    cg.mood = mood;
+    if (say) { cg.say = say; }
+}
+
+function cgMascotCard() {
+    const card = cgEl("div", "cg-mascot-card");
+    const art = cgEl("div", "");
+    art.setAttribute("aria-hidden", "true");
+    art.innerHTML = cgMascotSvg(cg.mood);
+    card.appendChild(art);
+    card.appendChild(cgEl("div", "cg-mascot-name", "Pico, tu guía"));
+    card.appendChild(cgEl("p", "cg-mascot-say", cg.say));
+    return card;
+}
+
+function cgStat(k, v, sub) {
+    const box = cgEl("div", "cg-stat");
+    box.appendChild(cgEl("div", "cg-stat-k", k));
+    const val = cgEl("div", "cg-stat-v", String(v));
+    if (sub) { const s = cgEl("small", "", " " + sub); val.appendChild(s); }
+    box.appendChild(val);
+    return box;
+}
+
+function cgRankBar() {
+    const wrap = cgEl("div", "cg-rankbar");
+    const line = cgEl("div", "cg-rank-line");
+    const now = cgRankNow();
+    const next = cgRankNext();
+    line.appendChild(cgEl("span", "cg-rank-now", "Rango: " + now.name));
+    line.appendChild(cgEl("span", "cg-rank-next", next
+        ? ("Faltan " + (next.min - cg.score) + " XP para " + next.name)
+        : "Rango máximo alcanzado"));
+    wrap.appendChild(line);
+    const meter = cgEl("div", "cg-meter");
+    const fill = cgEl("i");
+    let pct = 100;
+    if (next) {
+        const span = next.min - now.min;
+        pct = span > 0 ? Math.round(((cg.score - now.min) / span) * 100) : 0;
+    }
+    fill.style.width = Math.max(0, Math.min(100, pct)) + "%";
+    meter.appendChild(fill);
+    meter.setAttribute("role", "img");
+    meter.setAttribute("aria-label", "Progreso hacia el siguiente rango: " + pct + " por ciento");
+    wrap.appendChild(meter);
+    return wrap;
+}
+
+function cgBadgeRow() {
+    const row = cgEl("div", "cg-badges");
+    row.setAttribute("role", "list");
+    CG_WORDS.forEach((w, i) => {
+        const earned = cg.solved[i];
+        const b = cgEl("div", "cg-badge" + (earned ? " is-earned" : ""));
+        b.setAttribute("role", "listitem");
+        const icon = cgEl("span", "cg-badge-icon", w.badge.icon);
+        icon.setAttribute("aria-hidden", "true");
+        b.appendChild(icon);
+        b.appendChild(cgEl("span", "", w.badge.name));
+        b.appendChild(cgEl("span", "cg-badge-state", earned ? "Ganada" : "Bloqueada"));
+        row.appendChild(b);
+    });
+    return row;
+}
+
+function cgHud() {
+    const hud = cgEl("div", "cg-hud");
+    hud.appendChild(cgMascotCard());
+    const stats = cgEl("div", "cg-stats");
+    const r1 = cgEl("div", "cg-statrow");
+    r1.appendChild(cgStat("Puntos (XP)", cg.score));
+    r1.appendChild(cgStat("Racha de aciertos", cg.combo, cg.combo === 1 ? "acierto" : "aciertos"));
+    r1.appendChild(cgStat("Lugares resueltos", cg.solved.filter(Boolean).length + " de 5"));
+    stats.appendChild(r1);
+    stats.appendChild(cgRankBar());
+    stats.appendChild(cgBadgeRow());
+    hud.appendChild(stats);
+    return hud;
+}
+
+function cgSkylineBlock() {
+    const box = cgEl("div", "cg-skyline");
+    const art = cgEl("div", "");
+    art.innerHTML = cgSkylineSvg();
+    box.appendChild(art);
+    const n = cg.solved.filter(Boolean).length;
+    box.appendChild(cgEl("p", "cg-sky-caption",
+        "Puerto Coral: " + n + " de 5 edificios con las luces encendidas."));
+    return box;
+}
+
+/* ---------- Screen 1: mission ---------- */
+function cgMissionScreen() {
+    const s = cgEl("section", "cg-screen is-live");
+    s.appendChild(cgToolbar({
+        progress: "Pantalla 1 de 3 — Misión",
+        onBack: cgExit,
+        onHint: () => {
+            cgSetMood("think", "Consejo: mira bien la foto antes de escoger las letras. Cada fila es un lugar de la ciudad.");
+            cg.feedback = {
+                kind: "info",
+                title: "Pista de la misión",
+                body: "Cada fila del crucigrama es un lugar de la ciudad. Empieza por la fila 2 (BANCO) si quieres una palabra corta, o por la fila 1 si te sientes valiente."
+            };
+            cgRender();
+        }
+    }));
+    s.appendChild(cgHud());
+    const grid = cgEl("div", "cg-mission-grid");
+    const panel = cgEl("div", "cg-panel");
+    panel.appendChild(cgEl("h2", "", "Misión: Los letreros perdidos de Puerto Coral"));
+    panel.appendChild(cgEl("p", "", "Una tormenta se llevó los letreros de cinco lugares de Puerto Coral, "
+        + "y los visitantes ya no saben dónde están. Tú eres el nuevo guía de la ciudad. "
+        + "Mira cada foto, construye el nombre del lugar en español dentro del crucigrama, "
+        + "y las luces de ese edificio volverán a encenderse."));
+    panel.appendChild(cgEl("h3", "", "Lo que vas a practicar"));
+    const ul = cgEl("ul", "cg-objectives");
+    [
+        "Reconocer y escribir los nombres de cinco lugares de la ciudad en español.",
+        "Unir una imagen con la palabra correcta en español.",
+        "Deletrear cada palabra letra por letra, sin errores de ortografía."
+    ].forEach((t) => ul.appendChild(cgEl("li", "", t)));
+    panel.appendChild(ul);
+    panel.appendChild(cgEl("h3", "", "Cómo se juega"));
+    const ul2 = cgEl("ul", "cg-objectives");
+    [
+        "Toca una casilla vacía, después toca las letras del teclado en pantalla. Aquí no se escribe con el teclado del ordenador.",
+        "Cuando la fila esté llena, pulsa Comprobar.",
+        "El banco de palabras aparece después de tu primera comprobación.",
+        "No hay reloj ni vidas: puedes intentarlo las veces que quieras y tus puntos nunca bajan."
+    ].forEach((t) => ul2.appendChild(cgEl("li", "", t)));
+    panel.appendChild(ul2);
+    const go = cgBtn("▶ Empezar el crucigrama", "is-primary", () => {
+        cg.screen = "play";
+        cg.activeRow = 0;
+        cg.selected = { row: 0, idx: 0 };
+        cgSetMood("idle", "Fila 1: un lugar grande con muchas tiendas. ¿Cuál será?");
+        cg.feedback = null;
+        cgRender();
+    });
+    panel.appendChild(go);
+    grid.appendChild(panel);
+    s.appendChild(grid);
+    s.appendChild(cgSkylineBlock());
+    if (cg.feedback) { s.appendChild(cgFeedbackBlock()); }
+    return s;
+}
+
+/* ---------- Feedback block ---------- */
+function cgFeedbackBlock() {
+    const f = cg.feedback;
+    const box = cgEl("div", "cg-feedback " + (f.kind === "good" ? "is-good" : f.kind === "bad" ? "is-bad" : "is-info"));
+    box.setAttribute("role", "status");
+    box.appendChild(cgEl("h4", "", (f.kind === "good" ? "✔ " : f.kind === "bad" ? "✘ " : "💡 ") + f.title));
+    if (f.body) { box.appendChild(cgEl("p", "", f.body)); }
+    if (f.points && f.points.length) {
+        const ul = cgEl("ul");
+        f.points.forEach((t) => ul.appendChild(cgEl("li", "", t)));
+        box.appendChild(ul);
+    }
+    return box;
+}
+
+/* ---------- Restart confirmation ---------- */
+function cgConfirmBlock() {
+    const box = cgEl("div", "cg-feedback is-bad");
+    box.setAttribute("role", "alertdialog");
+    box.appendChild(cgEl("h4", "", "¿Empezar otra vez desde el principio?"));
+    box.appendChild(cgEl("p", "", "Se borrarán todas tus letras, tus puntos, tu racha, tu rango y tus insignias. "
+        + "Esta acción no se puede deshacer."));
+    const row = cgEl("div", "cg-toolbar");
+    row.appendChild(cgBtn("Sí, empezar de nuevo", "is-danger", cgDoRestart));
+    row.appendChild(cgBtn("No, seguir jugando", "is-primary", () => { cg.confirmRestart = false; cgRender(); }));
+    box.appendChild(row);
+    return box;
+}
+
+/* ---------- The crossword board ---------- */
+function cgBoard() {
+    const wrap = cgEl("div", "cg-board-wrap");
+    const board = cgEl("div", "cg-board");
+    board.setAttribute("role", "group");
+    board.setAttribute("aria-label", "Crucigrama de lugares en la ciudad, cinco filas");
+    CG_WORDS.forEach((w, r) => {
+        const row = cgEl("div", "cg-row"
+            + (r === cg.activeRow ? " is-active" : "")
+            + (cg.solved[r] ? " is-solved" : ""));
+        const num = cgEl("div", "cg-rownum", String(w.n));
+        num.setAttribute("aria-hidden", "true");
+        // leading gaps
+        for (let g = 0; g < w.start; g++) { row.appendChild(cgEl("div", "cg-gap")); }
+        row.insertBefore(num, row.firstChild);
+        w.answer.split("").forEach((letter, i) => {
+            const col = w.start + i;
+            const value = cg.grid[r][i];
+            const locked = cg.solved[r];
+            const sel = cg.selected && cg.selected.row === r && cg.selected.idx === i;
+            const marked = cg.attempted[r] && value !== "";
+            const right = marked && value === letter;
+            const wrong = marked && value !== letter;
+            const cell = cgEl("button", "cg-cell"
+                + (col === CG_KEY_COL ? " is-key" : "")
+                + (sel ? " is-selected" : "")
+                + (locked || right ? " is-right" : "")
+                + (wrong ? " is-wrong" : "")
+                + (locked ? " is-locked" : ""));
+            cell.type = "button";
+            cell.dataset.row = String(r);
+            cell.dataset.idx = String(i);
+            cell.textContent = value;
+            const stateWord = locked ? "correcta y bloqueada" : right ? "correcta" : wrong ? "incorrecta" : "";
+            cell.setAttribute("aria-label", "Fila " + w.n + ", casilla " + (i + 1) + " de " + w.answer.length
+                + (value ? (", letra " + value) : ", vacía")
+                + (stateWord ? (", " + stateWord) : ""));
+            if (locked) {
+                cell.setAttribute("aria-disabled", "true");
+            }
+            if (right || wrong) {
+                const m = cgEl("span", "cg-mark", right ? "✓" : "✗");
+                m.setAttribute("aria-hidden", "true");
+                cell.appendChild(m);
+            }
+            cell.addEventListener("click", () => cgSelect(r, i));
+            cell.addEventListener("keydown", cgCellKeys);
+            row.appendChild(cell);
+        });
+        board.appendChild(row);
+    });
+    wrap.appendChild(board);
+    return wrap;
+}
+
+function cgCellKeys(ev) {
+    const r = Number(ev.currentTarget.dataset.row);
+    const i = Number(ev.currentTarget.dataset.idx);
+    const len = CG_WORDS[r].answer.length;
+    let target = null;
+    if (ev.key === "ArrowRight") { target = { row: r, idx: Math.min(len - 1, i + 1) }; }
+    else if (ev.key === "ArrowLeft") { target = { row: r, idx: Math.max(0, i - 1) }; }
+    else if (ev.key === "ArrowDown") { const nr = Math.min(CG_WORDS.length - 1, r + 1); target = { row: nr, idx: Math.min(i, CG_WORDS[nr].answer.length - 1) }; }
+    else if (ev.key === "ArrowUp") { const nr = Math.max(0, r - 1); target = { row: nr, idx: Math.min(i, CG_WORDS[nr].answer.length - 1) }; }
+    if (target) {
+        ev.preventDefault();
+        cgSelect(target.row, target.idx);
+    }
+}
+
+function cgSelect(r, i) {
+    if (cg.solved[r]) {
+        cg.feedback = {
+            kind: "info",
+            title: "Fila " + CG_WORDS[r].n + " ya resuelta",
+            body: "Ya completaste " + CG_WORDS[r].article.toUpperCase() + ". Escoge otra fila que todavía tenga casillas vacías."
+        };
+        cgRender();
+        return;
+    }
+    cg.activeRow = r;
+    cg.selected = { row: r, idx: i };
+    cgRender(true);
+}
+
+/* ---------- Letter pad (the only input) ---------- */
+function cgPad() {
+    const pad = cgEl("div", "cg-pad");
+    const w = CG_WORDS[cg.activeRow];
+    pad.appendChild(cgEl("h3", "", "Teclado de letras — fila " + w.n + " (" + w.answer.length + " letras)"));
+    const keys = cgEl("div", "cg-keys");
+    CG_LETTERS.forEach((L) => {
+        const k = cgEl("button", "cg-key", L);
+        k.type = "button";
+        k.setAttribute("aria-label", "Poner la letra " + L);
+        k.addEventListener("click", () => cgPutLetter(L));
+        keys.appendChild(k);
+    });
+    const del = cgEl("button", "cg-key is-wide", "⌫ Borrar");
+    del.type = "button";
+    del.setAttribute("aria-label", "Borrar la letra de la casilla seleccionada");
+    del.addEventListener("click", cgDeleteLetter);
+    keys.appendChild(del);
+    const clr = cgEl("button", "cg-key is-wide", "Borrar palabra");
+    clr.type = "button";
+    clr.setAttribute("aria-label", "Borrar todas las letras de esta fila");
+    clr.addEventListener("click", cgClearRow);
+    keys.appendChild(clr);
+    pad.appendChild(keys);
+    return pad;
+}
+
+function cgActiveCellIdx() {
+    if (cg.selected && cg.selected.row === cg.activeRow) { return cg.selected.idx; }
+    return -1;
+}
+
+function cgPutLetter(L) {
+    const r = cg.activeRow;
+    if (cg.solved[r]) { return; }
+    let i = cgActiveCellIdx();
+    if (i < 0) {
+        i = cg.grid[r].findIndex((v) => v === "");
+        if (i < 0) { i = 0; }
+    }
+    cg.grid[r][i] = L;
+    // move on to the next empty square in this row
+    let next = -1;
+    for (let j = i + 1; j < cg.grid[r].length; j++) { if (cg.grid[r][j] === "") { next = j; break; } }
+    if (next < 0) { for (let j = 0; j < cg.grid[r].length; j++) { if (cg.grid[r][j] === "") { next = j; break; } } }
+    cg.selected = { row: r, idx: next < 0 ? i : next };
+    cg.feedback = null;
+    cgSetMood("think", "Vas construyendo la fila " + CG_WORDS[r].n + ". Pulsa Comprobar cuando esté llena.");
+    cgRender(true);
+}
+
+function cgDeleteLetter() {
+    const r = cg.activeRow;
+    if (cg.solved[r]) { return; }
+    let i = cgActiveCellIdx();
+    if (i < 0) { return; }
+    if (cg.grid[r][i] === "" && i > 0) { i = i - 1; }
+    cg.grid[r][i] = "";
+    cg.selected = { row: r, idx: i };
+    cgRender(true);
+}
+
+function cgClearRow() {
+    const r = cg.activeRow;
+    if (cg.solved[r]) { return; }
+    cg.grid[r] = cg.grid[r].map(() => "");
+    cg.attempted[r] = false;
+    cg.selected = { row: r, idx: 0 };
+    cg.feedback = { kind: "info", title: "Fila " + CG_WORDS[r].n + " vacía", body: "Puedes empezar esta palabra otra vez. Tus puntos y tu racha no cambian." };
+    cgRender(true);
+}
+
+/* ---------- Hint ---------- */
+function cgHintPlay() {
+    const r = cg.activeRow;
+    const w = CG_WORDS[r];
+    if (cg.solved[r]) {
+        cg.feedback = { kind: "info", title: "Esta fila ya está lista", body: "Escoge una fila sin resolver para pedir una pista." };
+        cgRender();
+        return;
+    }
+    // first square that is empty or holds a wrong letter
+    let target = -1;
+    for (let i = 0; i < w.answer.length; i++) {
+        if (cg.grid[r][i] !== w.answer[i]) { target = i; break; }
+    }
+    cg.hintsUsed += 1;
+    cg.hinted[r] = true;
+    if (target >= 0) {
+        cg.grid[r][target] = w.answer[target];
+        cg.selected = { row: r, idx: target };
+        cg.feedback = {
+            kind: "info",
+            title: "Pista para la fila " + w.n,
+            body: w.hintText,
+            points: ["Te puse gratis la letra " + w.answer[target] + " en la casilla " + (target + 1) + " de esa fila.",
+                "Las pistas no quitan puntos, pero una fila resuelta con pista vale " + CG_PTS_RETRY + " XP en vez de " + CG_PTS_FIRST + " XP."]
+        };
+    } else {
+        cg.feedback = { kind: "info", title: "Pista para la fila " + w.n, body: "Todas las letras ya son correctas. Pulsa Comprobar." };
+    }
+    cgSetMood("think", "Aquí tienes una ayuda para la fila " + w.n + ".");
+    cgRender();
+}
+
+/* ---------- Check ---------- */
+function cgRowFull(r) { return cg.grid[r].every((v) => v !== ""); }
+
+function cgCheck() {
+    const r = cg.activeRow;
+    const w = CG_WORDS[r];
+    if (cg.solved[r]) { return; }
+    if (!cgRowFull(r)) {
+        cg.feedback = {
+            kind: "info",
+            title: "Faltan letras en la fila " + w.n,
+            body: "Llena todas las " + w.answer.length + " casillas de esta fila antes de comprobar."
+        };
+        cgRender();
+        return;
+    }
+    const wasFirstReveal = !cg.bankRevealed;
+    cg.bankRevealed = true;
+    cg.checkedOnce = true;
+    cg.attempted[r] = true;
+    cg.attempts += 1;
+    const given = cg.grid[r].join("");
+    const wrongPositions = [];
+    for (let i = 0; i < w.answer.length; i++) {
+        if (cg.grid[r][i] !== w.answer[i]) { wrongPositions.push(i + 1); }
+    }
+
+    if (wrongPositions.length === 0) {
+        const clean = !cg.hinted[r] && !cg.failed[r];
+        const base = clean ? CG_PTS_FIRST : CG_PTS_RETRY;
+        cg.solved[r] = true;
+        if (clean) {
+            cg.firstTry += 1;
+            cg.combo += 1;
+            if (cg.combo > cg.bestCombo) { cg.bestCombo = cg.combo; }
+        }
+        const bonus = clean ? Math.min(CG_COMBO_CAP, CG_COMBO_STEP * (cg.combo - 1)) : 0;
+        cg.score += base + bonus;
+        cg.selected = null;
+        cgSetMood("happy", "¡Muy bien! " + w.article.toUpperCase() + " ya tiene su letrero y sus luces.");
+        cgToast("+" + (base + bonus) + " XP · " + w.display);
+        cg.feedback = {
+            kind: "good",
+            title: "¡Correcto! " + w.display.toUpperCase(),
+            body: "En español decimos " + w.article + " (" + w.english + "). Las luces de ese edificio ya están encendidas en Puerto Coral.",
+            points: [
+                "Ganaste " + base + " XP" + (bonus ? (" y " + bonus + " XP extra por tu racha de " + cg.combo + ".") : "."),
+                "Insignia desbloqueada: " + w.badge.name + "."
+            ]
+        };
+        if (wasFirstReveal) {
+            cg.feedback.points.push("El banco de palabras ya está visible debajo del crucigrama.");
+        }
+        // move to the next unsolved row
+        const nextRow = cg.solved.findIndex((v) => !v);
+        if (nextRow >= 0) {
+            cg.activeRow = nextRow;
+            cg.selected = { row: nextRow, idx: cg.grid[nextRow].findIndex((v) => v === "") };
+            if (cg.selected.idx < 0) { cg.selected.idx = 0; }
+        }
+        if (cg.solved.every(Boolean)) {
+            cg.screen = "done";
+            cgSetMood("happy", "¡Puerto Coral tiene todos sus letreros! Eres un guía de verdad.");
+        }
+        cgRender();
+        return;
+    }
+
+    // wrong: mark this row as failed at least once, then give four-part feedback
+    cg.failed[r] = true;
+    cg.combo = 0;
+    cgSetMood("think", "Casi. Mira otra vez las casillas marcadas con ✗ en la fila " + w.n + ".");
+    const correctSpaced = w.split
+        ? (w.answer.slice(0, w.split) + " " + w.answer.slice(w.split))
+        : w.answer;
+    cg.feedback = {
+        kind: "bad",
+        title: "Todavía no — fila " + w.n,
+        body: "Escribiste " + given + ", y esa no es la palabra correcta para esta imagen.",
+        points: [
+            "Qué está mal: " + (wrongPositions.length === 1
+                ? ("la letra de la casilla " + wrongPositions[0] + " de la fila " + w.n + ".")
+                : ("las letras de las casillas " + wrongPositions.join(", ") + " de la fila " + w.n + ".")),
+            "Por qué: en español este lugar se escribe de una sola manera, y esas letras no coinciden con su ortografía. " + w.clue,
+            "Cómo arreglarlo: toca cada casilla marcada con ✗, pulsa ⌫ Borrar y escoge la letra correcta en el teclado de letras. Las casillas con ✓ ya están bien; déjalas.",
+            "Modelo correcto: " + correctSpaced + " — se dice " + w.article + " (" + w.english + ")."
+        ]
+    };
+    if (wasFirstReveal) {
+        cg.feedback.points.push("El banco de palabras ya está visible debajo del crucigrama: úsalo para comparar tu ortografía.");
+    }
+    cgRender();
+}
+
+/* ---------- Clue rail ---------- */
+function cgClueRail() {
+    const box = cgEl("div", "cg-pad");
+    box.appendChild(cgEl("h3", "", "Pistas con imágenes"));
+    const list = cgEl("div", "cg-clues");
+    CG_WORDS.forEach((w, r) => {
+        const b = cgEl("button", "cg-clue"
+            + (r === cg.activeRow ? " is-active" : "")
+            + (cg.solved[r] ? " is-solved" : ""));
+        b.type = "button";
+        const art = cgEl("span", "");
+        art.setAttribute("aria-hidden", "true");
+        art.innerHTML = cgClueArt(w.art);
+        b.appendChild(art);
+        const txt = cgEl("span", "cg-clue-txt");
+        txt.appendChild(cgEl("span", "cg-clue-n", "Fila " + w.n + " · " + w.answer.length + " letras"));
+        txt.appendChild(cgEl("span", "cg-clue-d", w.clue));
+        txt.appendChild(cgEl("span", "cg-clue-state", cg.solved[r] ? "✔ Resuelta" : "Sin resolver"));
+        b.appendChild(txt);
+        b.setAttribute("aria-label", "Pista " + w.n + ". " + w.clue + " "
+            + w.answer.length + " letras. " + (cg.solved[r] ? "Resuelta." : "Sin resolver.")
+            + " Selecciona esta fila.");
+        b.addEventListener("click", () => {
+            if (cg.solved[r]) {
+                cg.feedback = { kind: "info", title: "Fila " + w.n + " ya resuelta", body: "Ya escribiste " + w.display + ". Escoge otra fila." };
+                cgRender();
+                return;
+            }
+            cgSelect(r, cg.grid[r].findIndex((v) => v === "") >= 0 ? cg.grid[r].findIndex((v) => v === "") : 0);
+        });
+        list.appendChild(b);
+    });
+    box.appendChild(list);
+    return box;
+}
+
+/* ---------- Word bank: hidden until the first check ---------- */
+function cgWordBank() {
+    const box = cgEl("div", "cg-bank");
+    box.appendChild(cgEl("h3", "", "Banco de palabras"));
+    if (!cg.bankRevealed) {
+        box.appendChild(cgEl("p", "cg-bank-locked",
+            "🔒 Bloqueado. El banco de palabras aparecerá en cuanto compruebes tu primera respuesta. "
+            + "Por ahora, usa solo las imágenes."));
+        return box;
+    }
+    const ul = cgEl("ul", "cg-bank-list");
+    CG_WORDS.forEach((w, r) => {
+        const li = cgEl("li", cg.solved[r] ? "is-used" : "", w.display);
+        if (cg.solved[r]) { li.appendChild(cgEl("span", "cg-sr", " (ya usada)")); }
+        ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    return box;
+}
+
+/* ---------- Screen 2: play ---------- */
+function cgPlayScreen() {
+    const s = cgEl("section", "cg-screen is-live");
+    const solvedN = cg.solved.filter(Boolean).length;
+    s.appendChild(cgToolbar({
+        progress: "Pantalla 2 de 3 — Crucigrama · " + solvedN + " de 5 filas resueltas",
+        onBack: () => { cg.screen = "mission"; cg.feedback = null; cgRender(); },
+        onHint: cgHintPlay
+    }));
+    s.appendChild(cgHud());
+    s.appendChild(cgSkylineBlock());
+
+    s.appendChild(cgBoard());
+
+    const play = cgEl("div", "cg-play");
+    const left = cgEl("div", "cg-screen is-live");
+    const actions = cgEl("div", "cg-toolbar");
+    const w = CG_WORDS[cg.activeRow];
+    const full = cgRowFull(cg.activeRow);
+    actions.appendChild(cgBtn("✓ Comprobar fila " + w.n, "is-primary", cgCheck,
+        { aria: "Check row " + w.n, disabled: cg.solved[cg.activeRow] }));
+    actions.appendChild(cgEl("span", "cg-progress-text",
+        cg.solved[cg.activeRow]
+            ? ("Fila " + w.n + ": resuelta ✔")
+            : (full ? ("Fila " + w.n + ": lista para comprobar")
+                : ("Fila " + w.n + ": " + cg.grid[cg.activeRow].filter((v) => v !== "").length
+                    + " de " + w.answer.length + " casillas llenas"))));
+    left.appendChild(actions);
+    left.appendChild(cgPad());
+    if (cg.confirmRestart) { left.appendChild(cgConfirmBlock()); }
+    if (cg.feedback) { left.appendChild(cgFeedbackBlock()); }
+    left.appendChild(cgWordBank());
+    play.appendChild(left);
+    play.appendChild(cgClueRail());
+    s.appendChild(play);
+    return s;
+}
+
+/* ---------- Screen 3: completion ---------- */
+function cgDoneScreen() {
+    const s = cgEl("section", "cg-screen is-live");
+    s.appendChild(cgToolbar({
+        progress: "Pantalla 3 de 3 — Certificado",
+        onBack: () => { cg.screen = "play"; cgRender(); },
+        onHint: () => {
+            cg.feedback = {
+                kind: "info",
+                title: "Para seguir practicando",
+                body: "Di en voz baja cada lugar con su artículo: el centro comercial, el banco, el restaurante, el supermercado, el parque. "
+                    + "Después pulsa Intentar de nuevo y hazlo sin pistas."
+            };
+            cgRender();
+        }
+    }));
+    const cert = cgEl("div", "cg-cert");
+    cert.appendChild(cgEl("div", "cg-cert-eyebrow", "Ayuntamiento de Puerto Coral"));
+    cert.appendChild(cgEl("h2", "", "Certificado de Guía de la Ciudad"));
+    cert.appendChild(cgEl("p", "", "Se otorga este certificado por devolver los cinco letreros perdidos "
+        + "y volver a encender las luces de Puerto Coral."));
+    cert.appendChild(cgEl("div", "cg-cert-rank", "Rango final: " + cgRankNow().name));
+    const grid = cgEl("div", "cg-statgrid");
+    grid.appendChild(cgStat("Puntos finales", cg.score, "XP"));
+    grid.appendChild(cgStat("Aciertos a la primera", cg.firstTry + " de 5"));
+    grid.appendChild(cgStat("Mejor racha", cg.bestCombo));
+    grid.appendChild(cgStat("Comprobaciones", cg.attempts));
+    grid.appendChild(cgStat("Pistas usadas", cg.hintsUsed));
+    grid.appendChild(cgStat("Insignias", cg.solved.filter(Boolean).length + " de 5"));
+    cert.appendChild(grid);
+    s.appendChild(cert);
+
+    const panel = cgEl("div", "cg-panel");
+    panel.appendChild(cgEl("h3", "", "Los cinco lugares de tu ciudad"));
+    const ul = cgEl("ul", "cg-objectives");
+    CG_WORDS.forEach((w) => {
+        ul.appendChild(cgEl("li", "", w.article + " — " + w.english));
+    });
+    panel.appendChild(ul);
+    s.appendChild(panel);
+    s.appendChild(cgSkylineBlock());
+    s.appendChild(cgHud());
+    if (cg.confirmRestart) { s.appendChild(cgConfirmBlock()); }
+    if (cg.feedback) { s.appendChild(cgFeedbackBlock()); }
+    return s;
+}
+
+/* ---------- Render ---------- */
+function cgRender(keepFocusOnBoard) {
+    const root = cgRoot();
+    if (!root) { return; }
+    const active = document.activeElement;
+    const wasCell = keepFocusOnBoard && active && active.classList
+        && active.classList.contains("cg-cell");
+    root.replaceChildren();
+
+    let live = document.getElementById("cgLive");
+    if (!live) {
+        live = cgEl("div", "cg-sr");
+        live.id = "cgLive";
+        live.setAttribute("role", "status");
+        live.setAttribute("aria-live", "polite");
+    }
+    live.textContent = cg.liveMsg || "";
+    root.appendChild(live);
+
+    if (cg.screen === "mission") { root.appendChild(cgMissionScreen()); }
+    else if (cg.screen === "play") { root.appendChild(cgPlayScreen()); }
+    else { root.appendChild(cgDoneScreen()); }
+
+    if (cg.screen === "mission" && cg.confirmRestart) { root.appendChild(cgConfirmBlock()); }
+
+    if (cg.selected && (wasCell || cg.screen === "play")) {
+        const sel = root.querySelector('.cg-cell.is-selected');
+        if (sel && wasCell) { sel.focus(); }
+    }
+}
+
+function devInit() {
+    cgBlankState();
+    cgRender();
+}
+
+function devReset() {
+    cgBlankState();
+    cgClearToasts();
+    const root = cgRoot();
+    if (root) { root.replaceChildren(); }
+}
+
+    </script>
+</body>
+
+</html>
