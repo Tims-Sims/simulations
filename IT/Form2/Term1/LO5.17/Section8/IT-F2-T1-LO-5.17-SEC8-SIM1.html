@@ -1,0 +1,2971 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 PBR Checkpoint: Flowcharts &amp; Decision Symbols</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 2 INFORMATION TECHNOLOGY: FLOWCHARTS & DECISION SYMBOLS
+           PBR CHECKPOINT SIMULATION
+           Single-file HTML/CSS/JS - Offline Friendly
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Flowchart & Status Colors */
+            --dot-color: #0ea5e9;
+            --dot-glow: rgba(14, 165, 233, 0.5);
+
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --yes-color: #10b981;
+            --no-color: #f43f5e;
+            --diamond-color: #f59e0b;
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* Lock outer window when in game mode so ONLY internal containers scroll */
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1360px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            flex-shrink: 0;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #0284c7, #f59e0b);
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn,
+        .accent-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .accent-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .hero-card {
+            width: min(100%, 880px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: clamp(2rem, 3.8vw, 3rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 740px);
+            margin: 0 auto 28px;
+            color: var(--text-soft);
+            font-size: 1.08rem;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+        }
+
+        .feature-item h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.88rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Stage / 25% Right Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 18px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Pane (75%): Roadway & Flowchart Interactive Simulation Area */
+        .stage-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        .stage-header {
+            padding: 12px 18px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .stage-title {
+            font-size: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stage-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: var(--surface-3);
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .stage-scroll-area {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background: color-mix(in srgb, var(--bg-soft) 40%, var(--surface));
+        }
+
+        /* TOP ROADWAY SCENE CONTAINER */
+        .roadway-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .roadway-top-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .gantry-sign {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: 2px solid #0284c7;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 800;
+            font-size: 0.84rem;
+            letter-spacing: 0.05em;
+            box-shadow: 0 0 10px rgba(2, 132, 199, 0.4);
+        }
+
+        .led-status-board {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            background: #0f172a;
+            color: #94a3b8;
+            border: 2px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .led-status-board.scanning {
+            color: #38bdf8;
+            border-color: #0284c7;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+            animation: pulseGlow 1s infinite alternate;
+        }
+
+        .led-status-board.allowed {
+            color: #10b981;
+            border-color: #10b981;
+            box-shadow: 0 0 14px rgba(16, 185, 129, 0.7);
+        }
+
+        .led-status-board.denied {
+            color: #ef4444;
+            border-color: #ef4444;
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.7);
+            animation: flashAlert 0.4s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+
+        @keyframes flashAlert {
+            from { background: #0f172a; }
+            to { background: #450a0a; }
+        }
+
+        /* SVG ROADWAY CANVAS */
+        .roadway-svg-container {
+            width: 100%;
+            height: 195px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .roadway-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* SVG Wheel Rotation & Indicator Blinking Animations */
+        .spin-wheel {
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        .is-moving .spin-wheel {
+            animation: wheelSpinAnim 0.35s linear infinite;
+        }
+
+        @keyframes wheelSpinAnim {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .blinker-active {
+            animation: blinkerFlash 0.28s infinite alternate !important;
+        }
+
+        @keyframes blinkerFlash {
+            from { fill: #f59e0b; opacity: 1; filter: drop-shadow(0 0 8px #f59e0b); }
+            to { fill: #451a03; opacity: 0.2; filter: none; }
+        }
+
+        .siren-red {
+            animation: sirenRedPulse 0.4s infinite alternate;
+        }
+
+        .siren-blue {
+            animation: sirenBluePulse 0.4s infinite alternate;
+        }
+
+        @keyframes sirenRedPulse {
+            0% { fill: #ef4444; filter: drop-shadow(0 0 8px #ef4444); }
+            100% { fill: #450a0a; filter: none; }
+        }
+
+        @keyframes sirenBluePulse {
+            0% { fill: #1e3a8a; filter: none; }
+            100% { fill: #38bdf8; filter: drop-shadow(0 0 8px #38bdf8); }
+        }
+
+        .scanner-beam-sweep {
+            animation: scanSweepAnim 0.7s ease-in-out infinite alternate;
+        }
+
+        @keyframes scanSweepAnim {
+            from { transform: translateX(-15px); }
+            to { transform: translateX(15px); }
+        }
+
+        /* BOTTOM FLOWCHART DIAGRAM CONTAINER */
+        .flowchart-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+
+        .flowchart-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .flowchart-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* FLOWCHART DIAGRAM SVG & INTERACTIVE NODES */
+        .flowchart-svg-wrap {
+            position: relative;
+            width: 100%;
+            min-height: 380px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 8px;
+            overflow-x: auto;
+        }
+
+        .flowchart-svg {
+            width: 100%;
+            max-width: 660px;
+            height: 380px;
+            display: block;
+        }
+
+        /* Flowchart Node Styles */
+        .fc-node {
+            transition: transform 0.2s ease, filter 0.2s ease, stroke 0.2s ease;
+        }
+
+        .fc-node text {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-weight: 700;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .fc-line {
+            fill: none;
+            stroke: var(--muted);
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.3s ease, stroke-width 0.3s ease, filter 0.3s ease;
+        }
+
+        .fc-line.active {
+            stroke: var(--accent);
+            stroke-width: 5;
+            stroke-dasharray: 8 6;
+            animation: dashFlow 1s linear infinite;
+            filter: drop-shadow(0 0 6px var(--accent));
+        }
+
+        .fc-line.yes-active {
+            stroke: var(--safe-color);
+            stroke-width: 5.5;
+            stroke-dasharray: 8 6;
+            animation: dashFlow 1s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8));
+        }
+
+        .fc-line.no-active {
+            stroke: var(--danger-color);
+            stroke-width: 5.5;
+            stroke-dasharray: 8 6;
+            animation: dashFlow 1s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8));
+        }
+
+        @keyframes dashFlow {
+            from { stroke-dashoffset: 28; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        .fc-token {
+            fill: #38bdf8;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+            filter: drop-shadow(0 0 12px #38bdf8);
+            transition: opacity 0.3s ease;
+        }
+
+        .fc-diamond-shape {
+            transition: all 0.3s ease;
+        }
+
+        .fc-diamond-shape.evaluating {
+            animation: diamondPulse 0.8s infinite alternate;
+            filter: drop-shadow(0 0 16px #f59e0b);
+        }
+
+        @keyframes diamondPulse {
+            from { transform: scale(1); stroke-width: 3; }
+            to { transform: scale(1.05); stroke-width: 5; }
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width / min 340px) */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-title {
+            font-size: 0.96rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 10px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            padding: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Config Form Elements in Action Panel */
+        .config-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .config-label {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .custom-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .custom-select:hover {
+            border-color: var(--accent);
+        }
+
+        /* Feedback Explanation Card */
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        .feedback-card.info {
+            border-color: rgba(56, 189, 248, 0.4);
+            background: rgba(56, 189, 248, 0.12);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .takeaway-banner {
+            margin: 20px 0;
+            padding: 16px 20px;
+            background: color-mix(in srgb, var(--accent) 14%, var(--surface-2));
+            border: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+            border-radius: var(--radius-lg);
+            color: var(--text);
+            font-size: 1.05rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 480px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 640px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 960px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+            .stage-pane {
+                min-height: auto;
+            }
+            .mission-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">🚦</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 PBR Checkpoint: Flowcharts &amp; Decision Symbols</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Information Technology Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Information Technology</div>
+                    <h2>Priority Bus Route Checkpoint Simulator</h2>
+                    <p>
+                        Welcome to the Automated Traffic Systems Lab! The Priority Bus Route (PBR) in Trinidad and Tobago requires strict automated vehicle authorization. 
+                        Construct the selection algorithm, test decision diamond branching, and trace live maxi-taxis, PTSC buses, and service vehicles as they pass through the digital scanner!
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">💎</div>
+                            <h3>Decision Diamonds</h3>
+                            <p>Understand how a selection condition evaluates to either YES (True) or NO (False).</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🚌</div>
+                            <h3>10 Interactive SVG Vehicles</h3>
+                            <p>Watch animated maxi-taxis, police cruisers, PTSC buses, and private cars react to scanner decisions.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚡</div>
+                            <h3>Algorithm Execution Tracing</h3>
+                            <p>Trace single-branch computer logic in real time and discover why faulty logic breaks automated systems.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.1rem; padding: 14px 28px;">🚀 Launch Checkpoint Simulator</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Interactive Stage / 25% Right Mission Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Roadway & Flowchart Diagram -->
+                <section class="stage-pane" id="stagePane">
+                    <div class="stage-header">
+                        <div class="stage-title">
+                            <span id="stageHeading">🛠️ Phase 1: Configure Decision Logic</span>
+                        </div>
+                        <span class="stage-badge" id="trafficStatusBadge">PBR Lane Scanner: Standby</span>
+                    </div>
+
+                    <div class="stage-scroll-area" id="stageScrollArea">
+                        <!-- TOP ROADWAY SCENE -->
+                        <div class="roadway-card">
+                            <div class="roadway-top-info">
+                                <div class="gantry-sign">
+                                    <span>📍 PRIORITY BUS ROUTE — CHECKPOINT</span>
+                                </div>
+                                <div class="led-status-board" id="ledStatusBoard">
+                                    <span>[ SENSOR READY - STANDBY ]</span>
+                                </div>
+                            </div>
+
+                            <!-- Roadway SVG Canvas -->
+                            <div class="roadway-svg-container">
+                                <svg class="roadway-svg" id="roadwaySvg" viewBox="0 0 800 195" preserveAspectRatio="none">
+                                    <defs>
+                                        <!-- Road Gradients & Patterns -->
+                                        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#0f172a" />
+                                            <stop offset="60%" stop-color="#1e293b" />
+                                            <stop offset="100%" stop-color="#334155" />
+                                        </linearGradient>
+                                        <linearGradient id="hillGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#064e3b" />
+                                            <stop offset="100%" stop-color="#022c22" />
+                                        </linearGradient>
+                                        <linearGradient id="tarmacGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#1e293b" />
+                                            <stop offset="100%" stop-color="#0f172a" />
+                                        </linearGradient>
+                                        <linearGradient id="scanBeamGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="rgba(56, 189, 248, 0.9)" />
+                                            <stop offset="50%" stop-color="rgba(56, 189, 248, 0.4)" />
+                                            <stop offset="100%" stop-color="rgba(56, 189, 248, 0)" />
+                                        </linearGradient>
+                                        <pattern id="barrierStripes" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                            <rect width="10" height="20" fill="#f59e0b" />
+                                            <rect x="10" width="10" height="20" fill="#0f172a" />
+                                        </pattern>
+                                        <radialGradient id="sensorWave" cx="50%" cy="50%" r="50%">
+                                            <stop offset="0%" stop-color="rgba(56, 189, 248, 0.6)" />
+                                            <stop offset="70%" stop-color="rgba(56, 189, 248, 0.15)" />
+                                            <stop offset="100%" stop-color="rgba(56, 189, 248, 0)" />
+                                        </radialGradient>
+                                    </defs>
+
+                                    <!-- Sky & Mountains (Northern Range backdrop) -->
+                                    <rect x="0" y="0" width="800" height="85" fill="url(#skyGrad)" />
+                                    <path d="M0 65 Q 120 20, 240 50 T 480 30 T 720 45 L 800 65 L 800 85 L 0 85 Z" fill="url(#hillGrad)" opacity="0.8" />
+                                    <path d="M0 72 Q 180 40, 360 60 T 720 50 L 800 70 L 800 85 L 0 85 Z" fill="#065f46" opacity="0.6" />
+
+                                    <!-- Tropical Trees Silhouettes -->
+                                    <circle cx="90" cy="55" r="14" fill="#047857" opacity="0.5" />
+                                    <circle cx="105" cy="52" r="12" fill="#059669" opacity="0.6" />
+                                    <circle cx="680" cy="54" r="16" fill="#047857" opacity="0.5" />
+                                    <circle cx="700" cy="50" r="13" fill="#059669" opacity="0.6" />
+
+                                    <!-- Road Sidewalk / Curb Area (y: 50 to 85) -->
+                                    <rect x="0" y="80" width="800" height="5" fill="#475569" />
+
+                                    <!-- Continuous Tarmac Road (PBR Main Lane: y: 85 to 195) -->
+                                    <rect x="0" y="85" width="800" height="110" fill="url(#tarmacGrad)" />
+                                    <line x1="0" y1="85" x2="800" y2="85" stroke="#64748b" stroke-width="2" />
+                                    <line x1="0" y1="195" x2="800" y2="195" stroke="#64748b" stroke-width="2" />
+
+                                    <!-- Yellow Transit Lane Dividers (Continuous Straight Highway) -->
+                                    <line x1="0" y1="135" x2="800" y2="135" stroke="#f59e0b" stroke-width="3" stroke-dasharray="16 10" />
+
+                                    <!-- Checkpoint Sensor Ground Pad with Pulsing Waves -->
+                                    <rect id="rfidSensorPad" x="355" y="90" width="80" height="95" fill="url(#sensorWave)" stroke="#0284c7" stroke-width="2" stroke-dasharray="6 4" rx="4" />
+                                    <text x="395" y="104" font-size="8.5" fill="#38bdf8" font-weight="bold" text-anchor="middle">RFID SENSOR PAD</text>
+
+                                    <!-- Road Markings Text Before & After Gate -->
+                                    <text x="220" y="165" font-size="14" fill="rgba(255,255,255,0.18)" font-weight="900" letter-spacing="4">BUS ROUTE ONLY</text>
+                                    <text x="580" y="165" font-size="13" fill="rgba(255,255,255,0.18)" font-weight="900" letter-spacing="3">TRANSIT LANE</text>
+
+                                    <!-- Checkpoint Barrier Gate Post (Mounted safely on top curb sidewalk at y=30 to 62) -->
+                                    <rect x="486" y="30" width="18" height="34" fill="#1e293b" stroke="#64748b" stroke-width="2" rx="3" />
+                                    <circle cx="495" cy="62" r="7" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+
+                                    <!-- Scanner Gantry Post & Overhead Beam -->
+                                    <rect x="425" y="28" width="14" height="162" fill="#334155" stroke="#0f172a" stroke-width="1.5" rx="2" />
+                                    <rect x="345" y="24" width="100" height="12" rx="4" fill="#1e293b" stroke="#0284c7" stroke-width="1.8" />
+                                    <text x="395" y="33" font-size="7.5" fill="#38bdf8" font-weight="bold" text-anchor="middle">PBR RFID SCANNER</text>
+                                    <circle cx="395" cy="30" r="4" fill="#38bdf8" id="scannerBeaconLight" />
+
+                                    <!-- Animated Scanner Laser Beam (hidden by default) -->
+                                    <g id="scannerLaserGroup" opacity="0">
+                                        <rect id="scannerLaserBeam" class="scanner-beam-sweep" x="375" y="36" width="40" height="152" fill="url(#scanBeamGrad)" />
+                                        <line x1="360" y1="110" x2="430" y2="110" stroke="#38bdf8" stroke-width="2" filter="drop-shadow(0 0 6px #38bdf8)" />
+                                    </g>
+
+                                    <!-- ANIMATED VEHICLE LAYER (Drives along upper transit lane y=92) -->
+                                    <g id="animatedVehicleGroup" transform="translate(-160, 92)">
+                                        <!-- Dynamic vehicle SVG will be injected here -->
+                                    </g>
+
+                                    <!-- Checkpoint Barrier Pivot Arm Group (Pivots at 495, 62) -->
+                                    <g id="barrierArmGroup" transform="translate(495, 62)">
+                                        <!-- Barrier arm pivots at (0,0):
+                                             0 deg = closed down across lane (perpendicular to road, blocking y=62 to 140)
+                                             -90 deg = open and strictly parallel to the road (horizontal along y=62, x=417 to 495) -->
+                                        <rect x="-4" y="0" width="8" height="78" fill="url(#barrierStripes)" stroke="#0f172a" stroke-width="1" rx="2" style="transform-origin: 0 0; transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);" id="barrierArm" />
+                                        <circle cx="0" cy="74" r="3.5" fill="#ef4444" id="barrierTipLight" />
+                                        <circle cx="0" cy="0" r="5.5" fill="#f59e0b" />
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- BOTTOM LIVE FLOWCHART DIAGRAM -->
+                        <div class="flowchart-card">
+                            <div class="flowchart-head">
+                                <div class="flowchart-title">
+                                    <span>📊 Live Algorithm Flowchart Diagram</span>
+                                </div>
+                                <span style="font-size:0.84rem; color:var(--muted); font-weight:700;">Standard ISO Flowchart Symbols</span>
+                            </div>
+
+                            <div class="flowchart-svg-wrap">
+                                <svg class="flowchart-svg" id="flowchartSvg" viewBox="0 0 660 380">
+                                    <defs>
+                                        <marker id="arrowMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--muted)" />
+                                        </marker>
+                                        <marker id="arrowAccent" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+                                        </marker>
+                                        <marker id="arrowYes" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+                                        </marker>
+                                        <marker id="arrowNo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#ef4444" />
+                                        </marker>
+                                    </defs>
+
+                                    <!-- FLOW LINES (BACKGROUND CHANNELS) -->
+                                    <!-- 1. Start to Read Vehicle -->
+                                    <path id="flow_start_to_input" class="fc-line" d="M 330 38 L 330 68" marker-end="url(#arrowMuted)" />
+
+                                    <!-- 2. Read Vehicle to Decision Diamond -->
+                                    <path id="flow_input_to_diamond" class="fc-line" d="M 330 110 L 330 140" marker-end="url(#arrowMuted)" />
+
+                                    <!-- 3. Diamond YES Branch (Left to Yes-Outcome) -->
+                                    <path id="flow_diamond_to_yes" class="fc-line" d="M 230 190 L 140 190 L 140 230" marker-end="url(#arrowMuted)" />
+
+                                    <!-- 4. Diamond NO Branch (Right to No-Outcome) -->
+                                    <path id="flow_diamond_to_no" class="fc-line" d="M 430 190 L 520 190 L 520 230" marker-end="url(#arrowMuted)" />
+
+                                    <!-- 5. Yes-Outcome to Stop -->
+                                    <path id="flow_yes_to_stop" class="fc-line" d="M 140 280 L 140 335 L 260 335" marker-end="url(#arrowMuted)" />
+
+                                    <!-- 6. No-Outcome to Stop -->
+                                    <path id="flow_no_to_stop" class="fc-line" d="M 520 280 L 520 335 L 400 335" marker-end="url(#arrowMuted)" />
+
+                                    <!-- NODE 1: START TERMINATOR (OVAL) -->
+                                    <g id="node_start" class="fc-node" transform="translate(330, 20)">
+                                        <rect x="-65" y="-18" width="130" height="36" rx="18" fill="var(--surface-3)" stroke="#38bdf8" stroke-width="2.5" />
+                                        <text x="0" y="5" fill="var(--text)" font-size="13" text-anchor="middle">Start</text>
+                                    </g>
+
+                                    <!-- NODE 2: INPUT PARALLELOGRAM (READ VEHICLE PASS) -->
+                                    <g id="node_input" class="fc-node" transform="translate(330, 90)">
+                                        <polygon points="-90,-20 -70,20 90,20 70,-20" fill="var(--surface-2)" stroke="#818cf8" stroke-width="2.5" />
+                                        <text x="0" y="4" fill="var(--text)" font-size="12" text-anchor="middle">Input: Read Vehicle Pass</text>
+                                    </g>
+
+                                    <!-- NODE 3: DECISION DIAMOND (CONDITION) -->
+                                    <g id="node_diamond" class="fc-node" transform="translate(330, 190)">
+                                        <polygon id="diamondPoly" class="fc-diamond-shape" points="0,-48 100,0 0,48 -100,0" fill="var(--surface-3)" stroke="#f59e0b" stroke-width="3" />
+                                        <text id="diamondText" x="0" y="-4" fill="#ffffff" font-size="12" text-anchor="middle" font-weight="bold">Is vehicle authorised?</text>
+                                        <text x="0" y="14" fill="#fbbf24" font-size="10" text-anchor="middle">(Selection Construct)</text>
+                                    </g>
+
+                                    <!-- BRANCH LABELS -->
+                                    <!-- YES Branch Label (Left) -->
+                                    <g transform="translate(180, 178)">
+                                        <rect x="-24" y="-12" width="48" height="24" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="1.5" />
+                                        <text x="0" y="4" fill="#10b981" font-size="11" font-weight="bold" text-anchor="middle" id="fcBranchLabelYes">YES</text>
+                                    </g>
+
+                                    <!-- NO Branch Label (Right) -->
+                                    <g transform="translate(480, 178)">
+                                        <rect x="-22" y="-12" width="44" height="24" rx="6" fill="#4c0519" stroke="#ef4444" stroke-width="1.5" />
+                                        <text x="0" y="4" fill="#ef4444" font-size="11" font-weight="bold" text-anchor="middle" id="fcBranchLabelNo">NO</text>
+                                    </g>
+
+                                    <!-- NODE 4: OUTCOME PROCESS BOX 1 (LEFT OUTCOME) -->
+                                    <g id="node_outcome_left" class="fc-node" transform="translate(140, 255)">
+                                        <rect x="-85" y="-24" width="170" height="48" rx="8" fill="var(--surface-2)" stroke="#10b981" stroke-width="2.5" id="rectOutcomeLeft" />
+                                        <text x="0" y="-4" fill="var(--text)" font-size="11" text-anchor="middle" id="textOutcomeLeftTitle">Allow Vehicle Through</text>
+                                        <text x="0" y="14" fill="var(--muted)" font-size="10" text-anchor="middle" id="textOutcomeLeftSub">(Lift PBR Barrier)</text>
+                                    </g>
+
+                                    <!-- NODE 5: OUTCOME PROCESS BOX 2 (RIGHT OUTCOME) -->
+                                    <g id="node_outcome_right" class="fc-node" transform="translate(520, 255)">
+                                        <rect x="-85" y="-24" width="170" height="48" rx="8" fill="var(--surface-2)" stroke="#ef4444" stroke-width="2.5" id="rectOutcomeRight" />
+                                        <text x="0" y="-4" fill="var(--text)" font-size="11" text-anchor="middle" id="textOutcomeRightTitle">Deny PBR Access</text>
+                                        <text x="0" y="14" fill="var(--muted)" font-size="10" text-anchor="middle" id="textOutcomeRightSub">(Keep Barrier Closed)</text>
+                                    </g>
+
+                                    <!-- NODE 6: STOP TERMINATOR (OVAL) -->
+                                    <g id="node_stop" class="fc-node" transform="translate(330, 335)">
+                                        <rect x="-65" y="-18" width="130" height="36" rx="18" fill="var(--surface-3)" stroke="#818cf8" stroke-width="2.5" />
+                                        <text x="0" y="5" fill="var(--text)" font-size="13" text-anchor="middle">Stop</text>
+                                    </g>
+
+                                    <!-- MOVING EXECUTION TOKEN (GLOWING ORB) -->
+                                    <circle id="executionToken" class="fc-token" cx="330" cy="20" r="9" opacity="0" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Dedicated Action & Status Tray -->
+                <aside class="mission-panel">
+                    <!-- 1. Progress & Stats Card -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Execution Progress</span>
+                            <span id="vehicleCountText" style="color:var(--accent);">0 / 10 Vehicles</span>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Interactive Controls Tray -->
+                    <div class="panel-card" style="gap:12px;">
+                        <div class="panel-title">
+                            <span id="panelControlsTitle">Algorithm Configuration</span>
+                        </div>
+
+                        <!-- PHASE 1: SELECTION CONSTRUCT BUILDER FORM -->
+                        <div id="configFormBlock" style="display:flex; flex-direction:column; gap:12px;">
+                            <div class="config-group">
+                                <label class="config-label" for="selectCondition">1. Decision Diamond Condition:</label>
+                                <select class="custom-select" id="selectCondition">
+                                    <option value="correct">"Is vehicle authorised?"</option>
+                                    <option value="wrong_color">"Is vehicle red?"</option>
+                                    <option value="wrong_barrier">"Is barrier open?"</option>
+                                </select>
+                            </div>
+
+                            <div class="config-group">
+                                <label class="config-label" for="selectYesBranch">2. Connect YES Branch to:</label>
+                                <select class="custom-select" id="selectYesBranch">
+                                    <option value="allow">Allow Vehicle Through (Lift Barrier)</option>
+                                    <option value="deny">Deny Access &amp; Reverse (Keep Barrier Closed)</option>
+                                </select>
+                            </div>
+
+                            <div class="config-group">
+                                <label class="config-label" for="selectNoBranch">3. Connect NO Branch to:</label>
+                                <select class="custom-select" id="selectNoBranch">
+                                    <option value="deny">Deny Access &amp; Reverse (Keep Barrier Closed)</option>
+                                    <option value="allow">Allow Vehicle Through (Lift Barrier)</option>
+                                </select>
+                            </div>
+
+                            <button class="primary-btn" id="runCheckpointBtn" style="width:100%; justify-content:center; margin-top:4px;">
+                                ▶️ Run PBR Checkpoint
+                            </button>
+                        </div>
+
+                        <!-- RUNNING SIMULATION CONTROLS -->
+                        <div id="simActionButtons" style="display:none; flex-direction:column; gap:10px;">
+                            <button class="secondary-btn" id="repairFlowchartBtn" style="width:100%; justify-content:center; display:none;">
+                                🔧 Repair Flowchart Logic
+                            </button>
+                            <button class="primary-btn" id="nextVehicleBtn" style="width:100%; justify-content:center; display:none;">
+                                Next Vehicle Approaching →
+                            </button>
+                            <button class="accent-btn" id="finishCertificationBtn" style="width:100%; justify-content:center; display:none;">
+                                Finish Certification 🎉
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Inspector Technical Explanation Box -->
+                    <div class="panel-card">
+                        <div class="panel-title">System Diagnostic &amp; Explanation</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Inspect the selection construct above! The flowchart configuration has been randomized. Make sure the <strong>Decision Condition</strong>, <strong>YES branch</strong>, and <strong>NO branch</strong> are wired correctly to authorize transit vehicles and deny unauthorized cars, then click <strong>[Run PBR Checkpoint]</strong>!
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Certification Complete</div>
+                <h2>Form 2 Algorithm &amp; Selection Construct Certification</h2>
+                <p>Outstanding job in the Traffic Systems Lab! You have successfully built, tested, and traced a selection construct flowchart on the Priority Bus Route across 10 vehicles.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Algorithm Architect</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You verified 100% of PBR traffic decisions using precise flowchart branching!</p>
+                </div>
+
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Vehicles Processed</div>
+                        <div class="val" id="summaryCorrectVal">0 / 10</div>
+                    </div>
+                </div>
+
+                <div class="takeaway-banner">
+                    💡 Core Algorithm Rule: 1 Decision Diamond → 2 Possible Paths (YES / NO) → Exactly 1 Path Followed per Vehicle!
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Traffic Trace Review Breakdown</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Logged vehicle evaluations &amp; selection branch traces.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Use the PBR Checkpoint Simulator</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome, Systems Analyst! In this simulation, you will operate and trace an automated algorithm controlling a Priority Bus Route (PBR) barrier checkpoint in Trinidad and Tobago.</p>
+                <ul>
+                    <li><strong>Phase 1 — Configure the Algorithm:</strong> The algorithm configuration starts randomized! Select the condition for the decision diamond and assign the <strong>YES</strong> and <strong>NO</strong> branches to the appropriate outcome boxes.</li>
+                    <li><strong>Phase 2 — Run &amp; Observe Traffic:</strong> Press <strong>Run PBR Checkpoint</strong>. 10 animated maxi-taxis, PTSC buses, police cruisers, and private cars approach the RFID scanner.</li>
+                    <li><strong>Automated Selection Tracing:</strong> Watch the glowing execution token flow automatically through the decision diamond, evaluate the condition, and illuminate the active branch.</li>
+                    <li><strong>Faulty Logic Feedback:</strong> If your branches are wired backwards, the computer faithfully follows your bad instructions! You will see the logic failure happen in real time and can click <strong>Repair Flowchart Logic</strong> to fix the system!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the checkpoint simulation and restart from Round 1?</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Simulator</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           DATASET: 10 DIVERSE TRINIDAD VEHICLES FOR PBR CHECKPOINT
+           ============================================================ */
+        const VEHICLE_DATASET = [
+            {
+                id: "veh_001",
+                name: "Route 2 Red-Band Maxi-Taxi",
+                type: "maxi",
+                icon: "🚐",
+                hasPass: true,
+                passLabel: "PBR PASS ✓",
+                expectedBranch: "YES",
+                description: "Authorised public transit maxi-taxi with valid Route 2 Arima-POS permit.",
+                svgGenerator: createMaxiTaxiSvg
+            },
+            {
+                id: "veh_002",
+                name: "Private Family Sedan",
+                type: "sedan",
+                icon: "🚗",
+                hasPass: false,
+                passLabel: "NO PBR PASS ✗",
+                expectedBranch: "NO",
+                description: "Private commuter car without a Priority Bus Route transit permit.",
+                svgGenerator: createPrivateSedanSvg
+            },
+            {
+                id: "veh_003",
+                name: "PTSC City Transit Bus",
+                type: "bus",
+                icon: "🚌",
+                hasPass: true,
+                passLabel: "PBR PASS ✓",
+                expectedBranch: "YES",
+                description: "Official Public Transport Service Corporation (PTSC) scheduled city bus.",
+                svgGenerator: createPtsBusSvg
+            },
+            {
+                id: "veh_004",
+                name: "Commercial Delivery Cargo Van",
+                type: "van",
+                icon: "🚚",
+                hasPass: false,
+                passLabel: "NO PBR PASS ✗",
+                expectedBranch: "NO",
+                description: "Private commercial delivery van without PBR peak-hour clearance.",
+                svgGenerator: createDeliveryVanSvg
+            },
+            {
+                id: "veh_005",
+                name: "Emergency Medical Ambulance",
+                type: "ambulance",
+                icon: "🚑",
+                hasPass: true,
+                passLabel: "PBR PASS ✓",
+                expectedBranch: "YES",
+                description: "First responder emergency vehicle with active priority transit beacon.",
+                svgGenerator: createAmbulanceSvg
+            },
+            {
+                id: "veh_006",
+                name: "Route 1 Yellow-Band Maxi-Taxi",
+                type: "maxi_yellow",
+                icon: "🚐",
+                hasPass: true,
+                passLabel: "PBR PASS ✓",
+                expectedBranch: "YES",
+                description: "Authorised transit maxi-taxi operating along the Route 1 Western transit corridor.",
+                svgGenerator: createYellowMaxiSvg
+            },
+            {
+                id: "veh_007",
+                name: "School Activity Minibus",
+                type: "school_bus",
+                icon: "🚐",
+                hasPass: false,
+                passLabel: "NO PBR PASS ✗",
+                expectedBranch: "NO",
+                description: "Secondary school extracurricular team bus without an active PBR pass.",
+                svgGenerator: createSchoolMinibusSvg
+            },
+            {
+                id: "veh_008",
+                name: "TTPS Highway Patrol Cruiser",
+                type: "police",
+                icon: "🚓",
+                hasPass: true,
+                passLabel: "PBR PASS ✓",
+                expectedBranch: "YES",
+                description: "Trinidad & Tobago Police Service highway response vehicle on patrol.",
+                svgGenerator: createPoliceCruiserSvg
+            },
+            {
+                id: "veh_009",
+                name: "Private Compact Hatchback",
+                type: "hatchback",
+                icon: "🚙",
+                hasPass: false,
+                passLabel: "NO PBR PASS ✗",
+                expectedBranch: "NO",
+                description: "Unauthorised private hatchback attempting to bypass highway traffic.",
+                svgGenerator: createHatchbackSvg
+            },
+            {
+                id: "veh_010",
+                name: "T&TEC Utility Service Truck",
+                type: "utility",
+                icon: "🚛",
+                hasPass: false,
+                passLabel: "NO PBR PASS ✗",
+                expectedBranch: "NO",
+                description: "Utility maintenance line truck operating off standard public roadways.",
+                svgGenerator: createUtilityTruckSvg
+            }
+        ];
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Inspect the selection construct above! The flowchart configuration has been randomized. Make sure the <strong>Decision Condition</strong>, <strong>YES branch</strong>, and <strong>NO branch</strong> are wired correctly to authorize transit vehicles and deny unauthorized cars, then click <strong>[Run PBR Checkpoint]</strong>!`;
+
+        /* Simulation State */
+        const state = {
+            phase: "config", // "config", "running", "completed"
+            vehicleIndex: 0,
+            vehiclesList: [],
+            evaluations: {}, // vehicleId -> { vehicle, executedBranch, outcomeAction, isCorrect }
+            score: 0,
+            attempts: 0,
+            streak: 0,
+            bestStreak: 0,
+            theme: "light",
+            isAnimating: false,
+            // User Configuration
+            configCondition: "correct",
+            configYesBranch: "allow",
+            configNoBranch: "deny",
+            isLogicValid: true
+        };
+
+        /* DOM Elements */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            stageHeading: document.getElementById("stageHeading"),
+            trafficStatusBadge: document.getElementById("trafficStatusBadge"),
+            ledStatusBoard: document.getElementById("ledStatusBoard"),
+            roadwaySvg: document.getElementById("roadwaySvg"),
+            animatedVehicleGroup: document.getElementById("animatedVehicleGroup"),
+            barrierArm: document.getElementById("barrierArm"),
+            barrierTipLight: document.getElementById("barrierTipLight"),
+            scannerLaserGroup: document.getElementById("scannerLaserGroup"),
+            scannerBeaconLight: document.getElementById("scannerBeaconLight"),
+            rfidSensorPad: document.getElementById("rfidSensorPad"),
+            flowchartSvg: document.getElementById("flowchartSvg"),
+            diamondText: document.getElementById("diamondText"),
+            diamondPoly: document.getElementById("diamondPoly"),
+            textOutcomeLeftTitle: document.getElementById("textOutcomeLeftTitle"),
+            textOutcomeLeftSub: document.getElementById("textOutcomeLeftSub"),
+            textOutcomeRightTitle: document.getElementById("textOutcomeRightTitle"),
+            textOutcomeRightSub: document.getElementById("textOutcomeRightSub"),
+            rectOutcomeLeft: document.getElementById("rectOutcomeLeft"),
+            rectOutcomeRight: document.getElementById("rectOutcomeRight"),
+            executionToken: document.getElementById("executionToken"),
+            vehicleCountText: document.getElementById("vehicleCountText"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            panelControlsTitle: document.getElementById("panelControlsTitle"),
+            configFormBlock: document.getElementById("configFormBlock"),
+            selectCondition: document.getElementById("selectCondition"),
+            selectYesBranch: document.getElementById("selectYesBranch"),
+            selectNoBranch: document.getElementById("selectNoBranch"),
+            runCheckpointBtn: document.getElementById("runCheckpointBtn"),
+            simActionButtons: document.getElementById("simActionButtons"),
+            repairFlowchartBtn: document.getElementById("repairFlowchartBtn"),
+            nextVehicleBtn: document.getElementById("nextVehicleBtn"),
+            finishCertificationBtn: document.getElementById("finishCertificationBtn"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Reset Explanation Box Helper (RULE 4.4) */
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+        }
+
+        /* Detect Browser Color Scheme (RULE 2.5) */
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        /* Shuffle Utility */
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        /* Randomize Flowchart Configuration on Startup & Reset */
+        function randomizeConfig() {
+            const conditions = ["correct", "wrong_color", "wrong_barrier"];
+            const yesOptions = ["allow", "deny"];
+            const noOptions = ["deny", "allow"];
+
+            const randCond = conditions[Math.floor(Math.random() * conditions.length)];
+            const randYes = yesOptions[Math.floor(Math.random() * yesOptions.length)];
+            const randNo = noOptions[Math.floor(Math.random() * noOptions.length)];
+
+            dom.selectCondition.value = randCond;
+            dom.selectYesBranch.value = randYes;
+            dom.selectNoBranch.value = randNo;
+
+            state.configCondition = randCond;
+            state.configYesBranch = randYes;
+            state.configNoBranch = randNo;
+
+            updateFlowchartDiagramPreview();
+        }
+
+        /* Init */
+        init();
+
+        function init() {
+            bindEvents();
+            loadState();
+            renderDashboard();
+
+            // Auto-open instructions modal on fresh launch
+            openModal();
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // Mandatory: No backdrop click dismissal for modals & drawer
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            // Configuration Form Changes
+            dom.selectCondition.addEventListener("change", updateFlowchartDiagramPreview);
+            dom.selectYesBranch.addEventListener("change", updateFlowchartDiagramPreview);
+            dom.selectNoBranch.addEventListener("change", updateFlowchartDiagramPreview);
+
+            // Action Buttons
+            dom.runCheckpointBtn.addEventListener("click", startTrafficSimulation);
+            dom.repairFlowchartBtn.addEventListener("click", switchToConfigMode);
+            dom.nextVehicleBtn.addEventListener("click", advanceToNextVehicle);
+            dom.finishCertificationBtn.addEventListener("click", () => showScreen("summary"));
+
+            // Real-time browser color scheme listener
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            // Lock outer body overflow in game mode
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        /* Update Flowchart Visuals in Real Time based on Dropdowns */
+        function updateFlowchartDiagramPreview() {
+            state.configCondition = dom.selectCondition.value;
+            state.configYesBranch = dom.selectYesBranch.value;
+            state.configNoBranch = dom.selectNoBranch.value;
+
+            // Update Diamond Text
+            if (state.configCondition === "correct") {
+                dom.diamondText.textContent = "Is vehicle authorised?";
+            } else if (state.configCondition === "wrong_color") {
+                dom.diamondText.textContent = "Is vehicle red?";
+            } else {
+                dom.diamondText.textContent = "Is barrier open?";
+            }
+
+            // Update Left Outcome Box (Wired to YES)
+            if (state.configYesBranch === "allow") {
+                dom.textOutcomeLeftTitle.textContent = "Allow Vehicle Through";
+                dom.textOutcomeLeftSub.textContent = "(Lift PBR Barrier)";
+                dom.rectOutcomeLeft.setAttribute("stroke", "#10b981");
+            } else {
+                dom.textOutcomeLeftTitle.textContent = "Deny PBR Access";
+                dom.textOutcomeLeftSub.textContent = "(Keep Barrier Closed)";
+                dom.rectOutcomeLeft.setAttribute("stroke", "#ef4444");
+            }
+
+            // Update Right Outcome Box (Wired to NO)
+            if (state.configNoBranch === "deny") {
+                dom.textOutcomeRightTitle.textContent = "Deny PBR Access";
+                dom.textOutcomeRightSub.textContent = "(Keep Barrier Closed)";
+                dom.rectOutcomeRight.setAttribute("stroke", "#ef4444");
+            } else {
+                dom.textOutcomeRightTitle.textContent = "Allow Vehicle Through";
+                dom.textOutcomeRightSub.textContent = "(Lift PBR Barrier)";
+                dom.rectOutcomeRight.setAttribute("stroke", "#10b981");
+            }
+        }
+
+        /* Switch back to Configuration Mode (When fixing faulty logic) */
+        function switchToConfigMode() {
+            state.phase = "config";
+            state.isAnimating = false;
+
+            dom.configFormBlock.style.display = "flex";
+            dom.simActionButtons.style.display = "none";
+            dom.panelControlsTitle.textContent = "Algorithm Configuration";
+
+            dom.stageHeading.textContent = "🛠️ Phase 1: Configure Decision Logic";
+            dom.trafficStatusBadge.textContent = "PBR Lane Scanner: Standby";
+            dom.ledStatusBoard.className = "led-status-board";
+            dom.ledStatusBoard.innerHTML = "<span>[ SENSOR READY - STANDBY ]</span>";
+
+            resetFlowchartHighlights();
+            lowerBarrier();
+
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = `
+                🔧 <strong>Repairing Flowchart Logic:</strong> Re-examine your selection construct. Ensure the <strong>YES</strong> branch opens the barrier for authorized transit and the <strong>NO</strong> branch denies access to unauthorized vehicles!
+            `;
+        }
+
+        /* START TRAFFIC SIMULATION (Phase 2) */
+        function startTrafficSimulation() {
+            state.phase = "running";
+            state.configCondition = dom.selectCondition.value;
+            state.configYesBranch = dom.selectYesBranch.value;
+            state.configNoBranch = dom.selectNoBranch.value;
+
+            // Check if student's logic is correct
+            state.isLogicValid = (
+                state.configCondition === "correct" &&
+                state.configYesBranch === "allow" &&
+                state.configNoBranch === "deny"
+            );
+
+            dom.configFormBlock.style.display = "none";
+            dom.simActionButtons.style.display = "flex";
+            dom.panelControlsTitle.textContent = "Traffic Checkpoint Simulation";
+
+            dom.stageHeading.textContent = "🚦 Phase 2: Live Traffic Execution";
+            dom.trafficStatusBadge.textContent = "Scanner: Active Traffic Monitoring";
+
+            processCurrentVehicle();
+        }
+
+        /* Process the current vehicle in queue */
+        function processCurrentVehicle() {
+            if (state.vehicleIndex >= state.vehiclesList.length) {
+                // Completed all 10 vehicles!
+                finishSimulationSequence();
+                return;
+            }
+
+            const currentVehicle = state.vehiclesList[state.vehicleIndex];
+            state.isAnimating = true;
+
+            // Reset UI states
+            dom.repairFlowchartBtn.style.display = "none";
+            dom.nextVehicleBtn.style.display = "none";
+            dom.finishCertificationBtn.style.display = "none";
+
+            resetFlowchartHighlights();
+            lowerBarrier();
+
+            // Render vehicle on SVG track
+            dom.animatedVehicleGroup.classList.remove("is-moving");
+            dom.animatedVehicleGroup.innerHTML = currentVehicle.svgGenerator(currentVehicle);
+            dom.animatedVehicleGroup.setAttribute("transform", "translate(-160, 92)");
+
+            // LED Board: Approaching
+            dom.ledStatusBoard.className = "led-status-board scanning";
+            dom.ledStatusBoard.innerHTML = `<span>[ DETECTING ${escapeHtml(currentVehicle.name.toUpperCase())}... ]</span>`;
+
+            dom.inspectorFeedbackBox.className = "feedback-card info";
+            dom.inspectorFeedbackBox.innerHTML = `
+                🚗 <strong>Vehicle Approaching:</strong> <em>${escapeHtml(currentVehicle.name)}</em> (${escapeHtml(currentVehicle.passLabel)}) enters the sensor pad...
+            `;
+
+            // Step 1: Vehicle drives to scanner pad (x: 230)
+            dom.animatedVehicleGroup.classList.add("is-moving");
+            animateVehiclePosition(-160, 230, 1100, () => {
+                dom.animatedVehicleGroup.classList.remove("is-moving");
+
+                // Step 2: Scanner scans RFID pass with animated laser & pulsing pad
+                dom.scannerLaserGroup.style.opacity = "1";
+                dom.scannerBeaconLight.setAttribute("fill", "#0284c7");
+                dom.rfidSensorPad.setAttribute("stroke", "#38bdf8");
+                playScannerSound();
+
+                setTimeout(() => {
+                    dom.scannerLaserGroup.style.opacity = "0";
+                    dom.scannerBeaconLight.setAttribute("fill", "#38bdf8");
+                    dom.rfidSensorPad.setAttribute("stroke", "#0284c7");
+
+                    const passText = currentVehicle.hasPass ? "PBR AUTHORISATION: YES" : "PBR AUTHORISATION: NO";
+                    dom.ledStatusBoard.innerHTML = `<span>[ ${passText} ]</span>`;
+
+                    // Directly execute automated algorithm flow
+                    executeAlgorithmFlow(currentVehicle);
+                }, 850);
+            });
+        }
+
+        /* EXECUTE ALGORITHM FLOW & SELECTION BRANCH TRACING */
+        function executeAlgorithmFlow(vehicle) {
+            highlightFlowLine("flow_start_to_input");
+            
+            // Move token from Start to Input to Diamond
+            animateExecutionToken([
+                { x: 330, y: 20 },
+                { x: 330, y: 90 },
+                { x: 330, y: 190 }
+            ], 600, () => {
+                highlightFlowLine("flow_input_to_diamond");
+                pulseDiamondNode(true);
+
+                setTimeout(() => {
+                    pulseDiamondNode(false);
+
+                    // Determine which branch the ALGORITHM ACTUALLY FOLLOWS based on student's wiring
+                    let executedBranch = "YES";
+                    let outcomeAction = "allow";
+
+                    if (state.configCondition === "correct") {
+                        executedBranch = vehicle.hasPass ? "YES" : "NO";
+                    } else if (state.configCondition === "wrong_color") {
+                        // "Is vehicle red?"
+                        const isRed = (vehicle.type === "maxi" || vehicle.type === "ambulance");
+                        executedBranch = isRed ? "YES" : "NO";
+                    } else {
+                        // "Is barrier open?" (initially false)
+                        executedBranch = "NO";
+                    }
+
+                    // Which outcome is wired to this executed branch?
+                    if (executedBranch === "YES") {
+                        outcomeAction = state.configYesBranch; // "allow" or "deny"
+                    } else {
+                        outcomeAction = state.configNoBranch; // "deny" or "allow"
+                    }
+
+                    executeBranchAnimation(vehicle, executedBranch, outcomeAction);
+                }, 700);
+            });
+        }
+
+        /* Animate the chosen branch in flowchart and execute physical road outcome */
+        function executeBranchAnimation(vehicle, executedBranch, outcomeAction) {
+            const isYesBranch = (executedBranch === "YES");
+            const branchLineId = isYesBranch ? "flow_diamond_to_yes" : "flow_diamond_to_no";
+            const outcomeStopLineId = isYesBranch ? "flow_yes_to_stop" : "flow_no_to_stop";
+            const branchClass = isYesBranch ? "yes-active" : "no-active";
+
+            const branchLine = document.getElementById(branchLineId);
+            if (branchLine) {
+                branchLine.classList.add(branchClass);
+            }
+
+            // Animate token along the branch to the outcome node, then to Stop
+            const tokenPath = isYesBranch ? [
+                { x: 330, y: 190 },
+                { x: 230, y: 190 },
+                { x: 140, y: 190 },
+                { x: 140, y: 255 },
+                { x: 140, y: 335 },
+                { x: 330, y: 335 }
+            ] : [
+                { x: 330, y: 190 },
+                { x: 430, y: 190 },
+                { x: 520, y: 190 },
+                { x: 520, y: 255 },
+                { x: 520, y: 335 },
+                { x: 330, y: 335 }
+            ];
+
+            animateExecutionToken(tokenPath, 850, () => {
+                const outcomeStopLine = document.getElementById(outcomeStopLineId);
+                if (outcomeStopLine) {
+                    outcomeStopLine.classList.add(branchClass);
+                }
+
+                // Check if physical road outcome is correct for this vehicle
+                const isPhysicallyCorrect = (vehicle.hasPass && outcomeAction === "allow") ||
+                                            (!vehicle.hasPass && outcomeAction === "deny");
+
+                // Record evaluation
+                state.evaluations[vehicle.id] = {
+                    vehicle,
+                    executedBranch,
+                    outcomeAction,
+                    isCorrect: isPhysicallyCorrect
+                };
+                state.attempts += 1;
+
+                if (isPhysicallyCorrect) {
+                    // Logic succeeded!
+                    state.score += 10;
+                    state.streak += 1;
+                    state.bestStreak = Math.max(state.bestStreak, state.streak);
+                    playAudioFeedback(true);
+                    updateScoreStats();
+
+                    if (outcomeAction === "allow") {
+                        // ACCESS ALLOWED -> Barrier lifts -> Vehicle drives straight through past gate
+                        liftBarrier();
+                        dom.ledStatusBoard.className = "led-status-board allowed";
+                        dom.ledStatusBoard.innerHTML = `<span>[ ✅ ACCESS ALLOWED - BARRIER OPEN ]</span>`;
+
+                        dom.inspectorFeedbackBox.className = "feedback-card success";
+                        dom.inspectorFeedbackBox.innerHTML = `
+                            ✅ <strong>Correct Branch Execution:</strong> <em>${escapeHtml(vehicle.name)}</em> has a valid permit (Condition = YES).
+                            The algorithm followed the <strong>YES</strong> branch to <strong>Allow Vehicle Through</strong>. The barrier opened and traffic proceeded smoothly!
+                        `;
+
+                        // Vehicle drives past checkpoint
+                        setTimeout(() => {
+                            dom.animatedVehicleGroup.classList.add("is-moving");
+                            animateVehiclePosition(230, 850, 1300, () => {
+                                dom.animatedVehicleGroup.classList.remove("is-moving");
+                                finalizeVehicleTurn();
+                            });
+                        }, 500);
+                    } else {
+                        // ACCESS DENIED -> Barrier stays down -> Flashing warning -> Vehicle flips horizontally & drives away (right to left)
+                        dom.ledStatusBoard.className = "led-status-board denied";
+                        dom.ledStatusBoard.innerHTML = `<span>[ ❌ PBR ACCESS NOT AUTHORISED ]</span>`;
+
+                        dom.inspectorFeedbackBox.className = "feedback-card success";
+                        dom.inspectorFeedbackBox.innerHTML = `
+                            ✅ <strong>Correct Branch Execution:</strong> <em>${escapeHtml(vehicle.name)}</em> has no permit (Condition = NO).
+                            The algorithm followed the <strong>NO</strong> branch to <strong>Deny Access</strong>. The barrier remained closed, and the vehicle turned around and drove away!
+                        `;
+
+                        // Vehicle activates hazard lights, flips horizontally, and drives away to the left
+                        setTimeout(() => {
+                            animateVehicleFlipAndExit(230, () => {
+                                finalizeVehicleTurn();
+                            });
+                        }, 500);
+                    }
+                } else {
+                    // FAULTY LOGIC ENCOUNTERED!
+                    state.streak = 0;
+                    playAudioFeedback(false);
+                    updateScoreStats();
+
+                    if (vehicle.hasPass && outcomeAction === "deny") {
+                        // Authorised vehicle was wrongly denied access because branches are reversed!
+                        dom.ledStatusBoard.className = "led-status-board denied";
+                        dom.ledStatusBoard.innerHTML = `<span>[ ❌ ACCESS DENIED - LOGIC ERROR ]</span>`;
+
+                        dom.inspectorFeedbackBox.className = "feedback-card warning";
+                        dom.inspectorFeedbackBox.innerHTML = `
+                            ⚠️ <strong>Faulty Algorithm Logic Encountered!</strong><br/>
+                            The vehicle (<em>${escapeHtml(vehicle.name)}</em>) was authorised (PBR PASS = YES), but the computer executed your <strong>YES</strong> branch—which leads to <strong>Deny Access</strong>!<br/>
+                            <em>Computers execute the exact instructions they are given. Click below to fix the flowchart!</em>
+                        `;
+
+                        // Vehicle stopped at barrier, cannot proceed
+                        dom.repairFlowchartBtn.style.display = "inline-flex";
+                        state.isAnimating = false;
+                    } else {
+                        // Unauthorised vehicle was wrongly let through!
+                        liftBarrier();
+                        dom.ledStatusBoard.className = "led-status-board denied";
+                        dom.ledStatusBoard.innerHTML = `<span>[ ⚠️ BREACH: UNAUTHORISED VEHICLE ]</span>`;
+
+                        dom.inspectorFeedbackBox.className = "feedback-card warning";
+                        dom.inspectorFeedbackBox.innerHTML = `
+                            ⚠️ <strong>Security Logic Fault!</strong><br/>
+                            An unauthorized vehicle with no permit (Condition = NO) was allowed through because your <strong>NO</strong> branch leads to <strong>Allow Vehicle Through</strong>!<br/>
+                            Click <strong>[Repair Flowchart Logic]</strong> to fix the branch connections.
+                        `;
+
+                        dom.repairFlowchartBtn.style.display = "inline-flex";
+                        state.isAnimating = false;
+                    }
+                }
+            });
+        }
+
+        function finalizeVehicleTurn() {
+            state.isAnimating = false;
+            state.vehicleIndex += 1;
+            updateScoreStats();
+            renderHistoryList();
+
+            if (state.vehicleIndex < state.vehiclesList.length) {
+                dom.nextVehicleBtn.style.display = "inline-flex";
+                dom.nextVehicleBtn.textContent = `Next Vehicle (${state.vehicleIndex + 1}/${state.vehiclesList.length}) →`;
+            } else {
+                dom.finishCertificationBtn.style.display = "inline-flex";
+            }
+        }
+
+        function advanceToNextVehicle() {
+            processCurrentVehicle();
+        }
+
+        function finishSimulationSequence() {
+            state.phase = "completed";
+            dom.stageHeading.textContent = "🎉 Checkpoint Running Successfully!";
+            dom.trafficStatusBadge.textContent = "All 10 Vehicles Evaluated";
+            dom.ledStatusBoard.className = "led-status-board allowed";
+            dom.ledStatusBoard.innerHTML = `<span>[ SYSTEM OPERATIONAL - 100% VERIFIED ]</span>`;
+
+            dom.inspectorFeedbackBox.className = "feedback-card success";
+            dom.inspectorFeedbackBox.innerHTML = `
+                👑 <strong>All 10 Vehicles Processed!</strong> You built, tested, and verified a working selection construct. Click <strong>[Finish Certification]</strong> to view your official score report!
+            `;
+
+            dom.finishCertificationBtn.style.display = "inline-flex";
+        }
+
+        /* Barrier Animations */
+        function liftBarrier() {
+            dom.barrierArm.style.transform = "rotate(-90deg)";
+            dom.barrierTipLight.setAttribute("fill", "#10b981");
+        }
+
+        function lowerBarrier() {
+            dom.barrierArm.style.transform = "rotate(0deg)";
+            dom.barrierTipLight.setAttribute("fill", "#ef4444");
+        }
+
+        /* SVG Vehicle Straight Translation (Forward: Left to Right) */
+        function animateVehiclePosition(startX, endX, duration, onComplete) {
+            const startTime = performance.now();
+
+            function frame(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // Smooth easeInOutQuad
+                const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                const currentX = startX + (endX - startX) * ease;
+
+                dom.animatedVehicleGroup.setAttribute("transform", `translate(${currentX}, 92)`);
+
+                if (progress < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    if (onComplete) onComplete();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        /* DENIED VEHICLE: HORIZONTALLY FLIP AND DRIVE AWAY RIGHT TO LEFT */
+        function animateVehicleFlipAndExit(startX, onComplete) {
+            // Activate amber turn indicator / hazard blinkers on vehicle
+            const blinkerEl = dom.animatedVehicleGroup.querySelector(".turn-blinker");
+            if (blinkerEl) {
+                blinkerEl.classList.add("blinker-active");
+            }
+
+            const duration = 2100;
+            const startTime = performance.now();
+            const endX = -220;
+
+            function frame(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                if (progress < 0.22) {
+                    // Phase 1: Flip horizontally in place (scaleX smoothly goes 1 -> -1)
+                    const pFlip = progress / 0.22;
+                    const scaleX = 1 - 2 * pFlip; // from 1 down to -1
+                    const pivotX = startX + 65;
+                    dom.animatedVehicleGroup.setAttribute(
+                        "transform",
+                        `translate(${pivotX}, 92) scale(${scaleX}, 1) translate(-65, 0)`
+                    );
+                } else {
+                    // Phase 2: Drive away from right to left (scaleX = -1, facing left)
+                    dom.animatedVehicleGroup.classList.add("is-moving");
+                    const pDrive = (progress - 0.22) / 0.78;
+                    // Smooth easeIn for vehicle accelerating away to the left
+                    const ease = pDrive * pDrive;
+                    const currentX = startX + (endX - startX) * ease;
+                    const pivotX = currentX + 65;
+                    dom.animatedVehicleGroup.setAttribute(
+                        "transform",
+                        `translate(${pivotX}, 92) scale(-1, 1) translate(-65, 0)`
+                    );
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    dom.animatedVehicleGroup.classList.remove("is-moving");
+                    if (blinkerEl) blinkerEl.classList.remove("blinker-active");
+                    if (onComplete) onComplete();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        /* Flowchart Execution Token Smooth Animation */
+        function animateExecutionToken(waypoints, duration, onComplete) {
+            if (!waypoints || waypoints.length === 0) return;
+
+            dom.executionToken.style.opacity = "1";
+            const startTime = performance.now();
+            const segmentDuration = duration / (waypoints.length - 1);
+
+            function frame(currentTime) {
+                const elapsed = currentTime - startTime;
+                const totalProgress = Math.min(elapsed / duration, 1);
+
+                const currentSegment = Math.min(Math.floor(elapsed / segmentDuration), waypoints.length - 2);
+                const segmentElapsed = (elapsed - currentSegment * segmentDuration) / segmentDuration;
+                const segmentProgress = Math.min(Math.max(segmentElapsed, 0), 1);
+
+                const p1 = waypoints[currentSegment];
+                const p2 = waypoints[currentSegment + 1];
+
+                if (p1 && p2) {
+                    const cx = p1.x + (p2.x - p1.x) * segmentProgress;
+                    const cy = p1.y + (p2.y - p1.y) * segmentProgress;
+                    dom.executionToken.setAttribute("cx", cx);
+                    dom.executionToken.setAttribute("cy", cy);
+                }
+
+                if (totalProgress < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    if (onComplete) onComplete();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        /* Flowchart Highlighting Helpers */
+        function highlightFlowLine(lineId) {
+            const el = document.getElementById(lineId);
+            if (el) {
+                el.classList.add("active");
+            }
+        }
+
+        function pulseDiamondNode(isPulse) {
+            if (isPulse) {
+                dom.diamondPoly.classList.add("evaluating");
+            } else {
+                dom.diamondPoly.classList.remove("evaluating");
+            }
+        }
+
+        function resetFlowchartHighlights() {
+            const lines = [
+                "flow_start_to_input",
+                "flow_input_to_diamond",
+                "flow_diamond_to_yes",
+                "flow_diamond_to_no",
+                "flow_yes_to_stop",
+                "flow_no_to_stop"
+            ];
+            lines.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.className.baseVal = "fc-line";
+                }
+            });
+            pulseDiamondNode(false);
+            dom.executionToken.style.opacity = "0";
+            dom.executionToken.setAttribute("cx", "330");
+            dom.executionToken.setAttribute("cy", "20");
+        }
+
+        /* Stats & Score Render */
+        function updateScoreStats() {
+            const totalVehicles = VEHICLE_DATASET.length;
+            const processedCount = Math.min(state.vehicleIndex, totalVehicles);
+            const pct = Math.round((processedCount / totalVehicles) * 100);
+
+            dom.vehicleCountText.textContent = `${processedCount} / ${totalVehicles} Vehicles`;
+            dom.progressPercent.textContent = `${pct}% Complete`;
+            dom.progressFillBar.style.width = `${pct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            const correctEvals = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = state.attempts === 0 ? 0 : Math.round((correctEvals / state.attempts) * 100);
+            dom.accuracyVal.textContent = `${accuracy}%`;
+        }
+
+        function renderDashboard() {
+            updateFlowchartDiagramPreview();
+            updateScoreStats();
+        }
+
+        /* SUMMARY COMPLETION SCREEN */
+        function renderSummaryScreen() {
+            const total = VEHICLE_DATASET.length;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = state.attempts === 0 ? 0 : Math.round((correctCount / state.attempts) * 100);
+
+            if (dom.summaryScoreVal) dom.summaryScoreVal.textContent = state.score;
+            if (dom.summaryAccuracyVal) dom.summaryAccuracyVal.textContent = `${accuracy}%`;
+            if (dom.summaryStreakVal) dom.summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            if (dom.summaryCorrectVal) dom.summaryCorrectVal.textContent = `${correctCount} / ${total}`;
+
+            if (accuracy >= 85) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "Master Algorithm Architect";
+                dom.badgeDesc.textContent = `Flawless execution! You achieved ${accuracy}% accuracy across all 10 PBR vehicles. You thoroughly understand selection constructs and flowchart decision diamonds.`;
+            } else if (accuracy >= 65) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Traffic Logic Analyst";
+                dom.badgeDesc.textContent = `Great work! You scored ${accuracy}% accuracy (${correctCount}/${total} correct). Review the branch execution breakdown below.`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Algorithm Trainee";
+                dom.badgeDesc.textContent = `You completed the PBR simulation with ${accuracy}% accuracy. Practice configuring and testing decision symbols to master conditional branching!`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+            VEHICLE_DATASET.forEach(v => {
+                const evalData = state.evaluations[v.id] || {};
+                const isEvaluated = !!state.evaluations[v.id];
+                const isCorrect = evalData.isCorrect === true;
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">${v.icon} ${escapeHtml(v.name)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'} (${escapeHtml(v.passLabel)} → Target: ${escapeHtml(v.expectedBranch)} Branch)
+                        </span>
+                    </div>
+                    <p style="margin:4px 0 0; color:var(--text-soft); font-size:0.9rem;">${escapeHtml(v.description)}</p>
+                `;
+                dom.summaryDetailsList.appendChild(card);
+            });
+        }
+
+        /* REVIEW MEMORY DRAWER LIST */
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedList = VEHICLE_DATASET.filter(v => state.evaluations[v.id]);
+
+            if (evaluatedList.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:16px; color:var(--muted); text-align:center;">No vehicle decisions evaluated yet. Run the checkpoint simulation to record traces!</div>`;
+                return;
+            }
+
+            evaluatedList.forEach(v => {
+                const evalData = state.evaluations[v.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const item = document.createElement("div");
+                item.className = "summary-item-card";
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">${v.icon} ${escapeHtml(v.name)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Incorrect Branch Logic'}
+                        </span>
+                    </div>
+                    <div style="font-size:0.86rem; color:var(--text-soft); margin-top:4px;">
+                        <strong>Pass RFID:</strong> ${escapeHtml(v.passLabel)} | <strong>Executed Path:</strong> ${escapeHtml(evalData.executedBranch || v.expectedBranch)} Branch → ${evalData.outcomeAction === 'allow' ? 'Barrier Lifted' : 'Barrier Kept Closed (Vehicle Turned Around)'}
+                    </div>
+                `;
+                dom.historyList.appendChild(item);
+            });
+        }
+
+        /* Modal & Drawer Controls */
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try {
+                sessionStorage.setItem("user_toggled_theme", state.theme);
+            } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen toggle failed", err);
+            }
+        }
+
+        /* Reset Simulation */
+        function confirmReset() {
+            closeResetModal();
+
+            state.vehiclesList = shuffleArray(VEHICLE_DATASET);
+            state.phase = "config";
+            state.vehicleIndex = 0;
+            state.evaluations = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.isAnimating = false;
+
+            randomizeConfig();
+            switchToConfigMode();
+            resetExplanationBox();
+            renderDashboard();
+            showScreen("home");
+        }
+
+        /* Fresh Launch Loader (RULE 4.5) */
+        function loadState() {
+            state.vehiclesList = shuffleArray(VEHICLE_DATASET);
+            state.phase = "config";
+            state.vehicleIndex = 0;
+            state.evaluations = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.isAnimating = false;
+
+            randomizeConfig();
+            resetExplanationBox();
+
+            // Clear legacy stored theme key
+            try {
+                localStorage.removeItem("pbr_checkpoint_theme");
+            } catch (e) {}
+
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+        }
+
+        /* Web Audio API Feedback Sounds (Offline Synthesizer) */
+        function playAudioFeedback(isSuccess) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.value = isSuccess ? 587.33 : 220;
+                gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (isSuccess ? 0.25 : 0.3));
+
+                osc.start();
+                osc.stop(ctx.currentTime + (isSuccess ? 0.26 : 0.31));
+            } catch (e) {}
+        }
+
+        function playScannerSound() {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15);
+
+                gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            } catch (e) {}
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        /* ============================================================
+           SVG VEHICLE ASSET GENERATORS (10 DIVERSE TRINIDAD VEHICLES)
+           ============================================================ */
+
+        // 1. Route 2 Red-and-White Maxi-Taxi
+        function createMaxiTaxiSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="135,28 175,20 175,44 135,36" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(26, -24)">
+                    <rect x="0" y="0" width="88" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="44" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <rect x="10" y="0" width="125" height="42" rx="7" fill="#f8fafc" stroke="#334155" stroke-width="2" />
+                <rect x="10" y="24" width="125" height="8" fill="#ef4444" />
+                <rect x="10" y="32" width="125" height="3" fill="#f59e0b" />
+                <rect x="22" y="6" width="22" height="14" rx="2" fill="#38bdf8" opacity="0.85" />
+                <rect x="48" y="6" width="24" height="14" rx="2" fill="#38bdf8" opacity="0.85" />
+                <rect x="76" y="6" width="24" height="14" rx="2" fill="#38bdf8" opacity="0.85" />
+                <rect x="104" y="6" width="18" height="14" rx="2" fill="#38bdf8" opacity="0.85" />
+                <rect x="131" y="20" width="5" height="12" rx="2" fill="#fbbf24" />
+                <line x1="125" y1="36" x2="134" y2="36" stroke="#94a3b8" stroke-width="2" />
+                <circle cx="132" cy="16" r="3.5" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(32, 42)">
+                    <circle cx="0" cy="0" r="10" fill="#0f172a" stroke="#64748b" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-8" y1="0" x2="8" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-8" x2="0" y2="8" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+                <g transform="translate(108, 42)">
+                    <circle cx="0" cy="0" r="10" fill="#0f172a" stroke="#64748b" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-8" y1="0" x2="8" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-8" x2="0" y2="8" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+            `;
+        }
+
+        // 2. Private Family Sedan
+        function createPrivateSedanSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="125,32 165,24 165,46 125,40" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(20, -24)">
+                    <rect x="0" y="0" width="94" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="47" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <path d="M 5 32 L 20 16 L 90 16 L 115 32 L 125 32 L 125 40 L 5 40 Z" fill="#64748b" stroke="#1e293b" stroke-width="2" />
+                <path d="M 28 19 L 52 19 L 52 30 L 16 30 Z" fill="#bae6fd" opacity="0.9" />
+                <path d="M 56 19 L 84 19 L 98 30 L 56 30 Z" fill="#bae6fd" opacity="0.9" />
+                <polygon points="120,33 125,33 123,38 118,38" fill="#fef08a" />
+                <circle cx="123" cy="28" r="3" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(30, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#ffffff" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#ffffff" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#ffffff" />
+                    </g>
+                </g>
+                <g transform="translate(100, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#ffffff" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#ffffff" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#ffffff" />
+                    </g>
+                </g>
+            `;
+        }
+
+        // 3. PTSC City Transit Bus
+        function createPtsBusSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="148,24 195,16 195,48 148,36" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(35, -24)">
+                    <rect x="0" y="0" width="88" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="44" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <rect x="5" y="-5" width="145" height="47" rx="8" fill="#0284c7" stroke="#0c4a6e" stroke-width="2" />
+                <rect x="5" y="24" width="145" height="8" fill="#f8fafc" />
+                <rect x="110" y="-1" width="34" height="8" rx="2" fill="#0f172a" />
+                <text x="127" y="6" font-size="6" fill="#f59e0b" font-weight="bold" text-anchor="middle">POS EXP</text>
+                <rect x="18" y="2" width="18" height="16" rx="2" fill="#e0f2fe" opacity="0.9" />
+                <rect x="40" y="2" width="22" height="16" rx="2" fill="#e0f2fe" opacity="0.9" />
+                <rect x="66" y="2" width="22" height="16" rx="2" fill="#e0f2fe" opacity="0.9" />
+                <rect x="92" y="2" width="22" height="16" rx="2" fill="#e0f2fe" opacity="0.9" />
+                <rect x="118" y="2" width="24" height="16" rx="2" fill="#e0f2fe" opacity="0.9" />
+                <circle cx="146" cy="18" r="3.5" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(35, 42)">
+                    <circle cx="0" cy="0" r="11" fill="#0f172a" stroke="#94a3b8" stroke-width="2.5" />
+                    <g class="spin-wheel">
+                        <line x1="-9" y1="0" x2="9" y2="0" stroke="#cbd5e1" stroke-width="1.8" />
+                        <line x1="0" y1="-9" x2="0" y2="9" stroke="#cbd5e1" stroke-width="1.8" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+                <g transform="translate(120, 42)">
+                    <circle cx="0" cy="0" r="11" fill="#0f172a" stroke="#94a3b8" stroke-width="2.5" />
+                    <g class="spin-wheel">
+                        <line x1="-9" y1="0" x2="9" y2="0" stroke="#cbd5e1" stroke-width="1.8" />
+                        <line x1="0" y1="-9" x2="0" y2="9" stroke="#cbd5e1" stroke-width="1.8" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+            `;
+        }
+
+        // 4. Commercial Delivery Cargo Van
+        function createDeliveryVanSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="125,28 168,20 168,44 125,38" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(20, -24)">
+                    <rect x="0" y="0" width="94" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="47" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <rect x="10" y="2" width="80" height="38" fill="#d97706" stroke="#78350f" stroke-width="2" />
+                <path d="M 90 14 L 115 14 L 125 28 L 125 40 L 90 40 Z" fill="#d97706" stroke="#78350f" stroke-width="2" />
+                <polygon points="94,18 112,18 120,28 94,28" fill="#bae6fd" opacity="0.9" />
+                <text x="50" y="24" font-size="9" fill="#fef3c7" font-weight="bold" text-anchor="middle">CARGO EXPRESS</text>
+                <circle cx="123" cy="24" r="3" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(35, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#cbd5e1" />
+                    </g>
+                </g>
+                <g transform="translate(105, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#cbd5e1" />
+                    </g>
+                </g>
+            `;
+        }
+
+        // 5. Emergency Medical Ambulance
+        function createAmbulanceSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="125,28 168,20 168,44 125,38" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(20, -24)">
+                    <rect x="0" y="0" width="88" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="44" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <g transform="translate(92, -4)">
+                    <rect x="0" y="0" width="8" height="6" rx="2" fill="#ef4444" class="siren-red" />
+                    <rect x="9" y="0" width="8" height="6" rx="2" fill="#38bdf8" class="siren-blue" />
+                </g>
+                <rect x="8" y="2" width="82" height="38" fill="#ffffff" stroke="#94a3b8" stroke-width="2" />
+                <path d="M 90 14 L 115 14 L 125 28 L 125 40 L 90 40 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2" />
+                <rect x="8" y="26" width="117" height="5" fill="#ef4444" />
+                <g transform="translate(48, 16)">
+                    <rect x="-3" y="-8" width="6" height="16" fill="#ef4444" />
+                    <rect x="-8" y="-3" width="16" height="6" fill="#ef4444" />
+                </g>
+                <polygon points="94,18 112,18 120,28 94,28" fill="#7dd3fc" opacity="0.9" />
+                <circle cx="123" cy="24" r="3" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(32, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#cbd5e1" />
+                    </g>
+                </g>
+                <g transform="translate(105, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#cbd5e1" />
+                    </g>
+                </g>
+            `;
+        }
+
+        // 6. Route 1 Yellow-Band Maxi-Taxi
+        function createYellowMaxiSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="135,28 175,20 175,44 135,36" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(26, -24)">
+                    <rect x="0" y="0" width="88" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="44" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <rect x="10" y="0" width="125" height="42" rx="7" fill="#f8fafc" stroke="#334155" stroke-width="2" />
+                <rect x="10" y="24" width="125" height="9" fill="#f59e0b" />
+                <rect x="10" y="33" width="125" height="3" fill="#10b981" />
+                <rect x="22" y="6" width="22" height="14" rx="2" fill="#38bdf8" opacity="0.85" />
+                <rect x="48" y="6" width="24" height="14" rx="2" fill="#38bdf8" opacity="0.85" />
+                <rect x="76" y="6" width="24" height="14" rx="2" fill="#38bdf8" opacity="0.85" />
+                <rect x="104" y="6" width="18" height="14" rx="2" fill="#38bdf8" opacity="0.85" />
+                <circle cx="132" cy="16" r="3.5" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(32, 42)">
+                    <circle cx="0" cy="0" r="10" fill="#0f172a" stroke="#64748b" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-8" y1="0" x2="8" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-8" x2="0" y2="8" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+                <g transform="translate(108, 42)">
+                    <circle cx="0" cy="0" r="10" fill="#0f172a" stroke="#64748b" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-8" y1="0" x2="8" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-8" x2="0" y2="8" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+            `;
+        }
+
+        // 7. School Activity Minibus
+        function createSchoolMinibusSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="135,28 175,20 175,44 135,36" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(26, -24)">
+                    <rect x="0" y="0" width="94" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="47" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <rect x="10" y="0" width="125" height="42" rx="7" fill="#fbbf24" stroke="#b45309" stroke-width="2" />
+                <rect x="10" y="24" width="125" height="6" fill="#1e293b" />
+                <text x="65" y="20" font-size="8" fill="#1e293b" font-weight="bold" text-anchor="middle">SCHOOL BUS</text>
+                <rect x="22" y="5" width="20" height="12" rx="2" fill="#bae6fd" opacity="0.9" />
+                <rect x="46" y="5" width="20" height="12" rx="2" fill="#bae6fd" opacity="0.9" />
+                <rect x="70" y="5" width="20" height="12" rx="2" fill="#bae6fd" opacity="0.9" />
+                <circle cx="132" cy="16" r="3.5" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(32, 42)">
+                    <circle cx="0" cy="0" r="10" fill="#0f172a" stroke="#64748b" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-8" y1="0" x2="8" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-8" x2="0" y2="8" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+                <g transform="translate(108, 42)">
+                    <circle cx="0" cy="0" r="10" fill="#0f172a" stroke="#64748b" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-8" y1="0" x2="8" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-8" x2="0" y2="8" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+            `;
+        }
+
+        // 8. TTPS Police Patrol Cruiser
+        function createPoliceCruiserSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="125,32 165,24 165,46 125,40" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(20, -24)">
+                    <rect x="0" y="0" width="94" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="47" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <!-- Police Lightbar -->
+                <g transform="translate(50, 11)">
+                    <rect x="0" y="0" width="10" height="4" fill="#38bdf8" class="siren-blue" />
+                    <rect x="10" y="0" width="10" height="4" fill="#ef4444" class="siren-red" />
+                </g>
+                <path d="M 5 32 L 20 16 L 90 16 L 115 32 L 125 32 L 125 40 L 5 40 Z" fill="#1e3a8a" stroke="#0f172a" stroke-width="2" />
+                <rect x="35" y="24" width="45" height="16" fill="#f8fafc" />
+                <text x="57" y="34" font-size="7" fill="#1e3a8a" font-weight="900" text-anchor="middle">POLICE</text>
+                <path d="M 28 19 L 52 19 L 52 30 L 16 30 Z" fill="#bae6fd" opacity="0.9" />
+                <path d="M 56 19 L 84 19 L 98 30 L 56 30 Z" fill="#bae6fd" opacity="0.9" />
+                <circle cx="123" cy="28" r="3" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(30, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#ffffff" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#ffffff" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#ffffff" />
+                    </g>
+                </g>
+                <g transform="translate(100, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#ffffff" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#ffffff" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#ffffff" />
+                    </g>
+                </g>
+            `;
+        }
+
+        // 9. Compact Hatchback
+        function createHatchbackSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="120,32 155,24 155,46 120,40" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(15, -24)">
+                    <rect x="0" y="0" width="94" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="47" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <path d="M 12 32 L 28 16 L 82 16 L 110 32 L 118 32 L 118 40 L 12 40 Z" fill="#0ea5e9" stroke="#0369a1" stroke-width="2" />
+                <path d="M 32 19 L 54 19 L 54 30 L 22 30 Z" fill="#e0f2fe" opacity="0.9" />
+                <path d="M 58 19 L 78 19 L 94 30 L 58 30 Z" fill="#e0f2fe" opacity="0.9" />
+                <circle cx="116" cy="28" r="3" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(32, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#ffffff" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#ffffff" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#ffffff" />
+                    </g>
+                </g>
+                <g transform="translate(95, 40)">
+                    <circle cx="0" cy="0" r="9" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#ffffff" stroke-width="1.5" />
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#ffffff" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="3" fill="#ffffff" />
+                    </g>
+                </g>
+            `;
+        }
+
+        // 10. T&TEC Utility Service Truck
+        function createUtilityTruckSvg(v) {
+            const badgeColor = v.hasPass ? '#10b981' : '#ef4444';
+            return `
+                <polygon points="128,30 168,22 168,46 128,38" fill="rgba(254, 240, 138, 0.25)" />
+                <g transform="translate(20, -24)">
+                    <rect x="0" y="0" width="94" height="18" rx="5" fill="#0f172a" stroke="${badgeColor}" stroke-width="2" />
+                    <text x="47" y="13" font-size="9" fill="${badgeColor}" font-weight="bold" text-anchor="middle">${v.passLabel}</text>
+                </g>
+                <!-- Utility crane ladder arm -->
+                <line x1="20" y1="4" x2="85" y2="4" stroke="#94a3b8" stroke-width="3" />
+                <line x1="20" y1="0" x2="85" y2="0" stroke="#94a3b8" stroke-width="3" />
+                <rect x="8" y="8" width="76" height="32" fill="#ea580c" stroke="#9a3412" stroke-width="2" />
+                <path d="M 84 16 L 112 16 L 126 28 L 126 40 L 84 40 Z" fill="#ea580c" stroke="#9a3412" stroke-width="2" />
+                <text x="46" y="26" font-size="8" fill="#ffedd5" font-weight="bold" text-anchor="middle">UTILITY LINE</text>
+                <polygon points="88,20 108,20 118,28 88,28" fill="#bae6fd" opacity="0.9" />
+                <circle cx="123" cy="24" r="3" fill="#f59e0b" class="turn-blinker" />
+                <g transform="translate(32, 40)">
+                    <circle cx="0" cy="0" r="10" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-8" y1="0" x2="8" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-8" x2="0" y2="8" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+                <g transform="translate(105, 40)">
+                    <circle cx="0" cy="0" r="10" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                    <g class="spin-wheel">
+                        <line x1="-8" y1="0" x2="8" y2="0" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="0" y1="-8" x2="0" y2="8" stroke="#cbd5e1" stroke-width="1.5" />
+                        <circle cx="0" cy="0" r="4" fill="#cbd5e1" />
+                    </g>
+                </g>
+            `;
+        }
+    </script>
+</body>
+
+</html>
