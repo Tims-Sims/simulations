@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 2 Build the Shot — Interactive Storyboard Lab</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 2 INFORMATION TECHNOLOGY — BUILD THE SHOT
+           Single-file HTML/CSS/JS - Offline Friendly
+           Trinidad and Tobago Secondary Schools — IT Computer Lab
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Connection & Status Colors */
+            --dot-color: #0ea5e9;
+            --dot-glow: rgba(14, 165, 233, 0.5);
+
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+
+            /* Storyboard Studio Specific Colors */
+            --studio-frame-bg: #0f172a;
+            --studio-screen-bg: #1e293b;
+            --studio-viewport-border: #334155;
+            --component-visual: #38bdf8;
+            --component-action: #a855f7;
+            --component-audio: #f59e0b;
+            --component-timing: #10b981;
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+
+            --studio-frame-bg: #e2e8f0;
+            --studio-screen-bg: #ffffff;
+            --studio-viewport-border: #cbd5e1;
+            --component-visual: #0284c7;
+            --component-action: #9333ea;
+            --component-audio: #d97706;
+            --component-timing: #059669;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* Lock outer window when in game mode so ONLY internal containers scroll */
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1320px;
+            margin: 0 auto;
+            height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Topbar Header (Sticky & Persistent) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            flex-shrink: 0;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn,
+        .mode-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .hero-card {
+            width: min(100%, 880px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(28px, 4vw, 48px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: clamp(2.1rem, 4vw, 3.1rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 740px);
+            margin: 0 auto 28px;
+            color: var(--text-soft);
+            font-size: 1.08rem;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            margin: 28px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Interactive Stage / 25% Right Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 370px;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Pane (75%): Interactive Storyboard Studio */
+        .canvas-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        .canvas-header {
+            padding: 12px 20px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .scenario-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .storyboard-studio-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background: radial-gradient(circle at top center, color-mix(in srgb, var(--bg-soft) 40%, var(--surface)), var(--bg));
+        }
+
+        /* The Main Storyboard Frame Box (16:9 Visual Canvas + Controls) */
+        .storyboard-frame-card {
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .frame-header-bar {
+            padding: 10px 18px;
+            background: var(--surface-3);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+
+        /* 1. Visual Stage Area */
+        .visual-viewport-canvas {
+            height: 270px;
+            background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 65%, #86efac 65%, #4ade80 100%);
+            border-bottom: 2px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        html[data-theme="dark"] .visual-viewport-canvas {
+            background: linear-gradient(180deg, #0c4a6e 0%, #075985 65%, #064e3b 65%, #065f46 100%);
+        }
+
+        .school-backdrop-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Interactive Props inside the Visual Frame */
+        .visual-stage-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 24px 32px 20px;
+            pointer-events: auto;
+        }
+
+        .placed-prop-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            user-select: none;
+            position: relative;
+        }
+
+        .placed-prop-item:hover {
+            transform: scale(1.1);
+        }
+
+        .placed-prop-item.actor-student {
+            position: absolute;
+            bottom: 20px;
+            left: 18%;
+            transition: left 1s ease-in-out, transform 0.3s ease;
+        }
+
+        .placed-prop-item.actor-litter {
+            position: absolute;
+            bottom: 24px;
+            left: 48%;
+        }
+
+        .placed-prop-item.actor-bin {
+            position: absolute;
+            bottom: 20px;
+            right: 18%;
+        }
+
+        .prop-emoji-icon {
+            font-size: 3.2rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .prop-label-tag {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.65);
+            color: #ffffff;
+        }
+
+        /* Props Dock (Available Draggable/Clickable Props) */
+        .props-dock-row {
+            padding: 12px 18px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow-x: auto;
+        }
+
+        .props-dock-label {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--component-visual);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .prop-toggle-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            color: var(--text-soft);
+            font-size: 0.84rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .prop-toggle-chip:hover {
+            border-color: var(--component-visual);
+            color: var(--text);
+        }
+
+        .prop-toggle-chip.placed {
+            background: color-mix(in srgb, var(--component-visual) 16%, var(--surface-2));
+            border-color: var(--component-visual);
+            color: var(--component-visual);
+        }
+
+        /* 2. Action Area */
+        .storyboard-section-block {
+            padding: 14px 18px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-tag-heading {
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .action-slot-dropzone {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 2px dashed var(--border);
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-soft);
+            transition: all 0.2s ease;
+        }
+
+        .action-slot-dropzone.assigned {
+            border-style: solid;
+            border-color: var(--component-action);
+            background: color-mix(in srgb, var(--component-action) 12%, var(--surface-2));
+            color: var(--text);
+        }
+
+        /* 3. Audio Timeline Strip */
+        .audio-strip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 4px 0;
+        }
+
+        .audio-chip-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            color: var(--text-soft);
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .audio-chip-item:hover {
+            border-color: var(--component-audio);
+            color: var(--text);
+        }
+
+        .audio-chip-item.active {
+            background: color-mix(in srgb, var(--component-audio) 16%, var(--surface-2));
+            border-color: var(--component-audio);
+            color: var(--component-audio);
+        }
+
+        /* 4. Timing Duration Slider Strip */
+        .timing-control-strip {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .slider-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .timing-slider-input {
+            flex: 1;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--surface-3);
+            outline: none;
+            cursor: pointer;
+            accent-color: var(--component-timing);
+        }
+
+        .duration-badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--component-timing) 16%, var(--surface));
+            border: 1.5px solid var(--component-timing);
+            color: var(--component-timing);
+            font-weight: 800;
+            font-size: 0.88rem;
+            min-width: 90px;
+            text-align: center;
+        }
+
+        /* Live Animated Preview Overlay / Playback Banner */
+        .preview-feedback-alert {
+            position: absolute;
+            top: 14px;
+            left: 20px;
+            right: 20px;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            z-index: 30;
+            animation: slideDown 0.25s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-12px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .preview-feedback-alert.info {
+            background: color-mix(in srgb, var(--accent) 20%, var(--surface));
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .preview-feedback-alert.success {
+            background: var(--safe-bg);
+            border-color: var(--safe-border);
+            color: var(--safe-color);
+        }
+
+        .preview-feedback-alert.warning {
+            background: var(--danger-bg);
+            border-color: var(--danger-border);
+            color: var(--danger-color);
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width) */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-title {
+            font-size: 0.98rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .component-checklist-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .comp-status-chip {
+            padding: 8px 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .comp-status-chip.ready {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+            color: var(--safe-color);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-box {
+            padding: 10px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Action Cards Selector Dock in Right Panel */
+        .action-cards-dock {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-select-btn {
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            color: var(--text-soft);
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .action-select-btn:hover {
+            border-color: var(--component-action);
+            color: var(--text);
+        }
+
+        .action-select-btn.active {
+            border-color: var(--component-action);
+            background: color-mix(in srgb, var(--component-action) 16%, var(--surface-2));
+            color: var(--text);
+        }
+
+        /* Feedback Explanation Card */
+        .feedback-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(24px, 4vw, 42px);
+            margin: 0 auto;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .badge-container {
+            margin: 20px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 32px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3.5rem;
+        }
+
+        .badge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 14px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.76rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        /* Completed Storyboard Callout Breakdown */
+        .storyboard-breakdown-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .callout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .callout-box {
+            padding: 14px;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--border);
+        }
+
+        .callout-box h4 {
+            margin: 0 0 4px;
+            font-size: 0.92rem;
+            font-weight: 800;
+        }
+
+        .callout-box p {
+            margin: 0;
+            font-size: 0.84rem;
+            color: var(--text-soft);
+            line-height: 1.4;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .summary-item-card {
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 50;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 460px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 660px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: grid;
+            place-items: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 960px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+
+            .mission-panel {
+                max-height: none;
+            }
+
+            .callout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header (Fixed & Persistent) -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">🎬</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 2 Build the Shot — Storyboard Planning Lab</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Information Technology</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 2 Information Technology</div>
+                    <h2>Build the Shot — Interactive Storyboard Studio</h2>
+                    <p>
+                        Welcome to the Multimedia Video Lab! Act as a video planner to construct a complete storyboard frame for a school video.
+                        A useful storyboard frame needs four connected pieces of information: <strong>Visual</strong>, <strong>Action</strong>,
+                        <strong>Audio</strong>, and <strong>Timing</strong>. Arrange the components, preview the shot, and see how your decisions shape the final scene!
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">🖼️</div>
+                            <h3>1. Visual</h3>
+                            <p>Place actors and props in the frame so the video crew knows what the audience sees.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚡</div>
+                            <h3>2. Action &amp; 3. Audio</h3>
+                            <p>Define what happens in the shot and assign dialogue, sound effects, and ambient audio.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⏱️</div>
+                            <h3>4. Timing &amp; Preview</h3>
+                            <p>Adjust shot duration and press Preview to watch the animated scene come to life!</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.1rem; padding: 14px 28px;">🚀 Launch Storyboard Studio</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Interactive Stage / 25% Right Action Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Storyboard Studio -->
+                <section class="canvas-pane" id="canvasPane">
+                    <div class="canvas-header">
+                        <div class="scenario-pill">
+                            <span>🎬</span>
+                            <span id="currentScenarioTitle">Shot Challenge: School Clean-up</span>
+                        </div>
+                        <div style="font-size:0.86rem; font-weight:800; color:var(--muted);">
+                            Frame 1 of 1 (16:9 Widescreen)
+                        </div>
+                    </div>
+
+                    <div class="storyboard-studio-scroll">
+                        <!-- Main Storyboard Frame Box -->
+                        <div class="storyboard-frame-card">
+                            <!-- Frame Top Bar -->
+                            <div class="frame-header-bar">
+                                <span>SCENE 1, SHOT 1</span>
+                                <span style="color:var(--component-visual);">AREA 1: VISUAL COMPOSITION</span>
+                            </div>
+
+                            <!-- 1. Visual Stage Canvas -->
+                            <div class="visual-viewport-canvas" id="visualViewport">
+                                <!-- Background Illustration (School Walkway & Gate) -->
+                                <svg class="school-backdrop-svg" viewBox="0 0 800 270" preserveAspectRatio="none">
+                                    <!-- Sky & School Building Silhouette -->
+                                    <rect x="0" y="0" width="800" height="175" fill="none" />
+                                    <!-- School Building Block -->
+                                    <path d="M 40 175 L 40 60 L 260 60 L 260 175 Z" fill="rgba(0,0,0,0.08)" />
+                                    <polygon points="30,60 150,15 270,60" fill="rgba(0,0,0,0.12)" />
+                                    <rect x="70" y="85" width="40" height="35" rx="4" fill="rgba(255,255,255,0.4)" />
+                                    <rect x="130" y="85" width="40" height="35" rx="4" fill="rgba(255,255,255,0.4)" />
+                                    <rect x="190" y="85" width="40" height="35" rx="4" fill="rgba(255,255,255,0.4)" />
+                                    <!-- Main Archway Entrance Gate -->
+                                    <path d="M 330 175 L 330 40 Q 400 10 470 40 L 470 175 Z" fill="rgba(0,0,0,0.06)" stroke="rgba(255,255,255,0.3)" stroke-width="4" />
+                                    <text x="400" y="36" text-anchor="middle" font-size="12" font-weight="bold" fill="currentColor" opacity="0.6">TRINIDAD &amp; TOBAGO SECONDARY</text>
+                                    <!-- Palm Trees -->
+                                    <path d="M 680 175 Q 675 110 660 70" stroke="#78350f" stroke-width="8" fill="none" />
+                                    <circle cx="655" cy="65" r="28" fill="#15803d" opacity="0.8" />
+                                    <!-- Pavement Path Walkway -->
+                                    <polygon points="150,270 300,175 500,175 650,270" fill="rgba(0,0,0,0.06)" />
+                                </svg>
+
+                                <!-- Interactive Elements placed in frame -->
+                                <div class="visual-stage-container" id="visualStageContainer">
+                                    <!-- Populated dynamically based on state.placedProps -->
+                                </div>
+
+                                <!-- Floating Live Preview Alert Banner -->
+                                <div class="preview-feedback-alert info" id="previewFeedbackAlert" style="display:none;">
+                                    <span id="previewFeedbackIcon">💡</span>
+                                    <span id="previewFeedbackText">Click Preview Shot to test your storyboard composition!</span>
+                                </div>
+                            </div>
+
+                            <!-- Props Dock Bar -->
+                            <div class="props-dock-row">
+                                <span class="props-dock-label">🖼️ Draggable Props:</span>
+                                <div id="propsDockItems" style="display:flex; gap:8px; flex-wrap:nowrap;">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- 2. Action Area -->
+                            <div class="storyboard-section-block">
+                                <div class="section-tag-heading">
+                                    <span style="color:var(--component-action);">⚡ AREA 2: ACTION (WHAT HAPPENS)</span>
+                                    <span style="font-size:0.75rem; color:var(--muted);">Select from right dock</span>
+                                </div>
+                                <div class="action-slot-dropzone" id="actionSlotDropzone">
+                                    👈 Click an Action Card from the panel on the right to assign what happens.
+                                </div>
+                            </div>
+
+                            <!-- 3. Audio Timeline Strip -->
+                            <div class="storyboard-section-block">
+                                <div class="section-tag-heading">
+                                    <span style="color:var(--component-audio);">🔊 AREA 3: AUDIO (WHAT THE AUDIENCE HEARS)</span>
+                                    <span style="font-size:0.75rem; color:var(--muted);">Select 1 or more clips</span>
+                                </div>
+                                <div class="audio-strip-container" id="audioStripContainer">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- 4. Timing Duration Control -->
+                            <div class="timing-control-strip">
+                                <div style="display:flex; flex-direction:column; gap:2px;">
+                                    <span style="font-size:0.8rem; font-weight:800; color:var(--component-timing);">⏱️ AREA 4: TIMING</span>
+                                    <span style="font-size:0.75rem; color:var(--muted);">Set shot duration</span>
+                                </div>
+                                <div class="slider-wrap">
+                                    <input type="range" min="1" max="10" step="1" value="5" class="timing-slider-input" id="timingSlider" />
+                                    <div class="duration-badge" id="durationBadge">5.0 Seconds</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Action Bar (Prominent Playback Control) -->
+                        <div style="display:flex; gap:12px; align-items:center; justify-content:center;">
+                            <button class="primary-btn" id="previewShotBtn" style="font-size:1.1rem; padding:14px 32px;">
+                                ▶ Preview Shot
+                            </button>
+                            <button class="secondary-btn" id="clearFrameBtn">
+                                ↺ Clear Storyboard
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Dedicated Action & Status Tray -->
+                <aside class="mission-panel">
+                    <!-- 1. Storyboard Readiness Card -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Storyboard Checklist</span>
+                            <span id="readinessCountText" style="color:var(--accent);">0 / 4 Ready</span>
+                        </div>
+
+                        <div class="component-checklist-grid">
+                            <div class="comp-status-chip" id="chipVisual">
+                                <span>🖼️</span> <span>Visual: ⏳</span>
+                            </div>
+                            <div class="comp-status-chip" id="chipAction">
+                                <span>⚡</span> <span>Action: ⏳</span>
+                            </div>
+                            <div class="comp-status-chip" id="chipAudio">
+                                <span>🔊</span> <span>Audio: ⏳</span>
+                            </div>
+                            <div class="comp-status-chip" id="chipTiming">
+                                <span>⏱️</span> <span>Timing: ⏳</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Director Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Previews Tested</div>
+                                <div class="val" id="previewsVal">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Scenario Director Brief Card -->
+                    <div class="panel-card" style="border-left: 4px solid var(--accent);">
+                        <div class="panel-title">
+                            <span>📋 Script Brief</span>
+                        </div>
+                        <p style="margin:0; font-size:0.88rem; color:var(--text); line-height:1.5; font-style:italic;" id="scenarioPromptText">
+                            “A student notices litter near the school entrance, picks it up, and places it in a bin.”
+                        </p>
+                    </div>
+
+                    <!-- 3. Action Cards Dock -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span style="color:var(--component-action);">⚡ Choose Action</span>
+                        </div>
+                        <div class="action-cards-dock" id="actionCardsDock">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- 4. Next Shot / Finish Action Card -->
+                    <div class="panel-card" style="gap:10px;">
+                        <button class="primary-btn" id="finishShotBtn" style="width:100%; justify-content:center; display:none; background:linear-gradient(135deg, var(--safe-color), #059669);">
+                            🏆 Finish &amp; View Certification
+                        </button>
+                        <button class="secondary-btn" id="nextScenarioBtn" style="width:100%; justify-content:center; display:none;">
+                            🎬 Build Another Shot
+                        </button>
+                    </div>
+
+                    <!-- 5. Inspector Live Technical Explanation Box -->
+                    <div class="panel-card">
+                        <div class="panel-title">Director Concept</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Place the student, litter, and bin in the visual frame. Select an action card, add audio clips, and set a timing duration between 4–6s. Then press [Preview Shot]!
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Storyboard Planning Certified</div>
+                <h2>Form 2 Video Planning Certification</h2>
+                <p>Outstanding work! You have successfully planned, constructed, and verified a professional storyboard frame with all four essential video production components.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Storyboard Director</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.95rem;">You integrated Visual composition, Action, Audio, and Timing into a coherent shot!</p>
+                </div>
+
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Timing Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">100%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Components</div>
+                        <div class="val" id="summaryCorrectVal">4 / 4</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Shots Built</div>
+                        <div class="val" id="summaryShotsVal">1</div>
+                    </div>
+                </div>
+
+                <!-- 4 Callouts Breakdown Card -->
+                <div class="storyboard-breakdown-card">
+                    <div style="font-size: 1.05rem; font-weight: 800; color: var(--accent); margin-bottom: 6px;">
+                        🎬 The 4 Essential Pillars of a Storyboard Frame
+                    </div>
+                    <p style="font-size: 0.88rem; color: var(--text-soft); line-height: 1.5; margin: 0 0 14px;">
+                        A storyboard frame is more than a picture. It communicates everything the production crew needs to film the scene:
+                    </p>
+
+                    <div class="callout-grid">
+                        <div class="callout-box" style="border-left: 4px solid var(--component-visual);">
+                            <h4 style="color:var(--component-visual);">1. VISUAL</h4>
+                            <p><strong>What the audience sees.</strong> Characters, actors, props, camera angle, and scene environment.</p>
+                        </div>
+                        <div class="callout-box" style="border-left: 4px solid var(--component-action);">
+                            <h4 style="color:var(--component-action);">2. ACTION</h4>
+                            <p><strong>What happens in the shot.</strong> Clear written description of physical movement, gestures, and events.</p>
+                        </div>
+                        <div class="callout-box" style="border-left: 4px solid var(--component-audio);">
+                            <h4 style="color:var(--component-audio);">3. AUDIO</h4>
+                            <p><strong>What the audience hears.</strong> Spoken dialogue, voiceover, sound effects (SFX), and ambient background audio.</p>
+                        </div>
+                        <div class="callout-box" style="border-left: 4px solid var(--component-timing);">
+                            <h4 style="color:var(--component-timing);">4. TIMING</h4>
+                            <p><strong>How long the shot lasts.</strong> Precise duration in seconds so the scene feels natural without being rushed or lagging.</p>
+                        </div>
+                    </div>
+
+                    <p style="margin: 18px 0 0; font-size: 0.95rem; font-weight: 800; color: var(--safe-color); text-align: center;">
+                        🎉 “A storyboard frame is more than a picture. It tells the video creator what happens, what is heard, and how long the shot should last.”
+                    </p>
+                </div>
+
+                <h3 style="text-align: left; margin: 24px 0 12px; font-size: 1.1rem;">Verified Shot Configuration</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 14px;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Build Another Shot</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer (Slide-Over, Right Side) -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.88rem;">Storyboard frame elements &amp; evaluation logs.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">×</button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">×</button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.35rem;">How to Build a Storyboard Shot</h3>
+            <div style="color: var(--text-soft); line-height: 1.65; font-size: 0.98rem;">
+                <p>Welcome, Video Planner! Your mission is to construct a complete storyboard frame with 4 connected components:</p>
+                <ul>
+                    <li><strong>1. Visual:</strong> Click the prop chips below the frame to place the required actor (student), prop (litter), and destination (rubbish bin).</li>
+                    <li><strong>2. Action:</strong> Pick the action card from the right panel that accurately describes the script brief.</li>
+                    <li><strong>3. Audio:</strong> Select relevant dialogue (<em>“Let’s keep our school clean!”</em>), sound effect (trash dropping), and schoolyard ambience.</li>
+                    <li><strong>4. Timing:</strong> Drag the duration slider to set natural pacing (4.0s – 6.0s).</li>
+                    <li><strong>5. Preview Shot:</strong> Click <strong>▶ Preview Shot</strong> to watch your planned scene animate in real-time and discover improvements!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">×</button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.35rem;">Reset Storyboard Frame?</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">Are you sure you want to reset the storyboard editor? All placed props, action choices, and preview history will be cleared.</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Frame</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           SCENARIOS DATASET
+           ============================================================ */
+        const SCENARIOS = [
+            {
+                id: "scenario_cleanup",
+                title: "Shot Challenge: School Clean-up",
+                prompt: "A student notices litter near the school entrance, picks it up, and places it in a bin.",
+                requiredProps: ["student", "litter", "bin"],
+                availableProps: [
+                    { id: "student", name: "Student", icon: "🧑", cls: "actor-student" },
+                    { id: "litter", name: "Litter", icon: "🥤", cls: "actor-litter" },
+                    { id: "bin", name: "Rubbish Bin", icon: "🗑️", cls: "actor-bin" },
+                    { id: "backpack", name: "School Bag", icon: "🎒", cls: "actor-backpack" }
+                ],
+                actions: [
+                    {
+                        id: "act_correct",
+                        text: "Student notices litter on the walkway, picks it up, and places it securely inside the rubbish bin.",
+                        isCorrect: true
+                    },
+                    {
+                        id: "act_walkpast",
+                        text: "Student walks straight past the litter into the main building without stopping.",
+                        isCorrect: false
+                    },
+                    {
+                        id: "act_standbin",
+                        text: "Student stands quietly beside the bin and checks their mobile phone.",
+                        isCorrect: false
+                    },
+                    {
+                        id: "act_entergate",
+                        text: "Student casually enters the school compound carrying a heavy backpack.",
+                        isCorrect: false
+                    }
+                ],
+                audioClips: [
+                    { id: "aud_dialogue", type: "dialogue", name: "Dialogue: “Let’s keep our school clean!”", icon: "🗣️", isAppropriate: true },
+                    { id: "aud_sfx_drop", type: "sfx", name: "SFX: Litter dropping into bin", icon: "🔊", isAppropriate: true },
+                    { id: "aud_ambient", type: "ambient", name: "Ambient: Morning schoolyard chatter", icon: "🍃", isAppropriate: true },
+                    { id: "aud_cheering", type: "sfx", name: "SFX: Loud stadium horns & cheering", icon: "🎺", isAppropriate: false }
+                ],
+                minTime: 4,
+                maxTime: 6
+            },
+            {
+                id: "scenario_sportsday",
+                title: "Shot Challenge: Sports Day Goal",
+                prompt: "A student strikes the football during the inter-house match, scores a goal, and celebrates.",
+                requiredProps: ["student", "ball", "goalpost"],
+                availableProps: [
+                    { id: "student", name: "Striker", icon: "🏃", cls: "actor-student" },
+                    { id: "ball", name: "Football", icon: "⚽", cls: "actor-litter" },
+                    { id: "goalpost", name: "Goal Net", icon: "🥅", cls: "actor-bin" },
+                    { id: "waterbottle", name: "Water Bottle", icon: "💧", cls: "actor-backpack" }
+                ],
+                actions: [
+                    {
+                        id: "act_correct",
+                        text: "Student kicks the football into the top corner of the net and raises arms in celebration.",
+                        isCorrect: true
+                    },
+                    {
+                        id: "act_sitbench",
+                        text: "Student sits on the sideline bench drinking water.",
+                        isCorrect: false
+                    },
+                    {
+                        id: "act_tieshoe",
+                        text: "Student ties their shoelaces near the corner flag.",
+                        isCorrect: false
+                    }
+                ],
+                audioClips: [
+                    { id: "aud_cheering", type: "sfx", name: "SFX: Whistle blow & cheering crowd", icon: "📣", isAppropriate: true },
+                    { id: "aud_dialogue", type: "dialogue", name: "Dialogue: “Goal! What a strike!”", icon: "🗣️", isAppropriate: true },
+                    { id: "aud_ambient", type: "ambient", name: "Ambient: School sports ground music", icon: "🥁", isAppropriate: true },
+                    { id: "aud_library", type: "ambient", name: "Ambient: Quiet library whispering", icon: "🤫", isAppropriate: false }
+                ],
+                minTime: 4,
+                maxTime: 6
+            }
+        ];
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Place the required props in the visual frame. Select an action card, add audio clips, and set timing between 4–6s. Then press [Preview Shot]!`;
+
+        /* Application State */
+        const state = {
+            currentScenarioIndex: 0,
+            placedProps: [], // array of prop ids
+            selectedActionId: null,
+            selectedAudioIds: [],
+            timingSeconds: 5,
+            score: 0,
+            previewsCount: 0,
+            shotsBuilt: 0,
+            theme: "light",
+            evaluations: {},
+            isPlayingAnimation: false
+        };
+
+        /* DOM Elements */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+
+            // Studio elements
+            currentScenarioTitle: document.getElementById("currentScenarioTitle"),
+            scenarioPromptText: document.getElementById("scenarioPromptText"),
+            visualViewport: document.getElementById("visualViewport"),
+            visualStageContainer: document.getElementById("visualStageContainer"),
+            propsDockItems: document.getElementById("propsDockItems"),
+            actionSlotDropzone: document.getElementById("actionSlotDropzone"),
+            audioStripContainer: document.getElementById("audioStripContainer"),
+            timingSlider: document.getElementById("timingSlider"),
+            durationBadge: document.getElementById("durationBadge"),
+            previewFeedbackAlert: document.getElementById("previewFeedbackAlert"),
+            previewFeedbackIcon: document.getElementById("previewFeedbackIcon"),
+            previewFeedbackText: document.getElementById("previewFeedbackText"),
+            previewShotBtn: document.getElementById("previewShotBtn"),
+            clearFrameBtn: document.getElementById("clearFrameBtn"),
+
+            // Right panel checklist & controls
+            readinessCountText: document.getElementById("readinessCountText"),
+            chipVisual: document.getElementById("chipVisual"),
+            chipAction: document.getElementById("chipAction"),
+            chipAudio: document.getElementById("chipAudio"),
+            chipTiming: document.getElementById("chipTiming"),
+            scoreVal: document.getElementById("scoreVal"),
+            previewsVal: document.getElementById("previewsVal"),
+            actionCardsDock: document.getElementById("actionCardsDock"),
+            finishShotBtn: document.getElementById("finishShotBtn"),
+            nextScenarioBtn: document.getElementById("nextScenarioBtn"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+
+            // Summary Screen Elements
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryShotsVal: document.getElementById("summaryShotsVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Helper: Reset Explanation Box */
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+        }
+
+        /* Helper: Detect Browser Theme */
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {
+                // Default to light
+            }
+            return "light";
+        }
+
+        /* Initialization */
+        init();
+
+        function init() {
+            bindEvents();
+            loadInitialTheme();
+            resetState();
+            renderDashboard();
+
+            // Auto-open instructions modal on launch
+            openModal();
+        }
+
+        function loadInitialTheme() {
+            const savedTheme = sessionStorage.getItem("storyboard_theme");
+            state.theme = savedTheme || detectSystemTheme();
+            updateThemeUI();
+        }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            sessionStorage.setItem("storyboard_theme", state.theme);
+            sessionStorage.setItem("user_toggled_theme", "true");
+            updateThemeUI();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+        }
+
+        function openModal() {
+            dom.instructionsModal.classList.add("show");
+        }
+
+        function closeModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetModal() {
+            dom.resetModal.classList.add("show");
+        }
+
+        function closeResetModal() {
+            dom.resetModal.classList.remove("show");
+        }
+
+        function openDrawer() {
+            renderHistoryList();
+            dom.historyDrawer.classList.add("show");
+            dom.historyDrawer.setAttribute("aria-hidden", "false");
+        }
+
+        function closeDrawer() {
+            dom.historyDrawer.classList.remove("show");
+            dom.historyDrawer.setAttribute("aria-hidden", "true");
+        }
+
+        function resetState() {
+            state.placedProps = [];
+            state.selectedActionId = null;
+            state.selectedAudioIds = [];
+            state.timingSeconds = 5;
+            state.score = 0;
+            state.previewsCount = 0;
+            state.shotsBuilt = 0;
+            state.evaluations = {};
+            resetExplanationBox();
+        }
+
+        function confirmReset() {
+            closeResetModal();
+            resetState();
+            renderDashboard();
+            showScreen("home");
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            // Lock outer body in game mode
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // Modals: no backdrop close
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", () => {
+                // Switch to next scenario or reset
+                state.currentScenarioIndex = (state.currentScenarioIndex + 1) % SCENARIOS.length;
+                state.placedProps = [];
+                state.selectedActionId = null;
+                state.selectedAudioIds = [];
+                state.timingSeconds = 5;
+                renderDashboard();
+                showScreen("game");
+            });
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            dom.timingSlider.addEventListener("input", (e) => {
+                state.timingSeconds = parseInt(e.target.value, 10);
+                dom.durationBadge.textContent = `${state.timingSeconds}.0 Seconds`;
+                renderChecklist();
+            });
+
+            dom.previewShotBtn.addEventListener("click", handlePreviewShot);
+            dom.clearFrameBtn.addEventListener("click", clearCurrentFrame);
+            dom.finishShotBtn.addEventListener("click", renderSummaryScreen);
+            dom.nextScenarioBtn.addEventListener("click", () => {
+                state.currentScenarioIndex = (state.currentScenarioIndex + 1) % SCENARIOS.length;
+                clearCurrentFrame();
+                dom.nextScenarioBtn.style.display = "none";
+                dom.finishShotBtn.style.display = "none";
+            });
+
+            // Escape key listener
+            window.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    closeModal();
+                    closeResetModal();
+                    closeDrawer();
+                }
+            });
+        }
+
+        function clearCurrentFrame() {
+            state.placedProps = [];
+            state.selectedActionId = null;
+            state.selectedAudioIds = [];
+            state.timingSeconds = 5;
+            dom.timingSlider.value = 5;
+            dom.durationBadge.textContent = "5.0 Seconds";
+            dom.previewFeedbackAlert.style.display = "none";
+            resetExplanationBox();
+            renderDashboard();
+        }
+
+        function toggleProp(propId) {
+            if (state.placedProps.includes(propId)) {
+                state.placedProps = state.placedProps.filter(p => p !== propId);
+            } else {
+                state.placedProps.push(propId);
+            }
+            renderDashboard();
+        }
+
+        function selectAction(actionId) {
+            state.selectedActionId = actionId;
+            renderDashboard();
+        }
+
+        function toggleAudio(audioId) {
+            if (state.selectedAudioIds.includes(audioId)) {
+                state.selectedAudioIds = state.selectedAudioIds.filter(a => a !== audioId);
+            } else {
+                state.selectedAudioIds.push(audioId);
+            }
+            renderDashboard();
+        }
+
+        /* ============================================================
+           PREVIEW SHOT LOGIC & CONSEQUENCE SIMULATION
+           ============================================================ */
+        function handlePreviewShot() {
+            if (state.isPlayingAnimation) return;
+            state.isPlayingAnimation = true;
+            state.previewsCount++;
+            dom.previewsVal.textContent = state.previewsCount;
+
+            const scenario = SCENARIOS[state.currentScenarioIndex];
+
+            // Evaluate the 4 components
+            const hasVisualActors = scenario.requiredProps.every(p => state.placedProps.includes(p));
+            const hasAction = state.selectedActionId !== null;
+            const actionObj = scenario.actions.find(a => a.id === state.selectedActionId);
+            const isActionCorrect = actionObj ? actionObj.isCorrect : false;
+            const hasAudio = state.selectedAudioIds.length > 0;
+            const hasAppropriateAudio = state.selectedAudioIds.some(id => {
+                const aud = scenario.audioClips.find(c => c.id === id);
+                return aud && aud.isAppropriate;
+            });
+            const timing = state.timingSeconds;
+            const isTimingGood = timing >= scenario.minTime && timing <= scenario.maxTime;
+            const isTimingTooShort = timing < scenario.minTime;
+            const isTimingTooLong = timing > scenario.maxTime;
+
+            // Animate Actors in Viewport
+            const studentEl = dom.visualStageContainer.querySelector(".actor-student");
+            const litterEl = dom.visualStageContainer.querySelector(".actor-litter");
+            const binEl = dom.visualStageContainer.querySelector(".actor-bin");
+
+            if (studentEl) {
+                // Walk animation
+                studentEl.style.left = "45%";
+            }
+
+            // Audio simulation using browser synthesized tone
+            playSynthesizedTone();
+
+            // Set timeout according to timing
+            const animationDurationMs = Math.min(timing * 400, 2500);
+
+            setTimeout(() => {
+                if (studentEl && hasVisualActors && isActionCorrect && !isTimingTooShort) {
+                    if (litterEl) litterEl.style.display = "none";
+                    studentEl.style.left = "70%";
+                }
+
+                // Diagnose Feedback
+                evaluatePreviewFeedback({
+                    hasVisualActors,
+                    hasAction,
+                    isActionCorrect,
+                    hasAudio,
+                    hasAppropriateAudio,
+                    isTimingGood,
+                    isTimingTooShort,
+                    isTimingTooLong,
+                    actionObj
+                });
+
+                state.isPlayingAnimation = false;
+            }, animationDurationMs);
+        }
+
+        function playSynthesizedTone() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch (e) {
+                // AudioContext fallback
+            }
+        }
+
+        function evaluatePreviewFeedback(diag) {
+            const scenario = SCENARIOS[state.currentScenarioIndex];
+
+            // 1. Missing Visual Information
+            if (!diag.hasVisualActors) {
+                const missing = scenario.requiredProps.filter(p => !state.placedProps.includes(p));
+                const missingNames = missing.map(p => {
+                    const found = scenario.availableProps.find(item => item.id === p);
+                    return found ? found.name : p;
+                }).join(", ");
+
+                showPreviewAlert("warning", `⚠️ Something is missing from the shot! Where are the essential props? (${missingNames})`);
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `⚠️ <strong>Missing Visual Elements:</strong> Your shot requires <strong>${missingNames}</strong> in the frame. Click the prop chips to place them into the scene!`;
+                return;
+            }
+
+            // 2. Action Does Not Match Visual / Brief
+            if (!diag.hasAction || !diag.isActionCorrect) {
+                showPreviewAlert("warning", `⚠️ The shot does not show the planned message yet. Action mismatch.`);
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `⚠️ <strong>Action Mismatch:</strong> The selected action does not achieve the director's script brief: <em>“${scenario.prompt}”</em>. Choose the action card where the student completes the intended task!`;
+                return;
+            }
+
+            // 3. Missing Audio
+            if (!diag.hasAudio) {
+                showPreviewAlert("warning", `🔇 Your shot works visually, but what should the audience hear?`);
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `🔇 <strong>Missing Audio:</strong> The scene plays silently! A complete storyboard needs dialogue, sound effects, or background ambience. Select suitable audio clips below the frame.`;
+                return;
+            }
+
+            // 4. Timing Too Short (< 4s)
+            if (diag.isTimingTooShort) {
+                showPreviewAlert("warning", `⏱️ The shot ended before the action finished. Try giving it more time.`);
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `⏱️ <strong>Timing Too Short (${state.timingSeconds}s):</strong> The action was rushed and cut off before the student could finish placing the item in the bin. Drag the timing slider to 4.0s – 6.0s!`;
+                return;
+            }
+
+            // 5. Timing Too Long (> 6s)
+            if (diag.isTimingTooLong) {
+                showPreviewAlert("warning", `⏱️ The action is finished, but the shot keeps going. Could it be shorter?`);
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `⏱️ <strong>Timing Too Long (${state.timingSeconds}s):</strong> The action completed naturally around 5 seconds, leaving unnecessary dead air. Adjust the timing slider closer to 4.0s – 6.0s.`;
+                return;
+            }
+
+            // 6. Well-Planned Shot (All 4 components work together!)
+            state.score += 100;
+            state.shotsBuilt++;
+            dom.scoreVal.textContent = state.score;
+
+            showPreviewAlert("success", `🎉 Great planning! Visual, Action, Audio and Timing give the crew enough information!`);
+            dom.inspectorFeedbackBox.className = "feedback-card success";
+            dom.inspectorFeedbackBox.innerHTML = `🎉 <strong>Great planning!</strong> Your Visual, Action, Audio, and Timing give the video creator enough information to build this scene accurately.`;
+
+            dom.finishShotBtn.style.display = "inline-flex";
+            dom.nextScenarioBtn.style.display = "inline-flex";
+
+            // Save permanent evaluation record
+            state.evaluations[scenario.id] = {
+                title: scenario.title,
+                visual: state.placedProps.join(", "),
+                action: diag.actionObj ? diag.actionObj.text : "None",
+                audio: state.selectedAudioIds.join(", "),
+                timing: `${state.timingSeconds}.0s (Optimal 4–6s)`,
+                isComplete: true
+            };
+
+            renderChecklist();
+        }
+
+        function showPreviewAlert(type, text) {
+            dom.previewFeedbackAlert.className = `preview-feedback-alert ${type}`;
+            dom.previewFeedbackAlert.style.display = "flex";
+            dom.previewFeedbackIcon.textContent = type === "success" ? "✅" : "⚠️";
+            dom.previewFeedbackText.textContent = text;
+        }
+
+        /* Render Dashboard Sub-views */
+        function renderVisualStage() {
+            const scenario = SCENARIOS[state.currentScenarioIndex];
+            dom.currentScenarioTitle.textContent = scenario.title;
+            dom.scenarioPromptText.textContent = `“${scenario.prompt}”`;
+
+            // Render Props Dock
+            let dockHtml = "";
+            scenario.availableProps.forEach(p => {
+                const isPlaced = state.placedProps.includes(p.id);
+                dockHtml += `
+                    <button class="prop-toggle-chip ${isPlaced ? 'placed' : ''}" data-prop-id="${p.id}" tabindex="0" role="button">
+                        <span>${p.icon}</span>
+                        <span>${p.name} ${isPlaced ? '✓' : '+'}</span>
+                    </button>
+                `;
+            });
+            dom.propsDockItems.innerHTML = dockHtml;
+
+            // Bind Dock Clicks
+            dom.propsDockItems.querySelectorAll("[data-prop-id]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const pId = btn.getAttribute("data-prop-id");
+                    toggleProp(pId);
+                });
+            });
+
+            // Render Props inside the visual frame
+            let stageHtml = "";
+            state.placedProps.forEach(pId => {
+                const propObj = scenario.availableProps.find(item => item.id === pId);
+                if (propObj) {
+                    stageHtml += `
+                        <div class="placed-prop-item ${propObj.cls}" data-placed-id="${pId}" title="Click to remove ${propObj.name}">
+                            <div class="prop-emoji-icon">${propObj.icon}</div>
+                            <span class="prop-label-tag">${propObj.name}</span>
+                        </div>
+                    `;
+                }
+            });
+            dom.visualStageContainer.innerHTML = stageHtml;
+
+            // Clicking placed prop removes it
+            dom.visualStageContainer.querySelectorAll("[data-placed-id]").forEach(el => {
+                el.addEventListener("click", () => {
+                    const pId = el.getAttribute("data-placed-id");
+                    toggleProp(pId);
+                });
+            });
+        }
+
+        function renderActionArea() {
+            const scenario = SCENARIOS[state.currentScenarioIndex];
+            const actionObj = scenario.actions.find(a => a.id === state.selectedActionId);
+
+            if (actionObj) {
+                dom.actionSlotDropzone.className = "action-slot-dropzone assigned";
+                dom.actionSlotDropzone.innerHTML = `<strong>⚡ Assigned Action:</strong> ${actionObj.text}`;
+            } else {
+                dom.actionSlotDropzone.className = "action-slot-dropzone";
+                dom.actionSlotDropzone.innerHTML = `👈 Click an Action Card from the panel on the right to assign what happens.`;
+            }
+
+            // Render Right Dock Action Cards
+            let cardsHtml = "";
+            scenario.actions.forEach(a => {
+                const isSelected = state.selectedActionId === a.id;
+                cardsHtml += `
+                    <button class="action-select-btn ${isSelected ? 'active' : ''}" data-action-id="${a.id}" tabindex="0" role="button">
+                        ${isSelected ? '✓ ' : '• '} ${a.text}
+                    </button>
+                `;
+            });
+            dom.actionCardsDock.innerHTML = cardsHtml;
+
+            dom.actionCardsDock.querySelectorAll("[data-action-id]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const aId = btn.getAttribute("data-action-id");
+                    selectAction(aId);
+                });
+            });
+        }
+
+        function renderAudioArea() {
+            const scenario = SCENARIOS[state.currentScenarioIndex];
+            let audioHtml = "";
+            scenario.audioClips.forEach(aud => {
+                const isActive = state.selectedAudioIds.includes(aud.id);
+                audioHtml += `
+                    <div class="audio-chip-item ${isActive ? 'active' : ''}" data-audio-id="${aud.id}" tabindex="0" role="button">
+                        <span>${aud.icon}</span>
+                        <span>${aud.name} ${isActive ? '✓' : '+'}</span>
+                    </div>
+                `;
+            });
+            dom.audioStripContainer.innerHTML = audioHtml;
+
+            dom.audioStripContainer.querySelectorAll("[data-audio-id]").forEach(el => {
+                el.addEventListener("click", () => {
+                    const aId = el.getAttribute("data-audio-id");
+                    toggleAudio(aId);
+                });
+            });
+        }
+
+        function renderChecklist() {
+            const scenario = SCENARIOS[state.currentScenarioIndex];
+            const hasVisual = scenario.requiredProps.every(p => state.placedProps.includes(p));
+            const hasAction = state.selectedActionId !== null;
+            const hasAudio = state.selectedAudioIds.length > 0;
+            const hasTiming = state.timingSeconds >= scenario.minTime && state.timingSeconds <= scenario.maxTime;
+
+            let readyCount = 0;
+            if (hasVisual) readyCount++;
+            if (hasAction) readyCount++;
+            if (hasAudio) readyCount++;
+            if (hasTiming) readyCount++;
+
+            dom.readinessCountText.textContent = `${readyCount} / 4 Ready`;
+
+            dom.chipVisual.className = `comp-status-chip ${hasVisual ? 'ready' : ''}`;
+            dom.chipVisual.innerHTML = `<span>🖼️</span> <span>Visual: ${hasVisual ? 'Ready ✓' : 'Incomplete'}</span>`;
+
+            dom.chipAction.className = `comp-status-chip ${hasAction ? 'ready' : ''}`;
+            dom.chipAction.innerHTML = `<span>⚡</span> <span>Action: ${hasAction ? 'Set ✓' : 'Needed'}</span>`;
+
+            dom.chipAudio.className = `comp-status-chip ${hasAudio ? 'ready' : ''}`;
+            dom.chipAudio.innerHTML = `<span>🔊</span> <span>Audio: ${hasAudio ? 'Added ✓' : 'Silent'}</span>`;
+
+            dom.chipTiming.className = `comp-status-chip ${hasTiming ? 'ready' : ''}`;
+            dom.chipTiming.innerHTML = `<span>⏱️</span> <span>Timing: ${hasTiming ? 'Optimal ✓' : `${state.timingSeconds}s`}</span>`;
+        }
+
+        function renderDashboard() {
+            renderVisualStage();
+            renderActionArea();
+            renderAudioArea();
+            renderChecklist();
+        }
+
+        /* Render Review Memory History List */
+        function renderHistoryList() {
+            let html = "";
+            SCENARIOS.forEach(sc => {
+                const evalRec = state.evaluations[sc.id];
+                const isDone = evalRec && evalRec.isComplete;
+
+                html += `
+                    <div class="summary-item-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <strong>🎬 ${sc.title}</strong>
+                            <span style="font-weight:800; color:${isDone ? 'var(--safe-color)' : 'var(--muted)'};">
+                                ${isDone ? '✅ Verified Shot' : '⏳ In Progress'}
+                            </span>
+                        </div>
+                        <p style="margin:0 0 8px; font-size:0.84rem; color:var(--text-soft); font-style:italic;">
+                            “${sc.prompt}”
+                        </p>
+                        <div style="font-size:0.82rem; color:var(--muted); line-height:1.5;">
+                            <div><strong>• Visual Props:</strong> ${sc.requiredProps.join(", ")}</div>
+                            <div><strong>• Target Timing:</strong> ${sc.minTime}s – ${sc.maxTime}s</div>
+                            <div><strong>• Key Principle:</strong> A storyboard frame coordinates Visual, Action, Audio, and Timing.</div>
+                        </div>
+                    </div>
+                `;
+            });
+            dom.historyList.innerHTML = html;
+        }
+
+        /* Render Summary Screen */
+        function renderSummaryScreen() {
+            dom.summaryScoreVal.textContent = state.score;
+            dom.summaryAccuracyVal.textContent = "100%";
+            dom.summaryCorrectVal.textContent = "4 / 4";
+            dom.summaryShotsVal.textContent = state.shotsBuilt;
+
+            dom.badgeIcon.textContent = "👑";
+            dom.badgeTitle.textContent = "Master Storyboard Director";
+            dom.badgeDesc.textContent = "You successfully integrated Visual composition, Action, Audio, and Timing into a professional shot!";
+
+            let html = "";
+            SCENARIOS.forEach(sc => {
+                const evalRec = state.evaluations[sc.id];
+                html += `
+                    <div class="summary-item-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <h4 style="margin:0; font-size:0.96rem;">🎬 ${sc.title}</h4>
+                            <span style="font-weight:800; color:var(--safe-color);">
+                                ✅ Complete &amp; Verified
+                            </span>
+                        </div>
+                        <p style="margin:0 0 8px; font-size:0.84rem; color:var(--text-soft); font-style:italic;">
+                            “${sc.prompt}”
+                        </p>
+                        <div style="font-size:0.84rem; color:var(--text-soft); line-height:1.5;">
+                            <div><strong>Visual Composition:</strong> Student, Litter, Rubbish Bin placed in 16:9 entrance frame.</div>
+                            <div><strong>Action Choreography:</strong> Student picks up litter and places it inside the bin.</div>
+                            <div><strong>Audio Tracks:</strong> Clean school dialogue, bin SFX, and schoolyard ambience.</div>
+                            <div><strong>Shot Duration:</strong> ${evalRec ? evalRec.timing : "5.0s (Natural pacing)"}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            dom.summaryDetailsList.innerHTML = html;
+
+            showScreen("summary");
+        }
+    </script>
+</body>
+
+</html>
