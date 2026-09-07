@@ -1383,19 +1383,34 @@
 
             const wallThickness = getWallThickness(thicknessValue);
 
-            // Lumen background (intestine interior)
-            const lumenGrad = ctx.createLinearGradient(0, 0, canvasW * 0.48, 0);
-            lumenGrad.addColorStop(0, '#1a0a0a');
-            lumenGrad.addColorStop(1, '#2d1520');
-            ctx.fillStyle = lumenGrad;
-            ctx.fillRect(0, 0, canvasW * 0.5, canvasH);
+            // Lumen background (intestine interior) — light for high contrast,
+            // shaped to follow the wall's wavy edge
+            const lumenPass = ctx.createLinearGradient(0, 0, canvasW, 0);
+            lumenPass.addColorStop(0, '#fdf3e7');
+            lumenPass.addColorStop(1, '#f6dfc8');
+            ctx.fillStyle = lumenPass;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            for (let y = 1; y <= canvasH; y += 2) {
+                ctx.lineTo(getWallX(y, canvasW, canvasH, foldValue), y);
+            }
+            ctx.lineTo(0, canvasH);
+            ctx.closePath();
+            ctx.fill();
 
-            // Bloodstream background
-            const bloodGrad = ctx.createLinearGradient(canvasW * 0.5, 0, canvasW, 0);
-            bloodGrad.addColorStop(0, '#1a0520');
-            bloodGrad.addColorStop(1, '#10022a');
-            ctx.fillStyle = bloodGrad;
-            ctx.fillRect(canvasW * 0.5, 0, canvasW * 0.5, canvasH);
+            // Bloodstream background — shaped to follow the wall's outer edge
+            const bloodPass = ctx.createLinearGradient(0, 0, canvasW, 0);
+            bloodPass.addColorStop(0, '#1a0520');
+            bloodPass.addColorStop(1, '#10022a');
+            ctx.fillStyle = bloodPass;
+            ctx.beginPath();
+            for (let y = 0; y <= canvasH; y += 2) {
+                ctx.lineTo(getWallX(y, canvasW, canvasH, foldValue) + wallThickness, y);
+            }
+            ctx.lineTo(canvasW, canvasH);
+            ctx.lineTo(canvasW, 0);
+            ctx.closePath();
+            ctx.fill();
 
             // Bloodstream vessels
             ctx.strokeStyle = 'rgba(180, 40, 80, 0.25)';
@@ -1448,7 +1463,7 @@
             ctx.font = 'bold 13px Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#5a3a1f';
             ctx.fillText('Intestine Lumen', canvasW * 0.18, 22);
 
             // Bloodstream label
@@ -1457,7 +1472,7 @@
 
             // Nutrients label
             ctx.font = '11px Arial, sans-serif';
-            ctx.fillStyle = 'rgba(251,191,36,0.5)';
+            ctx.fillStyle = '#7a4d20';
             ctx.fillText('Nutrients', canvasW * 0.18, canvasH - 12);
 
             ctx.fillStyle = 'rgba(180,40,80,0.5)';
