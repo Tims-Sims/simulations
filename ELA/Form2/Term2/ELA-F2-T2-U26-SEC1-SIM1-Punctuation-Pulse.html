@@ -564,6 +564,22 @@
             font-weight: 700;
         }
 
+        .pp-route {
+            margin-top: 14px;
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+            text-align: left;
+        }
+
+        .pp-route-list {
+            margin: 6px 0 0;
+            padding-left: 20px;
+            color: var(--text-soft);
+            line-height: 1.7;
+        }
+
         /* ---- Poem + pulse lines ---- */
 
         .pp-poem {
@@ -635,6 +651,23 @@
 
         .pp-slot:disabled {
             cursor: default;
+        }
+
+        .pp-slot-drop {
+            display: inline-flex;
+            padding: 14px 12px;
+            margin: -8px -6px;
+            border-radius: 18px;
+            transition: background 0.15s ease;
+        }
+
+        .pp-slot-drop.pp-drop-over {
+            background: color-mix(in srgb, var(--accent) 22%, transparent);
+        }
+
+        .pp-slot-drop.pp-drop-over .pp-slot {
+            border-color: var(--accent-2);
+            background: color-mix(in srgb, var(--accent) 26%, var(--surface));
         }
 
         .pp-poem-ready .pp-slot:not(.pp-slot-filled) {
@@ -1478,7 +1511,8 @@
         const PP_STAGES = [
             {
                 id: "s2",
-                eyebrow: "Stage 1 of 4 · Question Pulse",
+                name: "Question Pulse",
+                teaser: "Line 1 — a direct question ends with a question mark",
                 title: "A direct question",
                 intro: "Line 1 asks who called. Choose the end mark that turns a spoken question into a rising pulse.",
                 hint: "A line that asks a question — like \u201Cwho called?\u201D — ends with a question mark.",
@@ -1486,7 +1520,8 @@
             },
             {
                 id: "s3",
-                eyebrow: "Stage 2 of 4 · Statement and Urgency",
+                name: "Statement and Urgency",
+                teaser: "Lines 2–3 — a calm statement, then an urgent call",
                 title: "A statement, then a call",
                 intro: "Line 2 calmly states what happened. Line 3 is an urgent call. Punctuate each line to lock its pulse.",
                 hint: "Line 2 is a calm statement (full stop). Line 3 is an urgent call (exclamation mark).",
@@ -1494,7 +1529,8 @@
             },
             {
                 id: "s4",
-                eyebrow: "Stage 3 of 4 · Internal Pause",
+                name: "Internal Pause",
+                teaser: "Line 4 — a short pause before \u201Cbut\u201D, then a full stop",
                 title: "A pause inside the line",
                 intro: "Line 4 needs a short pause before \u201Cbut\u201D and a full stop at the end.",
                 hint: "Place a comma after \u201Cdark\u201D for the short pause, then a full stop at the end of the line.",
@@ -1609,7 +1645,9 @@
             var inner = token
                 ? '<span class="pp-slot-char">' + escapeHtml(token.char) + '</span><span class="pp-slot-tag">✓ ' + escapeHtml(token.label) + '</span>'
                 : '<span class="pp-slot-char">＿</span>';
-            return '<button type="button" class="pp-slot' + (token ? " pp-slot-filled" : "") + '" data-slot="' + key + '" aria-label="' + escapeHtml(label) + '"' + disabled + '>' + inner + '</button>';
+            return '<div class="pp-slot-drop" data-slot="' + key + '">' +
+                '<button type="button" class="pp-slot' + (token ? " pp-slot-filled" : "") + '" data-slot="' + key + '" aria-label="' + escapeHtml(label) + '"' + disabled + '>' + inner + '</button>' +
+                '</div>';
         }
 
         function ppLineHTML(key, mode) {
@@ -1640,14 +1678,28 @@
 
         function ppRenderMission() {
             var poem = ["l1", "l2", "l3", "l4"].map(function (k) { return ppLineHTML(k, "empty"); }).join("");
+            var route = PP.stages.map(function (st, i) {
+                return '<li>' + ppStageTeaser(i) + '</li>';
+            }).join("");
             return '<div class="pp-card">' +
                 '<div class="pp-eyebrow">Mission Brief</div>' +
                 '<h2 class="pp-title">Keep the poem\u2019s pulse alive</h2>' +
                 '<p class="pp-intro">A poem is a moving pulse line, but right now the beat is unsteady — every end mark is missing. Place the correct punctuation into the fixed slots to stabilise all four lines and preserve the poem\u2019s pace and meaning.</p>' +
+                '<div class="pp-route"><b>Your route</b><ol class="pp-route-list">' + route + '</ol></div>' +
                 '<div class="pp-poem">' + poem + '</div>' +
                 '<p class="pp-note">Four pulse segments are unstable. Choose accurate end marks and steady the rhythm.</p>' +
                 '<div class="button-row"><button type="button" class="primary-btn" id="ppBegin">Begin</button></div>' +
                 '</div>';
+        }
+
+        function ppStageEyebrow(idx) {
+            var st = PP.stages[idx];
+            return "Stage " + (idx + 1) + " of " + PP.stages.length + " · " + st.name;
+        }
+
+        function ppStageTeaser(idx) {
+            var st = PP.stages[idx];
+            return '<b>' + escapeHtml(ppStageEyebrow(idx)) + ':</b> ' + escapeHtml(st.teaser);
         }
 
         function ppRenderStage() {
@@ -1669,7 +1721,7 @@
                 ? '<p class="pp-note-ok">✓ This stage\u2019s lines are stable.</p>'
                 : '<div class="pp-tray"><p class="pp-tray-title">Punctuation tokens</p><p class="pp-tray-help">Tap a token to pick it up, then tap its empty slot to drop it. You can also drag a token straight onto a slot.</p><div class="pp-tray-tokens">' + tokens + '</div></div>';
             return '<div class="pp-card">' +
-                '<div class="pp-eyebrow">' + escapeHtml(st.eyebrow) + '</div>' +
+                '<div class="pp-eyebrow">' + escapeHtml(ppStageEyebrow(PP.stageIdx)) + '</div>' +
                 '<h2 class="pp-title">' + escapeHtml(st.title) + '</h2>' +
                 '<p class="pp-intro">' + escapeHtml(st.intro) + '</p>' +
                 '<div class="pp-poem">' + lines + '</div>' +
@@ -1724,6 +1776,7 @@
                 '<div class="pp-eyebrow">Mission Complete</div>' +
                 '<h2 class="pp-title"><span class="pp-check-big">✓</span> Poem pulse stable</h2>' +
                 '<p class="pp-intro">You stabilised all four lines and preserved the poem\u2019s pace and meaning.</p>' +
+                '<div class="pp-route"><b>Route completed</b><ol class="pp-route-list">' + PP.stages.map(function (st, i) { return '<li>' + ppStageTeaser(i) + '</li>'; }).join("") + '</ol></div>' +
                 '<div class="pp-skill-row">' +
                 '<p class="pp-note-ok">Skills you used:</p>' +
                 '<ul>' +
@@ -2012,6 +2065,12 @@
             if (msg) ppAnnounce(msg);
         }
 
+        function ppClearDropOver() {
+            document.querySelectorAll(".pp-slot-drop.pp-drop-over").forEach(function (el) {
+                el.classList.remove("pp-drop-over");
+            });
+        }
+
         function ppBindHost() {
             if (PP._bound) return;
             PP._bound = true;
@@ -2049,19 +2108,33 @@
                 }
             });
             host.addEventListener("dragover", function (ev) {
-                var slotBtn = ev.target.closest(".pp-slot");
-                if (!slotBtn || slotBtn.disabled) return;
+                var dropEl = ev.target.closest(".pp-slot-drop");
+                if (!dropEl || PP.slotFill[dropEl.dataset.slot]) return;
                 var data = ev.dataTransfer.types;
-                if (data && data.indexOf("text/plain") !== -1) ev.preventDefault();
+                if (data && data.indexOf("text/plain") !== -1) {
+                    ev.preventDefault();
+                    ev.dataTransfer.dropEffect = "copy";
+                    dropEl.classList.add("pp-drop-over");
+                }
+            });
+            host.addEventListener("dragleave", function (ev) {
+                var dropEl = ev.target.closest(".pp-slot-drop");
+                if (!dropEl) return;
+                if (ev.relatedTarget && dropEl.contains(ev.relatedTarget)) return;
+                dropEl.classList.remove("pp-drop-over");
+            });
+            host.addEventListener("dragend", function () {
+                ppClearDropOver();
             });
             host.addEventListener("drop", function (ev) {
-                var slotBtn = ev.target.closest(".pp-slot");
-                if (!slotBtn || slotBtn.disabled) return;
+                var dropEl = ev.target.closest(".pp-slot-drop");
+                if (!dropEl || PP.slotFill[dropEl.dataset.slot]) return;
                 var raw = ev.dataTransfer.getData("text/plain");
                 if (!raw || !PP_TOKEN_BY_ID[raw]) return;
                 ev.preventDefault();
                 PP.selectedToken = raw;
-                ppPlace(slotBtn.dataset.slot);
+                ppPlace(dropEl.dataset.slot);
+                ppClearDropOver();
             });
         }
 
