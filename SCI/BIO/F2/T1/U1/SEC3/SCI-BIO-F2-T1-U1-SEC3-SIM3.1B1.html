@@ -110,8 +110,9 @@
         .slider-col { display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 40px; }
         .slider-col label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); writing-mode: vertical-lr; text-orientation: mixed; transform: rotate(180deg); margin-bottom: 4px; }
         .vert-slider { writing-mode: vertical-lr; direction: rtl; width: 44px; height: 300px; accent-color: var(--accent); cursor: pointer; }
+        .slider-row { display: flex; align-items: flex-start; gap: 6px; }
         .slider-end-labels { display: flex; flex-direction: column; justify-content: space-between; height: 300px; font-size: 0.7rem; color: var(--muted); text-align: center; }
-        .slider-end-labels span { width: 60px; }
+        .slider-end-labels span { width: 72px; }
 
         .cavity-col { position: relative; }
         .cavity-canvas-wrap { width: 420px; height: 380px; position: relative; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
@@ -515,7 +516,22 @@
             }
         };
 
+        function shuffleIndices(n) {
+            const arr = [];
+            for (let i = 0; i < n; i++) arr.push(i);
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+            }
+            return arr;
+        }
+
         function devInit() {
+            /* Fresh session: clear leftover progress from a previous session so a
+               reload always starts cleanly (walkthrough, completion, hints, time). */
+            ["walkthroughDone", "completion", "questionsCorrect", "questionsTotal", "totalAttempts", "firstAttemptCorrect", "hintUsed", "timeOnTask", "finalMastery"].forEach(function (k) {
+                try { sessionStorage.removeItem(SIM_CONFIG.simId + ":" + k); } catch (e) {}
+            });
             buildSimUI();
             simState = {
                 diaphragmPos: 0,
@@ -542,6 +558,7 @@
                 questionAttempts: [0, 0, 0, 0, 0, 0],
                 questionCorrectCount: 0,
                 questionResults: [],
+                choiceOrder: QUESTIONS.map(function () { return shuffleIndices(QUESTIONS.length); }),
                 hintUsed: false,
                 startTime: Date.now()
             };
@@ -570,8 +587,10 @@
                 <div class="sim-main">
                     <div class="slider-col">
                         <label for="diaphragmSlider">Diaphragm Position</label>
-                        <input type="range" id="diaphragmSlider" class="vert-slider" min="0" max="100" value="0" step="1" orient="vertical" aria-label="Diaphragm Position: Up is Relaxed, Down is Contracted">
-                        <div class="slider-end-labels"><span>Relaxed (Up)</span><span>Contracted (Down)</span></div>
+                        <div class="slider-row">
+                            <input type="range" id="diaphragmSlider" class="vert-slider" min="0" max="100" value="0" step="1" orient="vertical" aria-label="Diaphragm Position: Up is Relaxed, Down is Contracted">
+                            <div class="slider-end-labels"><span>Relaxed (Up)</span><span>Contracted (Down)</span></div>
+                        </div>
                     </div>
                     <div class="cavity-col">
                         <div class="cavity-canvas-wrap">
@@ -698,10 +717,16 @@
             const hs = simState.hotspots.find(h => h.key === key);
             if (hs) {
                 const tipW = tip.offsetWidth;
-                let left = hs.cx + 16;
-                if (left + tipW > cavityCanvas.width - 10) left = hs.cx - tipW - 16;
-                tip.style.left = (left / scaleX) + "px";
-                tip.style.top = ((hs.cy / scaleY) - tip.offsetHeight / 2) + "px";
+                const tipH = tip.offsetHeight;
+                const wrapW = cavityCanvas.clientWidth;
+                const wrapH = cavityCanvas.clientHeight;
+                let left = (hs.cx + 20) / scaleX;
+                if (left + tipW > wrapW - 8) left = (hs.cx - 20) / scaleX - tipW;
+                left = Math.max(8, Math.min(left, wrapW - tipW - 8));
+                let top = (hs.cy / scaleY) - tipH / 2;
+                top = Math.max(8, Math.min(top, wrapH - tipH - 8));
+                tip.style.left = left + "px";
+                tip.style.top = top + "px";
             }
         }
 
@@ -1081,12 +1106,12 @@
 
             /* Build clickable hotspot hit-regions for this frame */
             simState.hotspots = [
-                { key: "trachea", cx: cx, cy: (h * 0.04 + lungTop) / 2, rx: 12, ry: (lungTop - h * 0.04) / 2 + 8 },
-                { key: "lungs", cx: cx - lungW * 1.1, cy: (lungTop + lungBottom) / 2, rx: lungW + 6, ry: (lungBottom - lungTop) / 2 + 6 },
-                { key: "lungs", cx: cx + lungW * 1.1, cy: (lungTop + lungBottom) / 2, rx: lungW + 6, ry: (lungBottom - lungTop) / 2 + 6 },
-                { key: "diaphragm", cx: cx, cy: diaphragmY, rx: w * ribSpread + 8, ry: 30 },
-                { key: "ribs", cx: cx - w * ribSpread * 0.72, cy: (ribTop + ribBottom) / 2, rx: w * ribSpread * 0.4, ry: (ribBottom - ribTop) / 2 },
-                { key: "ribs", cx: cx + w * ribSpread * 0.72, cy: (ribTop + ribBottom) / 2, rx: w * ribSpread * 0.4, ry: (ribBottom - ribTop) / 2 }
+                { key: "trachea", cx: cx, cy: (h * 0.04 + lungTop) / 2, rx: 16, ry: (lungTop - h * 0.04) / 2 + 10 },
+                { key: "ribs", cx: cx - w * ribSpread * 0.7, cy: (ribTop + ribBottom) / 2, rx: w * ribSpread * 0.55, ry: (ribBottom - ribTop) / 2 + 10 },
+                { key: "ribs", cx: cx + w * ribSpread * 0.7, cy: (ribTop + ribBottom) / 2, rx: w * ribSpread * 0.55, ry: (ribBottom - ribTop) / 2 + 10 },
+                { key: "lungs", cx: cx - lungW * 1.1, cy: (lungTop + lungBottom) / 2, rx: lungW, ry: (lungBottom - lungTop) / 2 },
+                { key: "lungs", cx: cx + lungW * 1.1, cy: (lungTop + lungBottom) / 2, rx: lungW, ry: (lungBottom - lungTop) / 2 },
+                { key: "diaphragm", cx: cx, cy: diaphragmY, rx: w * ribSpread + 8, ry: 32 }
             ];
 
             /* Body outline */
@@ -1113,10 +1138,10 @@
             }
 
             /* Lungs */
-            const fillAlpha = 0.08 + simState.lungFill * 0.25;
-            ctx.fillStyle = isDark ? `rgba(125,211,252,${fillAlpha})` : `rgba(14,165,233,${fillAlpha * 0.8})`;
-            ctx.strokeStyle = isDark ? "rgba(125,211,252,0.4)" : "rgba(14,165,233,0.3)";
-            ctx.lineWidth = 2;
+            const fillAlpha = 0.22 + simState.lungFill * 0.35;
+            ctx.fillStyle = isDark ? `rgba(125,211,252,${fillAlpha})` : `rgba(2,111,190,${fillAlpha * 0.95})`;
+            ctx.strokeStyle = isDark ? "rgba(125,211,252,0.75)" : "rgba(2,111,190,0.6)";
+            ctx.lineWidth = 2.5;
 
             ctx.beginPath();
             ctx.ellipse(cx - lungW * 1.1, (lungTop + lungBottom) / 2, lungW, (lungBottom - lungTop) / 2, 0, 0, Math.PI * 2);
@@ -1168,7 +1193,8 @@
                 /* Ribs label */
                 ctx.fillStyle = isDark ? "rgba(200,210,240,0.45)" : "rgba(50,60,100,0.4)";
                 ctx.font = "bold 16px Arial, sans-serif";
-                ctx.fillText("Ribs", cx - w * (ribSpread + 0.1) - 6, ribTop + 10);
+                const ribsLabelX = Math.max(16, cx - w * ribSpread - 8);
+                ctx.fillText("Ribs", ribsLabelX, ribTop + 10);
             }
 
             /* Diaphragm (color reflects contraction/tension) */
@@ -1221,8 +1247,8 @@
             /* Highlight the hovered or pinned (clicked) hotspot */
             const hl = simState.hoverHotspot || simState.pinnedHotspot;
             if (hl) {
-                ctx.fillStyle = "rgba(255,255,255,0.14)";
-                ctx.strokeStyle = "rgba(255,255,255,0.55)";
+                ctx.fillStyle = isDark ? "rgba(255,255,255,0.16)" : "rgba(14,165,233,0.2)";
+                ctx.strokeStyle = isDark ? "rgba(255,255,255,0.6)" : "rgba(2,111,190,0.75)";
                 ctx.lineWidth = 2;
                 for (const hs of simState.hotspots) {
                     if (hs.key !== hl) continue;
@@ -1378,8 +1404,8 @@
             document.getElementById("assessHeading").textContent = "Question " + (idx + 1) + " of " + QUESTIONS.length;
             document.getElementById("assessQuestion").textContent = q.question;
 
-            const choicesHTML = q.choices.map((c, i) =>
-                '<button class="assessment-choice" data-index="' + i + '" aria-label="Choice ' + (i + 1) + '">' + c + '</button>'
+            const choicesHTML = simState.choiceOrder[idx].map((origIdx, i) =>
+                '<button class="assessment-choice" data-oindex="' + origIdx + '" aria-label="Choice ' + (i + 1) + '">' + q.choices[origIdx] + '</button>'
             ).join("");
             document.getElementById("assessmentChoices").innerHTML = choicesHTML;
             document.querySelectorAll(".assessment-choice").forEach(btn => {
@@ -1399,14 +1425,14 @@
             if (simState.questionAnswered) return;
             const qi = simState.currentQuestion;
             const q = QUESTIONS[qi];
-            const choiceIdx = Number(btn.dataset.index);
+            const origIdx = Number(btn.dataset.oindex);
             simState.questionAttempts[qi]++;
             const allChoices = document.querySelectorAll(".assessment-choice");
             allChoices.forEach(c => c.classList.add("disabled"));
             document.getElementById("hintBtn").classList.add("hidden");
             const feedback = document.getElementById("assessmentFeedback");
 
-            if (choiceIdx === q.correctIndex) {
+            if (origIdx === q.correctIndex) {
                 btn.classList.add("correct");
                 feedback.className = "assessment-feedback correct";
                 feedback.innerHTML = "<strong>Correct!</strong> " + q.feedbackCorrect;
@@ -1415,7 +1441,7 @@
                 onQuestionDone();
             } else {
                 btn.classList.add("incorrect");
-                allChoices[q.correctIndex].classList.add("correct");
+                allChoices.forEach(c => { if (Number(c.dataset.oindex) === q.correctIndex) c.classList.add("correct"); });
                 feedback.className = "assessment-feedback incorrect";
                 if (simState.questionAttempts[qi] < 2) {
                     feedback.innerHTML = "<strong>Not quite.</strong> " + q.feedbackIncorrect + " Try again!";
@@ -1451,6 +1477,7 @@
         function retryQuestion() {
             simState.questionAnswered = false;
             document.getElementById("retryBtn").classList.add("hidden");
+            document.getElementById("hintBtn").classList.remove("hidden");
             const fb = document.getElementById("assessmentFeedback");
             fb.className = "assessment-feedback"; fb.innerHTML = "";
             document.querySelectorAll(".assessment-choice").forEach(c => c.classList.remove("disabled", "correct", "incorrect"));
