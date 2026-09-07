@@ -610,6 +610,20 @@
 }
 
 .cc-hint-final-active{opacity:1!important;filter:none!important;cursor:pointer!important;pointer-events:auto!important}.cc-hint-final-active:hover{transform:translateY(-1px)}
+.cc-hint {
+    opacity: 1 !important;
+    filter: none !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    background: color-mix(in srgb, var(--warning) 18%, var(--surface-2)) !important;
+    color: var(--text) !important;
+    border: 1px solid color-mix(in srgb, var(--warning) 55%, var(--border)) !important;
+}
+.cc-hint:hover {
+    background: color-mix(in srgb, var(--warning) 28%, var(--surface-2)) !important;
+}
+.cc-complex-row .cc-row-hint { margin-top: 10px; }
+
 </style>
 </head>
 
@@ -1201,6 +1215,7 @@
             route2: { selected: null, punctuation: null, locked: false },
             complexA: { selected: null, punctuation: null, locked: false },
             complexB: { selected: null, punctuation: null, locked: false },
+            finalBanks: { sentence1: [], sentence2: [] },
             final: {
                 sentence1: [],
                 sentence2: [],
@@ -1220,11 +1235,11 @@
                 model: "The team wanted to practise, but the field was flooded."
             },
             route2: {
-                clauses: ["The power went out during the storm", "the emergency lights switched on automatically"],
+                clauses: ["The battery was completely flat", "the device could not start"],
                 choices: ["for", "and", "so"],
                 correct: "so",
                 punctuation: true,
-                model: "The power went out during the storm, so the emergency lights switched on automatically."
+                model: "The battery was completely flat, so the device could not start."
             },
             complexA: {
                 before: "___ the rain started, we moved the equipment inside.",
@@ -1248,8 +1263,23 @@
         const FINAL_2 = [
             "Maya","checked","the","list",",","and","Joel","packed","the","boxes","."
         ];
-        const SCRAMBLED_1 = ["school","Although","assembly","the","reached",",","was","we","before","late","bus","."];
-        const SCRAMBLED_2 = ["boxes","and","Maya","packed","the","Joel","list",",","checked","the","."];
+        const FINAL_BANK_SOURCE_1 = [...FINAL_1];
+        const FINAL_BANK_SOURCE_2 = [...FINAL_2];
+
+        function ccShuffle(items) {
+            const a = [...items];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function ccEnsureFinalBanks() {
+            if (!CC.finalBanks.sentence1.length) CC.finalBanks.sentence1 = ccShuffle(FINAL_BANK_SOURCE_1);
+            if (!CC.finalBanks.sentence2.length) CC.finalBanks.sentence2 = ccShuffle(FINAL_BANK_SOURCE_2);
+        }
+        
 
         function ccEscape(v) {
             return String(v).replace(/[&<>"']/g, c => ({
@@ -1460,6 +1490,7 @@
                         ${d.choices.map(c => `<button class="cc-gate-choice ${s.selected === c ? "selected" : ""}" data-route="${id}" data-choice="${c}" type="button" ${s.selected ? "disabled" : ""}>${c}</button>`).join("")}
                     </div>
                     ${s.message ? ccFeedback(s.message, s.messageType || "error") : ""}
+                    <div class="cc-row-hint" data-hint-for="${id}"></div>
                 </div>`;
             }
 
@@ -1502,6 +1533,7 @@
 
         function ccFinal() {
             const f = CC.final;
+            ccEnsureFinalBanks();
             const ready = f.sentence1.join(" ") === FINAL_1.join(" ")
                 && f.sentence2.join(" ") === FINAL_2.join(" ")
                 && f.class1 === "complex"
@@ -1522,7 +1554,7 @@
                     <div class="cc-build-card">
                         <h3>Sentence 1</h3>
                         <div class="cc-build-area" aria-label="Sentence 1 drop area">${build(f.sentence1, "sentence1")}</div>
-                        <div class="cc-tile-bank">${tokenButtons(SCRAMBLED_1, "sentence1")}</div>
+                        <div class="cc-tile-bank">${tokenButtons(CC.finalBanks.sentence1, "sentence1")}</div>
                         <div class="cc-class-row">
                             <span>Classification:</span>
                             <button class="cc-class ${f.class1 === "compound" ? "selected" : ""}" data-target="class1" data-value="compound" type="button">Compound</button>
@@ -1532,7 +1564,7 @@
                     <div class="cc-build-card">
                         <h3>Sentence 2</h3>
                         <div class="cc-build-area" aria-label="Sentence 2 drop area">${build(f.sentence2, "sentence2")}</div>
-                        <div class="cc-tile-bank">${tokenButtons(SCRAMBLED_2, "sentence2")}</div>
+                        <div class="cc-tile-bank">${tokenButtons(CC.finalBanks.sentence2, "sentence2")}</div>
                         <div class="cc-class-row">
                             <span>Classification:</span>
                             <button class="cc-class ${f.class2 === "compound" ? "selected" : ""}" data-target="class2" data-value="compound" type="button">Compound</button>
@@ -1549,8 +1581,12 @@
             dom.simContainer.querySelectorAll(".cc-word-token").forEach(btn => {
                 btn.addEventListener("click", () => {
                     const target = btn.dataset.target;
-                    const value = (target === "sentence1" ? FINAL_1 : FINAL_2)[Number(btn.dataset.index)];
+                    const bank = CC.finalBanks[target];
+                    const index = Number(btn.dataset.index);
+                    const value = bank[index];
+                    if (value == null) return;
                     f[target].push(value);
+                    bank.splice(index, 1);
                     ccFinal();
                 });
             });
@@ -1558,7 +1594,9 @@
             dom.simContainer.querySelectorAll(".final-token").forEach(btn => {
                 btn.addEventListener("click", () => {
                     const target = btn.dataset.target;
-                    f[target].splice(Number(btn.dataset.index), 1);
+                    const index = Number(btn.dataset.index);
+                    const removed = f[target].splice(index, 1)[0];
+                    if (removed != null) CC.finalBanks[target].push(removed);
                     ccFinal();
                 });
             });
@@ -1583,69 +1621,75 @@
                 CC.complexB = { selected:null, punctuation:null, locked:false, message:"", messageType:"error" };
                 ccComplex();
             } else if (CC.screen === 5) {
-                CC.final = { sentence1:[], sentence2:[], class1:null, class2:null, active:1, locked:false };
+                CC.finalBanks = { sentence1:[], sentence2:[] };
+                CC.finalBanks = { sentence1:[], sentence2:[] };
+            CC.final = { sentence1:[], sentence2:[], class1:null, class2:null, active:1, locked:false };
                 ccFinal();
             }
         }
 
         function ccHint() {
             CC.hints++;
-            let title = "Think about the relationship";
-            let msg = "";
+
+            const setHint = (selector, title, msg) => {
+                const el = dom.simContainer.querySelector(selector);
+                if (!el) return;
+                el.innerHTML = `<div class="cc-feedback hint"><strong>${title}:</strong> ${msg}</div>`;
+            };
+
             if (CC.screen === 2) {
-                title = "Route 1 hint";
-                msg = "Read both clauses together. Do the ideas add information, contrast, or show a result?";
-            } else if (CC.screen === 3) {
-                title = "Route 2 hint";
-                msg = "Think about what happens first and what happens because of it. Which connection best shows that result?";
-            } else if (CC.screen === 4) {
+                setHint(".cc-nav", "Route 1 hint",
+                    "Compare the two ideas. One idea does not fit smoothly with the other, so focus on the relationship between them before choosing a gate.");
+                return;
+            }
+
+            if (CC.screen === 3) {
+                setHint(".cc-nav", "Route 2 hint",
+                    "The second event follows from the first. Choose the gate that best shows that one event leads to the other.");
+                return;
+            }
+
+            if (CC.screen === 4) {
                 const aUnanswered = !CC.complexA.selected;
                 const bUnanswered = !CC.complexB.selected;
-                if (aUnanswered && bUnanswered) {
-                    title = "Complex routes hint";
-                    msg = "One sentence expresses a reason; the other expresses a time relationship. Match each sentence to the relationship it describes.";
-                } else if (aUnanswered) {
-                    title = "First sentence hint";
-                    msg = "The opening clause explains why the equipment was moved. Look for a subordinating conjunction that introduces a reason.";
-                } else if (bUnanswered) {
-                    title = "Second sentence hint";
-                    msg = "The two events are connected by when they happen. Look for a subordinating conjunction that expresses time.";
-                } else {
-                    title = "Complex routes review";
-                    msg = "Review both relationships and make sure each conjunction matches the meaning of its sentence.";
+
+                if (aUnanswered) {
+                    setHint('[data-hint-for="complexA"]', "First sentence hint",
+                        "The opening part gives the circumstance for what happens next. Look at the meaning of the two parts before choosing a connector.");
                 }
-            } else if (CC.screen === 5) {
+                if (bUnanswered) {
+                    setHint('[data-hint-for="complexB"]', "Second sentence hint",
+                        "The blank connects two events. Think about how the timing of those events relates before choosing a connector.");
+                }
+                if (!aUnanswered && !bUnanswered) {
+                    setHint(".cc-nav", "Complex routes review",
+                        "Review the meaning of each sentence and ask whether the connector fits the relationship between its two parts.");
+                }
+                return;
+            }
+
+            if (CC.screen === 5) {
                 const one = CC.final.sentence1.join(" ") === FINAL_1.join(" ");
                 const two = CC.final.sentence2.join(" ") === FINAL_2.join(" ");
+
                 if (!one && !two) {
-                    title = "Sentence-building hint";
-                    msg = "Look for the words that signal the relationship between the clauses. Use punctuation and sentence meaning to guide the order.";
+                    setHint(".cc-nav", "Sentence-building hint",
+                        "Look for words that belong together as a clause. Punctuation can help you notice where one part ends and another begins.");
                 } else if (!one) {
-                    title = "Sentence 1 hint";
-                    msg = "The opening word changes the relationship between the first clause and the main clause. Use the surrounding words and punctuation to build a natural sentence.";
+                    setHint(".cc-nav", "Sentence 1 hint",
+                        "Start by finding the word or punctuation that naturally begins the first clause. Build from there using sentence meaning.");
                 } else if (!two) {
-                    title = "Sentence 2 hint";
-                    msg = "Both parts can stand as complete ideas. Look for the conjunction that joins those ideas and use the punctuation as a guide.";
+                    setHint(".cc-nav", "Sentence 2 hint",
+                        "Both sides contain complete ideas. Use the punctuation and the linking word to guide your order.");
                 } else {
-                    title = "Classification hint";
-                    msg = "Check whether each clause can stand alone. That will help you decide which sentence structure you have.";
+                    setHint(".cc-nav", "Classification hint",
+                        "Ask whether the clauses can stand alone as complete ideas. Use that test to decide the sentence type.");
                 }
-            } else {
-                title = "Mission hint";
-                msg = "Look at how the ideas relate to one another before choosing a gate.";
+                return;
             }
-            const existing = dom.simContainer.querySelector(".cc-feedback.hint");
-            if (existing) {
-                existing.innerHTML = `<strong>${title}:</strong> ${msg}`;
-            } else {
-                const nav = dom.simContainer.querySelector(".cc-nav");
-                if (nav) {
-                    const el = document.createElement("div");
-                    el.className = "cc-feedback hint";
-                    el.innerHTML = `<strong>${title}:</strong> ${msg}`;
-                    nav.parentNode.insertBefore(el, nav);
-                }
-            }
+
+            setHint(".cc-nav", "Mission hint",
+                "Before choosing a gate, think about the relationship between the ideas rather than looking for a word that simply sounds natural.");
         }
 
         function devInit() {
