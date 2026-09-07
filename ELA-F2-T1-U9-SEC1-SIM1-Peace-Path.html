@@ -605,6 +605,7 @@
                   <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
                 </button>
                 <!-- ===== END AUDIO TOGGLE BUTTON ===== -->
+                <button class="control-btn" id="reviewBtn" aria-label="Review progress">📋 Review</button>
                 <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
                 <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
                 <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
@@ -703,6 +704,27 @@
             <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
                 <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
                 <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+
+    <div class="modal" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeReviewBtn" aria-label="Close review">×</button>
+            <h3 id="reviewHeading">Review History</h3>
+            <div id="reviewBody"></div>
+        </section>
+    </div>
+
+    <div class="modal" id="ppConfirmModal" role="dialog" aria-modal="true" aria-labelledby="ppConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closePpConfirmBtn" aria-label="Close confirmation">×</button>
+            <h3 id="ppConfirmHeading">Start over?</h3>
+            <p id="ppConfirmText">Your current question progress will be cleared.</p>
+            <div class="button-row" style="justify-content:flex-start">
+                <button class="secondary-btn" id="cancelPpConfirmBtn" type="button">Cancel</button>
+                <button class="danger-btn" id="confirmPpConfirmBtn" type="button">Start Over</button>
             </div>
         </section>
     </div>
@@ -986,6 +1008,10 @@
             startBtn: document.getElementById("startBtn"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            reviewBtn: document.getElementById("reviewBtn"),
+            reviewModal: document.getElementById("reviewModal"),
+            reviewBody: document.getElementById("reviewBody"),
+            closeReviewBtn: document.getElementById("closeReviewBtn"),
             helpBtn: document.getElementById("helpBtn"),
             themeToggleBtn: document.getElementById("themeToggleBtn"),
             fullscreenBtn: document.getElementById("fullscreenBtn"),
@@ -997,20 +1023,16 @@
             resetConfirmModal: document.getElementById("resetConfirmModal"),
             closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
             cancelResetBtn: document.getElementById("cancelResetBtn"),
-            confirmResetBtn: document.getElementById("confirmResetBtn")
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            ppConfirmModal: document.getElementById("ppConfirmModal"),
+            closePpConfirmBtn: document.getElementById("closePpConfirmBtn"),
+            cancelPpConfirmBtn: document.getElementById("cancelPpConfirmBtn"),
+            confirmPpConfirmBtn: document.getElementById("confirmPpConfirmBtn")
         };
 
         initializeApp();
 
         function initializeApp() {
-            // One-time cleanup: earlier template versions saved to
-            // localStorage, which outlives the tab. Remove any of this sim's
-            // stale keys so shared machines carry no leftover learner data.
-            try {
-                Object.keys(localStorage)
-                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
-                    .forEach((k) => localStorage.removeItem(k));
-            } catch (err) { /* storage unavailable */ }
             applyConfigToUI();
             bindEvents();
             renderInstructions();
@@ -1043,6 +1065,9 @@
                 devInit();
             });
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.reviewBtn.addEventListener("click", openReviewModal);
+            dom.closeReviewBtn.addEventListener("click", closeReviewModal);
+            dom.reviewModal.addEventListener("click", (event) => { if (event.target === dom.reviewModal) closeReviewModal(); });
             dom.helpBtn.addEventListener("click", () => {
                 dom.helpBtn.classList.remove("pulse-help");
                 storageSet(SIM_CONFIG.simId + "-help-seen", "true");
@@ -1065,19 +1090,22 @@
                 devReset();
                 showScreen("home");
                 closeResetConfirmModal();
+                closeReviewModal();
+                closePpConfirmModal();
             });
             dom.resetConfirmModal.addEventListener("click", (event) => {
                 if (event.target === dom.resetConfirmModal) {
                     closeResetConfirmModal();
                 }
             });
+            dom.closePpConfirmBtn.addEventListener("click", closePpConfirmModal);
+            dom.cancelPpConfirmBtn.addEventListener("click", closePpConfirmModal);
+            dom.ppConfirmModal.addEventListener("click", (event) => { if (event.target === dom.ppConfirmModal) closePpConfirmModal(); });
             document.addEventListener("fullscreenchange", updateFullscreenButton);
             document.addEventListener("keydown", handleKeyShortcuts);
         }
 
         function renderInstructions() {
-            const intro = document.createElement("p");
-            intro.textContent = "Here is how this simulation works:";
             const list = document.createElement("ul");
 
             SIM_CONFIG.instructions.forEach((item) => {
@@ -1086,7 +1114,7 @@
                 list.appendChild(li);
             });
 
-            dom.instructionsBody.replaceChildren(intro, list);
+            dom.instructionsBody.replaceChildren(list);
         }
 
         function openInstructionsModal() {
@@ -1174,10 +1202,10 @@
         }
 
         function storageGet(key) {
-            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+            try { return localStorage.getItem(key); } catch (err) { return null; }
         }
         function storageSet(key, value) {
-            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+            try { localStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
         }
 
         // Peace Path is silent by design: the SIMS specification prohibits sound cues.
@@ -1207,6 +1235,29 @@
             { title: "Final Resolution Plan", progress: "4 of 4" }
         ];
 
+        const PP_STATE_KEY = SIM_CONFIG.simId + "-peace-path-state";
+        let ppConfirmAction = null;
+        function savePPState() { storageSet(PP_STATE_KEY, JSON.stringify({ ...pp, selections:[...pp.selections] })); }
+        function loadPPState() {
+            const raw=storageGet(PP_STATE_KEY); if(!raw) return false;
+            try { const saved=JSON.parse(raw); Object.assign(pp,saved); pp.selections=new Set(saved.selections||[]); return true; } catch(e){ return false; }
+        }
+        function clearPPState(){ try{ localStorage.removeItem(PP_STATE_KEY); }catch(e){} }
+        function ppRecord(label, result){ pp.history.push({screen:pp.screen,label,result,time:new Date().toLocaleTimeString()}); savePPState(); }
+        function openReviewModal(){
+            const entries=pp.history.length ? pp.history.map(x=>`<li><strong>${escapeHtml(x.label)}</strong> — ${escapeHtml(x.result)} <span class="muted">(${escapeHtml(x.time)})</span></li>`).join("") : "<p>No answers recorded yet.</p>";
+            dom.reviewBody.innerHTML=`<p>Screen: ${pp.screen===1?"Mission Brief":pp.screen-1+" of 4"} • Attempts: ${pp.attempts} • Hints: ${pp.hints}</p><ul>${entries}</ul>`;
+            dom.reviewModal.classList.add("show");
+        }
+        function closeReviewModal(){ dom.reviewModal.classList.remove("show"); }
+        function openPpConfirmModal(action, text){
+            ppConfirmAction=action; document.getElementById("ppConfirmText").textContent=text; dom.ppConfirmModal.classList.add("show");
+        }
+        function closePpConfirmModal(){ dom.ppConfirmModal.classList.remove("show"); ppConfirmAction=null; }
+        dom && setTimeout(()=>{ if(dom.confirmPpConfirmBtn) dom.confirmPpConfirmBtn.onclick=()=>{ const action=ppConfirmAction; closePpConfirmModal(); if(action) action(); }; },0);
+        function ppGoBack(){ if(pp.screen>1 && !pp.locked){ pp.screen--; pp.selections.clear(); pp.locked=false; ppClearFeedback(); savePPState(); renderPP(); } }
+        function shuffle(items){ return items.map(v=>({v,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.v); }
+
         function ppResetState() {
             pp.screen = 1;
             pp.attempts = 0;
@@ -1221,12 +1272,12 @@
         }
 
         function devInit() {
-            ppResetState();
+            if (!loadPPState()) ppResetState();
             renderPP();
         }
 
         function devReset() {
-            ppResetState();
+            ppResetState(); clearPPState();
             if (document.getElementById("peacePathApp")) renderPP();
         }
 
@@ -1313,7 +1364,9 @@
 
             ppRenderStatus();
             back.disabled = pp.screen <= 1 || pp.locked;
-            tryBtn.disabled = !pp.locked;
+            back.onclick = ppGoBack;
+            hint.disabled = pp.screen === 1 || pp.locked;
+            tryBtn.disabled = pp.screen === 1 || !pp.locked;
             feedback.classList.add("hidden");
             feedback.innerHTML = "";
 
@@ -1329,7 +1382,7 @@
                     ${ppMap()}
                 </div>
                 <div class="button-row"><button class="primary-btn" id="ppBeginBtn" type="button">Begin Path →</button></div>`;
-                document.getElementById("ppBeginBtn").onclick = () => { pp.screen = 2; renderPP(); };
+                document.getElementById("ppBeginBtn").onclick = () => { pp.screen = 2; savePPState(); renderPP(); };
                 return;
             }
 
@@ -1339,7 +1392,7 @@
             if (pp.screen === 5) renderResolution(scene);
 
             hint.onclick = () => ppHint();
-            tryBtn.onclick = () => { pp.locked = false; pp.selections.clear(); renderPP(); };
+            tryBtn.onclick = () => openPpConfirmModal(()=>{ pp.locked = false; pp.selections.clear(); savePPState(); renderPP(); }, "Your current question attempt will be cleared. Continue?");
         }
 
         function renderQuestionIntro(title, text) {
@@ -1352,13 +1405,17 @@
                 + `<section class="pp-question">
                     <span class="pp-label">Main conflict</span>
                     <div class="pp-card-grid" id="conflictType">
-                        ${ppOption("external","External — person versus person")}
-                        ${ppOption("internal","Internal — conflict within one person")}
+                        ${shuffle([
+                            ppOption("external","External — person versus person"),
+                            ppOption("internal","Internal — conflict within one person")
+                        ]).join("")}
                     </div>
                     <span class="pp-label" style="margin-top:18px">Asha's internal conflict</span>
                     <div class="pp-card-grid" id="internalChoice">
-                        ${ppOption("worry","She worries the display will look empty.")}
-                        ${ppOption("locked","The classroom is locked")}
+                        ${shuffle([
+                            ppOption("worry","She worries the display will look empty."),
+                            ppOption("locked","The classroom is locked")
+                        ]).join("")}
                     </div>
                 </section>`;
             bindPair("conflictType","internalChoice",["external","worry"], (ok)=>ppJudge(ok,
@@ -1375,18 +1432,24 @@
                 + `<section class="pp-question">
                     <span class="pp-label">Asha's perspective</span>
                     <div class="pp-card-grid" id="ashaChoice">
-                        ${ppOption("images","Visitors need images to understand quickly.")}
-                        ${ppOption("lazy","Asha is lazy")}
+                        ${shuffle([
+                            ppOption("images","Visitors need images to understand quickly."),
+                            ppOption("lazy","Asha is lazy")
+                        ]).join("")}
                     </div>
                     <span class="pp-label" style="margin-top:18px">Devin's perspective</span>
                     <div class="pp-card-grid" id="devinChoice">
-                        ${ppOption("facts","Visitors need written facts to learn accurately.")}
-                        ${ppOption("hates","Devin hates pictures")}
+                        ${shuffle([
+                            ppOption("facts","Visitors need written facts to learn accurately."),
+                            ppOption("hates","Devin hates pictures")
+                        ]).join("")}
                     </div>
                     <span class="pp-label" style="margin-top:18px">Bridge response</span>
                     <div class="pp-card-grid" id="bridgeChoice">
-                        ${ppOption("shared","Both of you value clear information, but you prefer different formats.")}
-                        ${ppOption("blame","One of you should stop being difficult.")}
+                        ${shuffle([
+                            ppOption("shared","Both of you value clear information, but you prefer different formats."),
+                            ppOption("blame","One of you should stop being difficult.")
+                        ]).join("")}
                     </div>
                 </section>`;
             bindTriple(["ashaChoice","devinChoice","bridgeChoice"],["images","facts","shared"], (ok)=>ppJudge(ok,
@@ -1403,13 +1466,17 @@
                 + `<section class="pp-question">
                     <span class="pp-label">Choose the line</span>
                     <div class="pp-card-grid" id="lineChoice">
-                        ${ppOption("escalate","Your idea will ruin the display.")}
-                        ${ppOption("calm","Can we use photographs with short factual captions?")}
+                        ${shuffle([
+                            ppOption("escalate","Your idea will ruin the display."),
+                            ppOption("calm","Can we use photographs with short factual captions?")
+                        ]).join("")}
                     </div>
                     <span class="pp-label" style="margin-top:18px">Effect</span>
                     <div class="pp-card-grid" id="effectChoice">
-                        ${ppOption("contribute","The compromise allows both students to contribute.")}
-                        ${ppOption("decision","Let one student make every decision.")}
+                        ${shuffle([
+                            ppOption("contribute","The compromise allows both students to contribute."),
+                            ppOption("decision","Let one student make every decision.")
+                        ]).join("")}
                     </div>
                 </section>`;
             bindPair("lineChoice","effectChoice",["calm","contribute"], (ok)=>ppJudge(ok,
@@ -1433,7 +1500,7 @@
                 "Select all four exact steps. Do not select either distractor. The path completes only with the complete fair plan.")
                 + `<section class="pp-resolution">
                     <div id="resolutionChoices" class="pp-select-row">
-                        ${items.map(([id,text])=>`<button type="button" class="pp-chip" data-id="${id}" aria-pressed="false">${text}</button>`).join("")}
+                        ${shuffle(items).map(([id,text])=>`<button type="button" class="pp-chip" data-id="${id}" aria-pressed="false">${text}</button>`).join("")}
                     </div>
                     <p class="pp-small">Selected: <span id="selectedCount">0</span> of 4 required steps</p>
                     <div class="button-row" style="justify-content:flex-start"><button class="primary-btn" id="checkResolution" type="button">Check Plan</button></div>
@@ -1477,7 +1544,7 @@
         function ppShowFeedback(title, why, fix, model) {
             const fb = document.getElementById("ppFeedback");
             if (!fb) return;
-            fb.innerHTML = `<strong>${title}</strong><p><b>Why:</b> ${why}</p><p><b>How to fix:</b> ${fix}</p><p class="model"><b>Correct model:</b> ${model}</p>`;
+            fb.classList.remove("pp-success"); fb.innerHTML = `<strong>${title}</strong><p><b>Why:</b> ${why}</p><p><b>How to fix:</b> ${fix}</p><p class="model"><b>Correct model:</b> ${model}</p>`;
             fb.classList.remove("hidden");
             const tryBtn = document.getElementById("ppTryBtn");
             if (tryBtn) tryBtn.disabled = false;
@@ -1485,7 +1552,7 @@
 
         function ppClearFeedback() {
             const fb = document.getElementById("ppFeedback");
-            if (fb) { fb.classList.add("hidden"); fb.innerHTML = ""; }
+            if (fb) { fb.classList.add("hidden"); fb.classList.remove("pp-success"); fb.innerHTML = ""; }
         }
 
         function ppOption(id,text) {
@@ -1510,12 +1577,17 @@
                             pp.attempts++;
                             if(!pp.firstAnswerRecorded){ pp.firstAnswerRecorded=true; pp.firstAttemptMistakes++; }
                             btn.classList.add("wrong");
+                            pp.locked = true;
+                            document.querySelectorAll(`#${a} .pp-option, #${b} .pp-option`).forEach(x=>{x.disabled=true;});
                             const f=feedback[group];
                             ppShowFeedback(f[0],f[1],f[2],f[3]);
                             chosen[group]=null;
+                            const tryBtn=document.getElementById("ppTryBtn");
+                            if(tryBtn) tryBtn.disabled=false;
                             return;
                         }
                         btn.classList.add("selected"); btn.setAttribute("aria-pressed","true");
+                        document.querySelectorAll(`#${group} .pp-option`).forEach(x=>{x.disabled=true;});
                         chosen[group]=value; ppClearFeedback();
                         if(chosen[a] && chosen[b]) judge(true);
                     };
@@ -1540,12 +1612,17 @@
                             pp.attempts++;
                             if(!pp.firstAnswerRecorded){ pp.firstAnswerRecorded=true; pp.firstAttemptMistakes++; }
                             btn.classList.add("wrong");
+                            pp.locked = true;
+                            groups.forEach(g=>document.querySelectorAll(`#${g} .pp-option`).forEach(x=>{x.disabled=true;}));
                             const f=feedback[group];
                             ppShowFeedback(f[0],f[1],f[2],f[3]);
                             chosen[group]=null;
+                            const tryBtn=document.getElementById("ppTryBtn");
+                            if(tryBtn) tryBtn.disabled=false;
                             return;
                         }
                         btn.classList.add("selected"); btn.setAttribute("aria-pressed","true");
+                        document.querySelectorAll(`#${group} .pp-option`).forEach(x=>{x.disabled=true;});
                         chosen[group]=value; ppClearFeedback();
                         if(groups.every(g=>chosen[g])) judge(true);
                     };
@@ -1561,11 +1638,13 @@
             }
             if(ok) {
                 pp.locked=true;
+                ppRecord(PP_SCREENS[pp.screen-1].title, "Correct");
                 playSound("correct");
                 pp.screen++;
                 setTimeout(()=>{ pp.locked=false; renderPP(); }, 280);
             } else {
                 pp.locked=true;
+                ppRecord(PP_SCREENS[pp.screen-1].title, "Incorrect");
                 playSound("wrong");
                 const fb=document.getElementById("ppFeedback");
                 fb.innerHTML=`<strong>${title}</strong><p><b>Why:</b> ${why}</p><p><b>How to fix:</b> ${fix}</p><p class="model"><b>Correct model:</b> ${model}</p>`;
@@ -1575,7 +1654,7 @@
         }
 
         function ppHint() {
-            pp.hints++;
+            pp.hints++; savePPState();
             const fb=document.getElementById("ppFeedback");
             const hints = {
                 2:"Look at who the disagreement is between. A private worry is a different type of conflict.",
@@ -1610,7 +1689,7 @@
             document.getElementById("ppBackBtn").disabled=true;
             document.getElementById("ppTryBtn").disabled=true;
             playSound("complete");
-            document.getElementById("ppReplayBtn").onclick=()=>{ ppResetState(); renderPP(); };
+            document.getElementById("ppReplayBtn").onclick=()=>openPpConfirmModal(()=>{ ppResetState(); clearPPState(); renderPP(); }, "Replay Mission will clear this completed mission and start a new run. Continue?");
             document.getElementById("ppHomeBtn").onclick=()=>{ devReset(); showScreen("home"); };
         }
     </script>
