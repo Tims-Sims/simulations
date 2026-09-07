@@ -1277,6 +1277,8 @@
         let simRunning = false;
         let simAnimId = null;
         let simCanvas, simCtx, graphCanvas, graphCtx;
+        let simCssW = 0, simCssH = 0;
+        let graphCssW = 0, graphCssH = 0;
         let shapeSlider, thicknessSlider;
         let rateValueEl, feedbackPanelEl, feedbackMsgEl, playAgainFeedbackBtn;
         let particles = [];
@@ -1443,13 +1445,15 @@
             }
 
             // Lumen label
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
             ctx.font = 'bold 13px Arial, sans-serif';
             ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#ffffff';
             ctx.fillText('Intestine Lumen', canvasW * 0.18, 22);
 
             // Bloodstream label
-            ctx.fillText('Bloodstream', canvasW * 0.82, 22);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('Bloodstream', canvasW * 0.79, canvasH * 0.5);
 
             // Nutrients label
             ctx.font = '11px Arial, sans-serif';
@@ -1496,8 +1500,8 @@
         function drawGraph() {
             const c = graphCanvas;
             const ctx = graphCtx;
-            const w = c.width;
-            const h = c.height;
+            const w = graphCssW || c.width;
+            const h = graphCssH || c.height;
             ctx.clearRect(0, 0, w, h);
 
             // Background
@@ -1596,8 +1600,8 @@
             const thicknessValue = Number(thicknessSlider.value);
             const rate = computeAbsorptionRate(foldValue, thicknessValue);
 
-            const cw = simCanvas.width;
-            const ch = simCanvas.height;
+            const cw = simCssW || simCanvas.width;
+            const ch = simCssH || simCanvas.height;
 
             updateParticles(dt, cw, ch, foldValue, thicknessValue, rate);
             drawSim(cw, ch, foldValue, thicknessValue, rate);
@@ -1648,6 +1652,8 @@
             simCtx.scale(dpr, dpr);
             simCanvas.style.width = rect.width + 'px';
             simCanvas.style.height = rect.height + 'px';
+            simCssW = rect.width;
+            simCssH = rect.height;
 
             const gWrap = graphCanvas.parentElement;
             const gRect = graphCanvas.getBoundingClientRect();
@@ -1656,6 +1662,8 @@
             graphCtx.scale(dpr, dpr);
             graphCanvas.style.width = gRect.width + 'px';
             graphCanvas.style.height = gRect.height + 'px';
+            graphCssW = gRect.width;
+            graphCssH = gRect.height;
 
             // Reset state
             particles = [];
