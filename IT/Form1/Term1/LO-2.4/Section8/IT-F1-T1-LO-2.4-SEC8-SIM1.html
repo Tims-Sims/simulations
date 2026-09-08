@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 1 Desk Rescue: Room Hazards Drag & Drop</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 1 DESK RESCUE: ROOM HAZARDS SIMULATION
+           Single-file HTML/CSS/JS - Master Template Compliant
+           Trinidad and Tobago Secondary Schools — Computer Studies Lab
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* Status Colors */
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 20px;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 12px 16px 16px;
+        }
+
+        /* Lock outer window when in game mode so ONLY internal containers scroll */
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        [tabindex]:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1340px;
+            margin: 0 auto;
+            min-height: calc(100vh - 28px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        body.in-game .app-shell {
+            height: calc(100vh - 28px);
+        }
+
+        /* Topbar Header (Fixed & Sticky When Vertical Scrolling) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 18px;
+            background: color-mix(in srgb, var(--surface) 95%, transparent);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 1px;
+            font-size: 0.84rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen */
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 12px;
+        }
+
+        .hero-card {
+            width: min(100%, 820px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(20px, 3vw, 32px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 10px;
+            font-size: clamp(1.7rem, 3vw, 2.3rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 680px);
+            margin: 0 auto 16px;
+            color: var(--text-soft);
+            font-size: 0.96rem;
+            line-height: 1.55;
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            padding: 12px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        .feature-icon {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+
+        .feature-item h3 {
+            margin: 0 0 4px;
+            font-size: 0.92rem;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Stage / 25% Right Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 330px;
+            gap: 14px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left Pane: Interactive Workstation Room Stage */
+        .canvas-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            position: relative;
+        }
+
+        /* Stage Header & Real-time Gauges (Compact) */
+        .stage-header {
+            padding: 8px 16px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .room-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-width: 0;
+        }
+
+        .room-title {
+            font-size: 0.96rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .room-sub {
+            font-size: 0.76rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        /* Device Meters Bar (System Health & Core Temp) */
+        .gauges-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .gauge-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface-3);
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+        }
+
+        .gauge-label {
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .meter-track {
+            width: 70px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .meter-fill {
+            height: 100%;
+            transition: width 0.4s ease, background 0.4s ease;
+            border-radius: 999px;
+        }
+
+        .health-fill {
+            width: 100%;
+            background: var(--safe-color);
+        }
+
+        .temp-fill {
+            width: 80%;
+            background: var(--danger-color);
+        }
+
+        .gauge-val-text {
+            font-size: 0.78rem;
+            font-weight: 800;
+            min-width: 38px;
+            text-align: right;
+        }
+
+        /* Interactive 2D Room Canvas Stage */
+        .stage-scroll-area {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: color-mix(in srgb, var(--bg-soft) 40%, var(--surface));
+            position: relative;
+        }
+
+        /* Flash overlay for Short-Circuit / Shock Error */
+        .short-circuit-flash {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.45) 0%, rgba(245, 158, 11, 0.2) 60%, transparent 100%);
+            z-index: 30;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+        }
+
+        .short-circuit-flash.trigger-flash {
+            animation: sparkFlash 0.5s ease-out;
+        }
+
+        @keyframes sparkFlash {
+            0% { opacity: 1; filter: brightness(2); }
+            25% { opacity: 0.4; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+
+        /* 1 SCENARIO PER PAGE: Hero Scenario Showcase & Animated SVG Stage */
+        .scenario-hero-viewport {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 10px 12px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .scenario-info-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 6px 12px;
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        .scenario-name-badge {
+            font-size: 0.88rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .scenario-status-pill {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .pill-hazard {
+            background: var(--hazard-bg);
+            color: var(--hazard-color);
+            border: 1px solid var(--hazard-border);
+            animation: pulseHazard 1.8s infinite;
+        }
+
+        .pill-safe {
+            background: var(--safe-bg);
+            color: var(--safe-color);
+            border: 1px solid var(--safe-border);
+        }
+
+        @keyframes pulseHazard {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.65; }
+        }
+
+        /* SVG Room Animation Container (Height 205px) */
+        .svg-canvas-wrapper {
+            width: 100%;
+            height: 205px;
+            background: var(--surface);
+            border: 2px dashed var(--hazard-border);
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.25s ease, background 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .svg-canvas-wrapper:hover:not(.neutralized) {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+        }
+
+        .svg-canvas-wrapper.drag-over {
+            border-color: var(--accent);
+            border-style: solid;
+            background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.45);
+            transform: scale(1.01);
+        }
+
+        .svg-canvas-wrapper.neutralized {
+            border: 2px solid var(--safe-border);
+            background: var(--safe-bg);
+            cursor: default;
+            transform: none !important;
+        }
+
+        .svg-canvas-wrapper.danger-flash {
+            border-color: var(--danger-color);
+            background: var(--danger-bg);
+            animation: shakeError 0.45s ease;
+        }
+
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+
+        .room-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* Overlay Drop Zone prompt within SVG container */
+        .svg-drop-overlay {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: color-mix(in srgb, var(--surface) 90%, transparent);
+            backdrop-filter: blur(8px);
+            border: 1px dashed var(--border);
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .svg-canvas-wrapper:hover .svg-drop-overlay {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .svg-canvas-wrapper.neutralized .svg-drop-overlay {
+            background: var(--safe-bg);
+            border-color: var(--safe-border);
+            color: var(--safe-color);
+        }
+
+        /* Scenario Narrative Description Box */
+        .scenario-narrative-box {
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            font-size: 0.84rem;
+            line-height: 1.45;
+            color: var(--text-soft);
+        }
+
+        /* Inventory Toolkit Tray */
+        .inventory-tray-wrap {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .tray-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .tray-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 8px;
+        }
+
+        .tool-item-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, opacity 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .tool-item-card:hover:not(.used) {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.22);
+        }
+
+        .tool-item-card:active:not(.used) {
+            cursor: grabbing;
+        }
+
+        .tool-item-card.selected-tool {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 15%, var(--surface));
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .tool-item-card.dragging {
+            opacity: 0.35;
+        }
+
+        /* Solid Floating Element when dragging (No ghost image) */
+        .dragging-clone {
+            position: fixed !important;
+            z-index: 9999 !important;
+            pointer-events: none !important;
+            opacity: 1 !important;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+            border: 2px solid var(--accent) !important;
+            background: var(--surface) !important;
+            transform: scale(1.05) !important;
+        }
+
+        .tool-item-card.used {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+            transform: none !important;
+        }
+
+        .tool-icon {
+            font-size: 1.3rem;
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            background: var(--surface-2);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+
+        .tool-text {
+            font-size: 0.8rem;
+            font-weight: 700;
+            line-height: 1.25;
+            pointer-events: none;
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width) */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 7px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .stat-box {
+            padding: 6px 8px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 1px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.68rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        /* Feedback Explanation Card */
+        .feedback-card {
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.82rem;
+            line-height: 1.45;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+            color: var(--text);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+            color: var(--text);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 900px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(20px, 3.5vw, 36px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 16px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 28px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3rem;
+        }
+
+        .badge-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 12px 8px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 3px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+            margin-top: 16px;
+        }
+
+        .summary-item-card {
+            padding: 12px 16px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 60;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 460px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 70;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 620px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            position: relative;
+            box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* PERFECTLY CENTERED CLOSE BUTTONS ACROSS ALL BROWSERS (SVG ICON) */
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            box-sizing: border-box;
+            user-select: none;
+            transition: background 0.18s ease, transform 0.18s ease;
+        }
+
+        .close-btn svg {
+            display: block;
+            pointer-events: none;
+            width: 18px;
+            height: 18px;
+        }
+
+        .close-btn:hover {
+            background: var(--surface-3);
+            transform: scale(1.05);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 960px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+
+            .mission-panel {
+                max-height: none;
+            }
+
+            .gauges-bar {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 4px;
+            }
+
+            .svg-canvas-wrapper {
+                height: 190px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Fixed Topbar Header (Master Template Compliant) -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">🛡️</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 1 Desk Rescue: Room Hazards Drag & Drop</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Computer Studies Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- MANDATORY HELP BUTTON (ALWAYS NAMED HELP WITH ORANGE PULSE RING) -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 1 Computer Studies</div>
+                    <h2>Desk Rescue: Room Hazards</h2>
+                    <p>
+                        Welcome, Systems Safety Cadet! Workstations across our secondary school environments are under environmental distress.
+                        Step through 12 randomized room hazard scenarios—including liquid threats, blocked heat vents, dust accumulation, dangerous magnets, lightning surges, and drop risks. Drag the matching safety tool from your inventory tray onto the animated room scene to rescue each workstation!
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">🎬</div>
+                            <h3 style="font-size:0.92rem;">Animated SVG Scenes</h3>
+                            <p>Live 2D animated room illustrations depicting realistic workstation hazards and distress.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🌡️</div>
+                            <h3 style="font-size:0.92rem;">Live Health & Temp</h3>
+                            <p>Watch system temperature cool down and health restore as you neutralize active hazards.</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚡</div>
+                            <h3 style="font-size:0.92rem;">Short-Circuit Feedback</h3>
+                            <p>Avoid hazardous mistakes (like wet sponges on dust) that trigger electrical short circuits.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.05rem; padding: 12px 24px;">🚀 Launch Desk Rescue</button>
+                        <button class="secondary-btn" id="openGuideBtn">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Stage / 25% Right Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive 1-Scenario-Per-Page Stage & Inventory -->
+                <section class="canvas-pane" id="canvasPane">
+                    <div class="stage-header">
+                        <div class="room-title-wrap">
+                            <div class="room-title">
+                                <span id="scenarioPageHeading">🏢 Scenario 1 of 12: Liquid Spill Threat</span>
+                            </div>
+                            <span class="room-sub" id="scenarioEnvironmentSub">Trinidad & Tobago Secondary Schools • Computer Workstation</span>
+                        </div>
+
+                        <!-- Real-time Device Gauges -->
+                        <div class="gauges-bar">
+                            <div class="gauge-item">
+                                <span class="gauge-label">💚 Health</span>
+                                <div class="meter-track">
+                                    <div class="meter-fill health-fill" id="systemHealthFill"></div>
+                                </div>
+                                <span class="gauge-val-text" id="systemHealthVal" style="color:var(--safe-color);">100%</span>
+                            </div>
+                            <div class="gauge-item">
+                                <span class="gauge-label">🔥 Temp</span>
+                                <div class="meter-track">
+                                    <div class="meter-fill temp-fill" id="systemTempFill"></div>
+                                </div>
+                                <span class="gauge-val-text" id="systemTempVal" style="color:var(--danger-color);">78°C</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Stage Area with Single Scenario Animated Viewport -->
+                    <div class="stage-scroll-area" id="stageScrollArea">
+                        <div class="short-circuit-flash" id="shortCircuitFlash"></div>
+
+                        <!-- 1 SCENARIO SHOWCASE VIEWPORT -->
+                        <div class="scenario-hero-viewport">
+                            <div class="scenario-info-banner">
+                                <div class="scenario-name-badge">
+                                    <span id="scenarioIcon">🥤</span>
+                                    <span id="scenarioHazardName">Cold Drink Beside Keyboard</span>
+                                </div>
+                                <span class="scenario-status-pill pill-hazard" id="scenarioStatusPill">⚠️ Active Hazard</span>
+                            </div>
+
+                            <!-- INTERACTIVE ANIMATED SVG ROOM CANVAS (DRAG & DROP TARGET) -->
+                            <div class="svg-canvas-wrapper" id="svgCanvasDropZone" tabindex="0" role="region" aria-label="Workstation Room Scene Drop Zone">
+                                <div id="svgIllustrationContainer" style="width:100%; height:100%;"></div>
+                                <div class="svg-drop-overlay" id="svgDropOverlay">
+                                    <span>📥 [ Drag Correct Tool Onto Scene to Neutralize ]</span>
+                                </div>
+                            </div>
+
+                            <!-- Narrative Box -->
+                            <div class="scenario-narrative-box" id="scenarioNarrativeText">
+                                A tall glass of cold sorrel drink with heavy condensation dripping right beside the keyboard edge.
+                            </div>
+                        </div>
+
+                        <!-- Inventory Toolkit Tray (Draggable 4 Choices per Scenario) -->
+                        <div class="inventory-tray-wrap">
+                            <div class="tray-head">
+                                <span>🧰 Rescue Inventory Toolkit (Drag tool onto room scene):</span>
+                            </div>
+                            <div class="tray-items-grid" id="inventoryTrayContainer"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Dedicated Action & Status Tray -->
+                <aside class="mission-panel">
+                    <!-- 1. Progress Card (FIRST) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Rescue Progress</span>
+                            <span id="hazardsCount" style="color:var(--accent);">0 / 12 Neutralized</span>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Inspector Live Explanation Box (SECOND) -->
+                    <div class="panel-card">
+                        <div class="panel-title">Live Safety Inspector</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Inspect the animated workstation room above. Drag the correct safety tool from your inventory onto the scene to neutralize the hazard!
+                        </div>
+                    </div>
+
+                    <!-- 3. Action Buttons Card (THIRD) -->
+                    <div class="panel-card" style="gap:8px;">
+                        <button class="secondary-btn" id="retryScenarioBtn" style="width:100%; justify-content:center;">
+                            ↺ Retry Scenario
+                        </button>
+                        <button class="primary-btn" id="nextScenarioBtn" style="width:100%; justify-content:center; display:none;">
+                            Next Scenario (2/12) →
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Safety Certification Complete</div>
+                <h2>Form 1 Desk Rescue: Safety Certification</h2>
+                <p>Outstanding work, Systems Safety Cadet! Here is your official workstation hazard defense performance review.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">Master Hardware Defender</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.92rem;">You neutralized all 12 physical hazards with flawless safety protocol execution!</p>
+                </div>
+
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Hazards Resolved</div>
+                        <div class="val" id="summaryCorrectVal">0 / 12</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 20px 0 10px; font-size: 1.05rem;">Workstation Hazard Analysis Breakdown (12 Scenarios)</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 28px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice Desk Rescue Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer (Slide-Over, Master Template Compliant) -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 3px 0 0; font-size: 0.84rem;">Neutralized hazards & corrective action records.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Fresh Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.3rem;">How to Play Desk Rescue</h3>
+            <div style="color: var(--text-soft); line-height: 1.6; font-size: 0.94rem;">
+                <p>Welcome, Cadet! Step through 12 workstation scenarios (1 scenario per page) to identify and eliminate physical computer hazards.</p>
+                <ul>
+                    <li><strong>Watch the Animated SVG Room:</strong> Inspect the 2D room view to identify the hazard (spills, blocked heat vents, dust, magnets, lightning surges, or rough drops).</li>
+                    <li><strong>Drag the Real Tool:</strong> Click and physically drag a tool from your <strong>Rescue Inventory Toolkit</strong> directly onto the animated room scene to apply the fix.</li>
+                    <li><strong>Monitor Health & Temperature:</strong> Correct placements cool down the CPU temp meter and restore health. Watch out for dangerous distractors (e.g. wet sponges on dust vents) that cause short-circuits!</li>
+                    <li><strong>Complete All 12 Scenarios:</strong> Neutralize all 12 scenarios to earn your Master Hardware Defender certification!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">
+                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.3rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.55;">Are you sure you want to reset the simulation and clear all saved answers and scores?</p>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Safety Progress</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           MASTER DATASET: 12 INDIVIDUAL WORKSTATION SCENARIOS
+           (Correct answers scattered across distinct default positions)
+           ============================================================ */
+        const MASTER_SCENARIOS = [
+            {
+                id: "sc_001",
+                name: "Cold Drink Beside Keyboard",
+                hazard_type: "Liquid Hazard",
+                icon: "🥤",
+                environment: "Form 1 Home Study Desk • High Drink Proximity",
+                desc: "A cold glass of sorrel drink is sweating heavy condensation right against the keyboard edge. Condensation droplets are pooling beside key switches.",
+                correct_tool_id: "tool_coaster",
+                correct_tool_name: "Spill-Proof Drink Coaster & Distant Cup Stand",
+                feedback_correct: "Correct! Placing drinks on a distant, stable coaster prevents condensation pooling and catastrophic liquid spills into keyboard circuitry.",
+                tools: [
+                    { id: "tool_stack_books", name: "Stack of Paperback Books", icon: "📚", isDistractor: true, reason: "Unstable books topple the cup, dumping sticky liquid directly into the keyboard!" },
+                    { id: "tool_wet_sponge", name: "Damp Soapy Sponge", icon: "🧽", isDistractor: true, reason: "Water leaks into electronic key matrix causing immediate short circuits!" },
+                    { id: "tool_coaster", name: "Spill-Proof Coaster Stand", icon: "☕", isCorrect: true },
+                    { id: "tool_mini_fan", name: "Desk Fan Aimed at Glass", icon: "🌀", isDistractor: true, reason: "Fan blows condensation droplets directly into keycap slots!" }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="wallGrad1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+                            <linearGradient id="deskGrad1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#92400e"/><stop offset="100%" stop-color="#78350f"/></linearGradient>
+                            <linearGradient id="drinkGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e11d48"/><stop offset="100%" stop-color="#881337"/></linearGradient>
+                        </defs>
+                        <rect x="0" y="0" width="800" height="200" fill="url(#wallGrad1)"/>
+                        <rect x="0" y="200" width="800" height="80" fill="url(#deskGrad1)"/>
+                        <line x1="0" y1="200" x2="800" y2="200" stroke="#b45309" stroke-width="4"/>
+
+                        <rect x="50" y="30" width="160" height="120" rx="8" fill="#38bdf8" opacity="0.3"/>
+                        <rect x="50" y="30" width="160" height="120" rx="8" fill="none" stroke="#64748b" stroke-width="4"/>
+                        <line x1="130" y1="30" x2="130" y2="150" stroke="#64748b" stroke-width="3"/>
+                        <line x1="50" y1="90" x2="210" y2="90" stroke="#64748b" stroke-width="3"/>
+
+                        <rect x="260" y="160" width="280" height="30" rx="4" fill="#334155" stroke="#475569" stroke-width="2"/>
+                        <rect x="280" y="70" width="240" height="90" rx="6" fill="#1e293b" stroke="#475569" stroke-width="3"/>
+                        <rect x="290" y="80" width="220" height="70" rx="4" fill="#0284c7" opacity="0.4"/>
+                        <text x="400" y="120" fill="#f8fafc" font-size="14" font-weight="bold" text-anchor="middle">Form 1 Study Desk</text>
+                        <rect x="275" y="165" width="250" height="18" rx="2" fill="#0f172a"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <rect x="560" y="130" width="46" height="66" rx="6" fill="url(#drinkGrad)" stroke="#f43f5e" stroke-width="2"/>
+                                <rect x="564" y="134" width="38" height="12" rx="2" fill="#fb7185" opacity="0.6"/>
+                                <line x1="585" y1="110" x2="575" y2="130" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                                <circle cx="560" cy="180" r="4" fill="#38bdf8">
+                                    <animate attributeName="cy" values="180;196;180" dur="2s" repeatCount="indefinite"/>
+                                    <animate attributeName="opacity" values="0.9;0.2;0.9" dur="2s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="606" cy="175" r="3.5" fill="#38bdf8">
+                                    <animate attributeName="cy" values="175;196;175" dur="1.8s" repeatCount="indefinite"/>
+                                </circle>
+                                <ellipse cx="565" cy="196" rx="18" ry="4" fill="#38bdf8" opacity="0.7">
+                                    <animate attributeName="rx" values="14;22;14" dur="2.5s" repeatCount="indefinite"/>
+                                </ellipse>
+                                <text x="583" y="100" fill="#f43f5e" font-size="12" font-weight="bold" text-anchor="middle">⚠️ Condensation Drip</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <rect x="680" y="192" width="70" height="8" rx="4" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/>
+                                <rect x="692" y="130" width="46" height="62" rx="6" fill="url(#drinkGrad)" stroke="#38bdf8" stroke-width="2"/>
+                                <line x1="715" y1="110" x2="705" y2="130" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>
+                                <text x="715" y="100" fill="#10b981" font-size="12" font-weight="bold" text-anchor="middle">✅ Safe Coaster Stand</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_002",
+                name: "Laptop Sinking into Soft Quilt",
+                hazard_type: "Heat & Airflow Blockage",
+                icon: "🛏️",
+                environment: "Bedroom Workstation • Soft Bedding Surface",
+                desc: "The student's laptop is sunk deep into a plush wool blanket on a bed. The bottom intake fans and side exhaust vents are completely smothered, spiking core temp to 82°C.",
+                correct_tool_id: "tool_cooling_pad",
+                correct_tool_name: "Elevated Hard Lap Cooling Pad with Air Vents",
+                feedback_correct: "Correct! A rigid, ventilated lap cooling stand elevates the laptop, keeping intake fans free and preventing thermal throttling.",
+                tools: [
+                    { id: "tool_wool_pillow", name: "Thick Wool Pillow", icon: "🛋️", isDistractor: true, reason: "Traps heat inside laptop chassis, accelerating thermal shutdown!" },
+                    { id: "tool_plastic_sheet", name: "Plastic Grocery Bag", icon: "🛍️", isDistractor: true, reason: "Melts against hot vents and seals internal airflow completely!" },
+                    { id: "tool_cotton_quilt", name: "Extra Cotton Quilt Layer", icon: "🛏️", isDistractor: true, reason: "Suffocates intake vents and builds dangerous static charges!" },
+                    { id: "tool_cooling_pad", name: "Hard Lap Cooling Stand", icon: "🧊", isCorrect: true }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="bedGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#475569"/><stop offset="100%" stop-color="#334155"/></linearGradient>
+                            <linearGradient id="quiltGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient>
+                        </defs>
+                        <rect x="0" y="0" width="800" height="150" fill="#0f172a"/>
+                        <rect x="100" y="40" width="600" height="90" rx="10" fill="#1e293b" stroke="#334155" stroke-width="4"/>
+                        <path d="M 0 170 Q 200 140 400 170 T 800 170 L 800 280 L 0 280 Z" fill="url(#quiltGrad)"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <rect x="280" y="160" width="240" height="26" rx="4" fill="#1e293b" stroke="#ef4444" stroke-width="3"/>
+                                <rect x="295" y="80" width="210" height="80" rx="6" fill="#0f172a" stroke="#ef4444" stroke-width="3"/>
+                                <rect x="305" y="90" width="190" height="60" rx="4" fill="#ef4444" opacity="0.3"/>
+                                <text x="400" y="125" fill="#fca5a5" font-size="14" font-weight="bold" text-anchor="middle">🔥 82°C OVERHEATING</text>
+
+                                <path d="M 320 70 Q 330 50 320 30" stroke="#ef4444" stroke-width="3" fill="none" stroke-linecap="round">
+                                    <animate attributeName="stroke-dashoffset" values="0;20;0" dur="1.5s" repeatCount="indefinite"/>
+                                </path>
+                                <path d="M 400 65 Q 410 45 400 25" stroke="#f59e0b" stroke-width="3.5" fill="none" stroke-linecap="round">
+                                    <animate attributeName="stroke-dashoffset" values="0;20;0" dur="1.2s" repeatCount="indefinite"/>
+                                </path>
+                                <path d="M 480 70 Q 490 50 480 30" stroke="#ef4444" stroke-width="3" fill="none" stroke-linecap="round">
+                                    <animate attributeName="stroke-dashoffset" values="0;20;0" dur="1.7s" repeatCount="indefinite"/>
+                                </path>
+                                <text x="400" y="18" fill="#ef4444" font-size="13" font-weight="bold" text-anchor="middle">⚠️ Vents Blocked by Blanket!</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <rect x="250" y="150" width="300" height="14" rx="6" fill="#0284c7" stroke="#38bdf8" stroke-width="3"/>
+                                <line x1="270" y1="164" x2="260" y2="185" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+                                <line x1="530" y1="164" x2="540" y2="185" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+
+                                <rect x="280" y="125" width="240" height="25" rx="4" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                                <rect x="295" y="45" width="210" height="80" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+                                <rect x="305" y="55" width="190" height="60" rx="4" fill="#10b981" opacity="0.3"/>
+                                <text x="400" y="90" fill="#a7f3d0" font-size="14" font-weight="bold" text-anchor="middle">❄️ 36°C Cool Airflow Active</text>
+
+                                <path d="M 330 145 Q 340 135 350 145" stroke="#38bdf8" stroke-width="3" fill="none"/>
+                                <path d="M 450 145 Q 460 135 470 145" stroke="#38bdf8" stroke-width="3" fill="none"/>
+                                <text x="400" y="30" fill="#10b981" font-size="13" font-weight="bold" text-anchor="middle">✅ Hard Ventilated Lap Stand Engaged</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_003",
+                name: "Heavy Dust Choking PC Vents",
+                hazard_type: "Dust & Particle Hazard",
+                icon: "💨",
+                environment: "School Computer Lab • High Dust Environment",
+                desc: "Thick dust bunnies and lint have clogged the desktop intake and exhaust vents, causing the cooling fan to whine loudly and choke air intake.",
+                correct_tool_id: "tool_microfiber_air",
+                correct_tool_name: "Anti-Static Microfiber Cloth & Compressed Air Duster",
+                feedback_correct: "Correct! Compressed air canisters and dry anti-static microfiber safely blow out dust without introducing damaging moisture or static electricity.",
+                tools: [
+                    { id: "tool_wet_rag", name: "Soaking Wet Cleaning Rag", icon: "🧼", isDistractor: true, reason: "Water seeps into power supply circuits, creating fatal short circuits!" },
+                    { id: "tool_microfiber_air", name: "Microfiber & Air Duster", icon: "💨", isCorrect: true },
+                    { id: "tool_metal_knife", name: "Metal Butter Knife", icon: "🔪", isDistractor: true, reason: "Conductive metal scratches circuit traces and snaps fan blades!" },
+                    { id: "tool_hair_dryer", name: "Hot Hair Dryer (High Heat)", icon: "♨️", isDistractor: true, reason: "120°C air melts plastic fan bearings and warps case panels!" }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="towerGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#334155"/><stop offset="100%" stop-color="#1e293b"/></linearGradient>
+                        </defs>
+                        <rect x="0" y="0" width="800" height="220" fill="#0b0f19"/>
+                        <rect x="0" y="220" width="800" height="60" fill="#1e293b"/>
+                        <line x1="0" y1="220" x2="800" y2="220" stroke="#38bdf8" stroke-width="2"/>
+
+                        <rect x="300" y="40" width="200" height="180" rx="10" fill="url(#towerGrad)" stroke="#475569" stroke-width="4"/>
+                        <circle cx="400" cy="65" r="8" fill="#38bdf8"/>
+                        <rect x="330" y="85" width="140" height="12" rx="2" fill="#0f172a"/>
+
+                        <rect x="330" y="115" width="140" height="85" rx="6" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+                        <line x1="340" y1="130" x2="460" y2="130" stroke="#64748b" stroke-width="3"/>
+                        <line x1="340" y1="145" x2="460" y2="145" stroke="#64748b" stroke-width="3"/>
+                        <line x1="340" y1="160" x2="460" y2="160" stroke="#64748b" stroke-width="3"/>
+                        <line x1="340" y1="175" x2="460" y2="175" stroke="#64748b" stroke-width="3"/>
+                        <line x1="340" y1="190" x2="460" y2="190" stroke="#64748b" stroke-width="3"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <circle cx="360" cy="140" r="14" fill="#78716c" opacity="0.8"/>
+                                <circle cx="430" cy="150" r="16" fill="#a8a29e" opacity="0.8"/>
+                                <circle cx="390" cy="175" r="18" fill="#78716c" opacity="0.85"/>
+                                <circle cx="440" cy="180" r="12" fill="#57534e" opacity="0.9"/>
+                                <circle cx="370" cy="155" r="8" fill="#d6d3d1">
+                                    <animate attributeName="cx" values="365;375;365" dur="1.5s" repeatCount="indefinite"/>
+                                    <animate attributeName="cy" values="150;160;150" dur="1.5s" repeatCount="indefinite"/>
+                                </circle>
+                                <text x="400" y="25" fill="#f59e0b" font-size="14" font-weight="bold" text-anchor="middle">⚠️ Clogged Intake Mesh (Airflow Starved)</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <path d="M 240 150 Q 280 130 320 150" stroke="#38bdf8" stroke-width="4" fill="none" stroke-linecap="round">
+                                    <animate attributeName="stroke-dashoffset" values="0;20;0" dur="1s" repeatCount="indefinite"/>
+                                </path>
+                                <text x="400" y="25" fill="#10b981" font-size="14" font-weight="bold" text-anchor="middle">✨ Vents Cleaned with Microfiber & Air Canister</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_004",
+                name: "Magnetic Speaker Near Hard Drive",
+                hazard_type: "Magnetic Field Hazard",
+                icon: "🧲",
+                environment: "Form 1 Tech Desk • External HDD Proximity",
+                desc: "A high-powered magnetic desk speaker is resting directly against an external magnetic hard drive (HDD) casing, risking permanent data loss and platter corruption.",
+                correct_tool_id: "tool_magnet_shelf",
+                correct_tool_name: "Non-Magnetic Storage Organizer (Away from Drives)",
+                feedback_correct: "Correct! Moving strong magnets to dedicated shelves protects traditional magnetic hard drives (HDDs) from data corruption and signal distortion.",
+                tools: [
+                    { id: "tool_magnet_shelf", name: "Shielded Shelf Storage", icon: "🧲", isCorrect: true },
+                    { id: "tool_metal_clips", name: "Steel Paperclip Basket", icon: "📎", isDistractor: true, reason: "Steel attracts and channels magnetic flux closer to HDD platters!" },
+                    { id: "tool_place_on_cpu", name: "Rest Magnet on CPU Case", icon: "🖥️", isDistractor: true, reason: "Distorts internal power supply and corrupts boot drive!" },
+                    { id: "tool_foil_wrap", name: "Wrap Drive in Kitchen Foil", icon: "🌯", isDistractor: true, reason: "Thin foil does not stop magnetic fields and causes overheating!" }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="800" height="200" fill="#0f172a"/>
+                        <rect x="0" y="200" width="800" height="80" fill="#1e293b"/>
+                        <line x1="0" y1="200" x2="800" y2="200" stroke="#818cf8" stroke-width="2"/>
+
+                        <rect x="260" y="120" width="130" height="80" rx="8" fill="#334155" stroke="#64748b" stroke-width="3"/>
+                        <circle cx="325" cy="160" r="24" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+                        <circle cx="325" cy="160" r="8" fill="#38bdf8"/>
+                        <text x="325" y="195" fill="#f8fafc" font-size="10" font-weight="bold" text-anchor="middle">Magnetic HDD</text>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <rect x="410" y="110" width="80" height="90" rx="10" fill="#475569" stroke="#ef4444" stroke-width="3"/>
+                                <circle cx="450" cy="155" r="26" fill="#1e293b" stroke="#ef4444" stroke-width="2"/>
+                                <circle cx="450" cy="155" r="12" fill="#ef4444"/>
+
+                                <path d="M 405 130 Q 385 155 405 180" stroke="#c084fc" stroke-width="3" fill="none">
+                                    <animate attributeName="stroke-width" values="2;5;2" dur="1.2s" repeatCount="indefinite"/>
+                                    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite"/>
+                                </path>
+                                <path d="M 395 120 Q 370 155 395 190" stroke="#a855f7" stroke-width="3" fill="none">
+                                    <animate attributeName="stroke-width" values="2;5;2" dur="1.5s" repeatCount="indefinite"/>
+                                </path>
+                                <text x="450" y="90" fill="#ef4444" font-size="13" font-weight="bold" text-anchor="middle">🧲 Dangerous Magnetic Field!</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <rect x="620" y="50" width="130" height="12" rx="2" fill="#92400e"/>
+                                <rect x="650" y="10" width="50" height="40" rx="6" fill="#475569" stroke="#10b981" stroke-width="2"/>
+                                <text x="675" y="0" fill="#10b981" font-size="12" font-weight="bold" text-anchor="middle">✅ Moved 2ft Away to Shelf</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_005",
+                name: "Tropical Lightning Storm Surge",
+                hazard_type: "Power Surge Hazard",
+                icon: "⚡",
+                environment: "Computer Studies Lab • Rainy Season Storm",
+                desc: "Severe tropical lightning is flashing outside the classroom window while computer cables are plugged directly into an ungrounded wall outlet.",
+                correct_tool_id: "tool_surge_protector",
+                correct_tool_name: "Certified Surge Suppressor Power Strip & Safe Disconnect",
+                feedback_correct: "Correct! Surge suppressors divert high-voltage electrical spikes caused by lightning away from delicate computer power supplies and motherboards.",
+                tools: [
+                    { id: "tool_multi_plug", name: "Non-Surge Multi-Plug Splitter", icon: "🔌", isDistractor: true, reason: "Zero lightning surge protection; sparks and catches fire during voltage spikes!" },
+                    { id: "tool_water_basin", name: "Wire in Bucket of Water", icon: "🪣", isDistractor: true, reason: "Severe electrocution hazard and room water flood threat!" },
+                    { id: "tool_surge_protector", name: "Surge Protector Strip", icon: "🔌", isCorrect: true },
+                    { id: "tool_tape_plug", name: "Clear Tape on Wall Socket", icon: "🩹", isDistractor: true, reason: "Flammable adhesive tape creates intense electrical arc fire!" }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="800" height="210" fill="#0b0f19"/>
+                        <rect x="0" y="210" width="800" height="70" fill="#1e293b"/>
+
+                        <rect x="80" y="25" width="220" height="150" rx="8" fill="#1e1b4b" stroke="#475569" stroke-width="4"/>
+                        <line x1="100" y1="40" x2="90" y2="70" stroke="#38bdf8" stroke-width="2" opacity="0.6"/>
+                        <line x1="160" y1="50" x2="150" y2="80" stroke="#38bdf8" stroke-width="2" opacity="0.6"/>
+                        <line x1="220" y1="40" x2="210" y2="70" stroke="#38bdf8" stroke-width="2" opacity="0.6"/>
+                        <path d="M 190 30 L 175 70 L 195 75 L 165 130" stroke="#fbbf24" stroke-width="4" fill="none">
+                            <animate attributeName="opacity" values="0;1;0;0;1;0" dur="2s" repeatCount="indefinite"/>
+                        </path>
+
+                        <rect x="620" y="130" width="50" height="70" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+                        <circle cx="635" cy="155" r="3" fill="#0f172a"/>
+                        <circle cx="655" cy="155" r="3" fill="#0f172a"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <path d="M 400 240 Q 550 250 645 165" stroke="#ef4444" stroke-width="5" fill="none"/>
+                                <circle cx="645" cy="165" r="6" fill="#fbbf24">
+                                    <animate attributeName="r" values="3;8;3" dur="0.8s" repeatCount="indefinite"/>
+                                </circle>
+                                <text x="540" y="110" fill="#ef4444" font-size="13" font-weight="bold" text-anchor="middle">⚡ High Surge Voltage Risk!</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <rect x="440" y="225" width="130" height="35" rx="6" fill="#0284c7" stroke="#38bdf8" stroke-width="3"/>
+                                <circle cx="460" cy="242" r="5" fill="#10b981"/>
+                                <path d="M 570 242 Q 620 240 645 165" stroke="#38bdf8" stroke-width="4" fill="none"/>
+                                <text x="505" y="215" fill="#10b981" font-size="12" font-weight="bold" text-anchor="middle">🛡️ Surge Suppressor Protected</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_006",
+                name: "Laptop Balancing on Desk Edge",
+                hazard_type: "Drop & Impact Hazard",
+                icon: "⚠️",
+                environment: "Form 1 Computer Lab • Edge Teetering",
+                desc: "A school laptop is hanging dangerously over the slippery desk edge on glossy folders, ready to slide and smash on the floor tiles.",
+                correct_tool_id: "tool_anti_slip_center",
+                correct_tool_name: "Centering Flat on Desk with Anti-Slip Pad",
+                feedback_correct: "Correct! Centering devices firmly on flat, stable anti-slip surfaces prevents costly accidental drops and cracked LCD screens.",
+                tools: [
+                    { id: "tool_tilted_binder", name: "Prop with Slanted Binder", icon: "📁", isDistractor: true, reason: "Slanted binder accelerates slippage, causing the laptop to crash down!" },
+                    { id: "tool_edge_tape", name: "Tape Laptop Corner to Edge", icon: "🩹", isDistractor: true, reason: "Thin tape snaps under device weight!" },
+                    { id: "tool_hang_chair", name: "Hang Laptop from Chair Arm", icon: "🪑", isDistractor: true, reason: "Snags on passing students and crashes immediately!" },
+                    { id: "tool_anti_slip_center", name: "Anti-Slip Mat Centering", icon: "🛑", isCorrect: true }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="800" height="180" fill="#0f172a"/>
+                        <rect x="0" y="180" width="520" height="100" fill="#92400e" stroke="#78350f" stroke-width="3"/>
+                        <rect x="520" y="180" width="280" height="100" fill="#1e293b"/>
+                        <line x1="520" y1="180" x2="520" y2="280" stroke="#475569" stroke-width="4"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <g transform="rotate(18, 480, 170)">
+                                    <rect x="420" y="160" width="180" height="18" rx="3" fill="#334155" stroke="#ef4444" stroke-width="3"/>
+                                    <rect x="430" y="80" width="160" height="80" rx="4" fill="#1e293b" stroke="#ef4444" stroke-width="2"/>
+                                    <text x="510" y="125" fill="#fca5a5" font-size="12" font-weight="bold" text-anchor="middle">⚠️ Teetering</text>
+                                </g>
+                                <text x="640" y="120" fill="#ef4444" font-size="14" font-weight="bold" text-anchor="middle">💥 Drop Hazard!</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <rect x="180" y="172" width="240" height="12" rx="4" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/>
+                                <rect x="200" y="150" width="200" height="22" rx="4" fill="#334155" stroke="#10b981" stroke-width="2"/>
+                                <rect x="210" y="75" width="180" height="75" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                                <text x="300" y="115" fill="#a7f3d0" font-size="13" font-weight="bold" text-anchor="middle">✅ Centered & Anti-Slip</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_007",
+                name: "Scorching Sunbeams on LCD Monitor",
+                hazard_type: "Thermal & Radiation Hazard",
+                icon: "☀️",
+                environment: "Form 1 Classroom • Unshaded Window Glare",
+                desc: "Intense afternoon tropical sunbeams are beaming directly onto the dark monitor screen, heating the casing to 75°C and blinding the student with glare.",
+                correct_tool_id: "tool_window_blinds",
+                correct_tool_name: "Heat-Reflecting Window Sun Blinds",
+                feedback_correct: "Correct! Closing reflective window blinds blocks thermal radiation and eliminates screen glare without introducing cooling liquids.",
+                tools: [
+                    { id: "tool_wet_towel", name: "Drape Wet Towel on Screen", icon: "🧼", isDistractor: true, reason: "Water drips into display bezels, ruining the LCD backlight matrix!" },
+                    { id: "tool_window_blinds", name: "Reflective Window Blinds", icon: "🪟", isCorrect: true },
+                    { id: "tool_ice_pack", name: "Rest Ice Pack on Monitor", icon: "🧊", isDistractor: true, reason: "Severe condensation pools inside high-voltage monitor components!" },
+                    { id: "tool_turn_brightness", name: "Increase Brightness to 100%", icon: "💡", isDistractor: true, reason: "Generates more internal panel heat, accelerating hardware failure!" }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="800" height="200" fill="#0f172a"/>
+                        <rect x="0" y="200" width="800" height="80" fill="#1e293b"/>
+
+                        <rect x="80" y="30" width="200" height="140" rx="6" fill="#fef08a" stroke="#64748b" stroke-width="4"/>
+                        <circle cx="130" cy="70" r="28" fill="#f59e0b"/>
+
+                        <rect x="420" y="50" width="240" height="130" rx="8" fill="#1e293b" stroke="#475569" stroke-width="4"/>
+                        <rect x="435" y="65" width="210" height="100" rx="4" fill="#0284c7" opacity="0.3"/>
+                        <rect x="520" y="180" width="40" height="30" fill="#334155"/>
+                        <rect x="490" y="205" width="100" height="8" rx="4" fill="#475569"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <polygon points="145,85 435,70 435,160 145,95" fill="#fef08a" opacity="0.45">
+                                    <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite"/>
+                                </polygon>
+                                <text x="540" y="120" fill="#ef4444" font-size="14" font-weight="bold" text-anchor="middle">🔥 75°C Direct Sunlight</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <rect x="80" y="30" width="200" height="140" rx="6" fill="#475569" stroke="#38bdf8" stroke-width="3"/>
+                                <line x1="80" y1="60" x2="280" y2="60" stroke="#64748b" stroke-width="2"/>
+                                <line x1="80" y1="90" x2="280" y2="90" stroke="#64748b" stroke-width="2"/>
+                                <line x1="80" y1="120" x2="280" y2="120" stroke="#64748b" stroke-width="2"/>
+                                <line x1="80" y1="150" x2="280" y2="150" stroke="#64748b" stroke-width="2"/>
+                                <text x="540" y="120" fill="#10b981" font-size="13" font-weight="bold" text-anchor="middle">✅ Sun Blinds Lowered</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_008",
+                name: "Loose Cords Across Walkway",
+                hazard_type: "Tripping & Snatch Hazard",
+                icon: "🪢",
+                environment: "School Computer Lab • Student Aisle",
+                desc: "Monitor power and VGA cables are draped loosely across the student walking aisle, creating a severe tripping and equipment snatch risk.",
+                correct_tool_id: "tool_cable_channel",
+                correct_tool_name: "Heavy-Duty Floor Cable Channel & Ties",
+                feedback_correct: "Correct! Routing cables through heavy-duty rubber floor channels protects students from trips and keeps ports securely seated.",
+                tools: [
+                    { id: "tool_cable_channel", name: "Floor Cable Channel", icon: "🪢", isCorrect: true },
+                    { id: "tool_tape_strip", name: "Thin Stationery Tape", icon: "🩹", isDistractor: true, reason: "Snaps when stepped on, leaving loose cord loops in walkways!" },
+                    { id: "tool_rug_cover", name: "Loose Floor Rug over Cords", icon: "🧶", isDistractor: true, reason: "Conceals the cable lump, causing unsuspecting students to trip hard!" },
+                    { id: "tool_pull_tight", name: "Pull Cord Tight in Mid-Air", icon: "➰", isDistractor: true, reason: "Snaps internal copper strands and rips ports out of devices!" }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="800" height="280" fill="#1e293b"/>
+                        <line x1="200" y1="0" x2="200" y2="280" stroke="#334155" stroke-width="2"/>
+                        <line x1="400" y1="0" x2="400" y2="280" stroke="#334155" stroke-width="2"/>
+                        <line x1="600" y1="0" x2="600" y2="280" stroke="#334155" stroke-width="2"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <path d="M 120 40 Q 300 220 500 180 T 700 80" stroke="#ef4444" stroke-width="6" fill="none" stroke-linecap="round">
+                                    <animate attributeName="stroke" values="#ef4444;#f59e0b;#ef4444" dur="1.5s" repeatCount="indefinite"/>
+                                </path>
+                                <text x="400" y="130" fill="#ef4444" font-size="16" font-weight="bold" text-anchor="middle">⚠️ Tripping & Port Snatch Hazard!</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <rect x="80" y="130" width="640" height="26" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="3"/>
+                                <line x1="90" y1="143" x2="710" y2="143" stroke="#38bdf8" stroke-width="3"/>
+                                <text x="400" y="115" fill="#10b981" font-size="14" font-weight="bold" text-anchor="middle">✅ Protective Rubber Cable Channel Engaged</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_009",
+                name: "Greasy Snacks & Open Soda at PC",
+                hazard_type: "Food & Sticky Residue Hazard",
+                icon: "🍟",
+                environment: "School Tech Project Station • Group Work",
+                desc: "Chips and sweet carbonated soda are placed right on top of the shared project keyboard during group work, dropping greasy crumbs into key switch mechanisms.",
+                correct_tool_id: "tool_snack_table",
+                correct_tool_name: "Dedicated Snack Table & Silicone Keyboard Cover",
+                feedback_correct: "Correct! Food belongs on separate eating tables. Silicone dust covers prevent crumbs and grease from seizing key mechanisms.",
+                tools: [
+                    { id: "tool_shake_keys", name: "Shake Keyboard Upside Down", icon: "🔄", isDistractor: true, reason: "Snaps keycap stabilizers and jams crumbs deeper into switches!" },
+                    { id: "tool_spray_cleaner", name: "Soak Keys with Spray Cleaner", icon: "🧴", isDistractor: true, reason: "Liquid pools inside membrane layers, destroying traces!" },
+                    { id: "tool_snack_table", name: "Separate Snack Table Cover", icon: "🛡️", isCorrect: true },
+                    { id: "tool_blow_mouth", name: "Blow Forcefully with Mouth", icon: "😮‍💨", isDistractor: true, reason: "Spits saliva moisture directly onto electrical contacts!" }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="800" height="190" fill="#0f172a"/>
+                        <rect x="0" y="190" width="800" height="90" fill="#92400e"/>
+
+                        <rect x="220" y="195" width="360" height="65" rx="6" fill="#334155" stroke="#475569" stroke-width="3"/>
+                        <rect x="240" y="205" width="320" height="45" rx="4" fill="#0f172a"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <rect x="360" y="90" width="80" height="95" rx="8" fill="#f59e0b" stroke="#d97706" stroke-width="3"/>
+                                <text x="400" y="145" fill="#78350f" font-size="14" font-weight="bold" text-anchor="middle">CHIPS</text>
+                                <circle cx="380" cy="180" r="3" fill="#fbbf24">
+                                    <animate attributeName="cy" values="180;205;180" dur="1.2s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="420" cy="185" r="2.5" fill="#d97706">
+                                    <animate attributeName="cy" values="185;210;185" dur="1.5s" repeatCount="indefinite"/>
+                                </circle>
+                                <text x="400" y="60" fill="#ef4444" font-size="14" font-weight="bold" text-anchor="middle">⚠️ Crumb & Grease Ingress Threat!</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <rect x="220" y="195" width="360" height="65" rx="6" fill="#38bdf8" opacity="0.3" stroke="#10b981" stroke-width="3"/>
+                                <rect x="660" y="140" width="90" height="100" rx="8" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/>
+                                <text x="705" y="195" fill="#f8fafc" font-size="11" font-weight="bold" text-anchor="middle">Snack Table</text>
+                                <text x="400" y="140" fill="#10b981" font-size="14" font-weight="bold" text-anchor="middle">✅ Protected by Silicone Cover & Separate Eating Zone</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_010",
+                name: "Heavy Books & Backpack on Laptop",
+                hazard_type: "Crush & Pressure Hazard",
+                icon: "🎒",
+                environment: "Form 1 Media Station • Bag Overload",
+                desc: "Three heavy CSEC textbooks and a 6kg student backpack are piled squarely on top of a closed laptop lid, flexing the fragile LCD screen matrix.",
+                correct_tool_id: "tool_bag_hook",
+                correct_tool_name: "Under-Desk Heavy Bag Hook & Vertical Book Slot",
+                feedback_correct: "Correct! Storing bags on dedicated hooks and books in vertical racks relieves static pressure on fragile LCD screens and hinges.",
+                tools: [
+                    { id: "tool_cardboard_box", name: "Place Wooden Crate on Top", icon: "📦", isDistractor: true, reason: "Adds more crushing weight onto fragile liquid crystal glass!" },
+                    { id: "tool_sit_on_laptop", name: "Sit on Closed Laptop as Seat", icon: "🪑", isDistractor: true, reason: "Completely destroys display matrix, hinges, and logic board!" },
+                    { id: "tool_balance_vert", name: "Balance on Narrow Spine Edge", icon: "📐", isDistractor: true, reason: "Topples over onto floor, denting metal corners!" },
+                    { id: "tool_bag_hook", name: "Desk Bag Hook & Rack", icon: "🎒", isCorrect: true }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="800" height="200" fill="#0f172a"/>
+                        <rect x="0" y="200" width="800" height="80" fill="#92400e"/>
+
+                        <rect x="280" y="180" width="240" height="20" rx="4" fill="#334155" stroke="#64748b" stroke-width="2"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <rect x="300" y="160" width="200" height="18" rx="2" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+                                <rect x="310" y="140" width="180" height="18" rx="2" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+                                <rect x="320" y="60" width="160" height="75" rx="14" fill="#4f46e5" stroke="#3730a3" stroke-width="3"/>
+                                <text x="400" y="105" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">6kg School Bag</text>
+
+                                <path d="M 270 90 L 270 140 M 265 130 L 270 140 L 275 130" stroke="#ef4444" stroke-width="4" fill="none">
+                                    <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
+                                </path>
+                                <path d="M 530 90 L 530 140 M 525 130 L 530 140 L 535 130" stroke="#ef4444" stroke-width="4" fill="none">
+                                    <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
+                                </path>
+                                <text x="400" y="35" fill="#ef4444" font-size="14" font-weight="bold" text-anchor="middle">⚠️ LCD Glass Crush Strain!</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <path d="M 160 200 L 160 250 Q 160 265 175 265" stroke="#cbd5e1" stroke-width="5" fill="none"/>
+                                <rect x="175" y="210" width="90" height="60" rx="8" fill="#4f46e5"/>
+                                <text x="400" y="130" fill="#10b981" font-size="14" font-weight="bold" text-anchor="middle">✅ Bag Moved to Under-Desk Hook & Book Slot</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_011",
+                name: "Lint Choking Micro-PC Fan Blades",
+                hazard_type: "Airflow Starvation & Static",
+                icon: "🖌️",
+                environment: "School Media Station • Micro-PC Projector",
+                desc: "Carpet lint and fluff have choked the micro-PC intake fan, causing fan blades to stutter and system temp to reach 85°C critical warning.",
+                correct_tool_id: "tool_antistatic_brush",
+                correct_tool_name: "Non-Conductive ESD Detailing Brush & Blower Bulb",
+                feedback_correct: "Correct! Anti-static detailing brushes safely dislodge trapped fibres without conducting electricity or damaging motherboard traces.",
+                tools: [
+                    { id: "tool_metal_clip", name: "Unfolded Steel Paperclip", icon: "📎", isDistractor: true, reason: "Conducts electricity and shorts motherboard solder points!" },
+                    { id: "tool_antistatic_brush", name: "Anti-Static Brush & Blower", icon: "🖌️", isCorrect: true },
+                    { id: "tool_vacuum", name: "Plastic Vacuum Cleaner", icon: "🧹", isDistractor: true, reason: "Generates massive electrostatic discharge (ESD) that fries chips!" },
+                    { id: "tool_water_spritz", name: "Water Mist Spritzer", icon: "💦", isDistractor: true, reason: "Instant fatal short circuit destroys power regulator chips!" }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="800" height="280" fill="#0b0f19"/>
+                        <rect x="250" y="40" width="300" height="200" rx="12" fill="#1e293b" stroke="#475569" stroke-width="4"/>
+                        <circle cx="400" cy="140" r="60" fill="#0f172a" stroke="#64748b" stroke-width="3"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <circle cx="400" cy="140" r="16" fill="#ef4444"/>
+                                <path d="M 400 140 L 400 90 M 400 140 L 445 165 M 400 140 L 355 165" stroke="#94a3b8" stroke-width="8" stroke-linecap="round"/>
+                                <path d="M 370 110 Q 385 100 400 110 T 430 105" stroke="#cbd5e1" stroke-width="4" fill="none"/>
+                                <path d="M 410 160 Q 425 150 440 160" stroke="#94a3b8" stroke-width="4" fill="none"/>
+                                <text x="400" y="25" fill="#ef4444" font-size="14" font-weight="bold" text-anchor="middle">⚠️ Fan Blades Choked by Fibres (85°C Warning)</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <circle cx="400" cy="140" r="16" fill="#10b981"/>
+                                <path d="M 400 140 L 400 90 M 400 140 L 445 165 M 400 140 L 355 165" stroke="#38bdf8" stroke-width="8" stroke-linecap="round">
+                                    <animateTransform attributeName="transform" type="rotate" from="0 400 140" to="360 400 140" dur="0.8s" repeatCount="indefinite"/>
+                                </path>
+                                <text x="400" y="25" fill="#10b981" font-size="14" font-weight="bold" text-anchor="middle">✨ Cleaned with ESD Detailing Brush & Air Bulb</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            },
+            {
+                id: "sc_012",
+                name: "Device Trapped in Hot Metal Locker",
+                hazard_type: "Extreme Thermal Enclosure",
+                icon: "📦",
+                environment: "School Locker Room • Midday Tropical Sun",
+                desc: "A tablet with a lithium-ion battery is sealed in an unventilated metal locker facing direct midday sun (internal temp 65°C, battery swelling risk).",
+                correct_tool_id: "tool_ventilated_locker",
+                correct_tool_name: "Shaded Ventilated Tech Cabinet with Intake Fan",
+                feedback_correct: "Correct! Lithium-ion batteries must be stored in cool, ventilated enclosures to prevent thermal runaway, swelling, and capacity loss.",
+                tools: [
+                    { id: "tool_ventilated_locker", name: "Ventilated Shaded Cabinet", icon: "🌬️", isCorrect: true },
+                    { id: "tool_bubble_wrap", name: "Wrap in Plastic Bubble Wrap", icon: "🫧", isDistractor: true, reason: "Insulates extreme heat inside battery casing, accelerating swelling!" },
+                    { id: "tool_food_freezer", name: "Put Tablet in Food Freezer", icon: "🥶", isDistractor: true, reason: "Severe condensation forms on internal motherboard when removed!" },
+                    { id: "tool_play_heavy_game", name: "Run 3D Stress Benchmark", icon: "🎮", isDistractor: true, reason: "Drives internal processor to 100°C, permanently damaging logic chips!" }
+                ],
+                renderSvg: (isNeutralized) => `
+                    <svg viewBox="0 0 800 280" class="room-svg" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="800" height="280" fill="#0b0f19"/>
+
+                        ${!isNeutralized ? `
+                            <g>
+                                <rect x="280" y="40" width="240" height="200" rx="8" fill="#475569" stroke="#ef4444" stroke-width="4"/>
+                                <line x1="400" y1="40" x2="400" y2="240" stroke="#334155" stroke-width="3"/>
+                                <rect x="330" y="110" width="140" height="85" rx="8" fill="#ef4444" opacity="0.8" stroke="#fca5a5" stroke-width="3">
+                                    <animate attributeName="opacity" values="0.6;1;0.6" dur="1.2s" repeatCount="indefinite"/>
+                                </rect>
+                                <text x="400" y="155" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">🔥 65°C Battery Swelling</text>
+                                <text x="400" y="25" fill="#ef4444" font-size="14" font-weight="bold" text-anchor="middle">⚠️ Trapped in Unventilated Hot Locker!</text>
+                            </g>
+                        ` : `
+                            <g>
+                                <rect x="250" y="40" width="300" height="200" rx="10" fill="#0284c7" stroke="#38bdf8" stroke-width="3"/>
+                                <line x1="280" y1="70" x2="520" y2="70" stroke="#e0f2fe" stroke-width="3"/>
+                                <line x1="280" y1="90" x2="520" y2="90" stroke="#e0f2fe" stroke-width="3"/>
+                                <rect x="330" y="120" width="140" height="85" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                                <text x="400" y="165" fill="#a7f3d0" font-size="13" font-weight="bold" text-anchor="middle">❄️ Safe 24°C Storage</text>
+                                <text x="400" y="25" fill="#10b981" font-size="14" font-weight="bold" text-anchor="middle">✅ Moved to Ventilated Shaded Tech Cabinet</text>
+                            </g>
+                        `}
+                    </svg>
+                `
+            }
+        ];
+
+        /* Dynamic Fisher-Yates Array Shuffler */
+        function shuffleArray(arr) {
+            const array = [...arr];
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+            return array;
+        }
+
+        /* Build Completely Randomized Scenario & Answer Dataset */
+        function generateShuffledScenarios() {
+            return shuffleArray(MASTER_SCENARIOS).map(scenario => {
+                return {
+                    ...scenario,
+                    tools: shuffleArray(scenario.tools)
+                };
+            });
+        }
+
+        const DEFAULT_INSPECTOR_HTML = `🔍 Inspect the animated workstation room above. Drag the correct safety tool from your inventory onto the scene to neutralize the hazard!`;
+
+        const state = {
+            activeScenarios: [],      // Shuffled scenarios array
+            currentScenarioIndex: 0,
+            evaluations: {},          // scenario_id -> { isCorrect, chosenToolName, targetToolName, feedback }
+            score: 0,
+            attempts: 0,
+            streak: 0,
+            bestStreak: 0,
+            selectedToolId: null,
+            theme: "light",
+            systemHealth: 100,
+            systemTemp: 78
+        };
+
+        /* DOM Elements */
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            scenarioPageHeading: document.getElementById("scenarioPageHeading"),
+            scenarioEnvironmentSub: document.getElementById("scenarioEnvironmentSub"),
+            systemHealthFill: document.getElementById("systemHealthFill"),
+            systemHealthVal: document.getElementById("systemHealthVal"),
+            systemTempFill: document.getElementById("systemTempFill"),
+            systemTempVal: document.getElementById("systemTempVal"),
+            shortCircuitFlash: document.getElementById("shortCircuitFlash"),
+            scenarioIcon: document.getElementById("scenarioIcon"),
+            scenarioHazardName: document.getElementById("scenarioHazardName"),
+            scenarioStatusPill: document.getElementById("scenarioStatusPill"),
+            svgCanvasDropZone: document.getElementById("svgCanvasDropZone"),
+            svgIllustrationContainer: document.getElementById("svgIllustrationContainer"),
+            svgDropOverlay: document.getElementById("svgDropOverlay"),
+            scenarioNarrativeText: document.getElementById("scenarioNarrativeText"),
+            inventoryTrayContainer: document.getElementById("inventoryTrayContainer"),
+            hazardsCount: document.getElementById("hazardsCount"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            retryScenarioBtn: document.getElementById("retryScenarioBtn"),
+            nextScenarioBtn: document.getElementById("nextScenarioBtn"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList")
+        };
+
+        /* Reset Explanation Box Helper (Mandatory Rule 4.4) */
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_INSPECTOR_HTML;
+        }
+
+        /* Auto-Detect Browser Color Scheme (Master Template Rule 2.5) */
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        /* Initialize Simulation */
+        init();
+
+        function init() {
+            bindEvents();
+            loadState();
+            renderDashboard();
+
+            // MANDATORY AUTO-OPEN INSTRUCTIONS GUIDE ON LAUNCH
+            openModal();
+        }
+
+        function bindEvents() {
+            dom.startSimBtn.addEventListener("click", () => {
+                resetExplanationBox();
+                showScreen("game");
+            });
+            dom.openGuideBtn.addEventListener("click", openModal);
+            dom.helpBtn.addEventListener("click", openModal);
+            dom.gotItBtn.addEventListener("click", closeModal);
+            dom.closeModalBtn.addEventListener("click", closeModal);
+
+            // MANDATORY RULE 4.3: NO BACKDROP CLICK DISMISSAL
+            dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.historyBtn.addEventListener("click", openDrawer);
+            dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            dom.resetBtn.addEventListener("click", openResetModal);
+            dom.restartSimBtn.addEventListener("click", openResetModal);
+            dom.retryScenarioBtn.addEventListener("click", handleRetryCurrentScenario);
+            dom.nextScenarioBtn.addEventListener("click", advanceScenarioOrSummary);
+            dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            // Setup SVG Canvas Drop Zone
+            dom.svgCanvasDropZone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dom.svgCanvasDropZone.classList.add("drag-over");
+            });
+            dom.svgCanvasDropZone.addEventListener("dragleave", () => {
+                dom.svgCanvasDropZone.classList.remove("drag-over");
+            });
+            dom.svgCanvasDropZone.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dom.svgCanvasDropZone.classList.remove("drag-over");
+                const toolId = e.dataTransfer ? e.dataTransfer.getData("text/plain") : null;
+                if (toolId) {
+                    applyCurrentTool(toolId);
+                }
+            });
+            dom.svgCanvasDropZone.addEventListener("click", () => {
+                if (state.selectedToolId) {
+                    applyCurrentTool(state.selectedToolId);
+                }
+            });
+            dom.svgCanvasDropZone.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    if (state.selectedToolId) {
+                        applyCurrentTool(state.selectedToolId);
+                    }
+                }
+            });
+
+            // Keyboard accessibility for Esc key
+            window.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    closeModal();
+                    closeResetModal();
+                    closeDrawer();
+                }
+            });
+
+            // Browser color scheme change listener
+            try {
+                const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkMedia.addEventListener) {
+                    darkMedia.addEventListener('change', e => {
+                        if (!sessionStorage.getItem("user_toggled_theme")) {
+                            state.theme = e.matches ? "dark" : "light";
+                            updateThemeUI();
+                        }
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            // HIDE HELP BUTTON ON LANDING PAGE; SHOW ON GAME & SUMMARY
+            dom.helpBtn.style.display = screenName === "home" ? "none" : "inline-flex";
+
+            // Lock outer body overflow in game mode
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        /* Setup Solid Pointer-Based Dragging (Drags Real Element, No Translucent Ghost) */
+        function setupPointerDragging(toolCard, tool, isResolved) {
+            if (isResolved) return;
+
+            let startX = 0;
+            let startY = 0;
+            let isDragging = false;
+            let dragClone = null;
+
+            toolCard.addEventListener("pointerdown", (e) => {
+                if (toolCard.classList.contains("used")) return;
+                startX = e.clientX;
+                startY = e.clientY;
+                isDragging = false;
+
+                const onPointerMove = (moveEv) => {
+                    const dx = moveEv.clientX - startX;
+                    const dy = moveEv.clientY - startY;
+
+                    if (!isDragging && Math.hypot(dx, dy) > 5) {
+                        isDragging = true;
+                        // Create solid floating copy of the tool card
+                        dragClone = document.createElement("div");
+                        dragClone.className = "tool-item-card dragging-clone";
+                        dragClone.style.left = `${moveEv.clientX - 45}px`;
+                        dragClone.style.top = `${moveEv.clientY - 24}px`;
+                        dragClone.style.width = `${toolCard.offsetWidth}px`;
+                        dragClone.innerHTML = toolCard.innerHTML;
+                        document.body.appendChild(dragClone);
+                        toolCard.classList.add("dragging");
+                    }
+
+                    if (isDragging && dragClone) {
+                        dragClone.style.left = `${moveEv.clientX - 45}px`;
+                        dragClone.style.top = `${moveEv.clientY - 24}px`;
+
+                        // Check collision with dropzone
+                        const dropRect = dom.svgCanvasDropZone.getBoundingClientRect();
+                        const isOver = (
+                            moveEv.clientX >= dropRect.left &&
+                            moveEv.clientX <= dropRect.right &&
+                            moveEv.clientY >= dropRect.top &&
+                            moveEv.clientY <= dropRect.bottom
+                        );
+                        dom.svgCanvasDropZone.classList.toggle("drag-over", isOver);
+                    }
+                };
+
+                const onPointerUp = (upEv) => {
+                    window.removeEventListener("pointermove", onPointerMove);
+                    window.removeEventListener("pointerup", onPointerUp);
+                    window.removeEventListener("pointercancel", onPointerUp);
+
+                    dom.svgCanvasDropZone.classList.remove("drag-over");
+                    toolCard.classList.remove("dragging");
+
+                    if (dragClone) {
+                        dragClone.remove();
+                        dragClone = null;
+                    }
+
+                    if (isDragging) {
+                        const dropRect = dom.svgCanvasDropZone.getBoundingClientRect();
+                        const isOver = (
+                            upEv.clientX >= dropRect.left &&
+                            upEv.clientX <= dropRect.right &&
+                            upEv.clientY >= dropRect.top &&
+                            upEv.clientY <= dropRect.bottom
+                        );
+                        if (isOver) {
+                            applyCurrentTool(tool.id);
+                        }
+                    } else {
+                        // Click / Tap Action
+                        if (state.selectedToolId === tool.id) {
+                            state.selectedToolId = null;
+                        } else {
+                            state.selectedToolId = tool.id;
+                        }
+                        renderDashboard();
+                    }
+                };
+
+                window.addEventListener("pointermove", onPointerMove);
+                window.addEventListener("pointerup", onPointerUp);
+                window.addEventListener("pointercancel", onPointerUp);
+            });
+        }
+
+        /* Render Current Scenario Dashboard */
+        function renderDashboard() {
+            if (!state.activeScenarios || state.activeScenarios.length === 0) return;
+
+            const currentScenario = state.activeScenarios[state.currentScenarioIndex];
+            const evalRecord = state.evaluations[currentScenario.id];
+            const isResolved = evalRecord && evalRecord.isCorrect;
+
+            dom.scenarioPageHeading.textContent = `🏢 Scenario ${state.currentScenarioIndex + 1} of 12: ${currentScenario.name}`;
+            dom.scenarioEnvironmentSub.textContent = currentScenario.environment;
+
+            dom.scenarioIcon.textContent = currentScenario.icon;
+            dom.scenarioHazardName.textContent = currentScenario.name;
+            dom.scenarioNarrativeText.textContent = currentScenario.desc;
+
+            // Update SVG Canvas status & graphics
+            dom.svgIllustrationContainer.innerHTML = currentScenario.renderSvg(isResolved);
+            dom.svgCanvasDropZone.className = `svg-canvas-wrapper ${isResolved ? 'neutralized' : ''}`;
+
+            if (isResolved) {
+                dom.scenarioStatusPill.className = "scenario-status-pill pill-safe";
+                dom.scenarioStatusPill.textContent = "✅ Hazard Neutralized";
+                dom.svgDropOverlay.innerHTML = `<span>🛡️ Protected with: <strong>${escapeHtml(evalRecord.chosenToolName)}</strong></span>`;
+                dom.svgDropOverlay.style.display = "flex";
+            } else {
+                dom.scenarioStatusPill.className = "scenario-status-pill pill-hazard";
+                dom.scenarioStatusPill.textContent = "⚠️ Active Hazard";
+                dom.svgDropOverlay.innerHTML = `<span>📥 [ Drag Correct Tool Onto Scene to Neutralize ]</span>`;
+                dom.svgDropOverlay.style.display = "flex";
+            }
+
+            // Real-time Temperature & Health Gauges
+            state.systemTemp = isResolved ? 36 : 78;
+            state.systemHealth = isResolved ? 100 : 70;
+
+            dom.systemTempFill.style.width = `${Math.min(100, Math.round((state.systemTemp / 90) * 100))}%`;
+            dom.systemTempVal.textContent = `${state.systemTemp}°C`;
+            dom.systemTempVal.style.color = state.systemTemp <= 42 ? "var(--safe-color)" : "var(--danger-color)";
+            dom.systemTempFill.style.background = state.systemTemp <= 42 ? "var(--safe-color)" : "var(--danger-color)";
+
+            dom.systemHealthFill.style.width = `${state.systemHealth}%`;
+            dom.systemHealthVal.textContent = `${state.systemHealth}%`;
+            dom.systemHealthVal.style.color = state.systemHealth >= 80 ? "var(--safe-color)" : "var(--hazard-color)";
+            dom.systemHealthFill.style.background = state.systemHealth >= 80 ? "var(--safe-color)" : "var(--hazard-color)";
+
+            // Total Evaluated Progress
+            const totalEvaluated = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const totalScenarios = state.activeScenarios.length;
+            const totalPct = Math.round((totalEvaluated / totalScenarios) * 100);
+
+            dom.hazardsCount.textContent = `${totalEvaluated} / ${totalScenarios} Neutralized`;
+            dom.progressPercent.textContent = `${totalPct}% Complete`;
+            dom.progressFillBar.style.width = `${totalPct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            const acc = state.attempts === 0 ? 0 : Math.round((totalEvaluated / state.attempts) * 100);
+            dom.accuracyVal.textContent = `${acc}%`;
+
+            // Render 4 Tool Options in Inventory Tray
+            dom.inventoryTrayContainer.innerHTML = "";
+            currentScenario.tools.forEach(tool => {
+                const isSelected = state.selectedToolId === tool.id;
+                const toolCard = document.createElement("div");
+                toolCard.className = `tool-item-card ${isResolved ? 'used' : ''} ${isSelected ? 'selected-tool' : ''}`;
+                toolCard.id = `tool_${tool.id}`;
+                toolCard.tabIndex = isResolved ? -1 : 0;
+                toolCard.setAttribute("role", "button");
+                toolCard.setAttribute("aria-label", `Tool: ${tool.name}`);
+
+                toolCard.innerHTML = `
+                    <div class="tool-icon">${tool.icon}</div>
+                    <div class="tool-text">${escapeHtml(tool.name)}</div>
+                `;
+
+                setupPointerDragging(toolCard, tool, isResolved);
+
+                toolCard.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        if (state.selectedToolId === tool.id) {
+                            state.selectedToolId = null;
+                        } else {
+                            state.selectedToolId = tool.id;
+                        }
+                        renderDashboard();
+                    }
+                });
+
+                dom.inventoryTrayContainer.appendChild(toolCard);
+            });
+
+            // Update Next Button Visibility
+            if (isResolved) {
+                dom.nextScenarioBtn.style.display = "inline-flex";
+                if (state.currentScenarioIndex === state.activeScenarios.length - 1) {
+                    dom.nextScenarioBtn.textContent = "Finish Safety Certification 🎉";
+                } else {
+                    dom.nextScenarioBtn.textContent = `Next Scenario (${state.currentScenarioIndex + 2}/12) →`;
+                }
+            } else {
+                dom.nextScenarioBtn.style.display = "none";
+            }
+        }
+
+        /* Apply Tool to Current Scenario */
+        function applyCurrentTool(toolId) {
+            if (!toolId) return;
+
+            const currentScenario = state.activeScenarios[state.currentScenarioIndex];
+            const chosenTool = currentScenario.tools.find(t => t.id === toolId);
+            if (!chosenTool) return;
+
+            state.attempts += 1;
+            const isCorrect = chosenTool.isCorrect === true;
+
+            state.evaluations[currentScenario.id] = {
+                scenarioName: currentScenario.name,
+                hazardType: currentScenario.hazard_type,
+                hazardIcon: currentScenario.icon,
+                isCorrect: isCorrect,
+                chosenToolName: chosenTool.name,
+                targetToolName: currentScenario.correct_tool_name,
+                feedback: isCorrect ? currentScenario.feedback_correct : (chosenTool.reason || "Dangerous choice! This action causes additional damage.")
+            };
+
+            if (isCorrect) {
+                state.score += 10;
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+                state.selectedToolId = null;
+
+                playAudioFeedback("repair");
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <strong>✅ Hazard Neutralized:</strong> ${escapeHtml(currentScenario.name)}<br>
+                    ${escapeHtml(currentScenario.feedback_correct)}
+                `;
+            } else {
+                state.streak = 0;
+                state.selectedToolId = null;
+
+                // Visual Short Circuit Flash & Shake
+                triggerShortCircuitEffect();
+                playAudioFeedback("short");
+
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <strong>❌ Hazardous Choice (${escapeHtml(chosenTool.name)}):</strong><br>
+                    ${escapeHtml(chosenTool.reason || "Dangerous corrective action!")}
+                `;
+            }
+
+            renderDashboard();
+            renderHistoryList();
+        }
+
+        /* Trigger Short Circuit Flash */
+        function triggerShortCircuitEffect() {
+            dom.shortCircuitFlash.classList.add("trigger-flash");
+            setTimeout(() => {
+                dom.shortCircuitFlash.classList.remove("trigger-flash");
+            }, 500);
+
+            dom.svgCanvasDropZone.classList.add("danger-flash");
+            setTimeout(() => {
+                dom.svgCanvasDropZone.classList.remove("danger-flash");
+            }, 500);
+        }
+
+        /* Retry Scenario (Reshuffles Answers on Retry) */
+        function handleRetryCurrentScenario() {
+            const currentScenario = state.activeScenarios[state.currentScenarioIndex];
+            delete state.evaluations[currentScenario.id];
+            state.selectedToolId = null;
+            currentScenario.tools = shuffleArray(currentScenario.tools);
+            resetExplanationBox();
+            renderDashboard();
+            renderHistoryList();
+        }
+
+        /* Advance Scenario or Summary (Reshuffles next scenario's answers) */
+        function advanceScenarioOrSummary() {
+            if (state.currentScenarioIndex < state.activeScenarios.length - 1) {
+                state.currentScenarioIndex += 1;
+                state.selectedToolId = null;
+
+                const nextScenario = state.activeScenarios[state.currentScenarioIndex];
+                if (nextScenario && !state.evaluations[nextScenario.id]) {
+                    nextScenario.tools = shuffleArray(nextScenario.tools);
+                }
+
+                resetExplanationBox();
+                renderDashboard();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showScreen("summary");
+            }
+        }
+
+        /* Render Summary Screen */
+        function renderSummaryScreen() {
+            const total = state.activeScenarios.length;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = state.attempts === 0 ? 0 : Math.round((correctCount / state.attempts) * 100);
+
+            if (dom.summaryScoreVal) dom.summaryScoreVal.textContent = state.score;
+            if (dom.summaryAccuracyVal) dom.summaryAccuracyVal.textContent = `${accuracy}%`;
+            if (dom.summaryStreakVal) dom.summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            if (dom.summaryCorrectVal) dom.summaryCorrectVal.textContent = `${correctCount} / ${total}`;
+
+            if (accuracy >= 85 && correctCount === total) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "Master Hardware Defender";
+                dom.badgeDesc.textContent = `Flawless execution! You scored ${state.score} points with ${accuracy}% accuracy (${correctCount}/${total} hazards resolved). You are fully certified in computer workstation safety!`;
+            } else if (correctCount >= 8) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Workstation Technician";
+                dom.badgeDesc.textContent = `Great work! You scored ${state.score} points with ${accuracy}% accuracy (${correctCount}/${total} hazards resolved). Review missed procedures below to perfect your safety skills.`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Safety Trainee";
+                dom.badgeDesc.textContent = `You scored ${state.score} points with ${accuracy}% accuracy (${correctCount}/${total} hazards resolved). Review the safety explanations in the memory drawer to strengthen your lab safety.`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+            state.activeScenarios.forEach(s => {
+                const evalData = state.evaluations[s.id];
+                const isCorrect = evalData && evalData.isCorrect === true;
+                const userChoice = evalData ? evalData.chosenToolName : "Unresolved";
+
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text); font-size:0.96rem;">${s.icon} ${escapeHtml(s.name)} (${escapeHtml(s.hazard_type)})</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800; font-size:0.88rem;">
+                            ${isCorrect ? '✅ Correct Action' : '❌ Missed / Unresolved'}
+                        </span>
+                    </div>
+                    <div style="font-size:0.84rem; color:var(--muted); margin-bottom:3px;">
+                        <strong>Target Solution:</strong> ${escapeHtml(s.correct_tool_name)} ${!isCorrect ? `| <em>Selected: ${escapeHtml(userChoice)}</em>` : ''}
+                    </div>
+                    <p style="margin:4px 0 0; color:var(--text-soft); font-size:0.86rem; line-height:1.45;">
+                        ${escapeHtml(evalData ? evalData.feedback : s.feedback_correct)}
+                    </p>
+                `;
+                dom.summaryDetailsList.appendChild(card);
+            });
+        }
+
+        /* Render Slide-Over Review Memory List */
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedList = state.activeScenarios.filter(s => state.evaluations[s.id]);
+
+            if (evaluatedList.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:14px; color:var(--muted); text-align:center; font-size:0.88rem;">No evaluated hazard actions recorded yet. Neutralize workstation hazards to build memory.</div>`;
+                return;
+            }
+
+            evaluatedList.forEach(s => {
+                const evalData = state.evaluations[s.id];
+                const isCorrect = evalData.isCorrect;
+                const item = document.createElement("div");
+                item.className = "summary-item-card";
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+                        <strong style="color:var(--text); font-size:0.92rem;">${s.icon} ${escapeHtml(s.name)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800; font-size:0.84rem;">
+                            ${isCorrect ? '✅ Neutralized' : '❌ Hazard Mistake'}
+                        </span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--muted); margin-bottom:3px;">
+                        Action Taken: <strong>${escapeHtml(evalData.chosenToolName)}</strong>
+                    </div>
+                    <div style="font-size:0.82rem; color:var(--text-soft); line-height:1.4;">
+                        ${escapeHtml(evalData.feedback)}
+                    </div>
+                `;
+                dom.historyList.appendChild(item);
+            });
+        }
+
+        /* Modal & Drawer Controls */
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try {
+                sessionStorage.setItem("user_toggled_theme", state.theme);
+            } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen toggle failed", err);
+            }
+        }
+
+        /* Confirm Reset (Master Template Rule 4.4 & Rule 4.5) */
+        function confirmReset() {
+            closeResetModal();
+
+            // Re-generate completely randomized scenarios and choices
+            state.activeScenarios = generateShuffledScenarios();
+
+            state.currentScenarioIndex = 0;
+            state.evaluations = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.selectedToolId = null;
+            state.systemHealth = 100;
+            state.systemTemp = 78;
+
+            resetExplanationBox();
+            renderDashboard();
+            showScreen("home");
+        }
+
+        /* Sound Synthesizer with Web Audio API */
+        function playAudioFeedback(type) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === "repair") {
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.18);
+                    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.14, ctx.currentTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.23);
+                } else if (type === "short") {
+                    osc.type = "sawtooth";
+                    osc.frequency.setValueAtTime(130, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(65, ctx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.29);
+                }
+            } catch (e) {}
+        }
+
+        /* Load Fresh State */
+        function loadState() {
+            // Generate randomized scenarios and randomized tool choices
+            state.activeScenarios = generateShuffledScenarios();
+
+            state.currentScenarioIndex = 0;
+            state.evaluations = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.selectedToolId = null;
+            state.systemHealth = 100;
+            state.systemTemp = 78;
+
+            resetExplanationBox();
+
+            // Automatic theme detection on fresh launch
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+
+            // Hide help button on initial landing page load
+            dom.helpBtn.style.display = "none";
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
