@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form 1 IPOS Cycle Simulator</title>
+    <style>
+        /* ============================================================
+           HIGH SCHOOL FORM 1 IPOS CYCLE SIMULATOR
+           Single-file HTML/CSS/JS - Master Template Compliant
+           Trinidad and Tobago Secondary Schools — Computer Support Lab
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0b0f19;
+            --bg-soft: #121829;
+            --surface: #1a2238;
+            --surface-2: #232d4a;
+            --surface-3: #2d3a5e;
+            --text: #f0f4fc;
+            --text-soft: #c3d0eb;
+            --muted: #8ca0ca;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #38bdf8;
+            --accent-2: #818cf8;
+
+            /* IPOS Stage Zone Colors */
+            --input-color: #38bdf8;
+            --proc-color: #f59e0b;
+            --output-color: #ec4899;
+            --storage-color: #10b981;
+
+            /* Status Colors */
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.15);
+            --safe-border: rgba(16, 185, 129, 0.4);
+
+            --hazard-color: #f59e0b;
+            --hazard-bg: rgba(245, 158, 11, 0.15);
+            --hazard-border: rgba(245, 158, 11, 0.4);
+
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: rgba(239, 68, 68, 0.4);
+
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+            --progress: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f1f5f9;
+            --bg-soft: #e2e8f0;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-soft: #334155;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, 0.12);
+            --accent: #0284c7;
+            --accent-2: #4f46e5;
+
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --focus: 0 0 0 3px rgba(2, 132, 199, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 25%),
+                var(--bg);
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        body.in-game {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1280px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Topbar Header (Sticky at Top 0) */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 18px;
+            background: color-mix(in srgb, var(--surface) 94%, transparent);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 1.35rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.85rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            line-height: 1.2;
+        }
+
+        .control-btn,
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger-color) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger-color) 40%, transparent);
+        }
+
+        /* MANDATORY ORANGE PULSE RING ON HELP BUTTON */
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid #f59e0b;
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { opacity: 0.9; transform: scale(0.98); }
+            70% { opacity: 0; transform: scale(1.12); }
+            100% { opacity: 0; }
+        }
+
+        /* Screens Management */
+        .screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Screen 1: Intro Screen (Compact & Zero Scrolling) */
+        .center-stage {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(8px, 1.5vh, 16px);
+        }
+
+        .hero-card {
+            width: min(100%, 820px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(18px, 2.5vh, 28px) clamp(20px, 3vw, 36px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 10px;
+            font-size: clamp(1.8rem, 3.2vw, 2.5rem);
+            line-height: 1.15;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--text-soft));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto 16px;
+            color: var(--text-soft);
+            font-size: 0.98rem;
+            line-height: 1.55;
+        }
+
+        /* 2 ROWS OF 2 GRID LAYOUT ON LANDING PAGE HERO FEATURES */
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 16px 0 20px;
+            text-align: left;
+        }
+
+        @media (max-width: 600px) {
+            .hero-features {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-item {
+            padding: 12px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .feature-icon {
+            font-size: 1.4rem;
+            margin-bottom: 2px;
+        }
+
+        .feature-item h3 {
+            margin: 0;
+            font-size: 0.92rem;
+            font-weight: 800;
+        }
+
+        .feature-item p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--muted);
+            line-height: 1.35;
+            width: 100%;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Screen 2: Split Dashboard Layout (75% Left Stage / 25% Right Action Panel) */
+        .dashboard-container {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) clamp(270px, 25vw, 310px);
+            gap: 14px;
+            height: 100%;
+            overflow: hidden;
+            align-items: stretch;
+        }
+
+        /* Left Pane (75%): Interactive Stage */
+        .canvas-pane {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            min-width: 0;
+            position: relative;
+        }
+
+        .canvas-header {
+            padding: 10px 16px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .room-title {
+            font-size: 0.98rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Scrollable IPOS Stage */
+        .ipos-stage {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 14px;
+            background: color-mix(in srgb, var(--bg-soft) 40%, var(--surface));
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            justify-content: flex-start;
+            position: relative;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .ipos-stage::-webkit-scrollbar {
+            width: 6px;
+        }
+        .ipos-stage::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        /* Animated Flow Packet Layer */
+        .flow-packet-anim {
+            position: absolute;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f59e0b, #ec4899);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.82rem;
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.8);
+            z-index: 45;
+            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* 4 IPOS Target Drop Zones Grid */
+        .zones-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .ipos-zone {
+            background: var(--surface-2);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            min-height: 160px;
+            max-height: 260px;
+            min-width: 0;
+            width: 100%;
+            overflow: hidden;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            position: relative;
+            box-sizing: border-box;
+            z-index: 20;
+        }
+
+        .ipos-zone[data-zone="Input"] { border-color: color-mix(in srgb, var(--input-color) 50%, transparent); }
+        .ipos-zone[data-zone="Processing"] { border-color: color-mix(in srgb, var(--proc-color) 50%, transparent); }
+        .ipos-zone[data-zone="Output"] { border-color: color-mix(in srgb, var(--output-color) 50%, transparent); }
+        .ipos-zone[data-zone="Storage"] { border-color: color-mix(in srgb, var(--storage-color) 50%, transparent); }
+
+        .ipos-zone.highlight,
+        .hardware-palette-section.highlight {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 0 22px var(--accent);
+            border-style: solid;
+            border-color: var(--accent) !important;
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface-2)) !important;
+        }
+
+        .ipos-zone.disabled-breakdown {
+            opacity: 0.35;
+            border-color: var(--danger-color) !important;
+            background: rgba(239, 68, 68, 0.1) !important;
+        }
+
+        .zone-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            pointer-events: none;
+        }
+
+        .zone-title {
+            font-size: 0.92rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            pointer-events: none;
+        }
+
+        .zone-cards-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-height: 100px;
+            min-width: 0;
+            width: 100%;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+            padding-right: 2px;
+        }
+
+        .zone-cards-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .zone-cards-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        /* Device Cards Deck - FIXED 4-COLUMN COMPACT PALETTE */
+        .hardware-palette-section {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 126px;
+            min-width: 0;
+            width: 100%;
+            overflow: visible;
+            flex-shrink: 0;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            position: relative;
+            z-index: 20;
+        }
+
+        .palette-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .palette-title-row h3 {
+            margin: 0;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            pointer-events: none;
+        }
+
+        .hardware-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-rows: repeat(2, minmax(48px, 54px));
+            gap: 8px;
+            min-height: 106px;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .hardware-cards-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-rows: repeat(4, minmax(48px, 54px));
+                min-height: 220px;
+            }
+        }
+
+        /* Physical Draggable Device Card (No Ghosting, Direct Manipulation) */
+        .device-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+            transition: transform 0.18s ease, border-color 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+            min-width: 0;
+            width: 100%;
+            height: 50px;
+            min-height: 48px;
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+            z-index: 25;
+        }
+
+        .device-card:hover:not(.dragging) {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* DRAGGING LAYER: High z-index (99999), moves physically above all boxes */
+        .device-card.dragging {
+            cursor: grabbing !important;
+            z-index: 99999 !important;
+            opacity: 0.95;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55) !important;
+            border-color: #f59e0b !important;
+            transition: none !important;
+            pointer-events: none !important;
+        }
+
+        /* Placeholder slot during drag */
+        .device-card-placeholder {
+            border: 2px dashed var(--accent);
+            background: color-mix(in srgb, var(--accent) 10%, transparent);
+            border-radius: 10px;
+            box-sizing: border-box;
+            pointer-events: none;
+            flex-shrink: 0;
+        }
+
+        .device-card.placed {
+            border-color: var(--accent-2);
+        }
+
+        .device-card.correct {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .device-card.incorrect {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        .device-icon {
+            font-size: 1.25rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--surface-2);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+            pointer-events: none;
+        }
+
+        .device-info {
+            min-width: 0;
+            flex: 1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .device-info h4 {
+            margin: 0 0 1px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+
+        .device-info p {
+            margin: 0;
+            font-size: 0.72rem;
+            color: var(--muted);
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+
+        /* Right Pane: Dedicated Action & Status Tray (25% Width) */
+        .mission-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            height: 100%;
+            min-height: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .mission-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+        .mission-panel::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: clamp(10px, 1.3vh, 14px);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text);
+        }
+
+        .progress-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .progress-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .progress-bar-wrap {
+            height: 8px;
+            width: 100%;
+            background: var(--surface-2);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--progress);
+            transition: width 0.35s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stat-box {
+            padding: 8px 6px;
+            background: var(--surface-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 1px;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        /* Feedback Explanation Card */
+        .feedback-card {
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            font-size: 0.84rem;
+            line-height: 1.45;
+            color: var(--text-soft);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .feedback-card.success {
+            border-color: var(--safe-border);
+            background: var(--safe-bg);
+        }
+
+        .feedback-card.warning {
+            border-color: var(--danger-border);
+            background: var(--danger-bg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Completion Screen */
+        .summary-card {
+            width: min(100%, 880px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(20px, 3.5vw, 36px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge-container {
+            margin: 16px 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 28px;
+            background: var(--surface-2);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 3rem;
+        }
+
+        .badge-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .summary-stats-grid .stat-box {
+            padding: 12px 8px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .summary-stats-grid .stat-box .val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 3px;
+        }
+
+        .summary-stats-grid .stat-box .lbl {
+            font-size: 0.74rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .summary-details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+            margin-top: 18px;
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .summary-item-card {
+            padding: 12px 16px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Drawer & Modals */
+        .drawer {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 10, 20, 0.65);
+            display: none;
+            justify-content: flex-end;
+            z-index: 60;
+        }
+
+        .drawer.show {
+            display: flex;
+        }
+
+        .drawer-card {
+            width: min(100%, 460px);
+            height: 100%;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            padding: 22px;
+            overflow-y: auto;
+        }
+
+        .drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.75);
+            z-index: 70;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 620px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 24px 28px;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        /* PERFECTLY CENTERED CLOSE BUTTONS */
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0;
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            line-height: 1;
+            transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--surface-3);
+            transform: scale(1.08);
+        }
+
+        .close-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            display: block;
+            pointer-events: none;
+        }
+
+        @media (max-width: 900px) {
+            body.in-game {
+                height: auto;
+                overflow: auto;
+            }
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow: visible;
+            }
+            .zones-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .canvas-pane {
+                min-height: auto;
+            }
+            .mission-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- Topbar Header (Sticky & Persistent at Top 0) -->
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge">🔄</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Form 1 IPOS Cycle Simulator</h1>
+                    <p id="brandSubtitle">Trinidad and Tobago Secondary Schools — Computer Support Lab</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- Help Button dynamically shown on game and summary screens, hidden on landing screen -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                <button class="control-btn" id="historyBtn" aria-label="Open review memory">🧠 Review Memory</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation">↺ Reset</button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Intro Screen -->
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow">Form 1 Computer Studies</div>
+                    <h2>IPOS Cycle Simulator</h2>
+                    <p>
+                        Welcome to the Hardware Lab! Master the <strong>IPOS (Input, Processing, Output, Storage)</strong> cycle.
+                        Drag 8 hardware device cards into their drop zones, shift them around freely, and submit your cycle to test data flow!
+                    </p>
+
+                    <!-- 2 ROWS OF 2 GRID LAYOUT ON LANDING PAGE -->
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">📥</div>
+                            <h3>Input Zone</h3>
+                            <p>Keyboard, Mouse (Captures user data & commands).</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚙️</div>
+                            <h3>Processing Zone</h3>
+                            <p>CPU Central Processing Unit (Calculates & computes).</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">📤</div>
+                            <h3>Output Zone</h3>
+                            <p>Monitor, Printer, Speakers (Displays results).</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">💾</div>
+                            <h3>Storage Zone</h3>
+                            <p>Hard Drive, Flash Drive (Saves permanent files).</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startSimBtn" style="font-size: 1.05rem; padding: 12px 28px;">🚀 Launch IPOS Simulator</button>
+                        <button class="secondary-btn" id="openGuideBtn" style="font-size: 0.95rem; padding: 11px 22px;">📖 Read Guide</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Screen 2: Game Dashboard Screen (75% Left Stage / 25% Right Action Panel) -->
+        <main class="screen" id="gameScreen">
+            <div class="dashboard-container">
+                <!-- Left Pane (75%): Interactive Bins & Flow Canvas -->
+                <section class="canvas-pane" id="canvasPane">
+                    <div class="canvas-header">
+                        <div class="room-title">
+                            <span id="pageTitleHeading">🔄 IPOS Cycle Simulator (8 Hardware Devices)</span>
+                        </div>
+                        <span style="font-size:0.82rem; color:var(--muted); font-weight:700;">Drag device cards into IPOS zones or shift them between zones</span>
+                    </div>
+
+                    <div class="ipos-stage" id="iposStage">
+                        <!-- Animated Packet -->
+                        <div class="flow-packet-anim" id="flowPacket">📦 Data: "25 + 17"</div>
+
+                        <!-- 4 IPOS Target Zones -->
+                        <div class="zones-grid">
+                            <!-- 1. Input -->
+                            <div class="ipos-zone" id="zone_Input" data-zone="Input">
+                                <div class="zone-header">
+                                    <span class="zone-title" style="color:var(--input-color);">📥 Input</span>
+                                </div>
+                                <div class="zone-cards-list" id="list_Input" data-zone="Input"></div>
+                            </div>
+
+                            <!-- 2. Processing -->
+                            <div class="ipos-zone" id="zone_Processing" data-zone="Processing">
+                                <div class="zone-header">
+                                    <span class="zone-title" style="color:var(--proc-color);">⚙️ Processing</span>
+                                </div>
+                                <div class="zone-cards-list" id="list_Processing" data-zone="Processing"></div>
+                            </div>
+
+                            <!-- 3. Output -->
+                            <div class="ipos-zone" id="zone_Output" data-zone="Output">
+                                <div class="zone-header">
+                                    <span class="zone-title" style="color:var(--output-color);">📤 Output</span>
+                                </div>
+                                <div class="zone-cards-list" id="list_Output" data-zone="Output"></div>
+                            </div>
+
+                            <!-- 4. Storage -->
+                            <div class="ipos-zone" id="zone_Storage" data-zone="Storage">
+                                <div class="zone-header">
+                                    <span class="zone-title" style="color:var(--storage-color);">💾 Storage</span>
+                                </div>
+                                <div class="zone-cards-list" id="list_Storage" data-zone="Storage"></div>
+                            </div>
+                        </div>
+
+                        <!-- Unassigned Hardware Palette Deck -->
+                        <div class="hardware-palette-section" id="paletteSection" data-zone="Palette">
+                            <div class="palette-title-row">
+                                <h3>📦 Unassigned Hardware Palette (8 Cards)</h3>
+                                <span style="font-size:0.78rem; color:var(--muted);">Drag cards back & forth freely before submitting</span>
+                            </div>
+                            <div class="hardware-cards-grid" id="paletteGrid" data-zone="Palette"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Pane (25%): Dedicated Action & Status Tray -->
+                <aside class="mission-panel">
+                    <!-- 1. Progress Card (FIRST) -->
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <span>Placement Progress</span>
+                            <span id="matchesCount" style="color:var(--accent);">0 / 8 Placed</span>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-info-row">
+                                <span id="progressPercent">0% Complete</span>
+                                <span id="streakChip">🔥 Streak: 0</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-fill-bar" id="progressFillBar"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="lbl">Score</div>
+                                <div class="val" id="scoreVal">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="lbl">Accuracy</div>
+                                <div class="val" id="accuracyVal">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Inspector Feedback Box (SECOND - ABOVE BUTTON CONTAINER) -->
+                    <div class="panel-card">
+                        <div class="panel-title">IPOS Rationale & System Diagnostics</div>
+                        <div id="inspectorFeedbackBox" class="feedback-card">
+                            🔍 Drag hardware cards into their IPOS drop zones! You can shift items between categories anytime before clicking <strong>[Submit IPOS Cycle]</strong>.
+                        </div>
+                    </div>
+
+                    <!-- 3. Action Buttons Card (THIRD - BELOW DIAGNOSTICS) -->
+                    <div class="panel-card" style="gap:8px;">
+                        <button class="secondary-btn" id="emptyAllBtn" style="width:100%; justify-content:center;">
+                            🗑️ Empty All Containers
+                        </button>
+                        <button class="primary-btn" id="submitAnswersBtn" style="width:100%; justify-content:center;" disabled>
+                            ✅ Submit IPOS Cycle (0/8 Placed)
+                        </button>
+                        <button class="primary-btn" id="runFlowTestBtn" style="width:100%; justify-content:center; display:none;">
+                            ⚡ Start IPOS Calculation
+                        </button>
+                        <button class="primary-btn" id="finishCertificationBtn" style="width:100%; justify-content:center; display:none;">
+                            Finish Certification 🎉
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Screen 3: Summary Completion Screen -->
+        <main class="screen" id="summaryScreen">
+            <section class="summary-card">
+                <div class="eyebrow">Certification Complete</div>
+                <h2>Form 1 IPOS Cycle Certification</h2>
+                <p>Excellent job in the Computer Support Lab! You have mastered the computer IPOS cycle and system breakdown diagnostics.</p>
+
+                <div class="badge-container">
+                    <div class="badge-icon" id="badgeIcon">👑</div>
+                    <div class="badge-title" id="badgeTitle">IPOS Architecture Master</div>
+                    <p class="muted" id="badgeDesc" style="margin: 0; font-size: 0.92rem;">You classified all 8 hardware components and tested data flow!</p>
+                </div>
+
+                <div class="summary-stats-grid">
+                    <div class="stat-box">
+                        <div class="lbl">Final Score</div>
+                        <div class="val" id="summaryScoreVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Accuracy</div>
+                        <div class="val" id="summaryAccuracyVal">0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Best Streak</div>
+                        <div class="val" id="summaryStreakVal">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="lbl">Placed Devices</div>
+                        <div class="val" id="summaryCorrectVal">0 / 8</div>
+                    </div>
+                </div>
+
+                <h3 style="text-align: left; margin: 20px 0 10px; font-size: 1.05rem;">Hardware Device Classification Breakdown (8 Cards)</h3>
+                <div class="summary-details-list" id="summaryDetailsList"></div>
+
+                <div style="margin-top: 28px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <button class="secondary-btn" id="reviewMemorySummaryBtn">🧠 Review Memory</button>
+                    <button class="primary-btn" id="restartSimBtn">↺ Practice IPOS Again</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Review Memory Drawer -->
+    <aside class="drawer" id="historyDrawer" aria-hidden="true">
+        <section class="drawer-card">
+            <div class="drawer-head">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem;">Review Memory</h3>
+                    <p class="muted" style="margin: 4px 0 0; font-size: 0.85rem;">Evaluated hardware devices & IPOS functions.</p>
+                </div>
+                <button class="close-btn" id="closeHistoryBtn" aria-label="Close review memory">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div id="historyList" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </section>
+    </aside>
+
+    <!-- Instructions Guide Modal (Auto-Opens on Launch) -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close instructions">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h3 id="modalTitle" style="margin-top: 0; font-size: 1.3rem;">How to Play IPOS Cycle Simulator</h3>
+            <div style="color: var(--text-soft); line-height: 1.6; font-size: 0.94rem;">
+                <p>Welcome! Learn how computers process data through the 4 steps of the IPOS cycle:</p>
+                <ul style="padding-left: 20px; margin: 10px 0;">
+                    <li><strong>📥 Input:</strong> Devices used to enter data (Keyboard, Mouse).</li>
+                    <li><strong>⚙️ Processing:</strong> Component that performs calculations (CPU).</li>
+                    <li><strong>📤 Output:</strong> Devices that display or present processed results (Monitor, Printer, Speakers).</li>
+                    <li><strong>💾 Storage:</strong> Devices that save files permanently (Hard Drive, Flash Drive).</li>
+                    <li><strong>🔄 Shifting Items:</strong> You can drag and shift items between categories anytime before submitting.</li>
+                    <li><strong>✅ Submit Check:</strong> Place all 8 devices into zones, then click <strong>Submit IPOS Cycle</strong>!</li>
+                    <li><strong>⚡ Start Calculation:</strong> Once submitted correctly, click <strong>[⚡ Start IPOS Calculation]</strong> to watch the data flow!</li>
+                </ul>
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                <button class="primary-btn" id="gotItBtn">Got It!</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetModalBtn" aria-label="Close reset prompt">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h3 id="resetModalTitle" style="margin-top: 0; font-size: 1.3rem;">Reset Simulation?</h3>
+            <p style="color: var(--text-soft); line-height: 1.55;">Are you sure you want to reset the IPOS simulator and clear all placed devices?</p>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset Progress</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        "use strict";
+
+        /* ============================================================
+           8 HARDWARE DEVICE CARDS DATASET
+           Trinidad and Tobago Secondary Schools — Form 1 Computer Studies
+           ============================================================ */
+        const MASTER_DATASET = [
+            {
+                "id": "dev_001",
+                "name": "Keyboard",
+                "icon": "⌨️",
+                "zone": "Input",
+                "desc": "Types text & key commands into computer",
+                "feedback": "Correct! Keyboards capture keypresses and send input data into the computer system."
+            },
+            {
+                "id": "dev_002",
+                "name": "Mouse",
+                "icon": "🖱️",
+                "zone": "Input",
+                "desc": "Sends pointer clicks & motion commands",
+                "feedback": "Correct! A mouse is an input device that translates hand movement and clicks into cursor coordinates."
+            },
+            {
+                "id": "dev_003",
+                "name": "CPU (Central Processing Unit)",
+                "icon": "⚙️",
+                "zone": "Processing",
+                "desc": "Executes arithmetic & logic instructions",
+                "feedback": "Correct! The CPU is the brain of the computer that processes data and executes calculations."
+            },
+            {
+                "id": "dev_004",
+                "name": "Monitor",
+                "icon": "🖥️",
+                "zone": "Output",
+                "desc": "Displays visual images, text & video",
+                "feedback": "Correct! Monitors display processed graphics and text on screen for the user."
+            },
+            {
+                "id": "dev_005",
+                "name": "Printer",
+                "icon": "🖨️",
+                "zone": "Output",
+                "desc": "Prints hardcopy text & images on paper",
+                "feedback": "Correct! Printers produce physical hardcopy output from processed digital documents."
+            },
+            {
+                "id": "dev_006",
+                "name": "Speakers",
+                "icon": "🔊",
+                "zone": "Output",
+                "desc": "Outputs audio signals, music & sound",
+                "feedback": "Correct! Speakers convert digital audio signals into audible sound waves output."
+            },
+            {
+                "id": "dev_007",
+                "name": "Hard Drive",
+                "icon": "🗄️",
+                "zone": "Storage",
+                "desc": "Stores OS, apps & student files permanently",
+                "feedback": "Correct! Hard drives provide secondary non-volatile magnetic/solid-state storage."
+            },
+            {
+                "id": "dev_008",
+                "name": "Flash Drive",
+                "icon": "💾",
+                "zone": "Storage",
+                "desc": "Portable USB flash memory storage stick",
+                "feedback": "Correct! USB flash drives store files portably for easy transport between school PCs."
+            }
+        ];
+
+        const DEFAULT_EXPLANATION_HTML = `🔍 Drag hardware cards into their IPOS drop zones! You can shift items between categories anytime before clicking <strong>[Submit IPOS Cycle]</strong>.`;
+
+        const state = {
+            draftPlacements: {}, // devId -> zone (Input, Processing, Output, Storage)
+            evaluations: {},     // devId -> { item, placedZone, isCorrect }
+            disabledZones: {},   // zoneName -> boolean
+            score: 0,
+            attempts: 0,
+            streak: 0,
+            bestStreak: 0,
+            theme: "light",
+            isSubmitted: false,
+            isFlowRunning: false,
+            shuffledItems: []
+        };
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        let activeDrag = null;
+
+        const dom = {
+            html: document.documentElement,
+            homeScreen: document.getElementById("homeScreen"),
+            gameScreen: document.getElementById("gameScreen"),
+            summaryScreen: document.getElementById("summaryScreen"),
+            startSimBtn: document.getElementById("startSimBtn"),
+            openGuideBtn: document.getElementById("openGuideBtn"),
+            helpBtn: document.getElementById("helpBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            closeModalBtn: document.getElementById("closeModalBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            resetModal: document.getElementById("resetModal"),
+            closeResetModalBtn: document.getElementById("closeResetModalBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            historyBtn: document.getElementById("historyBtn"),
+            closeHistoryBtn: document.getElementById("closeHistoryBtn"),
+            historyDrawer: document.getElementById("historyDrawer"),
+            resetBtn: document.getElementById("resetBtn"),
+            paletteGrid: document.getElementById("paletteGrid"),
+            paletteSection: document.getElementById("paletteSection"),
+            pageTitleHeading: document.getElementById("pageTitleHeading"),
+            matchesCount: document.getElementById("matchesCount"),
+            progressPercent: document.getElementById("progressPercent"),
+            progressFillBar: document.getElementById("progressFillBar"),
+            streakChip: document.getElementById("streakChip"),
+            scoreVal: document.getElementById("scoreVal"),
+            accuracyVal: document.getElementById("accuracyVal"),
+            inspectorFeedbackBox: document.getElementById("inspectorFeedbackBox"),
+            emptyAllBtn: document.getElementById("emptyAllBtn"),
+            submitAnswersBtn: document.getElementById("submitAnswersBtn"),
+            runFlowTestBtn: document.getElementById("runFlowTestBtn"),
+            finishCertificationBtn: document.getElementById("finishCertificationBtn"),
+            badgeIcon: document.getElementById("badgeIcon"),
+            badgeTitle: document.getElementById("badgeTitle"),
+            badgeDesc: document.getElementById("badgeDesc"),
+            summaryScoreVal: document.getElementById("summaryScoreVal"),
+            summaryAccuracyVal: document.getElementById("summaryAccuracyVal"),
+            summaryStreakVal: document.getElementById("summaryStreakVal"),
+            summaryCorrectVal: document.getElementById("summaryCorrectVal"),
+            summaryDetailsList: document.getElementById("summaryDetailsList"),
+            restartSimBtn: document.getElementById("restartSimBtn"),
+            reviewMemorySummaryBtn: document.getElementById("reviewMemorySummaryBtn"),
+            historyList: document.getElementById("historyList"),
+            flowPacket: document.getElementById("flowPacket")
+        };
+
+        function resetExplanationBox() {
+            dom.inspectorFeedbackBox.className = "feedback-card";
+            dom.inspectorFeedbackBox.innerHTML = DEFAULT_EXPLANATION_HTML;
+        }
+
+        function detectSystemTheme() {
+            try {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return "dark";
+                }
+            } catch (e) {}
+            return "light";
+        }
+
+        init();
+
+        function init() {
+            bindEvents();
+            loadState();
+            renderDashboard();
+            showScreen("home");
+            openModal();
+        }
+
+        function bindEvents() {
+            if (dom.startSimBtn) {
+                dom.startSimBtn.addEventListener("click", () => {
+                    resetExplanationBox();
+                    showScreen("game");
+                });
+            }
+
+            if (dom.openGuideBtn) {
+                dom.openGuideBtn.addEventListener("click", openModal);
+            }
+
+            if (dom.helpBtn) dom.helpBtn.addEventListener("click", openModal);
+            if (dom.gotItBtn) dom.gotItBtn.addEventListener("click", closeModal);
+            if (dom.closeModalBtn) dom.closeModalBtn.addEventListener("click", closeModal);
+
+            if (dom.closeResetModalBtn) dom.closeResetModalBtn.addEventListener("click", closeResetModal);
+            if (dom.cancelResetBtn) dom.cancelResetBtn.addEventListener("click", closeResetModal);
+            if (dom.confirmResetBtn) dom.confirmResetBtn.addEventListener("click", confirmReset);
+
+            if (dom.themeToggleBtn) dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            if (dom.fullscreenBtn) dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            if (dom.historyBtn) dom.historyBtn.addEventListener("click", openDrawer);
+            if (dom.closeHistoryBtn) dom.closeHistoryBtn.addEventListener("click", closeDrawer);
+
+            if (dom.resetBtn) dom.resetBtn.addEventListener("click", openResetModal);
+            if (dom.restartSimBtn) dom.restartSimBtn.addEventListener("click", openResetModal);
+            if (dom.emptyAllBtn) dom.emptyAllBtn.addEventListener("click", handleEmptyAllContainers);
+            if (dom.submitAnswersBtn) dom.submitAnswersBtn.addEventListener("click", handleSubmitAnswers);
+            if (dom.runFlowTestBtn) dom.runFlowTestBtn.addEventListener("click", handleRunFlowClick);
+            if (dom.finishCertificationBtn) dom.finishCertificationBtn.addEventListener("click", () => showScreen("summary"));
+            if (dom.reviewMemorySummaryBtn) dom.reviewMemorySummaryBtn.addEventListener("click", openDrawer);
+
+            // Pointer event listeners for direct physical element drag & drop (no ghost images)
+            window.addEventListener("pointermove", handlePointerMove);
+            window.addEventListener("pointerup", handlePointerUp);
+            window.addEventListener("pointercancel", handlePointerUp);
+        }
+
+        function showScreen(screenName) {
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.gameScreen.classList.toggle("active", screenName === "game");
+            dom.summaryScreen.classList.toggle("active", screenName === "summary");
+
+            // Help button hidden on landing page, visible on game and summary screens
+            if (dom.helpBtn) {
+                dom.helpBtn.style.display = (screenName === "home") ? "none" : "inline-flex";
+            }
+
+            document.body.classList.toggle("in-game", screenName === "game");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (screenName === "summary") {
+                renderSummaryScreen();
+            }
+        }
+
+        /* DIRECT ELEMENT POINTER DRAG & DROP SYSTEM (ALWAYS ON TOP, NO GHOST BITMAPS) */
+        function checkZoneUnderPointer(clientX, clientY) {
+            const zones = document.querySelectorAll(".ipos-zone, #paletteSection");
+            for (const zone of zones) {
+                const rect = zone.getBoundingClientRect();
+                if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+                    return zone.dataset.zone || (zone.id === "paletteSection" ? "Palette" : null);
+                }
+            }
+            return null;
+        }
+
+        function startPointerDrag(e, devId) {
+            if (state.isSubmitted || activeDrag) return;
+
+            const card = e.currentTarget;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const rect = card.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
+
+            if (card.setPointerCapture && e.pointerId !== undefined) {
+                try { card.setPointerCapture(e.pointerId); } catch (err) {}
+            }
+
+            // Create placeholder in original spot to prevent layout collapse
+            const placeholder = document.createElement("div");
+            placeholder.className = "device-card-placeholder";
+            placeholder.style.width = rect.width + "px";
+            placeholder.style.height = rect.height + "px";
+            card.parentNode.insertBefore(placeholder, card);
+
+            // Attach card to document body with fixed position so it is ALWAYS on top of all boxes
+            document.body.appendChild(card);
+            card.style.position = "fixed";
+            card.style.width = rect.width + "px";
+            card.style.height = rect.height + "px";
+            card.style.left = (e.clientX - offsetX) + "px";
+            card.style.top = (e.clientY - offsetY) + "px";
+            card.style.margin = "0";
+            card.classList.add("dragging");
+
+            activeDrag = {
+                card,
+                devId,
+                placeholder,
+                offsetX,
+                offsetY,
+                pointerId: e.pointerId,
+                startX: e.clientX,
+                startY: e.clientY
+            };
+        }
+
+        function handlePointerMove(e) {
+            if (!activeDrag) return;
+
+            const deltaX = e.clientX - activeDrag.startX;
+            const newLeft = e.clientX - activeDrag.offsetX;
+            const newTop = e.clientY - activeDrag.offsetY;
+
+            activeDrag.card.style.left = newLeft + "px";
+            activeDrag.card.style.top = newTop + "px";
+            activeDrag.card.style.transform = `scale(1.05) rotate(${deltaX * 0.025}deg)`;
+
+            const hoveredZone = checkZoneUnderPointer(e.clientX, e.clientY);
+            document.querySelectorAll(".ipos-zone, #paletteSection").forEach(target => {
+                const zoneName = target.dataset.zone || (target.id === "paletteSection" ? "Palette" : null);
+                target.classList.toggle("highlight", hoveredZone === zoneName && (!state.disabledZones[zoneName] || zoneName === "Palette"));
+            });
+        }
+
+        function handlePointerUp(e) {
+            if (!activeDrag) return;
+
+            const card = activeDrag.card;
+            const devId = activeDrag.devId;
+            const placeholder = activeDrag.placeholder;
+            const clientX = e.clientX;
+            const clientY = e.clientY;
+
+            if (card.releasePointerCapture && activeDrag.pointerId !== undefined) {
+                try { card.releasePointerCapture(activeDrag.pointerId); } catch (err) {}
+            }
+
+            // Remove placeholder and dragged card from DOM
+            if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.removeChild(placeholder);
+            }
+            if (card && card.parentNode) {
+                card.parentNode.removeChild(card);
+            }
+
+            document.querySelectorAll(".ipos-zone, #paletteSection").forEach(target => target.classList.remove("highlight"));
+
+            const targetZone = checkZoneUnderPointer(clientX, clientY);
+
+            activeDrag = null;
+
+            if (targetZone) {
+                handleShiftCard(devId, targetZone);
+            } else {
+                renderDashboard();
+            }
+        }
+
+        function handleEmptyAllContainers() {
+            state.draftPlacements = {};
+            state.evaluations = {};
+            state.isSubmitted = false;
+            state.isFlowRunning = false;
+            state.shuffledItems = shuffleArray(MASTER_DATASET);
+
+            dom.emptyAllBtn.style.display = "inline-flex";
+            dom.submitAnswersBtn.style.display = "inline-flex";
+            dom.runFlowTestBtn.style.display = "none";
+            dom.finishCertificationBtn.style.display = "none";
+
+            resetExplanationBox();
+            renderDashboard();
+        }
+
+        /* SHIFT CARD BETWEEN ZONES OR BACK TO PALETTE FREELY BEFORE SUBMIT */
+        function handleShiftCard(devId, targetZone) {
+            if (state.isSubmitted) return;
+
+            if (targetZone === "Palette") {
+                delete state.draftPlacements[devId];
+            } else if (!state.disabledZones[targetZone]) {
+                state.draftPlacements[devId] = targetZone;
+            }
+
+            state.isSubmitted = false;
+            state.evaluations = {};
+
+            // Reset action buttons state on shifting card
+            dom.emptyAllBtn.style.display = "inline-flex";
+            dom.submitAnswersBtn.style.display = "inline-flex";
+            dom.runFlowTestBtn.style.display = "none";
+            dom.finishCertificationBtn.style.display = "none";
+
+            renderDashboard();
+        }
+
+        /* DEFERRED SUBMISSION AND CHECKING ON CLICK SUBMIT (STRICTLY REQUIRES ALL 8 ITEMS) */
+        function handleSubmitAnswers() {
+            const placedDevIds = Object.keys(state.draftPlacements);
+            if (placedDevIds.length < MASTER_DATASET.length) return;
+
+            state.attempts += 1;
+            state.evaluations = {};
+            let allCorrect = true;
+            let correctCount = 0;
+
+            MASTER_DATASET.forEach(item => {
+                const placedZone = state.draftPlacements[item.id];
+                if (placedZone) {
+                    const isCorrect = item.zone === placedZone;
+                    state.evaluations[item.id] = {
+                        item,
+                        placedZone,
+                        isCorrect
+                    };
+                    if (isCorrect) {
+                        correctCount += 1;
+                    } else {
+                        allCorrect = false;
+                    }
+                } else {
+                    allCorrect = false;
+                }
+            });
+
+            state.isSubmitted = true;
+            dom.emptyAllBtn.style.display = "none";
+            dom.submitAnswersBtn.style.display = "none";
+
+            if (allCorrect && placedDevIds.length === 8) {
+                state.score += 80;
+                state.streak += 1;
+                state.bestStreak = Math.max(state.bestStreak, state.streak);
+
+                playAudioFeedback(true);
+                renderDashboard();
+                renderHistoryList();
+
+                // If all correct, bring up Start IPOS Calculation button
+                dom.runFlowTestBtn.style.display = "inline-flex";
+                dom.runFlowTestBtn.textContent = "⚡ Start IPOS Calculation";
+                dom.finishCertificationBtn.style.display = "none";
+
+                dom.inspectorFeedbackBox.className = "feedback-card success";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <strong>✅ Perfect Placement! All 8 hardware devices are assigned to correct IPOS zones!</strong><br>
+                    Click <strong>[⚡ Start IPOS Calculation]</strong> to watch the data calculation flow!
+                `;
+            } else {
+                state.streak = 0;
+                playAudioFeedback(false);
+                renderDashboard();
+                renderHistoryList();
+
+                // If wrong, hide flow test button and bring up Finish Certification button directly
+                dom.runFlowTestBtn.style.display = "none";
+                dom.finishCertificationBtn.style.display = "inline-flex";
+
+                dom.inspectorFeedbackBox.className = "feedback-card warning";
+                dom.inspectorFeedbackBox.innerHTML = `
+                    <strong>⚠️ Evaluation Results: ${correctCount} / 8 Correctly Placed.</strong><br>
+                    Review the highlighted cards in the zones above. Click <strong>Finish Certification 🎉</strong> to view your results.
+                `;
+            }
+        }
+
+        async function handleRunFlowClick() {
+            await runFlowTestAnimation();
+
+            // After run finishes, bring up finish button so student can either re-run calculation or finish
+            dom.runFlowTestBtn.style.display = "inline-flex";
+            dom.runFlowTestBtn.textContent = "⚡ Start IPOS Calculation Again";
+            dom.finishCertificationBtn.style.display = "inline-flex";
+        }
+
+        async function runFlowTestAnimation() {
+            if (state.isFlowRunning) return;
+            state.isFlowRunning = true;
+
+            const flowSteps = [
+                { zone: "Input", label: "📥 Input: Keyboard enters '25 + 17'", err: "❌ System Error: Cannot enter data into the computer! No input signal received." },
+                { zone: "Processing", label: "⚙️ Processing: CPU calculates 25 + 17 = 42", err: "❌ System Error: Computer Freeze! Without the CPU, data cannot be processed or computed." },
+                { zone: "Output", label: "📤 Output: Monitor displays result '42'", err: "❌ System Error: Dark Screen! Data was processed, but there is no display to show results to user." },
+                { zone: "Storage", label: "💾 Storage: Hard Drive saves 'math_result.txt'", err: "❌ System Error: Data Lost on Power Off! Data processed cannot be saved for future use." }
+            ];
+
+            const packet = dom.flowPacket;
+            packet.style.opacity = "1";
+
+            for (let i = 0; i < flowSteps.length; i++) {
+                const step = flowSteps[i];
+                const zoneEl = document.getElementById(`zone_${step.zone}`);
+                
+                // Check if zone is removed
+                if (state.disabledZones[step.zone]) {
+                    const rect = zoneEl.getBoundingClientRect();
+                    const stageRect = document.getElementById("iposStage").getBoundingClientRect();
+
+                    packet.style.left = `${rect.left - stageRect.left + 20}px`;
+                    packet.style.top = `${rect.top - stageRect.top + 50}px`;
+                    packet.textContent = `💥 Breakdown at ${step.zone}!`;
+
+                    playAudioFeedback(false);
+                    dom.inspectorFeedbackBox.className = "feedback-card warning";
+                    dom.inspectorFeedbackBox.innerHTML = `
+                        <strong>${step.err}</strong><br>
+                        The computer system broke down at the <strong>${step.zone}</strong> stage because the required hardware component was missing or disabled.
+                    `;
+
+                    await new Promise(r => setTimeout(r, 2200));
+                    packet.style.opacity = "0";
+                    state.isFlowRunning = false;
+                    return;
+                }
+
+                // Normal step flow
+                if (zoneEl) {
+                    const rect = zoneEl.getBoundingClientRect();
+                    const stageRect = document.getElementById("iposStage").getBoundingClientRect();
+
+                    packet.style.left = `${rect.left - stageRect.left + 20}px`;
+                    packet.style.top = `${rect.top - stageRect.top + 50}px`;
+                    packet.textContent = step.label;
+
+                    playAudioFeedback(true);
+                    dom.inspectorFeedbackBox.className = "feedback-card success";
+                    dom.inspectorFeedbackBox.innerHTML = `
+                        <strong>⚡ IPOS Step ${i + 1}/4:</strong> ${step.label}
+                    `;
+                    await new Promise(r => setTimeout(r, 1400));
+                }
+            }
+
+            dom.inspectorFeedbackBox.className = "feedback-card success";
+            dom.inspectorFeedbackBox.innerHTML = `
+                <strong>🎉 IPOS Cycle Calculation Complete!</strong><br>
+                Data successfully traveled through Input 📥 -> Processing ⚙️ -> Output 📤 -> Storage 💾! Click <strong>Finish Certification 🎉</strong> to view final results or re-run calculation!
+            `;
+
+            packet.style.opacity = "0";
+            state.isFlowRunning = false;
+        }
+
+        function renderDashboard() {
+            const draftCount = Object.keys(state.draftPlacements).length;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const total = MASTER_DATASET.length;
+            const pct = Math.round((draftCount / total) * 100);
+
+            dom.matchesCount.textContent = `${draftCount} / ${total} Placed`;
+            dom.progressPercent.textContent = `${pct}% Complete`;
+            dom.progressFillBar.style.width = `${pct}%`;
+            dom.streakChip.textContent = `🔥 Streak: ${state.streak}`;
+            dom.scoreVal.textContent = state.score;
+
+            const acc = !state.isSubmitted ? 0 : Math.min(100, Math.round((correctCount / total) * 100));
+            dom.accuracyVal.textContent = `${acc}%`;
+
+            // Clear zone containers
+            ["Input", "Processing", "Output", "Storage"].forEach(z => {
+                document.getElementById(`list_${z}`).innerHTML = "";
+            });
+
+            // Render cards in palette or placed zones
+            dom.paletteGrid.innerHTML = "";
+
+            const itemsToRender = (state.shuffledItems && state.shuffledItems.length > 0) ? state.shuffledItems : MASTER_DATASET;
+            itemsToRender.forEach(item => {
+                const placedZone = state.draftPlacements[item.id];
+                const card = document.createElement("div");
+                card.id = `card_${item.id}`;
+
+                if (placedZone) {
+                    const evalData = state.evaluations[item.id];
+                    let cardClass = "device-card placed";
+                    let statusLabel = `<span style="font-size:0.72rem; color:var(--muted);">Placed in ${placedZone}</span>`;
+
+                    if (state.isSubmitted && evalData) {
+                        cardClass += evalData.isCorrect ? " correct" : " incorrect";
+                        statusLabel = evalData.isCorrect ? '<span style="font-size:0.72rem; color:var(--safe-color); font-weight:800;">✅ Correct</span>' : `<span style="font-size:0.72rem; color:var(--danger-color); font-weight:800;">❌ Target: ${item.zone}</span>`;
+                    }
+
+                    card.className = cardClass;
+                    card.innerHTML = `
+                        <div class="device-icon">${item.icon}</div>
+                        <div class="device-info">
+                            <h4 title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h4>
+                            <p>${statusLabel}</p>
+                        </div>
+                    `;
+
+                    if (!state.isSubmitted) {
+                        card.addEventListener("pointerdown", (e) => startPointerDrag(e, item.id));
+                    } else {
+                        card.style.cursor = "default";
+                    }
+
+                    const listEl = document.getElementById(`list_${placedZone}`);
+                    if (listEl) listEl.appendChild(card);
+                } else {
+                    card.className = "device-card";
+                    card.innerHTML = `
+                        <div class="device-icon">${item.icon}</div>
+                        <div class="device-info">
+                            <h4 title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h4>
+                            <p>${escapeHtml(item.desc)}</p>
+                        </div>
+                    `;
+
+                    if (!state.isSubmitted) {
+                        card.addEventListener("pointerdown", (e) => startPointerDrag(e, item.id));
+                    } else {
+                        card.style.cursor = "default";
+                    }
+
+                    dom.paletteGrid.appendChild(card);
+                }
+            });
+
+            if (dom.paletteGrid.children.length === 0) {
+                const emptyNotice = document.createElement("div");
+                emptyNotice.style.cssText = "grid-column: 1 / -1; display: grid; place-items: center; text-align: center; color: var(--muted); font-size: 0.84rem; font-weight: 700; height: 106px; background: rgba(0,0,0,0.08); border: 2px dashed var(--border); border-radius: var(--radius-lg); pointer-events: none;";
+                emptyNotice.innerHTML = "✨ All 8 hardware devices are placed into IPOS containers!";
+                dom.paletteGrid.appendChild(emptyNotice);
+            }
+
+            dom.emptyAllBtn.disabled = draftCount === 0;
+            // ONLY ACTIVE WHEN ALL 8 ITEMS ARE PLACED
+            dom.submitAnswersBtn.disabled = draftCount < total;
+            dom.submitAnswersBtn.textContent = `✅ Submit IPOS Cycle (${draftCount}/${total} Placed)`;
+        }
+
+        function renderSummaryScreen() {
+            const total = MASTER_DATASET.length;
+            const correctCount = Object.values(state.evaluations).filter(e => e && e.isCorrect).length;
+            const accuracy = Math.min(100, Math.round((correctCount / total) * 100));
+
+            const summaryScoreVal = document.getElementById("summaryScoreVal");
+            const summaryAccuracyVal = document.getElementById("summaryAccuracyVal");
+            const summaryStreakVal = document.getElementById("summaryStreakVal");
+            const summaryCorrectVal = document.getElementById("summaryCorrectVal");
+
+            if (summaryScoreVal) summaryScoreVal.textContent = state.score;
+            if (summaryAccuracyVal) summaryAccuracyVal.textContent = `${accuracy}%`;
+            if (summaryStreakVal) summaryStreakVal.textContent = `🔥 ${state.bestStreak}`;
+            if (summaryCorrectVal) summaryCorrectVal.textContent = `${correctCount} / ${total}`;
+
+            if (accuracy >= 90) {
+                dom.badgeIcon.textContent = "👑";
+                dom.badgeTitle.textContent = "IPOS Architecture Master";
+                dom.badgeDesc.textContent = `Flawless! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct)! You have mastered the computer IPOS cycle and hardware architecture.`;
+            } else if (accuracy >= 70) {
+                dom.badgeIcon.textContent = "🏆";
+                dom.badgeTitle.textContent = "Certified Hardware Tech";
+                dom.badgeDesc.textContent = `Great effort! You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Review the missed items below to refine your hardware skills.`;
+            } else {
+                dom.badgeIcon.textContent = "🌱";
+                dom.badgeTitle.textContent = "Hardware Trainee";
+                dom.badgeDesc.textContent = `You achieved ${accuracy}% accuracy (${correctCount}/${total} correct). Review the hardware explanations in the review memory drawer to strengthen your knowledge.`;
+            }
+
+            dom.summaryDetailsList.innerHTML = "";
+            MASTER_DATASET.forEach(item => {
+                const evalData = state.evaluations[item.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const userChoice = evalData.placedZone || "Unplaced";
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">${item.icon} ${escapeHtml(item.name)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'} ${isCorrect ? `(🎯 ${escapeHtml(item.zone)})` : `(Selected: ${escapeHtml(userChoice)} → Target: ${escapeHtml(item.zone)})`}
+                        </span>
+                    </div>
+                    <p style="margin:4px 0 0; color:var(--text-soft); font-size:0.88rem; line-height:1.4;">${escapeHtml(item.feedback)}</p>
+                `;
+                dom.summaryDetailsList.appendChild(card);
+            });
+        }
+
+        function renderHistoryList() {
+            dom.historyList.innerHTML = "";
+            const evaluatedList = MASTER_DATASET.filter(i => state.evaluations[i.id]);
+
+            if (evaluatedList.length === 0) {
+                dom.historyList.innerHTML = `<div style="padding:16px; color:var(--muted); text-align:center;">No evaluated hardware devices yet.</div>`;
+                return;
+            }
+
+            evaluatedList.forEach(item => {
+                const evalData = state.evaluations[item.id] || {};
+                const isCorrect = evalData.isCorrect === true;
+                const userChoice = evalData.placedZone || "Unplaced";
+                const card = document.createElement("div");
+                card.className = "summary-item-card";
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:8px;">
+                        <strong style="color:var(--text);">${item.icon} ${escapeHtml(item.name)}</strong>
+                        <span style="color:${isCorrect ? 'var(--safe-color)' : 'var(--danger-color)'}; font-weight:800;">
+                            ${isCorrect ? '✅ Correct' : '❌ Missed'} ${isCorrect ? `(🎯 ${escapeHtml(item.zone)})` : `(Selected: ${escapeHtml(userChoice)} → Target: ${escapeHtml(item.zone)})`}
+                        </span>
+                    </div>
+                    <div style="font-size:0.84rem; color:var(--text-soft); margin-top:4px; line-height:1.4;">${escapeHtml(item.feedback)}</div>
+                `;
+                dom.historyList.appendChild(card);
+            });
+        }
+
+        function openModal() { dom.instructionsModal.classList.add("show"); }
+        function closeModal() { dom.instructionsModal.classList.remove("show"); }
+        function openResetModal() { dom.resetModal.classList.add("show"); }
+        function closeResetModal() { dom.resetModal.classList.remove("show"); }
+
+        function openDrawer() { renderHistoryList(); dom.historyDrawer.classList.add("show"); }
+        function closeDrawer() { dom.historyDrawer.classList.remove("show"); }
+
+        function updateThemeUI() {
+            dom.html.setAttribute("data-theme", state.theme);
+            dom.themeToggleBtn.textContent = state.theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            try {
+                sessionStorage.setItem("user_toggled_theme", state.theme);
+            } catch (e) {}
+            updateThemeUI();
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen toggle failed", err);
+            }
+        }
+
+        function confirmReset() {
+            closeResetModal();
+
+            state.draftPlacements = {};
+            state.evaluations = {};
+            state.disabledZones = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.isSubmitted = false;
+            state.shuffledItems = shuffleArray(MASTER_DATASET);
+
+            dom.emptyAllBtn.style.display = "inline-flex";
+            dom.submitAnswersBtn.style.display = "inline-flex";
+            dom.runFlowTestBtn.style.display = "none";
+            dom.finishCertificationBtn.style.display = "none";
+
+            resetExplanationBox();
+            renderDashboard();
+            showScreen("home");
+        }
+
+        function playAudioFeedback(isSuccess) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            try {
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.frequency.value = isSuccess ? 523.25 : 220;
+                gain.gain.setValueAtTime(0.001, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (isSuccess ? 0.25 : 0.3));
+
+                osc.start();
+                osc.stop(ctx.currentTime + (isSuccess ? 0.26 : 0.31));
+            } catch (e) {}
+        }
+
+        function loadState() {
+            state.draftPlacements = {};
+            state.evaluations = {};
+            state.disabledZones = {};
+            state.score = 0;
+            state.attempts = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.isSubmitted = false;
+            state.shuffledItems = shuffleArray(MASTER_DATASET);
+
+            resetExplanationBox();
+
+            state.theme = detectSystemTheme();
+            updateThemeUI();
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>
