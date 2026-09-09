@@ -173,7 +173,10 @@
 
         .completion-banner { margin-top: 16px; padding: 20px; background: color-mix(in srgb, var(--success) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--success) 30%, transparent); border-radius: var(--radius-lg); text-align: center; }
         .completion-banner h3 { margin: 0 0 8px; font-size: 1.15rem; color: var(--success); }
-        .completion-banner p { margin: 0; font-size: 0.92rem; color: var(--text-soft); line-height: 1.6; }
+        .completion-banner p { margin: 0 0 8px; font-size: 0.92rem; color: var(--text-soft); line-height: 1.6; }
+        .completion-banner.warn-banner { background: color-mix(in srgb, var(--warning) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warning) 38%, transparent); }
+        .completion-banner.warn-banner h3 { color: var(--warning); }
+        .completion-banner .restart-result-btn { margin-top: 16px; }
 
         @media (max-width: 600px) {
             .split-screen { grid-template-columns: 1fr; }
@@ -380,6 +383,7 @@
                 oxygenPerSec: 0, smoothedCount: 0,
                 countWindow: [],
                 answered: false, selectedChoice: null,
+                passed: false,
                 attempts: 0, firstAttemptCorrect: null,
                 startTime: Date.now(), hintUsed: false
             };
@@ -453,17 +457,17 @@
                 <div class="assessment-section" id="assessmentSection">
                     <h3>Assessment Question</h3>
                     <p class="assessment-question">Why do more oxygen molecules cross the membrane when the energy demand is high?</p>
-                    <div class="assessment-choices" id="assessmentChoices">
-                        <button class="assessment-choice" data-index="0" aria-label="Choice 1">The alveolus gets bigger and pushes more oxygen through.</button>
-                        <button class="assessment-choice" data-index="1" aria-label="Choice 2">Active cells require more oxygen to carry out cellular respiration at a faster rate.</button>
-                        <button class="assessment-choice" data-index="2" aria-label="Choice 3">The membrane becomes thinner when the person exercises.</button>
-                        <button class="assessment-choice" data-index="3" aria-label="Choice 4">Oxygen molecules become lighter and move on their own.</button>
+                    <div class="assessment-choices" id="assessmentChoices" role="radiogroup" aria-label="Answer choices">
+                        <button type="button" class="assessment-choice" data-index="0" role="radio" aria-checked="false" aria-label="Choice 1">The alveolus gets bigger and pushes more oxygen through.</button>
+                        <button type="button" class="assessment-choice" data-index="1" role="radio" aria-checked="false" aria-label="Choice 2">Active cells require more oxygen to carry out cellular respiration at a faster rate.</button>
+                        <button type="button" class="assessment-choice" data-index="2" role="radio" aria-checked="false" aria-label="Choice 3">The membrane becomes thinner when the person exercises.</button>
+                        <button type="button" class="assessment-choice" data-index="3" role="radio" aria-checked="false" aria-label="Choice 4">Oxygen molecules become lighter and move on their own.</button>
                     </div>
                     <div class="button-row" style="margin-top: 10px; justify-content: flex-start;">
                         <button class="ghost-btn" id="hintBtn">Hint</button>
                         <button class="secondary-btn hidden" id="retryBtn">Try Again</button>
                     </div>
-                    <div class="assessment-feedback" id="assessmentFeedback"></div>
+                    <div class="assessment-feedback" id="assessmentFeedback" role="status" aria-live="polite"></div>
                 </div>
                 <div id="completionArea"></div>
             `;
@@ -792,7 +796,12 @@
             simState.selectedChoice = Number(btn.dataset.index);
 
             const allChoices = document.querySelectorAll(".assessment-choice");
-            allChoices.forEach((c) => c.classList.add("disabled"));
+            allChoices.forEach((c) => {
+                c.classList.add("disabled");
+                c.setAttribute("aria-disabled", "true");
+                c.setAttribute("tabindex", "-1");
+                c.setAttribute("aria-checked", c === btn ? "true" : "false");
+            });
             document.getElementById("hintBtn").classList.add("hidden");
 
             const feedback = document.getElementById("assessmentFeedback");
@@ -802,6 +811,7 @@
                 feedback.className = "assessment-feedback correct";
                 feedback.innerHTML = "<strong>Correct!</strong> Active cells require more oxygen to carry out cellular respiration at a faster rate. This process releases the extra energy needed for the increased physical activity.";
                 simState.answered = true;
+                simState.passed = true;
                 simState.firstAttemptCorrect = simState.attempts === 1;
                 storageSet(SIM_CONFIG.simId + ":firstAttempt", simState.firstAttemptCorrect ? "correct" : "wrong");
                 storageSet(SIM_CONFIG.simId + ":attempts", String(simState.attempts));
@@ -813,9 +823,11 @@
                 if (simState.attempts < 2) {
                     feedback.innerHTML = "<strong>Not quite.</strong> Think about what happens inside the body's cells when they need more energy. Try again!";
                     document.getElementById("retryBtn").classList.remove("hidden");
+                    allChoices.forEach((c) => { c.setAttribute("tabindex", "0"); c.setAttribute("aria-disabled", "false"); });
                 } else {
                     feedback.innerHTML = "<strong>Not quite.</strong> The correct answer is: Active cells require more oxygen to carry out cellular respiration at a faster rate. This process releases the extra energy needed for the increased physical activity.";
                     simState.answered = true;
+                    simState.passed = false;
                     simState.firstAttemptCorrect = false;
                     storageSet(SIM_CONFIG.simId + ":firstAttempt", "wrong");
                     storageSet(SIM_CONFIG.simId + ":attempts", String(simState.attempts));
@@ -830,7 +842,12 @@
             document.getElementById("retryBtn").classList.add("hidden");
             const fb = document.getElementById("assessmentFeedback");
             fb.className = "assessment-feedback"; fb.innerHTML = "";
-            document.querySelectorAll(".assessment-choice").forEach((c) => c.classList.remove("disabled", "correct", "incorrect"));
+            document.querySelectorAll(".assessment-choice").forEach((c) => {
+                c.classList.remove("disabled", "correct", "incorrect");
+                c.setAttribute("tabindex", "0");
+                c.setAttribute("aria-disabled", "false");
+                c.setAttribute("aria-checked", "false");
+            });
         }
 
         function showHint() {
@@ -847,24 +864,43 @@
         function showCompletion() {
             const area = document.getElementById("completionArea");
             const attempts = simState.attempts;
+            const passed = simState.passed;
             const first = simState.firstAttemptCorrect;
             const elapsed = Math.round((Date.now() - simState.startTime) / 1000);
             const mins = Math.floor(elapsed / 60);
             const secs = elapsed % 60;
             const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
             storageSet(SIM_CONFIG.simId + ":timeOnTask", String(elapsed));
-            storageSet(SIM_CONFIG.simId + ":completion", "true");
+            storageSet(SIM_CONFIG.simId + ":completion", passed ? "true" : "failed");
+            storageSet(SIM_CONFIG.simId + ":mastered", passed ? "true" : "false");
 
             let extra = "";
             if (simState.hintUsed) extra += " You used a hint.";
             extra += ` Time on task: ${timeStr}.`;
 
-            area.innerHTML = `
-                <div class="completion-banner">
-                    <h3>Simulation Complete</h3>
-                    <p>You answered the assessment question in ${attempts} attempt${attempts > 1 ? "s" : ""}.${first ? " You got it right on your first try!" : " Keep studying and try to get it right first time next attempt."}${extra}</p>
-                </div>
-            `;
+            if (passed) {
+                const tryNote = first
+                    ? " You got it right on your first try!"
+                    : " You selected the correct answer on your next attempt \u2014 great work correcting your answer!";
+                area.innerHTML = `
+                    <div class="completion-banner">
+                        <h3>Simulation Complete</h3>
+                        <p>You answered the assessment question correctly in ${attempts} attempt${attempts > 1 ? "s" : ""}.${tryNote}${extra}</p>
+                    </div>
+                `;
+            } else {
+                area.innerHTML = `
+                    <div class="completion-banner warn-banner">
+                        <h3>Not Finished Yet \u2014 Let's Give It Another Try</h3>
+                        <p>The assessment question was not answered correctly after ${attempts} attempts, so no worries \u2014 you haven't finished this session yet.</p>
+                        <p><strong>The correct answer is:</strong> Active cells require more oxygen to carry out cellular respiration at a faster rate. This process releases the extra energy needed for the increased physical activity.</p>
+                        <p>Review the animation above, then run the simulation again to answer the question correctly.${extra}</p>
+                        <button type="button" class="primary-btn restart-result-btn" id="restartResultBtn">&#8635; Try the Simulation Again</button>
+                    </div>
+                `;
+                const resBtn = document.getElementById("restartResultBtn");
+                if (resBtn) resBtn.addEventListener("click", function () { devReset(); devInit(); });
+            }
         }
     </script>
 </body>
