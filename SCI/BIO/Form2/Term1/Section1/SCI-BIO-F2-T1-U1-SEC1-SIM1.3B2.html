@@ -1124,10 +1124,31 @@
         function bindEvents() {
             if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
             const backToTopBtn = document.getElementById("backToTopBtn");
-            if (backToTopBtn) {
+            const simContainer = dom.simContainer;
+            const graphLegend = simContainer ? simContainer.querySelector(".legend") : null;
+            if (backToTopBtn && simContainer) {
+                const updateBackToTopBtn = () => {
+                    const legendRect = graphLegend
+                        ? graphLegend.getBoundingClientRect()
+                        : simContainer.getBoundingClientRect();
+                    if (legendRect.top > window.innerHeight) {
+                        backToTopBtn.textContent = "⬇ Scroll to Sim";
+                        backToTopBtn.dataset.mode = "toSim";
+                    } else {
+                        backToTopBtn.textContent = "⬆ Back to Top";
+                        backToTopBtn.dataset.mode = "toTop";
+                    }
+                };
                 backToTopBtn.addEventListener("click", () => {
-                    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+                    if (backToTopBtn.dataset.mode === "toSim") {
+                        simContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+                    } else {
+                        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+                    }
                 });
+                window.addEventListener("scroll", updateBackToTopBtn, { passive: true });
+                window.addEventListener("resize", updateBackToTopBtn);
+                updateBackToTopBtn();
             }
             dom.startBtn.addEventListener("click", () => {
                 showScreen("sim");
