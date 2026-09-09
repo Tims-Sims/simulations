@@ -5,80 +5,486 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Skill Badge Forge | Cause and Effect</title>
+
   <style>
-    :root { --bg:#0f1222; --bg-soft:#171b31; --surface:#1d2340; --surface-2:#252d52; --text:#eef2ff; --soft:#c7d0f0; --muted:#98a4c8; --border:rgba(255,255,255,.14); --accent:#7dd3fc; --accent-2:#a78bfa; --success:#34d399; --warning:#fbbf24; --danger:#fb7185; }
-    html[data-theme="light"] { --bg:#f4f7ff; --bg-soft:#e7edff; --surface:#fff; --surface-2:#eef3ff; --text:#17203f; --soft:#344267; --muted:#5d6b95; --border:rgba(23,32,63,.14); --accent:#0284c7; --accent-2:#7c3aed; --success:#047857; --warning:#b45309; --danger:#be123c; }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; padding:16px; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--text); }
-    button { font:inherit; cursor:pointer; }
-    button:disabled { cursor:not-allowed; opacity:.58; }
-    .app { max-width:1180px; margin:auto; }
-    .topbar,.card { background:var(--surface); border:1px solid var(--border); border-radius:18px; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:12px 16px; }
-    .brand { display:flex; align-items:center; gap:12px; }
-    .brand-mark { width:46px; height:46px; display:grid; place-items:center; border-radius:14px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; font-size:1.4rem; }
-    h1,h2,h3,p { margin-top:0; }
-    .brand h1 { margin:0; font-size:1.1rem; }
-    .brand p { margin:3px 0 0; color:var(--muted); }
-    .controls,.button-row { display:flex; flex-wrap:wrap; gap:9px; }
-    .control-btn,.primary-btn,.secondary-btn,.danger-btn,.choice-btn { padding:10px 15px; border-radius:999px; border:1px solid var(--border); font-weight:bold; }
-    .control-btn,.secondary-btn { background:var(--surface-2); color:var(--text); }
-    .primary-btn { background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border:0; }
-    .danger-btn { background:var(--surface-2); color:var(--text); border-color:var(--danger); }
-    main { display:none; padding:24px 0; }
-    main.active { display:block; }
-    .hero { max-width:900px; margin:auto; text-align:center; padding:42px 25px; }
-    .eyebrow { display:inline-block; padding:8px 13px; background:var(--surface-2); border-radius:999px; margin-bottom:16px; }
-    .hero p { color:var(--soft); line-height:1.6; max-width:700px; margin:0 auto; }
-    .hero .button-row { justify-content:center; margin-top:25px; }
-    .sim-card { max-width:980px; margin:auto; padding:25px; }
-    .mission-head { display:flex; justify-content:space-between; gap:16px; border-bottom:1px solid var(--border); padding-bottom:15px; }
-    .mission-head p { color:var(--muted); margin-bottom:0; }
-    .objective { color:var(--accent); font-weight:bold; }
-    .progress { min-width:150px; text-align:right; font-weight:bold; }
-    .progress-bar { width:150px; height:9px; background:var(--bg-soft); border-radius:999px; margin-top:7px; overflow:hidden; }
-    .progress-fill { height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
-    .forge-board { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:22px 0; }
-    .passage,.forge,.task-panel,.reflection { padding:18px; border:1px solid var(--border); background:var(--bg-soft); border-radius:16px; }
-    .passage p { color:var(--soft); line-height:1.65; }
-    .forge { min-height:290px; }
-    .forge-title { text-align:center; font-weight:bold; margin-bottom:18px; }
-    .slots { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
-    .slot { min-height:90px; padding:10px; border:2px dashed var(--muted); border-radius:13px; display:flex; flex-direction:column; justify-content:center; text-align:center; color:var(--soft); }
-    .slot.filled { border-style:solid; border-color:var(--success); background:var(--surface); }
-    .task-panel { grid-column:1 / -1; }
-    .prompt { font-size:1.1rem; line-height:1.5; }
-    .choices { display:grid; gap:10px; }
-    .choice-btn { width:100%; text-align:left; border-radius:13px; background:var(--surface); color:var(--text); line-height:1.4; }
-    .choice-btn.correct { border-color:var(--success); background:var(--surface-2); }
-    .choice-btn.incorrect { border-color:var(--danger); background:var(--surface-2); }
-    .feedback { min-height:54px; margin-top:14px; padding:11px 13px; border-radius:12px; background:var(--surface-2); color:var(--soft); line-height:1.45; }
-    .feedback.good { border-left:4px solid var(--success); }
-    .feedback.try { border-left:4px solid var(--warning); }
-    .tool-row { margin-top:16px; align-items:center; }
-    .hint { color:var(--soft); }
-    .reflection { margin-top:20px; }
-    .reflection-list { list-style:none; padding:0; }
-    .reflection-list li { padding:10px; margin:8px 0; background:var(--surface); border-left:4px solid var(--success); border-radius:8px; }
-    .summary { display:none; text-align:center; }
-    .summary.show { display:block; }
-    .badge { max-width:390px; margin:20px auto; padding:28px; border:8px double var(--warning); border-radius:50%; background:var(--surface-2); }
-    .medal { font-size:3rem; }
-    .hidden { display:none !important; }
-    .modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(0,0,0,.65); }
-    .modal.show { display:flex; }
-    .modal-card { position:relative; max-width:700px; padding:28px; border-radius:20px; background:var(--surface); }
-    .close { position:absolute; top:12px; right:12px; border-radius:50%; width:40px; height:40px; }
-    .footer { text-align:center; color:var(--muted); }
+    :root {
+      --bg:#0f1222;
+      --bg-soft:#171b31;
+      --surface:#1d2340;
+      --surface-2:#252d52;
+      --text:#eef2ff;
+      --soft:#c7d0f0;
+      --muted:#98a4c8;
+      --border:rgba(255,255,255,.14);
+      --accent:#7dd3fc;
+      --accent-2:#a78bfa;
+      --success:#34d399;
+      --warning:#fbbf24;
+      --danger:#fb7185;
+    }
+
+    html[data-theme="light"] {
+      --bg:#f4f7ff;
+      --bg-soft:#e7edff;
+      --surface:#fff;
+      --surface-2:#eef3ff;
+      --text:#17203f;
+      --soft:#344267;
+      --muted:#5d6b95;
+      --border:rgba(23,32,63,.14);
+      --accent:#0284c7;
+      --accent-2:#7c3aed;
+      --success:#047857;
+      --warning:#b45309;
+      --danger:#be123c;
+    }
+
+    * {
+      box-sizing:border-box;
+    }
+
+    body {
+      margin:0;
+      min-height:100vh;
+      padding:16px;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    button {
+      font:inherit;
+      cursor:pointer;
+    }
+
+    button:disabled {
+      cursor:not-allowed;
+      opacity:.58;
+    }
+
+    button:focus-visible {
+      outline:3px solid var(--accent);
+      outline-offset:3px;
+    }
+
+    .app {
+      max-width:1180px;
+      margin:auto;
+    }
+
+    .topbar,
+    .card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:18px;
+    }
+
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      padding:12px 16px;
+    }
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .brand-mark {
+      width:46px;
+      height:46px;
+      display:grid;
+      place-items:center;
+      border-radius:14px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      color:#fff;
+      font-size:1.4rem;
+    }
+
+    h1,h2,h3,p {
+      margin-top:0;
+    }
+
+    .brand h1 {
+      margin:0;
+      font-size:1.1rem;
+    }
+
+    .brand p {
+      margin:3px 0 0;
+      color:var(--muted);
+    }
+
+    .controls,
+    .button-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:9px;
+    }
+
+    .control-btn,
+    .primary-btn,
+    .secondary-btn,
+    .danger-btn,
+    .choice-btn {
+      min-height:44px;
+      padding:10px 15px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      font-weight:bold;
+    }
+
+    .control-btn,
+    .secondary-btn {
+      background:var(--surface-2);
+      color:var(--text);
+    }
+
+    .primary-btn {
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      color:#fff;
+      border:0;
+    }
+
+    .danger-btn {
+      background:var(--surface-2);
+      color:var(--text);
+      border-color:var(--danger);
+    }
+
+    main {
+      display:none;
+      padding:24px 0;
+    }
+
+    main.active {
+      display:block;
+    }
+
+    .hero {
+      max-width:900px;
+      margin:auto;
+      text-align:center;
+      padding:42px 25px;
+    }
+
+    .eyebrow {
+      display:inline-block;
+      padding:8px 13px;
+      background:var(--surface-2);
+      border-radius:999px;
+      margin-bottom:16px;
+    }
+
+    .hero p {
+      color:var(--soft);
+      line-height:1.6;
+      max-width:700px;
+      margin:0 auto;
+    }
+
+    .hero .button-row {
+      justify-content:center;
+      margin-top:25px;
+    }
+
+    .sim-card {
+      max-width:980px;
+      margin:auto;
+      padding:25px;
+    }
+
+    .mission-head {
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      border-bottom:1px solid var(--border);
+      padding-bottom:15px;
+    }
+
+    .mission-head p {
+      color:var(--muted);
+      margin-bottom:0;
+    }
+
+    .objective {
+      color:var(--accent);
+      font-weight:bold;
+    }
+
+    .progress {
+      min-width:170px;
+      text-align:right;
+      font-weight:bold;
+    }
+
+    .progress-bar {
+      width:170px;
+      height:9px;
+      background:var(--bg-soft);
+      border-radius:999px;
+      margin-top:7px;
+      overflow:hidden;
+    }
+
+    .progress-fill {
+      height:100%;
+      width:0;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      transition:width .25s ease;
+    }
+
+    .forge-board {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+      margin:22px 0;
+    }
+
+    .passage,
+    .forge,
+    .task-panel,
+    .reflection {
+      padding:18px;
+      border:1px solid var(--border);
+      background:var(--bg-soft);
+      border-radius:16px;
+    }
+
+    .passage p {
+      color:var(--soft);
+      line-height:1.65;
+    }
+
+    .forge {
+      min-height:290px;
+    }
+
+    .forge-title {
+      text-align:center;
+      font-weight:bold;
+      margin-bottom:18px;
+    }
+
+    .slots {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:11px;
+    }
+
+    .slot {
+      min-height:90px;
+      padding:10px;
+      border:2px dashed var(--muted);
+      border-radius:13px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      text-align:center;
+      color:var(--soft);
+    }
+
+    .slot.filled {
+      border-style:solid;
+      border-color:var(--success);
+      background:var(--surface);
+    }
+
+    .slot-status {
+      margin-top:5px;
+      font-size:.9rem;
+    }
+
+    .task-panel {
+      grid-column:1 / -1;
+    }
+
+    .stage-type {
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:var(--surface-2);
+      color:var(--accent);
+      font-size:.9rem;
+      font-weight:bold;
+      margin-bottom:10px;
+    }
+
+    .prompt {
+      font-size:1.1rem;
+      line-height:1.5;
+    }
+
+    .choices {
+      display:grid;
+      gap:10px;
+    }
+
+    .choice-btn {
+      width:100%;
+      text-align:left;
+      border-radius:13px;
+      background:var(--surface);
+      color:var(--text);
+      line-height:1.4;
+    }
+
+    .choice-btn.correct {
+      border-color:var(--success);
+      background:var(--surface-2);
+    }
+
+    .choice-btn.incorrect {
+      border-color:var(--danger);
+      background:var(--surface-2);
+    }
+
+    .feedback {
+      min-height:70px;
+      margin-top:14px;
+      padding:11px 13px;
+      border-radius:12px;
+      background:var(--surface-2);
+      color:var(--soft);
+      line-height:1.45;
+    }
+
+    .feedback.good {
+      border-left:4px solid var(--success);
+    }
+
+    .feedback.try {
+      border-left:4px solid var(--warning);
+    }
+
+    .tool-row {
+      margin-top:16px;
+      align-items:center;
+    }
+
+    .hint {
+      color:var(--soft);
+      line-height:1.4;
+    }
+
+    .reflection {
+      margin-top:20px;
+    }
+
+    .reflection-box {
+      padding:16px;
+      background:var(--surface);
+      border-radius:12px;
+      border-left:4px solid var(--success);
+      line-height:1.65;
+      color:var(--soft);
+    }
+
+    .summary {
+      display:none;
+      text-align:center;
+    }
+
+    .summary.show {
+      display:block;
+    }
+
+    .badge {
+      max-width:390px;
+      margin:20px auto;
+      padding:28px;
+      border:8px double var(--warning);
+      border-radius:50%;
+      background:var(--surface-2);
+    }
+
+    .medal {
+      font-size:3rem;
+    }
+
+    .mastery-box {
+      max-width:600px;
+      margin:20px auto;
+      padding:16px;
+      background:var(--bg-soft);
+      border-radius:14px;
+      line-height:1.6;
+    }
+
+    .hidden {
+      display:none !important;
+    }
+
+    .modal {
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(0,0,0,.65);
+      z-index:10;
+    }
+
+    .modal.show {
+      display:flex;
+    }
+
+    .modal-card {
+      position:relative;
+      max-width:700px;
+      padding:28px;
+      border-radius:20px;
+      background:var(--surface);
+    }
+
+    .modal-card li {
+      margin-bottom:10px;
+      line-height:1.5;
+    }
+
+    .close {
+      position:absolute;
+      top:12px;
+      right:12px;
+      border-radius:50%;
+      width:44px;
+      height:44px;
+    }
+
+    .footer {
+      text-align:center;
+      color:var(--muted);
+    }
+
     @media (max-width:700px) {
-      .topbar,.mission-head { flex-direction:column; align-items:flex-start; }
-      .forge-board { grid-template-columns:1fr; }
-      .task-panel { grid-column:auto; }
+      .topbar,
+      .mission-head {
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .forge-board {
+        grid-template-columns:1fr;
+      }
+
+      .task-panel {
+        grid-column:auto;
+      }
+
+      .progress {
+        text-align:left;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="app">
+
     <header class="topbar">
       <div class="brand">
         <div class="brand-mark">⚒</div>
@@ -87,6 +493,7 @@
           <p>Cause-and-effect reflection mission</p>
         </div>
       </div>
+
       <div class="controls">
         <button class="control-btn" id="helpBtn">❔ Rules</button>
         <button class="control-btn" id="themeBtn">☀ Light</button>
@@ -95,11 +502,19 @@
       </div>
     </header>
 
+    <!-- SCREEN 1: MISSION -->
     <main id="homeScreen" class="active">
       <section class="card hero">
         <div class="eyebrow">Mission: forge a better reflection</div>
+
         <h2>Earn the Cause-and-Effect Communicator badge</h2>
-        <p>Read the paragraph, then choose the best Strength, Evidence, Challenge and Next Step. There is no timer and you can retry.</p>
+
+        <p>
+          Read the paragraph, then build your reflection by choosing
+          evidence-based Strength, Evidence, Challenge and Next Step plates.
+          There is no timer and you can retry.
+        </p>
+
         <div class="button-row">
           <button class="primary-btn" id="startBtn">Enter the Forge</button>
           <button class="secondary-btn" id="homeRulesBtn">Read the Rules</button>
@@ -107,318 +522,401 @@
       </section>
     </main>
 
+    <!-- GAME -->
     <main id="simScreen">
       <section class="card sim-card">
+
         <div class="mission-head">
           <div>
             <div class="objective" id="objectiveLabel">Objective 34.2</div>
             <h2 id="stageTitle">Forge the Strength Plate</h2>
-            <p id="stageSubtitle">Choose the sentence that names what worked in the paragraph.</p>
+            <p id="stageSubtitle">
+              Choose the sentence that names what worked in the paragraph.
+            </p>
           </div>
+
           <div class="progress">
             <span id="progressText">0 of 4 plates forged</span>
-            <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+            <div class="progress-bar">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
           </div>
         </div>
 
         <div class="forge-board">
+
+          <!-- DRAFT -->
           <article class="passage">
             <h3>The draft to reflect on</h3>
-            <p>Heavy rain blocked the drain near the school. <strong>As a result, water covered the pavement, so students used the covered walkway.</strong> The water moved quickly. The water made a large puddle.</p>
+
+            <p>
+              Heavy rain blocked the drain near the school.
+              As a result, water covered the pavement, so students used the
+              covered walkway. The water moved quickly and water made a large
+              puddle, leaving water pooled near the drain.
+            </p>
           </article>
 
+          <!-- FORGE -->
           <section class="forge">
             <div class="forge-title">Your badge forge</div>
             <div class="slots" id="slots"></div>
           </section>
 
+          <!-- TASK -->
           <section id="task-panel" class="task-panel">
-            <h3>Click one answer below — do not drag</h3>
+
+            <div class="stage-type" id="stageType">Strength</div>
+
+            <h3 id="taskHeading">
+              Click one answer below — do not drag
+            </h3>
+
             <p class="prompt" id="prompt"></p>
+
             <div id="choices" class="choices"></div>
-            <div id="feedback" class="feedback">Click an answer button to select a plate.</div>
+
+            <div id="feedback" class="feedback">
+              Click an answer button to select a plate.
+            </div>
 
             <div class="button-row tool-row">
               <button id="backBtn" class="secondary-btn">← Back</button>
               <button id="hintBtn" class="secondary-btn">Hint</button>
-              <button id="tryAgainBtn" class="secondary-btn hidden">Try Again</button>
-              <button id="nextBtn" class="primary-btn hidden">Forge Next Plate →</button>
+              <button id="tryAgainBtn" class="secondary-btn hidden">
+                Try Again
+              </button>
+              <button id="nextBtn" class="primary-btn hidden">
+                Forge Next Plate →
+              </button>
+
               <span id="hintText" class="hint"></span>
             </div>
+
           </section>
         </div>
 
+        <!-- FINAL REFLECTION -->
         <section id="reflection" class="reflection hidden">
           <h3>Your evidence-based reflection</h3>
-          <p>These four plates form one complete reflection.</p>
-          <ul id="reflectionList" class="reflection-list"></ul>
-          <button id="stampBtn" class="primary-btn">Stamp My Badge</button>
+
+          <p>
+            Your four plates are ready. Read the complete reflection before
+            stamping your badge.
+          </p>
+
+          <div class="reflection-box">
+            I organised my paragraph clearly from cause to effect, and my
+            transition words showed the relationships. I repeated ‘water’ too
+            often in the draft. During revision, I will use precise
+            alternatives where they fit. Reflection helps me choose an
+            improvement I can control.
+          </div>
+
+          <div class="button-row" style="margin-top:16px;">
+            <button id="stampBtn" class="primary-btn">
+              Stamp My Badge
+            </button>
+          </div>
         </section>
 
+        <!-- COMPLETION -->
         <section id="summary" class="summary">
+
           <div class="badge">
             <div class="medal">🏅</div>
+
             <h3>Cause-and-Effect Communicator</h3>
-            <p>You used structure, evidence and a clear next step.</p>
+
+            <p>
+              You used evidence to reflect on your writing and chose an
+              empowering next step.
+            </p>
           </div>
+
           <h3>Skill forged!</h3>
-          <p id="mastery"></p>
-          <div class="button-row">
-            <button id="restartBtn" class="primary-btn">Forge Again</button>
-            <button id="homeBtn" class="secondary-btn">Return Home</button>
+
+          <div class="mastery-box">
+            <p id="mastery"></p>
           </div>
+
+          <div class="button-row" style="justify-content:center;">
+            <button id="restartBtn" class="primary-btn">
+              Forge Again
+            </button>
+
+            <button id="homeBtn" class="secondary-btn">
+              Return Home
+            </button>
+          </div>
+
         </section>
+
       </section>
     </main>
 
-    <p class="footer">ELA Form 2 • Unit 34 • Local learning simulation</p>
+    <p class="footer">
+      ELA Form 2 • Unit 34 • Local learning simulation
+    </p>
+
   </div>
 
+  <!-- RULES MODAL -->
   <div class="modal" id="rulesModal">
     <section class="modal-card">
+
       <button class="close" id="closeRulesBtn">×</button>
+
       <h2>How to use the forge</h2>
+
       <ol>
         <li>Read the cause-and-effect draft.</li>
         <li>Click one answer for each plate.</li>
-        <li>If you are correct, click <strong>Forge Next Plate</strong>.</li>
-        <li>If you are wrong, use the feedback and try another answer.</li>
-        <li>When all four plates are complete, stamp your badge.</li>
+        <li>If you are correct, the plate is forged.</li>
+        <li>If you are wrong, read the feedback and try again.</li>
+        <li>Use Hint if you need help.</li>
+        <li>Forge all four plates, then stamp your badge.</li>
       </ol>
+
     </section>
   </div>
 
   <script>
+
+    /*
+      ============================================================
+      SKILL BADGE FORGE
+      Unit 34 — Reflective Writing
+
+      Four stages:
+        1. Strength
+        2. Evidence
+        3. Challenge
+        4. Next Step
+
+      The FOUR STAGES are randomized every new playthrough.
+      The answer choices inside each stage are NOT randomized.
+      ============================================================
+    */
+
     const stages = [
+
+      /* --------------------------------------------------------
+         STAGE 1 — STRENGTH
+         Objective 34.2
+      -------------------------------------------------------- */
       {
+        id: "strength",
         slot: "Strength",
         objective: "Objective 34.2",
+
         title: "Forge the Strength Plate",
-        subtitle: "Choose the sentence that names what worked in the paragraph.",
-        prompt: "Which strength correctly reflects the organisation of the draft?",
-        hint: "Look at the order: the cause happens first, then the results.",
-        correct: 0,
+
+        subtitle:
+          "Choose the sentence that identifies what worked in the writing.",
+
+        prompt:
+          "Which strength correctly reflects the organisation of the draft?",
+
+        hint:
+          "Look at the order: the cause happens first, then the results.",
+
         choices: [
           "I organised the paragraph from cause to effect.",
-          "I used personal and relative pronouns in every sentence.",
-          "I made the paragraph longer by adding extra details."
+          "I am the best writer.",
+          "The drain was near the gate."
         ],
-        feedback: "Correct. The draft moves from heavy rain and a blocked drain to the effects on the pavement and students."
+
+        correct: 0,
+
+        feedback:
+          "Correct. The paragraph begins with the cause and then explains the effects."
       },
+
+
+      /* --------------------------------------------------------
+         STAGE 2 — EVIDENCE
+         Objective 34.3
+      -------------------------------------------------------- */
       {
+        id: "evidence",
         slot: "Evidence",
         objective: "Objective 34.3",
+
         title: "Forge the Evidence Plate",
-        subtitle: "Choose evidence that proves the strength.",
-        prompt: "Which evidence best supports the strength plate?",
-        hint: "Find the linking words that show how one event leads to another.",
-        correct: 1,
+
+        subtitle:
+          "Choose evidence that supports the reflection.",
+
+        prompt:
+          "Which evidence best supports the strength plate?",
+
+        hint:
+          "Look for the words that show one event leading to another.",
+
         choices: [
-          "The paragraph has two sentences about water.",
-          "I used “so” and “as a result” to show the relationships.",
-          "The paragraph begins with the word “Heavy”."
+          "The paragraph has two sentences about the school.",
+          "I used ‘so’ and ‘as a result’ to show the relationships.",
+          "The paragraph begins with the word ‘Heavy’."
         ],
-        feedback: "Correct. “So” and “as a result” clearly show the cause-and-effect relationships."
+
+        correct: 1,
+
+        feedback:
+          "Correct. ‘So’ and ‘as a result’ show the relationships between the cause and effects."
       },
+
+
+      /* --------------------------------------------------------
+         STAGE 3 — CHALLENGE
+         Objective 34.3
+      -------------------------------------------------------- */
       {
+        id: "challenge",
         slot: "Challenge",
         objective: "Objective 34.3",
+
         title: "Forge the Challenge Plate",
-        subtitle: "Choose a specific part that needs improving.",
-        prompt: "Which challenge is supported by the draft?",
-        hint: "Read the final two short sentences and notice the repeated noun.",
-        correct: 2,
+
+        subtitle:
+          "Choose a specific challenge supported by the draft.",
+
+        prompt:
+          "Which challenge is supported by the draft?",
+
+        hint:
+          "Look at the final two sentences and notice the repeated word.",
+
         choices: [
-          "The draft has no cause-and-effect idea.",
-          "The word “rain” is used four times.",
-          "I repeated the word “water” too many times."
+          "I repeated the word ‘water’ too many times.",
+          "The whole unit was impossible.",
+          "My page was white."
         ],
-        feedback: "Correct. “Water” appears repeatedly in the final two sentences."
+
+        correct: 0,
+
+        feedback:
+          "Correct. The word ‘water’ appears four times in the final two sentences."
       },
+
+
+      /* --------------------------------------------------------
+         STAGE 4 — NEXT STEP
+         Objective 34.4
+      -------------------------------------------------------- */
       {
+        id: "nextStep",
         slot: "Next Step",
         objective: "Objective 34.4",
-        title: "Forge the Next Step Plate",
-        subtitle: "Choose an action the writer can control during revision.",
-        prompt: "Which next step would improve the challenge?",
-        hint: "Choose a specific revision action.",
-        correct: 0,
+
+        title: "Forge the Next-Step Plate",
+
+        subtitle:
+          "Choose an action you can control during revision.",
+
+        prompt:
+          "Which next step would improve the challenge?",
+
+        hint:
+          "Choose a specific revision action that you can control.",
+
         choices: [
-          "During revision, I will replace repeated words with precise alternatives such as “floodwater” and “runoff” where they fit.",
+          "During revision, I will replace repeated words with precise alternatives such as ‘floodwater’ and ‘runoff’ where they fit.",
           "I will hope the paragraph becomes better without changing it.",
           "I will delete the whole paragraph and begin a different topic."
         ],
-        feedback: "Correct. This is a specific revision action that makes the wording more precise."
+
+        correct: 0,
+
+        feedback:
+          "Correct. This is a specific revision action that the learner can control."
       }
+
     ];
 
+
+    /*
+      ============================================================
+      GAME STATE
+      ============================================================
+    */
+
     let current = 0;
+
+    // Holds the randomized order of the four stages.
+    let stageOrder = [];
+
+    // Stores the selected answer for each actual stage.
     let forged = [];
+
+    // Stores whether the first answer was correct for each stage.
     let firstAttempts = [];
+
+    // Stores the number of attempts for each stage.
+    let attempts = [];
+
+    // Stores whether a hint was used for each stage.
+    let hintsUsed = [];
+
 
     const $ = id => document.getElementById(id);
 
+
+    /*
+      ============================================================
+      RANDOMIZE THE FOUR STAGES
+      ============================================================
+    */
+
+    function shuffleStages() {
+
+      // Start with the four stages in their normal positions.
+      stageOrder = [0, 1, 2, 3];
+
+      // Fisher-Yates shuffle.
+      for (let i = stageOrder.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [stageOrder[i], stageOrder[j]] =
+          [stageOrder[j], stageOrder[i]];
+      }
+    }
+
+
+    /*
+      ============================================================
+      SCREEN CONTROL
+      ============================================================
+    */
+
     function showScreen(name) {
-      $("homeScreen").classList.toggle("active", name === "home");
-      $("simScreen").classList.toggle("active", name === "sim");
+
+      $("homeScreen").classList.toggle(
+        "active",
+        name === "home"
+      );
+
+      $("simScreen").classList.toggle(
+        "active",
+        name === "sim"
+      );
     }
 
-    function renderSlots() {
-      $("slots").innerHTML = stages.map((stage, index) => `
-        <div class="slot ${forged[index] !== undefined ? "filled" : ""}">
-          <strong>${stage.slot}</strong>
-          <span>${forged[index] !== undefined ? "✓ Plate forged" : "Waiting for plate"}</span>
-        </div>
-      `).join("");
+
+    /*
+      ============================================================
+      GET CURRENT STAGE
+      ============================================================
+    */
+
+    function getCurrentStageIndex() {
+      return stageOrder[current];
     }
 
-    function render() {
-      renderSlots();
 
-      const complete = forged.length;
-      $("progressText").textContent = `${complete} of 4 plates forged`;
-      $("progressFill").style.width = `${complete * 25}%`;
-
-      if (forged.length === 4) {
-        $("task-panel").classList.add("hidden");
-        $("reflection").classList.remove("hidden");
-
-        $("reflectionList").innerHTML = stages.map((stage, index) =>
-          `<li><strong>${stage.slot}:</strong> ${stage.choices[forged[index]]}</li>`
-        ).join("");
-
-        return;
-      }
-
-      $("task-panel").classList.remove("hidden");
-      $("reflection").classList.add("hidden");
-
-      const stage = stages[current];
-
-      $("objectiveLabel").textContent = stage.objective;
-      $("stageTitle").textContent = stage.title;
-      $("stageSubtitle").textContent = stage.subtitle;
-      $("prompt").textContent = stage.prompt;
-      $("hintText").textContent = "";
-      $("nextBtn").classList.add("hidden");
-      $("tryAgainBtn").classList.add("hidden");
-      $("backBtn").disabled = current === 0;
-
-      const choiceArea = $("choices");
-      choiceArea.innerHTML = "";
-
-      stage.choices.forEach((choice, index) => {
-        const button = document.createElement("button");
-        button.className = "choice-btn";
-        button.textContent = choice;
-        button.addEventListener("click", () => chooseAnswer(index, button));
-        choiceArea.appendChild(button);
-      });
-
-      $("feedback").className = "feedback";
-      $("feedback").textContent = "Click an answer button to select a plate.";
+    function getCurrentStage() {
+      return stages[getCurrentStageIndex()];
     }
 
-    function chooseAnswer(index, button) {
-      const stage = stages[current];
-      const allButtons = [...$("choices").children];
 
-      if (index === stage.correct) {
-        if (firstAttempts[current] === undefined) firstAttempts[current] = true;
-
-        button.classList.add("correct");
-        allButtons.forEach(item => item.disabled = true);
-
-        $("feedback").className = "feedback good";
-        $("feedback").textContent = `${stage.feedback} Click “Forge Next Plate” to continue.`;
-
-        forged[current] = index;
-        $("nextBtn").classList.remove("hidden");
-      } else {
-        if (firstAttempts[current] === undefined) firstAttempts[current] = false;
-
-        button.classList.add("incorrect");
-        button.disabled = true;
-
-        $("feedback").className = "feedback try";
-        $("feedback").textContent = "Not quite. Read the hint or choose another answer.";
-        $("tryAgainBtn").classList.remove("hidden");
-      }
-    }
-
-    function resetGame() {
-      current = 0;
-      forged = [];
-      firstAttempts = [];
-      $("summary").classList.remove("show");
-      showScreen("home");
-      render();
-    }
-
-    $("startBtn").addEventListener("click", () => {
-      showScreen("sim");
-      render();
-    });
-
-    $("nextBtn").addEventListener("click", () => {
-      current++;
-      render();
-    });
-
-    $("backBtn").addEventListener("click", () => {
-      if (current > 0) {
-        current--;
-        forged.splice(current, 1);
-        render();
-      }
-    });
-
-    $("hintBtn").addEventListener("click", () => {
-      $("hintText").textContent = `Hint: ${stages[current].hint}`;
-    });
-
-    $("tryAgainBtn").addEventListener("click", () => {
-      [...$("choices").children].forEach(button => {
-        if (!button.classList.contains("correct")) button.disabled = false;
-      });
-      $("tryAgainBtn").classList.add("hidden");
-      $("feedback").className = "feedback";
-      $("feedback").textContent = "Try another answer.";
-    });
-
-    $("stampBtn").addEventListener("click", () => {
-      $("reflection").classList.add("hidden");
-      $("summary").classList.add("show");
-
-      const firstCorrect = firstAttempts.filter(item => item === true).length;
-      $("mastery").textContent =
-        `${firstCorrect} of 4 plates were correct on the first attempt. Final mastery: all four plates are correct.`;
-    });
-
-    $("restartBtn").addEventListener("click", resetGame);
-    $("resetBtn").addEventListener("click", resetGame);
-    $("exitBtn").addEventListener("click", () => showScreen("home"));
-    $("homeBtn").addEventListener("click", () => showScreen("home"));
-
-    function openRules() {
-      $("rulesModal").classList.add("show");
-    }
-
-    function closeRules() {
-      $("rulesModal").classList.remove("show");
-    }
-
-    $("helpBtn").addEventListener("click", openRules);
-    $("homeRulesBtn").addEventListener("click", openRules);
-    $("closeRulesBtn").addEventListener("click", closeRules);
-
-    $("themeBtn").addEventListener("click", () => {
-      const isLight = document.documentElement.dataset.theme === "light";
-      document.documentElement.dataset.theme = isLight ? "dark" : "light";
-      $("themeBtn").textContent = isLight ? "☀ Light" : "◐ Dark";
-    });
-
-    render();
-  </script>
-</body>
-</html>
