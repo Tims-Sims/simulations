@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLANK SIMULATION TEMPLATE
+     Search "DEV-EDIT" to find all 6 zones you need to edit:
+       1. DEV-EDIT: SIM CONFIG
+       2. DEV-EDIT: PAGE TITLE
+       3. DEV-EDIT: SIM AREA
+       4. DEV-EDIT: SIM STYLES
+       5. DEV-EDIT: SIM LOGIC
+       6. DEV-EDIT: FOOTER
+     Everything else is chrome (theme/fullscreen/help/reset) —
+     DO NOT EDIT unless you know what you're doing.
+     ============================================================ -->
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ============================================================
+         DEV-EDIT: PAGE TITLE
+         Change the browser tab title here.
+         Search "DEV-EDIT" to find every place you need to change.
+         ============================================================ -->
+    <title>Simulation Template Shell</title>
+    <style>
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           Theme variables, base layout, topbar, buttons, modal, footer.
+           ============================================================ */
+
+        :root {
+            color-scheme: dark;
+            --bg: #0f1222;
+            --bg-soft: #171b31;
+            --surface: #1d2340;
+            --surface-2: #252d52;
+            --text: #eef2ff;
+            --text-soft: #c7d0f0;
+            --muted: #98a4c8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #7dd3fc;
+            --accent-2: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --focus: 0 0 0 3px rgba(125, 211, 252, 0.35);
+        }
+
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f7ff;
+            --bg-soft: #e7edff;
+            --surface: #ffffff;
+            --surface-2: #eef3ff;
+            --text: #17203f;
+            --text-soft: #344267;
+            --muted: #5d6b95;
+            --border: rgba(23, 32, 63, 0.12);
+            --accent: #0ea5e9;
+            --accent-2: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #e11d48;
+            --shadow: 0 18px 40px rgba(46, 64, 112, 0.14);
+            --focus: 0 0 0 3px rgba(14, 165, 233, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+                radial-gradient(circle at top left, rgba(125, 211, 252, 0.12), transparent 25%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: none;
+            box-shadow: var(--focus);
+        }
+
+        .app-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: color-mix(in srgb, var(--surface) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-badge {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .brand-copy h1,
+        .brand-copy p {
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-copy h1 {
+            font-size: 1.08rem;
+        }
+
+        .brand-copy p {
+            color: var(--muted);
+            margin-top: 2px;
+            font-size: 0.92rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .control-btn,
+        .primary-btn,
+        .secondary-btn,
+        .ghost-btn,
+        .danger-btn,
+        .nav-btn {
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .control-btn,
+        .secondary-btn,
+        .nav-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            color: var(--text-soft);
+            border: 1px dashed var(--border);
+        }
+
+        .danger-btn {
+            background: color-mix(in srgb, var(--danger) 18%, var(--surface));
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+        }
+
+        .pulse-help {
+            position: relative;
+        }
+
+        .pulse-help::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 999px;
+            border: 2px solid color-mix(in srgb, var(--warning) 70%, transparent);
+            animation: pulseRing 1.7s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                opacity: 0.9;
+                transform: scale(0.98);
+            }
+
+            70% {
+                opacity: 0;
+                transform: scale(1.12);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .center-stage {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .hero-card,
+        .modal-card {
+            width: min(100%, 920px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: clamp(24px, 4vw, 42px);
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.08;
+        }
+
+        .hero-card p {
+            width: min(100%, 700px);
+            margin: 0 auto;
+            color: var(--text-soft);
+            font-size: 1.05rem;
+            line-height: 1.65;
+        }
+
+        .hero-actions {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sim-layout {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+        }
+
+        .sim-card {
+            width: min(100%, 960px);
+            padding: clamp(18px, 3vw, 28px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(6, 10, 20, 0.64);
+            z-index: 60;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            padding: clamp(18px, 3vw, 30px);
+            position: relative;
+            /* Keep tall modals usable on short screens: cap the card height
+               and let its body scroll so the footer buttons stay reachable. */
+            max-height: min(90vh, 90dvh);
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .modal-card h3 {
+            margin: 0 0 12px;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .modal-card p,
+        .modal-card li {
+            color: var(--text-soft);
+            line-height: 1.65;
+        }
+
+        .modal-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .volume-sliders {
+            margin-top: 18px;
+        }
+
+        .volume-sliders h3 {
+            margin: 0 0 10px;
+            font-size: 1.05rem;
+        }
+
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .volume-row label {
+            flex: 0 0 150px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .volume-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .button-row {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .topbar {
+                padding: 12px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM STYLES
+           Add your simulation CSS below. Do not modify chrome CSS above.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <div class="brand-badge" id="brandBadge">SIM</div>
+                <div class="brand-copy">
+                    <h1 id="brandTitle">Simulation Title Placeholder</h1>
+                    <p id="brandSubtitle">Offline interactive learning shell</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- ===== OPTIONAL: AUDIO TOGGLE BUTTON =====
+                     Delete this button (and the DEV-EDIT: AUDIO script section below)
+                     if you do not want sound in your sim. -->
+                <button id="audioBtn" class="control-btn" type="button" aria-label="Mute audio" title="Audio on">
+                  <svg class="btn-icon" id="audioOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                  <svg class="btn-icon" id="audioOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <!-- ===== END AUDIO TOGGLE BUTTON ===== -->
+                <button class="control-btn pulse-help" id="helpBtn" aria-label="Open instructions">❔ Help</button>
+                <button class="control-btn" id="themeToggleBtn" aria-label="Switch theme">🌙 Dark</button>
+                <button class="control-btn" id="fullscreenBtn" aria-label="Toggle fullscreen"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen</button>
+                <button class="danger-btn" id="resetBtn" aria-label="Reset simulation"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg> Reset</button>
+            </div>
+        </header>
+
+        <main class="screen active" id="homeScreen">
+            <div class="center-stage">
+                <section class="hero-card">
+                    <div class="eyebrow" id="homeEyebrow">Template Shell Ready</div>
+                    <h2 id="homeTitle">Replace This Title With Your Simulation Name</h2>
+                    <p id="homeDescription">
+                        This is a blank offline-ready template. Build your simulation logic in the DEV AREA.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main class="screen" id="simScreen">
+            <div class="sim-layout">
+                <section class="sim-card" id="simContainer">
+                    <!-- ============================================================
+                         DEV-EDIT: SIM AREA
+                         Build your simulation markup here. Remove the placeholder
+                         text below once your simulation UI is in place.
+                         Search "DEV-EDIT" to find every place you need to change.
+                         ============================================================ -->
+                    <p class="muted">Simulation content placeholder. Replace this section with your simulation UI.</p>
+                </section>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             DEV-EDIT: FOOTER
+             Change the footer text below.
+             Search "DEV-EDIT" to find every place you need to change.
+             ============================================================ -->
+        <div class="footer-note">
+            Built as a local, editable shell. Swap the content, keep the structure, and your developers are good to go.
+        </div>
+    </div>
+
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true" aria-labelledby="instructionsHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeInstructionsBtn" aria-label="Close instructions">×</button>
+            <h3 id="instructionsHeading">How to Use This Simulation</h3>
+            <div id="instructionsBody"></div>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="primary-btn" id="gotItBtn">Got it</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="resetConfirmModal" role="dialog" aria-modal="true" aria-labelledby="resetConfirmHeading">
+        <section class="modal-card">
+            <button class="close-btn" id="closeResetConfirmBtn" aria-label="Close reset confirmation">×</button>
+            <h3 id="resetConfirmHeading">Reset simulation?</h3>
+            <p>This will clear your current progress and return you to the home screen.</p>
+            <div class="button-row" style="margin-top: 18px; justify-content: flex-start;">
+                <button class="secondary-btn" id="cancelResetBtn">Cancel</button>
+                <button class="danger-btn" id="confirmResetBtn">Reset</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* Safety net: never allow a native form submission. Builders often
+           add forms to this shell; without a JS handler a submit navigates
+           the page to its own URL, which Chrome blocks with an "Unsafe
+           attempt to load URL" error when the file runs from file:// inside
+           an iframe. Capture-phase, unconditional. */
+        document.addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, true);
+
+        /* ============================================================
+           DEV-EDIT: SIM CONFIG
+           Change title, subtitle, description, instructions here.
+           Search "DEV-EDIT" to find every place you need to change.
+
+           Field notes:
+             simId          - must be UNIQUE per sim. Used as the
+                               sessionStorage key prefix (theme, help-seen,
+                               and any state you persist). Colliding
+                               simIds will clobber each other's saved data.
+             title           - shown in <title>, topbar, and home screen.
+             subtitle        - shown under the title in the topbar.
+             badgeText       - short text in the topbar logo badge.
+             homeEyebrow     - small pill label above the home title.
+             homeDescription - paragraph text on the home screen.
+             instructions    - array of strings rendered as a bullet list
+                                in the Help/Instructions modal.
+           ============================================================ */
+        const SIM_CONFIG = {
+            templateVersion: "2.2.1", // do not change — identifies which template base this sim was built from
+            simId: "blank-simulation-template",
+            title: "Editable Simulation Template",
+            subtitle: "Single-file shell for local student activities",
+            badgeText: "SIM",
+            homeEyebrow: "Template Shell Ready",
+            homeDescription:
+                "Use this shell to build a child-friendly maths, ELA, or general subject simulation. Replace this description and build your simulation logic in devInit().",
+            instructions: [
+                "Read the instructions before starting.",
+                "Click Start to begin the simulation.",
+                "Use the Reset button any time you want to restart from scratch.",
+                "This file runs completely offline in a browser. No internet is needed."
+            ]
+        };
+
+        /* ============================================================
+           DEV-EDIT: AUDIO (OPTIONAL)
+           Audio is completely optional. If you don't want sound in your
+           sim, delete this whole section AND the #audioBtn button in the
+           header above (search "OPTIONAL: AUDIO TOGGLE BUTTON").
+
+           All sounds here work fully offline - no internet connection
+           is ever needed. There are two ways to give a sound to a slot
+           in SOUND_FILES below:
+
+             1. Leave it as "" (empty string) to use a built-in
+                synthesized "beep" tone instead of a real audio file.
+                This needs no file at all and always works offline.
+
+             2. Paste a base64 "data URI" string, like:
+                "data:audio/mp3;base64,AAAA..."
+                To make one: convert your .mp3 or .wav file to base64
+                text (many free online converters do this, or your
+                own audio editor), then paste that text after the
+                "data:audio/mp3;base64," prefix shown above. This keeps
+                the sound baked directly into this one HTML file, so
+                there is nothing else to ship and nothing to break if
+                the file is moved. Note it makes the file bigger
+                (roughly 1.37x the size of the original audio), so this
+                is best for short sound effects, not music or narration.
+
+             3. Alternatively, point to a separate audio file next to
+                this HTML file, e.g. "sounds/correct.mp3" - but then you
+                must remember to ship that file alongside this one.
+
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+        const SOUND_FILES = {
+            click: "",     // played on general button/option clicks
+            correct: "",   // played when the learner answers correctly
+            wrong: "",     // played when the learner answers incorrectly
+            typing: "",    // played per-keystroke or per-character reveal
+            complete: ""   // played when the simulation/activity finishes
+            // Feel free to add your own keys here (e.g. levelUp: "") and
+            // call playSound("levelUp") from your DEV-EDIT: SIM LOGIC code.
+        };
+
+        /* Each sound belongs to a category. The "effects" category always gets a
+           volume slider in the Help window. Any OTHER category name you use here
+           (for example "voice" for narration you add yourself) automatically gets
+           its own labelled slider in the Help window — and if no sound uses it,
+           no slider appears. */
+        const SOUND_CATEGORIES = {
+            click: "effects",
+            typing: "effects",
+            correct: "effects",
+            wrong: "effects",
+            complete: "effects",
+            // narration: "voice",   // example: your own added sound in its own category
+        };
+        /* Optional nicer slider labels. Category name used if missing. */
+        const CATEGORY_LABELS = { effects: "Sound effects", voice: "Voice / narration" };
+
+        /* ---- Audio engine below. Safe to leave untouched. ---- */
+        let audioCtx = null;
+        let audioEnabled = true;
+        const AUDIO_STORAGE_KEY = () => `sim:${SIM_CONFIG.simId}:audioMuted`;
+        const channelVolumes = {};   // category -> 0..1
+        const VOL_STORAGE_KEY = (cat) => `sim:${SIM_CONFIG.simId}:vol:${cat}`;
+
+        function getCategories() {
+            const cats = new Set(["effects"]);
+            Object.values(SOUND_CATEGORIES).forEach((c) => cats.add(c));
+            return [...cats];
+        }
+        function loadVolumes() {
+            getCategories().forEach((cat) => {
+                const raw = storageGet(VOL_STORAGE_KEY(cat));
+                const n = raw === null || raw === "" ? 100 : Number(raw);
+                channelVolumes[cat] = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1;
+            });
+        }
+        function volumeFor(name) {
+            const cat = SOUND_CATEGORIES[name] || "effects";
+            return channelVolumes[cat] != null ? channelVolumes[cat] : 1;
+        }
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, durationMs, type, volume, startDelayMs) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const t0 = ctx.currentTime + (startDelayMs || 0) / 1000;
+            osc.type = type || "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(volume != null ? volume : 0.15, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durationMs / 1000);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + durationMs / 1000);
+        }
+
+        const SYNTH_SOUNDS = {
+            click:    (v) => playTone(600, 60, "square", 0.06 * v),
+            typing:   (v) => playTone(420, 30, "square", 0.04 * v),
+            correct:  (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(784, 180, "sine", 0.15 * v, 110); },
+            wrong:    (v) => playTone(180, 250, "sawtooth", 0.12 * v),
+            complete: (v) => { playTone(523, 120, "sine", 0.15 * v); playTone(659, 120, "sine", 0.15 * v, 120); playTone(784, 250, "sine", 0.15 * v, 240); },
+        };
+
+        function playSound(name) {
+            if (!audioEnabled) return;
+            const v = volumeFor(name);
+            if (v <= 0) return;
+            const src = SOUND_FILES[name];
+            if (src) {
+                try {
+                    const a = new Audio(src);
+                    a.volume = v;
+                    a.play().catch(() => {});
+                } catch (err) { /* ignore */ }
+                return;
+            }
+            const synth = SYNTH_SOUNDS[name];
+            if (synth) { try { synth(v); } catch (err) { /* ignore */ } }
+        }
+        // Example usage from your own sim logic:
+        // playSound("correct"); // call anywhere in your DEV-EDIT: SIM LOGIC code
+
+        function updateAudioButton() {
+            const btn = dom.audioBtn;
+            if (!btn) return;
+            const onIcon = document.getElementById("audioOnIcon");
+            const offIcon = document.getElementById("audioOffIcon");
+            if (audioEnabled) {
+                if (onIcon) onIcon.style.display = "";
+                if (offIcon) offIcon.style.display = "none";
+                btn.setAttribute("title", "Audio on");
+                btn.setAttribute("aria-label", "Mute audio");
+            } else {
+                if (onIcon) onIcon.style.display = "none";
+                if (offIcon) offIcon.style.display = "";
+                btn.setAttribute("title", "Audio muted");
+                btn.setAttribute("aria-label", "Unmute audio");
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            storageSet(AUDIO_STORAGE_KEY(), audioEnabled ? "" : "1");
+            updateAudioButton();
+            if (audioEnabled) playSound("click");
+        }
+
+        function loadAudioSetting() {
+            loadVolumes();
+            audioEnabled = storageGet(AUDIO_STORAGE_KEY()) !== "1";
+            updateAudioButton();
+        }
+
+        function renderVolumeSliders() {
+            const body = dom.instructionsBody;
+            if (!body) return;
+            let container = document.getElementById("volumeSliders");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "volumeSliders";
+                container.className = "volume-sliders";
+                body.appendChild(container);
+            }
+            container.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Audio volume";
+            container.appendChild(heading);
+
+            getCategories().forEach((cat) => {
+                const repName = Object.keys(SOUND_CATEGORIES).find((n) => SOUND_CATEGORIES[n] === cat) || "click";
+                const row = document.createElement("div");
+                row.className = "volume-row";
+
+                const label = document.createElement("label");
+                label.textContent = CATEGORY_LABELS[cat] || cat;
+
+                const input = document.createElement("input");
+                input.type = "range";
+                input.min = "0";
+                input.max = "100";
+                input.step = "5";
+                input.value = String(Math.round((channelVolumes[cat] != null ? channelVolumes[cat] : 1) * 100));
+
+                input.addEventListener("input", () => {
+                    channelVolumes[cat] = Number(input.value) / 100;
+                    storageSet(VOL_STORAGE_KEY(cat), input.value);
+                });
+                input.addEventListener("change", () => {
+                    playSound(repName);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        /* ============================================================
+           CHROME — DO NOT EDIT
+           ============================================================ */
+        const state = {
+            currentScreen: "home",
+            theme: "dark"
+        };
+
+        const dom = {
+            html: document.documentElement,
+            brandBadge: document.getElementById("brandBadge"),
+            brandTitle: document.getElementById("brandTitle"),
+            brandSubtitle: document.getElementById("brandSubtitle"),
+            homeEyebrow: document.getElementById("homeEyebrow"),
+            homeTitle: document.getElementById("homeTitle"),
+            homeDescription: document.getElementById("homeDescription"),
+            homeScreen: document.getElementById("homeScreen"),
+            simScreen: document.getElementById("simScreen"),
+            simContainer: document.getElementById("simContainer"),
+            startBtn: document.getElementById("startBtn"),
+            openInstructionsBtn: document.getElementById("openInstructionsBtn"),
+            audioBtn: document.getElementById("audioBtn"), // null if audio section removed — safe
+            helpBtn: document.getElementById("helpBtn"),
+            themeToggleBtn: document.getElementById("themeToggleBtn"),
+            fullscreenBtn: document.getElementById("fullscreenBtn"),
+            resetBtn: document.getElementById("resetBtn"),
+            instructionsModal: document.getElementById("instructionsModal"),
+            instructionsBody: document.getElementById("instructionsBody"),
+            closeInstructionsBtn: document.getElementById("closeInstructionsBtn"),
+            gotItBtn: document.getElementById("gotItBtn"),
+            resetConfirmModal: document.getElementById("resetConfirmModal"),
+            closeResetConfirmBtn: document.getElementById("closeResetConfirmBtn"),
+            cancelResetBtn: document.getElementById("cancelResetBtn"),
+            confirmResetBtn: document.getElementById("confirmResetBtn")
+        };
+
+        initializeApp();
+
+        function initializeApp() {
+            // One-time cleanup: earlier template versions saved to
+            // localStorage, which outlives the tab. Remove any of this sim's
+            // stale keys so shared machines carry no leftover learner data.
+            try {
+                Object.keys(localStorage)
+                    .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
+                    .forEach((k) => localStorage.removeItem(k));
+            } catch (err) { /* storage unavailable */ }
+            applyConfigToUI();
+            bindEvents();
+            renderInstructions();
+            loadTheme();
+            loadHelpSeen();
+            try { loadAudioSetting(); } catch (err) { /* audio section removed */ }
+        }
+
+        function loadHelpSeen() {
+            const seen = storageGet(SIM_CONFIG.simId + "-help-seen");
+            if (seen === "true") {
+                dom.helpBtn.classList.remove("pulse-help");
+            }
+        }
+
+        function applyConfigToUI() {
+            document.title = SIM_CONFIG.title;
+            dom.brandBadge.textContent = SIM_CONFIG.badgeText;
+            dom.brandTitle.textContent = SIM_CONFIG.title;
+            dom.brandSubtitle.textContent = SIM_CONFIG.subtitle;
+            dom.homeEyebrow.textContent = SIM_CONFIG.homeEyebrow;
+            dom.homeTitle.textContent = SIM_CONFIG.title;
+            dom.homeDescription.textContent = SIM_CONFIG.homeDescription;
+        }
+
+        function bindEvents() {
+            if (dom.audioBtn) dom.audioBtn.addEventListener("click", toggleAudio);
+            dom.startBtn.addEventListener("click", () => {
+                showScreen("sim");
+                devInit();
+            });
+            dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
+            dom.helpBtn.addEventListener("click", () => {
+                dom.helpBtn.classList.remove("pulse-help");
+                storageSet(SIM_CONFIG.simId + "-help-seen", "true");
+                openInstructionsModal();
+            });
+            dom.closeInstructionsBtn.addEventListener("click", closeInstructionsModal);
+            dom.gotItBtn.addEventListener("click", closeInstructionsModal);
+            dom.instructionsModal.addEventListener("click", (event) => {
+                if (event.target === dom.instructionsModal) {
+                    closeInstructionsModal();
+                }
+            });
+
+            dom.themeToggleBtn.addEventListener("click", toggleTheme);
+            dom.fullscreenBtn.addEventListener("click", toggleFullscreen);
+            dom.resetBtn.addEventListener("click", openResetConfirmModal);
+            dom.closeResetConfirmBtn.addEventListener("click", closeResetConfirmModal);
+            dom.cancelResetBtn.addEventListener("click", closeResetConfirmModal);
+            dom.confirmResetBtn.addEventListener("click", () => {
+                devReset();
+                showScreen("home");
+                closeResetConfirmModal();
+            });
+            dom.resetConfirmModal.addEventListener("click", (event) => {
+                if (event.target === dom.resetConfirmModal) {
+                    closeResetConfirmModal();
+                }
+            });
+            document.addEventListener("fullscreenchange", updateFullscreenButton);
+            document.addEventListener("keydown", handleKeyShortcuts);
+        }
+
+        function renderInstructions() {
+            const intro = document.createElement("p");
+            intro.textContent = "Here is how this simulation works:";
+            const list = document.createElement("ul");
+
+            SIM_CONFIG.instructions.forEach((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+
+            dom.instructionsBody.replaceChildren(intro, list);
+        }
+
+        function openInstructionsModal() {
+            dom.instructionsModal.classList.add("show");
+            try { renderVolumeSliders(); } catch (err) { /* audio section removed */ }
+        }
+
+        function closeInstructionsModal() {
+            dom.instructionsModal.classList.remove("show");
+        }
+
+        function openResetConfirmModal() {
+            dom.resetConfirmModal.classList.add("show");
+        }
+
+        function closeResetConfirmModal() {
+            dom.resetConfirmModal.classList.remove("show");
+        }
+
+        function showScreen(screenName) {
+            state.currentScreen = screenName;
+            dom.homeScreen.classList.toggle("active", screenName === "home");
+            dom.simScreen.classList.toggle("active", screenName === "sim");
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === "dark" ? "light" : "dark";
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+            storageSet(SIM_CONFIG.simId + "-theme", state.theme);
+        }
+
+        function loadTheme() {
+            const saved = storageGet(SIM_CONFIG.simId + "-theme");
+            if (saved === "light" || saved === "dark") {
+                state.theme = saved;
+            } else {
+                const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+                state.theme = prefersLight ? "light" : "dark";
+            }
+            dom.html.setAttribute("data-theme", state.theme);
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const switchToLight = state.theme === "dark";
+            dom.themeToggleBtn.textContent = switchToLight ? "☀️ Light Mode" : "🌙 Dark Mode";
+            dom.themeToggleBtn.setAttribute("aria-label", switchToLight ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        async function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.error("Fullscreen is not available in this browser right now.", error);
+            }
+        }
+
+        const FS_ENTER_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Full Screen';
+        const FS_EXIT_HTML = '<svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg> Exit Full Screen';
+
+        function updateFullscreenButton() {
+            dom.fullscreenBtn.innerHTML = document.fullscreenElement ? FS_EXIT_HTML : FS_ENTER_HTML;
+        }
+
+        function handleKeyShortcuts(event) {
+            if (event.key === "Escape") {
+                closeInstructionsModal();
+                closeResetConfirmModal();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function storageGet(key) {
+            try { return sessionStorage.getItem(key); } catch (err) { return null; }
+        }
+        function storageSet(key, value) {
+            try { sessionStorage.setItem(key, value); } catch (err) { /* storage unavailable (e.g. sandboxed iframe) */ }
+        }
+
+        /* ============================================================
+           DEV-EDIT: SIM LOGIC
+           devInit() runs when the student clicks Start.
+           devReset() runs when the student confirms Reset — clear your
+           simulation state here.
+           Add your functions below this banner.
+           Search "DEV-EDIT" to find every place you need to change.
+           ============================================================ */
+
+        /* --- HANDY UTILITIES (examples — uncomment what you need) --- */
+        // function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+        // function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        // function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        // Example: const order = shuffle([1, 2, 3, 4]);  const dice = randInt(1, 6);
+        // Sound: playSound("correct"), playSound("levelUp"), etc. are available (see DEV-EDIT: AUDIO).
+        // Storage: storageGet/storageSet are available for saving progress, keyed like `sim:${SIM_CONFIG.simId}:mydata`.
+
+        function devInit() {
+            // Build your simulation UI/logic inside dom.simContainer here.
+        }
+
+        function devReset() {
+            // Clear/reset any simulation-specific state here.
+        }
+    </script>
+</body>
+
+</html>
