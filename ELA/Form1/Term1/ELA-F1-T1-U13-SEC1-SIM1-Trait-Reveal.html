@@ -313,7 +313,7 @@
             *, *::before, *::after { animation: none !important; transition: none !important; }
         }
 
-        .game-shell { display: flex; flex-direction: column; gap: 14px; }
+        .game-shell { display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden; }
 
         .scene-bar {
             display: flex;
@@ -571,6 +571,28 @@
         .role-card.role-minor .role-icon { color: var(--text-soft); }
         .role-card h4 { margin: 0 0 6px; font-size: 0.95rem; color: var(--text); }
         .role-card p { margin: 0; font-size: 0.85rem; line-height: 1.55; color: var(--text-soft); }
+
+        .scene-dots { display: flex; gap: 6px; margin-top: 8px; }
+        .scene-dots .sd-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); transition: background 0.3s ease, transform 0.3s ease; }
+        .scene-dots .sd-dot.passed { background: var(--accent); }
+        .scene-dots .sd-dot.current { background: color-mix(in srgb, var(--accent) 45%, var(--surface)); outline: 2px solid var(--accent); outline-offset: 2px; transform: scale(1.15); }
+
+        .feedback-box.success { animation: fb-pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+        @keyframes fb-pop { 0% { transform: scale(0.92); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .trait-option.shake, .tr-card.shake, .sort-chip.shake { animation: shake-x 0.3s ease; }
+        @keyframes shake-x { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 60% { transform: translateX(4px); } }
+
+        .deck-pulse { animation: deck-pulse 0.8s ease; }
+        @keyframes deck-pulse { 0% { transform: scale(1); } 40% { transform: scale(1.25); color: var(--accent); } 100% { transform: scale(1); } }
+
+        .confetti { position: absolute; width: 8px; height: 8px; border-radius: 2px; top: -12px; animation: confetti-fall 2.6s ease-in forwards; pointer-events: none; }
+        .confetti.star { border-radius: 50%; }
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(560px) rotate(720deg); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) { .confetti { display: none; } }
 
         @media (max-width: 780px) {
             .game-body { grid-template-columns: 1fr; }
@@ -1064,6 +1086,7 @@
                         '<div>' +
                             '<div class="progress-text" id="progressText" aria-live="polite"></div>' +
                             '<div class="scene-title" id="sceneTitle"></div>' +
+                            '<div class="scene-dots" aria-hidden="true">' + Array.from({ length: TOTAL_SCENES }, function () { return '<span class="sd-dot"></span>'; }).join("") + '</div>' +
                         '</div>' +
                         '<div class="scene-tools">' +
                             '<button type="button" class="ghost-btn" id="backBtn" aria-label="Back to previous scene">&#8592; Back</button>' +
@@ -1166,6 +1189,12 @@
             SIM.maxScene = Math.max(SIM.maxScene, sceneNumber);
             document.getElementById("progressText").textContent = "Scene " + sceneNumber + " of " + TOTAL_SCENES;
             document.getElementById("sceneTitle").textContent = titleText;
+            const dots = document.querySelectorAll(".scene-dots .sd-dot");
+            dots.forEach(function (d, i) {
+                const n = i + 1;
+                d.classList.toggle("passed", n < sceneNumber);
+                d.classList.toggle("current", n === sceneNumber);
+            });
             storageSet(SIM_CONFIG.simId + ":lastScreen", String(sceneNumber));
             const backBtn = document.getElementById("backBtn");
             const hintBtn = document.getElementById("hintBtn");
@@ -1519,6 +1548,12 @@
                 hintBtn.classList.add("hidden");
             }
             updateProgressPanels();
+            const deck = document.getElementById("deckProgress");
+            if (deck) {
+                deck.classList.remove("deck-pulse");
+                void deck.offsetWidth;
+                deck.classList.add("deck-pulse");
+            }
         }
 
         function correctMessage(item) {
@@ -1539,7 +1574,12 @@
 
             if (choiceIndex !== null && choiceIndex !== undefined) {
                 const picked = status.querySelector('[data-opt="' + choiceIndex + '"], [data-card="' + choiceIndex + '"]');
-                if (picked) { picked.disabled = true; picked.classList.add("reveal-wrong"); }
+                if (picked) {
+                    picked.disabled = true;
+                    picked.classList.add("reveal-wrong");
+                    picked.classList.add("shake");
+                    setTimeout(function () { picked.classList.remove("shake"); }, 400);
+                }
             }
 
             status.querySelectorAll(".feedback-box.error").forEach(function (el) { el.remove(); });
@@ -1753,6 +1793,25 @@
                 rmb.addEventListener("click", function () {
                     renderMissedReview(0);
                 });
+            }
+            spawnConfetti();
+        }
+
+        function spawnConfetti() {
+            if (!window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            const shell = document.querySelector(".game-shell");
+            if (!shell) return;
+            const colors = ["var(--accent)", "#fbbf24", "#f5a623", "#8ecae6", "#f07167"];
+            for (let i = 0; i < 26; i++) {
+                const p = document.createElement("span");
+                p.className = "confetti" + (i % 3 === 0 ? " star" : "");
+                p.style.left = (6 + Math.random() * 88) + "%";
+                p.style.background = colors[i % colors.length];
+                p.style.animationDelay = (Math.random() * 0.8) + "s";
+                p.style.animationDuration = (2.2 + Math.random() * 1.2) + "s";
+                p.style.transform = "rotate(" + Math.floor(Math.random() * 90) + "deg)";
+                shell.appendChild(p);
+                p.addEventListener("animationend", function () { p.remove(); });
             }
         }
 
