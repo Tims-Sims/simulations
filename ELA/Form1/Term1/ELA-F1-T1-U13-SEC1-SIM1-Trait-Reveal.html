@@ -1178,12 +1178,14 @@
                 let fb = '<div class="feedback-box success">';
                 fb += "<strong>Correct!</strong> " + correctMessage(item);
                 if (item.proof) fb += '<div class="proof-line">Evidence: "' + item.proof + '"</div>';
-                const sc = nextSceneAfter(index);
-                const isSceneEnd = sc > item.scene;
-                if (isSceneEnd) {
+                const nextIndex = index + 1;
+                if (nextIndex < ITEMS.length) {
+                    const nextScene = ITEMS[nextIndex].scene;
                     fb += '<div class="feedback-actions"><button type="button" class="primary-btn" id="sceneNextBtn">' +
-                        (index + 1 >= ITEMS.length ? "View Completed Profile" : "Continue to " + sceneName(sc)) +
+                        (nextScene > item.scene ? "Continue to " + sceneName(nextScene) : "Continue") +
                         '</button></div>';
+                } else {
+                    fb += '<div class="feedback-actions"><button type="button" class="primary-btn" id="sceneNextBtn">View Completed Profile</button></div>';
                 }
                 fb += '</div>';
                 status.dataset.locked = "1";
@@ -1192,7 +1194,7 @@
                 const nextBtn = document.getElementById("sceneNextBtn");
                 if (nextBtn) nextBtn.addEventListener("click", function () { goToItem(index + 1); });
 
-                if (sc <= item.scene) {
+                if (nextIndex >= ITEMS.length || ITEMS[nextIndex].scene === item.scene) {
                     const hintBtn = document.getElementById("hintBtn");
                     hintBtn.classList.add("hidden");
                 }
