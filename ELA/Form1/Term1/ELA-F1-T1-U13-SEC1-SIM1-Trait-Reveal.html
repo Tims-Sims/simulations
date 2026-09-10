@@ -554,6 +554,23 @@
         .sort-tray { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 4px; }
         .sort-card { border-style: solid; }
 
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+        .game-shell.celebrate .avatar-svg { animation: avatar-pop 1.1s ease 1; }
+        @keyframes avatar-pop {
+            0%, 100% { transform: scale(1); }
+            35% { transform: scale(1.1) rotate(-2deg); }
+            70% { transform: scale(0.97); }
+        }
+
+        .role-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+        .role-card { border-radius: var(--radius-lg); padding: 14px 16px; border: 2px solid var(--border); background: var(--surface); }
+        .role-card.role-main { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+        .role-card .role-icon { display: block; font-size: 1.1rem; margin-bottom: 4px; color: var(--accent); }
+        .role-card.role-minor .role-icon { color: var(--text-soft); }
+        .role-card h4 { margin: 0 0 6px; font-size: 0.95rem; color: var(--text); }
+        .role-card p { margin: 0; font-size: 0.85rem; line-height: 1.55; color: var(--text-soft); }
+
         @media (max-width: 780px) {
             .game-body { grid-template-columns: 1fr; }
             .avatar-panel { display: flex; flex-direction: column; align-items: center; }
@@ -593,6 +610,7 @@
                     </p>
                     <div class="hero-actions">
                         <button class="primary-btn" id="startBtn">Start</button>
+                        <button class="secondary-btn hidden" id="resumeBtn">Continue Where I Left Off</button>
                         <button class="secondary-btn" id="openInstructionsBtn">Read Instructions</button>
                     </div>
                 </section>
@@ -687,6 +705,7 @@
             simScreen: document.getElementById("simScreen"),
             simContainer: document.getElementById("simContainer"),
             startBtn: document.getElementById("startBtn"),
+            resumeBtn: document.getElementById("resumeBtn"),
             openInstructionsBtn: document.getElementById("openInstructionsBtn"),
             audioBtn: null,
             helpBtn: document.getElementById("helpBtn"),
@@ -711,6 +730,11 @@
                     .filter((k) => k.indexOf(SIM_CONFIG.simId + "-") === 0)
                     .forEach((k) => localStorage.removeItem(k));
             } catch (err) { /* storage unavailable */ }
+            try {
+                const hasProgress = storageGet(SIM_CONFIG.simId + ":progress");
+                const isComplete = storageGet(SIM_CONFIG.simId + ":completion") === "true";
+                dom.resumeBtn.classList.toggle("hidden", !hasProgress || isComplete);
+            } catch (err) { dom.resumeBtn.classList.add("hidden"); }
             applyConfigToUI();
             bindEvents();
             renderInstructions();
@@ -736,8 +760,14 @@
         function bindEvents() {
             dom.startBtn.addEventListener("click", () => {
                 showScreen("sim");
-                devInit();
+                devInit(false);
             });
+            if (dom.resumeBtn) {
+                dom.resumeBtn.addEventListener("click", () => {
+                    showScreen("sim");
+                    devInit(true);
+                });
+            }
             dom.openInstructionsBtn.addEventListener("click", openInstructionsModal);
             dom.helpBtn.addEventListener("click", () => {
                 dom.helpBtn.classList.remove("pulse-help");
@@ -878,7 +908,7 @@
                 badges: ["Honest", "Careless", "Impatient"],
                 correct: 0,
                 badgeUnlock: "honest",
-                reveal: "eyes",
+                reveal: ["eyes"],
                 proof: "carried the wallet to the office without opening it",
                 hl: "carried it to the office without opening it",
                 beat: "The team notices their new teammate can be trusted.",
@@ -897,7 +927,7 @@
                 badges: ["Determined", "Lazy", "Selfish"],
                 correct: 0,
                 badgeUnlock: "determined",
-                reveal: "smile",
+                reveal: ["smile", "hair"],
                 proof: "repaired the poster and continued working",
                 hl: "repaired it and continued working",
                 beat: "Even after the poster tears twice, Nia keeps going.",
@@ -916,7 +946,7 @@
                 badges: ["Considerate", "Selfish", "Careless"],
                 correct: 0,
                 badgeUnlock: "considerate",
-                reveal: "body",
+                reveal: ["body", "tie"],
                 proof: "“Let us hear Amir's idea before we decide”",
                 hl: "Amir's idea before we decide",
                 beat: "Amir smiles \u2014 his idea is finally being heard.",
@@ -939,7 +969,7 @@
                 badges: null,
                 correct: 0,
                 badgeUnlock: "responsible",
-                reveal: "full",
+                reveal: ["ring", "full"],
                 proof: "“I made the mistake, so I will fix the labels”",
                 hl: "I made the mistake, so I will fix the labels",
                 beat: "Nia owns her mistake and fixes it in her own words.",
@@ -972,8 +1002,37 @@
 
         let SIM = null;
 
-        function devInit() {
-            ["completion", "mastery", "firstAttempt", "attempts", "hints", "timeOnTask", "missedSkill"].forEach(function (k) {
+        function devInit(resumeRun) {
+            if (resumeRun === true) {
+                let saved = null;
+                try { saved = JSON.parse(storageGet(SIM_CONFIG.simId + ":progress") || "null"); } catch (e) { saved = null; }
+                SIM = {
+                    currentItem: (saved && saved.itemState) ? saved.currentItem : 0,
+                    currentScene: 1,
+                    maxScene: 1,
+                    itemState: saved && saved.itemState ? saved.itemState : ITEMS.map(function () { return { passed: false, attempts: 0, hintUsed: false }; }),
+                    unlocked: saved && saved.unlocked ? saved.unlocked : {},
+                    revealed: saved && saved.revealed ? saved.revealed : {},
+                    hintsUsed: saved ? saved.hintsUsed || 0 : 0,
+                    startTime: Date.now(),
+                    reviewing: null,
+                    sort: null
+                };
+                buildShell();
+                let resumeIdx = 0;
+                for (let i = 0; i < SIM.itemState.length; i++) {
+                    if (!SIM.itemState[i].passed) { resumeIdx = i; break; }
+                    resumeIdx = i;
+                }
+                if (SIM.itemState[resumeIdx] && SIM.itemState[resumeIdx].passed) {
+                    renderCompletion();
+                } else {
+                    goToItem(resumeIdx, null);
+                }
+                updateProgressPanels();
+                return;
+            }
+            ["completion", "mastery", "firstAttempt", "attempts", "hints", "timeOnTask", "missedSkill", "progress"].forEach(function (k) {
                 try { sessionStorage.removeItem(SIM_CONFIG.simId + ":" + k); } catch (e) {}
             });
             SIM = {
@@ -1024,11 +1083,20 @@
                                 '<g class="rev rev-eyes show">' +
                                     '<path d="M76 58 Q84 52 92 58 M108 58 Q116 52 124 58" stroke="#0f1222" stroke-width="3" fill="none" />' +
                                 '</g>' +
+                                '<g class="rev rev-hair">' +
+                                    '<path d="M60 66 Q60 32 100 30 Q140 32 140 66" stroke="var(--accent)" stroke-width="6" fill="none" stroke-linecap="round" />' +
+                                '</g>' +
                                 '<g class="rev rev-smile">' +
                                     '<path d="M84 98 Q100 116 116 98" stroke="#0f1222" stroke-width="4" fill="none" stroke-linecap="round" />' +
                                 '</g>' +
+                                '<g class="rev rev-tie">' +
+                                    '<path d="M100 100 L110 116 L100 134 L90 116 Z" fill="var(--accent)" />' +
+                                '</g>' +
                                 '<g class="rev rev-body">' +
                                     '<path d="M60 130 Q100 142 140 130 L140 168 Q100 182 60 168 Z" fill="#0f1222" stroke="#0f1222" stroke-width="2" />' +
+                                '</g>' +
+                                '<g class="rev rev-ring">' +
+                                    '<circle cx="100" cy="130" r="88" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="3 9" />' +
                                 '</g>' +
                                 '<g class="rev rev-full">' +
                                     '<circle cx="100" cy="72" r="46" fill="none" stroke="#fbbf24" stroke-width="3" stroke-dasharray="5 4" />' +
@@ -1079,12 +1147,17 @@
 
         function updateAvatar() {
             document.querySelectorAll(".avatar-svg .rev-eyes").forEach(function (g) { g.classList.toggle("show", !!SIM.revealed.eyes); });
+            document.querySelectorAll(".avatar-svg .rev-hair").forEach(function (g) { g.classList.toggle("show", !!SIM.revealed.hair); });
             document.querySelectorAll(".avatar-svg .rev-smile").forEach(function (g) { g.classList.toggle("show", !!SIM.revealed.smile); });
+            document.querySelectorAll(".avatar-svg .rev-tie").forEach(function (g) { g.classList.toggle("show", !!SIM.revealed.tie); });
             document.querySelectorAll(".avatar-svg .rev-body").forEach(function (g) { g.classList.toggle("show", !!SIM.revealed.body); });
+            document.querySelectorAll(".avatar-svg .rev-ring").forEach(function (g) { g.classList.toggle("show", !!SIM.revealed.ring); });
             document.querySelectorAll(".avatar-svg .rev-full").forEach(function (g) { g.classList.toggle("show", !!SIM.revealed.full); });
             renderBadgeSlots();
             updateProgressPanels();
         }
+
+        const REVEAL_ORDER = ["eyes", "hair", "smile", "tie", "body", "ring", "full"];
 
         function updateProgressPanels() {
             const deck = document.getElementById("deckProgress");
@@ -1094,11 +1167,24 @@
             }
             const meter = document.getElementById("revealMeter");
             if (meter && SIM) {
-                const unlockedCount = BADGE_ORDER.filter(function (b) { return !!SIM.unlocked[b]; }).length;
-                meter.textContent = "Profile revealed: " + unlockedCount + " of " + BADGE_ORDER.length;
+                const revealedCount = REVEAL_ORDER.filter(function (k) { return !!SIM.revealed[k]; }).length;
+                meter.textContent = "Profile revealed: " + revealedCount + " of " + REVEAL_ORDER.length;
             }
             const svg = document.querySelector(".avatar-svg");
             if (svg && SIM) svg.classList.toggle("full-reveal", !!SIM.revealed.full);
+        }
+
+        function saveProgress() {
+            if (!SIM) return;
+            try {
+                sessionStorage.setItem(SIM_CONFIG.simId + ":progress", JSON.stringify({
+                    currentItem: SIM.currentItem,
+                    itemState: SIM.itemState,
+                    unlocked: SIM.unlocked,
+                    revealed: SIM.revealed,
+                    hintsUsed: SIM.hintsUsed
+                }));
+            } catch (err) { /* storage unavailable */ }
         }
 
         function sceneName(n) {
@@ -1243,6 +1329,7 @@
             };
             status.innerHTML =
                 '<div class="sort-board">' +
+                    '<div id="sortLive" class="sr-only" role="status" aria-live="polite"></div>' +
                     '<div class="sort-rails">' +
                         '<button type="button" class="sort-col-btn' + (sort.col === "main" ? " active" : "") + '" data-col="main" aria-pressed="' + (sort.col === "main") + '">Main character</button>' +
                         '<button type="button" class="sort-col-btn' + (sort.col === "minor" ? " active" : "") + '" data-col="minor" aria-pressed="' + (sort.col === "minor") + '">Minor character</button>' +
@@ -1264,18 +1351,24 @@
                         x.classList.toggle("active", x === b);
                         x.setAttribute("aria-pressed", String(x === b));
                     });
+                    const live = document.getElementById("sortLive");
+                    if (live) live.textContent = "Selected column: " + (sort.col === "main" ? "Main character" : "Minor character");
                 });
             });
             status.querySelectorAll(".sort-card").forEach(function (b) {
                 b.addEventListener("click", function () {
                     sort.assigned[Number(b.dataset.card)] = sort.col;
                     renderSortBoard(item, index, status);
+                    const live = document.getElementById("sortLive");
+                    if (live) live.textContent = "Card placed under " + (sort.col === "main" ? "Main character" : "Minor character");
                 });
             });
             status.querySelectorAll(".sort-chip").forEach(function (b) {
                 b.addEventListener("click", function () {
                     delete sort.assigned[Number(b.dataset.card)];
                     renderSortBoard(item, index, status);
+                    const live = document.getElementById("sortLive");
+                    if (live) live.textContent = "Card returned to the tray.";
                 });
             });
             document.getElementById("sortCheckBtn").addEventListener("click", function () { submitSort(index); });
@@ -1328,6 +1421,7 @@
                 fix: "Place every Nia event under Main character and the clerk's one action under Minor character.",
                 model: "Nia affects the whole project, so she is the main character; the office clerk appears once, so she is the minor character."
             });
+            saveProgress();
         }
 
         function submitAnswer(index, choiceIndex) {
@@ -1349,6 +1443,7 @@
                     model: "Match the exact action or words to the trait."
                 });
             }
+            saveProgress();
         }
 
         function showSuccess(index, message) {
@@ -1357,7 +1452,17 @@
             status.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
             if (item.badgeUnlock) {
                 SIM.unlocked[item.badgeUnlock] = true;
-                if (item.reveal) SIM.revealed[item.reveal] = true;
+                if (item.reveal) {
+                    const reveals = Array.isArray(item.reveal) ? item.reveal : [item.reveal];
+                    reveals.forEach(function (r) { SIM.revealed[r] = true; });
+                    if (reveals.indexOf("full") !== -1) {
+                        const shell = document.querySelector(".game-shell");
+                        if (shell) {
+                            shell.classList.add("celebrate");
+                            setTimeout(function () { shell.classList.remove("celebrate"); }, 1400);
+                        }
+                    }
+                }
                 updateAvatar();
             }
             let fb = '<div class="feedback-box success">';
@@ -1448,6 +1553,7 @@
             note.style.marginTop = "10px";
             note.textContent = "Hint: " + item.hint;
             status.appendChild(note);
+            saveProgress();
         }
 
         function onBack() {
@@ -1465,7 +1571,7 @@
             goToItem(idx, targetScene);
         }
 
-        function renderReview(index) {
+        function renderReview(index, reviewMode) {
             const item = ITEMS[index];
             const heading = document.getElementById("taskHeading");
             const text = document.getElementById("taskText");
@@ -1497,21 +1603,41 @@
                     return '<button type="button" class="trait-option' + (isCorrect ? " reveal-correct" : "") + '" disabled>' + b + '</button>';
                 }).join("") + '</div>';
             }
+            let backLabel = "Return to Current Scene";
+            if (reviewMode === "completion") backLabel = "Back to Completed Profile";
+            const hasNext = reviewMode === "completion" && SIM.missedQueue.indexOf(index) + 1 < SIM.missedQueue.length;
             html += '<div class="button-row" style="justify-content:flex-start; margin-top:14px;">' +
-                '<button type="button" class="primary-btn" id="reviewBackBtn">Return to Current Scene</button>' +
+                '<button type="button" class="primary-btn" id="reviewBackBtn">' + backLabel + '</button>' +
+                (hasNext ? '<button type="button" class="secondary-btn" id="reviewNextBtn">&rarr; Next Tricky Item</button>' : '') +
             '</div>';
             status.innerHTML = html;
             document.getElementById("reviewBackBtn").addEventListener("click", function () {
+                if (reviewMode === "completion") {
+                    renderCompletion();
+                    return;
+                }
                 goToItem(SIM.currentItem, null);
                 const hintBtn = document.getElementById("hintBtn");
                 const itemNow = ITEMS[SIM.currentItem];
                 hintBtn.classList.toggle("hidden", !itemNow || SIM.itemState[SIM.currentItem].passed);
             });
+            if (reviewMode === "completion") {
+                document.getElementById("reviewNextBtn").addEventListener("click", function () {
+                    const pos = SIM.missedQueue.indexOf(index) + 1;
+                    if (pos < SIM.missedQueue.length) renderMissedReview(pos);
+                });
+            }
+        }
+
+        function renderMissedReview(pos) {
+            const index = SIM.missedQueue[pos];
+            if (index === undefined) { renderCompletion(); return; }
+            renderReview(index, "completion");
         }
 
         function renderCompletion() {
             setSceneBar(6, "Completed Profile");
-            SIM.revealed = { eyes: true, smile: true, body: true, full: true };
+            SIM.revealed = { eyes: true, hair: true, smile: true, tie: true, body: true, ring: true, full: true };
             updateAvatar();
 
             const heading = document.getElementById("taskHeading");
@@ -1528,15 +1654,33 @@
             });
             profileHtml += '</div>';
 
+            profileHtml += '<div class="role-row">' +
+                '<div class="role-card role-main">' +
+                    '<span class="role-icon">&#9733;</span>' +
+                    '<h4>Main character \u2014 Nia</h4>' +
+                    '<p>She plans the display, repairs the poster and presents the finished work. Her choices drive every major event, so she is the main character.</p>' +
+                '</div>' +
+                '<div class="role-card role-minor">' +
+                    '<span class="role-icon">&#9670;</span>' +
+                    '<h4>Minor character \u2014 the office clerk</h4>' +
+                    '<p>She appears once, returning the wallet, and does not drive the main events. Her small role makes her a minor character.</p>' +
+                '</div>' +
+            '</div>';
+
             const total = ITEMS.length;
             let firstTry = 0;
             let attemptsTotal = 0;
             let missedSkill = "none";
+            const missed = [];
             for (let i = 0; i < ITEMS.length; i++) {
                 attemptsTotal += SIM.itemState[i].attempts;
                 if (SIM.itemState[i].passed && SIM.itemState[i].attempts === 1) firstTry++;
-                else if (SIM.itemState[i].attempts > 1 && missedSkill === "none") missedSkill = ITEMS[i].skill;
+                else if (SIM.itemState[i].attempts > 1) {
+                    if (missedSkill === "none") missedSkill = ITEMS[i].skill;
+                    missed.push(i);
+                }
             }
+            SIM.missedQueue = missed;
             const mastery = Math.round((firstTry / total) * 100);
             const elapsed = Math.round((Date.now() - SIM.startTime) / 1000);
             const mins = Math.floor(elapsed / 60);
@@ -1550,6 +1694,7 @@
             storageSet(SIM_CONFIG.simId + ":hints", String(SIM.hintsUsed));
             storageSet(SIM_CONFIG.simId + ":timeOnTask", String(elapsed));
             storageSet(SIM_CONFIG.simId + ":missedSkill", missedSkill);
+            try { sessionStorage.removeItem(SIM_CONFIG.simId + ":progress"); } catch (e) {}
 
             status.innerHTML =
                 '<div class="feedback-box success">' +
@@ -1564,6 +1709,7 @@
                     (missedSkill !== "none" ? " Focus skill to revisit: " + missedSkill + "." : "") +
                 '</div>' +
                 '<div class="button-row" style="justify-content:flex-start;">' +
+                    (missed.length > 0 ? '<button type="button" class="secondary-btn" id="reviewMissedBtn">Review Tricky Items (' + missed.length + ')</button>' : '') +
                     '<button type="button" class="primary-btn" id="playAgainBtn">&#8635; Play Again</button>' +
                     '<span id="playAgainWrap"></span>' +
                 '</div>' +
@@ -1571,6 +1717,12 @@
                 "Main characters affect several events; minor characters have smaller roles.</div>";
 
             document.getElementById("playAgainBtn").addEventListener("click", confirmPlayAgain);
+            const rmb = document.getElementById("reviewMissedBtn");
+            if (rmb) {
+                rmb.addEventListener("click", function () {
+                    renderMissedReview(0);
+                });
+            }
         }
 
         function confirmPlayAgain() {
@@ -1583,7 +1735,7 @@
                 '</div>';
             document.getElementById("confirmYesBtn").addEventListener("click", function () {
                 devReset();
-                devInit();
+                devInit(false);
             });
             document.getElementById("confirmNoBtn").addEventListener("click", function () {
                 wrap.innerHTML = "";
