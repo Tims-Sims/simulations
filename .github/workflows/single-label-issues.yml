@@ -1,0 +1,59 @@
+name: Enforce only one label on issues
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  issues: write
+
+# Prevent multiple workflow runs from fighting each other
+concurrency:
+  group: issue-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  enforce-single-label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Keep only newest label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue_number = context.payload.issue.number;
+            const newestLabel = context.payload.label.name;
+
+            console.log("Newest label:", newestLabel);
+
+            // Wait briefly so GitHub finishes applying all labels
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            // Get the latest labels on the issue
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number
+            });
+
+            const currentLabels = labels.map(label => label.name);
+
+            console.log("Current labels:", currentLabels);
+
+            // Remove all labels except the newest one
+            const labelsToRemove = currentLabels.filter(
+              label => label !== newestLabel
+            );
+
+            console.log("Removing labels:", labelsToRemove);
+
+            for (const label of labelsToRemove) {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                name: label
+              });
+            }
+
+            console.log("Done. Only one label remains.");

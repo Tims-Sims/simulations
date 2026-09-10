@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Tone Simulator</title>
+
+<style>
+
+
+    
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+:root{
+
+    --page-bg:#edf2f7;
+
+    --card-bg:#ffffff;
+
+    --secondary-bg:#f7f9fc;
+
+    --chat-bg:#d9e9ff;
+
+    --you-bg:#DCF8C6;
+
+    --correct-bg:#a5d6a7;
+
+    --answer-bg:#ffe082;
+
+    --phone-bg:#ffffff;
+
+    --header-bg:#4f8ef7;
+
+    --polite-bg:#e8f5e9;
+
+    --rude-bg:#ffebee;
+
+    --unclear-bg:#fff8e1;
+
+    --aggressive-bg:#f3e5f5;
+
+    --text-color:#222222;
+
+    --shadow:rgba(0,0,0,.18);
+
+    --secondary-button:#e8eef7;
+
+    --secondary-button-hover:#d9e6f5;
+
+    --secondary-button-text:#222;
+
+    --danger:#d32f2f;
+
+    --danger-hover:#b71c1c;
+
+}
+
+body.dark{
+
+    --page-bg:#181a1b;
+
+    --card-bg:#252728;
+
+    --secondary-bg:#303233;
+
+    --chat-bg:#122038;
+
+    --you-bg:#056000;
+
+    --correct-bg:#08710c;
+
+    --answer-bg:#896804;
+
+    --phone-bg:#222425;
+
+    --header-bg:#062356;
+
+    --polite-bg:#026c0b;
+
+    --rude-bg:#710515;
+
+    --unclear-bg:#937104;
+
+    --aggressive-bg:#630172;
+
+    --text-color:#eeeeee;
+
+    --shadow:rgba(0,0,0,.45);
+
+    --secondary-button:#383838;
+
+    --secondary-button-hover:#4a4a4a;
+
+    --secondary-button-text:#f2f2f2;
+
+    --danger:#ef5350;
+
+    --danger-hover:#e53935;
+
+}
+
+body{
+    background:var(--page-bg);
+    color:var(--text-color);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+
+
+.layout{
+    display:none;
+
+    display:grid;
+
+    grid-template-columns:380px 450px 280px;
+
+    gap:30px;
+
+    justify-content:center;
+
+    align-items:start;
+
+    width:100%;
+
+    max-width:1400px;
+
+    margin:0 auto;
+
+    padding:12px 20px;
+
+}
+
+.themeContainer{
+
+    position:fixed;
+
+    top:15px;
+
+    right:20px;
+
+    z-index:6000;
+
+}
+
+#themeButton{
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    background:#4f8ef7;
+
+    color:white;
+
+    font-weight:bold;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.2);
+
+}
+
+.sidePanel{
+
+    background:var(--card-bg);
+
+    border-radius:20px;
+
+    padding:16px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.1);
+
+    top:25px;
+
+}
+
+.sidePanel h2{
+
+    margin-bottom:18px;
+
+}
+
+.toneGrid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:12px;
+
+    margin-top:15px;
+
+}
+
+.toneCard{
+
+    padding:12px;
+
+    border-radius:15px;
+
+    margin:0;
+
+}
+
+.politeGuide{
+    background:var(--polite-bg);
+}
+
+.rudeGuide{
+    background:var(--rude-bg);
+}
+
+.unclearGuide{
+    background:var(--unclear-bg);
+}
+
+.aggressiveGuide{
+    background:var(--aggressive-bg);
+}
+
+.toneCard ul{
+
+    margin:8px 0 0 18px;
+
+    padding:0;
+
+    line-height:1.35;
+
+    font-size:14px;
+
+}
+
+.toneCard h3{
+
+    margin:0 0 8px;
+
+    font-size:17px;
+
+}
+
+#feedbackBox{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+    padding:15px;
+
+    border-left:5px solid #4f8ef7;
+
+    background:var(--secondary-bg);
+
+    border-radius:10px;
+
+    transition:
+        background .3s ease,
+        border-left .3s ease;
+
+
+}
+
+#feedbackBox p{
+
+    margin:0;
+
+    line-height:1.6;
+
+}
+
+#feedbackTitle{
+
+    margin:0;
+
+    font-size:22px;
+
+    padding:20px 40px;
+
+
+}
+
+#feedbackBox.correct{
+
+    background:#dff6dd;
+
+    border-left:6px solid #2e7d32;
+
+}
+
+#feedbackBox.incorrect{
+
+    background:#fde2e2;
+
+    border-left:6px solid #c62828;
+
+}
+
+body.dark #feedbackBox.correct{
+
+    background:#23402b;
+
+    border-left:6px solid #66bb6a;
+
+}
+
+body.dark #feedbackBox.incorrect{
+
+    background:#4a2222;
+
+    border-left:6px solid #ef5350;
+
+}
+
+.phone{
+
+    width:420px;
+
+    margin-top:0px;
+
+    background:var(--card-bg);
+
+    border-radius:30px;
+
+    box-shadow:0 15px 40px rgba(0,0,0,.2);
+
+    overflow:hidden;
+
+}
+
+.header{
+    background:var(--header-bg);
+    color:white;
+    text-align:center;
+    padding:18px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.info{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 18px;
+    background:var(--secondary-bg);
+    font-weight:bold;
+}
+
+.chat{
+
+    background:var(--chat-bg);
+
+    min-height:320px;
+
+    padding:12px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:12px;
+
+    overflow-y:auto;
+
+}
+
+.bubble{
+
+    background:var(--card-bg);
+
+    padding:12px 16px;
+
+    border-radius:18px;
+
+    max-width:80%;
+
+    box-shadow:0 3px 10px rgba(0,0,0,.15);
+
+    animation:pop .3s;
+
+}
+
+@keyframes pop{
+from{transform:scale(.7);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+.buttons{
+    padding:15px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.answerButton{
+    border:none;
+    border-radius:10px;
+    padding:12px;
+    cursor:pointer;
+    font-size:15px;
+    transition:.25s;
+}
+
+.answerButton.choice{
+
+    background:#4f8ef7;
+
+    color:white;
+
+    border:2px solid #2f6fe0;
+
+    transform:scale(1.02);
+
+    box-shadow:0 4px 12px rgba(79,142,247,.35);
+
+}
+
+.answerButton.correctchoice{
+
+    background:#4CAF50;
+
+    color:white;
+
+}
+
+.answerButton.incorrectchoice{
+
+    background:#e53935;
+
+    color:white;
+
+}
+
+.answerButton.dimmed{
+
+    background:#d9d9d9;
+
+    color:#777;
+
+    opacity:.65;
+
+    cursor:not-allowed;
+
+}
+
+body.dark .answerButton.dimmed{
+
+    background:#444;
+
+    color:#aaa;
+
+}
+
+.secondaryButton{
+
+    background:var(--secondary-button);
+
+    color:var(--secondary-button-text);
+
+    border:1px solid rgba(0,0,0,.12);
+
+    border-radius:10px;
+
+    padding:12px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.secondaryButton:hover{
+
+    background:var(--secondary-button-hover);
+
+    transform:translateY(-2px);
+
+}
+
+.dangerButton{
+
+    background:var(--danger);
+
+    color:white;
+
+    border:none;
+
+    border-radius:10px;
+
+    padding:12px 18px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+    transition:.2s;
+
+}
+
+.dangerButton:hover{
+
+    background:var(--danger-hover);
+
+}
+
+.feedbackActions{
+
+    display:flex;
+
+    gap:12px;
+
+    margin-top:18px;
+
+}
+
+.feedbackActions button{
+
+    flex:1;
+
+}
+
+.answerButton:hover{
+    transform:translateY(-2px);
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+.polite{background:#4CAF50;color:var(--text-color);}
+.rude{background:#f44336;color:var(--text-color);}
+.unclear{background:#FFC107;color:var(--text-color);}
+.aggressive{background:#7B1FA2;color:var(--text-color);}
+
+.feedback{
+    min-height:90px;
+    padding:15px;
+    background:var(--card-bg);
+    font-size:15px;
+    line-height:1.5;
+}
+
+
+.next{
+    border:none;
+    width:100%;
+    background:#2196F3;
+    color:var(--text-color);
+    padding:14px;
+    font-size:17px;
+}
+
+.next:hover{
+    transform:translateY(-0.5px);
+}
+
+.hidden{
+    display:none;
+}
+
+.final{
+    text-align:center;
+    padding:20px;
+}
+
+.playAgain{
+    background:#4CAF50;
+    color:var(--text-color);
+    margin-top:15px;
+    width:100%;
+}
+
+/* =========================
+      Welcome Modal
+========================= */
+
+.modal{
+
+    position:fixed;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,.65);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:5000;
+
+}
+
+.closeModal{
+
+    position:absolute;
+
+    top:15px;
+
+    right:18px;
+
+    background:none;
+
+    border:none;
+
+    font-size:30px;
+
+    font-weight:bold;
+
+    color:var(--text-color);
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.closeModal:hover{
+
+    color:#d32f2f;
+
+    transform:scale(1.15);
+
+}
+
+.modalContent{
+
+    background:var(--card-bg);
+
+    width:90%;
+
+    max-width:650px;
+
+    border-radius:25px;
+
+    padding:35px;
+
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
+
+    text-align:center;
+
+    position:relative;
+
+}
+
+.modalContent h1{
+
+    color:#4f8ef7;
+
+    margin-bottom:10px;
+
+}
+
+.resetActions{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:15px;
+
+    margin-top:25px;
+
+}
+
+.subtitle{
+
+    font-size:18px;
+
+    color:#666;
+
+    margin-bottom:20px;
+
+}
+
+.instructionList{
+
+    text-align:left;
+
+    margin:25px 0;
+
+    line-height:2;
+
+    padding-left:20px;
+
+}
+
+#startButton{
+
+    background:#4CAF50;
+
+    color:var(--text-color);
+
+    font-size:18px;
+
+    padding:14px 30px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+#startButton:hover{
+
+    transform:translateY(-3px);
+
+    background:#43a047;
+
+}
+
+@media (max-width:1100px){
+
+    .layout{
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        gap:25px;
+
+        padding:20px;
+
+    }
+
+    .sidePanel{
+
+        width:100%;
+
+        max-width:700px;
+
+    }
+
+    .phone{
+
+        width:100%;
+
+        max-width:420px;
+
+    }
+
+    .toneGrid{
+
+    grid-template-columns:1fr;
+
+}
+}
+
+    .reviewWindow{
+
+    background:var(--card-bg);
+
+    width:700px;
+
+    max-height:80vh;
+
+    overflow-y:auto;
+
+    border-radius:20px;
+
+    padding:25px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.25);
+
+}
+
+.reviewCard{
+
+    border:1px solid #ddd;
+
+    border-radius:15px;
+
+    padding:15px;
+
+    margin-bottom:15px;
+
+}
+
+.reviewCorrect{
+
+    border-left:8px solid #4CAF50;
+
+}
+
+.reviewWrong{
+
+    border-left:8px solid #f44336;
+
+}
+
+.reviewConversation{
+
+    background:var(--secondary-bg);
+
+    padding:15px;
+
+    border-radius:15px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+    margin:15px 0;
+
+}
+
+.reviewBubble{
+
+    max-width:75%;
+
+    padding:10px 14px;
+
+    border-radius:18px;
+
+    background:var(--card-bg);
+
+    box-shadow:0 2px 8px rgba(0,0,0,.12);
+
+}
+
+.reviewYou{
+
+    align-self:flex-end;
+
+    background:var(--you-bg);
+
+}
+
+.reviewOther{
+
+    align-self:flex-start;
+
+}
+
+.reviewHighlight{
+
+    border:3px solid #4f8ef7;
+
+    box-shadow:0 0 12px rgba(79,142,247,.35);
+
+}
+
+.reviewResults{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:15px;
+
+    background:var(--secondary-bg);
+
+    padding:15px;
+
+    border-radius:12px;
+
+}
+
+.answerTag{
+
+    background:var(--answer-bg);
+
+    padding:5px 10px;
+
+    border-radius:20px;
+
+    font-weight:bold;
+
+}
+
+.correctTag{
+
+    background:var(--correct-bg);
+
+    padding:5px 10px;
+
+    border-radius:20px;
+
+    font-weight:bold;
+
+}
+
+.reviewExplanation{
+
+    margin-top:15px;
+
+    background:var(--secondary-bg);
+
+    border-left:5px solid #4f8ef7;
+
+    padding:15px;
+
+    border-radius:10px;
+
+}
+
+#reviewButton{
+
+    margin-top:12px;
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+    background:var(--secondary-bg);
+
+    color:var(--text-color);
+
+}
+
+
+</style>
+</head>
+
+<body>
+
+    <!-- =======================
+     Welcome Modal
+======================== -->
+
+<div id="welcomeModal" class="modal" onclick="closeModalOutside(event, 'welcomeModal')">
+
+    <div class="modalContent" onclick="event.stopPropagation()">
+
+        <button class="closeModal" onclick="closeInstructions()">
+            &times;
+        </button>
+
+        <h1>📱 Tone Detective</h1>
+
+        <p class="subtitle">
+            Welcome to the Digital Communication Simulator!
+        </p>
+
+        <hr>
+
+        <h2 style="padding-top:20px;">How to Play</h2>
+
+        <ul class="instructionList">
+
+            <li>💬 Read the conversation carefully.</li>
+
+            <li>🔵 The highlighted message is the one you are judging.</li>
+
+            <li>😊 Decide whether it is <strong>Polite</strong>,
+                <strong>Rude</strong>,
+                <strong>Unclear</strong>,
+                or
+                <strong>Too Aggressive</strong>.</li>
+
+            <li>💡 Read the feedback after every answer to learn why.</li>
+
+            <li>🏆 Try to achieve a perfect score!</li>
+
+        </ul>
+
+        <button id="startButton" onclick="startSimulation()">
+▶ Start Simulation
+</button>
+
+<button id="continueButton"
+        onclick="closeInstructions()"
+        style="display:none;">
+▶ Continue
+</button>
+
+    </div>
+
+</div>
+
+    <div class="layout">
+      
+        <div class="themeContainer">
+
+    <button id="themeButton" onclick="toggleTheme()">
+
+        🌙 Dark Mode
+
+    </button>
+
+</div>
+
+    <!-- LEFT PANEL -->
+    <div class="sidePanel">
+
+        <h2>📘 Tone Guide</h2>
+
+        <div class="toneGrid"> 
+
+        <div class="toneCard politeGuide">
+            <h3>😊 Polite</h3>
+            <ul>
+                <li>Uses respectful words</li>
+                <li>Says please or thank you</li>
+                <li>Shows appreciation</li>
+                <li>Makes kind requests</li>
+            </ul>
+        </div>
+
+        <div class="toneCard rudeGuide">
+            <h3>😠 Rude</h3>
+            <ul>
+                <li>Dismissive language</li>
+                <li>Blames others</li>
+                <li>Little respect</li>
+                <li>Can hurt feelings</li>
+            </ul>
+        </div>
+
+        <div class="toneCard unclearGuide">
+            <h3>🤔 Unclear</h3>
+            <ul>
+                <li>Missing information</li>
+                <li>Short replies</li>
+                <li>Can mean many things</li>
+            </ul>
+        </div>
+
+        <div class="toneCard aggressiveGuide">
+            <h3>😡 Too Aggressive</h3>
+            <ul>
+                <li>ALL CAPS</li>
+                <li>Demands</li>
+                <li>Strong commands</li>
+                <li>Too intense</li>
+            </ul>
+        </div>
+
+        </div>
+
+    </div>
+
+<div class="phone">
+
+<div class="header">
+Tone Detective
+</div>
+
+<div class="info">
+<span id="progress">1 / 10</span>
+<span id="score">Score: 0</span>
+</div>
+
+<div class="chat" id="chatArea">
+
+</div>
+
+<div class="buttons">
+
+<button class="answerButton polite" onclick="answer('Polite')">
+😊 Polite
+</button>
+
+<button class="answerButton rude" onclick="answer('Rude')">
+😠 Rude
+</button>
+
+<button class="answerButton unclear" onclick="answer('Unclear')">
+🤔 Unclear
+</button>
+
+<button class="answerButton aggressive" onclick="answer('Too Aggressive')">
+😡 Too Aggressive
+</button>
+
+</div>
+
+<button class="next hidden" id="nextBtn" onclick="nextQuestion()">
+Next Message
+</button>
+
+</div>
+<div class="sidePanel">
+
+<div class="feedbackActions">
+
+    <button id="instructionsButton"
+            class="secondaryButton"
+            onclick="showInstructions()">
+
+        ❓ Instructions
+
+    </button>
+
+    <button id="resetButton"
+            class="secondaryButton"
+            onclick="showResetModal()">
+
+        🔄 Reset
+
+    </button>
+
+</div>
+
+<h3 id="feedbackTitle">💡 Feedback</h3>
+       
+        
+
+        <div id="feedbackBox">
+
+            <p>
+                Read the conversation and choose the tone of the highlighted message.
+            </p>
+
+        </div>
+
+    <button id="reviewButton" onclick="openReviewPanel()">
+    📖 Review Answers
+    </button>
+
+    </div>
+
+</div>
+
+<div id="reviewModal" class="modal" onclick="closeModalOutside(event, 'reviewModal')" style="display:none">
+
+    <div class="reviewWindow" onclick="event.stopPropagation()">
+
+        <button class="closeModal"
+        onclick="closeReviewPanel()">
+
+            &times;
+
+        </button>
+
+        <h2 style="padding-bottom:10px;">Review Answers</h2>
+
+        <div id="reviewList">
+
+        </div>
+
+        <button class="secondaryButton" 
+        onclick="closeReviewPanel()">
+            Close
+        </button>
+
+    </div>
+
+</div>
+
+<div id="resetModal" class="modal"
+     onclick="closeModalOutside(event, 'resetModal')" style="display:none">
+
+    <div class="modalContent"
+         onclick="event.stopPropagation()">
+
+        <button class="closeModal"
+                onclick="closeResetModal()">
+
+            &times;
+
+        </button>
+
+        <h2>🔄 Restart Simulation?</h2>
+
+        <p>
+
+            Your current progress and score will be lost.
+
+        </p>
+
+        <div class="resetActions">
+
+            <button class="dangerButton"
+                    onclick="confirmResetAction()">
+
+                Yes, Restart
+
+            </button>
+
+            <button class="secondaryButton"
+                    onclick="closeResetModal()">
+
+                Cancel
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<script>
+
+let gameStarted = false;
+
+const questions = [
+
+{
+conversation:[
+    {sender:"Alex", text:"Are you still coming tonight?"},
+    {sender:"You", text:"Yeah, I'll be there around 7."},
+    {sender:"Alex", text:"Fine."}
+],
+questionIndex:2,
+answer:"Unclear",
+feedback:"'Fine.' could be sincere or annoyed. Without more context, its tone is unclear."
+},
+
+{
+conversation:[
+    {sender:"Jordan", text:"Can you send me the assignment?"},
+    {sender:"You", text:"I'm finishing it now."},
+    {sender:"Jordan", text:"Thanks! I really appreciate it."}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"The speaker expresses appreciation, making the tone polite."
+},
+
+{
+conversation:[
+    {sender:"Taylor", text:"Did you remember to bring the forms?"},
+    {sender:"You", text:"I forgot them."},
+    {sender:"Taylor", text:"Seriously? You never remember anything."}
+],
+questionIndex:2,
+answer:"Rude",
+feedback:"The message attacks the person instead of addressing the situation."
+},
+
+{
+conversation:[
+    {sender:"Chris", text:"Can you send that now?"},
+    {sender:"You", text:"I'm in class."},
+    {sender:"Chris", text:"SEND IT NOW!"}
+],
+questionIndex:2,
+answer:"Too Aggressive",
+feedback:"Capital letters and commanding language make the message aggressive."
+},
+
+{
+conversation:[
+    {sender:"Emma", text:"Could you look over my presentation when you're free?"},
+    {sender:"You", text:"Sure! I'll take a look after lunch."},
+    {sender:"Emma", text:"Thank you so much!"}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"Expressing gratitude with 'Thank you so much!' shows appreciation and respect."
+},
+
+{
+conversation:[
+    {sender:"Liam", text:"Did you finish the group project?"},
+    {sender:"You", text:"I'm almost done."},
+    {sender:"Liam", text:"You always leave everything until the last minute."}
+],
+questionIndex:2,
+answer:"Rude",
+feedback:"The message criticizes the person rather than discussing the situation constructively."
+},
+
+{
+conversation:[
+    {sender:"Sophia", text:"Should I bring snacks tomorrow?"},
+    {sender:"You", text:"If you'd like."},
+    {sender:"Sophia", text:"Okay..."}
+],
+questionIndex:2,
+answer:"Unclear",
+feedback:"'Okay...' could mean agreement, disappointment, or uncertainty depending on context."
+},
+
+{
+conversation:[
+    {sender:"Noah", text:"Can you send me the file?"},
+    {sender:"You", text:"I'm still editing it."},
+    {sender:"Noah", text:"I SAID SEND IT NOW!"}
+],
+questionIndex:2,
+answer:"Too Aggressive",
+feedback:"Capital letters and demanding language make this message aggressive."
+},
+
+{
+conversation:[
+    {sender:"Olivia", text:"I appreciate you helping me study yesterday."},
+    {sender:"You", text:"Anytime!"},
+    {sender:"Olivia", text:"You're the best!"}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"The message is positive and appreciative, creating a respectful tone."
+},
+
+{
+conversation:[
+    {sender:"Mason", text:"I couldn't answer because I was driving."},
+    {sender:"You", text:"That's okay."},
+    {sender:"Mason", text:"Whatever."}
+],
+questionIndex:2,
+answer:"Rude",
+feedback:"'Whatever.' dismisses the conversation and can sound disrespectful."
+},
+
+{
+conversation:[
+    {sender:"Ava", text:"Do you want to join us later?"},
+    {sender:"You", text:"Maybe."},
+    {sender:"Ava", text:"Alright."}
+],
+questionIndex:2,
+answer:"Unclear",
+feedback:"'Alright.' doesn't clearly communicate whether the person is happy, disappointed, or simply acknowledging the response."
+},
+
+{
+conversation:[
+    {sender:"Ethan", text:"I forgot to reply yesterday."},
+    {sender:"You", text:"No worries."},
+    {sender:"Ethan", text:"GOOD. STOP BRINGING IT UP."}
+],
+questionIndex:2,
+answer:"Too Aggressive",
+feedback:"The use of capital letters and commanding language creates an aggressive tone."
+},
+
+{
+conversation:[
+    {sender:"Grace", text:"Could you help me move these boxes?"},
+    {sender:"You", text:"Of course."},
+    {sender:"Grace", text:"I really appreciate your help."}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"Showing appreciation makes the message warm and respectful."
+},
+
+{
+conversation:[
+    {sender:"Lucas", text:"I made a mistake on the report."},
+    {sender:"You", text:"We can fix it together."},
+    {sender:"Lucas", text:"I guess."}
+],
+questionIndex:2,
+answer:"Unclear",
+feedback:"'I guess.' can indicate hesitation, uncertainty, or reluctant agreement."
+},
+
+{
+conversation:[
+    {sender:"Chloe", text:"Can we meet after school?"},
+    {sender:"You", text:"Yes, around 3:30 works."},
+    {sender:"Chloe", text:"Perfect! See you then."}
+],
+questionIndex:2,
+answer:"Polite",
+feedback:"The response is friendly, positive, and confirms the plan respectfully."
+}
+
+];
+
+let current=0;
+let score=0;
+let answered=false;
+let history = [];
+let gameQuestions=[];
+
+let message=document.getElementById("message");
+const feedback=document.getElementById("feedbackBox");
+const progress=document.getElementById("progress");
+const scoreLabel=document.getElementById("score");
+const nextBtn=document.getElementById("nextBtn");
+
+
+function shuffleArray(array){
+ const arr=[...array];
+ for(let i=arr.length-1;i>0;i--){
+
+  const j=Math.floor(Math.random()*(i+1));
+
+  [arr[i],arr[j]]=[arr[j],arr[i]];
+
+ }
+ return arr;
+
+}
+
+function showInstructions(){
+
+    document.getElementById("welcomeModal").style.display = "flex";
+
+    document.getElementById("startButton").innerHTML =
+        "Continue Simulation";
+
+}
+
+function closeInstructions(){
+
+    document.getElementById("welcomeModal").style.display="none";
+
+}
+
+function toggleTheme(){
+
+    document.body.classList.toggle("dark");
+
+    const btn=document.getElementById("themeButton");
+
+    if(document.body.classList.contains("dark")){
+
+        btn.innerHTML="☀️ Light Mode";
+
+    }
+
+    else{
+
+        btn.innerHTML="🌙 Dark Mode";
+
+    }
+
+}
+
+function startGame(){
+
+ gameQuestions=shuffleArray(questions);
+
+ current=0;
+ score=0;
+ history = [];
+ answered=false;
+
+ scoreLabel.textContent="Score: 0";
+
+ document.querySelector(".buttons").style.display="grid";
+
+ document.querySelector(".chat").innerHTML='<div class="bubble" id="message"></div>';
+
+ message=document.getElementById("message");
+
+ feedback.innerHTML="Choose the tone of the message.";
+
+ nextBtn.innerHTML="Next Message";
+
+ nextBtn.onclick=nextQuestion;
+
+ loadQuestion();
+ 
+}
+
+function loadQuestion(){
+
+    const feedbackBox = document.getElementById("feedbackBox");
+
+feedbackBox.classList.remove("correct","incorrect");
+
+    const buttons = document.querySelectorAll(".answerButton");
+
+buttons.forEach(button=>{
+
+    button.disabled = false;
+
+    button.classList.remove("correctchoice");
+
+    button.classList.remove("incorrectchoice");
+
+    button.classList.remove("dimmed");
+
+});
+
+    answered=false;
+
+    const q = gameQuestions[current];
+
+    const chat = document.getElementById("chatArea");
+
+    chat.innerHTML="";
+
+    q.conversation.forEach((msg,index)=>{
+
+        const bubble=document.createElement("div");
+
+        bubble.className="bubble";
+
+        if(msg.sender==="You"){
+
+            bubble.style.marginLeft="auto";
+            bubble.style.background="var(--you-bg)";
+
+        }
+
+        bubble.innerHTML=
+        "<strong>"+msg.sender+"</strong><br>"+msg.text;
+
+        if(index===q.questionIndex){
+
+            bubble.style.border="3px solid #4f8ef7";
+
+        }
+
+        chat.appendChild(bubble);
+
+    });
+
+    feedback.innerHTML="Choose the tone of the highlighted message.";
+
+    nextBtn.classList.add("hidden");
+
+    progress.textContent=(current+1)+" / "+gameQuestions.length;
+
+    if(reviewMode && history[current]){
+
+    answered = true;
+
+    const record = history[current];
+
+    feedback.innerHTML =
+
+        "<h3>" +
+
+        (record.correct ? "✅ Correct" : "❌ Incorrect")
+
+        +
+
+        "</h3>"
+
+        +
+
+        "<p><strong>Your answer:</strong> "
+
+        + record.selected +
+
+        "</p>"
+
+        +
+
+        "<p><strong>Correct answer:</strong> "
+
+        + record.correctAnswer +
+
+        "</p><br>"
+
+        +
+
+        record.feedback;
+
+    nextBtn.classList.remove("hidden");
+
+    
+
+}
+
+
+
+}
+
+function answer(choice){
+
+    const feedbackBox = document.getElementById("feedbackBox");
+
+feedbackBox.classList.remove("correct","incorrect");
+
+    const buttons = document.querySelectorAll(".answerButton");
+
+buttons.forEach(button => {
+
+    button.disabled = true;
+
+    if(button.textContent.includes(choice)){
+
+        if(choice === gameQuestions[current].answer){
+
+    button.classList.add("correctchoice");
+    feedbackBox.classList.add("correct");
+
+}else{
+
+    button.classList.add("incorrectchoice");
+    feedbackBox.classList.add("incorrect");
+}
+
+    }else{
+
+        button.classList.add("dimmed");
+
+    }
+
+});
+
+if(answered)return;
+
+answered=true;
+
+
+
+const q=gameQuestions[current];
+
+if(choice===q.answer){
+
+score++;
+
+feedback.innerHTML=
+"<b>✅ Correct!</b><br><br>"+q.feedback;
+
+}else{
+
+feedback.innerHTML=
+"<b>❌ Not quite.</b><br><br>"+
+"Correct answer: <b>"+q.answer+"</b><br><br>"+
+q.feedback;
+
+}
+
+scoreLabel.textContent="Score: "+score;
+
+const isCorrect = (choice === q.answer);
+
+history[current] = {
+
+    selected: choice,
+
+    correctAnswer: q.answer,
+
+    correct: isCorrect,
+
+    feedback: q.feedback
+
+};
+
+nextBtn.classList.remove("hidden");
+
+}
+
+function nextQuestion(){
+
+current++;
+
+if(current>=gameQuestions.length){
+
+document.querySelector(".chat").innerHTML=
+'<div class="final"><h2>Simulation Complete!</h2><br><h3>Your Score: '+score+' / '+gameQuestions.length+'</h3><br><p>Great job identifying the tone of different chat messages.</p></div>';
+
+document.querySelector(".buttons").style.display="none";
+
+feedback.innerHTML="<b>Thanks for playing!</b><br><br>" + "You can review your answers or play again.";
+
+const feedbackBox = document.getElementById("feedbackBox");
+
+feedbackBox.classList.remove("correct","incorrect");
+
+nextBtn.innerHTML="Play Again";
+
+nextBtn.onclick=restart;
+
+
+return;
+
+}
+
+loadQuestion();
+
+}
+
+
+function restart(){
+startGame();
+}
+
+startGame();
+document.querySelector(".layout").style.display="none";
+
+
+function startSimulation(){
+
+    document.getElementById("welcomeModal").style.display = "none";
+
+    document.querySelector(".layout").style.display = "grid";
+
+    if(!gameStarted){
+
+        gameStarted = true;
+
+        startGame();
+
+    }
+
+}
+
+function resetSimulation(){
+
+    startGame();
+
+}
+
+function openReviewPanel(){
+
+    const list = document.getElementById("reviewList");
+
+    list.innerHTML = "";
+
+    history.forEach((record,index)=>{
+
+        if(!record) return;
+
+        const q = gameQuestions[index];
+
+        const card = document.createElement("div");
+
+        card.className = "reviewCard";
+
+        card.classList.add(
+            record.correct ?
+            "reviewCorrect" :
+            "reviewWrong"
+        );
+
+        let conversationHTML = "";
+
+        q.conversation.forEach((msg,msgIndex)=>{
+
+            const isTarget = msgIndex === q.questionIndex;
+
+            conversationHTML += `
+
+                <div class="reviewBubble ${msg.sender==="You" ? "reviewYou" : "reviewOther"} ${isTarget ? "reviewHighlight" : ""}">
+
+                    <strong>${msg.sender}</strong><br>
+
+                    ${msg.text}
+
+                </div>
+
+            `;
+
+        });
+
+        card.innerHTML =
+
+        `
+            <h3>
+
+${record.correct ? "✅" : "❌"}
+
+Question ${index+1}
+
+</h3>
+
+            <div class="reviewConversation">
+
+                ${conversationHTML}
+
+            </div>
+
+        <div class="reviewResults">
+
+<p><strong>Your Answer:</strong>
+
+
+<span class="answerTag">${record.selected}</span>
+
+
+
+
+</p>
+
+<p>
+
+<strong>Correct Answer:</strong>
+
+
+<span class="correctTag">${record.correctAnswer}</span>
+
+
+</p>
+</div>
+<div class="reviewExplanation">
+
+    <p><strong>Why?</strong>
+
+    ${record.feedback}</p>
+
+</div>
+
+
+            
+        `;
+
+        list.appendChild(card);
+
+    });
+
+    document.getElementById("reviewModal").style.display="flex";
+
+}
+
+function closeReviewPanel(){
+
+    document.getElementById("reviewModal").style.display="none";
+
+}
+
+
+
+
+
+function closeModalOutside(event, modalId){
+
+    if(event.target.id === modalId){
+
+        document.getElementById(modalId).style.display = "none";
+
+    }
+
+}
+
+
+function showResetModal(){
+
+    document.getElementById("resetModal").style.display="flex";
+
+}
+
+function closeResetModal(){
+
+    document.getElementById("resetModal").style.display="none";
+
+}
+
+function confirmResetAction(){
+
+    closeResetModal();
+
+    startGame();
+
+}
+
+</script>
+
+</body>
+</html>
