@@ -594,6 +594,14 @@
         }
         @media (prefers-reduced-motion: reduce) { .confetti { display: none; } }
 
+        .panel-in { animation: panel-in 0.3s ease; }
+        @keyframes panel-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+        .sort-col.active-col { outline: 2px dashed var(--accent); outline-offset: 3px; }
+        .sort-col.active-col h4 { color: var(--accent); }
+
+        .last-run-note { margin-top: 10px; font-size: 0.85rem; color: var(--muted); }
+
         @media (max-width: 780px) {
             .game-body { grid-template-columns: 1fr; }
             .avatar-panel { display: flex; flex-direction: column; align-items: center; }
@@ -757,6 +765,13 @@
                 const hasProgress = storageGet(SIM_CONFIG.simId + ":progress");
                 const isComplete = storageGet(SIM_CONFIG.simId + ":completion") === "true";
                 dom.resumeBtn.classList.toggle("hidden", !hasProgress || isComplete);
+                if (isComplete && dom.homeDescription) {
+                    const note = document.createElement("p");
+                    note.className = "last-run-note";
+                    note.textContent = "Last run: " + storageGet(SIM_CONFIG.simId + ":mastery") + "% mastery \u2014 trait matches on the first try: " +
+                        (storageGet(SIM_CONFIG.simId + ":firstAttempt") === "true" ? "all" : "some") + ".";
+                    dom.homeDescription.insertAdjacentElement("afterend", note);
+                }
             } catch (err) { dom.resumeBtn.classList.add("hidden"); }
             applyConfigToUI();
             bindEvents();
@@ -1172,6 +1187,21 @@
 
             document.getElementById("backBtn").addEventListener("click", onBack);
             document.getElementById("hintBtn").addEventListener("click", onHint);
+            document.getElementById("gameStatus").addEventListener("keydown", function (ev) {
+                const keys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
+                if (keys.indexOf(ev.key) === -1) return;
+                const btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
+                if (!btn) return;
+                const row = btn.parentElement ? btn.parentElement.querySelectorAll("button") : null;
+                if (!row || row.length < 2) return;
+                ev.preventDefault();
+                const idx = Array.prototype.indexOf.call(row, btn);
+                const dir = (ev.key === "ArrowRight" || ev.key === "ArrowDown") ? 1 : -1;
+                for (let step = 1; step <= row.length; step++) {
+                    const cand = row[(idx + dir * step + row.length) % row.length];
+                    if (!cand.disabled) { cand.focus(); break; }
+                }
+            });
             renderBadgeSlots();
         }
 
@@ -1371,6 +1401,9 @@
             if (SIM.itemState[index].attempts > 0) {
                 hintBtn.disabled = false;
             }
+            status.classList.remove("panel-in");
+            void status.offsetWidth;
+            status.classList.add("panel-in");
         }
 
         function renderSortBoard(item, index, status) {
@@ -1395,8 +1428,8 @@
                         '<button type="button" class="sort-col-btn' + (sort.col === "minor" ? " active" : "") + '" data-col="minor" aria-pressed="' + (sort.col === "minor") + '">Minor character</button>' +
                     '</div>' +
                     '<div class="sort-cols">' +
-                        '<div class="sort-col"><h4>Main character</h4><div class="sort-bucket">' + bucketHTML("main") + '</div></div>' +
-                        '<div class="sort-col"><h4>Minor character</h4><div class="sort-bucket">' + bucketHTML("minor") + '</div></div>' +
+                        '<div class="sort-col' + (sort.col === "main" ? " active-col" : "") + '" data-col="main"><h4>Main character</h4><div class="sort-bucket">' + bucketHTML("main") + '</div></div>' +
+                        '<div class="sort-col' + (sort.col === "minor" ? " active-col" : "") + '" data-col="minor"><h4>Minor character</h4><div class="sort-bucket">' + bucketHTML("minor") + '</div></div>' +
                     '</div>' +
                     '<div class="sort-tray">' + trayHTML() + '</div>' +
                     '<div class="button-row" style="justify-content:flex-start; margin-top:4px;">' +
@@ -1410,6 +1443,9 @@
                     status.querySelectorAll(".sort-col-btn").forEach(function (x) {
                         x.classList.toggle("active", x === b);
                         x.setAttribute("aria-pressed", String(x === b));
+                    });
+                    status.querySelectorAll(".sort-col").forEach(function (x) {
+                        x.classList.toggle("active-col", x.dataset.col === sort.col);
                     });
                     const live = document.getElementById("sortLive");
                     if (live) live.textContent = "Selected column: " + (sort.col === "main" ? "Main character" : "Minor character");
@@ -1432,6 +1468,9 @@
                 });
             });
             document.getElementById("sortCheckBtn").addEventListener("click", function () { submitSort(index); });
+            status.classList.remove("panel-in");
+            void status.offsetWidth;
+            status.classList.add("panel-in");
         }
 
         function submitSort(index) {
