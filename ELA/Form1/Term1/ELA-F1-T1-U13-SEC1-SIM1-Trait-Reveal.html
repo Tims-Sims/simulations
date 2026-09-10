@@ -496,9 +496,68 @@
 
         .credits { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
 
+        .deck-progress { margin-top: 10px; font-size: 0.78rem; color: var(--muted); }
+        .reveal-meter { margin-top: 4px; font-size: 0.78rem; font-weight: 700; color: var(--muted); }
+
+        .avatar-svg.full-reveal { animation: avatar-glow 0.9s ease 1; filter: drop-shadow(0 0 16px color-mix(in srgb, var(--accent) 60%, transparent)); }
+        @keyframes avatar-glow {
+            0% { filter: drop-shadow(0 0 2px transparent); opacity: 0.85; }
+            100% { filter: drop-shadow(0 0 16px color-mix(in srgb, var(--accent) 60%, transparent)); opacity: 1; }
+        }
+
+        .proof-hl { background: color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 4px; padding: 0 2px; }
+
+        .story-beat { margin-top: 8px; font-style: italic; color: var(--accent); line-height: 1.5; }
+
+        .sort-board { display: flex; flex-direction: column; gap: 12px; }
+        .sort-rails { display: flex; flex-wrap: wrap; gap: 8px; }
+        .sort-col-btn {
+            min-height: 44px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            color: var(--text-soft);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .sort-col-btn:hover { border-color: var(--accent); }
+        .sort-col-btn.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent); }
+
+        .sort-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .sort-col {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: 12px 14px;
+            min-height: 130px;
+            background: var(--bg-soft);
+        }
+        .sort-col h4 { margin: 0 0 10px; font-size: 0.8rem; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.06em; }
+        .sort-bucket { display: flex; flex-direction: column; gap: 8px; }
+        .sort-chip {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--accent);
+            background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+            color: var(--text);
+            font-size: 0.85rem;
+            line-height: 1.45;
+            cursor: pointer;
+        }
+        .sort-chip .chip-x { float: right; margin-left: 6px; color: var(--muted); font-weight: 800; }
+        .sort-chip.misplaced { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, var(--surface)); }
+        .sort-chip.reveal-correct { border-color: var(--success); background: color-mix(in srgb, var(--success) 16%, var(--surface)); }
+        .sort-tray { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 4px; }
+        .sort-card { border-style: solid; }
+
         @media (max-width: 780px) {
             .game-body { grid-template-columns: 1fr; }
             .avatar-panel { display: flex; flex-direction: column; align-items: center; }
+            .sort-cols { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -821,6 +880,8 @@
                 badgeUnlock: "honest",
                 reveal: "eyes",
                 proof: "carried the wallet to the office without opening it",
+                hl: "carried it to the office without opening it",
+                beat: "The team notices their new teammate can be trusted.",
                 hint: "Think about what a person who wanted to keep the money might have done. Nia did the opposite.",
                 wrong: [
                     { idx: 1, why: "Careless means forgetting or losing track of things. Nia guarded the wallet all the way to the office.", fix: "Ask whether Nia was untidy or forgetful with the wallet.", model: "Nia's careful, fair action supports \u201chonest\u201d, not careless." },
@@ -838,6 +899,8 @@
                 badgeUnlock: "determined",
                 reveal: "smile",
                 proof: "repaired the poster and continued working",
+                hl: "repaired it and continued working",
+                beat: "Even after the poster tears twice, Nia keeps going.",
                 hint: "How many times did the poster tear? What did Nia do after each tear?",
                 wrong: [
                     { idx: 1, why: "A lazy person stops at the first difficulty. Nia kept working after the poster tore twice.", fix: "Count how many times Nia could have given up.", model: "Repairing and continuing supports \u201cdetermined\u201d, not lazy." },
@@ -855,6 +918,8 @@
                 badgeUnlock: "considerate",
                 reveal: "body",
                 proof: "“Let us hear Amir's idea before we decide”",
+                hl: "Amir's idea before we decide",
+                beat: "Amir smiles \u2014 his idea is finally being heard.",
                 hint: "Who gets to speak before the group decides?",
                 wrong: [
                     { idx: 1, why: "Selfish means putting yourself first. Nia offered the turn to Amir instead.", fix: "Notice who Nia let speak first.", model: "Making room for Amir's idea supports \u201cconsiderate\u201d, not selfish." },
@@ -876,6 +941,8 @@
                 badgeUnlock: "responsible",
                 reveal: "full",
                 proof: "“I made the mistake, so I will fix the labels”",
+                hl: "I made the mistake, so I will fix the labels",
+                beat: "Nia owns her mistake and fixes it in her own words.",
                 hint: "Direct speech is written inside quotation marks. Which card shows Nia's exact words?",
                 wrong: [
                     { idx: 1, why: "Card B reports Nia's promise without her exact sentence.", fix: "Look for the card written inside quotation marks.", model: "Card A is direct speech: “I made the mistake, so I will fix the labels.” Card B is indirect speech \u2014 it describes the same promise but does not show the exact spoken words." }
@@ -884,8 +951,8 @@
             {
                 scene: 5,
                 title: "Main or Minor?",
-                prompt: "Some characters drive the whole story \u2014 those are main characters. Characters who appear in only one small moment are minor characters. Tap the card about a MINOR character.",
-                teach: "The main character appears across all the major events. A minor character appears once and does not drive the main events.",
+                prompt: "Sort each event card into the correct column: main character events or minor character events. Tap a column to select it, then tap a card to place it.",
+                teach: "The main character appears across all the major events. A minor character appears once and does not drive the main events. Tap a placed card to send it back to the tray.",
                 cards: [
                     "Nia proposes the display plan.",
                     "Nia repairs the torn poster.",
@@ -894,30 +961,12 @@
                 ],
                 cardLabels: ["EVENT", "EVENT", "EVENT", "EVENT"],
                 badges: null,
-                correct: 3,
+                sort: true,
+                columns: { main: [0, 1, 2], minor: [3] },
                 badgeUnlock: null,
                 reveal: null,
                 hint: "A minor character appears once and does not drive the main events. Which card is not about Nia?",
-                wrong: [
-                    { idx: 0, why: "Proposing the display plan is a major event that starts the story.", fix: "A minor character appears in one small moment.", model: "The office clerk, who returns the wallet once, is the minor character." },
-                    { idx: 1, why: "Repairing the torn poster is one of Nia's major actions in the project.", fix: "Look for the card that is NOT about Nia.", model: "The clerk's single action makes her the minor character." },
-                    { idx: 2, why: "Presenting the finished display is the final major event, led by Nia.", fix: "Choose the card about the person who appears only once.", model: "The office clerk is the minor character." }
-                ]
-            },
-            {
-                scene: 5,
-                title: "Main or Minor?",
-                prompt: "Nia appears in every big event of this story. Now tap who is the MAIN character.",
-                cards: ["Nia, the school project team member", "The office clerk"],
-                cardLabels: ["CHARACTER", "CHARACTER"],
-                badges: null,
-                correct: 0,
-                badgeUnlock: null,
-                reveal: null,
-                hint: "The main character appears in all the major events of the story.",
-                wrong: [
-                    { idx: 1, why: "The office clerk appears only once, returning the wallet.", fix: "The main character appears across all the major events.", model: "Nia plans, repairs and presents the display, so Nia is the main character." }
-                ]
+                beat: "The office clerk appears once \u2014 Nia is at the heart of every big event."
             }
         ];
 
@@ -940,6 +989,7 @@
             };
             buildShell();
             renderMission();
+            updateProgressPanels();
         }
 
         function devReset() {
@@ -985,6 +1035,8 @@
                                 '</g>' +
                             '</svg>' +
                             '<div class="badge-slots" id="badgeSlots" aria-label="Trait badges"></div>' +
+                            '<div class="deck-progress" id="deckProgress" aria-live="polite"></div>' +
+                            '<div class="reveal-meter" id="revealMeter" aria-live="polite"></div>' +
                         '</aside>' +
                         '<section class="activity-panel">' +
                             '<div class="task-copy">' +
@@ -1015,6 +1067,7 @@
             SIM.maxScene = Math.max(SIM.maxScene, sceneNumber);
             document.getElementById("progressText").textContent = "Scene " + sceneNumber + " of " + TOTAL_SCENES;
             document.getElementById("sceneTitle").textContent = titleText;
+            storageSet(SIM_CONFIG.simId + ":lastScreen", String(sceneNumber));
             const backBtn = document.getElementById("backBtn");
             const hintBtn = document.getElementById("hintBtn");
             backBtn.disabled = sceneNumber <= 2 && SIM.reviewing === null;
@@ -1030,6 +1083,22 @@
             document.querySelectorAll(".avatar-svg .rev-body").forEach(function (g) { g.classList.toggle("show", !!SIM.revealed.body); });
             document.querySelectorAll(".avatar-svg .rev-full").forEach(function (g) { g.classList.toggle("show", !!SIM.revealed.full); });
             renderBadgeSlots();
+            updateProgressPanels();
+        }
+
+        function updateProgressPanels() {
+            const deck = document.getElementById("deckProgress");
+            if (deck && SIM) {
+                const done = SIM.itemState.filter(function (s) { return s.passed; }).length;
+                deck.textContent = "Evidence matched: " + done + " of " + ITEMS.length;
+            }
+            const meter = document.getElementById("revealMeter");
+            if (meter && SIM) {
+                const unlockedCount = BADGE_ORDER.filter(function (b) { return !!SIM.unlocked[b]; }).length;
+                meter.textContent = "Profile revealed: " + unlockedCount + " of " + BADGE_ORDER.length;
+            }
+            const svg = document.querySelector(".avatar-svg");
+            if (svg && SIM) svg.classList.toggle("full-reveal", !!SIM.revealed.full);
         }
 
         function sceneName(n) {
@@ -1095,6 +1164,13 @@
 
             const status = document.getElementById("gameStatus");
             status.dataset.locked = "";
+
+            if (item.sort) {
+                SIM.sort = { col: "main", assigned: {} };
+                renderSortBoard(item, index, status);
+                return;
+            }
+
             let html = "";
             if (item.teach) {
                 html += '<div class="teach-note">' + item.teach + '</div>';
@@ -1119,8 +1195,9 @@
                 btn.addEventListener("click", function () {
                     if (SIM.lockAnswers) return;
                     if (item.badges) {
-                        status.querySelectorAll(".tr-card").forEach(function (b) { b.classList.remove("selected"); });
+                        status.querySelectorAll(".tr-card").forEach(function (b) { b.classList.remove("selected"); b.setAttribute("aria-pressed", "false"); });
                         btn.classList.add("selected");
+                        btn.setAttribute("aria-pressed", "true");
                         SIM.selectedEvidence = Number(btn.dataset.card);
                     } else {
                         submitAnswer(index, Number(btn.dataset.card));
@@ -1133,7 +1210,7 @@
                     btn.addEventListener("click", function () {
                         if (SIM.lockAnswers) return;
                         if (SIM.selectedEvidence === undefined || SIM.selectedEvidence === null) {
-                            showItemError(index, {
+                            showItemError(index, null, {
                                 why: "You tapped a trait badge before reading the evidence.",
                                 fix: "First tap the evidence card to read it, then choose the trait badge.",
                                 model: "Match the evidence first, then the badge it supports."
@@ -1150,6 +1227,109 @@
             }
         }
 
+        function renderSortBoard(item, index, status) {
+            const sort = SIM.sort;
+            const bucketHTML = function (col) {
+                return item.cards.map(function (c, ci) {
+                    if (sort.assigned[ci] !== col) return "";
+                    return '<button type="button" class="sort-chip" data-card="' + ci + '" data-col="' + col + '" aria-label="Remove from ' + (col === "main" ? "main" : "minor") + ': ' + c + '">' + c + ' <span class="chip-x" aria-hidden="true">&#10005;</span></button>';
+                }).join("");
+            };
+            const trayHTML = function () {
+                return item.cards.map(function (c, ci) {
+                    if (sort.assigned[ci] !== undefined) return "";
+                    return '<button type="button" class="tr-card sort-card" data-card="' + ci + '"><span class="card-label">' + item.cardLabels[ci] + '</span>' + c + '</button>';
+                }).join("");
+            };
+            status.innerHTML =
+                '<div class="sort-board">' +
+                    '<div class="sort-rails">' +
+                        '<button type="button" class="sort-col-btn' + (sort.col === "main" ? " active" : "") + '" data-col="main" aria-pressed="' + (sort.col === "main") + '">Main character</button>' +
+                        '<button type="button" class="sort-col-btn' + (sort.col === "minor" ? " active" : "") + '" data-col="minor" aria-pressed="' + (sort.col === "minor") + '">Minor character</button>' +
+                    '</div>' +
+                    '<div class="sort-cols">' +
+                        '<div class="sort-col"><h4>Main character</h4><div class="sort-bucket">' + bucketHTML("main") + '</div></div>' +
+                        '<div class="sort-col"><h4>Minor character</h4><div class="sort-bucket">' + bucketHTML("minor") + '</div></div>' +
+                    '</div>' +
+                    '<div class="sort-tray">' + trayHTML() + '</div>' +
+                    '<div class="button-row" style="justify-content:flex-start; margin-top:4px;">' +
+                        '<button type="button" class="primary-btn" id="sortCheckBtn">Check Classification</button>' +
+                    '</div>' +
+                '</div>';
+
+            status.querySelectorAll(".sort-col-btn").forEach(function (b) {
+                b.addEventListener("click", function () {
+                    sort.col = b.dataset.col;
+                    status.querySelectorAll(".sort-col-btn").forEach(function (x) {
+                        x.classList.toggle("active", x === b);
+                        x.setAttribute("aria-pressed", String(x === b));
+                    });
+                });
+            });
+            status.querySelectorAll(".sort-card").forEach(function (b) {
+                b.addEventListener("click", function () {
+                    sort.assigned[Number(b.dataset.card)] = sort.col;
+                    renderSortBoard(item, index, status);
+                });
+            });
+            status.querySelectorAll(".sort-chip").forEach(function (b) {
+                b.addEventListener("click", function () {
+                    delete sort.assigned[Number(b.dataset.card)];
+                    renderSortBoard(item, index, status);
+                });
+            });
+            document.getElementById("sortCheckBtn").addEventListener("click", function () { submitSort(index); });
+        }
+
+        function submitSort(index) {
+            const item = ITEMS[index];
+            const st = SIM.itemState[index];
+            if (st.passed) return;
+            const status = document.getElementById("gameStatus");
+            if (status.dataset.locked) return;
+            st.attempts++;
+
+            const assigned = [];
+            for (const iStr in SIM.sort.assigned) {
+                const i = Number(iStr);
+                assigned.push({ i: i, col: SIM.sort.assigned[iStr] });
+            }
+            const expected = item.columns;
+            const complete = assigned.length === item.cards.length;
+            const allCorrect = complete && assigned.every(function (a) {
+                const inMain = expected.main.indexOf(a.i) !== -1;
+                return (a.col === "main") === inMain;
+            });
+
+            if (allCorrect) {
+                st.passed = true;
+                showSuccess(index, "Every event is in the correct column.");
+                return;
+            }
+
+            const missing = item.cards.length - assigned.length;
+            let why = "";
+            if (missing > 0) {
+                why = missing + " card" + (missing > 1 ? "s" : "") + " " + (missing > 1 ? "are" : "is") + " still in the tray.";
+            } else {
+                const wrongCount = assigned.filter(function (a) {
+                    const inMain = expected.main.indexOf(a.i) !== -1;
+                    return (a.col === "main") !== inMain;
+                }).length;
+                why = wrongCount + " card" + (wrongCount > 1 ? "s are" : " is") + " in the wrong column.";
+            }
+            status.querySelectorAll(".sort-chip").forEach(function (chip) {
+                const ci = Number(chip.dataset.card);
+                const inMain = expected.main.indexOf(ci) !== -1;
+                chip.classList.toggle("misplaced", (chip.dataset.col === "main") !== inMain);
+            });
+            showItemError(index, null, {
+                why: why,
+                fix: "Place every Nia event under Main character and the clerk's one action under Minor character.",
+                model: "Nia affects the whole project, so she is the main character; the office clerk appears once, so she is the minor character."
+            });
+        }
+
         function submitAnswer(index, choiceIndex) {
             const item = ITEMS[index];
             const st = SIM.itemState[index];
@@ -1161,50 +1341,48 @@
 
             if (choiceIndex === item.correct) {
                 st.passed = true;
-                if (item.badgeUnlock) {
-                    SIM.unlocked[item.badgeUnlock] = true;
-                    if (item.reveal) SIM.revealed[item.reveal] = true;
-                    updateAvatar();
-                }
-                document.querySelectorAll(".trait-option[data-opt]").forEach(function (b) {
-                    b.disabled = true;
-                    if (Number(b.dataset.opt) === item.correct) b.classList.add("reveal-correct");
-                });
-                document.querySelectorAll(".tr-card[data-card]").forEach(function (b) {
-                    b.disabled = true;
-                    if (Number(b.dataset.card) === item.correct) b.classList.add("reveal-correct");
-                });
-
-                let fb = '<div class="feedback-box success">';
-                fb += "<strong>Correct!</strong> " + correctMessage(item);
-                if (item.proof) fb += '<div class="proof-line">Evidence: "' + item.proof + '"</div>';
-                const nextIndex = index + 1;
-                if (nextIndex < ITEMS.length) {
-                    const nextScene = ITEMS[nextIndex].scene;
-                    fb += '<div class="feedback-actions"><button type="button" class="primary-btn" id="sceneNextBtn">' +
-                        (nextScene > item.scene ? "Continue to " + sceneName(nextScene) : "Continue") +
-                        '</button></div>';
-                } else {
-                    fb += '<div class="feedback-actions"><button type="button" class="primary-btn" id="sceneNextBtn">View Completed Profile</button></div>';
-                }
-                fb += '</div>';
-                status.dataset.locked = "1";
-                status.innerHTML = fb;
-
-                const nextBtn = document.getElementById("sceneNextBtn");
-                if (nextBtn) nextBtn.addEventListener("click", function () { goToItem(index + 1); });
-
-                if (nextIndex >= ITEMS.length || ITEMS[nextIndex].scene === item.scene) {
-                    const hintBtn = document.getElementById("hintBtn");
-                    hintBtn.classList.add("hidden");
-                }
+                showSuccess(index, correctMessage(item));
             } else {
-                showItemError(index, item.wrong.find(function (w) { return w.idx === choiceIndex; }) || {
+                showItemError(index, choiceIndex, item.wrong.find(function (w) { return w.idx === choiceIndex; }) || {
                     why: "That choice does not match this evidence.",
                     fix: "Reread the evidence and think about what it proves.",
                     model: "Match the exact action or words to the trait."
                 });
             }
+        }
+
+        function showSuccess(index, message) {
+            const item = ITEMS[index];
+            const status = document.getElementById("gameStatus");
+            status.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
+            if (item.badgeUnlock) {
+                SIM.unlocked[item.badgeUnlock] = true;
+                if (item.reveal) SIM.revealed[item.reveal] = true;
+                updateAvatar();
+            }
+            let fb = '<div class="feedback-box success">';
+            fb += "<strong>Correct!</strong> " + message;
+            if (item.proof) fb += '<div class="proof-line">Evidence: "' + item.proof + '"</div>';
+            if (item.beat) fb += '<div class="story-beat">' + item.beat + '</div>';
+            const nextIndex = index + 1;
+            if (nextIndex < ITEMS.length) {
+                const nextScene = ITEMS[nextIndex].scene;
+                fb += '<div class="feedback-actions"><button type="button" class="primary-btn" id="sceneNextBtn">' +
+                    (nextScene > item.scene ? "Continue to " + sceneName(nextScene) : "Continue") +
+                    '</button></div>';
+            } else {
+                fb += '<div class="feedback-actions"><button type="button" class="primary-btn" id="sceneNextBtn">View Completed Profile</button></div>';
+            }
+            fb += '</div>';
+            status.dataset.locked = "1";
+            status.innerHTML = fb;
+            const nextBtn = document.getElementById("sceneNextBtn");
+            if (nextBtn) nextBtn.addEventListener("click", function () { goToItem(index + 1); });
+            if (nextIndex >= ITEMS.length || ITEMS[nextIndex].scene === item.scene) {
+                const hintBtn = document.getElementById("hintBtn");
+                hintBtn.classList.add("hidden");
+            }
+            updateProgressPanels();
         }
 
         function correctMessage(item) {
@@ -1217,31 +1395,30 @@
             return "That is exactly right!";
         }
 
-        function showItemError(index, fbObj) {
+        function showItemError(index, choiceIndex, fbObj) {
             const item = ITEMS[index];
             const status = document.getElementById("gameStatus");
             const hintBtn = document.getElementById("hintBtn");
             hintBtn.classList.remove("hidden");
-            const fb = '<div class="feedback-box error">' +
-                "<strong>Not quite.</strong> " + (fbObj.why ? "Why: " + fbObj.why : "") +
-                (fbObj.fix ? " How to fix it: " + fbObj.fix : "") +
-                (fbObj.model ? " Correct model: " + fbObj.model : "") +
-                (item.proof ? '<div class="proof-line">Look for: "' + item.proof + '"</div>' : "") +
-                '<div class="feedback-actions">' +
-                    '<button type="button" class="secondary-btn" id="tryAgainBtn">Try Again</button>' +
-                '</div>' +
-            '</div>';
-            status.dataset.locked = "1";
-            status.innerHTML = fb;
 
-            document.querySelectorAll(".trait-option, .tr-card").forEach(function (b) {
-                b.disabled = true;
-                const val = Number(b.dataset.opt !== undefined ? b.dataset.opt : b.dataset.card);
-                if (val === SIM.lastChoice) b.classList.add("reveal-wrong");
-            });
+            if (choiceIndex !== null && choiceIndex !== undefined) {
+                const picked = status.querySelector('[data-opt="' + choiceIndex + '"], [data-card="' + choiceIndex + '"]');
+                if (picked) { picked.disabled = true; picked.classList.add("reveal-wrong"); }
+            }
+
+            status.querySelectorAll(".feedback-box.error").forEach(function (el) { el.remove(); });
+            status.insertAdjacentHTML("beforeend",
+                '<div class="feedback-box error">' +
+                    "<strong>Not quite.</strong> " + (fbObj.why ? "Why: " + fbObj.why : "") +
+                    (fbObj.fix ? " How to fix it: " + fbObj.fix : "") +
+                    (fbObj.model ? " Correct model: " + fbObj.model : "") +
+                    (item.proof ? '<div class="proof-line">Look for: "' + item.proof + '"</div>' : "") +
+                    '<div class="feedback-actions">' +
+                        '<button type="button" class="secondary-btn" id="tryAgainBtn">Try Again</button>' +
+                    '</div>' +
+                '</div>');
 
             document.getElementById("tryAgainBtn").addEventListener("click", function () {
-                status.dataset.locked = "";
                 clearStatus();
                 renderItem(index);
             });
@@ -1259,6 +1436,13 @@
             SIM.itemState[index].hintUsed = true;
             SIM.hintsUsed++;
             const status = document.getElementById("gameStatus");
+            if (item.hl) {
+                status.querySelectorAll(".tr-card").forEach(function (btn, ci) {
+                    const safe = String(item.cards[ci] || "");
+                    const hl = safe.split(item.hl).join('<mark class="proof-hl">' + item.hl + '</mark>');
+                    btn.innerHTML = '<span class="card-label">' + item.cardLabels[ci] + '</span>' + hl;
+                });
+            }
             const note = document.createElement("div");
             note.className = "teach-note";
             note.style.marginTop = "10px";
@@ -1289,10 +1473,24 @@
             text.textContent = "You completed this scene. This is your reviewed evidence and correct answer.";
             clearStatus();
             const status = document.getElementById("gameStatus");
-            let html = '<div class="card-stack">' + item.cards.map(function (c, ci) {
-                const isCorrect = ci === item.correct;
-                return '<button type="button" class="tr-card' + (isCorrect ? " reveal-correct" : "") + '" disabled><span class="card-label">' + item.cardLabels[ci] + '</span>' + c + '</button>';
-            }).join("") + '</div>';
+            let html = "";
+            if (item.sort) {
+                html = '<div class="sort-cols">' + ["main", "minor"].map(function (col) {
+                    const inCol = item.cards.map(function (c, ci) {
+                        return item.columns[col].indexOf(ci) !== -1 ? ci : -1;
+                    }).filter(function (x) { return x !== -1; });
+                    return '<div class="sort-col"><h4>' + (col === "main" ? "Main character" : "Minor character") + '</h4><div class="sort-bucket">' +
+                        inCol.map(function (ci) {
+                            return '<button type="button" class="sort-chip reveal-correct" disabled>' + item.cards[ci] + '</button>';
+                        }).join("") +
+                    '</div></div>';
+                }).join("") + '</div>';
+            } else {
+                html = '<div class="card-stack">' + item.cards.map(function (c, ci) {
+                    const isCorrect = ci === item.correct;
+                    return '<button type="button" class="tr-card' + (isCorrect ? " reveal-correct" : "") + '" disabled><span class="card-label">' + item.cardLabels[ci] + '</span>' + c + '</button>';
+                }).join("") + '</div>';
+            }
             if (item.badges) {
                 html += '<div class="option-row" style="margin-top:12px;">' + item.badges.map(function (b, bi) {
                     const isCorrect = bi === item.correct;
