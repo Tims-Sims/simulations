@@ -110,9 +110,9 @@
         .slider-col { display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 40px; }
         .slider-col label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); writing-mode: vertical-lr; text-orientation: mixed; transform: rotate(180deg); margin-bottom: 4px; }
         .vert-slider { writing-mode: vertical-lr; direction: rtl; width: 44px; height: 300px; accent-color: var(--accent); cursor: pointer; }
-        .slider-row { display: flex; align-items: flex-start; gap: 3px; }
-        .slider-end-labels { display: flex; flex-direction: column; justify-content: space-between; height: 300px; font-size: 0.7rem; color: var(--muted); text-align: center; }
-        .slider-end-labels span { width: 54px; }
+        .slider-row { position: relative; display: flex; align-items: flex-start; }
+        .slider-end-labels { position: absolute; left: calc(100% + 3px); top: 13px; bottom: 13px; display: flex; flex-direction: column; justify-content: space-between; font-size: 0.7rem; line-height: 1.2; color: var(--muted); text-align: center; }
+        .slider-end-labels span { width: max-content; max-width: 92px; }
 
         .cavity-col { position: relative; }
         .cavity-canvas-wrap { width: 420px; height: 380px; position: relative; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
@@ -219,7 +219,6 @@
             .cavity-canvas-wrap { width: 300px; height: 280px; }
             .vert-slider { height: 220px; }
             .gauge-wrap { height: 220px; }
-            .slider-end-labels { height: 220px; }
         }
     </style>
 </head>
@@ -697,7 +696,15 @@
             for (const hs of simState.hotspots) {
                 const dx = (x - hs.cx) / hs.rx;
                 const dy = (y - hs.cy) / hs.ry;
-                if (dx * dx + dy * dy <= 1) return hs.key;
+                if (dx * dx + dy * dy <= 1) {
+                    if (hs.key === "ribs" && simState.hotspots.some(l => {
+                        if (l.key !== "lungs") return false;
+                        const ldx = (x - l.cx) / l.rx;
+                        const ldy = (y - l.cy) / l.ry;
+                        return ldx * ldx + ldy * ldy <= 1;
+                    })) continue;
+                    return hs.key;
+                }
             }
             return null;
         }
@@ -1107,10 +1114,10 @@
             /* Build clickable hotspot hit-regions for this frame */
             simState.hotspots = [
                 { key: "trachea", cx: cx, cy: (h * 0.04 + lungTop) / 2, rx: 16, ry: (lungTop - h * 0.04) / 2 + 10 },
-                { key: "ribs", cx: cx - w * ribSpread * 0.7, cy: (ribTop + ribBottom) / 2, rx: w * ribSpread * 0.55, ry: (ribBottom - ribTop) / 2 + 10 },
-                { key: "ribs", cx: cx + w * ribSpread * 0.7, cy: (ribTop + ribBottom) / 2, rx: w * ribSpread * 0.55, ry: (ribBottom - ribTop) / 2 + 10 },
-                { key: "lungs", cx: cx - lungW * 1.1, cy: (lungTop + lungBottom) / 2, rx: lungW, ry: (lungBottom - lungTop) / 2 },
-                { key: "lungs", cx: cx + lungW * 1.1, cy: (lungTop + lungBottom) / 2, rx: lungW, ry: (lungBottom - lungTop) / 2 },
+                { key: "ribs", cx: cx - w * ribSpread * 0.72, cy: (ribTop + ribBottom) / 2, rx: w * ribSpread * 0.72, ry: (ribBottom - ribTop) / 2 + 12 },
+                { key: "ribs", cx: cx + w * ribSpread * 0.72, cy: (ribTop + ribBottom) / 2, rx: w * ribSpread * 0.72, ry: (ribBottom - ribTop) / 2 + 12 },
+                { key: "lungs", cx: cx - lungW * 1.1, cy: (lungTop + lungBottom) / 2, rx: lungW * 0.72, ry: (lungBottom - lungTop) / 2 * 0.6 },
+                { key: "lungs", cx: cx + lungW * 1.1, cy: (lungTop + lungBottom) / 2, rx: lungW * 0.72, ry: (lungBottom - lungTop) / 2 * 0.6 },
                 { key: "diaphragm", cx: cx, cy: diaphragmY, rx: w * ribSpread + 8, ry: 32 }
             ];
 
